@@ -60,7 +60,7 @@ describe('<TableTab />', () => {
     expect(getAllByTestId(FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID).length).toBeGreaterThan(0);
   });
 
-  it('should filter the table correctly', () => {
+  it('should filter the table correctly', async () => {
     const { getByTestId, queryByTestId, queryByText } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -69,7 +69,7 @@ describe('<TableTab />', () => {
       </TestProviders>
     );
 
-    userEvent.type(getByTestId(TABLE_TAB_SEARCH_INPUT_TEST_ID), 'test');
+    await userEvent.type(getByTestId(TABLE_TAB_SEARCH_INPUT_TEST_ID), 'test');
     expect(queryByText('kibana.alert.workflow_status')).not.toBeInTheDocument();
     expect(queryByText('open')).not.toBeInTheDocument();
     expect(queryByTestId(FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID)).not.toBeInTheDocument();
