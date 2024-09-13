@@ -513,6 +513,7 @@ export async function getMWTelemetry({
   try {
     const MWFinder = await savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      namespaces: ['*'],
       perPage: 100,
     });
 

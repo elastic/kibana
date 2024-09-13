@@ -252,7 +252,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         });
         // MW with toggles off
         await createMaintenanceWindow({ spaceId: space.id });
-        // // MW with toggles on
+        // MW with toggles on
         await createMaintenanceWindow({
           spaceId: space.id,
           interval: 1,
@@ -548,9 +548,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_rules_by_execution_status_per_day.success > 0).to.be(true);
 
       // maintenance window telemetry
-      expect(telemetry.count_mw_total).to.equal(1);
-      expect(telemetry.count_mw_with_filter_alert_toggle_on).to.equal(1);
-      expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(1);
+      expect(telemetry.count_mw_total).to.equal(6);
+      expect(telemetry.count_mw_with_filter_alert_toggle_on).to.equal(3);
+      expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(3);
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
