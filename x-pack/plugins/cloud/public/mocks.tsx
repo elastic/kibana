@@ -53,7 +53,9 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   serverless: {
     projectId: undefined,
   },
-  fetchElasticsearchConfig: () => new Promise(() => ({ elasticsearchUrl: 'elasticsearch-url' })),
+  fetchElasticsearchConfig: jest.fn(
+    () => new Promise(() => ({ elasticsearchUrl: 'elasticsearch-url' }))
+  ),
 });
 
 export const cloudMock = {
