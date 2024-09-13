@@ -21,7 +21,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 
 export interface Props {
   policy: SerializedEnrichPolicy;
