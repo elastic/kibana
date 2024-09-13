@@ -53,7 +53,10 @@
     "@kbn/shared-ux-router",
     "@kbn/investigation-shared",
     "@kbn/core-security-common",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/presentation-containers",
     "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
+    "@kbn/zod",
   ],
 }
