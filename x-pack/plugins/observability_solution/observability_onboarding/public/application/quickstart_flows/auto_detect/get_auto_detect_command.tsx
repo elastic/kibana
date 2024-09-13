@@ -13,13 +13,14 @@ export function getAutoDetectCommand(
 ) {
   const scriptName = 'auto_detect.sh';
   return oneLine`
-    curl -s -O ${options.scriptDownloadUrl} -O ${options.confDownloadUrl} &&
+    curl ${options.scriptDownloadUrl} -so ${scriptName} &&
     sudo bash ${scriptName}
       --id=${options.onboardingFlow.id}
       --kibana-url=${options.kibanaUrl}
       --install-key=${options.installApiKey}
       --ingest-key=${options.ingestApiKey}
       --ea-version=${options.elasticAgentVersion}
+      --integration-config-file=${options.confDownloadUrl}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {

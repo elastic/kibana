@@ -10,15 +10,15 @@ if [ -z "${BASH_VERSION:-}" ]; then
 fi
 
 if ! command -v curl >/dev/null 2>&1; then
-    fail "curl is required to run this script"
+  fail "curl is required to run this script"
 fi
 
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
-    LSOF_PATH=$(command -v lsof)
+  LSOF_PATH=$(command -v lsof)
 elif command -v /usr/sbin/lsof >/dev/null 2>&1; then
-    LSOF_PATH="/usr/sbin/lsof"
+  LSOF_PATH="/usr/sbin/lsof"
 fi
 
 install_api_key_encoded=""
@@ -26,62 +26,68 @@ ingest_api_key_encoded=""
 kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
+integration_config_file=""
 
 help() {
-    echo "Usage: sudo ./auto-detect.sh <arguments>"
-    echo ""
-    echo "Arguments:"
-    echo "  --install-key=<value>  Base64 Encoded API key that has priviledges to install integrations."
-    echo "  --ingest-key=<value>   Base64 Encoded API key that has priviledges to ingest data."
-    echo "  --kibana-url=<value>  Kibana API endpoint."
-    echo "  --id=<value>   Onboarding flow ID."
-    echo "  --ea-version=<value>   Elastic Agent version."
-    exit 1
+  echo "Usage: sudo ./auto-detect.sh <arguments>"
+  echo ""
+  echo "Arguments:"
+  echo "  --install-key=<value>  Base64 Encoded API key that has priviledges to install integrations."
+  echo "  --ingest-key=<value>   Base64 Encoded API key that has priviledges to ingest data."
+  echo "  --kibana-url=<value>  Kibana API endpoint."
+  echo "  --id=<value>   Onboarding flow ID."
+  echo "  --ea-version=<value>   Elastic Agent version."
+  echo "  --integration-config-file=<value>   Configuration file (.conf) containing integration details, patterns, and titles."
+  exit 1
 }
 
 ensure_argument() {
-    if [ -z "$1" ]; then
-        echo "Error: Missing value for $2."
-        help
-    fi
+  if [ -z "$1" ]; then
+    echo "Error: Missing value for $2."
+    help
+  fi
 }
 
 if [ "$EUID" -ne 0 ]; then
-    echo "Error: This script must be run as root."
-    help
+  echo "Error: This script must be run as root."
+  help
 fi
 
 # Parse command line arguments
 for i in "$@"; do
-    case $i in
-        --install-key=*)
-            shift
-            install_api_key_encoded="${i#*=}"
-            ;;
-        --ingest-key=*)
-            shift
-            ingest_api_key_encoded="${i#*=}"
-            ;;
-        --kibana-url=*)
-            shift
-            kibana_api_endpoint="${i#*=}"
-            ;;
-        --id=*)
-            shift
-            onboarding_flow_id="${i#*=}"
-            ;;
-        --ea-version=*)
-            shift
-            elastic_agent_version="${i#*=}"
-            ;;
-        --help)
-            help
-            ;;
-        *)
-            echo "Unknown option: $i"
-            help
-            ;;
-    esac
+  case $i in
+  --install-key=*)
+    shift
+    install_api_key_encoded="${i#*=}"
+    ;;
+  --ingest-key=*)
+    shift
+    ingest_api_key_encoded="${i#*=}"
+    ;;
+  --kibana-url=*)
+    shift
+    kibana_api_endpoint="${i#*=}"
+    ;;
+  --id=*)
+    shift
+    onboarding_flow_id="${i#*=}"
+    ;;
+  --ea-version=*)
+    shift
+    elastic_agent_version="${i#*=}"
+    ;;
+  --integration-config-file=*)
+    shift
+    integration_config_file="${i#*=}"
+    ;;
+  --help)
+    help
+    ;;
+  *)
+    echo "Unknown option: $i"
+    help
+    ;;
+  esac
 done
 
 ensure_argument "$install_api_key_encoded" "--install-key"
@@ -89,6 +95,7 @@ ensure_argument "$ingest_api_key_encoded" "--ingest-key"
 ensure_argument "$kibana_api_endpoint" "--kibana-url"
 ensure_argument "$onboarding_flow_id" "--id"
 ensure_argument "$elastic_agent_version" "--ea-version"
+ensure_argument "$integration_config_file" "--integration-config-file"
 
 known_integrations_list_string=""
 selected_known_integrations_array=()
@@ -176,7 +183,7 @@ extract_elastic_agent() {
 }
 
 install_elastic_agent() {
-  "./${elastic_agent_artifact_name}/elastic-agent" install -f -n > /dev/null
+  "./${elastic_agent_artifact_name}/elastic-agent" install -f -n >/dev/null
 
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
@@ -190,11 +197,11 @@ install_elastic_agent() {
 wait_for_elastic_agent_status() {
   local MAX_RETRIES=10
   local i=0
-  elastic-agent status > /dev/null 2>&1
+  elastic-agent status >/dev/null 2>&1
   local ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
   while [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ] && [ $i -le $MAX_RETRIES ]; do
     sleep 1
-    elastic-agent status > /dev/null 2>&1
+    elastic-agent status >/dev/null 2>&1
     ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
     ((i++))
   done
@@ -224,7 +231,7 @@ ensure_elastic_agent_healthy() {
 
 backup_elastic_agent_config() {
   if [ -f "$elastic_agent_config_path" ]; then
-    echo -e "\nExisting config found at $elastic_agent_config_path";
+    echo -e "\nExisting config found at $elastic_agent_config_path"
 
     printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Create backup and continue installation?" "[Y/n] (default: Yes): "
     read confirmation_reply
@@ -289,13 +296,13 @@ apply_elastic_agent_config() {
   local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
 
   # Verify that the downloaded archive contains the expected `elastic-agent.yml` file
-  tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' > /dev/null && \
-  # Remove existing config file including `inputs.d` directory
-  rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" && \
-  # Extract new config files from downloaded archive
-  tar --extract --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' --directory "$(dirname "$elastic_agent_config_path")" && \
-  # Replace placeholder with the Ingest API key
-  sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+  tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' >/dev/null &&
+    # Remove existing config file including `inputs.d` directory
+    rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" &&
+    # Extract new config files from downloaded archive
+    tar --extract --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' --directory "$(dirname "$elastic_agent_config_path")" &&
+    # Replace placeholder with the Ingest API key
+    sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
     tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' | while read -r file; do
@@ -316,15 +323,15 @@ read_open_log_file_list() {
     "^\/Users\/.+?\/Library\/Containers"
     "^\/Users\/.+?\/Library\/Caches"
     "^\/private"
-  
+
     # Exclude previous installation logs
     "\/opt\/Elastic\/Agent\/"
     "\/Library\/Elastic\/Agent\/"
   )
 
-# Excluding all patterns that correspond to known integrations
-# that we are detecting separately
- for pattern in "${detected_patterns[@]}"; do
+  # Excluding all patterns that correspond to known integrations
+  # that we are detecting separately
+  for pattern in "${detected_patterns[@]}"; do
     exclude_patterns+=("$pattern")
   done
 
@@ -332,10 +339,13 @@ read_open_log_file_list() {
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
-    if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
-        unknown_log_file_path_list_string+="$line\n"
+    if ! grep -qE "$(
+      IFS="|"
+      echo "${exclude_patterns[*]}"
+    )" <<<"$line"; then
+      unknown_log_file_path_list_string+="$line\n"
     fi
-  done <<< "$list"
+  done <<<"$list"
 }
 
 detect_known_integrations() {
@@ -343,81 +353,83 @@ detect_known_integrations() {
   # Even when there is no system logs on the host,
   # System integration will still be able to to collect metrics.
   known_integrations_list_string+="system"$'\n'
-    
-    local config_file="./integrations.conf"
-    local integration=""
-    local patterns=()
 
-    # Debug: Check if the config file exists
-    if [[ ! -f "$config_file" ]]; then
-        echo "Config file not found: $config_file"
-        exit 1
+  curl -L -O "${integration_config_file}" --silent --fail
+  config_file="./integrations.conf"
+
+  local integration=""
+  local patterns=()
+
+  # Debug: Check if the config file exists
+  if [[ ! -f "$config_file" ]]; then
+    echo "Config file not found: $config_file"
+    exit 1
+  fi
+
+  while IFS= read -r line; do
+
+    # Skip comments and empty lines
+    if [[ $line =~ ^\s*# || -z $line ]]; then
+      continue
     fi
 
-    while IFS= read -r line; do
-
-        # Skip comments and empty lines
-        if [[ $line =~ ^\s*# || -z $line ]]; then
-            continue
-        fi
-
-        # Process section headers
-        if [[ $line =~ ^\[([a-zA-Z0-9_]+)\] ]]; then
-            # If we were processing a previous section, check patterns for the previous integration
-            if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
-                for pattern in "${patterns[@]}"; do
-                    pattern=$(echo "$pattern" | xargs)  # Trim leading/trailing spaces
-                    if compgen -G "$pattern" > /dev/null; then
-                        known_integrations_list_string+="$integration"$'\n'
-                        detected_patterns+=("${patterns[@]}")
-                        break
-                    fi
-                done
-            fi
-
-            # Start a new section
-            integration="${BASH_REMATCH[1]}"
-            patterns=()
-            continue
-        fi
-
-        # Process patterns
-        if [[ $line =~ ^patterns= ]]; then
-            # Capture patterns by trimming spaces and handling multi-line patterns
-            IFS=$'\n' read -r -d '' -a patterns <<< "${line#patterns=}"
-            patterns=($(echo "${patterns[@]}" | xargs))  # Trim leading/trailing spaces
-        elif [[ $line =~ ^title=.*$ ]]; then
-        # Capture titles
-            integration_titles+=("${line#title=}")
-            integration_names+=("$integration")
-        elif [[ -n "$integration" && -n "$line" ]]; then
-            # Capture multi-line patterns if not directly following "patterns="
-            patterns+=("$(echo "$line" | xargs)")  # Trim leading/trailing spaces
-        fi
-    done < "$config_file"
-
-    # Check patterns for the last section
-    if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
+    # Process section headers
+    if [[ $line =~ ^\[([a-zA-Z0-9_]+)\] ]]; then
+      # If we were processing a previous section, check patterns for the previous integration
+      if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
         for pattern in "${patterns[@]}"; do
-            pattern=$(echo "$pattern" | xargs)  # Trim leading/trailing spaces
-            if compgen -G "$pattern" > /dev/null; then
-                known_integrations_list_string+="$integration"$'\n'
-                detected_patterns+=("${patterns[@]}")
-                break
-            fi
+          pattern=$(echo "$pattern" | xargs) # Trim leading/trailing spaces
+          if compgen -G "$pattern" >/dev/null; then
+            known_integrations_list_string+="$integration"$'\n'
+            detected_patterns+=("${patterns[@]}")
+            break
+          fi
         done
+      fi
+
+      # Start a new section
+      integration="${BASH_REMATCH[1]}"
+      patterns=()
+      continue
     fi
+
+    # Process patterns
+    if [[ $line =~ ^patterns= ]]; then
+      # Capture patterns by trimming spaces and handling multi-line patterns
+      IFS=$'\n' read -r -d '' -a patterns <<<"${line#patterns=}"
+      patterns=($(echo "${patterns[@]}" | xargs)) # Trim leading/trailing spaces
+    elif [[ $line =~ ^title=.*$ ]]; then
+      # Capture titles
+      integration_titles+=("${line#title=}")
+      integration_names+=("$integration")
+    elif [[ -n "$integration" && -n "$line" ]]; then
+      # Capture multi-line patterns if not directly following "patterns="
+      patterns+=("$(echo "$line" | xargs)") # Trim leading/trailing spaces
+    fi
+  done <"$config_file"
+
+  # Check patterns for the last section
+  if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
+    for pattern in "${patterns[@]}"; do
+      pattern=$(echo "$pattern" | xargs) # Trim leading/trailing spaces
+      if compgen -G "$pattern" >/dev/null; then
+        known_integrations_list_string+="$integration"$'\n'
+        detected_patterns+=("${patterns[@]}")
+        break
+      fi
+    done
+  fi
 }
 
 known_integration_title() {
-    local integration=$1
-    for i in "${!integration_names[@]}"; do
-        if [[ "${integration_names[$i]}" == "$integration" ]]; then
-            echo "${integration_titles[$i]}"
-            return
-        fi
-    done
-    echo "Unknown"
+  local integration=$1
+  for i in "${!integration_names[@]}"; do
+    if [[ "${integration_names[$i]}" == "$integration" ]]; then
+      echo "${integration_titles[$i]}"
+      return
+    fi
+  done
+  echo "Unknown"
 }
 
 build_unknown_log_file_patterns() {
@@ -427,7 +439,7 @@ build_unknown_log_file_patterns() {
     fi
 
     unknown_log_file_pattern_list_string+="$(dirname "$log_file_path")/*.log\n"
-  done <<< "$(echo -e "$unknown_log_file_path_list_string")"
+  done <<<"$(echo -e "$unknown_log_file_path_list_string")"
 
   unknown_log_file_pattern_list_string=$(echo -e "$unknown_log_file_pattern_list_string" | sort -u)
 }
@@ -441,14 +453,14 @@ function select_list() {
       continue
     fi
     known_integrations_options+=("$line")
-  done <<< "$known_integrations_list_string"
+  done <<<"$known_integrations_list_string"
 
   while IFS= read -r line; do
     if [[ -z "$line" ]]; then
       continue
     fi
     unknown_logs_options+=("$line")
-  done <<< "$unknown_log_file_pattern_list_string"
+  done <<<"$unknown_log_file_pattern_list_string"
 
   local options=("${known_integrations_options[@]}" "${unknown_logs_options[@]}")
 
@@ -468,13 +480,13 @@ function select_list() {
     printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "Exclude logs by listing their index numbers" "(e.g. 1, 2, 3). Press Enter to skip."
     read exclude_index_list_string
 
-    IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
+    IFS=', ' read -r -a exclude_index_list_array <<<"$exclude_index_list_string"
 
     for index in "${!options[@]}"; do
       local is_excluded=0
       for excluded_index in "${exclude_index_list_array[@]}"; do
         if [[ "$index" -eq "$((excluded_index - 1))" ]]; then
-            is_excluded=1
+          is_excluded=1
         fi
       done
 
@@ -501,7 +513,7 @@ function select_list() {
     printf "\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "List any additional logs you'd like to ingest" "(e.g. /path1/*.log, /path2/*.log). Press Enter to skip."
     read custom_log_file_path_list_string
 
-    IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
+    IFS=', ' read -r -a custom_log_file_path_list_array <<<"$custom_log_file_path_list_string"
 
     echo -e "\nYou've selected these logs for ingestion:"
     for item in "${selected_known_integrations_array[@]}"; do
@@ -526,30 +538,30 @@ function select_list() {
 }
 
 generate_custom_integration_name() {
-    local path_pattern="$1"
-    local dir_path
-    local name_parts=()
-    local name
+  local path_pattern="$1"
+  local dir_path
+  local name_parts=()
+  local name
 
-    dir_path=$(dirname "$path_pattern")
-    IFS='/' read -r -a dir_array <<< "$dir_path"
+  dir_path=$(dirname "$path_pattern")
+  IFS='/' read -r -a dir_array <<<"$dir_path"
 
-    # Get the last up to 4 parts of the path
-    for (( i=${#dir_array[@]}-1, count=0; i>=0 && count<4; i--, count++ )); do
-        name_parts=("${dir_array[$i]}" "${name_parts[@]}")
-    done
+  # Get the last up to 4 parts of the path
+  for ((i = ${#dir_array[@]} - 1, count = 0; i >= 0 && count < 4; i--, count++)); do
+    name_parts=("${dir_array[$i]}" "${name_parts[@]}")
+  done
 
-    # Join the parts into a single string with underscores
-    name=$(printf "%s_" "${name_parts[@]}")
-    name="${name#_}"  # Remove leading underscore
-    name="${name%_}"  # Remove trailing underscore
+  # Join the parts into a single string with underscores
+  name=$(printf "%s_" "${name_parts[@]}")
+  name="${name#_}" # Remove leading underscore
+  name="${name%_}" # Remove trailing underscore
 
-    # Replace special characters with underscores
-    name="${name// /_}"
-    name="${name//-/_}"
-    name="${name//./_}"
+  # Replace special characters with underscores
+  name="${name// /_}"
+  name="${name//-/_}"
+  name="${name//./_}"
 
-    echo "$name"
+  echo "$name"
 }
 
 printf "\e[1m%s\e[0m\n" "Looking for log files..."
@@ -558,10 +570,10 @@ detect_known_integrations
 
 # Check if LSOF_PATH is executable
 if [ -x "$LSOF_PATH" ]; then
-    read_open_log_file_list
-    build_unknown_log_file_patterns
+  read_open_log_file_list
+  build_unknown_log_file_patterns
 else
-    echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
+  echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
 fi
 
 update_step_progress "logs-detect" "complete"
