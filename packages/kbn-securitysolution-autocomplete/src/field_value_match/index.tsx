@@ -171,9 +171,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       }
 
       if (searchVal) {
+        // Clear selected option when user types to allow user to modify value without {backspace}
         onChange('');
       }
 
+      // Update search query unconditionally to show correct suggestions even when input is cleared
       setSearchQuery(searchVal);
     },
     [
