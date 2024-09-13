@@ -97,7 +97,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     }: {
       spaceId: string;
       interval?: number;
-      scopedQuery?: string | null;
+      scopedQuery?: {
+        filters: string[];
+        kql: string;
+        dsl: string;
+      } | null;
     }) {
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/maintenance_window`)
