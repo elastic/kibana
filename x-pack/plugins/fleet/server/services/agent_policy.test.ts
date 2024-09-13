@@ -952,8 +952,11 @@ describe('Agent policy', () => {
           });
         }
       });
-
-      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      await agentPolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -993,6 +996,10 @@ describe('Agent policy', () => {
       mockedDownloadSourceService.getDefaultDownloadSourceId.mockResolvedValue(
         'default-download-source-id'
       );
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -1010,11 +1017,7 @@ describe('Agent policy', () => {
         ],
       } as any);
 
-      await agentPolicyService.removeDefaultSourceFromAll(
-        soClient,
-        esClient,
-        'default-download-source-id'
-      );
+      await agentPolicyService.removeDefaultSourceFromAll(esClient, 'default-download-source-id');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
