@@ -43,13 +43,12 @@
   .euiDataGridHeaderCell {
     align-items: start;
 
-    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-      height: 100%;
-      align-items: flex-start;
+    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
+      align-self: center;
     }
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
@@ -63,7 +62,7 @@
     border-left: 0;
     border-right: 0;
   }
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] {
     padding-bottom: 0;
   }
 
@@ -78,7 +77,7 @@
     border-left: 0;
     border-right: 0;
   }
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] {
     height: 100%;
     padding: 0;
     border-bottom: 0;
@@ -93,7 +92,8 @@
   }
 
   .euiDataGridRowCell__content--autoHeight,
-  .euiDataGridRowCell__content--lineCountHeight {
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
   }
 }
@@ -102,25 +102,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,
