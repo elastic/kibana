@@ -65,10 +65,10 @@ export function Doc(props: DocProps) {
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   const { rootProfileLoading } = useRootProfile();
-  const getAppWrapperAccessor = useProfileAccessor('getAppWrapper');
+  const getRenderAppWrapperAccessor = useProfileAccessor('getRenderAppWrapper');
   const AppWrapper = useMemo(
-    () => getAppWrapperAccessor(({ children }) => <>{children}</>),
-    [getAppWrapperAccessor]
+    () => getRenderAppWrapperAccessor(({ children }) => <>{children}</>),
+    [getRenderAppWrapperAccessor]
   );
 
   if (rootProfileLoading) {

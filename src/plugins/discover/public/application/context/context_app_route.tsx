@@ -50,10 +50,10 @@ export function ContextAppRoute() {
   const anchorId = decodeURIComponent(id);
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
   const { rootProfileLoading } = useRootProfile();
-  const getAppWrapperAccessor = useProfileAccessor('getAppWrapper');
+  const getRenderAppWrapperAccessor = useProfileAccessor('getRenderAppWrapper');
   const AppWrapper = useMemo(
-    () => getAppWrapperAccessor(({ children }) => <>{children}</>),
-    [getAppWrapperAccessor]
+    () => getRenderAppWrapperAccessor(({ children }) => <>{children}</>),
+    [getRenderAppWrapperAccessor]
   );
 
   if (error) {
