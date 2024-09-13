@@ -148,7 +148,11 @@ export class ApiService {
     });
   }
 
-  public async createGeoipDatabase(database: { maxmind: string; databaseName: string }) {
+  public async createGeoipDatabase(database: {
+    databaseType: string;
+    maxmind?: string;
+    databaseName: string;
+  }) {
     return this.sendRequest({
       path: `${API_BASE_PATH}/geoip_database`,
       method: 'post',

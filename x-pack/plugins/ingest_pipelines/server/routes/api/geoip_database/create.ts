@@ -12,12 +12,12 @@ import { serializeGeoipDatabase } from './serialization';
 import { normalizeDatabaseName } from './normalize_database_name';
 
 const bodySchema = schema.object({
-  maxmind: schema.string({ maxLength: 1000 }),
-  /*
-   * Only allow these database names, should be in sync with this file in ES
-   * https://github.com/elastic/elasticsearch/blob/f150e2c11df0fe3bef298c55bd867437e50f5f73/modules/ingest-geoip/src/main/java/org/elasticsearch/ingest/geoip/direct/DatabaseConfiguration.java#L58
-   */
+  databaseType: schema.oneOf([schema.literal('ipinfo'), schema.literal('maxmind')]),
+  // maxmind is only needed for "geoip" type
+  maxmind: schema.maybe(schema.string({ maxLength: 1000 })),
+  // only allow database names in sync with ES
   databaseName: schema.oneOf([
+    // geoip names https://github.com/elastic/elasticsearch/blob/f150e2c11df0fe3bef298c55bd867437e50f5f73/modules/ingest-geoip/src/main/java/org/elasticsearch/ingest/geoip/direct/DatabaseConfiguration.java#L58
     schema.literal('GeoIP2-Anonymous-IP'),
     schema.literal('GeoIP2-City'),
     schema.literal('GeoIP2-Connection-Type'),
@@ -25,6 +25,10 @@ const bodySchema = schema.object({
     schema.literal('GeoIP2-Domain'),
     schema.literal('GeoIP2-Enterprise'),
     schema.literal('GeoIP2-ISP'),
+    // ipinfo names
+    schema.literal('Free IP to ASN'),
+    schema.literal('Free IP to Country'),
+    schema.literal('Free IP to Country + IP to ASN'),
   ]),
 });
 
@@ -41,8 +45,8 @@ export const registerCreateGeoipRoute = ({
     },
     async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
-      const { maxmind, databaseName } = req.body as { maxmind: string; databaseName: string };
-      const serializedDatabase = serializeGeoipDatabase({ databaseName, maxmind });
+      const { databaseType, databaseName, maxmind } = req.body;
+      const serializedDatabase = serializeGeoipDatabase({ databaseType, databaseName, maxmind });
       const normalizedDatabaseName = normalizeDatabaseName(databaseName);
 
       try {

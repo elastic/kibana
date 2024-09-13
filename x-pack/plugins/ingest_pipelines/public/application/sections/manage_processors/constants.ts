@@ -139,6 +139,11 @@ export const getTypeLabel = (type: GeoipDatabase['type']): string => {
         defaultMessage: 'MaxMind',
       });
     }
+    case 'ipinfo': {
+      return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeIpinfoLabel', {
+        defaultMessage: 'IPInfo',
+      });
+    }
     case 'unknown':
     default: {
       return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeUnknownLabel', {

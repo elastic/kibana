@@ -60,14 +60,14 @@ export const AddDatabaseModal = ({
     setDatabaseName(value);
     setNameExistsError(existingDatabaseNames.includes(value));
   };
-  const isFormValid = () => {
+  const isFormValid = (): boolean => {
     if (!databaseType || nameExistsError) {
       return false;
     }
-    if (databaseType === 'maxmid') {
-      return maxmind && databaseName;
+    if (databaseType === 'maxmind') {
+      return Boolean(maxmind) && Boolean(databaseName);
     }
-    return databaseName;
+    return Boolean(databaseName);
   };
   const onDatabaseTypeChange = (value: string) => {
     setDatabaseType(value);
@@ -79,7 +79,11 @@ export const AddDatabaseModal = ({
     }
     setIsLoading(true);
     try {
-      const { error } = await services.api.createGeoipDatabase({ maxmind, databaseName });
+      const { error } = await services.api.createGeoipDatabase({
+        databaseType,
+        databaseName,
+        maxmind,
+      });
       setIsLoading(false);
       if (error) {
         services.notifications.toasts.addError(error, {

@@ -11,14 +11,28 @@ export interface GeoipDatabaseFromES {
   modified_date_millis: number;
   database: {
     name: string;
-    maxmind: {
+    // maxmind type
+    maxmind?: {
       account_id: string;
     };
+    // ipinfo type
+    ipinfo?: {};
+  };
+}
+
+interface SerializedGeoipDatabase {
+  name: string;
+  ipinfo?: {};
+  maxmind?: {
+    account_id: string;
   };
 }
 
 const getGeoipType = ({ database }: GeoipDatabaseFromES) => {
   if (database.maxmind && database.maxmind.account_id) {
+    return 'maxmind';
+  }
+  if (database.ipinfo) {
     return 'maxmind';
   }
   return 'unknown';
@@ -34,16 +48,20 @@ export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabaseFromES) => 
 };
 
 export const serializeGeoipDatabase = ({
+  databaseType,
   databaseName,
   maxmind,
 }: {
+  databaseType: 'maxmind' | 'ipinfo';
   databaseName: string;
-  maxmind: string;
-}) => {
-  return {
-    name: databaseName,
-    maxmind: {
-      account_id: maxmind,
-    },
-  };
+  maxmind?: string;
+}): SerializedGeoipDatabase => {
+  const database = { name: databaseName } as SerializedGeoipDatabase;
+  if (databaseType === 'maxmind') {
+    database.maxmind = { account_id: maxmind ?? '' };
+  }
+  if (databaseType === 'ipinfo') {
+    database.ipinfo = {};
+  }
+  return database;
 };
