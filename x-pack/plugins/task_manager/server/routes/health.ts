@@ -86,6 +86,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   let numOfKibanaInstances = 1;
   numOfKibanaInstances$.subscribe((updatedNumber) => {
+    // if there are no active nodes right now, assume there's at least 1
     numOfKibanaInstances = Math.max(updatedNumber, 1);
   });
 
