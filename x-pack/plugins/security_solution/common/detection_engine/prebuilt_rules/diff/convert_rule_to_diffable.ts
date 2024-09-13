@@ -20,7 +20,6 @@ import type {
   NewTermsRuleCreateProps,
   QueryRule,
   QueryRuleCreateProps,
-  RuleResponse,
   SavedQueryRule,
   SavedQueryRuleCreateProps,
   ThreatMatchRule,
@@ -41,6 +40,7 @@ import type {
   DiffableThresholdFields,
 } from '../../../api/detection_engine/prebuilt_rules';
 import { addEcsToRequiredFields } from '../../rule_management/utils';
+import type { DiffableRuleInput } from './types';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
@@ -58,7 +58,7 @@ import { extractTimestampOverrideObject } from './extract_timestamp_override_obj
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
  * Read more in the JSDoc description of DiffableRule.
  */
-export const convertRuleToDiffable = (rule: RuleResponse): DiffableRule => {
+export const convertRuleToDiffable = (rule: DiffableRuleInput): DiffableRule => {
   const commonFields = extractDiffableCommonFields(rule);
 
   switch (rule.type) {
@@ -108,7 +108,7 @@ export const convertRuleToDiffable = (rule: RuleResponse): DiffableRule => {
 };
 
 const extractDiffableCommonFields = (
-  rule: RuleResponse
+  rule: DiffableRuleInput
 ): RequiredOptional<DiffableCommonFields> => {
   return {
     // --------------------- REQUIRED FIELDS

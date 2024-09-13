@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse, RuleSource } from '../../../../../../../../common/api/detection_engine';
+import type { RuleSource } from '../../../../../../../../common/api/detection_engine';
+import type { DiffableRuleInput } from '../../../../../../../../common/detection_engine/prebuilt_rules/diff/types';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateIsCustomized } from './calculate_is_customized';
 
@@ -25,7 +26,7 @@ export const calculateRuleSourceFromAsset = ({
   assetWithMatchingVersion,
   ruleIdExists,
 }: {
-  rule: RuleResponse;
+  rule: DiffableRuleInput;
   assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   ruleIdExists: boolean;
 }): RuleSource => {

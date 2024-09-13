@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
 import type { RuleNameOverrideObject } from '../../../api/detection_engine/prebuilt_rules';
+import type { DiffableRuleInput } from './types';
 
 export const extractRuleNameOverrideObject = (
-  rule: RuleResponse
+  rule: DiffableRuleInput
 ): RuleNameOverrideObject | undefined => {
   if (rule.rule_name_override == null) {
     return undefined;

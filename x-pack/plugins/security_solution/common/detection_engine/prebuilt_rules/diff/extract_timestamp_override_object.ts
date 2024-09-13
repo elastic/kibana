@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
 import type { TimestampOverrideObject } from '../../../api/detection_engine/prebuilt_rules';
+import type { DiffableRuleInput } from './types';
 
 export const extractTimestampOverrideObject = (
-  rule: RuleResponse
+  rule: DiffableRuleInput
 ): TimestampOverrideObject | undefined => {
   if (rule.timestamp_override == null) {
     return undefined;

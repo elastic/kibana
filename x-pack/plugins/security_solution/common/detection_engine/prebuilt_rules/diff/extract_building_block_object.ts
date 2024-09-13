@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
 import type { BuildingBlockObject } from '../../../api/detection_engine/prebuilt_rules';
+import type { DiffableRuleInput } from './types';
 
-export const extractBuildingBlockObject = (rule: RuleResponse): BuildingBlockObject | undefined => {
+export const extractBuildingBlockObject = (
+  rule: DiffableRuleInput
+): BuildingBlockObject | undefined => {
   if (rule.building_block_type == null) {
     return undefined;
   }
