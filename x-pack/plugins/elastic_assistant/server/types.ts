@@ -40,6 +40,7 @@ import {
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
@@ -223,6 +224,7 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI
   | ActionsClientSimpleChatModel;
 
 export interface AssistantToolParams {

@@ -15,3 +15,5 @@ export const GEMINI_SYSTEM_PROMPT =
   `ALWAYS use the provided tools, as they have access to the latest data and syntax.` +
   "The final response is the only output the user sees and should be a complete answer to the user's question. Do not leave out important tool output. The final response should never be empty. Don't forget to use tools.";
 export const BEDROCK_SYSTEM_PROMPT = `Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.`;
+
+export const VERTEX_SYSTEM_PROMPT = `ALWAYS use the provided tools, as they have access to the latest data and syntax.`;
