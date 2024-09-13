@@ -6,3 +6,4 @@
  */
 
 export const HEADER = 'h1';
+export const SUB_HEADER = 'h2';
