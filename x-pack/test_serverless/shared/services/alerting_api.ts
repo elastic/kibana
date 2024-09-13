@@ -67,7 +67,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       num: number;
       retryOptions?: TryWithRetriesOptions;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       return await retry.tryWithRetries(
         `Alerting API - waitForAlertInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
         async () => {
@@ -99,7 +98,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
 
           return response;
         },
-        { retryCount, retryDelay }
+        retryOptions
       );
     },
 
@@ -118,7 +117,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       sort?: 'asc' | 'desc';
       retryOptions?: TryWithRetriesOptions;
     }): Promise<SearchResponse> {
-      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       return await retry.tryWithRetries(
         `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
         async () => {
@@ -144,7 +142,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           }
           return response;
         },
-        { retryCount, retryDelay }
+        retryOptions
       );
     },
 
@@ -467,7 +465,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       testStart: Date;
       retryOptions?: TryWithRetriesOptions;
     }) {
-      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       for (let i = 0; i < numOfRuns; i++) {
         await retry.tryWithRetries(
           `Alerting API - waitForNumRuleRuns, retryOptions: ${JSON.stringify(retryOptions)}`,
@@ -481,7 +478,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             });
             await this.waiting.waitForAllTasksIdle({ esClient, filter: testStart });
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       }
     },
@@ -576,7 +573,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         sort?: 'asc' | 'desc';
         retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForDocumentInIndex, retryOptions: ${JSON.stringify(
             retryOptions
@@ -604,7 +600,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       },
 
@@ -644,7 +640,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         filter: Date;
         retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForAllTasksIdle, retryOptions: ${JSON.stringify(
             retryOptions
@@ -685,7 +680,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       },
 
@@ -702,7 +697,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         num?: number;
         retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForExecutionEventLog, retryOptions: ${JSON.stringify(
             retryOptions
@@ -750,7 +744,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       },
 
@@ -777,7 +771,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         attempts: number;
         retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForAllTasks, retryOptions: ${JSON.stringify(retryOptions)}`,
           async () => {
@@ -824,7 +817,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       },
 
@@ -839,7 +832,6 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         filter: Date;
         retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForDisabled, retryOptions: ${JSON.stringify(retryOptions)}`,
           async () => {
@@ -881,7 +873,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retryCount, retryDelay }
+          retryOptions
         );
       },
     },
