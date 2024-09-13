@@ -44,7 +44,9 @@ export const ElasticsearchStartPage = () => {
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <StartPageError error={indicesFetchError} />}
-        <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
+        {!isInitialLoading && !hasIndicesStatusFetchError && (
+          <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
+        )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
