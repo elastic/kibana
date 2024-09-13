@@ -2,19 +2,19 @@
 
 exports[`FieldName renders a custom description icon 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+          class="euiToken kbnFieldIcon css-2lvpo4-euiToken-square-light-s-euiColorVis1"
         >
           <span
             data-euiicon-type="tokenString"
@@ -27,17 +27,17 @@ exports[`FieldName renders a custom description icon 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             test
@@ -51,19 +51,19 @@ exports[`FieldName renders a custom description icon 1`] = `
 
 exports[`FieldName renders a geo field 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis5"
+          class="euiToken kbnFieldIcon css-nelz4y-euiToken-square-light-s-euiColorVis5"
         >
           <span
             data-euiicon-type="tokenGeo"
@@ -76,17 +76,17 @@ exports[`FieldName renders a geo field 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             test.test.test
@@ -100,19 +100,19 @@ exports[`FieldName renders a geo field 1`] = `
 
 exports[`FieldName renders a number field by providing a field record 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          class="euiToken kbnFieldIcon css-126yzfz-euiToken-square-light-s-euiColorVis0"
         >
           <span
             data-euiicon-type="tokenNumber"
@@ -125,17 +125,17 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             test.test.test
@@ -149,19 +149,19 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
 
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+          class="euiToken kbnFieldIcon css-2lvpo4-euiToken-square-light-s-euiColorVis1"
         >
           <span
             data-euiicon-type="tokenString"
@@ -174,17 +174,17 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             test
@@ -198,19 +198,19 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
 
 exports[`FieldName renders unknown field 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-circle-light-s-gray"
+          class="euiToken kbnFieldIcon css-1uwaxbd-euiToken-circle-light-s-gray"
         >
           <span
             data-euiicon-type="questionInCircle"
@@ -223,17 +223,17 @@ exports[`FieldName renders unknown field 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             test.test.test
@@ -247,19 +247,19 @@ exports[`FieldName renders unknown field 1`] = `
 
 exports[`FieldName renders when mapping is provided 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          class="euiToken kbnFieldIcon css-126yzfz-euiToken-square-light-s-euiColorVis0"
         >
           <span
             data-euiicon-type="tokenNumber"
@@ -272,17 +272,17 @@ exports[`FieldName renders when mapping is provided 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             bytes
@@ -296,19 +296,19 @@ exports[`FieldName renders when mapping is provided 1`] = `
 
 exports[`FieldName renders with a search highlight 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
+  class="euiFlexGroup css-ddu7vs-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer css-dhjvmj-euiFlexGroup-s-flexStart-center-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <span
-          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          class="euiToken kbnFieldIcon css-126yzfz-euiToken-square-light-s-euiColorVis0"
         >
           <span
             data-euiicon-type="tokenNumber"
@@ -321,21 +321,21 @@ exports[`FieldName renders with a search highlight 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+      class="euiFlexGroup css-lqqg1w-euiFlexGroup-wrap-none-flexStart-center-row"
     >
       <div
-        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll css-kpsrin-euiFlexItem-growZero"
         data-test-subj="tableDocViewRow-test.test.test-name"
       >
         <span
-          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+          class="euiToolTipAnchor eui-textBreakAll css-jcaat8-euiToolTipAnchor-inlineBlock"
         >
           <span>
             <mark
-              class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+              class="euiMark css-loqq4i-euiMark-hasScreenReaderHelpText"
             >
               te
             </mark>

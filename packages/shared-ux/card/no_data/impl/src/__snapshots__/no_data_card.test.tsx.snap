@@ -6,23 +6,23 @@ exports[`NoDataCard props button 1`] = `
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard css-1hwq9r9-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiCard__top css-1hghi78-euiCard__top-vertical"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiCard__image css-3ekcfg-euiCard__image"
         >
           <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+            class="euiImageWrapper css-3m9hxu-euiImageWrapper-fullWidth"
           >
             <img
               alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              class="euiImage css-dhoeyf-euiImage-fullWidth"
               src="test-file-stub"
               style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
             />
@@ -30,27 +30,27 @@ exports[`NoDataCard props button 1`] = `
         </div>
       </div>
       <div
-        class="euiCard__content emotion-euiCard__content-vertical"
+        class="euiCard__content css-jolp8x-euiCard__content-vertical"
       >
         <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
+          class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
           id="generated-idTitle"
         >
           <a
             aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            class="euiCard__titleAnchor css-t68l8w-euiCard__text-center-interactive"
             href="/app/integrations/browse"
             rel="noreferrer"
           >
             <span
-              class="emotion-euiScreenReaderOnly"
+              class="css-gb1zbv-euiScreenReaderOnly"
             >
               Card title
             </span>
           </a>
         </p>
         <div
-          class="euiText emotion-euiText-s-euiCard__description"
+          class="euiText css-mtv1pd-euiText-s-euiCard__description"
           id="generated-idDescription"
         >
           <p>
@@ -59,16 +59,16 @@ exports[`NoDataCard props button 1`] = `
         </div>
       </div>
       <div
-        class="emotion-euiCard__footer"
+        class="css-sec0wf-euiCard__footer"
       >
         <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          class="euiButton css-1ew06m2-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="noDataDefaultFooterAction"
           href="/app/integrations/browse"
           rel="noreferrer"
         >
           <span
-            class="emotion-euiButtonDisplayContent"
+            class="css-cf8eum-euiButtonDisplayContent"
           >
             <span
               class="eui-textTruncate"
@@ -89,23 +89,23 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class css-1hwq9r9-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiCard__top css-1hghi78-euiCard__top-vertical"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiCard__image css-3ekcfg-euiCard__image"
         >
           <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+            class="euiImageWrapper css-3m9hxu-euiImageWrapper-fullWidth"
           >
             <img
               alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              class="euiImage css-dhoeyf-euiImage-fullWidth"
               src="test-file-stub"
               style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
             />
@@ -113,27 +113,27 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
         </div>
       </div>
       <div
-        class="euiCard__content emotion-euiCard__content-vertical"
+        class="euiCard__content css-jolp8x-euiCard__content-vertical"
       >
         <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
+          class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
           id="generated-idTitle"
         >
           <a
             aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            class="euiCard__titleAnchor css-t68l8w-euiCard__text-center-interactive"
             href="/app/integrations/browse"
             rel="noreferrer"
           >
             <span
-              class="emotion-euiScreenReaderOnly"
+              class="css-gb1zbv-euiScreenReaderOnly"
             >
               Card title
             </span>
           </a>
         </p>
         <div
-          class="euiText emotion-euiText-s-euiCard__description"
+          class="euiText css-mtv1pd-euiText-s-euiCard__description"
           id="generated-idDescription"
         >
           <p>
@@ -142,16 +142,16 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
         </div>
       </div>
       <div
-        class="emotion-euiCard__footer"
+        class="css-sec0wf-euiCard__footer"
       >
         <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          class="euiButton css-1ew06m2-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="noDataDefaultFooterAction"
           href="/app/integrations/browse"
           rel="noreferrer"
         >
           <span
-            class="emotion-euiButtonDisplayContent"
+            class="css-cf8eum-euiButtonDisplayContent"
           >
             <span
               class="eui-textTruncate"
@@ -172,23 +172,23 @@ exports[`NoDataCard props href 1`] = `
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard css-1hwq9r9-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiCard__top css-1hghi78-euiCard__top-vertical"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiCard__image css-3ekcfg-euiCard__image"
         >
           <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+            class="euiImageWrapper css-3m9hxu-euiImageWrapper-fullWidth"
           >
             <img
               alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              class="euiImage css-dhoeyf-euiImage-fullWidth"
               src="test-file-stub"
               style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
             />
@@ -196,27 +196,27 @@ exports[`NoDataCard props href 1`] = `
         </div>
       </div>
       <div
-        class="euiCard__content emotion-euiCard__content-vertical"
+        class="euiCard__content css-jolp8x-euiCard__content-vertical"
       >
         <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
+          class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
           id="generated-idTitle"
         >
           <a
             aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            class="euiCard__titleAnchor css-t68l8w-euiCard__text-center-interactive"
             href="#"
             rel="noreferrer"
           >
             <span
-              class="emotion-euiScreenReaderOnly"
+              class="css-gb1zbv-euiScreenReaderOnly"
             >
               Card title
             </span>
           </a>
         </p>
         <div
-          class="euiText emotion-euiText-s-euiCard__description"
+          class="euiText css-mtv1pd-euiText-s-euiCard__description"
           id="generated-idDescription"
         >
           <p>
@@ -225,16 +225,16 @@ exports[`NoDataCard props href 1`] = `
         </div>
       </div>
       <div
-        class="emotion-euiCard__footer"
+        class="css-sec0wf-euiCard__footer"
       >
         <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          class="euiButton css-1ew06m2-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="noDataDefaultFooterAction"
           href="#"
           rel="noreferrer"
         >
           <span
-            class="emotion-euiButtonDisplayContent"
+            class="css-cf8eum-euiButtonDisplayContent"
           >
             <span
               class="eui-textTruncate"
@@ -255,23 +255,23 @@ exports[`NoDataCard props no access to Fleet 1`] = `
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-EuiCard"
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard css-1qdz9pu-euiPanel-grow-m-l-subdued-EuiCard"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical-disabled"
+        class="euiCard__top css-8k4n0b-euiCard__top-vertical-disabled"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiCard__image css-3ekcfg-euiCard__image"
         >
           <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+            class="euiImageWrapper css-3m9hxu-euiImageWrapper-fullWidth"
           >
             <img
               alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              class="euiImage css-dhoeyf-euiImage-fullWidth"
               src="test-file-stub"
               style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
             />
@@ -279,31 +279,31 @@ exports[`NoDataCard props no access to Fleet 1`] = `
         </div>
       </div>
       <div
-        class="euiCard__content emotion-euiCard__content-vertical"
+        class="euiCard__content css-jolp8x-euiCard__content-vertical"
       >
         <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
+          class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
           id="generated-idTitle"
         >
           <button
             aria-describedby=" generated-idDescription"
-            class="euiCard__titleButton emotion-euiCard__text-center-disabled"
+            class="euiCard__titleButton css-10swnxw-euiCard__text-center-disabled"
             disabled=""
           >
             <span
-              class="emotion-euiTextColor-default"
+              class="css-7fidck-euiTextColor-default"
             >
               Contact your administrator
             </span>
           </button>
         </p>
         <div
-          class="euiText emotion-euiText-s-euiCard__description"
+          class="euiText css-mtv1pd-euiText-s-euiCard__description"
           id="generated-idDescription"
         >
           <p>
             <span
-              class="emotion-euiTextColor-default"
+              class="css-7fidck-euiTextColor-default"
             >
               This integration is not yet enabled. Your administrator has the required permissions to turn it on.
             </span>
@@ -321,23 +321,23 @@ exports[`NoDataCard renders 1`] = `
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard css-1hwq9r9-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiCard__top css-1hghi78-euiCard__top-vertical"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiCard__image css-3ekcfg-euiCard__image"
         >
           <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+            class="euiImageWrapper css-3m9hxu-euiImageWrapper-fullWidth"
           >
             <img
               alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              class="euiImage css-dhoeyf-euiImage-fullWidth"
               src="test-file-stub"
               style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
             />
@@ -345,27 +345,27 @@ exports[`NoDataCard renders 1`] = `
         </div>
       </div>
       <div
-        class="euiCard__content emotion-euiCard__content-vertical"
+        class="euiCard__content css-jolp8x-euiCard__content-vertical"
       >
         <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
+          class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
           id="generated-idTitle"
         >
           <a
             aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            class="euiCard__titleAnchor css-t68l8w-euiCard__text-center-interactive"
             href="/app/integrations/browse"
             rel="noreferrer"
           >
             <span
-              class="emotion-euiScreenReaderOnly"
+              class="css-gb1zbv-euiScreenReaderOnly"
             >
               Card title
             </span>
           </a>
         </p>
         <div
-          class="euiText emotion-euiText-s-euiCard__description"
+          class="euiText css-mtv1pd-euiText-s-euiCard__description"
           id="generated-idDescription"
         >
           <p>
@@ -374,16 +374,16 @@ exports[`NoDataCard renders 1`] = `
         </div>
       </div>
       <div
-        class="emotion-euiCard__footer"
+        class="css-sec0wf-euiCard__footer"
       >
         <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          class="euiButton css-1ew06m2-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="noDataDefaultFooterAction"
           href="/app/integrations/browse"
           rel="noreferrer"
         >
           <span
-            class="emotion-euiButtonDisplayContent"
+            class="css-cf8eum-euiButtonDisplayContent"
           >
             <span
               class="eui-textTruncate"

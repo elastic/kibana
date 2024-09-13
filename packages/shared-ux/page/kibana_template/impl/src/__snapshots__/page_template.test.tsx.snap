@@ -2,29 +2,29 @@
 
 exports[`KibanaPageTemplate render basic template 1`] = `
 <div
-  class="euiPageTemplate kbnPageTemplate emotion-euiPageOuter-row-grow"
+  class="euiPageTemplate kbnPageTemplate css-cjgvy1-euiPageOuter-row-grow"
   style="min-block-size:calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));padding-block-start:0"
 >
   <main
-    class="emotion-euiPageInner"
+    class="css-nq554q-euiPageInner"
     id="EuiPageTemplateInner_generated-id"
   >
     <header
-      class="euiPageHeader emotion-euiPageHeader-l-border"
+      class="euiPageHeader css-l42bnp-euiPageHeader-l-border"
       title="test"
     >
       <div
-        class="euiPageHeaderContent emotion-euiPageHeaderContent-l"
+        class="euiPageHeaderContent css-q8z7o-euiPageHeaderContent-l"
         style="max-width:1200px"
       >
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top css-1drqwgc-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
           >
             <div
-              class="euiText emotion-euiText-constrainedWidth-m"
+              class="euiText css-5ytxik-euiText-constrainedWidth-m"
             >
               <p>
                 test
@@ -32,13 +32,13 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexGroup css-1mydtf-euiFlexGroup-wrap-l-flexStart-stretch-row"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
               >
                 test
               </div>
