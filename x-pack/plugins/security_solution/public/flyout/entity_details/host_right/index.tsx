@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -95,9 +94,6 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const hasMisconfigurationFindingsIndex =
-    useCspSetupStatusApi().data?.hasMisconfigurationsFindings || false;
-
   const { data } = useMisconfigurationPreview({
     query: buildEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
@@ -133,7 +129,6 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
-          hasMisconfigurationFindingsIndex,
           hasMisconfigurationFindingsForThisQuery,
         },
       });
@@ -144,7 +139,6 @@ export const HostPanel = ({
       hostName,
       scopeId,
       isRiskScoreExist,
-      hasMisconfigurationFindingsIndex,
       hasMisconfigurationFindingsForThisQuery,
     ]
   );
@@ -186,9 +180,7 @@ export const HostPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode &&
-                (isRiskScoreExist ||
-                  (hasMisconfigurationFindingsIndex && hasMisconfigurationFindingsForThisQuery))
+                !isPreviewMode && (isRiskScoreExist || hasMisconfigurationFindingsForThisQuery)
               }
               expandDetails={openDefaultPanel}
             />

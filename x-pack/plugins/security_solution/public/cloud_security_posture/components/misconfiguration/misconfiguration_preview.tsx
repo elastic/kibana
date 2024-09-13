@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
@@ -59,12 +58,7 @@ const MisconfigurationEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
-          <EuiTitle
-            size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
+          <EuiTitle size="m">
             <h1>{'-'}</h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -104,12 +98,7 @@ const MisconfigurationPreviewScore = ({
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
-          <EuiTitle
-            size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
+          <EuiTitle size="s">
             <h1>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -144,8 +133,6 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
 
   const { euiTheme } = useEuiTheme();
   const hasMisconfigurationFindingsForThisQuery = passedFindings > 0 || failedFindings > 0;
-  const hasMisconfigurationFindingsIndex =
-    useCspSetupStatusApi().data?.hasMisconfigurationsFindings || false;
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
@@ -168,18 +155,11 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
       params: {
         name: hostName,
         isRiskScoreExist,
-        hasMisconfigurationFindingsIndex,
         hasMisconfigurationFindingsForThisQuery,
         path: { tab: 'csp_insights' },
       },
     });
-  }, [
-    hasMisconfigurationFindingsForThisQuery,
-    hasMisconfigurationFindingsIndex,
-    hostName,
-    isRiskScoreExist,
-    openLeftPanel,
-  ]);
+  }, [hasMisconfigurationFindingsForThisQuery, hostName, isRiskScoreExist, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode

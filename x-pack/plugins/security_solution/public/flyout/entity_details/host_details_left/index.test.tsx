@@ -69,7 +69,6 @@ describe('HostDetailsPanel', () => {
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        hasMisconfigurationFindingsIndex={true}
         hasMisconfigurationFindingsForThisQuery={false}
       />,
       {
@@ -85,7 +84,6 @@ describe('HostDetailsPanel', () => {
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        hasMisconfigurationFindingsIndex={true}
         hasMisconfigurationFindingsForThisQuery={true}
       />,
       {
