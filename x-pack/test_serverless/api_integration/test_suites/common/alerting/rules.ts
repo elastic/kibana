@@ -109,6 +109,10 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
+        retryOptions: {
+          retryCount: 12,
+          retryDelay: 2000,
+        },
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -605,6 +609,10 @@ export default function ({ getService }: FtrProviderContext) {
         filter: testStart,
         ruleId,
         num: 2,
+        retryOptions: {
+          retryCount: 12,
+          retryDelay: 2000,
+        },
       });
       expect(eventLogResp.hits.hits.length).to.be(2);
 

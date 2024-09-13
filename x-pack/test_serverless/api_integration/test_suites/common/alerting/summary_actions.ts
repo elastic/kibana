@@ -480,7 +480,10 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 2,
         sort: 'asc',
-        retryOptions: { retryDelay: 1500, retryCount: 10 },
+        retryOptions: {
+          retryCount: 12,
+          retryDelay: 2000,
+        },
       });
 
       const resp2 = await alertingApi.helpers.waitForAlertInIndex({

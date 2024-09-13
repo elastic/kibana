@@ -14,6 +14,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { v4 as uuidv4 } from 'uuid';
+import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import { RoleCredentials } from '.';
 import type { SloBurnRateRuleParams } from '../../api_integration/services/slo_api';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
@@ -38,10 +39,7 @@ interface CreateEsQueryRuleParams {
 }
 const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;
-interface RetryOptions {
-  retryCount: number;
-  retryDelay: number;
-}
+
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
@@ -67,9 +65,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       indexName: string;
       ruleId: string;
       num: number;
-      retryOptions?: RetryOptions;
+      retryOptions?: TryWithRetriesOptions;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      const { retryCount, retryDelay } = retryOptions;
+      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       return await retry.tryWithRetries(
         `Alerting API - waitForAlertInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
         async () => {
@@ -118,9 +116,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       ruleId: string;
       num?: number;
       sort?: 'asc' | 'desc';
-      retryOptions?: RetryOptions;
+      retryOptions?: TryWithRetriesOptions;
     }): Promise<SearchResponse> {
-      const { retryCount, retryDelay } = retryOptions;
+      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       return await retry.tryWithRetries(
         `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
         async () => {
@@ -467,9 +465,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       ruleId: string;
       esClient: Client;
       testStart: Date;
-      retryOptions?: RetryOptions;
+      retryOptions?: TryWithRetriesOptions;
     }) {
-      const { retryCount, retryDelay } = retryOptions;
+      const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
       for (let i = 0; i < numOfRuns; i++) {
         await retry.tryWithRetries(
           `Alerting API - waitForNumRuleRuns, retryOptions: ${JSON.stringify(retryOptions)}`,
@@ -576,9 +574,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         ruleId: string;
         num?: number;
         sort?: 'asc' | 'desc';
-        retryOptions?: RetryOptions;
+        retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount, retryDelay } = retryOptions;
+        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForDocumentInIndex, retryOptions: ${JSON.stringify(
             retryOptions
@@ -644,9 +642,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       }: {
         esClient: Client;
         filter: Date;
-        retryOptions?: RetryOptions;
+        retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount, retryDelay } = retryOptions;
+        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForAllTasksIdle, retryOptions: ${JSON.stringify(
             retryOptions
@@ -702,9 +700,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         filter: Date;
         ruleId: string;
         num?: number;
-        retryOptions?: RetryOptions;
+        retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount, retryDelay } = retryOptions;
+        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForExecutionEventLog, retryOptions: ${JSON.stringify(
             retryOptions
@@ -777,9 +775,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         filter: Date;
         taskType: string;
         attempts: number;
-        retryOptions?: RetryOptions;
+        retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount, retryDelay } = retryOptions;
+        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForAllTasks, retryOptions: ${JSON.stringify(retryOptions)}`,
           async () => {
@@ -839,9 +837,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         esClient: Client;
         ruleId: string;
         filter: Date;
-        retryOptions?: RetryOptions;
+        retryOptions?: TryWithRetriesOptions;
       }): Promise<SearchResponse> {
-        const { retryCount, retryDelay } = retryOptions;
+        const { retryCount = RETRY_COUNT, retryDelay = RETRY_DELAY } = retryOptions;
         return await retry.tryWithRetries(
           `Alerting API - waiting.waitForDisabled, retryOptions: ${JSON.stringify(retryOptions)}`,
           async () => {
