@@ -120,7 +120,6 @@ export interface FunctionDefinition {
       name: string;
       type: FunctionParameterType;
       optional?: boolean;
-      noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
       /**
        * If set, this parameter does not accept a field. It only accepts a constant,
