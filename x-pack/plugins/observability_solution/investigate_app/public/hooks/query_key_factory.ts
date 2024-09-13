@@ -9,6 +9,7 @@
 
 export const investigationKeys = {
   all: ['investigations'] as const,
+  tags: () => [...investigationKeys.all, 'tags'] as const,
   lists: () => [...investigationKeys.all, 'list'] as const,
   list: (params: { page: number; perPage: number; search?: string; filter?: string }) =>
     [...investigationKeys.lists(), params] as const,

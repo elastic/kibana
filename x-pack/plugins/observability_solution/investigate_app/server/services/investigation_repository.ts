@@ -27,6 +27,7 @@ export interface InvestigationRepository {
     filter?: string;
     pagination: Pagination;
   }): Promise<Paginated<Investigation>>;
+  findAllTags(): Promise<string[]>;
 }
 
 export function investigationRepositoryFactory({
@@ -119,6 +120,26 @@ export function investigationRepositoryFactory({
           .map((savedObject) => toInvestigation(savedObject.attributes))
           .filter((investigation) => investigation !== undefined) as Investigation[],
       };
+    },
+
+    async findAllTags(): Promise<string[]> {
+      interface AggsTagsTerms {
+        tags: { buckets: [{ key: string }] };
+      }
+
+      const response = await soClient.find<StoredInvestigation, AggsTagsTerms>({
+        type: SO_INVESTIGATION_TYPE,
+        aggs: {
+          tags: {
+            terms: {
+              field: 'investigation.attributes.tags',
+              size: 10000,
+            },
+          },
+        },
+      });
+
+      return response.aggregations?.tags?.buckets.map((bucket) => bucket.key) ?? [];
     },
   };
 }
