@@ -55,7 +55,7 @@ describe('AnalyticsCollectionIntegrate', () => {
       .toMatchInlineSnapshot(`
       "<script type=\\"text/javascript\\">
       window.elasticAnalytics.createTracker({
-        endpoint: \\"elasticsearch-url\\",
+        endpoint: \\"https://localhost:9200\\",
         collectionName: \\"example\\",
         apiKey: \\"########\\",
         // Optional: sampling rate percentage: 0-1, 0 = no events, 1 = all events
