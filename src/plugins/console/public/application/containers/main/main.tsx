@@ -48,6 +48,7 @@ import { History } from '../history';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
+import { ImportConfirmModal } from './import_confirm_modal';
 import {
   SHELL_TAB_ID,
   HISTORY_TAB_ID,
@@ -73,6 +74,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
+  const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
 
   const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
@@ -149,16 +151,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         const fileContent = e?.target?.result;
 
         if (fileContent) {
-          dispatch({
-            type: 'setFileToImport',
-            payload: fileContent as string,
-          });
-
-          notifications.toasts.addSuccess(
-            i18n.translate('console.notification.fileImportedSuccessfully', {
-              defaultMessage: `The file you selected has been imported successfully.`,
-            })
-          );
+          setIsConfirmImportOpen(fileContent as string);
         } else {
           notifications.toasts.addWarning(
             i18n.translate('console.notification.error.fileImportNoContent', {
@@ -346,6 +339,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
       <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
         <div />
       </ConsoleTourStep>
+
+      {isConfirmImportOpen && (
+        <ImportConfirmModal
+          onClose={() => setIsConfirmImportOpen(null)}
+          fileContent={isConfirmImportOpen}
+        />
+      )}
     </div>
   );
 }

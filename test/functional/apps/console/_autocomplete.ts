@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
+  const browser = getService('browser');
 
   async function runTemplateTest(type: string, template: string) {
     await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
@@ -28,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
     await PageObjects.console.pressEnter();
     await retry.try(async () => {
-      const request = await PageObjects.console.getEditorText();
+      await PageObjects.console.copyRequestsToClipboard();
+      const request = await browser.execute(() => navigator.clipboard.readText());
       log.debug(request);
       expect(request).to.contain(`${template}`);
     });
