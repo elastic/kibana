@@ -5302,7 +5302,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management@link:x-pack/packages/index-management":
+"@kbn/index-management-shared-types@link:x-pack/packages/index-management/index_management_shared_types":
   version "0.0.0"
   uid ""
 
