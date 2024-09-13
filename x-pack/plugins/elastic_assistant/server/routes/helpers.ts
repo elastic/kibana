@@ -28,8 +28,9 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -400,12 +401,15 @@ export const langChainExecute = async ({
     executorParams
   );
 
+  const { esqlExists, isModelDeployed } = await getIsKnowledgeBaseEnabled(kbDataClient);
+
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
+    isEnabledKnowledgeBase: isModelDeployed && esqlExists,
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
@@ -586,4 +590,27 @@ export const performChecks = ({
   }
 
   return undefined;
+};
+
+/**
+ * Returns whether the v2 KB is enabled
+ *
+ * @param context - Route context
+ * @param request - Route KibanaRequest
+
+ */
+export const isV2KnowledgeBaseEnabled = ({
+  context,
+  request,
+}: {
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
+  request: KibanaRequest;
+}): boolean => {
+  const pluginName = getPluginNameFromRequest({
+    request,
+    defaultPluginName: DEFAULT_PLUGIN_NAME,
+  });
+  return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 };
