@@ -28,7 +28,7 @@ export const applyRuleUpdate = async ({
     ...applyRuleDefaults(ruleUpdate),
 
     // Use existing values
-    enabled: ruleUpdate.enabled ?? existingRule.enabled, // TODO this value isn't used by our call to update
+    enabled: ruleUpdate.enabled ?? existingRule.enabled,
     version: ruleUpdate.version ?? existingRule.version,
 
     // Always keep existing values for these fields

@@ -18,7 +18,7 @@ import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_re
 import type { ImportRuleArgs } from '../detection_rules_client_interface';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
-import { validateMlAuth } from '../utils';
+import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { SERVER_APP_ID } from '../../../../../../../common';
 
@@ -74,7 +74,11 @@ export const importRuleWithSource = async ({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
     });
-    return convertAlertingRuleToRuleResponse(updatedRule);
+
+    // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
+    const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
+
+    return convertAlertingRuleToRuleResponse({ ...updatedRule, enabled });
   }
 
   const ruleWithDefaults = applyRuleDefaults(ruleToImport);
