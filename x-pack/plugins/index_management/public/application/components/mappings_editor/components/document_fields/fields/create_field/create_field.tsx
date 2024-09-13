@@ -253,6 +253,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
               <FormDataProvider pathsToWatch={['type', 'subType']}>
                 {({ type, subType }) => {
+                  if (!type) return null;
+
                   const RequiredParametersForm = getRequiredParametersFormForType(
                     type?.[0]?.value,
                     subType?.[0]?.value
@@ -266,7 +268,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
                   return (
                     <div className="mappingsEditor__createFieldRequiredProps">
-                      {typeDefinition.isBeta ? (
+                      {typeDefinition?.isBeta ? (
                         <>
                           <FieldBetaBadge />
                           <EuiSpacer size="m" />

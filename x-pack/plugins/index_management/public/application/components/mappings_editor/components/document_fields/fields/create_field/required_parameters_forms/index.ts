@@ -6,6 +6,7 @@
  */
 
 import { ComponentType } from 'react';
+import { TYPE_DEFINITION } from '../../../../../constants';
 import { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
 
 import { AliasTypeRequiredParameters } from './alias_type';
@@ -27,5 +28,14 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
 export const getRequiredParametersFormForType = (
   type: MainType,
   subType?: SubType
-): ComponentType<ComponentProps> | undefined =>
-  typeToParametersFormMap[subType as DataType] || typeToParametersFormMap[type];
+): ComponentType<ComponentProps> | undefined => {
+  const typeDefinition = TYPE_DEFINITION[type];
+
+  if (subType) {
+    return typeDefinition.subTypes?.types.includes(subType)
+      ? typeToParametersFormMap[subType]
+      : undefined;
+  }
+
+  return typeToParametersFormMap[type];
+};
