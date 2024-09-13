@@ -97,6 +97,13 @@ export interface DefaultAppStateExtension {
 }
 
 /**
+ * Parameters passed to the cell renderers extension
+ */
+export interface CellRenderersExtensionParams {
+  rowHeight: number | undefined;
+}
+
+/**
  * Parameters passed to the row controls extension
  */
 export interface RowControlsExtensionParams {
@@ -216,7 +223,7 @@ export interface Profile {
    * Gets a map of column names to custom cell renderers to use in the data grid
    * @returns The custom cell renderers to use in the data grid
    */
-  getCellRenderers: () => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
 
   /**
    * Gets a row indicator provider, allowing rows in the data grid to be given coloured highlights

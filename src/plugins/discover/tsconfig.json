@@ -95,7 +95,8 @@
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/security-solution-common"
+    "@kbn/security-solution-common",
+    "@kbn/react-hooks",
   ],
   "exclude": [
     "target/**/*"

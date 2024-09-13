@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { getSummaryColumn } from '../../../../../components/data_types/logs/summary_column';
 import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { ProfileProviderServices } from '../../../profile_provider_services';
 
-export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
-  (prev) => () => ({
-    ...prev(),
+export const makeGetCellRenderersHandler =
+  (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getCellRenderers'] =>
+  (prev) =>
+  (params) => ({
+    ...prev(params),
     ...LOG_LEVEL_FIELDS.reduce(
       (acc, field) => ({
         ...acc,
@@ -22,4 +27,5 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       }),
       {}
     ),
+    [SOURCE_COLUMN]: getSummaryColumn({ data: services.data, params }),
   });

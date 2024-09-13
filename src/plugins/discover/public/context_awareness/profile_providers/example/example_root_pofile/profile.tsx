@@ -16,8 +16,8 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
   isExperimental: true,
   profile: {
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
+    getCellRenderers: (prev) => (params) => ({
+      ...prev(params),
       '@timestamp': (props) => {
         const timestamp = getFieldValue(props.row, '@timestamp');
 

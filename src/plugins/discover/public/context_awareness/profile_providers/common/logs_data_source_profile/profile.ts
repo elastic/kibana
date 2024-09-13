@@ -10,7 +10,7 @@
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import {
-  getCellRenderers,
+  makeGetCellRenderersHandler,
   getRowIndicatorProvider,
   getRowAdditionalLeadingControls,
 } from './accessors';
@@ -21,8 +21,8 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
+    getCellRenderers: makeGetCellRenderersHandler(services),
     getRowIndicatorProvider,
-    getCellRenderers,
     getRowAdditionalLeadingControls,
   },
   resolve: (params) => {

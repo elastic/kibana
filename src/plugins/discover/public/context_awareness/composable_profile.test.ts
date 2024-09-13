@@ -14,7 +14,7 @@ describe('getMergedAccessor', () => {
   it('should return the base implementation if no profiles are provided', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
     const mergedAccessor = getMergedAccessor([], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor();
+    const result = mergedAccessor({ rowHeight: 0 });
     expect(baseImpl).toHaveBeenCalled();
     expect(result).toEqual({ base: expect.any(Function) });
   });
@@ -22,19 +22,19 @@ describe('getMergedAccessor', () => {
   it('should merge the accessors in the correct order', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
     const profile1: ComposableProfile = {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         profile1: jest.fn(),
       })),
     };
     const profile2: ComposableProfile = {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         profile2: jest.fn(),
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor();
+    const result = mergedAccessor({ rowHeight: 0 });
     expect(baseImpl).toHaveBeenCalled();
     expect(profile1.getCellRenderers).toHaveBeenCalled();
     expect(profile2.getCellRenderers).toHaveBeenCalled();
@@ -52,13 +52,13 @@ describe('getMergedAccessor', () => {
       getCellRenderers: jest.fn(() => () => ({ profile1: jest.fn() })),
     };
     const profile2: ComposableProfile = {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         profile2: jest.fn(),
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor();
+    const result = mergedAccessor({ rowHeight: 0 });
     expect(baseImpl).not.toHaveBeenCalled();
     expect(profile1.getCellRenderers).toHaveBeenCalled();
     expect(profile2.getCellRenderers).toHaveBeenCalled();

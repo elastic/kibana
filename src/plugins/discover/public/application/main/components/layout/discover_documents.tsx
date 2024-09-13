@@ -315,14 +315,14 @@ function DiscoverDocumentsComponent({
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations() || {};
+    useContextualGridCustomisations({ rowHeight }) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers();
-  }, [customCellRenderer, getCellRenderersAccessor]);
+    return getCellRenderers({ rowHeight });
+  }, [customCellRenderer, getCellRenderersAccessor, rowHeight]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 

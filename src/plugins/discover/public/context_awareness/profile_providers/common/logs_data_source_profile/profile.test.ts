@@ -151,7 +151,7 @@ describe('logsDataSourceProfileProvider', () => {
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
-      const cellRenderers = getCellRenderers?.();
+      const cellRenderers = getCellRenderers?.({ rowHeight: 0 });
 
       expect(cellRenderers).toBeDefined();
       expect(cellRenderers?.['log.level']).toBeDefined();

@@ -10,7 +10,7 @@
 import React from 'react';
 import { LogFlyoutDoc, LogLevelBadge } from '@kbn/discover-utils/src';
 import * as constants from '../../../../common/data_types/logs/constants';
-import { ChipPopover } from './popover_chip';
+import { CellActionsPopover } from './cell_actions_popover';
 
 interface LogLevelProps {
   level: LogFlyoutDoc['log.level'];
@@ -20,17 +20,15 @@ export function LogLevel({ level }: LogLevelProps) {
   if (!level) return null;
 
   return (
-    <ChipPopover
+    <CellActionsPopover
       property={constants.LOG_LEVEL_FIELD}
       text={level}
-      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => (
+      renderPopoverTrigger={({ popoverTriggerProps }) => (
         <LogLevelBadge
+          {...popoverTriggerProps}
           logLevel={level}
           iconType="arrowDown"
           iconSide="right"
-          onClick={handleChipClick}
-          onClickAriaLabel={handleChipClickAriaLabel}
-          css={[chipCss, { width: '80px', paddingInline: '4px' }]}
         />
       )}
     />

@@ -45,6 +45,7 @@ export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
+
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   const renderDocumentView = useCallback(
@@ -94,8 +95,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers();
-  }, [getCellRenderersAccessor]);
+    return getCellRenderers({ rowHeight: gridProps.rowHeightState });
+  }, [getCellRenderersAccessor, gridProps.rowHeightState]);
 
   return (
     <SavedSearchEmbeddableBase

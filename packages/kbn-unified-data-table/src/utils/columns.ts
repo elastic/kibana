@@ -9,10 +9,12 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+export const SOURCE_COLUMN = '_source';
+
 // We store this outside the function as a constant, so we're not creating a new array every time
 // the function is returning this. A changing array might cause the data grid to think it got
 // new columns, and thus performing worse than using the same array over multiple renders.
-const SOURCE_ONLY = ['_source'];
+const SOURCE_ONLY = [SOURCE_COLUMN];
 
 /**
  * Function to provide fallback when

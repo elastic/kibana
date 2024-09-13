@@ -28,6 +28,7 @@ export const getCustomCellPopoverRenderer = () => {
     useEffect(() => {
       setCellPopoverProps({
         panelClassName: 'unifiedDataTable__cellPopover',
+        panelProps: { css: { maxInlineSize: 'min(75vw, 600px) !important' } },
       });
     }, [setCellPopoverProps]);
 
