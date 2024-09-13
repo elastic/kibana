@@ -293,6 +293,7 @@ export async function createAgentPolicy(
       return await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id });
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
+      throw Error(`>> Error searching for agent: ${e}`);
     }
   });
 
@@ -306,6 +307,7 @@ export async function createAgentPolicy(
       });
     } catch (e) {
       logger.error(`>> Error creating package policy: ${e}`);
+      throw Error(`>> Error creating package policy: ${e}`);
     }
   });
 }
