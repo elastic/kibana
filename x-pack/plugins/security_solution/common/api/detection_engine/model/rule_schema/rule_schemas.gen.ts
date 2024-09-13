@@ -160,7 +160,7 @@ export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
-  rule_source: RuleSource,
+  rule_source: RuleSource.optional(),
   updated_at: z.string().datetime(),
   updated_by: z.string(),
   created_at: z.string().datetime(),

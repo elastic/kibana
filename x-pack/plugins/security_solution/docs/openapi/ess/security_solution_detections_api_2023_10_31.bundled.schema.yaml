@@ -4869,7 +4869,6 @@ components:
         - id
         - rule_id
         - immutable
-        - rule_source
         - updated_at
         - updated_by
         - created_at
