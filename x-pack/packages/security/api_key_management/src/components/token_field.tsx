@@ -32,7 +32,6 @@ export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props
   return (
     <EuiFieldText
       data-test-subj="apiKeyTokenField"
-      controlOnly
       aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
         defaultMessage: 'Token',
       })}
