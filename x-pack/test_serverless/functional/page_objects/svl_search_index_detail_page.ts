@@ -8,11 +8,23 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
+export function SvlSearchIndexDetailPageProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
+  const commonPageObject = getPageObject('common');
 
   return {
+    async navigateToIndexDetailPage(indexName: string) {
+      await commonPageObject.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+        shouldLoginIfPrompted: false,
+      });
+      expect(await browser.getCurrentUrl()).contain('/index_details');
+    },
+
     async expectToBeIndexDetailPage() {
       expect(await browser.getCurrentUrl()).contain('/index_details');
     },
@@ -63,6 +75,16 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await quickStatsDocumentElem.click();
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('AI Search\n1 Field');
       await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
+    },
+
+    async expectAddDocumentCodeExamples() {
+      await testSubjects.existOrFail('SearchIndicesAddDocumentsCode', { timeout: 2000 });
+    },
+
+    async expectHasIndexDocuments() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail('search-index-documents-result', { timeout: 2000 });
+      });
     },
   };
 }

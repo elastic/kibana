@@ -7,20 +7,22 @@
 
 import {
   EuiPageSection,
-  EuiSpacer,
   EuiButton,
   EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { IndexDocuments } from '../index_documents/index_documents';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
@@ -69,17 +71,31 @@ export const SearchIndexDetailsPage = () => {
       />
       <div data-test-subj="searchIndexDetailsContent" />
       <EuiPageTemplate.Section grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <ConnectionDetails />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ConnectionDetails />
+              </EuiFlexItem>
+              <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        <EuiFlexGroup>
-          <QuickStats index={index} mappings={mappings} />
+          <EuiFlexItem>
+            <QuickStats index={index} mappings={mappings} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabbedContent
+              tabs={[
+                {
+                  id: 'data',
+                  name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+                    defaultMessage: 'Data',
+                  }),
+                  content: <IndexDocuments indexName={indexName} />,
+                },
+              ]}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
       {embeddableConsole}

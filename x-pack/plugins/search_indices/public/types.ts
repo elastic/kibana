@@ -28,7 +28,6 @@ export interface SearchIndicesAppPluginStartDependencies {
   cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
-  cloud: CloudStart;
 }
 
 export interface SearchIndicesServicesContextDeps {

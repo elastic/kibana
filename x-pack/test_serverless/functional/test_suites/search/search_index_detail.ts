@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const es = getService('es');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
@@ -25,10 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await es.indices.create({ index: indexName });
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
-          shouldLoginIfPrompted: false,
-        });
-        await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
+        await pageObjects.svlSearchIndexDetailPage.navigateToIndexDetailPage(indexName);
       });
     });
 
@@ -61,11 +57,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         },
       });
-      await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
-        shouldLoginIfPrompted: false,
+      await pageObjects.svlSearchIndexDetailPage.navigateToIndexDetailPage(indexName);
+      await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+    });
+
+    it('should show code examples for adding documents', async () => {
+      await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+    });
+
+    it('should have index documents', async () => {
+      await es.index({
+        index: indexName,
+        body: {
+          my_field: [1, 0, 1],
+        },
       });
 
-      await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+      await pageObjects.svlSearchIndexDetailPage.navigateToIndexDetailPage(indexName);
+      await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
     });
 
     it('should redirect to indices list page', async () => {
