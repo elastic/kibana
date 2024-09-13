@@ -13,7 +13,6 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
 import moment from 'moment';
 import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -23,6 +22,7 @@ import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
+import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
   KibanaObjects,
@@ -248,6 +248,72 @@ export class DataRecognizer {
   }
 
   // called externally by an endpoint
+  public async findIndexMatches(
+    moduleId: string,
+    size: number = 15
+  ): Promise<RecognizeModuleResultDataView[]> {
+    const config = await this._findConfig(moduleId);
+    if (config?.module.query === undefined) {
+      return [];
+    }
+
+    try {
+      const idsWithTitle = await this._dataViewsService.getIdsWithTitle();
+      // create temp objects with a function for running the query
+      const tempObjs = idsWithTitle.map(({ id, title, name }) => {
+        return {
+          id,
+          title,
+          name,
+          func: async () =>
+            this._client.asCurrentUser.search(
+              {
+                index: title, // title is index pattern we can search by e.g. "filebeat-*"
+                size: 0,
+                body: {
+                  query: config?.module.query,
+                },
+              },
+              { maxRetries: 0 }
+            ),
+        };
+      });
+
+      // run all the queries in parallel
+      const response = await Promise.all(
+        tempObjs.map(async ({ id, name, title, func }) => {
+          try {
+            const resp = await func();
+            const totalHits =
+              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
+            return { id, name, title, totalHits };
+          } catch (error) {
+            mlLog.warn(
+              `Data recognizer error running search for query defined in module ${config.module.id}. ${error}`
+            );
+            return { id, name, title, totalHits: 0 };
+          }
+        })
+      );
+
+      return response
+        .reduce<RecognizeModuleResultDataView[]>((acc, { id, title, name, totalHits }) => {
+          if (totalHits > 0) {
+            acc.push({ id, title, name });
+          }
+          return acc;
+        }, [])
+        .slice(0, size);
+    } catch (error) {
+      mlLog.warn(
+        `Data recognizer error fetching and matching data views for query in ${config.module.id}. ${error}`
+      );
+    }
+
+    return [];
+  }
+
+  // called externally by an endpoint
   public async findMatches(
     indexPattern: string,
     moduleTagFilters?: string[]
@@ -268,25 +334,12 @@ export class DataRecognizer {
         }
 
         if (match === true) {
-          let logo: Logo = null;
-          if (moduleConfig.logo) {
-            logo = moduleConfig.logo;
-          } else if (moduleConfig.logoFile) {
-            try {
-              const logoFile = await this._readFile(
-                `${this._modulesDir}/${i.dirName}/${moduleConfig.logoFile}`
-              );
-              logo = JSON.parse(logoFile);
-            } catch (e) {
-              logo = null;
-            }
-          }
           results.push({
             id: moduleConfig.id,
             title: moduleConfig.title,
             query: moduleConfig.query,
             description: moduleConfig.description,
-            logo,
+            logo: await this._loadLogoFile(moduleConfig, i.dirName),
           });
         }
       })
@@ -295,6 +348,30 @@ export class DataRecognizer {
     results.sort((res1, res2) => res1.id.localeCompare(res2.id));
 
     return results;
+  }
+
+  private async _loadLogoFile(
+    moduleConfig: FileBasedModule | Module,
+    dirName: string | null | undefined
+  ) {
+    let logo: Logo = null;
+
+    if (moduleConfig.logo) {
+      logo = moduleConfig.logo;
+    } else if (moduleConfig.logoFile) {
+      try {
+        const logoFileString = await this._readFile(
+          `${this._modulesDir}/${dirName}/${moduleConfig.logoFile}`
+        );
+        logo = JSON.parse(logoFileString);
+      } catch (error) {
+        mlLog.warn(
+          `Data recognizer error loading logo file ${moduleConfig.logoFile} for module ${moduleConfig.id}. ${error}`
+        );
+      }
+    }
+
+    return logo;
   }
 
   private async _searchForFields(moduleConfig: FileBasedModule | Module, indexPattern: string) {
@@ -418,6 +495,9 @@ export class DataRecognizer {
 
       datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
+
+    module.logo = await this._loadLogoFile(module, dirName);
+
     // load all of the kibana saved objects
     if (module.kibana !== undefined) {
       const kKeys = Object.keys(module.kibana) as Array<keyof FileBasedModule['kibana']>;

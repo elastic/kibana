@@ -14,21 +14,48 @@ import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
 
+/**
+ * Indicates the category of the data source (e.g. logs, alerts, etc.)
+ */
 export enum DataSourceCategory {
   Logs = 'logs',
   Default = 'default',
 }
 
+/**
+ * The data source profile interface
+ */
 export type DataSourceProfile = Profile;
 
+/**
+ * Parameters for the data source profile provider `resolve` method
+ */
 export interface DataSourceProfileProviderParams {
+  /**
+   * The current root context
+   */
   rootContext: RootContext;
+  /**
+   * The current data source
+   */
   dataSource?: DiscoverDataSource;
+  /**
+   * The current data view
+   */
   dataView?: DataView;
+  /**
+   * The current query
+   */
   query?: Query | AggregateQuery;
 }
 
+/**
+ * The resulting context object returned by the data source profile provider `resolve` method
+ */
 export interface DataSourceContext {
+  /**
+   * The category of the current data source
+   */
   category: DataSourceCategory;
 }
 
