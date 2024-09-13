@@ -147,6 +147,10 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
+        retryOptions: {
+          retryCount: 20,
+          retryDelay: 15_000,
+        },
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -156,6 +160,10 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
+        retryOptions: {
+          retryCount: 20,
+          retryDelay: 15_000,
+        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 
@@ -273,6 +281,10 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
+        retryOptions: {
+          retryCount: 20,
+          retryDelay: 15_000,
+        },
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -282,6 +294,10 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
+        retryOptions: {
+          retryCount: 20,
+          retryDelay: 15_000,
+        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 
@@ -492,6 +508,10 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
+        retryOptions: {
+          retryCount: 20,
+          retryDelay: 15_000,
+        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 
