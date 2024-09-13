@@ -15,6 +15,7 @@
     "@kbn/i18n",
     "@kbn/esql-ast",
     "@kbn/utility-types",
+    "@kbn/fields-metadata-plugin",
   ],
   "exclude": [
     "target/**/*",
