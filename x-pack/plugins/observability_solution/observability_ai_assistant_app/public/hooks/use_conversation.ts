@@ -45,6 +45,7 @@ export interface UseConversationProps {
   chatService: ObservabilityAIAssistantChatService;
   connectorId: string | undefined;
   onConversationUpdate?: (conversation: { conversation: Conversation['conversation'] }) => void;
+  scope: AssistantScope;
 }
 
 export type UseConversationResult = {
@@ -61,6 +62,7 @@ export function useConversation({
   chatService,
   connectorId,
   onConversationUpdate,
+  scope,
 }: UseConversationProps): UseConversationResult {
   const service = useObservabilityAIAssistantAppService();
 
@@ -126,6 +128,7 @@ export function useConversation({
       onConversationUpdate?.({ conversation: event.conversation });
     },
     persist: true,
+    scope,
   });
 
   const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);
