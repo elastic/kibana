@@ -12,12 +12,12 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { getServiceNameBadgeCell } from './service_name_badge_cell';
+import { getServiceNameCell } from './service_name_cell';
 
 const renderCell = (serviceNameField: string, record: DataTableRecord) => {
-  const ServiceNameBadgeCell = getServiceNameBadgeCell(serviceNameField);
+  const ServiceNameCell = getServiceNameCell(serviceNameField);
   render(
-    <ServiceNameBadgeCell
+    <ServiceNameCell
       rowIndex={0}
       colIndex={0}
       columnId="service.name"
@@ -33,14 +33,14 @@ const renderCell = (serviceNameField: string, record: DataTableRecord) => {
   );
 };
 
-describe('getServiceNameBadgeCell', () => {
+describe('getServiceNameCell', () => {
   it('renders icon if agent name is recognized', () => {
     const record = buildDataTableRecord(
       { fields: { 'service.name': 'test-service', 'agent.name': 'nodejs' } },
       dataViewMock
     );
     renderCell('service.name', record);
-    expect(screen.getByTestId('serviceNameBadgeCell-nodejs')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceNameCell-nodejs')).toBeInTheDocument();
   });
 
   it('renders default icon with unknwon test subject if agent name is missing', () => {
@@ -49,13 +49,13 @@ describe('getServiceNameBadgeCell', () => {
       dataViewMock
     );
     renderCell('service.name', record);
-    expect(screen.getByTestId('serviceNameBadgeCell-unknown')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceNameCell-unknown')).toBeInTheDocument();
   });
 
-  it('does not render badge if service name is missing', () => {
+  it('does not render if service name is missing', () => {
     const record = buildDataTableRecord({ fields: { 'agent.name': 'nodejs' } }, dataViewMock);
     renderCell('service.name', record);
-    expect(screen.queryByTestId('serviceNameBadgeCell-nodejs')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceNameBadgeCell-unknown')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceNameCell-nodejs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceNameCell-unknown')).not.toBeInTheDocument();
   });
 });

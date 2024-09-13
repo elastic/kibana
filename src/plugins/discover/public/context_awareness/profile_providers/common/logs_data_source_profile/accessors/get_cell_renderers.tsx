@@ -12,7 +12,7 @@ import {
   SERVICE_NAME_FIELDS,
 } from '../../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
-import { getServiceNameBadgeCell } from '../../../../../components/data_types/logs/service_name_badge_cell';
+import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
 import { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
@@ -29,8 +29,8 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
     ...SERVICE_NAME_FIELDS.reduce(
       (acc, field) => ({
         ...acc,
-        [field]: getServiceNameBadgeCell(field),
-        [`${field}.keyword`]: getServiceNameBadgeCell(`${field}.keyword`),
+        [field]: getServiceNameCell(field),
+        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`),
       }),
       {}
     ),

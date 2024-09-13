@@ -85,8 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
-      describe('Service Name Badge Cell', () => {
-        it('should render service.name badge cell', async () => {
+      describe('Service Name Cell', () => {
+        it('should render service.name cell', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: {
@@ -104,17 +104,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 0);
-          const firstServiceNameBadge = await firstCell.findByTestSubject(
-            'serviceNameBadgeCell-java'
-          );
-          const lastServiceNameBadge = await lastCell.findByTestSubject(
-            'serviceNameBadgeCell-unknown'
-          );
-          expect(await firstServiceNameBadge.getVisibleText()).to.be('product');
-          expect(await lastServiceNameBadge.getVisibleText()).to.be('accounting');
+          const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
+          const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
+          expect(await firstServiceNameCell.getVisibleText()).to.be('product');
+          expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
         });
 
-        it("should not render service.name badge cell if it's not a logs data source", async () => {
+        it("should not render service.name cell if it's not a logs data source", async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: {
@@ -133,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             expect(await firstCell.getVisibleText()).to.be('product');
-            await testSubjects.missingOrFail('*serviceNameBadgeCell*');
+            await testSubjects.missingOrFail('*serviceNameCell*');
           });
         });
       });
@@ -225,8 +221,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Service Name Badge Cell', () => {
-        it('should render service.name badge cell', async () => {
+      describe('Service Name Cell', () => {
+        it('should render service.name cell', async () => {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
@@ -247,18 +243,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 1);
-            const firstServiceNameBadge = await firstCell.findByTestSubject(
-              'serviceNameBadgeCell-java'
-            );
-            const lastServiceNameBadge = await lastCell.findByTestSubject(
-              'serviceNameBadgeCell-unknown'
-            );
-            expect(await firstServiceNameBadge.getVisibleText()).to.be('product');
-            expect(await lastServiceNameBadge.getVisibleText()).to.be('accounting');
+            const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
+            const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
+            expect(await firstServiceNameCell.getVisibleText()).to.be('product');
+            expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
           });
         });
 
-        it("should not render service.name badge cell if it's not a logs data source", async () => {
+        it("should not render service.name cell if it's not a logs data source", async () => {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
@@ -282,7 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await firstCell.getVisibleText()).to.be('product');
             expect(await lastCell.getVisibleText()).to.be('accounting');
-            await testSubjects.missingOrFail('*serviceNameBadgeCell*');
+            await testSubjects.missingOrFail('*serviceNameCell*');
           });
         });
       });

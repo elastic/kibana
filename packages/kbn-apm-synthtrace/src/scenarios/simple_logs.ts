@@ -83,7 +83,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .fill(0)
             .map(() => {
               const {
-                serviceName,
                 logMessage: { level, message },
                 commonLongEntryFields,
               } = constructLogsCommonData();
@@ -92,7 +91,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceName)
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults(commonLongEntryFields)
