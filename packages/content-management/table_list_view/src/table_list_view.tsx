@@ -59,7 +59,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   headingId,
   initialPageSize,
   listingLimit,
-  urlStateEnabled = true,
+  urlStateEnabled = false,
   customTableColumn,
   emptyPrompt,
   findItems,
