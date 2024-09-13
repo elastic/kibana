@@ -20,6 +20,13 @@ export interface RoleCredentials {
   apiKeyHeader: { Authorization: string };
 }
 
+export interface CookieCredentials {
+  Cookie: string;
+  // supertest.set() expects an object that matches IncomingHttpHeaders type, that needs to accept arbitrary key-value pairs as headers
+  // We extende the interface with an index signature to resolve this.
+  [header: string]: string;
+}
+
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
@@ -59,7 +66,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
-    async getM2MApiCredentialsWithRoleScope(role: string) {
+    async getM2MApiCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
       return sessionManager.getApiCredentialsForRole(role);
     },
     async getEmail(role: string) {
