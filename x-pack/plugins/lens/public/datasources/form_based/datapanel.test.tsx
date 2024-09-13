@@ -33,7 +33,9 @@ const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
 jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsFetcher');
 jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsReader');
-jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+
+const loadFieldExistingMock = jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
+loadFieldExistingMock.mockResolvedValue({
   indexPatternTitle: 'idx1',
   existingFieldNames: [],
 });
@@ -237,11 +239,20 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 const renderFormBasedDataPanel = async (propsOverrides?: Partial<FormBasedDataPanelProps>) => {
-  const rtlRender = render(<FormBasedDataPanel {...defaultProps} {...propsOverrides} />, {
-    wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-  });
+  const { rerender, ...rest } = render(
+    <FormBasedDataPanel {...defaultProps} {...propsOverrides} />,
+    {
+      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+    }
+  );
   await waitToLoad();
-  return rtlRender;
+  return {
+    ...rest,
+    rerender: async (overrides?: Partial<FormBasedDataPanelProps>) => {
+      rerender(<FormBasedDataPanel {...defaultProps} {...overrides} />);
+      await waitToLoad();
+    },
+  };
 };
 
 const getAriaDescription = () => screen.getByTestId('lnsIndexPattern__ariaDescription').textContent;
@@ -285,7 +296,7 @@ describe('FormBased Data Panel', () => {
 
   describe('loading existence data', () => {
     it('loads existence data', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         indexPatternTitle: 'idx1',
         existingFieldNames: [indexPatterns['1'].fields[0].name, indexPatterns['1'].fields[1].name],
       });
@@ -306,7 +317,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it('loads existence data for current index pattern id', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         indexPatternTitle: 'idx1',
         existingFieldNames: [indexPatterns['2'].fields[0].name],
       });
@@ -329,7 +340,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         indexPatternTitle: 'idx1',
         existingFieldNames: [indexPatterns['1'].fields[0].name, indexPatterns['1'].fields[1].name],
       });
@@ -345,18 +356,17 @@ describe('FormBased Data Panel', () => {
       );
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
 
-      rerender(<FormBasedDataPanel {...defaultProps} />);
-      await waitToLoad();
+      await rerender();
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
     });
 
     it('loads existence data if date range changes', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         indexPatternTitle: 'idx1',
         existingFieldNames: [indexPatterns['1'].fields[0].name, indexPatterns['1'].fields[1].name],
       });
 
-      const { rerender } = await renderFormBasedDataPanel(defaultProps);
+      const { rerender } = await renderFormBasedDataPanel();
 
       expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -375,12 +385,7 @@ describe('FormBased Data Panel', () => {
           timeFieldName: indexPatterns['1'].timeFieldName,
         })
       );
-      rerender(
-        <FormBasedDataPanel
-          {...{ ...defaultProps, dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' } }}
-        />
-      );
-      await waitToLoad();
+      await rerender({ dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' } });
 
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
@@ -427,22 +432,7 @@ describe('FormBased Data Panel', () => {
 
       expect(getAriaDescription()).toBe('2 available fields. 3 empty fields. 0 meta fields.');
 
-      rerender(
-        <FormBasedDataPanel
-          {...defaultProps}
-          state={{
-            currentIndexPatternId: '2',
-            layers: {
-              1: {
-                indexPatternId: '2',
-                columnOrder: [],
-                columns: {},
-              },
-            },
-          }}
-        />
-      );
-      await waitToLoad();
+      await rerender({ state: constructState('2') });
 
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
@@ -463,7 +453,7 @@ describe('FormBased Data Panel', () => {
         existingFieldNames: string[];
         indexPatternTitle: string;
       }) => void;
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue(
+      loadFieldExistingMock.mockResolvedValue(
         new Promise((resolve) => {
           resolveFunction = resolve;
         })
@@ -485,7 +475,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it("should trigger showNoDataPopover if fields don't have data", async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         existingFieldNames: [],
         indexPatternTitle: 'idx1',
       });
@@ -498,7 +488,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         indexPatternTitle: 'idx1',
         existingFieldNames: [indexPatterns['1'].fields[0].name, indexPatterns['1'].fields[1].name],
       });
@@ -517,7 +507,7 @@ describe('FormBased Data Panel', () => {
 
   describe('displaying field list', () => {
     beforeEach(() => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValue({
+      loadFieldExistingMock.mockResolvedValue({
         existingFieldNames: ['bytes', 'memory'],
         indexPatternTitle: 'idx1',
       });
@@ -567,7 +557,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValueOnce({
+      loadFieldExistingMock.mockResolvedValueOnce({
         existingFieldNames: [],
         indexPatternTitle: 'idx1',
       });
@@ -593,7 +583,7 @@ describe('FormBased Data Panel', () => {
         existingFieldNames: string[];
         indexPatternTitle: string;
       }) => void;
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockResolvedValueOnce(
+      loadFieldExistingMock.mockResolvedValueOnce(
         new Promise((resolve) => {
           resolveFunction = resolve;
         })
@@ -618,7 +608,7 @@ describe('FormBased Data Panel', () => {
     });
 
     it('should show error when loading fails', async () => {
-      jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(() => {
+      loadFieldExistingMock.mockImplementation(() => {
         throw new Error('idx1');
       });
 
