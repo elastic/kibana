@@ -2319,6 +2319,32 @@ describe('TaskManagerRunner', () => {
 
       expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
     });
+
+    it(`should return true if attempts = max attempts and in claiming status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Claiming,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
+    });
+
+    it(`should return false if attempts = max attempts and in running status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Running,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
   });
 
   describe('removeTask()', () => {

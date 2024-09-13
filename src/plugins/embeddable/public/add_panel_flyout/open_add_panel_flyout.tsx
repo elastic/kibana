@@ -13,7 +13,7 @@ import { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
@@ -28,7 +28,7 @@ export const openAddPanelFlyout = ({
   onAddPanel,
   onClose,
 }: {
-  container: PresentationContainer;
+  container: CanAddNewPanel;
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {

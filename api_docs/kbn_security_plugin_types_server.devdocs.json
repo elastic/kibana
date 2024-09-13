@@ -4285,26 +4285,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               },
               {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-              },
-              {
                 "plugin": "entityManager",
                 "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
               },
@@ -4323,6 +4303,26 @@
               {
                 "plugin": "entityManager",
                 "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
               },
               {
                 "plugin": "apm",
