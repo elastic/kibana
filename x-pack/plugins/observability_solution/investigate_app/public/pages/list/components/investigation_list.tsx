@@ -77,29 +77,6 @@ export function InvestigationList() {
       truncateText: true,
     },
     {
-      field: 'notes',
-      name: i18n.translate('xpack.investigateApp.investigationList.notesLabel', {
-        defaultMessage: 'Comments',
-      }),
-      render: (notes: InvestigationResponse['notes']) => <span>{notes?.length || 0}</span>,
-    },
-    {
-      field: 'createdAt',
-      name: i18n.translate('xpack.investigateApp.investigationList.createdAtLabel', {
-        defaultMessage: 'Created at',
-      }),
-      render: (createdAt: InvestigationResponse['createdAt']) => (
-        <span>{moment(createdAt).tz(tz).format(dateFormat)}</span>
-      ),
-    },
-    {
-      field: 'status',
-      name: 'Status',
-      render: (status: InvestigationResponse['status']) => {
-        return <InvestigationStatusBadge status={status} />;
-      },
-    },
-    {
       field: 'tags',
       name: 'Tags',
       render: (tags: InvestigationResponse['tags']) => {
@@ -110,6 +87,30 @@ export function InvestigationList() {
         ));
       },
     },
+    {
+      field: 'notes',
+      name: i18n.translate('xpack.investigateApp.investigationList.notesLabel', {
+        defaultMessage: 'Comments',
+      }),
+      render: (notes: InvestigationResponse['notes']) => <span>{notes?.length || 0}</span>,
+    },
+    {
+      field: 'updatedAt',
+      name: i18n.translate('xpack.investigateApp.investigationList.updatedAtLabel', {
+        defaultMessage: 'Updated at',
+      }),
+      render: (updatedAt: InvestigationResponse['updatedAt']) => (
+        <span>{moment(updatedAt).tz(tz).format(dateFormat)}</span>
+      ),
+    },
+    {
+      field: 'status',
+      name: 'Status',
+      render: (status: InvestigationResponse['status']) => {
+        return <InvestigationStatusBadge status={status} />;
+      },
+    },
+
     {
       name: 'Actions',
       render: (investigation: InvestigationResponse) => (
