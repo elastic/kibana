@@ -56,7 +56,7 @@ const DashboardToolBarComponent = ({
   );
 
   useEffect(() => {
-    onLoad?.((viewMode as ViewMode) ?? 'edit');
+    onLoad?.((viewMode as ViewMode) ?? 'view');
   }, [onLoad, viewMode]);
 
   const embedSettings = useMemo(
