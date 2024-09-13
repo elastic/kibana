@@ -48,7 +48,9 @@ export class EntityStoreDataClient {
       definition: {
         ...definition,
         filter,
-        indexPatterns: [...definition.indexPatterns, ...indexPattern.split(',')],
+        indexPatterns: indexPattern
+          ? [...definition.indexPatterns, ...indexPattern.split(',')]
+          : definition.indexPatterns,
       },
     });
     const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
