@@ -386,7 +386,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                     hasErrors: schema.boolean(),
                     diff: schema.maybe(
                       schema.arrayOf(
-                        schema.oneOf([PackagePolicyResponseSchema, DryRunPackagePolicySchema])
+                        schema.oneOf([
+                          PackagePolicyResponseSchema.extends({
+                            id: schema.maybe(schema.string()),
+                          }),
+                          DryRunPackagePolicySchema,
+                        ])
                       )
                     ),
                     agent_diff: schema.maybe(
