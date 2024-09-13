@@ -6,8 +6,7 @@
  */
 
 import type { FC } from 'react';
-import { Fragment } from 'react';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -46,7 +45,6 @@ import type { CloudInfo } from '../services/ml_server_info';
 import { getNewJobLimits } from '../services/ml_server_info';
 import { dictionaryValidator } from '../../../common/util/validators';
 import type { ModelItem } from './models_list';
-import { useEnabledFeatures } from '../contexts/ml';
 import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
@@ -431,10 +429,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           </EuiFormHelpText>
         </EuiPanel>
 
-        <EuiSpacer size={'m'} />
-
         {!disableAdaptiveResourcesControl ? (
           <>
+            <EuiSpacer size={'m'} />
+
             <EuiSwitch
               label={
                 <FormattedMessage
@@ -462,10 +460,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 }
               />
             </EuiFormHelpText>
+
+            <EuiSpacer size={'m'} />
           </>
         ) : null}
-
-        <EuiSpacer size={'m'} />
       </EuiAccordion>
     </EuiForm>
   );
@@ -480,6 +478,7 @@ interface StartDeploymentModalProps {
   modelAndDeploymentIds?: string[];
   cloudInfo: CloudInfo;
   deploymentParamsMapper: DeploymentParamsMapper;
+  showNodeInfo: boolean;
 }
 
 /**
@@ -494,9 +493,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   modelAndDeploymentIds,
   cloudInfo,
   deploymentParamsMapper,
+  showNodeInfo,
 }) => {
-  const { showNodeInfo } = useEnabledFeatures();
-
   const isUpdate = !!initialParams;
 
   const getDefaultParams = (): DeploymentParamsUI => {
@@ -582,7 +580,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
         <EuiHorizontalRule margin="m" />
 
-        {cloudInfo.cloudUrl ? (
+        {cloudInfo.cloudUrl && showNodeInfo ? (
           <>
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveResourcesCloudHelp"
@@ -660,7 +658,8 @@ export const getUserInputModelDeploymentParamsProvider =
     overlays: OverlayStart,
     startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
     startModelDeploymentDocUrl: string,
-    cloudInfo: CloudInfo
+    cloudInfo: CloudInfo,
+    showNodeInfo: boolean
   ) =>
   (
     model: ModelItem,
@@ -670,7 +669,8 @@ export const getUserInputModelDeploymentParamsProvider =
     const deploymentParamsMapper = new DeploymentParamsMapper(
       model.model_id,
       getNewJobLimits(),
-      cloudInfo
+      cloudInfo,
+      showNodeInfo
     );
 
     const params = initialParams
@@ -682,6 +682,7 @@ export const getUserInputModelDeploymentParamsProvider =
         const modalSession = overlays.openModal(
           toMountPoint(
             <StartUpdateDeploymentModal
+              showNodeInfo={showNodeInfo}
               deploymentParamsMapper={deploymentParamsMapper}
               cloudInfo={cloudInfo}
               startModelDeploymentDocUrl={startModelDeploymentDocUrl}

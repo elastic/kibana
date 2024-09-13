@@ -46,7 +46,8 @@ export class DeploymentParamsMapper {
   constructor(
     private readonly modelId: string,
     private readonly mlServerLimits: MlServerLimits,
-    private readonly cloudInfo: CloudInfo
+    private readonly cloudInfo: CloudInfo,
+    private readonly showNodeInfo: boolean
   ) {
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
@@ -106,14 +107,20 @@ export class DeploymentParamsMapper {
   public mapUiToUiDeploymentParams(
     input: DeploymentParamsUI
   ): MlStartTrainedModelDeploymentRequestNew {
-    const allocationParams = this.getAllocationsParams(input);
+    const resultInput: DeploymentParamsUI = Object.create(input);
+    if (!this.showNodeInfo) {
+      // Enforce adaptive resources for serverless
+      resultInput.adaptiveResources = true;
+    }
+
+    const allocationParams = this.getAllocationsParams(resultInput);
 
     return {
       model_id: this.modelId,
-      deployment_id: input.deploymentId,
-      priority: input.vCPUUsage === 'low' ? 'low' : 'normal',
-      threads_per_allocation: this.getNumberOfThread(input),
-      ...(input.adaptiveResources
+      deployment_id: resultInput.deploymentId,
+      priority: resultInput.vCPUUsage === 'low' ? 'low' : 'normal',
+      threads_per_allocation: this.getNumberOfThread(resultInput),
+      ...(resultInput.adaptiveResources || !this.showNodeInfo
         ? {
             adaptive_allocations: {
               enabled: true,

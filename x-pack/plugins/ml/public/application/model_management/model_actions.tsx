@@ -20,6 +20,7 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useEnabledFeatures } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -61,6 +62,8 @@ export function useModelActions({
       ...startServices
     },
   } = useMlKibana();
+
+  const { showNodeInfo } = useEnabledFeatures();
 
   const cloudInfo = useCloudCheck();
 
@@ -118,9 +121,10 @@ export function useModelActions({
         overlays,
         startServices,
         startModelDeploymentDocUrl,
-        cloudInfo
+        cloudInfo,
+        showNodeInfo
       ),
-    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo]
+    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo]
   );
 
   const isBuiltInModel = useCallback(

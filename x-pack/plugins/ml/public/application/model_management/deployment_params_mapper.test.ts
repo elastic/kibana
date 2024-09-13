@@ -24,9 +24,46 @@ describe('DeploymentParamsMapper', () => {
 
   let mapper: DeploymentParamsMapper;
 
-  mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo);
+  mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo, true);
 
   describe('DeploymentParamsMapper', () => {
+    describe('running in serverless', () => {
+      beforeEach(() => {
+        mapper = new DeploymentParamsMapper(
+          modelId,
+          {
+            max_single_ml_node_processors: 16,
+            total_ml_processors: 32,
+          },
+          {
+            isMlAutoscalingEnabled: false,
+          } as CloudInfo,
+          false
+        );
+      });
+
+      it('should enforce adaptive allocations', () => {
+        expect(
+          mapper.mapUiToUiDeploymentParams({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          })
+        ).toEqual({
+          adaptive_allocations: {
+            enabled: true,
+            max_number_of_allocations: 1,
+            min_number_of_allocations: 1,
+          },
+          deployment_id: 'test-deployment',
+          model_id: 'test-model',
+          priority: 'low',
+          threads_per_allocation: 1,
+        });
+      });
+    });
+
     describe('32 cores, 16 single', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
@@ -37,7 +74,8 @@ describe('DeploymentParamsMapper', () => {
           },
           {
             isMlAutoscalingEnabled: false,
-          } as CloudInfo
+          } as CloudInfo,
+          true
         );
       });
 
@@ -50,9 +88,14 @@ describe('DeploymentParamsMapper', () => {
 
     describe('when autoscaling in disabled', () => {
       beforeEach(() => {
-        mapper = new DeploymentParamsMapper(modelId, mlServerLimits, {
-          isMlAutoscalingEnabled: false,
-        } as CloudInfo);
+        mapper = new DeploymentParamsMapper(
+          modelId,
+          mlServerLimits,
+          {
+            isMlAutoscalingEnabled: false,
+          } as CloudInfo,
+          true
+        );
       });
 
       it('should map UI params to API request correctly', () => {
@@ -316,9 +359,14 @@ describe('DeploymentParamsMapper', () => {
 
     describe('when autoscaling in enabled', () => {
       beforeEach(() => {
-        mapper = new DeploymentParamsMapper(modelId, mlServerLimits, {
-          isMlAutoscalingEnabled: true,
-        } as CloudInfo);
+        mapper = new DeploymentParamsMapper(
+          modelId,
+          mlServerLimits,
+          {
+            isMlAutoscalingEnabled: true,
+          } as CloudInfo,
+          true
+        );
       });
 
       it('should map UI params to API request correctly', () => {
