@@ -12,8 +12,7 @@ import * as DataStreamModule from './data_stream';
 import * as FieldsModule from './fields';
 import * as AgentModule from './agent';
 import * as PipelineModule from './pipeline';
-import { DataStream, Docs, InputType, Pipeline } from '../../common';
-import { Integration } from '../../common';
+import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
 import { renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
 
@@ -210,7 +209,6 @@ describe('buildPackage', () => {
       secondDatastreamPath,
       secondDataStreamDocs
     );
-
   });
 });
 
