@@ -64,6 +64,8 @@ export function useFetchInvestigationList({
     retry: false,
     refetchInterval: 60 * 1000,
     refetchOnWindowFocus: false,
+    cacheTime: 600 * 1000, // 10 minutes
+    staleTime: 0,
     onError: (error: Error) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {

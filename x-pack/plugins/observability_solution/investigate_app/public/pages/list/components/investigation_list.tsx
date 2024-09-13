@@ -12,6 +12,8 @@ import {
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
@@ -126,6 +128,20 @@ export function InvestigationList() {
     showPerPageOptions: true,
   };
 
+  const resultsCount =
+    pageSize === 0
+      ? i18n.translate('xpack.investigateApp.investigationList.allLabel', {
+          defaultMessage: 'Showing All',
+        })
+      : i18n.translate('xpack.investigateApp.investigationList.showingLabel', {
+          defaultMessage: 'Showing {startItem}-{endItem} of {totalItemCount}',
+          values: {
+            startItem: pageSize * pageIndex + 1,
+            endItem: pageSize * pageIndex + pageSize,
+            totalItemCount,
+          },
+        });
+
   const onTableChange = ({ page }: Criteria<InvestigationResponse>) => {
     if (page) {
       const { index, size } = page;
@@ -135,27 +151,30 @@ export function InvestigationList() {
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <SearchBar
         isLoading={isLoading}
         onSearch={(value) => setSearch(value)}
         onStatusFilterChange={(selected) => setStatus(selected)}
         onTagsFilterChange={(selected) => setTags(selected)}
       />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="s">
         {isLoading && <EuiLoadingSpinner size="xl" />}
         {isError && <InvestigationsError />}
         {!isLoading && !isError && (
-          <EuiBasicTable
-            tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
-              defaultMessage: 'Investigations List',
-            })}
-            items={investigations}
-            pagination={pagination}
-            rowHeader="title"
-            columns={columns}
-            onChange={onTableChange}
-          />
+          <>
+            <EuiText size="xs">{resultsCount}</EuiText>
+            <EuiBasicTable
+              tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
+                defaultMessage: 'Investigations List',
+              })}
+              items={investigations}
+              pagination={pagination}
+              rowHeader="title"
+              columns={columns}
+              onChange={onTableChange}
+            />
+          </>
         )}
       </EuiFlexGroup>
     </EuiFlexGroup>
