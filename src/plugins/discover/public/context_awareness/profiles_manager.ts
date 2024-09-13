@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, tap } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -39,6 +39,9 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
+export type ProfilesManagerEbtContext = BehaviorSubject<{ dscActiveProfiles: string[] }>;
+export const EBT_NO_ACTIVE_PROFILES = ['default'];
+
 /**
  * Options for the `getProfiles` method
  */
@@ -52,6 +55,7 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
+  private readonly ebtContext$: ProfilesManagerEbtContext | undefined;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -61,10 +65,12 @@ export class ProfilesManager {
   constructor(
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
-    private readonly documentProfileService: DocumentProfileService
+    private readonly documentProfileService: DocumentProfileService,
+    ebtContext$: ProfilesManagerEbtContext | undefined
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+    this.ebtContext$ = ebtContext$;
   }
 
   /**
@@ -191,6 +197,16 @@ export class ProfilesManager {
    */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
+      tap(() => {
+        const dscActiveProfiles = [
+          this.rootContext$.getValue().profileId,
+          this.dataSourceContext$.getValue().profileId,
+        ];
+        // console.log(dscActiveProfiles);
+        this.ebtContext$?.next({
+          dscActiveProfiles,
+        });
+      }),
       map(() => this.getProfiles(options))
     );
   }

@@ -59,7 +59,11 @@ import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import { RootProfileService } from './context_awareness/profiles/root_profile';
 import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
-import { ProfilesManager } from './context_awareness/profiles_manager';
+import {
+  ProfilesManager,
+  ProfilesManagerEbtContext,
+  EBT_NO_ACTIVE_PROFILES,
+} from './context_awareness/profiles_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -149,6 +153,25 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
+    const ebtContext$ = new BehaviorSubject({ dscActiveProfiles: EBT_NO_ACTIVE_PROFILES });
+
+    core.analytics.registerContextProvider({
+      name: 'dsc_active_profiles',
+      context$: ebtContext$,
+      schema: {
+        dscActiveProfiles: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'List of profiles which are activated by Discover Context Awareness logic',
+            },
+          },
+        },
+      },
+    });
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -183,7 +206,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager({ ebtContext$ }),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -319,14 +342,19 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   });
 
-  private async createProfilesManager() {
+  private async createProfilesManager({
+    ebtContext$,
+  }: {
+    ebtContext$?: ProfilesManagerEbtContext;
+  } = {}) {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
       await this.createProfileServices();
 
     return new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
-      documentProfileService
+      documentProfileService,
+      ebtContext$
     );
   }
 
@@ -334,7 +362,8 @@ export class DiscoverPlugin
     return new ProfilesManager(
       new RootProfileService(),
       new DataSourceProfileService(),
-      new DocumentProfileService()
+      new DocumentProfileService(),
+      undefined // TODO?
     );
   }
 
@@ -365,6 +394,7 @@ export class DiscoverPlugin
       };
     };
 
+    // TODO: enable for the embeddable too?
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const profilesManager = await this.createProfilesManager();
