@@ -354,6 +354,7 @@ describe('install_entity_definition', () => {
         version: semver.inc(mockEntityDefinition.version, 'major') ?? '0.0.0',
       };
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
       const soClient = savedObjectsClientMock.create();
 
       soClient.find.mockResolvedValueOnce({
@@ -391,6 +392,7 @@ describe('install_entity_definition', () => {
         version: semver.inc(mockEntityDefinition.version, 'major') ?? '0.0.0',
       };
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
       const soClient = savedObjectsClientMock.create();
 
       soClient.find.mockResolvedValueOnce({
@@ -426,6 +428,7 @@ describe('install_entity_definition', () => {
 
     it('should reinstall when failed installation', async () => {
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
       const soClient = savedObjectsClientMock.create();
 
       soClient.find.mockResolvedValueOnce({

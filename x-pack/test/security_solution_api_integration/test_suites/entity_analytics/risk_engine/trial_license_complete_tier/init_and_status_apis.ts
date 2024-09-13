@@ -300,40 +300,43 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should remove legacy risk score transform if it exists', async () => {
-        await installLegacyRiskScore({ supertest });
+      describe('remove legacy risk score transform', function () {
+        this.tags('skipFIPS');
+        it('should remove legacy risk score transform if it exists', async () => {
+          await installLegacyRiskScore({ supertest });
 
-        for (const transformId of legacyTransformIds) {
-          const tr = await es.transform.getTransform({
-            transform_id: transformId,
-          });
-
-          expect(tr?.transforms?.[0]?.id).to.eql(transformId);
-        }
-
-        const legacyDashboards = await getLegacyRiskScoreDashboards({
-          kibanaServer,
-        });
-
-        expect(legacyDashboards.length).to.eql(4);
-
-        await riskEngineRoutes.init();
-
-        for (const transformId of legacyTransformIds) {
-          try {
-            await es.transform.getTransform({
+          for (const transformId of legacyTransformIds) {
+            const tr = await es.transform.getTransform({
               transform_id: transformId,
             });
-          } catch (err) {
-            expect(err).to.not.be(undefined);
+
+            expect(tr?.transforms?.[0]?.id).to.eql(transformId);
           }
-        }
 
-        const legacyDashboardsAfterInit = await getLegacyRiskScoreDashboards({
-          kibanaServer,
+          const legacyDashboards = await getLegacyRiskScoreDashboards({
+            kibanaServer,
+          });
+
+          expect(legacyDashboards.length).to.eql(4);
+
+          await riskEngineRoutes.init();
+
+          for (const transformId of legacyTransformIds) {
+            try {
+              await es.transform.getTransform({
+                transform_id: transformId,
+              });
+            } catch (err) {
+              expect(err).to.not.be(undefined);
+            }
+          }
+
+          const legacyDashboardsAfterInit = await getLegacyRiskScoreDashboards({
+            kibanaServer,
+          });
+
+          expect(legacyDashboardsAfterInit.length).to.eql(0);
         });
-
-        expect(legacyDashboardsAfterInit.length).to.eql(0);
       });
     });
 
