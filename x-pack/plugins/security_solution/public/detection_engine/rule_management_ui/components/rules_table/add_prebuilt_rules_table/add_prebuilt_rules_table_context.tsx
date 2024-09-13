@@ -75,9 +75,9 @@ export interface AddPrebuiltRulesTableState {
 
 export interface AddPrebuiltRulesTableActions {
   reFetchRules: () => void;
-  installOneRule: (ruleId: RuleSignatureId, enableOnInstall?: boolean) => void;
+  installOneRule: (ruleId: RuleSignatureId, enable?: boolean) => void;
   installAllRules: () => void;
-  installSelectedRules: (enableOnInstall?: boolean) => void;
+  installSelectedRules: (enable?: boolean) => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
   openRulePreview: (ruleId: RuleSignatureId) => void;
@@ -140,7 +140,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const installOneRule = useCallback(
-    async (ruleId: RuleSignatureId, enableOnInstall?: boolean) => {
+    async (ruleId: RuleSignatureId, enable?: boolean) => {
       const rule = rules.find((r) => r.rule_id === ruleId);
       invariant(rule, `Rule with id ${ruleId} not found`);
 
@@ -148,7 +148,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       try {
         await installSpecificRulesRequest({
           rules: [{ rule_id: ruleId, version: rule.version }],
-          enableOnInstall,
+          enable,
         });
       } finally {
         setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
@@ -158,14 +158,14 @@ export const AddPrebuiltRulesTableContextProvider = ({
   );
 
   const installSelectedRules = useCallback(
-    async (enableOnInstall?: boolean) => {
+    async (enable?: boolean) => {
       const rulesToUpgrade = selectedRules.map((rule) => ({
         rule_id: rule.rule_id,
         version: rule.version,
       }));
       setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
       try {
-        await installSpecificRulesRequest({ rules: rulesToUpgrade, enableOnInstall });
+        await installSpecificRulesRequest({ rules: rulesToUpgrade, enable });
       } finally {
         setLoadingRules((prev) =>
           prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))

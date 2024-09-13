@@ -29,7 +29,7 @@ export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
 
 export interface UsePerformSpecificRulesInstallParams {
   rules: InstallSpecificRulesRequest['rules'];
-  enableOnInstall?: boolean;
+  enable?: boolean;
 }
 
 export const usePerformSpecificRulesInstallMutation = (
@@ -54,9 +54,8 @@ export const usePerformSpecificRulesInstallMutation = (
     Error,
     UsePerformSpecificRulesInstallParams
   >(
-    (rulesToInstall: UsePerformSpecificRulesInstallParams) => {
-      return performInstallSpecificRules(rulesToInstall.rules);
-    },
+    (rulesToInstall: UsePerformSpecificRulesInstallParams) =>
+      performInstallSpecificRules(rulesToInstall.rules),
     {
       ...options,
       mutationKey: PERFORM_SPECIFIC_RULES_INSTALLATION_KEY,
@@ -70,11 +69,11 @@ export const usePerformSpecificRulesInstallMutation = (
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
 
-        const [response, , { enableOnInstall }] = args;
+        const [response, , { enable }] = args;
 
-        if (response && enableOnInstall) {
-          const idMap = response.results.created.map((rule) => rule.id);
-          const bulkAction: BulkAction = { type: 'enable', ids: idMap };
+        if (response && enable) {
+          const ruleIdsToEnable = response.results.created.map((rule) => rule.id);
+          const bulkAction: BulkAction = { type: 'enable', ids: ruleIdsToEnable };
           mutateAsync({ bulkAction });
         }
 

@@ -15,7 +15,8 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useBoolean } from 'react-use';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
@@ -40,26 +41,33 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const isRuleInstalling = loadingRules.length > 0;
   const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
-  const [isOverflowPopoverOpen, setOverflowPopover] = useState(false);
+  const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
 
-  const onButtonClick = () => {
+  const onOverflowButtonClick = () => {
     setOverflowPopover(!isOverflowPopoverOpen);
   };
 
-  const closeOverflowPopover = () => {
+  const closeOverflowPopover = useCallback(() => {
     setOverflowPopover(false);
-  };
+  }, [setOverflowPopover]);
 
-  const enableOnClick = () => {
+  const enableOnClick = useCallback(() => {
     installSelectedRules(true);
     closeOverflowPopover();
-  };
+  }, [closeOverflowPopover, installSelectedRules]);
 
-  const overflowItems = [
-    <EuiContextMenuItem key="copy" icon={'play'} onClick={enableOnClick}>
-      {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-    </EuiContextMenuItem>,
-  ];
+  const installOnClick = useCallback(() => {
+    installSelectedRules();
+  }, [installSelectedRules]);
+
+  const overflowItems = useMemo(
+    () => [
+      <EuiContextMenuItem key="copy" icon={'play'} onClick={enableOnClick}>
+        {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+      </EuiContextMenuItem>,
+    ],
+    [enableOnClick]
+  );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -67,12 +75,12 @@ export const AddPrebuiltRulesHeaderButtons = () => {
         <>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={() => installSelectedRules()}
+              onClick={installOnClick}
               disabled={!canUserEditRules || isRequestInProgress}
               data-test-subj="installSelectedRulesButton"
             >
               {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
-              {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
+              {isRuleInstalling && <EuiLoadingSpinner size="s" />}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -83,7 +91,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
                   size="m"
                   iconType="boxesVertical"
                   aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
-                  onClick={onButtonClick}
+                  onClick={onOverflowButtonClick}
                   disabled={!canUserEditRules || isRequestInProgress}
                 />
               }
@@ -107,7 +115,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}
-          {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
+          {isRuleInstalling && <EuiLoadingSpinner size="s" />}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

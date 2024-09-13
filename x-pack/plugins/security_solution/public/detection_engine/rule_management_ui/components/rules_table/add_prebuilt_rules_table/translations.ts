@@ -46,14 +46,14 @@ export const INSTALL_BUTTON_LABEL = i18n.translate(
 );
 
 export const INSTALL_WITHOUT_ENABLING_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.installButtonLabel',
+  'xpack.securitySolution.detectionEngine.ruleDetails.installWithoutEnablingButtonLabel',
   {
     defaultMessage: 'Install without enabling',
   }
 );
 
 export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.installButtonLabel',
+  'xpack.securitySolution.detectionEngine.ruleDetails.installAndEnableButtonLabel',
   {
     defaultMessage: 'Install and enable',
   }
