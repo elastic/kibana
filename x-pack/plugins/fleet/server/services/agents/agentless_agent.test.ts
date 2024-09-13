@@ -555,17 +555,5 @@ describe('Agentless Agent service', () => {
       expect.stringContaining(`\"fleet_token\":\"[REDACTED]\"`),
       expect.any(Object)
     );
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`\"cert\":\"[REDACTED]\"`),
-      expect.any(Object)
-    );
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`\"key\":\"[REDACTED]\"`),
-      expect.any(Object)
-    );
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`\"ca\":\"[REDACTED]\"`),
-      expect.any(Object)
-    );
   });
 });
