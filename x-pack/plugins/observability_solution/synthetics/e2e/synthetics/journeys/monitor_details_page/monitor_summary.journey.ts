@@ -12,12 +12,7 @@ import moment from 'moment';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
-const journeySkip =
-  (...params: Parameters<typeof journey>) =>
-  () =>
-    journey(...params);
-// TODO: skipped because failing on main and need to unblock CI
-journeySkip(`MonitorSummaryTab`, async ({ page, params }) => {
+journey(`MonitorSummaryTab`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
@@ -53,7 +48,9 @@ journeySkip(`MonitorSummaryTab`, async ({ page, params }) => {
 
   step('Monitor is as up in summary page', async () => {
     await page.hover('text=Test Monitor');
+    await page.waitForSelector('[aria-label="Open actions menu"]');
     await page.click('[aria-label="Open actions menu"]');
+    await page.waitForSelector('text=Go to monitor');
     await page.click('text=Go to monitor');
     await page.waitForSelector(byTestId('monitorLatestStatusUp'));
   });
