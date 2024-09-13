@@ -9,7 +9,10 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import {
+  getCreateRulesSchemaMock,
+  getRulesSchemaMock,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -17,26 +20,27 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
-import { getValidatedRuleToImportWithSourceMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
 jest.mock('./methods/get_rule_by_rule_id');
 
-describe('DetectionRulesClient.importRule', () => {
+describe('DetectionRulesClient.legacyImportRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   let actionsClient: jest.Mocked<ActionsClient>;
 
+  const immutable = false as const; // Can only take value of false
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
-    ...getValidatedRuleToImportWithSourceMock(),
+    ...getCreateRulesSchemaMock(),
     tags: ['import-tag'],
     rule_id: 'rule-id',
     version: 1,
+    immutable,
   };
   const existingRule = getRulesSchemaMock();
   existingRule.rule_id = ruleToImport.rule_id;
@@ -56,7 +60,7 @@ describe('DetectionRulesClient.importRule', () => {
 
   it('calls rulesClient.create with the correct parameters when rule_id does not match an installed rule', async () => {
     (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(null);
-    await detectionRulesClient.importRule({
+    await detectionRulesClient.legacyImportRule({
       ruleToImport,
       overwriteRules: true,
       allowMissingConnectorSecrets,
@@ -68,10 +72,9 @@ describe('DetectionRulesClient.importRule', () => {
           name: ruleToImport.name,
           tags: ruleToImport.tags,
           params: expect.objectContaining({
-            immutable: ruleToImport.immutable,
+            immutable,
             ruleId: ruleToImport.rule_id,
             version: ruleToImport.version,
-            ruleSource: ruleToImport.rule_source,
           }),
         }),
         allowMissingConnectorSecrets,
@@ -85,7 +88,7 @@ describe('DetectionRulesClient.importRule', () => {
     });
 
     await expect(
-      detectionRulesClient.importRule({
+      detectionRulesClient.legacyImportRule({
         ruleToImport,
         overwriteRules: true,
         allowMissingConnectorSecrets,
@@ -100,7 +103,7 @@ describe('DetectionRulesClient.importRule', () => {
     it('calls rulesClient.update with the correct parameters when overwriteRules is true', async () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
 
-      await detectionRulesClient.importRule({
+      await detectionRulesClient.legacyImportRule({
         ruleToImport,
         overwriteRules: true,
         allowMissingConnectorSecrets,
@@ -112,11 +115,8 @@ describe('DetectionRulesClient.importRule', () => {
             name: ruleToImport.name,
             tags: ruleToImport.tags,
             params: expect.objectContaining({
+              index: ruleToImport.index,
               description: ruleToImport.description,
-              immutable: ruleToImport.immutable,
-              ruleId: ruleToImport.rule_id,
-              version: ruleToImport.version,
-              ruleSource: ruleToImport.rule_source,
             }),
           }),
           id: existingRule.id,
@@ -138,7 +138,7 @@ describe('DetectionRulesClient.importRule', () => {
       };
       (getRuleByRuleId as jest.Mock).mockResolvedValue(existingRuleWithTimestampOverride);
 
-      await detectionRulesClient.importRule({
+      await detectionRulesClient.legacyImportRule({
         ruleToImport: {
           ...ruleToImport,
           timestamp_override: undefined,
@@ -166,7 +166,7 @@ describe('DetectionRulesClient.importRule', () => {
       };
       (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(disabledExistingRule);
 
-      const rule = await detectionRulesClient.importRule({
+      const rule = await detectionRulesClient.legacyImportRule({
         ruleToImport: {
           ...ruleToImport,
           enabled: true,
@@ -200,7 +200,7 @@ describe('DetectionRulesClient.importRule', () => {
       };
       (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(enabledExistingRule);
 
-      const rule = await detectionRulesClient.importRule({
+      const rule = await detectionRulesClient.legacyImportRule({
         ruleToImport: {
           ...ruleToImport,
           enabled: false,
@@ -230,7 +230,7 @@ describe('DetectionRulesClient.importRule', () => {
     it('rejects when overwriteRules is false', async () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(existingRule);
       await expect(
-        detectionRulesClient.importRule({
+        detectionRulesClient.legacyImportRule({
           ruleToImport,
           overwriteRules: false,
           allowMissingConnectorSecrets,

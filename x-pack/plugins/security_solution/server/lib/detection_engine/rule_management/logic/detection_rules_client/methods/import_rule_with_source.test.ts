@@ -8,7 +8,7 @@
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { getImportRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getValidatedRuleToImportMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { importRuleWithSource } from './import_rule_with_source';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -55,7 +55,7 @@ describe('importRuleWithSource', () => {
 
     it('throws an error if overwriting is disabled', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         rule_source: {
           type: 'external' as const,
@@ -81,7 +81,7 @@ describe('importRuleWithSource', () => {
 
     it('preserves the passed "rule_source" and "immutable" values', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         rule_source: {
           type: 'external' as const,
@@ -114,7 +114,7 @@ describe('importRuleWithSource', () => {
 
     it('TODO REVIEW does not preserve the passed "enabled" value', async () => {
       const disabledRule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         enabled: false,
         immutable: true,
         rule_source: {
@@ -142,7 +142,7 @@ describe('importRuleWithSource', () => {
 
     it('TODO REVIEW preserves the existing rule\'s "id" value', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         id: 'some-id',
         rule_source: {
@@ -173,7 +173,7 @@ describe('importRuleWithSource', () => {
 
     it('TODO REVIEW preserves the existing rule\'s "version" value if left unspecified', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         rule_source: {
           type: 'external' as const,
@@ -202,7 +202,7 @@ describe('importRuleWithSource', () => {
 
     it('TODO REVIEW preserves the specified "version" value', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         version: 42,
         rule_source: {
@@ -238,7 +238,7 @@ describe('importRuleWithSource', () => {
 
     it('preserves the passed "rule_source" and "immutable" values', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         rule_source: {
           type: 'external' as const,
@@ -270,7 +270,7 @@ describe('importRuleWithSource', () => {
 
     it('preserves the passed "enabled" value', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         enabled: true,
         immutable: true,
         rule_source: {
@@ -298,7 +298,7 @@ describe('importRuleWithSource', () => {
 
     it('defaults defaultable values', async () => {
       const rule = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         rule_source: {
           type: 'external' as const,

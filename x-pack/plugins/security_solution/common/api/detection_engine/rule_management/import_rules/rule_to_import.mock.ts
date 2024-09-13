@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { RuleToImport } from './rule_to_import';
+import type {
+  RuleToImport,
+  ValidatedRuleToImport,
+  ValidatedRuleToImportWithSource,
+} from './rule_to_import';
 
 export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): RuleToImport =>
   ({
@@ -20,6 +24,23 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     immutable: false,
     ...rewrites,
   } as RuleToImport);
+
+export const getValidatedRuleToImportMock = (
+  overrides?: Partial<ValidatedRuleToImport>
+): ValidatedRuleToImport => ({
+  version: 1,
+  ...getImportRulesSchemaMock(overrides),
+});
+
+export const getValidatedRuleToImportWithSourceMock = (
+  overrides?: Partial<ValidatedRuleToImportWithSource>
+): ValidatedRuleToImportWithSource => ({
+  rule_source: {
+    type: 'internal',
+  },
+  immutable: false,
+  ...getValidatedRuleToImportMock(overrides),
+});
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
   id: '6afb8ce1-ea94-4790-8653-fd0b021d2113',

@@ -1087,5 +1087,16 @@ describe('RuleToImport', () => {
       expectParseSuccess(result);
       expect(result.data).toEqual(payload);
     });
+
+    describe('backwards compatibility', () => {
+      it('allows version to be absent', () => {
+        const payload = getImportRulesSchemaMock();
+        delete payload.version;
+
+        const result = RuleToImport.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+    });
   });
 });

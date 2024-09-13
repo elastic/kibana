@@ -275,7 +275,6 @@ describe('Import rules route', () => {
 
     it('returns an error if rule is missing a version', async () => {
       const ruleWithoutVersion = getImportRulesWithIdSchemaMock('rule-1');
-      // @ts-expect-error
       delete ruleWithoutVersion.version;
       const payload = buildHapiStream(rulesToNdJsonString([ruleWithoutVersion]));
       const versionlessRequest = getImportRulesRequest(payload);
