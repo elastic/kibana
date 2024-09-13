@@ -55,8 +55,8 @@ export function useFetchInvestigationList({
         query: {
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
-          ...(search !== undefined && { search }),
-          ...(filter !== undefined && { filter }),
+          ...(!!search && { search }),
+          ...(!!filter && { filter }),
         },
         signal,
       });
