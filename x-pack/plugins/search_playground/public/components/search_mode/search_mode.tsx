@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
@@ -14,42 +13,38 @@ import {
   EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@tanstack/react-query';
 import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
-import { ChatForm, ChatFormFields } from '../../types';
+import { ChatForm, ChatFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 
 export const SearchMode: React.FC = () => {
-  const {
-    data: { results, pagination, isInitialState },
-    fetchSearchResults,
-  } = useSearchPreview();
   const { euiTheme } = useEuiTheme();
   const { control, handleSubmit } = useFormContext();
   const {
-    field: { onChange: searchBarOnChange, value: searchBarValue },
+    field: { value: searchBarValue },
     formState: { isSubmitting },
   } = useController<ChatForm, ChatFormFields.searchQuery>({
     name: ChatFormFields.searchQuery,
   });
 
-  const updateSearchQuery = useCallback(
-    (query: string) => {
-      searchBarOnChange(query);
-    },
-    [searchBarOnChange]
-  );
+  const [searchQuery, setSearchQuery] = React.useState<{
+    query: string;
+    pagination: Pagination;
+  }>({ query: searchBarValue, pagination: DEFAULT_PAGINATION });
+
+  const { results, pagination } = useSearchPreview(searchQuery);
+
+  const queryClient = useQueryClient();
   const handleSearch = async (query = searchBarValue, paginationParam = DEFAULT_PAGINATION) => {
-    try {
-      await fetchSearchResults({ query, pagination: paginationParam });
-    } catch (e) {
-      // TODO handle error ?
-    }
+    queryClient.resetQueries({ queryKey: ['search-preview-results'] });
+    setSearchQuery({ query, pagination: paginationParam });
   };
 
   const onPagination = (page: number) => {
@@ -80,7 +75,6 @@ export const SearchMode: React.FC = () => {
                       'xpack.searchPlayground.searchMode.searchBar.placeholder',
                       { defaultMessage: 'Search for documents' }
                     )}
-                    onChange={(e) => updateSearchQuery(e.target.value)}
                     isLoading={isSubmitting}
                   />
                 )}
@@ -90,11 +84,12 @@ export const SearchMode: React.FC = () => {
           <EuiFlexItem className="eui-yScroll">
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                {!isInitialState ? (
+                {searchQuery.query ? (
                   <ResultList
                     searchResults={results}
                     pagination={pagination}
                     onPaginationChange={onPagination}
+                    searchQuery={searchQuery.query}
                   />
                 ) : (
                   <EuiEmptyPrompt
@@ -114,13 +109,6 @@ export const SearchMode: React.FC = () => {
                             'Type in a query in the search bar above or view the query we automatically created for you.',
                         })}
                       </p>
-                    }
-                    actions={
-                      <EuiButton>
-                        {i18n.translate('xpack.searchPlayground.searchMode.viewQuery', {
-                          defaultMessage: 'View the query',
-                        })}
-                      </EuiButton>
                     }
                   />
                 )}

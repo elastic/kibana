@@ -255,11 +255,18 @@ export function defineRoutes({
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      // TODO validate indices not empty, figure out if it is ok
       const { client } = (await context.core).elasticsearch;
       const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
 
       try {
+        if (indices.length === 0) {
+          return response.badRequest({
+            body: {
+              message: 'Indices cannot be empty',
+            },
+          });
+        }
+
         const retriever = createRetriever(elasticsearchQuery)(request.body.search_query);
         const searchResult = await client.asCurrentUser.search({
           index: indices,

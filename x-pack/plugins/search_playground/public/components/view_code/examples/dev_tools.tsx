@@ -17,7 +17,7 @@ export const DevToolsCode: React.FC = () => {
   const indices = getValues(ChatFormFields.indices) ?? [];
   const searchQuery = getValues(ChatFormFields.searchQuery) ?? '';
   const replacedQuery = searchQuery
-    ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery, null, 2))
+    ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery))
     : JSON.stringify(query, null, 2);
 
   return (

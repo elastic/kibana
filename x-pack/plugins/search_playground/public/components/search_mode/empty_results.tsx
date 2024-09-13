@@ -10,14 +10,23 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const EmptyResults: React.FC = () => {
+export interface EmptyResultsArgs {
+  query?: string;
+}
+
+export const EmptyResults: React.FC<EmptyResultsArgs> = ({ query }) => {
   return (
     <EuiEmptyPrompt
       body={
         <p>
-          {i18n.translate('xpack.searchPlayground.resultList.empty.text', {
-            defaultMessage: 'No results found',
-          })}
+          {query
+            ? i18n.translate('xpack.searchPlayground.resultList.emptyWithQuery.text', {
+                defaultMessage: 'No result found for: {query}',
+                values: { query },
+              })
+            : i18n.translate('xpack.searchPlayground.resultList.empty.text', {
+                defaultMessage: 'No results found',
+              })}
         </p>
       }
     />

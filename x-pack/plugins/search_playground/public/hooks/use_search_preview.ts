@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { useFormContext } from 'react-hook-form';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import useSWR from 'swr';
-import { APIRoutes, ChatFormFields, Pagination } from '../types';
+import { useQuery } from '@tanstack/react-query';
+import { useFormContext } from 'react-hook-form';
+import { APIRoutes, ChatForm, ChatFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
 
 export interface FetchSearchResultsArgs {
   query: string;
   pagination: Pagination;
+  indices: ChatForm[ChatFormFields.indices];
+  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery];
+  http: ReturnType<typeof useKibana>['services']['http'];
 }
 
 interface UseSearchPreviewData {
   results: SearchHit[];
   pagination: Pagination;
-  isInitialState: boolean;
 }
 
 export interface UseSearchPreviewResponse {
@@ -28,39 +30,58 @@ export interface UseSearchPreviewResponse {
   data: UseSearchPreviewData;
 }
 
-const DEFAULT_SEARCH_PREVIEW_DATA: UseSearchPreviewData = {
+export const DEFAULT_SEARCH_PREVIEW_DATA: UseSearchPreviewData = {
   results: [],
   pagination: DEFAULT_PAGINATION,
-  isInitialState: true,
 };
 
-export const useSearchPreview = (): UseSearchPreviewResponse => {
-  const { getValues } = useFormContext();
-  const { services } = useKibana();
-  const { http } = services;
+export const fetchSearchResults = async ({
+  query,
+  indices,
+  elasticsearchQuery,
+  pagination: paginationParam = DEFAULT_PAGINATION,
+  http,
+}: FetchSearchResultsArgs): Promise<UseSearchPreviewData> => {
+  const { results, pagination: paginationResult } = await http.post<{
+    results: SearchHit[];
+    pagination: Pagination;
+  }>(APIRoutes.POST_SEARCH_QUERY, {
+    body: JSON.stringify({
+      search_query: query,
+      elasticsearch_query: JSON.stringify(elasticsearchQuery),
+      indices,
+      size: paginationParam.size,
+      from: paginationParam.from,
+    }),
+  });
+  return { results, pagination: paginationResult };
+};
 
-  const { data, mutate } = useSWR<UseSearchPreviewData>('search-preview-results', null, {
-    fallbackData: DEFAULT_SEARCH_PREVIEW_DATA,
+export const useSearchPreview = ({
+  query,
+  pagination,
+}: {
+  query: string;
+  pagination: Pagination;
+}) => {
+  const { services } = useKibana();
+  const { getValues } = useFormContext();
+  const { http } = services;
+  const indices = getValues(ChatFormFields.indices);
+  const elasticsearchQuery = getValues(ChatFormFields.elasticsearchQuery);
+
+  const { data } = useQuery({
+    queryKey: ['search-preview-results', query, indices, elasticsearchQuery, pagination],
+    queryFn: () => fetchSearchResults({ query, pagination, http, indices, elasticsearchQuery }),
+    initialData: DEFAULT_SEARCH_PREVIEW_DATA,
+    enabled: !!query,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 
-  const fetchSearchResults = async ({
-    query,
-    pagination: paginationParam = DEFAULT_PAGINATION,
-  }: FetchSearchResultsArgs) => {
-    const { results, pagination: paginationResult } = await http.post<{
-      results: SearchHit[];
-      pagination: Pagination;
-    }>(APIRoutes.POST_SEARCH_QUERY, {
-      body: JSON.stringify({
-        search_query: query,
-        elasticsearch_query: JSON.stringify(getValues(ChatFormFields.elasticsearchQuery)),
-        indices: getValues(ChatFormFields.indices),
-        size: paginationParam.size,
-        from: paginationParam.from,
-      }),
-    });
-    mutate({ results, pagination: paginationResult, isInitialState: false });
+  return {
+    pagination: data.pagination,
+    results: data.results,
   };
-
-  return { fetchSearchResults, data: data || DEFAULT_SEARCH_PREVIEW_DATA };
 };

@@ -33,12 +33,14 @@ export interface ResultListArgs {
   searchResults: SearchHit[];
   pagination: Pagination;
   onPaginationChange: (nextPage: number) => void;
+  searchQuery?: string;
 }
 
 export const ResultList: React.FC<ResultListArgs> = ({
   searchResults,
   pagination,
   onPaginationChange,
+  searchQuery = '',
 }) => {
   const {
     services: { data },
@@ -55,36 +57,42 @@ export const ResultList: React.FC<ResultListArgs> = ({
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {searchResults.map((item, index) => {
-          return (
-            <>
-              <EuiFlexItem
-                key={item._id + '-' + index}
-                onClick={() => setFlyoutDocId(item._id)}
-                grow
-              >
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  <EuiFlexItem grow>
-                    <EuiTitle size="xs">
-                      <h3>ID:{item._id}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow>
-                    <EuiText size="s">
-                      <p>
-                        {i18n.translate('xpack.searchPlayground.resultList.result.score', {
-                          defaultMessage: 'Document score: {score}',
-                          values: { score: item._score },
-                        })}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {index !== searchResults.length - 1 && <EuiHorizontalRule margin="m" />}
-            </>
-          );
-        })}
+        {searchResults.length === 0 && (
+          <EuiFlexItem>
+            <EmptyResults query={searchQuery} />
+          </EuiFlexItem>
+        )}
+        {searchResults.length !== 0 &&
+          searchResults.map((item, index) => {
+            return (
+              <>
+                <EuiFlexItem
+                  key={item._id + '-' + index}
+                  onClick={() => setFlyoutDocId(item._id)}
+                  grow
+                >
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem grow>
+                      <EuiTitle size="xs">
+                        <h3>ID:{item._id}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <EuiText size="s">
+                        <p>
+                          {i18n.translate('xpack.searchPlayground.resultList.result.score', {
+                            defaultMessage: 'Document score: {score}',
+                            values: { score: item._score },
+                          })}
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {index !== searchResults.length - 1 && <EuiHorizontalRule margin="m" />}
+              </>
+            );
+          })}
         {searchResults.length !== 0 && (
           <EuiFlexItem>
             <EuiPagination
@@ -92,11 +100,6 @@ export const ResultList: React.FC<ResultListArgs> = ({
               activePage={page}
               onPageClick={onPaginationChange}
             />
-          </EuiFlexItem>
-        )}
-        {searchResults.length === 0 && (
-          <EuiFlexItem>
-            <EmptyResults />
           </EuiFlexItem>
         )}
         {flyoutDocId && dataView && hit && (
