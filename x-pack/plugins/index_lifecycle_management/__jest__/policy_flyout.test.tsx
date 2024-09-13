@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { PolicyFromES } from '../common/types';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 import React, { ReactElement } from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
+
+import type { PolicyFromES } from '../common/types';
+import { KibanaContextProvider } from '../public/shared_imports';
+import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 import { ViewPolicyFlyout } from '../public/application/sections/policy_list/policy_flyout';
 import * as readOnlyHook from '../public/application/lib/use_is_read_only';
 import { policyAllPhases } from './mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
 let component: ReactElement;
 const TestComponent = ({ policy }: { policy: PolicyFromES }) => {
