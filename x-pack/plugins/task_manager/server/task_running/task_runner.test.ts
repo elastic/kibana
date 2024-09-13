@@ -43,6 +43,7 @@ import {
 import { schema } from '@kbn/config-schema';
 import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
+import { configMock } from '../config.mock';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -2467,10 +2468,12 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
-      eventLoopDelayConfig: {
-        monitor: true,
-        warn_threshold: 5000,
-      },
+      config: configMock.create({
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
+        },
+      }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
       pollIntervalConfiguration$: new BehaviorSubject(500),
