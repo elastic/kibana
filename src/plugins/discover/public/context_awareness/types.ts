@@ -272,5 +272,5 @@ export interface Profile {
    * @param props The doc viewer override props
    * @returns The custom doc viewer component
    */
-  getRenderDocViewerOverride: (props: DiscoverGridFlyoutProps) => ReactElement;
+  getRenderDocViewerFlyout: (props: DiscoverGridFlyoutProps) => ReactElement;
 }

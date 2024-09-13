@@ -9,6 +9,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
+import { EuiFlyout } from '@elastic/eui';
 import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -44,5 +45,14 @@ export const getRenderAppWrapper: DataSourceProfileProvider['profile']['getRende
       <testContext.Provider value="test-override">
         <PrevWrapper>{children}</PrevWrapper>
       </testContext.Provider>
+    );
+  };
+
+export const getRenderDocViewerFlyout: DataSourceProfileProvider['profile']['getRenderDocViewerFlyout'] =
+  () => (props) => {
+    return (
+      <EuiFlyout onClose={props.onClose}>
+        <pre>{JSON.stringify(props.hit, null, 2)}</pre>
+      </EuiFlyout>
     );
   };

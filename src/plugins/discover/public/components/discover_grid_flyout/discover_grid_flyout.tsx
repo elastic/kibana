@@ -43,12 +43,12 @@ export interface DiscoverGridFlyoutProps {
  * Flyout displaying an expanded Elasticsearch document
  */
 export function DiscoverGridFlyout(props: DiscoverGridFlyoutProps) {
-  const getRenderDocViewerOverride = useProfileAccessor('getRenderDocViewerOverride', {
+  const getRenderDocViewerFlyout = useProfileAccessor('getRenderDocViewerFlyout', {
     record: props.hit,
   });
   const GridFlyout = useMemo(
-    () => getRenderDocViewerOverride(DefaultDiscoverGridFlyout),
-    [getRenderDocViewerOverride]
+    () => getRenderDocViewerFlyout(DefaultDiscoverGridFlyout),
+    [getRenderDocViewerFlyout]
   );
 
   return <GridFlyout {...props} />;
