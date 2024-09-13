@@ -102,7 +102,7 @@ export const ForLastExpression = ({
           <EuiFlexItem grow={false}>
             <EuiFormRow
               isInvalid={Number(errors.timeWindowSize?.length) > 0}
-              error={errors.timeWindowSize}
+              error={errors.timeWindowSize as string[]}
             >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EntityDefinition } from '@kbn/entities-schema';
 import { getCustomHistoryTemplateComponents, getCustomLatestTemplateComponents } from './helpers';
 
 describe('helpers', () => {
   it('getCustomLatestTemplateComponents should return template component in the right sort order', () => {
-    const definitionId = 'test';
-    const result = getCustomLatestTemplateComponents(definitionId);
+    const result = getCustomLatestTemplateComponents({ id: 'test' } as EntityDefinition);
     expect(result).toEqual([
       'test@platform',
       'test-latest@platform',
@@ -20,8 +20,7 @@ describe('helpers', () => {
   });
 
   it('getCustomHistoryTemplateComponents should return template component in the right sort order', () => {
-    const definitionId = 'test';
-    const result = getCustomHistoryTemplateComponents(definitionId);
+    const result = getCustomHistoryTemplateComponents({ id: 'test' } as EntityDefinition);
     expect(result).toEqual([
       'test@platform',
       'test-history@platform',

@@ -96,7 +96,7 @@ const updateInvestigationRoute = createInvestigateAppServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await updateInvestigation(params.path.investigationId, params.body, {
+    return await updateInvestigation(params.path.investigationId, params.body ?? {}, {
       repository,
       user,
     });
