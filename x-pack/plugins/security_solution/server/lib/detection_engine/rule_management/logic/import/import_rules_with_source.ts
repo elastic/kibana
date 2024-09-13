@@ -127,8 +127,6 @@ export const importRules = async ({
               prebuiltRuleAssets,
               installedRuleIds,
             });
-            parsedRule.rule_source = ruleSource;
-            parsedRule.immutable = immutable;
 
             try {
               const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
@@ -141,6 +139,8 @@ export const importRules = async ({
               const importedRule = await detectionRulesClient.importRule({
                 ruleToImport: {
                   ...parsedRule,
+                  rule_source: ruleSource,
+                  immutable,
                   exceptions_list: [...exceptions],
                 },
                 overwriteRules,
