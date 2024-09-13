@@ -33,6 +33,12 @@ import {
   UpdateAgentPolicyRequest,
   UpdatePackageResponse,
   UpdatePackageRequest,
+  PostDownloadSourceRequest,
+  GetOneDownloadSourceResponse,
+  PostFleetServerHostsRequest,
+  PostFleetServerHostsResponse,
+  PostOutputRequest,
+  GetOneOutputResponse,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -478,6 +484,69 @@ export class SpaceTestApiClient {
       .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
       .set('kbn-xsrf', 'xxxx')
       .set('elastic-api-version', '1');
+
+    return res;
+  }
+  // Download source
+  async deleteDownloadSource(id: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources/${id}`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async postDownloadSource(
+    data: PostDownloadSourceRequest['body'],
+    spaceId?: string
+  ): Promise<GetOneDownloadSourceResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  // Fleet server hosts
+  async deleteFleetServerHosts(id: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/fleet_server_hosts/${id}`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async postFleetServerHosts(
+    data: PostFleetServerHostsRequest['body'],
+    spaceId?: string
+  ): Promise<PostFleetServerHostsResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/fleet_server_hosts`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  // Output
+  async deleteOutput(id: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/outputs/${id}`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async postOutput(
+    data: PostOutputRequest['body'],
+    spaceId?: string
+  ): Promise<GetOneOutputResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/outputs`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
 
     return res;
   }
