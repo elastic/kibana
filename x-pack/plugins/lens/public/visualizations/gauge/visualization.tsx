@@ -23,13 +23,7 @@ import {
   getMinValue,
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
-import {
-  IconChartGaugeSemiCircle,
-  IconChartGaugeCircle,
-  IconChartGaugeArc,
-  IconChartHorizontalBullet,
-  IconChartVerticalBullet,
-} from '@kbn/chart-icons';
+import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
@@ -39,10 +33,9 @@ import type {
   Suggestion,
   UserMessage,
   Visualization,
-  VisualizationType,
 } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState, gaugeTitlesByType } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -57,10 +50,6 @@ import {
   GAUGE_MIN_NE_MAX,
 } from '../../user_messages_ids';
 
-const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
-});
-
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
@@ -71,49 +60,6 @@ export const isNumericMetric = (op: OperationMetadata) =>
 
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
-
-export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
-  [GaugeShapes.HORIZONTAL_BULLET]: {
-    id: GaugeShapes.HORIZONTAL_BULLET,
-    icon: IconChartHorizontalBullet,
-    label: gaugeTitlesByType.horizontalBullet,
-    groupLabel: groupLabelForGauge,
-    showExperimentalBadge: true,
-    sortOrder: 10,
-  },
-  [GaugeShapes.VERTICAL_BULLET]: {
-    id: GaugeShapes.VERTICAL_BULLET,
-    icon: IconChartVerticalBullet,
-    label: gaugeTitlesByType.verticalBullet,
-    groupLabel: groupLabelForGauge,
-    showExperimentalBadge: true,
-    sortOrder: 10,
-  },
-  [GaugeShapes.SEMI_CIRCLE]: {
-    id: GaugeShapes.SEMI_CIRCLE,
-    icon: IconChartGaugeSemiCircle,
-    label: gaugeTitlesByType.semiCircle,
-    groupLabel: groupLabelForGauge,
-    showExperimentalBadge: true,
-    sortOrder: 9,
-  },
-  [GaugeShapes.ARC]: {
-    id: GaugeShapes.ARC,
-    icon: IconChartGaugeArc,
-    label: gaugeTitlesByType.arc,
-    groupLabel: groupLabelForGauge,
-    showExperimentalBadge: true,
-    sortOrder: 8,
-  },
-  [GaugeShapes.CIRCLE]: {
-    id: GaugeShapes.CIRCLE,
-    icon: IconChartGaugeCircle,
-    label: gaugeTitlesByType.circle,
-    groupLabel: groupLabelForGauge,
-    showExperimentalBadge: true,
-    sortOrder: 7,
-  },
-};
 
 function computePaletteParams(params: CustomPaletteParams) {
   return {
@@ -216,17 +162,29 @@ export const getGaugeVisualization = ({
   paletteService,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
-
-  visualizationTypes: [
-    CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
-    CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
-    CHART_NAMES[GaugeShapes.SEMI_CIRCLE],
-    CHART_NAMES[GaugeShapes.ARC],
-    CHART_NAMES[GaugeShapes.CIRCLE],
-  ],
-  getVisualizationTypeId(state) {
-    return state.shape;
+  getVisualizationTypeId() {
+    return this.id;
   },
+  visualizationTypes: [
+    {
+      id: LENS_GAUGE_ID,
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+      sortPriority: 7,
+      description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+        defaultMessage: 'Show progress to a goal in linear or arced style.',
+      }),
+      subtypes: [
+        GaugeShapes.HORIZONTAL_BULLET,
+        GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.SEMI_CIRCLE,
+        GaugeShapes.ARC,
+        GaugeShapes.CIRCLE,
+      ],
+    },
+  ],
   getLayerIds(state) {
     return [state.layerId];
   },
@@ -241,8 +199,13 @@ export const getGaugeVisualization = ({
     return newState;
   },
 
-  getDescription(state) {
-    return CHART_NAMES[state.shape];
+  getDescription() {
+    return {
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+    };
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {

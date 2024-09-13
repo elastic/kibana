@@ -9,6 +9,7 @@ import type { InvestigateAppServices } from '../services/types';
 import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies } from '../types';
 import { registerEmbeddableItem } from './embeddable_item/register_embeddable_item';
 import { registerEsqlItem } from './esql_item/register_esql_item';
+import { registerLensItem } from './lens_item/register_lens_item';
 
 export interface Options {
   dependencies: {
@@ -21,4 +22,5 @@ export interface Options {
 export function registerItems(options: Options) {
   registerEsqlItem(options);
   registerEmbeddableItem(options);
+  registerLensItem(options);
 }

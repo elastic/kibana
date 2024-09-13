@@ -87,7 +87,7 @@ describe('Onboarding Component new section', () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
       expect(renderResult.getByText('All events')).toBeVisible();
     });
@@ -98,7 +98,7 @@ describe('Onboarding Component new section', () => {
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={mockedOnChange} />
       );
       expect(mockedOnChange).toHaveBeenCalledTimes(1);
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(mockedOnChange).toHaveBeenCalledTimes(2);
     });
 
@@ -116,7 +116,7 @@ describe('Onboarding Component new section', () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByDisplayValue('ALL_EVENTS')).not.toBeChecked();
       expect(renderResult.getByDisplayValue('INTERACTIVE_ONLY')).toBeChecked();
     });
@@ -136,7 +136,7 @@ describe('Onboarding Component new section', () => {
         ${'DataCollection'} | ${'below platinum'} | ${'should NOT see'} | ${''}
         ${'DataCollection'} | ${'platinum'}       | ${'should NOT see'} | ${''}
         ${'DataCollection'} | ${'enterprise'}     | ${'should NOT see'} | ${''}
-      `('$preset: $license users $result notes', ({ license, preset, result, text }) => {
+      `('$preset: $license users $result notes', async ({ license, preset, result, text }) => {
         const isEnterprise = license === 'enterprise';
         const isPlatinumPlus = ['platinum', 'enterprise'].includes(license);
 
@@ -147,7 +147,7 @@ describe('Onboarding Component new section', () => {
         renderResult = mockedContext.render(
           <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
         );
-        userEvent.click(screen.getByDisplayValue(preset));
+        await userEvent.click(screen.getByDisplayValue(preset));
         expect(renderResult.getByDisplayValue(preset)).toBeChecked();
 
         if (result === 'should see') {
@@ -223,9 +223,9 @@ describe('Onboarding Component new section', () => {
       });
     });
 
-    it('should still be able to select cloud configuration', () => {
+    it('should still be able to select cloud configuration', async () => {
       render();
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
 
       expect(onChange).toHaveBeenLastCalledWith({
         isValid: true,

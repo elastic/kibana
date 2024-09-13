@@ -11,8 +11,8 @@ export enum ChartMetricType {
 }
 
 const metricsFormulasMap: Record<ChartMetricType, string> = {
-  [ChartMetricType.LOG_RATE]: `count(kql='log.level: *') / [PERIOD_IN_MINUTES]`,
-  [ChartMetricType.LOG_ERROR_RATE]: `count(kql='log.level: "error" OR log.level: "ERROR" OR error.log.level: "error"') / [PERIOD_IN_MINUTES]`,
+  [ChartMetricType.LOG_RATE]: `count() / [PERIOD_IN_MINUTES]`,
+  [ChartMetricType.LOG_ERROR_RATE]: `count(kql='log.level: "error" OR log.level: "ERROR" OR error.log.level: "error" OR error.log.level: "ERROR"') / [PERIOD_IN_MINUTES]`,
 };
 
 export function getMetricsFormula(chartMetricType: ChartMetricType) {
