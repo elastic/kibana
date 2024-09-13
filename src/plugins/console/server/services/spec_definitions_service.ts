@@ -19,7 +19,7 @@ import {
   GENERATED_SUBFOLDER,
   MANUAL_SUBFOLDER,
   OVERRIDES_SUBFOLDER,
-  API_REFERENCE_DOC_LINK,
+  API_DOCS_LINK,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 
@@ -71,7 +71,7 @@ export class SpecDefinitionsService {
     }
 
     if (docsLinkToApiReference) {
-      description.documentation = API_REFERENCE_DOC_LINK;
+      description.documentation = API_DOCS_LINK;
     }
 
     _.assign(copiedDescription, description);

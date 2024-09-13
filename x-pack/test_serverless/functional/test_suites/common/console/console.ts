@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Retry until the documentation is loaded
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('api-reference.html');
+        expect(url).to.contain('/docs/api');
       });
 
       // Close the documentation tab
