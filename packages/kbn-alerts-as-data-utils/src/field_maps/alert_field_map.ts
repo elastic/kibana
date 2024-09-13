@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -44,7 +45,9 @@ import {
   VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_ORIGINAL,
   TAGS,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { MultiField } from './types';
 
@@ -127,6 +130,11 @@ export const alertFieldMap = {
     required: true,
   },
   [ALERT_RULE_EXECUTION_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [ALERT_INTENDED_TIMESTAMP]: {
     type: 'date',
     array: false,
     required: false,
@@ -224,11 +232,19 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   [EVENT_KIND]: {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
+  },
+  [EVENT_ORIGINAL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
   },
   [SPACE_IDS]: {
     type: 'keyword',

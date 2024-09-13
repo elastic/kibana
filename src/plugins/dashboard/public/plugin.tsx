@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -52,6 +53,10 @@ import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -87,6 +92,7 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   urlForwarding: UrlForwardingSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface DashboardStartDependencies {
@@ -110,6 +116,7 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export interface DashboardSetup {
@@ -120,9 +127,9 @@ export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: (
+  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings
+    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
 }
 
@@ -222,7 +229,7 @@ export class DashboardPlugin
 
         // We also don't want to store the table list view state.
         // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by'];
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by', 'favorites'];
         return replaceUrlHashQuery(newNavLink, (query) => {
           [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
             delete query[param];

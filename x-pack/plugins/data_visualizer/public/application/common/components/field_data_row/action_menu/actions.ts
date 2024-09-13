@@ -147,8 +147,8 @@ export function getActions(
         available: (item: FieldVisConfig) => {
           return item.deletable === true;
         },
-        onClick: (item: FieldVisConfig) => {
-          dataViewEditorRef.current = services.dataViewFieldEditor?.openDeleteModal({
+        onClick: async (item: FieldVisConfig) => {
+          dataViewEditorRef.current = await services.dataViewFieldEditor?.openDeleteModal({
             ctx: { dataView },
             fieldName: item.fieldName!,
             onDelete: refreshPage,

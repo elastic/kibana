@@ -14,7 +14,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { StatusBell } from './status_bell';
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
 
 interface Props {
@@ -38,10 +37,8 @@ const HeaderComponent: React.FC<Props> = ({
   onCancel,
   stats,
 }) => {
-  const isFlyoutMode = false; // always false for attack discovery
-  const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
-  const disabled = !hasAssistantPrivilege || connectorId == null;
+  const disabled = connectorId == null;
 
   const [didCancel, setDidCancel] = useState(false);
 
@@ -85,7 +82,6 @@ const HeaderComponent: React.FC<Props> = ({
       {connectorsAreConfigured && (
         <EuiFlexItem grow={false}>
           <ConnectorSelectorInline
-            isFlyoutMode={isFlyoutMode}
             onConnectorSelected={noop}
             onConnectorIdSelected={onConnectorIdSelected}
             selectedConnectorId={connectorId}

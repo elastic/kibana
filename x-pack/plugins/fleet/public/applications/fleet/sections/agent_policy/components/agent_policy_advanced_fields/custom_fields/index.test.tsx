@@ -66,7 +66,7 @@ describe('CustomFields', () => {
 
     renderComponent(mockAgentPolicy);
 
-    const unsupportedInputsWarning = renderResult.getByText('Unsupported Inputs');
+    const unsupportedInputsWarning = renderResult.getByText('Unsupported inputs');
     expect(unsupportedInputsWarning).toBeInTheDocument();
 
     const strongElements = renderResult.container.querySelector('strong');
@@ -87,7 +87,7 @@ describe('CustomFields', () => {
       ],
     });
     renderComponent(mockAgentPolicy);
-    expect(renderResult.queryByText('Unsupported Inputs')).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Unsupported inputs')).not.toBeInTheDocument();
   });
 
   it('should render global data tags table with initial tags', () => {

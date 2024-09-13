@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-doc-links-server",
-        "id": "def-common.DocLinksServiceSetup",
+        "id": "def-server.DocLinksServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "DocLinksServiceSetup",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-common.DocLinksServiceSetup.version",
+            "id": "def-server.DocLinksServiceSetup.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -46,7 +38,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-common.DocLinksServiceSetup.elasticWebsiteUrl",
+            "id": "def-server.DocLinksServiceSetup.elasticWebsiteUrl",
             "type": "string",
             "tags": [],
             "label": "elasticWebsiteUrl",
@@ -59,7 +51,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-common.DocLinksServiceSetup.links",
+            "id": "def-server.DocLinksServiceSetup.links",
             "type": "Object",
             "tags": [],
             "label": "links",
@@ -87,7 +79,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-doc-links-server",
-        "id": "def-common.DocLinksServiceStart",
+        "id": "def-server.DocLinksServiceStart",
         "type": "Type",
         "tags": [],
         "label": "DocLinksServiceStart",
@@ -95,9 +87,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-doc-links-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreDocLinksServerPluginApi",
-            "section": "def-common.DocLinksServiceSetup",
+            "section": "def-server.DocLinksServiceSetup",
             "text": "DocLinksServiceSetup"
           }
         ],
@@ -107,6 +99,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

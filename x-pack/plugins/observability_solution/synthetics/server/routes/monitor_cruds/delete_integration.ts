@@ -16,12 +16,12 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
       packagePolicyId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, savedObjectsClient, server, uptimeEsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server, syntheticsEsClient }): Promise<any> => {
     const { packagePolicyId } = request.params;
 
     const response = await server.fleet.packagePolicyService.delete(
       savedObjectsClient,
-      uptimeEsClient.baseESClient,
+      syntheticsEsClient.baseESClient,
       [packagePolicyId],
       {
         force: true,

@@ -4,38 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { UpdateRuleArgs } from '../detection_rules_client_interface';
+import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
-import {
-  convertUpdateAPIToInternalSchema,
-  internalRuleToAPIResponse,
-} from '../../../normalization/rule_converters';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 
-import {
-  validateMlAuth,
-  ClientError,
-  toggleRuleEnabledOnUpdate,
-  RuleResponseValidationError,
-} from '../utils';
+import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
 
-import { readRules } from '../read_rules';
+import type { RuleUpdateProps } from '../../../../../../../common/api/detection_engine';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
+import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 
-export const updateRule = async (
-  rulesClient: RulesClient,
-  args: UpdateRuleArgs,
-  mlAuthz: MlAuthz
-): Promise<RuleResponse> => {
-  const { ruleUpdate } = args;
+interface UpdateRuleArguments {
+  actionsClient: ActionsClient;
+  rulesClient: RulesClient;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+  ruleUpdate: RuleUpdateProps;
+  mlAuthz: MlAuthz;
+}
+
+export const updateRule = async ({
+  actionsClient,
+  rulesClient,
+  prebuiltRuleAssetClient,
+  ruleUpdate,
+  mlAuthz,
+}: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
   await validateMlAuth(mlAuthz, ruleUpdate.type);
 
-  const existingRule = await readRules({
+  const existingRule = await getRuleByIdOrRuleId({
     rulesClient,
     ruleId,
     id,
@@ -46,33 +50,21 @@ export const updateRule = async (
     throw new ClientError(error.message, error.statusCode);
   }
 
-  const newInternalRule = convertUpdateAPIToInternalSchema({
+  const ruleWithUpdates = await applyRuleUpdate({
+    prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate,
   });
 
-  const updatedInternalRule = await rulesClient.update({
+  const updatedRule = await rulesClient.update({
     id: existingRule.id,
-    data: newInternalRule,
+    data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
   });
 
-  const { enabled } = await toggleRuleEnabledOnUpdate(
-    rulesClient,
-    existingRule,
-    ruleUpdate.enabled
-  );
+  const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
 
-  /* Trying to convert the internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(
-    internalRuleToAPIResponse({ ...updatedInternalRule, enabled })
-  );
-
-  if (!parseResult.success) {
-    throw new RuleResponseValidationError({
-      message: stringifyZodError(parseResult.error),
-      ruleId: updatedInternalRule.params.ruleId,
-    });
-  }
-
-  return parseResult.data;
+  return convertAlertingRuleToRuleResponse({
+    ...updatedRule,
+    enabled,
+  });
 };

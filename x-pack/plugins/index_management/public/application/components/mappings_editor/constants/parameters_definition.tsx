@@ -1041,7 +1041,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.number,
   },
-
   dims: {
     fieldConfig: {
       defaultValue: '',
@@ -1070,20 +1069,46 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   reference_field: {
     fieldConfig: {
+      defaultValue: '',
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.referenceFieldLabel', {
         defaultMessage: 'Reference field',
       }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.referenceFieldHelpText', {
         defaultMessage: 'Reference field for model inference.',
       }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.referenceFieldIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Reference field is required.',
+              }
+            )
+          ),
+        },
+      ],
     },
     schema: t.string,
   },
   inference_id: {
     fieldConfig: {
+      defaultValue: 'elser_model_2',
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.inferenceIdLabel', {
         defaultMessage: 'Select an inference endpoint:',
       }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Inference ID is required.',
+              }
+            )
+          ),
+        },
+      ],
     },
     schema: t.string,
   },

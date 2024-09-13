@@ -55,14 +55,6 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
   - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
-  - [Rule upgrade workflow: simple diff algorithm](#rule-upgrade-workflow-simple-diff-algorithm)
-    - [**Scenario: Rule field doesn't have an update and has no custom value**](#scenario-rule-field-doesnt-have-an-update-and-has-no-custom-value)
-    - [**Scenario: Rule field doesn't have an update but has a custom value**](#scenario-rule-field-doesnt-have-an-update-but-has-a-custom-value)
-    - [**Scenario: Rule field has an update and doesn't have a custom value**](#scenario-rule-field-has-an-update-and-doesnt-have-a-custom-value)
-    - [**Scenario: Rule field has an update and a custom value that are the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-the-same)
-    - [**Scenario: Rule field has an update and a custom value that are NOT the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-not-the-same)
-    - [**Scenario: Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist)
-    - [**Scenario: Rule field has an update and a custom value that are the same and the rule base version doesn't exist**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist)
   - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
     - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
     - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
@@ -639,13 +631,9 @@ Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules of all types available to install
 When user opens the Add Rules page
 Then all X rules available for installation should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
-And all properties of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+When user opens a rule preview for any rule
+Then the preview should appear
+And all properties of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before installing**
@@ -791,15 +779,11 @@ And for all of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then all X rules available for upgrade should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
+When user opens a rule preview for any rule
+Then the preview should appear
 And the "Updates" tab should be active
 When user selects the "Overview" tab
-Then all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+Then all properties of the new version of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before upgrading**
@@ -822,144 +806,6 @@ And the Investigation Guide tab should NOT be displayed
 ### Rule upgrade workflow: filtering, sorting, pagination
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
-
-### Rule upgrade workflow: simple diff algorithm
-
-#### **Scenario: Rule field doesn't have an update and has no custom value**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And <field_name> field is not customized by the user (current version == base version)
-And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should not be returned from the `upgrade/_review` API endpoint
-And <field_name> field should not be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | "A"          | "A"             | "A"            |
-| risk_score | 1            | 1               | 1              |
-```
-
-#### **Scenario: Rule field doesn't have an update but has a custom value**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And <field_name> field is customized by the user (current version != base version)
-And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should be returned from the `upgrade/_review` API endpoint
-And <field_name> field should be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | "A"          | "B"             | "A"            |
-| risk_score | 1            | 2               | 1              |
-```
-
-#### **Scenario: Rule field has an update and doesn't have a custom value**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And <field_name> field is not customized by the user (current version == base version)
-And <field_name> field is updated by Elastic in this upgrade (target version != base version)
-Then for <field_name> field the diff algorithm should output the target version as the merged one without a conflict
-And <field_name> field should be returned from the `upgrade/_review` API endpoint
-And <field_name> field should be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | "A"          | "A"             | "B"            |
-| risk_score | 1            | 1               | 2              |
-```
-
-#### **Scenario: Rule field has an update and a custom value that are the same**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And <field_name> field is customized by the user (current version != base version)
-And <field_name> field is updated by Elastic in this upgrade (target version != base version)
-And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should be returned from the `upgrade/_review` API endpoint
-And <field_name> field should be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | "A"          | "B"             | "B"            |
-| risk_score | 1            | 2               | 2              |
-```
-
-#### **Scenario: Rule field has an update and a custom value that are NOT the same**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And <field_name> field is customized by the user (current version != base version)
-And <field_name> field is updated by Elastic in this upgrade (target version != base version)
-And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one with a conflict
-And <field_name> field should be returned from the `upgrade/_review` API endpoint
-And <field_name> field should be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | "A"          | "B"             | "C"            |
-| risk_score | 1            | 2               | 3              |
-```
-
-#### **Scenario: Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And the base version of the rule cannot be determined
-And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output the target version as the merged one with a conflict
-And <field_name> field should be returned from the `upgrade/_review` API endpoint
-And <field_name> field should be shown in the upgrade preview UI
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | N/A          | "B"             | "C"            |
-| risk_score | N/A          | 2               | 3              |
-```
-
-#### **Scenario: Rule field has an update and a custom value that are the same and the rule base version doesn't exist**
-
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
-
-```Gherkin
-Given at least 1 prebuilt rule is installed in Kibana
-And for this rule there is a new version available
-And the base version of the rule cannot be determined
-And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should not be returned from the `upgrade/_review` API endpoint
-And <field_name> field should not be shown in the upgrade preview UI
-
-
-Examples:
-| field_name | base_version | current_version | target_version |
-| name       | N/A          | "A"             | "A"            |
-| risk_score | N/A          | 1               | 1              |
-```
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
 

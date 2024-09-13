@@ -178,8 +178,6 @@ image::user/ml/images/ml-log-rate-analysis.png[Log rate spike explained]
 [[log-pattern-analysis]]
 === Log pattern analysis
 
-preview::[]
-
 // The following intro is used on the `run-pattern-analysis-discover` page.
 //tag::log-pattern-analysis-intro[]
 Log pattern analysis helps you to find patterns in unstructured log messages and 

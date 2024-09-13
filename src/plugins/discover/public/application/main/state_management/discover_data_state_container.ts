@@ -1,45 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+} from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import { DiscoverAppState } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { InternalState } from './discover_internal_state_container';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { getDefaultProfileState } from './utils/get_default_profile_state';
 
 export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
   options: {
     reset: boolean;
@@ -140,15 +144,15 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  getAppState,
-  getInternalState,
+  appStateContainer,
+  internalStateContainer,
   getSavedSearch,
   setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  getAppState: () => DiscoverAppState;
-  getInternalState: () => InternalState;
+  appStateContainer: DiscoverAppStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
@@ -180,10 +184,9 @@ export function getDataStateContainer({
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
-    availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
   };
 
-  let autoRefreshDone: AutoRefreshDoneFn | undefined;
+  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop
@@ -224,8 +227,8 @@ export function getDataStateContainer({
             inspectorAdapters,
             searchSessionId,
             services,
-            getAppState,
-            getInternalState,
+            getAppState: appStateContainer.getState,
+            getInternalState: internalStateContainer.getState,
             savedSearch: getSavedSearch(),
             useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
           };
@@ -235,34 +238,65 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-
             const fetchMoreStartTime = window.performance.now();
+
             await fetchMoreDocuments(dataSubjects, {
               abortController: abortControllerFetchMore,
               ...commonFetchDeps,
             });
+
             const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
             reportPerformanceMetricEvent(services.analytics, {
               eventName: 'discoverFetchMore',
               duration: fetchMoreDuration,
             });
+
             return;
           }
 
           await profilesManager.resolveDataSourceProfile({
-            dataSource: getAppState().dataSource,
+            dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
-            query: getAppState().query,
+            query: appStateContainer.getState().query,
           });
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-
           const fetchAllStartTime = window.performance.now();
-          await fetchAll(dataSubjects, options.reset, {
-            abortController,
-            ...commonFetchDeps,
-          });
+
+          await fetchAll(
+            dataSubjects,
+            options.reset,
+            {
+              abortController,
+              ...commonFetchDeps,
+            },
+            async () => {
+              const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
+
+              if (dataView) {
+                const stateUpdate = getDefaultProfileState({
+                  profilesManager,
+                  resetDefaultProfileState,
+                  defaultColumns,
+                  dataView,
+                  esqlQueryColumns,
+                });
+
+                if (stateUpdate) {
+                  await appStateContainer.replaceUrlState(stateUpdate);
+                }
+              }
+
+              internalStateContainer.transitions.setResetDefaultProfileState({
+                columns: false,
+                rowHeight: false,
+              });
+            }
+          );
+
           const fetchAllDuration = window.performance.now() - fetchAllStartTime;
           reportPerformanceMetricEvent(services.analytics, {
             eventName: 'discoverFetchAll',
@@ -271,8 +305,8 @@ export function getDataStateContainer({
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done
-          // and a new one can be scheduled.
-          if (autoRefreshDone === prevAutoRefreshDone) {
+          // and a new one can be scheduled. null is checked to always start initial looping.
+          if (autoRefreshDone === prevAutoRefreshDone || prevAutoRefreshDone === null) {
             // if this function was set and is executed, another refresh fetch can be triggered
             autoRefreshDone?.();
             autoRefreshDone = undefined;
@@ -289,7 +323,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async (resetQuery?: boolean) => {
-    const query = getAppState().query;
+    const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
@@ -304,6 +338,7 @@ export function getDataStateContainer({
     } else {
       refetch$.next(undefined);
     }
+
     return refetch$;
   };
 

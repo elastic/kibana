@@ -10,17 +10,26 @@ import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'r
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
+import { TaskCost } from '../task';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
+
+// Capacity is measured in number of normal cost tasks that can be run
+// At a minimum, we need to be able to run a single task with the greatest cost
+// so we should convert the greatest cost to normal cost
+export const MIN_COST = TaskCost.ExtraLarge / TaskCost.Normal;
+
+// For default claim strategy
 export const MIN_WORKERS = 1;
 
-// When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
-// When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
+// When errors occur, reduce capacity by CAPACITY_DECREASE_PERCENTAGE
+// When errors no longer occur, start increasing capacity by CAPACITY_INCREASE_PERCENTAGE
 // until starting value is reached
-const MAX_WORKERS_DECREASE_PERCENTAGE = 0.8;
-const MAX_WORKERS_INCREASE_PERCENTAGE = 1.05;
+const CAPACITY_DECREASE_PERCENTAGE = 0.8;
+const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 
 // When errors occur, increase pollInterval by POLL_INTERVAL_INCREASE_PERCENTAGE
 // When errors no longer occur, start decreasing pollInterval by POLL_INTERVAL_DECREASE_PERCENTAGE
@@ -29,28 +38,32 @@ const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
 interface ManagedConfigurationOpts {
-  logger: Logger;
-  startingMaxWorkers: number;
-  startingPollInterval: number;
+  config: TaskManagerConfig;
+  defaultCapacity?: number;
   errors$: Observable<Error>;
+  logger: Logger;
 }
 
 export interface ManagedConfiguration {
-  maxWorkersConfiguration$: Observable<number>;
+  startingCapacity: number;
+  capacityConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
 
 export function createManagedConfiguration({
+  config,
+  defaultCapacity = DEFAULT_CAPACITY,
   logger,
-  startingMaxWorkers,
-  startingPollInterval,
   errors$,
 }: ManagedConfigurationOpts): ManagedConfiguration {
   const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
+  const startingCapacity = calculateStartingCapacity(config, logger, defaultCapacity);
+  const startingPollInterval = config.poll_interval;
   return {
-    maxWorkersConfiguration$: errorCheck$.pipe(
-      createMaxWorkersScan(logger, startingMaxWorkers),
-      startWith(startingMaxWorkers),
+    startingCapacity,
+    capacityConfiguration$: errorCheck$.pipe(
+      createCapacityScan(config, logger, startingCapacity),
+      startWith(startingCapacity),
       distinctUntilChanged()
     ),
     pollIntervalConfiguration$: errorCheck$.pipe(
@@ -61,37 +74,39 @@ export function createManagedConfiguration({
   };
 }
 
-function createMaxWorkersScan(logger: Logger, startingMaxWorkers: number) {
-  return scan((previousMaxWorkers: number, errorCount: number) => {
-    let newMaxWorkers: number;
+function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingCapacity: number) {
+  return scan((previousCapacity: number, errorCount: number) => {
+    let newCapacity: number;
     if (errorCount > 0) {
-      // Decrease max workers by MAX_WORKERS_DECREASE_PERCENTAGE while making sure it doesn't go lower than 1.
+      const minCapacity = getMinCapacity(config);
+      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
       // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-      newMaxWorkers = Math.max(
-        Math.floor(previousMaxWorkers * MAX_WORKERS_DECREASE_PERCENTAGE),
-        MIN_WORKERS
+      newCapacity = Math.max(
+        Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
+        minCapacity
       );
     } else {
-      // Increase max workers by MAX_WORKERS_INCREASE_PERCENTAGE while making sure it doesn't go
+      // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
       // higher than the starting value. Using Math.ceil to make sure the number is different than
       // previous while not being a decimal value
-      newMaxWorkers = Math.min(
-        startingMaxWorkers,
-        Math.ceil(previousMaxWorkers * MAX_WORKERS_INCREASE_PERCENTAGE)
+      newCapacity = Math.min(
+        startingCapacity,
+        Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
       );
     }
-    if (newMaxWorkers !== previousMaxWorkers) {
+
+    if (newCapacity !== previousCapacity) {
       logger.debug(
-        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+        `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
-      if (previousMaxWorkers === startingMaxWorkers) {
+      if (previousCapacity === startingCapacity) {
         logger.warn(
-          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+          `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
-    return newMaxWorkers;
-  }, startingMaxWorkers);
+    return newCapacity;
+  }, startingCapacity);
 }
 
 function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
@@ -185,4 +200,37 @@ function resetErrorCount() {
     tag: 'initial',
     count: 0,
   };
+}
+
+function getMinCapacity(config: TaskManagerConfig) {
+  switch (config.claim_strategy) {
+    case CLAIM_STRATEGY_MGET:
+      return MIN_COST;
+
+    default:
+      return MIN_WORKERS;
+  }
+}
+
+export function calculateStartingCapacity(
+  config: TaskManagerConfig,
+  logger: Logger,
+  defaultCapacity: number
+): number {
+  if (config.capacity !== undefined && config.max_workers !== undefined) {
+    logger.warn(
+      `Both "xpack.task_manager.capacity" and "xpack.task_manager.max_workers" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
+    );
+  }
+
+  if (config.capacity) {
+    // Use capacity if explicitly set
+    return config.capacity!;
+  } else if (config.max_workers) {
+    // Otherwise use max_worker value as capacity, capped at MAX_CAPACITY
+    return Math.min(config.max_workers, MAX_CAPACITY);
+  }
+
+  // Neither are set, use the given default capacity
+  return defaultCapacity;
 }

@@ -8,8 +8,8 @@
 import type { RequestHandler } from '@kbn/core/server';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
-import type { DataViewTitleSchema } from '../../../../common/api_schemas/common';
-import type { FieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
+import type { DataViewTitleSchema } from '../../api_schemas/common';
+import type { FieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 
@@ -23,14 +23,16 @@ export const routeHandler: RequestHandler<
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
-    const resp = await fetchHistogramsForFields(
-      esClient.asCurrentUser,
-      dataViewTitle,
-      query,
-      fields,
-      samplerShardSize,
-      runtimeMappings
-    );
+    const resp = await fetchHistogramsForFields({
+      esClient: esClient.asCurrentUser,
+      arguments: {
+        indexPattern: dataViewTitle,
+        query,
+        fields,
+        samplerShardSize,
+        runtimeMappings,
+      },
+    });
 
     return res.ok({ body: resp });
   } catch (e) {

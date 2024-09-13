@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
@@ -27,6 +28,8 @@ export interface SuggestionRawDefinition {
   label: string;
   /* The actual text to insert into the editor */
   text: string;
+  /* Text to use for filtering the suggestions */
+  filterText?: string;
   /**
    * Should the text be inserted as a snippet?
    * That is usually used for special behaviour like moving the cursor in a specific position
@@ -57,11 +60,23 @@ export interface SuggestionRawDefinition {
     title: string;
     id: string;
   };
+  /**
+   * The range that should be replaced when the suggestion is applied
+   */
+  rangeToReplace?: {
+    start: number;
+    end: number;
+  };
 }
 
 export interface EditorContext {
   /** The actual char that triggered the suggestion (1 single char) */
   triggerCharacter?: string;
-  /** The type of trigger id. triggerKind = 0 is a programmatic trigger, while any other non-zero value is currently ignored. */
+  /**
+   * monaco.editor.CompletionTriggerKind
+   *
+   * 0 is "Invoke" (user starts typing a word)
+   * 1 is "Trigger character" (user types a trigger character)
+   */
   triggerKind: number;
 }

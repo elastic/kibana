@@ -6,6 +6,8 @@
  */
 
 import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { EuiCommentProps } from '@elastic/eui';
+import { UserAvatar } from '.';
 
 export interface MessagePresentation {
   delay?: number;
@@ -18,23 +20,6 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   content?: string;
   presentation?: MessagePresentation;
-}
-
-export interface ConversationTheme {
-  title?: string;
-  titleIcon?: string;
-  user?: {
-    name?: string;
-    icon?: string;
-  };
-  assistant?: {
-    name?: string;
-    icon?: string;
-  };
-  system?: {
-    name?: string;
-    icon?: string;
-  };
 }
 /**
  * Complete state to reconstruct a conversation instance.
@@ -64,18 +49,12 @@ export interface AssistantTelemetry {
   reportAssistantMessageSent: (params: {
     conversationId: string;
     role: string;
-    isEnabledKnowledgeBase: boolean;
-    isEnabledRAGAlerts: boolean;
     actionTypeId: string;
     model?: string;
     provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: {
-    isEnabledKnowledgeBase?: boolean;
-    isEnabledRAGAlerts?: boolean;
-    assistantStreamingEnabled?: boolean;
-  }) => void;
+  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
 }
 
 export interface AssistantAvailability {
@@ -90,3 +69,15 @@ export interface AssistantAvailability {
   // When true, user has `Edit` privilege for `AnonymizationFields`
   hasUpdateAIAssistantAnonymization: boolean;
 }
+
+export type GetAssistantMessages = (commentArgs: {
+  abortStream: () => void;
+  currentConversation?: Conversation;
+  isFetchingResponse: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
+  regenerateMessage: (conversationId: string) => void;
+  showAnonymizedValues: boolean;
+  currentUserAvatar?: UserAvatar;
+  setIsStreaming: (isStreaming: boolean) => void;
+  systemPromptContent?: string;
+}) => EuiCommentProps[];

@@ -28,6 +28,11 @@ export const getAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Get an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

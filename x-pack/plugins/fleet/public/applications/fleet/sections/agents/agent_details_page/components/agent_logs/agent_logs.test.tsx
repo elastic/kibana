@@ -12,8 +12,6 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
 
-jest.mock('../../../../../../../hooks/use_authz');
-
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   return {
     ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
@@ -26,6 +24,13 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 jest.mock('@kbn/logs-shared-plugin/public', () => {
   return {
     LogStream: () => <div />,
+  };
+});
+jest.mock('@kbn/logs-shared-plugin/common', () => {
+  return {
+    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+      logsLocator: { getRedirectUrl: jest.fn(() => 'https://logs-explorer-redirect-url') },
+    }),
   };
 });
 
@@ -52,6 +57,13 @@ jest.mock('../../../../../hooks', () => {
     ...jest.requireActual('../../../../../hooks'),
     useLink: jest.fn(),
     useStartServices: jest.fn(),
+    useAuthz: jest.fn(),
+    useDiscoverLocator: jest.fn().mockImplementation(() => {
+      return {
+        id: 'DISCOVER_APP_LOCATOR',
+        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+      };
+    }),
   };
 });
 
@@ -62,6 +74,7 @@ describe('AgentLogsUI', () => {
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
+        readAgents: true,
       },
     } as any);
   });
@@ -100,34 +113,36 @@ describe('AgentLogsUI', () => {
           },
         },
       },
-      http: {
-        basePath: {
-          prepend: (url: string) => 'http://localhost:5620' + url,
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              useUrl: () => 'https://locator.url',
+            }),
+          },
         },
-      },
-      cloud: {
-        isServerlessEnabled,
       },
     });
   };
 
-  it('should render Open in Logs UI if capabilities not set', () => {
+  it('should render Open in Logs button if privileges are set', () => {
     mockStartServices();
     const result = renderComponent();
     expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
       'href',
-      `http://localhost:5620/app/logs/stream?logPosition=(end%3A'2023-20-04T14%3A20%3A00.340Z'%2Cstart%3A'2023-20-04T14%3A00%3A00.340Z'%2CstreamLive%3A!f)&logFilter=(expression%3A'elastic_agent.id%3Aagent1%20and%20(data_stream.dataset%3Aelastic_agent)%20and%20(log.level%3Ainfo%20or%20log.level%3Aerror)'%2Ckind%3Akuery)`
+      `https://logs-explorer-redirect-url`
     );
   });
 
-  it('should render Open in Discover if serverless enabled', () => {
-    mockStartServices(true);
+  it('should not render Open in Logs button if privileges are not set', () => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        readAgents: false,
+      },
+    } as any);
+    mockStartServices();
     const result = renderComponent();
-    const viewInDiscover = result.getByTestId('viewInDiscoverBtn');
-    expect(viewInDiscover).toHaveAttribute(
-      'href',
-      `http://localhost:5620/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2023-20-04T14:00:00.340Z',to:'2023-20-04T14:20:00.340Z'))&_a=(columns:!(event.dataset,message),index:'logs-*',query:(language:kuery,query:'elastic_agent.id:agent1 and (data_stream.dataset:elastic_agent) and (log.level:info or log.level:error)'))`
-    );
+    expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
 
   it('should show log level dropdown with correct value', () => {

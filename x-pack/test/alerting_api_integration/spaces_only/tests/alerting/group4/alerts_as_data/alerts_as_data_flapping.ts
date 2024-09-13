@@ -32,14 +32,15 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  describe('alerts as data flapping', () => {
+  describe('alerts as data flapping', function () {
+    this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     // These are the same tests from x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/event_log.ts

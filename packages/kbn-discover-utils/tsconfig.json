@@ -5,12 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -23,6 +24,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/i18n",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/ui-theme",
+    "@kbn/expressions-plugin"
   ]
 }

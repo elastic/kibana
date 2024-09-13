@@ -17,7 +17,7 @@ import type {
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const API_VERSIONS: ApiVersion[] = ['2'];
+const API_VERSIONS: ApiVersion[] = ['3'];
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

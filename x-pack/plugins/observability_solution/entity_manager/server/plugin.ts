@@ -6,30 +6,35 @@
  */
 
 import {
-  Plugin,
   CoreSetup,
-  RequestHandlerContext,
   CoreStart,
-  PluginInitializerContext,
-  PluginConfigDescriptor,
+  KibanaRequest,
   Logger,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
 } from '@kbn/core/server';
-import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
-import { setupRoutes } from './routes';
+import { registerRoutes } from '@kbn/server-route-repository';
+import { firstValueFrom } from 'rxjs';
+import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { builtInDefinitions } from './lib/entities/built_in';
+import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
+import { EntityClient } from './lib/entity_client';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { entityManagerRouteRepository } from './routes';
+import { EntityManagerRouteDependencies } from './routes/types';
+import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entitiesBaseComponentTemplateConfig } from './templates/components/base';
-import { entitiesEventComponentTemplateConfig } from './templates/components/event';
-import { entitiesIndexTemplateConfig } from './templates/entities_template';
-import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
 
-export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
-export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntityManagerServerPluginSetup {}
+export interface EntityManagerServerPluginStart {
+  getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+}
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
   schema: configSchema,
@@ -54,7 +59,10 @@ export class EntityManagerServerPlugin
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: EntityManagerPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    plugins: EntityManagerPluginSetupDependencies
+  ): EntityManagerServerPluginSetup {
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
     plugins.encryptedSavedObjects.registerType({
@@ -63,24 +71,43 @@ export class EntityManagerServerPlugin
       attributesToIncludeInAAD: new Set(['id', 'name']),
     });
 
-    const router = core.http.createRouter();
-
     this.server = {
       config: this.config,
       logger: this.logger,
     } as EntityManagerServerSetup;
 
-    setupRoutes<RequestHandlerContext>({
-      router,
+    registerRoutes<EntityManagerRouteDependencies>({
+      repository: entityManagerRouteRepository,
+      dependencies: {
+        server: this.server,
+        getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+          const [coreStart] = await core.getStartServices();
+          return this.getScopedClient({ request, coreStart });
+        },
+      },
+      core,
       logger: this.logger,
-      spaces: plugins.spaces,
-      server: this.server,
     });
 
     return {};
   }
 
-  public start(core: CoreStart, plugins: EntityManagerPluginStartDependencies) {
+  private async getScopedClient({
+    request,
+    coreStart,
+  }: {
+    request: KibanaRequest;
+    coreStart: CoreStart;
+  }) {
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asSecondaryAuthUser;
+    const soClient = coreStart.savedObjects.getScopedClient(request);
+    return new EntityClient({ esClient, soClient, logger: this.logger });
+  }
+
+  public start(
+    core: CoreStart,
+    plugins: EntityManagerPluginStartDependencies
+  ): EntityManagerServerPluginStart {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -90,30 +117,27 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Install entities component templates and index template
-    Promise.all([
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEventComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEntityComponentTemplateConfig,
-      }),
-    ])
-      .then(() =>
-        upsertTemplate({ esClient, logger: this.logger, template: entitiesIndexTemplateConfig })
-      )
-      .catch(() => {});
+    installEntityManagerTemplates({ esClient, logger: this.logger })
+      .then(async () => {
+        // the api key validation requires a check against the cluster license
+        // which is lazily loaded. we ensure it gets loaded before the update
+        await firstValueFrom(plugins.licensing.license$);
+        const { success } = await upgradeBuiltInEntityDefinitions({
+          definitions: builtInDefinitions,
+          server: this.server!,
+        });
 
-    return {};
+        if (success) {
+          this.logger.info('Builtin definitions were successfully upgraded');
+        }
+      })
+      .catch((err) => this.logger.error(err));
+
+    return {
+      getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+        return this.getScopedClient({ request, coreStart: core });
+      },
+    };
   }
 
   public stop() {}

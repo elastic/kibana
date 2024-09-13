@@ -6,7 +6,19 @@ fail() {
 }
 
 if [ -z "${BASH_VERSION:-}" ]; then
-  fail "Bash is requred to run this script"
+  fail "Bash is required to run this script"
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+    fail "curl is required to run this script"
+fi
+
+# Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
+LSOF_PATH=""
+if command -v lsof >/dev/null 2>&1; then
+    LSOF_PATH=$(command -v lsof)
+elif command -v /usr/sbin/lsof >/dev/null 2>&1; then
+    LSOF_PATH="/usr/sbin/lsof"
 fi
 
 install_api_key_encoded=""
@@ -89,7 +101,7 @@ selected_unknown_log_file_pattern_tsv_string=""
 custom_log_file_path_list_tsv_string=""
 elastic_agent_artifact_name=""
 elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
-elastic_agent_tmp_config_path="/tmp/elastic-agent-config-template.yml"
+elastic_agent_tmp_config_path="/tmp/elastic-agent-config.tar"
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -106,7 +118,7 @@ elif [ "${OS}" == "Darwin" ]; then
   fi
   elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
 else
-  fail "This script is only supported on linux and macOS"
+  fail "This script is only supported on Linux and macOS"
 fi
 
 elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
@@ -136,7 +148,8 @@ update_step_progress() {
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
-  curl -L -O $download_url --silent --fail
+  rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
+  curl -L -O "$download_url" --silent --fail
 
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
@@ -163,7 +176,7 @@ install_elastic_agent() {
   "./${elastic_agent_artifact_name}/elastic-agent" install -f -n > /dev/null
 
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent installed to $(dirname $elastic_agent_config_path)"
+    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
     update_step_progress "ea-install" "complete"
   else
     update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
@@ -208,7 +221,7 @@ ensure_elastic_agent_healthy() {
 
 backup_elastic_agent_config() {
   if [ -f "$elastic_agent_config_path" ]; then
-    echo -e "\nExisting config file found at $elastic_agent_config_path";
+    echo -e "\nExisting config found at $elastic_agent_config_path";
 
     printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Create backup and continue installation?" "[Y/n] (default: Yes): "
     read confirmation_reply
@@ -216,13 +229,19 @@ backup_elastic_agent_config() {
 
     if [[ "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
       local backup_path="$(pwd)/$(basename "${elastic_agent_config_path%.yml}.$(date +%s).yml")" # e.g. /opt/Elastic/Agent/elastic-agent.1712267614.yml
-      cp $elastic_agent_config_path $backup_path
+      # Backup to tar archive if `inputs.d` directory exists
+      if [ -d "$(dirname "$elastic_agent_config_path")/inputs.d" ]; then
+        backup_path="${backup_path%.yml}.tar" # Change file extension to `.tar`
+        tar --create --file "$backup_path" --directory "$(dirname "$elastic_agent_config_path")" "$(basename "$elastic_agent_config_path")" 'inputs.d'
+      else
+        cp "$elastic_agent_config_path" "$backup_path"
+      fi
 
       if [ "$?" -eq 0 ]; then
         printf "\n\e[1;32m✓\e[0m %s\n" "Backup saved to $backup_path"
       else
         update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
-        fail "Failed to backup existing config file - Try manually creating a backup or delete your existing config file before re-running this script"
+        fail "Failed to backup existing config - Try manually creating a backup or delete your existing config before re-running this script"
       fi
     else
       fail "Installation aborted"
@@ -244,15 +263,16 @@ install_integrations() {
   done
 
   curl --request POST \
-    -o $elastic_agent_tmp_config_path \
     --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
+    --header "Accept: application/x-tar" \
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
     --no-progress-meter \
-    --fail
+    --fail \
+    --output "$elastic_agent_tmp_config_path"
 
   if [ "$?" -eq 0 ]; then
     printf "\n\e[1;32m✓\e[0m %s\n" "Integrations installed"
@@ -265,9 +285,20 @@ install_integrations() {
 apply_elastic_agent_config() {
   local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
 
-  sed "s/'\${API_KEY}'/$decoded_ingest_api_key/g" $elastic_agent_tmp_config_path > $elastic_agent_config_path
+  # Verify that the downloaded archive contains the expected `elastic-agent.yml` file
+  tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' > /dev/null && \
+  # Remove existing config file including `inputs.d` directory
+  rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" && \
+  # Extract new config files from downloaded archive
+  tar --extract --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' --directory "$(dirname "$elastic_agent_config_path")" && \
+  # Replace placeholder with the Ingest API key
+  sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Config written to $elastic_agent_config_path"
+    printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
+    tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' | while read -r file; do
+      echo "  - $(dirname "$elastic_agent_config_path")/$file"
+    done
+
     update_step_progress "ea-config" "complete"
   else
     update_step_progress "ea-config" "warning" "Failed to configure Elastic Agent"
@@ -293,19 +324,27 @@ read_open_log_file_list() {
     "^\/var\/log\/system.log"
     "^\/var\/log\/messages"
     "^\/var\/log\/secure"
+    # Exclude previous installation logs
+    "\/opt\/Elastic\/Agent\/"
+    "\/Library\/Elastic\/Agent\/"
   )
 
-  local list=$(lsof -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
+  local list=$("$LSOF_PATH" -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
-      if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
-          unknown_log_file_path_list_string+="$line\n"
-      fi
+    if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
+        unknown_log_file_path_list_string+="$line\n"
+    fi
   done <<< "$list"
 }
 
 detect_known_integrations() {
+  # Always suggesting to install System integartion.
+  # Even when there is no system logs on the host,
+  # System integration will still be able to to collect metrics.
+  known_integrations_list_string+="system"$'\n'
+
   local nginx_patterns=(
     "/var/log/nginx/access.log*"
     "/var/log/nginx/error.log*"
@@ -333,25 +372,11 @@ detect_known_integrations() {
     fi
   done
 
-  if compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
+  if [ -S /var/run/docker.sock ]; then
+    known_integrations_list_string+="docker"$'\n'
+  elif compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
     known_integrations_list_string+="docker"$'\n'
   fi
-
-  local system_patterns=(
-    "/var/log/messages*"
-    "/var/log/syslog*"
-    "/var/log/system*"
-    "/var/log/auth.log*"
-    "/var/log/secure*"
-    "/var/log/system.log*"
-  )
-
-  for pattern in "${system_patterns[@]}"; do
-    if compgen -G "$pattern" > /dev/null; then
-      known_integrations_list_string+="system"$'\n'
-      break
-    fi
-  done
 }
 
 known_integration_title() {
@@ -367,7 +392,7 @@ known_integration_title() {
       echo "Docker Container Logs"
       ;;
     "system")
-      echo "System Logs"
+      echo "System Logs And Metrics"
       ;;
     *)
       echo "Unknown"
@@ -377,8 +402,12 @@ known_integration_title() {
 
 build_unknown_log_file_patterns() {
   while IFS= read -r log_file_path; do
+    if [ -z "$log_file_path" ]; then
+      continue
+    fi
+
     unknown_log_file_pattern_list_string+="$(dirname "$log_file_path")/*.log\n"
-  done <<< "$(echo -e $unknown_log_file_path_list_string)"
+  done <<< "$(echo -e "$unknown_log_file_path_list_string")"
 
   unknown_log_file_pattern_list_string=$(echo -e "$unknown_log_file_pattern_list_string" | sort -u)
 }
@@ -506,8 +535,15 @@ generate_custom_integration_name() {
 printf "\e[1m%s\e[0m\n" "Looking for log files..."
 update_step_progress "logs-detect" "loading"
 detect_known_integrations
-read_open_log_file_list
-build_unknown_log_file_patterns
+
+# Check if LSOF_PATH is executable
+if [ -x "$LSOF_PATH" ]; then
+    read_open_log_file_list
+    build_unknown_log_file_patterns
+else
+    echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
+fi
+
 update_step_progress "logs-detect" "complete"
 echo -e "\nWe found these logs on your system:"
 select_list

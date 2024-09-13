@@ -40,7 +40,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
   return (
     <EuiCard
       css={cardCss}
-      data-test-subj="package-card-preview"
+      data-test-subj="packageCardPreview"
       layout="horizontal"
       title={integrationSettings?.title ?? ''}
       description={integrationSettings?.description ?? ''}
@@ -49,6 +49,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
       icon={
         <EuiIcon
           size={'xl'}
+          data-test-subj="packageCardPreviewIcon"
           type={
             integrationSettings?.logo
               ? `data:image/svg+xml;base64,${integrationSettings.logo}`

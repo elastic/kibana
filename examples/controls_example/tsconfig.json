@@ -24,16 +24,7 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-markdown",
-    "@kbn/i18n",
-    "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/content-management-utils",
-    "@kbn/presentation-util-plugin",
-    "@kbn/ui-theme",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/presentation-panel-plugin",
-    "@kbn/datemath",
+    "@kbn/react-kibana-context-render",
   ]
 }

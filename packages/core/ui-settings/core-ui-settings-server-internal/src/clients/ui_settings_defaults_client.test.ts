@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Chance from 'chance';
@@ -62,6 +63,43 @@ describe('ui settings defaults', () => {
         result.foo = 'bar';
       }).toThrow();
     });
+
+    it('returns default values from async getValue() handler', async () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          getValue: async () => {
+            // simulate async operation
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            return 'default foo';
+          },
+        },
+        baz: { schema: schema.string(), value: 'default baz' },
+      };
+
+      const uiSettings = new UiSettingsDefaultsClient({ defaults, log: logger });
+
+      await expect(uiSettings.getAll()).resolves.toStrictEqual({
+        foo: 'default foo',
+        baz: 'default baz',
+      });
+    });
+
+    it('pass down the context object to the getValue() handler', async () => {
+      const getValue = jest.fn().mockResolvedValue('default foo');
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          getValue,
+        },
+      };
+
+      const uiSettings = new UiSettingsDefaultsClient({ defaults, log: logger });
+
+      const context = { foo: 'bar' };
+      await uiSettings.getAll(context as any);
+      expect(getValue).toHaveBeenCalledWith(context);
+    });
   });
 
   describe('#get()', () => {
@@ -93,6 +131,38 @@ describe('ui settings defaults', () => {
       const uiSettings = new UiSettingsDefaultsClient({ defaults, overrides, log: logger });
 
       await expect(uiSettings.get('foo')).resolves.toBe('default foo');
+    });
+
+    it('returns default values from async getValue() handler', async () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          getValue: async () => {
+            // simulate async operation
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            return 'default foo';
+          },
+        },
+      };
+
+      const uiSettings = new UiSettingsDefaultsClient({ defaults, log: logger });
+      await expect(uiSettings.get('foo')).resolves.toBe('default foo');
+    });
+
+    it('pass down the context object to the getValue() handler', async () => {
+      const getValue = jest.fn().mockResolvedValue('default foo');
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          getValue,
+        },
+      };
+
+      const uiSettings = new UiSettingsDefaultsClient({ defaults, log: logger });
+
+      const context = { foo: 'bar' };
+      await uiSettings.get('foo', context as any);
+      expect(getValue).toHaveBeenCalledWith(context);
     });
   });
 

@@ -1,19 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters, OpenAPIConverter } from '../type';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
+import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
 
 export class OasConverter {
-  readonly #converters: OpenAPIConverter[] = [kbnConfigSchemaConverter, catchAllConverter];
+  readonly #converters: OpenAPIConverter[] = [
+    kbnConfigSchemaConverter,
+    zodConverter,
+    catchAllConverter,
+  ];
   readonly #sharedSchemas = new Map<string, OpenAPIV3.SchemaObject>();
 
   #getConverter(schema: unknown) {

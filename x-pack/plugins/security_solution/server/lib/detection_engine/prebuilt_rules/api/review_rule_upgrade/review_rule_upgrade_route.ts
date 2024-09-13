@@ -27,7 +27,7 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
@@ -87,12 +87,34 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
 };
 
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
-  const allTags = new Set<string>(
-    results.flatMap((result) => result.ruleVersions.input.current?.tags ?? [])
+  const allTags = new Set<string>();
+
+  const stats = results.reduce(
+    (acc, result) => {
+      acc.num_rules_to_upgrade_total += 1;
+
+      if (result.ruleDiff.num_fields_with_conflicts > 0) {
+        acc.num_rules_with_conflicts += 1;
+      }
+
+      if (result.ruleDiff.num_fields_with_non_solvable_conflicts > 0) {
+        acc.num_rules_with_non_solvable_conflicts += 1;
+      }
+
+      result.ruleVersions.input.current?.tags.forEach((tag) => allTags.add(tag));
+
+      return acc;
+    },
+    {
+      num_rules_to_upgrade_total: 0,
+      num_rules_with_conflicts: 0,
+      num_rules_with_non_solvable_conflicts: 0,
+    }
   );
+
   return {
-    num_rules_to_upgrade_total: results.length,
-    tags: [...allTags].sort((a, b) => a.localeCompare(b)),
+    ...stats,
+    tags: Array.from(allTags),
   };
 };
 
@@ -123,9 +145,13 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
-          (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
+          (fieldDiff) =>
+            fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate &&
+            fieldDiff.diff_outcome !== ThreeWayDiffOutcome.MissingBaseNoUpdate
         ),
-        has_conflict: ruleDiff.has_conflict,
+        num_fields_with_updates: ruleDiff.num_fields_with_updates,
+        num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
+        num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,
       },
     };
   });

@@ -43,6 +43,16 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
+  const isShared = useMemo(() => {
+    if (agentPolicies?.length !== 1) {
+      return false;
+    }
+    const packagePolicy = agentPolicies[0].package_policies?.find(
+      (policy) => policy.id === packagePolicies[0]
+    );
+    return (packagePolicy?.policy_ids?.length ?? 0) > 1;
+  }, [agentPolicies, packagePolicies]);
+
   const hasMultipleAgentPolicies =
     canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
 
@@ -59,7 +69,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
       const request = await sendGetAgents({
         kuery,
-        showInactive: false,
+        showInactive: true,
       });
       setAgentsCount(request.data?.total || 0);
       setIsLoadingAgentsCount(false);
@@ -196,7 +206,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            {hasMultipleAgentPolicies && (
+            {(hasMultipleAgentPolicies || isShared) && (
               <>
                 <EuiCallOut
                   color="warning"

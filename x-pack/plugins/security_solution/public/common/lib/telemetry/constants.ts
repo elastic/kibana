@@ -84,6 +84,8 @@ export enum TelemetryEventTypes {
   ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
   EventLogFilterByRunType = 'Event Log Filter By Run Type',
   EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
+  OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
+  AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

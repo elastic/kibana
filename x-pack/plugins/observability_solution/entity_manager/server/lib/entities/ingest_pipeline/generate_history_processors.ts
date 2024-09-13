@@ -5,45 +5,82 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryIndexName } from '../helpers/generate_index_name';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
+import {
+  initializePathScript,
+  cleanScript,
+} from '../helpers/ingest_pipeline_script_processor_helpers';
+import { generateHistoryIndexName } from '../helpers/generate_component_id';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
-function createIdTemplate(definition: EntityDefinition) {
-  return definition.identityFields.reduce((template, id) => {
-    return template.replaceAll(id.field, `entity.identityFields.${id.field}`);
-  }, definition.displayNameTemplate);
-}
-
-function mapDestinationToPainless(destination: string, source: string) {
-  const fieldParts = destination.split('.');
-  return fieldParts.reduce((acc, _part, currentIndex, parts) => {
-    if (currentIndex + 1 === parts.length) {
-      return `${acc}\n  ctx${parts
-        .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${source}.keySet();`;
-    }
-    return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
-      .slice(0, currentIndex + 1)
-      .map((s) => `["${s}"]`)
-      .join('')} = new HashMap();`;
-  }, '');
+function mapDestinationToPainless(field: string) {
+  return `
+    ${initializePathScript(field)}
+    ctx.${field} = ctx.entity.metadata.${field}.keySet();
+  `;
 }
 
 function createMetadataPainlessScript(definition: EntityDefinition) {
   if (!definition.metadata) {
     return '';
   }
-  return definition.metadata.reduce((script, def) => {
-    const source = def.source;
-    const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
-      '.',
-      '?.'
-    )} != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
+
+  return definition.metadata.reduce((acc, def) => {
+    const destination = def.destination;
+    const optionalFieldPath = destination.replaceAll('.', '?.');
+    const next = `
+      if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
+        ${mapDestinationToPainless(destination)}
+      }
+    `;
+    return `${acc}\n${next}`;
   }, '');
 }
 
-export function generateHistoryProcessors(definition: EntityDefinition, spaceId: string) {
+function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+  return definition.identityFields.map((key) => ({
+    set: {
+      if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
+      field: key.field,
+      value: `{{entity.identity.${key.field}}}`,
+    },
+  }));
+}
+
+function getCustomIngestPipelines(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
+      },
+    },
+  ];
+}
+
+export function generateHistoryProcessors(definition: EntityDefinition) {
   return [
     {
       set: {
@@ -59,26 +96,32 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
     },
     {
       set: {
-        field: 'entity.spaceId',
-        value: spaceId,
-      },
-    },
-    {
-      set: {
         field: 'entity.definitionId',
         value: definition.id,
       },
     },
     {
       set: {
-        field: 'entity.displayName',
-        value: createIdTemplate(definition),
+        field: 'entity.definitionVersion',
+        value: definition.version,
+      },
+    },
+    {
+      set: {
+        field: 'entity.schemaVersion',
+        value: ENTITY_SCHEMA_VERSION_V1,
+      },
+    },
+    {
+      set: {
+        field: 'entity.identityFields',
+        value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {
       script: {
         description: 'Generated the entity.id field',
-        source: `
+        source: cleanScript(`
         // This function will recursively collect all the values of a HashMap of HashMaps
         Collection collectValues(HashMap subject) {
           Collection values = new ArrayList();
@@ -97,9 +140,9 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
         // Create the string builder
         StringBuilder entityId = new StringBuilder();
 
-        if (ctx["entity"]["identityFields"] != null) {
+        if (ctx["entity"]["identity"] != null) {
           // Get the values as a collection
-          Collection values = collectValues(ctx["entity"]["identityFields"]);
+          Collection values = collectValues(ctx["entity"]["identity"]);
 
           // Convert to a list and sort
           List sortedValues = new ArrayList(values);
@@ -111,10 +154,10 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
             entityId.append(":");
           }
 
-            // Assign the slo.instanceId
+            // Assign the entity.id
           ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
         }
-       `,
+       `),
       },
     },
     {
@@ -130,7 +173,7 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
         }))
       : []),
     ...(definition.metadata != null
-      ? [{ script: { source: createMetadataPainlessScript(definition) } }]
+      ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
     {
       remove: {
@@ -138,13 +181,21 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
         ignore_missing: true,
       },
     },
+    ...liftIdentityFieldsToDocumentRoot(definition),
+    {
+      remove: {
+        field: 'entity.identity',
+        ignore_missing: true,
+      },
+    },
     {
       date_index_name: {
         field: '@timestamp',
-        index_name_prefix: `${generateHistoryIndexName(definition)}.${spaceId}.`,
+        index_name_prefix: `${generateHistoryIndexName(definition)}.`,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
+    ...getCustomIngestPipelines(definition),
   ];
 }

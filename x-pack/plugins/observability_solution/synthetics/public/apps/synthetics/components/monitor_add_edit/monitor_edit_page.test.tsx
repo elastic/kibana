@@ -191,6 +191,7 @@ describe('MonitorEditPage', () => {
           attributes: {
             [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
             [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
+            [ConfigKey.MONITOR_TYPE]: 'browser',
             [ConfigKey.LOCATIONS]: [],
             [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
           },
@@ -219,7 +220,7 @@ describe('MonitorEditPage', () => {
 
       const inputField = getByTestId('syntheticsMonitorConfigName');
       fireEvent.focus(inputField);
-      userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
+      await userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
       fireEvent.blur(inputField);
 
       if (nameAlreadyExists) {

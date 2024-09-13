@@ -75,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
+        'actions:.thehive',
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
@@ -137,8 +138,11 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
         'fleet:check-deleted-files-task',
+        'fleet:deploy_agent_policies',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
+        'fleet:setup:upgrade_managed_package_policies',
+        'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',
@@ -158,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'task_manager:delete_inactive_background_task_nodes',
       ]);
     });
   });

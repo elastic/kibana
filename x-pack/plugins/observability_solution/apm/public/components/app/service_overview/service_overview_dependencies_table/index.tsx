@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
@@ -131,20 +131,22 @@ export function ServiceOverviewDependenciesTable({
       dependencies={dependencies}
       fixedHeight={fixedHeight}
       title={
-        <EuiToolTip
-          content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
-            defaultMessage:
-              'Downstream services and external connections to uninstrumented services',
+        <>
+          {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitle', {
+            defaultMessage: 'Dependencies',
           })}
-        >
-          <>
-            {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitle', {
-              defaultMessage: 'Dependencies',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignCenter"
+            content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
+              defaultMessage:
+                'Downstream services and external connections to uninstrumented services',
             })}
-            &nbsp;
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignCenter" />
-          </>
-        </EuiToolTip>
+          />
+        </>
       }
       nameColumnTitle={i18n.translate('xpack.apm.serviceOverview.dependenciesTableColumn', {
         defaultMessage: 'Dependency',

@@ -72,7 +72,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   });
 
   const goToNetwork = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,

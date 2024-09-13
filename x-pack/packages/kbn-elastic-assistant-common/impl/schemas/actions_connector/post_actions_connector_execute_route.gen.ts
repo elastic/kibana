@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
@@ -38,8 +38,6 @@ export const ExecuteConnectorRequestBody = z.object({
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),
-  isEnabledKnowledgeBase: z.boolean().optional(),
-  isEnabledRAGAlerts: z.boolean().optional(),
   replacements: Replacements,
   size: z.number().optional(),
   langSmithProject: z.string().optional(),

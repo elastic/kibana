@@ -1,75 +1,58 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import useObservable from 'react-use/lib/useObservable';
+import React, { useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  DashboardLocatorParams,
-  getDashboardLocatorParamsFromEmbeddable,
-} from '@kbn/dashboard-plugin/public';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
-import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { isFilterPinned, Query } from '@kbn/es-query';
 import {
   DASHBOARD_LINK_TYPE,
-  Link,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
-import { useLinks } from '../links_hooks';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { fetchDashboard } from './dashboard_link_tools';
+import { LinksParentApi, ResolvedLink } from '../../types';
 
 export const DashboardLinkComponent = ({
   link,
   layout,
-  onLoading,
-  onRender,
+  parentApi,
 }: {
-  link: Link;
+  link: ResolvedLink;
   layout: LinksLayoutType;
-  onLoading: () => void;
-  onRender: () => void;
+  parentApi: LinksParentApi;
 }) => {
-  const linksEmbeddable = useLinks();
-  const [error, setError] = useState<Error | undefined>();
-
-  const dashboardContainer = linksEmbeddable.parent as DashboardContainer;
-  const parentDashboardInput = useObservable(dashboardContainer.getInput$());
-  const parentDashboardId = dashboardContainer.select((state) => state.componentState.lastSavedId);
-
-  /** Fetch the dashboard that the link is pointing to */
-  const { loading: loadingDestinationDashboard, value: destinationDashboard } =
-    useAsync(async () => {
-      if (link.id !== parentDashboardId && link.destination) {
-        /**
-         * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
-         * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
-         */
-        const dashboard = await fetchDashboard(link.destination)
-          .then((result) => {
-            setError(undefined);
-            return result;
-          })
-          .catch((e) => setError(e));
-        return dashboard;
-      }
-    }, [link, parentDashboardId]);
+  const [
+    parentDashboardId,
+    parentDashboardTitle,
+    parentDashboardDescription,
+    timeRange,
+    filters,
+    query,
+  ] = useBatchedPublishingSubjects(
+    parentApi.savedObjectId,
+    parentApi.panelTitle,
+    parentApi.panelDescription,
+    parentApi.timeRange$,
+    parentApi.filters$,
+    parentApi.query$
+  );
 
   /**
    * Returns the title and description of the dashboard that the link points to; note that, if the link points to
@@ -78,9 +61,9 @@ export const DashboardLinkComponent = ({
    */
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
-      ? [parentDashboardInput?.title, parentDashboardInput?.description]
-      : [destinationDashboard?.attributes.title, destinationDashboard?.attributes.description];
-  }, [link.destination, parentDashboardId, parentDashboardInput, destinationDashboard]);
+      ? [parentDashboardTitle, parentDashboardDescription]
+      : [link.title, link.description];
+  }, [link, parentDashboardId, parentDashboardTitle, parentDashboardDescription]);
 
   /**
    * Memoized link information
@@ -90,17 +73,17 @@ export const DashboardLinkComponent = ({
   }, [link, dashboardTitle]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
-    if (error) {
+    if (link.error) {
       return {
         tooltipTitle: DashboardLinkStrings.getDashboardErrorLabel(),
-        tooltipMessage: error.message,
+        tooltipMessage: link.error.message,
       };
     }
     return {
       tooltipTitle: Boolean(dashboardDescription) ? linkLabel : undefined,
       tooltipMessage: dashboardDescription || linkLabel,
     };
-  }, [error, linkLabel, dashboardDescription]);
+  }, [link, linkLabel, dashboardDescription]);
 
   /**
    * Dashboard-to-dashboard navigation
@@ -116,15 +99,18 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(
-        linksEmbeddable as Partial<
-          PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>
-        >,
-        linkOptions
-      ),
     };
+    if (linkOptions.useCurrentFilters && query) {
+      params.query = query as Query;
+    }
 
-    const locator = dashboardContainer.locator;
+    if (linkOptions.useCurrentDateRange && timeRange) {
+      params.timeRange = timeRange;
+    }
+
+    params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);
+
+    const locator = parentApi.locator;
     if (!locator) return;
 
     const href = locator.getRedirectUrl(params);
@@ -151,30 +137,24 @@ export const DashboardLinkComponent = ({
         }
       },
     };
-  }, [link, dashboardContainer.locator, linksEmbeddable, parentDashboardId]);
-
-  useEffect(() => {
-    if (loadingDestinationDashboard) {
-      onLoading();
-    } else {
-      onRender();
-    }
-  }, [link, linksEmbeddable, loadingDestinationDashboard, onLoading, onRender]);
+  }, [
+    link.destination,
+    link.options,
+    parentDashboardId,
+    filters,
+    parentApi.locator,
+    query,
+    timeRange,
+  ]);
 
   const id = `dashboardLink--${link.id}`;
 
-  return loadingDestinationDashboard ? (
-    <li id={`${id}--loading`}>
-      <EuiButtonEmpty size="s" isLoading={true} data-test-subj={`${id}--loading`}>
-        {DashboardLinkStrings.getLoadingDashboardLabel()}
-      </EuiButtonEmpty>
-    </li>
-  ) : (
+  return (
     <EuiListGroupItem
       size="s"
       color="text"
       {...onClickProps}
-      id={`dashboardLink--${link.id}`}
+      id={id}
       showToolTip={true}
       toolTipProps={{
         title: tooltipTitle,
@@ -184,17 +164,17 @@ export const DashboardLinkComponent = ({
         delay: 'long',
         'data-test-subj': `${id}--tooltip`,
       }}
-      iconType={error ? 'warning' : undefined}
+      iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
-      isDisabled={Boolean(error)}
+      isDisabled={Boolean(link.error)}
       className={classNames('linksPanelLink', {
         linkCurrent: link.destination === parentDashboardId,
-        dashboardLinkError: Boolean(error),
+        dashboardLinkError: Boolean(link.error),
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
       external={link.options?.openInNewTab}
-      data-test-subj={error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${id}--error` : `${id}`}
       aria-current={link.destination === parentDashboardId}
     />
   );

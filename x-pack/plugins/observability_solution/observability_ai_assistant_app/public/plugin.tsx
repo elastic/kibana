@@ -24,9 +24,8 @@ import type {
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
 import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
-import { SharedProviders } from './utils/shared_providers';
-import { LazyNavControl } from './components/nav_control/lazy_nav_control';
 import { getObsAIAssistantConnectorType } from './rule_connector';
+import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -103,27 +102,26 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
+    const isEnabled = appService.isEnabled();
+    if (isEnabled) {
+      coreStart.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <NavControlInitiator
+              appService={appService}
+              coreStart={coreStart}
+              pluginsStart={pluginsStart}
+            />,
+            element,
+            () => {}
+          );
 
-    coreStart.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <SharedProviders
-            coreStart={coreStart}
-            pluginsStart={pluginsStart}
-            service={appService}
-            theme$={coreStart.theme.theme$}
-          >
-            <LazyNavControl />
-          </SharedProviders>,
-          element,
-          () => {}
-        );
-
-        return () => {};
-      },
-      // right before the user profile
-      order: 1001,
-    });
+          return () => {};
+        },
+        // right before the user profile
+        order: 1001,
+      });
+    }
 
     const service = pluginsStart.observabilityAIAssistant.service;
 

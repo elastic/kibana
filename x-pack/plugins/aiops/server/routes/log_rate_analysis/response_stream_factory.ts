@@ -39,7 +39,7 @@ import { streamPushPingWithTimeoutFactory } from './response_stream_utils/stream
  */
 export interface ResponseStreamOptions<T extends ApiVersion> {
   version: T;
-  client: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   events: KibanaRequestEvents;
   headers: Headers;

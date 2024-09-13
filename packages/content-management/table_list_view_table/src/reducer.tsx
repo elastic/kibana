@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -33,11 +34,18 @@ export function getReducer<T extends UserContentCommonSchema>() {
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
-          if (hasUpdatedAtMetadata && !state.sortColumnChanged) {
-            tableSort = {
-              field: 'updatedAt' as const,
-              direction: 'desc' as const,
-            };
+          if (!state.sortColumnChanged) {
+            if (state.hasRecentlyAccessedMetadata) {
+              tableSort = {
+                field: 'accessedAt' as const,
+                direction: 'desc' as const,
+              };
+            } else if (hasUpdatedAtMetadata) {
+              tableSort = {
+                field: 'updatedAt' as const,
+                direction: 'desc' as const,
+              };
+            }
           }
         }
 

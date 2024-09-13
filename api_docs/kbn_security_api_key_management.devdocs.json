@@ -37,9 +37,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -186,9 +186,9 @@
             "signature": [
               "(apiKey: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
@@ -209,9 +209,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
@@ -234,9 +234,9 @@
             "signature": [
               "(apiKey: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.UpdateAPIKeyParams",
                 "text": "UpdateAPIKeyParams"
               },
@@ -257,9 +257,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.UpdateAPIKeyParams",
                     "text": "UpdateAPIKeyParams"
                   }
@@ -532,9 +532,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/security-plugin-types-server",
+            "pluginId": "@kbn/core-security-server",
             "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
             "section": "def-server.CreateAPIKeyParams",
             "text": "CreateAPIKeyParams"
           }
@@ -586,9 +586,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/security-plugin-types-server",
+            "pluginId": "@kbn/core-security-server",
             "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
             "section": "def-server.UpdateAPIKeyParams",
             "text": "UpdateAPIKeyParams"
           }
@@ -660,7 +660,7 @@
         "label": "TimeToolTip",
         "description": [],
         "signature": [
-          "({ timestamp, children }: React.PropsWithChildren<",
+          "({ timestamp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -668,7 +668,7 @@
             "section": "def-public.TimeToolTipProps",
             "text": "TimeToolTipProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
         "deprecated": false,
@@ -679,10 +679,10 @@
             "id": "def-public.TimeToolTip.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ timestamp, children }",
+            "label": "{\n  timestamp,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
@@ -690,7 +690,7 @@
                 "section": "def-public.TimeToolTipProps",
                 "text": "TimeToolTipProps"
               },
-              ">"
+              ">>"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
             "deprecated": false,
@@ -976,7 +976,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"expiration\" | \"role_descriptors\" | \"realm\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
             "deprecated": false,
@@ -1131,9 +1131,31 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyParams",
+            "text": "CreateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
+            "text": "CreateCrossClusterAPIKeyParams"
+          }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1150,7 +1172,7 @@
         "signature": [
           "SecurityCreateApiKeyResponse"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1163,7 +1185,7 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"expiration\" | \"role_descriptors\" | \"realm\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
         "deprecated": false,
@@ -1180,9 +1202,31 @@
           "\nRequest body of Kibana Update API key endpoint."
         ],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { id: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { id: string; type: \"cross_cluster\"; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { id: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateRestAPIKeyParams",
+            "text": "UpdateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateCrossClusterAPIKeyParams",
+            "text": "UpdateCrossClusterAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
+          }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1199,7 +1243,7 @@
         "signature": [
           "SecurityUpdateApiKeyResponse"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

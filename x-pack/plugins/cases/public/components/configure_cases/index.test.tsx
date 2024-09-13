@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -87,7 +87,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -138,7 +138,7 @@ describe('ConfigureCases', () => {
       }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -180,7 +180,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -202,7 +202,7 @@ describe('ConfigureCases', () => {
 
     test('it disables correctly when the user cannot update', () => {
       const newWrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
       });
 
@@ -259,7 +259,7 @@ describe('ConfigureCases', () => {
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -297,7 +297,7 @@ describe('ConfigureCases', () => {
       }));
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
     });
@@ -328,7 +328,7 @@ describe('ConfigureCases', () => {
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -373,7 +373,7 @@ describe('ConfigureCases', () => {
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -414,7 +414,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -468,7 +468,7 @@ describe('ConfigureCases', () => {
         }));
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
@@ -513,7 +513,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -562,7 +562,7 @@ describe('ConfigureCases', () => {
 
     test('it show the add flyout when pressing the add connector button', async () => {
       const wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
@@ -597,7 +597,7 @@ describe('ConfigureCases', () => {
         .mockReturnValue(true);
 
       const wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
       wrapper
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
@@ -695,13 +695,13 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -724,6 +724,165 @@ describe('ConfigureCases', () => {
       });
     });
 
+    it('deletes a custom field from template while deleting custom field from configuration', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                title: 'Case with sample template 4',
+                description: 'case desc',
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = await screen.findByTestId('custom-fields-list');
+
+      await userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
+          ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                title: 'Case with sample template 4',
+                description: 'case desc',
+                customFields: [],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
+    it('adds a custom field to template while adding a new custom field', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: null,
+            },
+          ],
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(await screen.findByTestId(`add-custom-field`));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('New custom field');
+      await userEvent.click(screen.getByTestId('text-custom-field-required'));
+      await userEvent.click(screen.getByTestId('text-custom-field-default-value'));
+      await userEvent.paste('This is a default value');
+
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: expect.anything(),
+              label: 'New custom field',
+              type: CustomFieldTypes.TEXT as const,
+              required: true,
+              defaultValue: 'This is a default value',
+            },
+          ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: customFieldsConfigurationMock[0].type,
+                    value: customFieldsConfigurationMock[0].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[1].key,
+                    type: customFieldsConfigurationMock[1].type,
+                    value: customFieldsConfigurationMock[1].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[2].key,
+                    type: customFieldsConfigurationMock[2].type,
+                    value: null,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[3].key,
+                    type: customFieldsConfigurationMock[3].type,
+                    value: false,
+                  },
+                  {
+                    key: expect.anything(),
+                    type: CustomFieldTypes.TEXT as const,
+                    value: 'This is a default value',
+                  },
+                ],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
     it('updates a custom field correctly', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
@@ -737,15 +896,16 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
-      userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('!!');
+      await userEvent.click(screen.getByTestId('text-custom-field-required'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -778,7 +938,7 @@ describe('ConfigureCases', () => {
     it('opens fly out for when click on add field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
     });
@@ -786,11 +946,11 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on cancel', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('common-flyout-cancel'));
+      await userEvent.click(screen.getByTestId('common-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
@@ -799,13 +959,14 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on save field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('Summary');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -862,7 +1023,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('add-template'));
+      await userEvent.click(await screen.findByTestId('add-template'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
       expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
@@ -876,20 +1037,20 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('add-template'));
+      await userEvent.click(await screen.findByTestId('add-template'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
-      );
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Template name');
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste('Template description');
 
       const caseTitle = await screen.findByTestId('caseTitle');
-      userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
+      await userEvent.click(within(caseTitle).getByTestId('input'));
+      await userEvent.paste('Case using template');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -930,6 +1091,11 @@ describe('ConfigureCases', () => {
                     value: customFieldsConfigurationMock[1].defaultValue,
                   },
                   {
+                    key: customFieldsConfigurationMock[2].key,
+                    type: customFieldsConfigurationMock[2].type,
+                    value: null,
+                  },
+                  {
                     key: customFieldsConfigurationMock[3].key,
                     type: customFieldsConfigurationMock[3].type,
                     value: false, // when no default value for toggle, we set it to false
@@ -962,13 +1128,13 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('templates-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -1005,16 +1171,17 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('templates-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.clear(await screen.findByTestId('template-name-input'));
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Updated template name');
+      await userEvent.clear(await screen.findByTestId('template-name-input'));
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Updated template name');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({

@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -32,6 +32,7 @@ interface BulkEditBulkActionsValidationArgs {
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
   immutable: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 interface DryRunBulkEditBulkActionsValidationArgs {
@@ -110,15 +111,18 @@ export const validateBulkEditRule = async ({
   mlAuthz,
   edit,
   immutable,
+  experimentalFeatures,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
 
-  // if rule can't be edited error will be thrown
-  const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
-  await throwDryRunError(
-    () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-    BulkActionsDryRunErrCode.IMMUTABLE
-  );
+  if (!experimentalFeatures.prebuiltRulesCustomizationEnabled) {
+    // if rule can't be edited error will be thrown
+    const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
+    await throwDryRunError(
+      () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+      BulkActionsDryRunErrCode.IMMUTABLE
+    );
+  }
 };
 
 /**
@@ -147,6 +151,7 @@ export const dryRunValidateBulkEditRule = async ({
     mlAuthz,
     edit,
     immutable: rule.params.immutable,
+    experimentalFeatures,
   });
 
   // if rule is machine_learning, index pattern action can't be applied to it
@@ -169,16 +174,5 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
-  );
-
-  // check whether "custom highlighted fields" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled ||
-          !edit.some((action) => isInvestigationFieldsBulkEditAction(action.type)),
-        'Bulk custom highlighted fields action feature is disabled.'
-      ),
-    BulkActionsDryRunErrCode.INVESTIGATION_FIELDS_FEATURE
   );
 };

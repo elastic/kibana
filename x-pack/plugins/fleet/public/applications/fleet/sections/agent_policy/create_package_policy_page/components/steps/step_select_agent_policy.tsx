@@ -101,16 +101,23 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         updateAgentPolicies([]);
       }
     };
+    if (isLoading || isFirstLoad) {
+      return;
+    }
+    const agentPolicyIds = agentPolicies.map((policy) => policy.id);
     const agentPoliciesHaveAllSelectedIds = selectedPolicyIds.every((id) =>
-      agentPolicies.map((policy) => policy.id).includes(id)
+      agentPolicyIds.includes(id)
     );
-    if (agentPolicies.length === 0 || !agentPoliciesHaveAllSelectedIds) {
+    if (
+      (agentPolicies.length === 0 && selectedPolicyIds.length !== 0) ||
+      !agentPoliciesHaveAllSelectedIds
+    ) {
       fetchAgentPolicyInfo();
     } else if (agentPoliciesHaveAllSelectedIds && selectedPolicyIds.length < agentPolicies.length) {
       setSelectedAgentPolicyError(undefined);
       updateAgentPolicies(agentPolicies.filter((policy) => selectedPolicyIds.includes(policy.id)));
     }
-  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies]);
+  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies, isLoading, isFirstLoad]);
 
   // Try to select default agent policy
   useEffect(() => {
@@ -149,9 +156,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   // Bubble up any issues with agent policy selection
   useEffect(() => {
-    if (selectedPolicyIds.length > 0 && !selectedAgentPolicyError) {
+    if (!selectedAgentPolicyError) {
       setHasAgentPolicyError(false);
-    } else setHasAgentPolicyError(true);
+    } else {
+      setHasAgentPolicyError(true);
+    }
   }, [selectedAgentPolicyError, selectedPolicyIds, setHasAgentPolicyError]);
 
   const onChange = useCallback(
@@ -192,7 +201,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle"
-                    defaultMessage="Agent policy"
+                    defaultMessage="Agent policies"
                   />
                 </h3>
               </EuiTitle>
@@ -215,7 +224,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   <EuiFlexItem>
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
-                      defaultMessage="Agent policy"
+                      defaultMessage="Agent policies"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -234,16 +243,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   />
                 ) : null
               }
-              isInvalid={Boolean(
-                selectedPolicyIds.length === 0 || someNewAgentPoliciesHaveLimitedPackage
-              )}
+              isInvalid={Boolean(someNewAgentPoliciesHaveLimitedPackage)}
               error={
-                selectedPolicyIds.length === 0 ? (
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
-                    defaultMessage="An agent policy is required."
-                  />
-                ) : someNewAgentPoliciesHaveLimitedPackage ? (
+                someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
                     defaultMessage="This integration can only be added once per agent policy."

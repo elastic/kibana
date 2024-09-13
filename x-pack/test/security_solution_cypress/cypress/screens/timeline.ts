@@ -110,6 +110,10 @@ export const ANALYZER_GRAPH_TAB_BUTTON = getDataTestSubjectSelector('timelineTab
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
+export const EQL_EVENT_COUNT = '[data-test-subj="eql-events-count"]';
+
+export const QUERY_EVENT_COUNT = '[data-test-subj="query-events-count"]';
+
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
@@ -269,8 +273,7 @@ export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name
 
 export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.alert.severity"]';
 
-export const ALERT_TABLE_FILE_NAME_VALUES =
-  '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
+export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[data-test-subj="dataGridRowCell"]`; // empty column for the test data
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
@@ -317,3 +320,5 @@ export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
 );
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
+
+export const EXPAND_ALERT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');

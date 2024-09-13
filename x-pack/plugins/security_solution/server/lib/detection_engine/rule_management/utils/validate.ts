@@ -31,7 +31,7 @@ import {
   type UnifiedQueryRuleParams,
 } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 export const transformValidateBulkError = (
   ruleId: string,
@@ -64,9 +64,7 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  const { experimentalFeatures } = await securitySolution.getConfig();
-
-  if (!experimentalFeatures.endpointResponseActionsEnabled || !isQueryRule(ruleUpdate.type)) {
+  if (!isQueryRule(ruleUpdate.type)) {
     return;
   }
 

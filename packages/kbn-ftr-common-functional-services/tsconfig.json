@@ -14,7 +14,17 @@
     "@kbn/core-saved-objects-server",
     "@kbn/tooling-log",
     "@kbn/es-archiver",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/search-types",
+    "@kbn/core-http-common",
+    "@kbn/bfetch-plugin",
+    "@kbn/data-plugin",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/data-views-plugin"
   ],
   "exclude": [
     "target/**/*",

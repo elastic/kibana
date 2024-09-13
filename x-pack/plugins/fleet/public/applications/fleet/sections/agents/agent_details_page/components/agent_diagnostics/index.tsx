@@ -232,32 +232,39 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         );
       },
     },
-    {
-      name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
-        defaultMessage: 'Actions',
-      }),
-      width: '70px',
-      actions: [
-        {
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText', {
-            defaultMessage: 'Delete',
-          }),
-          available: (item: AgentDiagnostics) => item.status === 'READY',
-          description: i18n.translate(
-            'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
-            {
-              defaultMessage: 'Delete diagnostics file',
-            }
-          ),
-          onClick: (item: AgentDiagnostics) => {
-            deleteFile(item.id);
+    ...((authz.fleet.allAgents
+      ? [
+          {
+            name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
+              defaultMessage: 'Actions',
+            }),
+            width: '70px',
+            actions: [
+              {
+                type: 'icon',
+                icon: 'trash',
+                color: 'danger',
+                name: i18n.translate(
+                  'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                ),
+                available: (item: AgentDiagnostics) => item.status === 'READY',
+                description: i18n.translate(
+                  'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
+                  {
+                    defaultMessage: 'Delete diagnostics file',
+                  }
+                ),
+                onClick: (item: AgentDiagnostics) => {
+                  deleteFile(item.id);
+                },
+              },
+            ],
           },
-        },
-      ],
-    },
+        ]
+      : []) as Array<EuiBasicTableColumn<AgentDiagnostics>>),
   ];
 
   const requestDiagnosticsButton = (
@@ -294,7 +301,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         <p>
           <FormattedMessage
             id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
+            defaultMessage="Consider changing the log level to debug before requesting a diagnostic. Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are deleted periodically through an ILM policy."
           />
         </p>
       </EuiText>

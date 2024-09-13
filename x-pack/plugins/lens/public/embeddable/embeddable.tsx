@@ -162,7 +162,7 @@ interface PreventableEvent {
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-interface LensBaseEmbeddableInput extends EmbeddableInput {
+export interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -185,6 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -259,7 +260,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {errors.length ? (
               <>
-                <p>{errors[0].longMessage}</p>
+                <p>{errors[0].longMessage as React.ReactNode}</p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
@@ -610,6 +611,22 @@ export class Embeddable
 
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
+  private handleExternalUserMessage = (messages: UserMessage[]) => {
+    if (this.input.onBeforeBadgesRender) {
+      // we need something else to better identify those errors
+      const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+        message.displayLocations.some((location) => location.id === 'embeddableBadge')
+      );
+
+      if (messagesToHandle.length > 0) {
+        const customBadgeMessages = this.input.onBeforeBadgesRender(messagesToHandle);
+        return [...originalMessages, ...customBadgeMessages];
+      }
+    }
+
+    return messages;
+  };
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(
@@ -637,8 +654,9 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return this.handleExternalUserMessage(userMessages);
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
@@ -683,10 +701,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return this.handleExternalUserMessage(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 
@@ -772,22 +792,28 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: this.deps.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
-          : undefined,
-      });
+      const references =
+        activeDatasourceId === 'formBased'
+          ? extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: this.deps.datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates: Object.fromEntries(
+                Object.entries(datasourceStates).map(([id, state]) => [
+                  id,
+                  { isLoading: false, state },
+                ])
+              ),
+              visualizationState,
+              activeVisualization: this.activeVisualizationId
+                ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+                : undefined,
+            })
+          : [];
       const attrs = {
         ...viz,
         state: {
@@ -856,7 +882,7 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(
+  async openConfigPanel(
     startDependencies: LensPluginStartDependencies,
     isNewPanel?: boolean,
     deletePanel?: () => void

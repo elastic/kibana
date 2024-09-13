@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
@@ -22,15 +21,17 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
   EuiBadge,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
+import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 interface UseCaseOption {
   id: Category;
@@ -39,19 +40,6 @@ interface UseCaseOption {
   logos?: SupportedLogo[];
   showIntegrationsBadge?: boolean;
 }
-
-type SupportedLogo =
-  | 'aws'
-  | 'azure'
-  | 'docker'
-  | 'dotnet'
-  | 'prometheus'
-  | 'gcp'
-  | 'java'
-  | 'javascript'
-  | 'kubernetes'
-  | 'nginx'
-  | 'opentelemetry';
 
 export const OnboardingFlowForm: FunctionComponent = () => {
   const options: UseCaseOption[] = [
@@ -104,8 +92,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const {
+    services: {
+      context: { isCloud },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
+  const categorySelectorTitleId = useGeneratedHtmlId();
+  const packageListTitleId = useGeneratedHtmlId();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -146,12 +141,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     searchParams.get('category') as Category | null
   );
   const virtualSearchResults = useVirtualSearchResults();
+  /**
+   * Cloud deployments have the new Firehose quick start
+   * flow enabled, so the ond card 'epr:awsfirehose' should
+   * not show up in the search results.
+   */
+  const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
+        id={categorySelectorTitleId}
         iconType="createSingleMetricJob"
         title={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
@@ -161,7 +163,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
+      <EuiFlexGroup
+        css={{ ...customMargin, maxWidth: '560px' }}
+        gutterSize="l"
+        direction="column"
+        role="group"
+        aria-labelledby={categorySelectorTitleId}
+      >
         {options.map((option) => (
           <EuiFlexItem
             key={option.id}
@@ -170,36 +178,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
               name={radioGroupId}
-              label={
-                <>
-                  <EuiText css={{ fontWeight: 'bold' }}>{option.label}</EuiText>
-                  <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="s">
-                    {option.description}
-                  </EuiText>
-                  {(option.logos || option.showIntegrationsBadge) && (
-                    <>
-                      <EuiSpacer size="m" />
-                      <EuiFlexGroup gutterSize="s" responsive={false}>
-                        {option.logos?.map((logo) => (
-                          <EuiFlexItem key={logo} grow={false}>
-                            <LogoIcon logo={logo} />
-                          </EuiFlexItem>
-                        ))}
-                        {option.showIntegrationsBadge && (
-                          <EuiBadge color="hollow">
-                            <FormattedMessage
-                              defaultMessage="+ Integrations"
-                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
-                              description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
-                            />
-                          </EuiBadge>
-                        )}
-                      </EuiFlexGroup>
-                    </>
-                  )}
-                </>
-              }
+              label={<EuiText css={{ fontWeight: 'bold' }}>{option.label}</EuiText>}
               checked={option.id === searchParams.get('category')}
               /**
                * onKeyDown and onKeyUp handlers disable
@@ -225,15 +204,45 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   );
                 }
               }}
-            />
+            >
+              <EuiText color="subdued" size="s">
+                {option.description}
+              </EuiText>
+              {(option.logos || option.showIntegrationsBadge) && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    {option.logos?.map((logo) => (
+                      <EuiFlexItem key={logo} grow={false}>
+                        <LogoIcon logo={logo} />
+                      </EuiFlexItem>
+                    ))}
+                    {option.showIntegrationsBadge && (
+                      <EuiBadge color="hollow">
+                        <FormattedMessage
+                          defaultMessage="+ Integrations"
+                          id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                          description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
+                        />
+                      </EuiBadge>
+                    )}
+                  </EuiFlexGroup>
+                </>
+              )}
+            </EuiCheckableCard>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
       {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
-      <div hidden={!searchParams.get('category') || !customCards}>
+      <div
+        hidden={!searchParams.get('category') || !customCards}
+        role="group"
+        aria-labelledby={packageListTitleId}
+      >
         <EuiSpacer />
         <div ref={suggestedPackagesRef}>
           <TitleWithIcon
+            id={packageListTitleId}
             iconType="savedObjectsApp"
             title={i18n.translate(
               'xpack.observability_onboarding.experimentalOnboardingFlow.whatTypeOfResourceLabel',
@@ -268,6 +277,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 (card) => card.type === 'virtual' && !card.isCollectionCard
               )
               .concat(virtualSearchResults)}
+            excludePackageIdList={searchExcludePackageIdList}
             joinCardLists
           />
         </div>
@@ -279,15 +289,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 interface TitleWithIconProps {
   title: string;
   iconType: string;
+  id?: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType, id }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} iconSize="l" color="subdued" />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle size="s">
+      <EuiTitle size="s" id={id}>
         <strong>{title}</strong>
       </EuiTitle>
     </EuiFlexItem>
@@ -305,36 +316,4 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
     behavior: 'smooth',
     top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
   });
-}
-
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
-  const {
-    services: { http },
-  } = useKibana();
-  switch (logo) {
-    case 'aws':
-      return 'logoAWS';
-    case 'azure':
-      return 'logoAzure';
-    case 'gcp':
-      return 'logoGCP';
-    case 'kubernetes':
-      return 'logoKubernetes';
-    case 'nginx':
-      return 'logoNginx';
-    case 'prometheus':
-      return 'logoPrometheus';
-    case 'docker':
-      return 'logoDocker';
-    default:
-      return http?.staticAssets.getPluginAssetHref(`${logo}.svg`);
-  }
-}
-
-function LogoIcon({ logo }: { logo: SupportedLogo }) {
-  const iconType = useIconForLogo(logo);
-  if (iconType) {
-    return <EuiIcon type={iconType} />;
-  }
-  return null;
 }

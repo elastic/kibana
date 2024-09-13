@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export type { Index } from '@kbn/index-management';
+export type { Index } from '@kbn/index-management-shared-types';
 
-interface IndexModule {
+export interface IndexModule {
   number_of_shards: number | string;
   codec: string;
   routing_partition_size: number;
+  refresh_interval: string;
   load_fixed_bitset_filters_eagerly: boolean;
   shard: {
     check_on_startup: boolean | 'checksum';

@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.14 7.17
+      branch_configuration: main 8.x 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
@@ -49,10 +49,14 @@ spec:
           cronline: 0 9 * * * America/New_York
           message: Daily build
           branch: main
-        Daily build (8.14):
+        Daily build (8.x):
           cronline: 0 9 * * * America/New_York
           message: Daily build
-          branch: '8.14'
+          branch: '8.x'
+        Daily build (8.15):
+          cronline: 0 9 * * * America/New_York
+          message: Daily build
+          branch: '8.15'
         Daily build (7.17):
           cronline: 0 9 * * * America/New_York
           message: Daily build
@@ -82,7 +86,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.14 7.17
+      branch_configuration: main 8.x 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
@@ -130,7 +134,7 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.14 7.17
+      branch_configuration: main 8.x 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml

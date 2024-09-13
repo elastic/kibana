@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './discover_layout.scss';
@@ -30,9 +31,10 @@ import {
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -80,11 +82,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.columns,
     state.sort,
+    state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
 
@@ -126,6 +129,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dataState.fetchStatus, dataState.foundDocuments]
   );
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -135,10 +145,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
 
   // The assistant is getting the state from the url correctly
@@ -389,7 +400,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 trackUiMetric={trackUiMetric}
                 onFieldEdited={onFieldEdited}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                availableFields$={stateContainer.dataState.data$.availableFields$}
                 sidebarToggleState$={sidebarToggleState$}
               />
             }
@@ -414,6 +424,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                           }
                         )}
                         error={dataState.error}
+                        isEsqlMode={isEsqlMode}
                       />
                     ) : (
                       <DiscoverNoResults

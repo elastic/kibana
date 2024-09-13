@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
@@ -16,10 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -122,8 +119,21 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
+  private onCloud$ = new BehaviorSubject<boolean>(false);
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config$ = initializerContext.config.create<ConfigType>();
+    this.config$ = combineLatest([
+      initializerContext.config.create<ConfigType>(),
+      this.onCloud$,
+    ]).pipe(
+      map(
+        ([config, onCloud]): ConfigType => ({
+          ...config,
+          // We only allow "solution" to be set on cloud environments, not on prem
+          allowSolutionVisibility: onCloud ? config.allowSolutionVisibility : false,
+        })
+      )
+    );
     this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
@@ -134,6 +144,7 @@ export class SpacesPlugin
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
+    this.onCloud$.next(plugins.cloud !== undefined && plugins.cloud.isCloudEnabled);
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
     const spacesServiceSetup = this.spacesService.setup({
@@ -221,8 +232,8 @@ export class SpacesPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    const spacesClientStart = this.spacesClientService.start(core);
+  public start(core: CoreStart, plugins: PluginsStart) {
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

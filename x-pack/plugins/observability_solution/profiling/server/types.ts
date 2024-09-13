@@ -6,7 +6,7 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';

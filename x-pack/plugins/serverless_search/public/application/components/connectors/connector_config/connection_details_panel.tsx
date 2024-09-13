@@ -60,7 +60,7 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({
             <strong>service_type</strong>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="serverlessSearchConnectorServiceType">
           {Boolean(serviceType) && <EuiCode>{serviceType}</EuiCode>}
         </EuiFlexItem>
       </EuiFlexGroup>

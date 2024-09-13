@@ -20,7 +20,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -60,7 +61,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: PluginSetupContract;
-  features: FeaturesSetup;
+  features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
@@ -99,6 +100,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
@@ -111,6 +113,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: [observabilityFeatureId],
@@ -234,6 +237,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         }),
         order: 1000,
         category: DEFAULT_APP_CATEGORIES.observability,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
         alerting: o11yRuleTypes,

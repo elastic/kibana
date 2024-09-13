@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { validatePermissions } from './edit_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
@@ -82,6 +83,14 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const normalizedMonitor = validationResult.decodedMonitor;
 
+      const err = await validatePermissions(routeContext, normalizedMonitor.locations);
+      if (err) {
+        return response.forbidden({
+          body: {
+            message: err,
+          },
+        });
+      }
       const nameError = await addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name);
       if (nameError) {
         return response.badRequest({

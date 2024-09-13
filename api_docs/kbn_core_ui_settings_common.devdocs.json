@@ -105,6 +105,41 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.GetUiSettingsContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetUiSettingsContext",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.GetUiSettingsContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.UiSettingsParams",
         "type": "Interface",
         "tags": [],
@@ -157,6 +192,55 @@
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.getValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getValue",
+            "description": [
+              "handler to return the default value asynchronously. Supersedes the `value` prop"
+            ],
+            "signature": [
+              "((context?: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.GetUiSettingsContext",
+                "text": "GetUiSettingsContext"
+              },
+              " | undefined) => Promise<T>) | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-common",
+                "id": "def-common.UiSettingsParams.getValue.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.GetUiSettingsContext",
+                    "text": "GetUiSettingsContext"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
@@ -573,7 +657,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"image\" | \"select\" | \"json\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

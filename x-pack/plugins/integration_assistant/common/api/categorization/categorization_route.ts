@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   Connector,
   DataStreamName,
+  LangSmithOptions,
   PackageName,
   Pipeline,
   RawSamples,
+  SamplesFormat,
 } from '../model/common_attributes';
 import { CategorizationAPIResponse } from '../model/response_schemas';
 
@@ -21,8 +23,10 @@ export const CategorizationRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
+  samplesFormat: SamplesFormat,
   currentPipeline: Pipeline,
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type CategorizationRequestBodyInput = z.input<typeof CategorizationRequestBody>;
 

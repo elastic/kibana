@@ -24,11 +24,19 @@ it('matches snapshot', () => {
       },
       "event.action": Object {
         "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
       "event.kind": Object {
         "array": false,
+        "ignore_above": 1024,
+        "required": false,
+        "type": "keyword",
+      },
+      "event.original": Object {
+        "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
@@ -71,6 +79,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": true,
         "type": "keyword",
+      },
+      "kibana.alert.intended_timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
       },
       "kibana.alert.last_detected": Object {
         "array": false,

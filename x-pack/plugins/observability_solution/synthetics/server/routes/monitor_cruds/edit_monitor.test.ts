@@ -27,7 +27,7 @@ describe('syncEditedMonitor', () => {
   const logger = loggerMock.create();
 
   const serverMock: SyntheticsServerSetup = {
-    uptimeEsClient: { search: jest.fn() },
+    syntheticsEsClient: { search: jest.fn() },
     stackVersion: null,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),

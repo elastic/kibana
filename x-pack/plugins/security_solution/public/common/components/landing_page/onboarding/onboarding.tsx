@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -14,7 +15,7 @@ import { useTogglePanel } from './hooks/use_toggle_panel';
 import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
-import { WelcomeHeader } from './welcome_header';
+import { DataIngestionHubHeader } from './data_ingestion_hub_header';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
@@ -55,8 +56,9 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
-  const { telemetry } = useKibana().services;
+  const { wrapperStyles, headerSectionStyles, progressSectionStyles, stepsSectionStyles } =
+    useOnboardingStyles();
+  const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
     (params: OnboardingHubStepLinkClickedParams) => {
       telemetry.reportOnboardingHubStepLinkClicked(params);
@@ -64,12 +66,29 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     [telemetry]
   );
 
+  const [showAVCBanner, setShowAVCBanner] = useState(
+    storage.get('securitySolution.showAvcBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowAVCBanner(false);
+    storage.set('securitySolution.showAvcBanner', false);
+  }, [storage]);
+
   useScrollToHash();
 
   return (
     <div className={wrapperStyles}>
-      <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
-        <WelcomeHeader productTier={productTier} />
+      {useIsStillYear2024() && showAVCBanner && (
+        <KibanaPageTemplate.Section paddingSize="none">
+          <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+        </KibanaPageTemplate.Section>
+      )}
+      <KibanaPageTemplate.Section
+        className={headerSectionStyles}
+        restrictWidth={CONTENT_WIDTH}
+        paddingSize="xl"
+      >
+        <DataIngestionHubHeader />
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}

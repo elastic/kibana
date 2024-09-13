@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -18,7 +19,6 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
-  isFormulaDataset,
   mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
@@ -31,18 +31,17 @@ function getAccessorName(type: 'breakdown') {
 
 function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
   const layer = config;
-  const isFormula = isFormulaDataset(config.dataset) || isFormulaDataset(layer.dataset);
 
   return {
     layerId: DEFAULT_LAYER_ID,
-    valueAccessor: !isFormula ? layer.value : ACCESSOR,
+    valueAccessor: ACCESSOR,
     maxFontSize: 72,
     minFontSize: 12,
     orientation: 'single',
     showLabel: true,
     ...(layer.breakdown
       ? {
-          tagAccessor: !isFormula ? (layer.breakdown as string) : getAccessorName('breakdown'),
+          tagAccessor: getAccessorName('breakdown'),
         }
       : {}),
   };

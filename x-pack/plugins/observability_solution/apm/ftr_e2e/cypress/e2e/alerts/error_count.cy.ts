@@ -57,8 +57,7 @@ describe('Alerts', () => {
     synthtrace.clean();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180981
-  describe.skip('when rendered from Service view in APM app', () => {
+  describe('when rendered from Service view in APM app', () => {
     const ruleName = 'Error count threshold';
     const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
 

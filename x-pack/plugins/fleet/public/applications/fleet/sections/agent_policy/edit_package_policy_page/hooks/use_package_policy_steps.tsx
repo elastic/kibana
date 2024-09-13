@@ -10,9 +10,10 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
-import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
+import { SelectedPolicyTab } from '../../create_package_policy_page/components';
 import type { PackageInfo } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -21,13 +22,14 @@ import {
 } from '../../create_package_policy_page/single_page_layout/hooks';
 import { agentPolicyFormValidation } from '../../components';
 import { createAgentPolicyIfNeeded } from '../../create_package_policy_page/single_page_layout/hooks/form';
+import { StepEditHosts } from '../components/step_edit_hosts';
 
 interface Params {
   configureStep: React.ReactNode;
   packageInfo?: PackageInfo;
   existingAgentPolicies: AgentPolicy[];
   setHasAgentPolicyError: (hasError: boolean) => void;
-  updatePackagePolicy: (data: { policy_ids: string[] }) => void;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   agentPolicies: AgentPolicy[];
   setAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   isLoadingData: boolean;
@@ -49,8 +51,12 @@ export function usePackagePolicySteps({
   packagePolicyId,
   setNewAgentPolicyName,
 }: Params) {
+  const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+    generateNewAgentPolicyWithDefaults({
+      name: 'Agent policy 1',
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
 
@@ -78,7 +84,7 @@ export function usePackagePolicySteps({
   );
 
   const updateSelectedPolicyTab = useCallback(
-    (currentTab) => {
+    (currentTab: SelectedPolicyTab) => {
       setSelectedPolicyTab(currentTab);
       setPolicyValidation(currentTab, newAgentPolicy);
     },
@@ -91,20 +97,12 @@ export function usePackagePolicySteps({
       if (!isLoadingData && isEqual(updatedAgentPolicies, agentPolicies)) {
         return;
       }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        updatePackagePolicy({
-          policy_ids: updatedAgentPolicies.map((policy) => policy.id),
-        });
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
-        updatePackagePolicy({
-          policy_ids: [],
-        });
+      setAgentPolicies(updatedAgentPolicies);
+      updatePackagePolicy({
+        policy_ids: updatedAgentPolicies.map((policy) => policy.id),
+      });
+      if (packageInfo) {
+        setHasAgentPolicyError(false);
       }
 
       // eslint-disable-next-line no-console
@@ -134,15 +132,18 @@ export function usePackagePolicySteps({
 
   const { selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,
+    packagePolicy,
+    isEditPage: true,
+    agentPolicies,
   });
 
   const stepSelectAgentPolicy = useMemo(
     () => (
-      <StepSelectHosts
+      <StepEditHosts
         agentPolicies={agentPolicies}
         updateAgentPolicies={updateAgentPolicies}
         newAgentPolicy={newAgentPolicy}
@@ -154,7 +155,6 @@ export function usePackagePolicySteps({
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
         selectedAgentPolicyIds={existingAgentPolicies.map((policy) => policy.id)}
-        initialSelectedTabIndex={1}
       />
     ),
     [

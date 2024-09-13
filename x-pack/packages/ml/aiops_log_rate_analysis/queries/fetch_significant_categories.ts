@@ -32,16 +32,22 @@ const getCategoriesTestData = (categories: Category[]): Histogram[] => {
 const getCategoriesTotalCount = (categories: Category[]): number =>
   categories.reduce((p, c) => p + c.count, 0);
 
-export const fetchSignificantCategories = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  fieldNames: string[],
-  logger: Logger,
+export const fetchSignificantCategories = async ({
+  esClient,
+  abortSignal,
+  emitError,
+  logger,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  emitError?: (m: string) => void;
+  logger?: Logger;
+  arguments: AiopsLogRateAnalysisSchema & { fieldNames: string[]; sampleProbability?: number };
+}) => {
   // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-) => {
+  const { fieldNames, sampleProbability = 1, ...params } = args;
+
   const categoriesOverall = await fetchCategories(
     esClient,
     params,

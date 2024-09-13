@@ -24,6 +24,10 @@ describe('FormFields ', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -56,8 +60,8 @@ describe('FormFields ', () => {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

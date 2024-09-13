@@ -40,12 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Snapshot nodes', () => {
       const { min, max } = DATES.serverlessTestingHost;
       before(async () => {
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
         await esArchiver.load(ARCHIVE_NAME);
       });
       after(async () => {
         await esArchiver.unload(ARCHIVE_NAME);
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('should work', async () => {

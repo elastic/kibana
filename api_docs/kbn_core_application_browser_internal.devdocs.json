@@ -2,26 +2,10 @@
   "id": "@kbn/core-application-browser-internal",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.appendAppPath",
+        "id": "def-public.appendAppPath",
         "type": "Function",
         "tags": [],
         "label": "appendAppPath",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.appendAppPath.$1",
+            "id": "def-public.appendAppPath.$1",
             "type": "string",
             "tags": [],
             "label": "appBasePath",
@@ -50,7 +34,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.appendAppPath.$2",
+            "id": "def-public.appendAppPath.$2",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -69,7 +53,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.getAppInfo",
+        "id": "def-public.getAppInfo",
         "type": "Function",
         "tags": [],
         "label": "getAppInfo",
@@ -78,17 +62,17 @@
           "(app: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.App",
+            "section": "def-public.App",
             "text": "App"
           },
           "<unknown>) => ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.PublicAppInfo",
+            "section": "def-public.PublicAppInfo",
             "text": "PublicAppInfo"
           }
         ],
@@ -98,7 +82,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.getAppInfo.$1",
+            "id": "def-public.getAppInfo.$1",
             "type": "Object",
             "tags": [],
             "label": "app",
@@ -106,9 +90,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.App",
+                "section": "def-public.App",
                 "text": "App"
               },
               "<unknown>"
@@ -124,7 +108,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.parseAppUrl",
+        "id": "def-public.parseAppUrl",
         "type": "Function",
         "tags": [],
         "label": "parseAppUrl",
@@ -135,17 +119,17 @@
           "(url: string, basePath: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IBasePath",
+            "section": "def-public.IBasePath",
             "text": "IBasePath"
           },
           ", apps: Map<string, ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.App",
+            "section": "def-public.App",
             "text": "App"
           },
           "<unknown>>, currentUrl?: string) => ",
@@ -158,7 +142,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.parseAppUrl.$1",
+            "id": "def-public.parseAppUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -173,7 +157,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.parseAppUrl.$2",
+            "id": "def-public.parseAppUrl.$2",
             "type": "Object",
             "tags": [],
             "label": "basePath",
@@ -181,9 +165,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IBasePath",
+                "section": "def-public.IBasePath",
                 "text": "IBasePath"
               }
             ],
@@ -194,7 +178,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.parseAppUrl.$3",
+            "id": "def-public.parseAppUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "apps",
@@ -203,9 +187,9 @@
               "Map<string, ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.App",
+                "section": "def-public.App",
                 "text": "App"
               },
               "<unknown>>"
@@ -217,7 +201,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.parseAppUrl.$4",
+            "id": "def-public.parseAppUrl.$4",
             "type": "string",
             "tags": [],
             "label": "currentUrl",
@@ -236,7 +220,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.relativeToAbsolute",
+        "id": "def-public.relativeToAbsolute",
         "type": "Function",
         "tags": [],
         "label": "relativeToAbsolute",
@@ -252,7 +236,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.relativeToAbsolute.$1",
+            "id": "def-public.relativeToAbsolute.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -271,7 +255,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.removeSlashes",
+        "id": "def-public.removeSlashes",
         "type": "Function",
         "tags": [],
         "label": "removeSlashes",
@@ -287,7 +271,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.removeSlashes.$1",
+            "id": "def-public.removeSlashes.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -302,7 +286,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
-            "id": "def-common.removeSlashes.$2",
+            "id": "def-public.removeSlashes.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    trailing = false,\n    leading = false,\n    duplicates = true,\n  }",
@@ -313,7 +297,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
-                "id": "def-common.removeSlashes.$2.trailing",
+                "id": "def-public.removeSlashes.$2.trailing",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "trailing",
@@ -327,7 +311,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
-                "id": "def-common.removeSlashes.$2.leading",
+                "id": "def-public.removeSlashes.$2.leading",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "leading",
@@ -341,7 +325,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
-                "id": "def-common.removeSlashes.$2.duplicates",
+                "id": "def-public.removeSlashes.$2.duplicates",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "duplicates",
@@ -365,7 +349,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.DEFAULT_APP_VISIBILITY",
+        "id": "def-public.DEFAULT_APP_VISIBILITY",
         "type": "Array",
         "tags": [],
         "label": "DEFAULT_APP_VISIBILITY",
@@ -373,9 +357,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLinkLocations",
+            "section": "def-public.AppDeepLinkLocations",
             "text": "AppDeepLinkLocations"
           },
           "[]"
@@ -387,7 +371,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-internal",
-        "id": "def-common.DEFAULT_LINK_VISIBILITY",
+        "id": "def-public.DEFAULT_LINK_VISIBILITY",
         "type": "Array",
         "tags": [],
         "label": "DEFAULT_LINK_VISIBILITY",
@@ -395,9 +379,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLinkLocations",
+            "section": "def-public.AppDeepLinkLocations",
             "text": "AppDeepLinkLocations"
           },
           "[]"
@@ -408,6 +392,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

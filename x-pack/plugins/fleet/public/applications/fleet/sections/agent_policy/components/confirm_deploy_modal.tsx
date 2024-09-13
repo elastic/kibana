@@ -27,7 +27,46 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPoliciesToAdd = [],
   agentPoliciesToRemove = [],
 }) => {
-  return (
+  return agentPolicies.length === 0 && agentPoliciesToRemove.length === 0 ? (
+    <EuiConfirmModal
+      title={
+        <FormattedMessage
+          id="xpack.fleet.agentPolicy.noPolicies.confirmModalTitle"
+          defaultMessage="Save changes"
+        />
+      }
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.fleet.agentPolicy.noPolicies.confirmModalCancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.fleet.agentPolicy.noPolicies.confirmModalConfirmButtonLabel"
+          defaultMessage="Save changes"
+        />
+      }
+      buttonColor="primary"
+    >
+      <EuiCallOut
+        iconType="iInCircle"
+        data-test-subj="confirmNoPoliciesCallout"
+        title={i18n.translate('xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutTitle', {
+          defaultMessage: 'No agent policies selected',
+        })}
+      >
+        <div className="eui-textBreakWord">
+          <FormattedMessage
+            id="xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutDescription"
+            defaultMessage="This integration will not be added to any agent policies."
+          />
+        </div>
+      </EuiCallOut>
+    </EuiConfirmModal>
+  ) : (
     <EuiConfirmModal
       title={
         <FormattedMessage
@@ -80,9 +119,6 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
           iconType="iInCircle"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
             defaultMessage: 'This action will update the selected agent policies',
-            values: {
-              agentCount,
-            },
           })}
         >
           {agentPoliciesToAdd.length > 0 && (

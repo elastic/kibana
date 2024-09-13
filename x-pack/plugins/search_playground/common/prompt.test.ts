@@ -21,8 +21,8 @@ describe('Prompt function', () => {
         Instructions:
         
         - Provide an explanation of the process.
-        - Answer questions truthfully and factually using only the information presented.
-        - If you don't know the answer, just say that you don't know, don't make up an answer!
+        - Answer questions truthfully and factually using only the context presented.
+        - If you don't know the answer, just say that you don't know, don't make up an answer.
         - You must always cite the document where the answer was extracted using inline academic citation style [], using the position.
         - Use markdown format for code examples.
         - You are correct, factual, precise, and reliable.
@@ -31,8 +31,7 @@ describe('Prompt function', () => {
         Context:
         {context}
 
-        Question: {question}
-        Answer:
+        
         "
     `);
   });
@@ -45,8 +44,8 @@ describe('Prompt function', () => {
       "
         <s>[INST]
         - Explain the significance of the findings.
-        - Answer questions truthfully and factually using only the information presented.
-        - If you don't know the answer, just say that you don't know, don't make up an answer!
+        - Answer questions truthfully and factually using only the context presented.
+        - If you don't know the answer, just say that you don't know, don't make up an answer.
         
         - Use markdown format for code examples.
         - You are correct, factual, precise, and reliable.
@@ -55,10 +54,10 @@ describe('Prompt function', () => {
         [INST]
         Context:
         {context}
-
-        Question: {question}
-        Answer:
         [/INST]
+
+        
+
         "
     `);
   });
@@ -72,7 +71,7 @@ describe('Prompt function', () => {
         <instructions>
         - Summarize the key points of the article.
         
-        - If you don't know the answer, just say that you don't know, don't make up an answer!
+        - If you don't know the answer, just say that you don't know, don't make up an answer.
         
         - Use markdown format for code examples.
         - You are correct, factual, precise, and reliable.
@@ -82,7 +81,7 @@ describe('Prompt function', () => {
         {context}
         </context>
 
-        <input>{question}</input>
+        
         "
     `);
   });

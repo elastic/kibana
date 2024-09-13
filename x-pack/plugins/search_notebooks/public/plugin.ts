@@ -14,14 +14,18 @@ import {
   SearchNotebooksPluginStart,
   SearchNotebooksPluginStartDependencies,
   NotebookListValue,
+  AppMetricsTracker,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
+import { createUsageTracker } from './utils/usage_tracker';
+import { removeNotebookParameter, setNotebookParameter } from './utils/notebook_query_param';
 
 export class SearchNotebooksPlugin
   implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
 {
   private notebooksList: NotebookListValue = null;
   private queryClient: QueryClient | undefined;
+  private usageTracker: AppMetricsTracker | undefined;
 
   public setup(core: CoreSetup): SearchNotebooksPluginSetup {
     this.queryClient = new QueryClient({
@@ -56,12 +60,14 @@ export class SearchNotebooksPlugin
     core: CoreStart,
     deps: SearchNotebooksPluginStartDependencies
   ): SearchNotebooksPluginStart {
+    this.usageTracker = createUsageTracker(deps.usageCollection);
     if (deps.console?.registerEmbeddedConsoleAlternateView) {
       deps.console.registerEmbeddedConsoleAlternateView(
         notebooksConsoleView(
           core,
           this.queryClient!,
-          this.clearNotebookList.bind(this),
+          this.usageTracker,
+          this.clearNotebooksState.bind(this),
           this.getNotebookList.bind(this)
         )
       );
@@ -70,12 +76,16 @@ export class SearchNotebooksPlugin
       setNotebookList: (value: NotebookListValue) => {
         this.setNotebookList(value);
       },
+      setSelectedNotebook: (value: string) => {
+        setNotebookParameter(value);
+      },
     };
   }
   public stop() {}
 
-  private clearNotebookList() {
+  private clearNotebooksState() {
     this.setNotebookList(null);
+    removeNotebookParameter();
   }
 
   private setNotebookList(value: NotebookListValue) {

@@ -74,7 +74,7 @@
         "label": "CodeBox",
         "description": [],
         "signature": [
-          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, showTopBar, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
+          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/code_box.tsx",
         "deprecated": false,
@@ -85,7 +85,7 @@
             "id": "def-common.CodeBox.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  showTopBar = true,\n}",
+            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  consoleTitle,\n  showTopBar = true,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<CodeBoxProps>"
@@ -293,7 +293,7 @@
         "label": "GithubLink",
         "description": [],
         "signature": [
-          "({ assetBasePath, label, href }: React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>) => JSX.Element"
+          "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/github_link.tsx",
         "deprecated": false,
@@ -304,10 +304,10 @@
             "id": "def-common.GithubLink.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ assetBasePath, label, href }",
+            "label": "{ assetBasePath, label, href, 'aria-label': ariaLabel }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>"
+              "React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }>"
             ],
             "path": "packages/kbn-search-api-panels/components/github_link.tsx",
             "deprecated": false,
@@ -1177,9 +1177,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               },
               " | undefined"

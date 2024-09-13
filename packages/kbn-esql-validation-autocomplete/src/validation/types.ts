@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import { FieldType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
@@ -17,7 +19,10 @@ export interface ESQLVariable {
 
 export interface ESQLRealField {
   name: string;
-  type: string;
+  type: FieldType;
+  metadata?: {
+    description?: string;
+  };
 }
 
 export interface ESQLPolicy {

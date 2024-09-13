@@ -59,20 +59,12 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'everything_space_all at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except spaces, monitoring, the enterprise search suite, and ES features are enabled
+            // everything except spaces, monitoring, the classic enterprise search suite (app search/workplace search), and ES features are enabled
             // (easier to say: all "proper" Kibana features are enabled)
             const exceptions = [
               'monitoring',
-              'enterpriseSearch',
-              'enterpriseSearchContent',
-              'enterpriseSearchAnalytics',
-              'enterpriseSearchApplications',
-              'enterpriseSearchAISearch',
-              'enterpriseSearchVectorSearch',
-              'enterpriseSearchElasticsearch',
               'appSearch',
               'workplaceSearch',
-              'searchExperiences',
               'spaces',
               ...esFeatureExceptions,
             ];
@@ -99,7 +91,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'enterpriseSearchApplications',
               'enterpriseSearchAISearch',
               'enterpriseSearchVectorSearch',
+              'enterpriseSearchSemanticSearch',
               'enterpriseSearchElasticsearch',
+              'enterpriseSearchRelevance',
+              'searchInferenceEndpoints',
               'appSearch',
               'observabilityAIAssistant',
               'workplaceSearch',

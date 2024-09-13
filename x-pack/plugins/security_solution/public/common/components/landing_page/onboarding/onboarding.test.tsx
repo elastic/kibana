@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { OnboardingComponent } from './onboarding';
 import {
   AddIntegrationsSteps,
@@ -15,44 +14,40 @@ import {
   ViewDashboardSteps,
 } from './types';
 import { ProductLine, ProductTier } from './configs';
-jest.mock('./toggle_panel');
-jest.mock('./hooks/use_project_features_url');
-jest.mock('./hooks/use_projects_url');
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
+
+const mockedUseKibana = mockUseKibana();
+const mockedStorageGet = jest.fn();
+const mockedStorageSet = jest.fn();
+
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
+
   return {
     ...original,
     useCurrentUser: jest.fn().mockReturnValue({ fullName: 'UserFullName' }),
-    useAppUrl: jest.fn().mockReturnValue({ getAppUrl: jest.fn().mockReturnValue('mock url') }),
-  };
-});
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    useEuiTheme: jest.fn().mockReturnValue({
-      euiTheme: {
-        base: 16,
-        size: { xs: '4px', m: '12px', l: '24px', xl: '32px', xxl: '40px' },
-        colors: { lightestShade: '' },
-        font: {
-          weight: { bold: 700 },
+    useKibana: () => ({
+      mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        storage: {
+          ...mockedUseKibana.services.storage,
+          get: mockedStorageGet,
+          set: mockedStorageSet,
         },
       },
     }),
   };
 });
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
-}));
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
-  SecurityPageName: {
-    landing: 'landing',
-  },
-}));
+
+jest.mock('./toggle_panel');
 
 describe('OnboardingComponent', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderResult: ReturnType<typeof render>;
+  let mockedContext: AppContextTestRender;
   const props = {
     indicesExist: true,
     productTypes: [{ product_line: ProductLine.security, product_tier: ProductTier.complete }],
@@ -65,31 +60,81 @@ describe('OnboardingComponent', () => {
     ],
     spaceId: 'spaceId',
   };
+
   beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
+    render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render page title, subtitle, and description', () => {
-    const { getByText } = render(<OnboardingComponent {...props} />);
+    render();
 
-    const pageTitle = getByText('Hi UserFullName!');
-    const subtitle = getByText(`Get started with Security`);
-    const description = getByText(
-      `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
-    );
+    const pageTitle = renderResult.getByText('Hi UserFullName!');
+    const subtitle = renderResult.getByText(`Welcome to Elastic Security`);
+    const description = renderResult.getByText(`Follow these steps to set up your workspace.`);
 
     expect(pageTitle).toBeInTheDocument();
     expect(subtitle).toBeInTheDocument();
     expect(description).toBeInTheDocument();
   });
 
-  it('should render welcomeHeader and TogglePanel', () => {
-    const { getByTestId } = render(<OnboardingComponent {...props} />);
+  it('should render dataIngestionHubHeader and TogglePanel', () => {
+    render();
+    const dataIngestionHubHeader = renderResult.getByTestId('data-ingestion-hub-header');
+    const togglePanel = renderResult.getByTestId('toggle-panel');
 
-    const welcomeHeader = getByTestId('welcome-header');
-    const togglePanel = getByTestId('toggle-panel');
-
-    expect(welcomeHeader).toBeInTheDocument();
+    expect(dataIngestionHubHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
+  });
+
+  describe('AVC 2024 Results banner', () => {
+    beforeEach(() => {
+      mockedStorageGet.mockReturnValue(true);
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+    it('should render on the page', () => {
+      render();
+      expect(renderResult.getByTestId('avcResultsBanner')).toBeTruthy();
+    });
+
+    it('should link to the blog post', () => {
+      render();
+      expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/blog/elastic-av-comparatives-business-security-test'
+      );
+    });
+
+    it('on closing the callout should store dismissal state in local storage', () => {
+      render();
+      renderResult.getByTestId('euiDismissCalloutButton').click();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      expect(mockedStorageSet).toHaveBeenCalledWith('securitySolution.showAvcBanner', false);
+    });
+
+    it('should stay dismissed if it has been closed once', () => {
+      mockedStorageGet.mockReturnValueOnce(false);
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+    });
+
+    it('should not be shown if the current date is January 1, 2025', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2025-01-01T05:00:00.000Z'));
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      jest.useRealTimers();
+    });
+    it('should be shown if the current date is before January 1, 2025', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-12-31T05:00:00.000Z'));
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeTruthy();
+    });
   });
 });

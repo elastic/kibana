@@ -206,9 +206,9 @@ describe('LargeShardSizeRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
         context: {
-          internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `Large shard size alert is firing for the following index: ${shardIndex}. Investigate indices with large shard sizes.`,
-          action: `[View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: 'Investigate indices with large shard sizes.',
           clusterName,
           state: 'firing',
@@ -327,9 +327,9 @@ describe('LargeShardSizeRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
         context: {
-          internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,
+          internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           internalShortMessage: `Large shard size alert is firing for the following index: ${shardIndex}. Investigate indices with large shard sizes.`,
-          action: `[View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,
+          action: `[View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           actionPlain: 'Investigate indices with large shard sizes.',
           clusterName,
           state: 'firing',

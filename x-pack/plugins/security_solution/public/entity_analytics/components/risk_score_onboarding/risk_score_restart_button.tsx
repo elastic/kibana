@@ -30,7 +30,7 @@ const RiskScoreRestartButtonComponent = ({
   );
   const spaceId = useSpaceId();
 
-  const { renderDocLink } = useRiskScoreToastContent(riskScoreEntity);
+  const { renderDocLink } = useRiskScoreToastContent();
   const { http, ...startServices } = useKibana().services;
 
   const onClick = useCallback(async () => {

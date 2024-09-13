@@ -37,9 +37,10 @@ import {
   selectDeleteNotesStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
-  selectNotesByDocumentId,
+  selectSortedNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'added a note',
@@ -79,15 +80,22 @@ export interface NotesListProps {
 export const NotesList = memo(({ eventId }: NotesListProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const canDeleteNotes = kibanaSecuritySolutionsPrivileges.crud;
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
 
-  const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+  const notes: Note[] = useSelector((state: State) =>
+    selectSortedNotesByDocumentId(state, {
+      documentId: eventId,
+      sort: { field: 'created', direction: 'desc' },
+    })
+  );
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
@@ -105,15 +113,15 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
 
   const queryTimelineById = useQueryTimelineById();
   const openTimeline = useCallback(
-    ({ timelineId }) =>
+    ({ timelineId }: { timelineId: string }) =>
       queryTimelineById({
         duplicate: false,
         onOpenTimeline: undefined,
         timelineId,
         timelineType: undefined,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       }),
-    [queryTimelineById, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   // show a toast if the fetch notes call fails
@@ -162,16 +170,18 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
                   onClick={() => openTimeline(note)}
                 />
               )}
-              <EuiButtonIcon
-                data-test-subj={`${DELETE_NOTE_BUTTON_TEST_ID}-${index}`}
-                title={DELETE_NOTE}
-                aria-label={DELETE_NOTE}
-                color="text"
-                iconType="trash"
-                onClick={() => deleteNoteFc(note.noteId)}
-                disabled={deletingNoteId !== note.noteId && deleteStatus === ReqStatus.Loading}
-                isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
-              />
+              {canDeleteNotes && (
+                <EuiButtonIcon
+                  data-test-subj={`${DELETE_NOTE_BUTTON_TEST_ID}-${index}`}
+                  title={DELETE_NOTE}
+                  aria-label={DELETE_NOTE}
+                  color="text"
+                  iconType="trash"
+                  onClick={() => deleteNoteFc(note.noteId)}
+                  disabled={deletingNoteId !== note.noteId && deleteStatus === ReqStatus.Loading}
+                  isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
+                />
+              )}
             </>
           }
           timelineAvatar={

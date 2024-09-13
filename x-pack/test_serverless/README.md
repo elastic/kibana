@@ -54,9 +54,10 @@ configurations.
 
 **If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
 
-In case a common test needs to be skipped for one of the projects, there are the following
-suite tags available to do so: `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be
-added like this to a test suite:
+In case a common test needs to be skipped for one of the projects 
+(in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
+there are the following suite tags available to do so: 
+`skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
 ```
 describe('my test suite', function () {
@@ -143,20 +144,20 @@ describe("my test suite", async function() {
 #### API integration test example
 
 Recommendations:
-- in each test file top level `describe` suite should start with `createApiKeyForRole` call in `before` hook
-- don't forget to invalidate api key using `invalidateApiKeyForRole` in `after` hook
+- in each test file top level `describe` suite should start with `createM2mApiKeyWithRoleScope` call in `before` hook
+- don't forget to invalidate api key using `invalidateApiKeyWithRoleScope` in `after` hook
 - make api calls using `supertestWithoutAuth` with generated api key header
 
 ```
 describe("my test suite", async function() {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
       commonRequestHeader = svlCommonApi.getCommonRequestHeader();
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyWithRoleScope(roleAuthc);
     });
 
     it(''test step', async () => {
@@ -259,3 +260,19 @@ describe("my test suite", async function() {
 ```
 
 If you are running tests from your local against MKI projects, make sure to add `--exclude-tag=skipMKI` to your FTR command.
+
+## Run tests with dockerized package registry
+
+For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
+
+To be able to run this version locally you must have a docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+
+```
+export set FLEET_PACKAGE_REGISTRY_PORT=12345
+```
+
+To unset the variable, and run the tests against the real endpoint again, execute
+
+```
+unset FLEET_PACKAGE_REGISTRY_PORT 
+```

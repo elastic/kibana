@@ -5,25 +5,26 @@
  * 2.0.
  */
 import agent, { Span } from 'elastic-apm-node';
-import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import {
+  initializeAgentExecutorWithOptions,
+  createToolCallingAgent,
+  AgentExecutor as lcAgentExecutor,
+} from 'langchain/agents';
 
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
-import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { getDefaultArguments } from '@kbn/langchain/server';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
+import { getLlmClass } from '../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
@@ -35,8 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   esClient,
   esStore,
@@ -51,27 +52,37 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
   dataClients,
+  conversationId,
 }) => {
   const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
-  const llm = new llmClass({
-    actionsClient,
-    connectorId,
-    llmType,
-    logger,
-    // possible client model override,
-    // let this be undefined otherwise so the connector handles the model
-    model: request.body.model,
-    // ensure this is defined because we default to it in the language_models
-    // This is where the LangSmith logs (Metadata > Invocation Params) are set
-    temperature: getDefaultArguments(llmType).temperature,
-    signal: abortSignal,
-    streaming: isStream,
-    // prevents the agent from retrying on failure
-    // failure could be due to bad connector, we should deliver that result to the client asap
-    maxRetries: 0,
-  });
+  /**
+   * Creates a new instance of llmClass.
+   *
+   * This function ensures that a new llmClass instance is created every time it is called.
+   * This is necessary to avoid any potential side effects from shared state. By always
+   * creating a new instance, we prevent other uses of llm from binding and changing
+   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   */
+  const createLlmInstance = () =>
+    new llmClass({
+      actionsClient,
+      connectorId,
+      llmType,
+      logger,
+      // possible client model override,
+      // let this be undefined otherwise so the connector handles the model
+      model: request.body.model,
+      // ensure this is defined because we default to it in the language_models
+      // This is where the LangSmith logs (Metadata > Invocation Params) are set
+      temperature: getDefaultArguments(llmType).temperature,
+      signal: abortSignal,
+      streaming: isStream,
+      // prevents the agent from retrying on failure
+      // failure could be due to bad connector, we should deliver that result to the client asap
+      maxRetries: 0,
+    });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -97,7 +108,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
@@ -105,8 +116,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
-    llm,
+    isEnabledKnowledgeBase: true,
     logger,
     modelExists,
     onNewReplacements,
@@ -116,10 +126,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   };
 
   const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
   );
 
-  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
+  logger.debug(
+    () => `applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`
+  );
 
   const executorArgs = {
     memory,
@@ -128,11 +140,26 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   };
   // isOpenAI check is not on agentType alone because typescript doesn't like
   const executor = isOpenAI
-    ? await initializeAgentExecutorWithOptions(tools, llm, {
+    ? await initializeAgentExecutorWithOptions(tools, createLlmInstance(), {
         agentType: 'openai-functions',
         ...executorArgs,
       })
-    : await initializeAgentExecutorWithOptions(tools, llm, {
+    : llmType === 'bedrock' && bedrockChatEnabled
+    ? new lcAgentExecutor({
+        agent: await createToolCallingAgent({
+          llm: createLlmInstance(),
+          tools,
+          prompt: ChatPromptTemplate.fromMessages([
+            ['system', 'You are a helpful assistant'],
+            ['placeholder', '{chat_history}'],
+            ['human', '{input}'],
+            ['placeholder', '{agent_scratchpad}'],
+          ]),
+          streamRunnable: isStream,
+        }),
+        tools,
+      })
+    : await initializeAgentExecutorWithOptions(tools, createLlmInstance(), {
         agentType: 'structured-chat-zero-shot-react-description',
         ...executorArgs,
         returnIntermediateSteps: false,
@@ -272,6 +299,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       trace_data: traceData,
       replacements,
       status: 'ok',
+      conversationId,
     },
     headers: {
       'content-type': 'application/json',

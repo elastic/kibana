@@ -29,6 +29,7 @@ export const connectorTypes: string[] = [
   '.gemini',
   '.d3security',
   '.resilient',
+  '.thehive',
   '.sentinelone',
   '.crowdstrike',
   '.cases',

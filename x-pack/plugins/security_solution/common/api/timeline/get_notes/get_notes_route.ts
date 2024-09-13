@@ -10,8 +10,8 @@ import { unionWithNullType } from '../../../utility_types';
 
 export const getNotesSchema = runtimeTypes.partial({
   documentIds: runtimeTypes.union([runtimeTypes.array(runtimeTypes.string), runtimeTypes.string]),
-  page: unionWithNullType(runtimeTypes.number),
-  perPage: unionWithNullType(runtimeTypes.number),
+  page: unionWithNullType(runtimeTypes.string),
+  perPage: unionWithNullType(runtimeTypes.string),
   search: unionWithNullType(runtimeTypes.string),
   sortField: unionWithNullType(runtimeTypes.string),
   sortOrder: unionWithNullType(runtimeTypes.string),

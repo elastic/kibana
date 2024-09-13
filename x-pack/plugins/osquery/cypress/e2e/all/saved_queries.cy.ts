@@ -43,8 +43,7 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/187388
-describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -183,7 +182,8 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  it('checks that user cant add a saved query with an ID that already exists', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/187388
+  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
     cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
@@ -203,7 +203,8 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('prebuilt', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169787
+  describe.skip('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

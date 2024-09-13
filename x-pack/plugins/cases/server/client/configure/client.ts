@@ -44,7 +44,7 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter, removeCustomFieldFromTemplates } from '../utils';
+import { combineAuthorizedAndOwnerFilter, transformTemplateCustomFields } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
@@ -320,14 +320,14 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    await validateTemplates({
+    const updatedTemplates = transformTemplateCustomFields({
       templates,
-      clientArgs,
-      customFields: configuration.attributes.customFields,
+      customFields: request.customFields,
     });
 
-    const updatedTemplates = removeCustomFieldFromTemplates({
-      templates,
+    await validateTemplates({
+      templates: updatedTemplates,
+      clientArgs,
       customFields: request.customFields,
     });
 

@@ -22,6 +22,7 @@ export const ML_PAGES = {
   MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
+  SUPPLIED_CONFIGURATIONS: 'supplied_configurations',
   /**
    * Page: Data Visualizer
    */
@@ -85,4 +86,4 @@ export const ML_PAGES = {
   AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: 'aiops/change_point_detection_index_select',
 } as const;
 
-export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
+export type MlPages = (typeof ML_PAGES)[keyof typeof ML_PAGES];

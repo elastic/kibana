@@ -6,7 +6,6 @@
  */
 
 import { requestMock, serverMock } from '../__mocks__';
-import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
@@ -43,13 +42,7 @@ describe('creating signals migrations route', () => {
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    const securityMock = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-      },
-    } as unknown as SetupPlugins['security'];
-
-    createSignalsMigrationRoute(server.router, securityMock);
+    createSignalsMigrationRoute(server.router);
   });
 
   it('passes options to the createMigration', async () => {

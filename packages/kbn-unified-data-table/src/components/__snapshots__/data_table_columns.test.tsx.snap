@@ -159,6 +159,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -320,6 +321,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -430,6 +432,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -564,6 +567,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -686,6 +690,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -820,6 +825,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -929,6 +935,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1063,6 +1070,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1190,6 +1198,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1351,6 +1360,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1471,6 +1481,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1632,6 +1643,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1745,6 +1757,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1795,6 +1808,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1900,6 +1914,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1950,6 +1965,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2060,6 +2076,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2152,6 +2169,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2274,6 +2292,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2366,6 +2385,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2474,6 +2494,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2566,6 +2587,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2676,6 +2698,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2768,6 +2791,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2915,6 +2939,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -3007,6 +3032,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -3132,6 +3158,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -3224,6 +3251,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],

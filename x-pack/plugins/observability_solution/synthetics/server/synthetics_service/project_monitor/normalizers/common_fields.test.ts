@@ -8,8 +8,34 @@
 import {
   flattenAndFormatObject,
   getNormalizeCommonFields,
+  getUrlsField,
+  isValidURL,
   NormalizedProjectProps,
 } from './common_fields';
+
+describe('isValidUrl', () => {
+  it('returns false for invalid URL', () => {
+    expect(isValidURL('invalid')).toBeFalsy();
+  });
+
+  it('returns true for valid URL', () => {
+    expect(isValidURL('https://elastic.co')).toBeTruthy();
+  });
+});
+
+describe('getUrlsField', () => {
+  it('supports a string value containing a comma', () => {
+    expect(getUrlsField('https://elastic.co?foo=bar,baz')).toEqual([
+      'https://elastic.co?foo=bar,baz',
+    ]);
+  });
+
+  it('supports lists containing exactly one entry, even with commas', () => {
+    expect(getUrlsField(['https://elastic.co?foo=bar,baz'])).toEqual([
+      'https://elastic.co?foo=bar,baz',
+    ]);
+  });
+});
 
 describe('normalizeYamlConfig', () => {
   it('does not continue flattening when encountering an array', () => {

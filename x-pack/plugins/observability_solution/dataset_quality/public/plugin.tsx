@@ -8,7 +8,9 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
-import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
+import { createDatasetQualityDetails } from './components/dataset_quality_details';
+import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
+import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
 import { DataStreamsStatsService } from './services/data_streams_stats';
 import { DataStreamDetailsService } from './services/data_stream_details';
 import {
@@ -22,6 +24,7 @@ export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
   private telemetry = new TelemetryService();
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
@@ -50,9 +53,26 @@ export class DatasetQualityPlugin
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsClient,
+    });
+
+    const DatasetQualityDetails = createDatasetQualityDetails({
+      core,
+      plugins,
+      telemetryClient,
+    });
+
+    const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
+      core,
+      plugins,
+      dataStreamStatsClient,
       dataStreamDetailsClient,
     });
 
-    return { DatasetQuality, createDatasetQualityController };
+    return {
+      DatasetQuality,
+      createDatasetQualityController,
+      DatasetQualityDetails,
+      createDatasetQualityDetailsController,
+    };
   }
 }

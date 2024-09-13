@@ -12,7 +12,7 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip{{#fips}} perl make gcc{{/fips}}
 {{/ubi}}
 {{#ubuntu}}
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
@@ -37,6 +37,30 @@ WORKDIR /usr/share/kibana
 RUN tar \
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz
+
+{{#fips}}
+# OpenSSL requires specific versions that are FIPS certified.
+#
+# See:
+# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
+# https://www.openssl.org/docs/man3.0/man7/fips_module.html
+RUN set -e ; \
+ OPENSSL_VERSION='3.0.8'; \
+ OPENSSL_PATH=/usr/share/kibana/openssl ; \
+ mkdir "${OPENSSL_PATH}"; \
+ curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" ; \
+ curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz.sha256" ; \
+ echo "$(cat openssl-${OPENSSL_VERSION}.tar.gz.sha256) openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c ; \
+ tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
+ rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
+ cd "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
+ ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
+ make -j $(nproc) > /dev/null ; \
+ make install > /dev/null ; \
+ rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
+ chown -R 1000:0 "${OPENSSL_PATH}";
+ 
+{{/fips}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -90,7 +114,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       microdnf update --setopt=tsflags=nodocs -y && \
       microdnf install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
+        fontconfig freetype shadow-utils nss findutils && \
       microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -110,7 +134,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -127,35 +151,12 @@ RUN fc-cache -v
 WORKDIR /usr/share/kibana
 {{#fips}}
 
-# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
-# need to be compiled on the machine to pass its own self validation on startup.
-#
-# See:
-# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
-# https://www.openssl.org/docs/man3.0/man7/fips_module.html
-
-# Ideally we would handle this in the builder step, but OpenSSL requires linking of many submodules.
-RUN set -e ; \
- OPENSSL_VERSION='3.0.8'; \
- OPENSSL_PATH=/usr/share/kibana/openssl ; \
- mkdir "${OPENSSL_PATH}"; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" ; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz.sha256" ; \
- echo "$(cat openssl-${OPENSSL_VERSION}.tar.gz.sha256) openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c ; \
- tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
- rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
- cd "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
- make -j $(nproc) > /dev/null ; \
- make install > /dev/null ; \
- rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- chown -R 1000:0 "${OPENSSL_PATH}";
-
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
-RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
+ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 
 {{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
@@ -230,7 +231,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

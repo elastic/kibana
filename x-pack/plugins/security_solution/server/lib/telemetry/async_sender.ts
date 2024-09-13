@@ -21,7 +21,7 @@ import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { newTelemetryLogger } from './helpers';
+import { copyLicenseFields, newTelemetryLogger } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
@@ -276,20 +276,15 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private enrich(event: Event): Event {
     const clusterInfo = this.telemetryReceiver?.getClusterInfo();
 
-    // TODO(szaffarano): generalize the enrichment at channel level to not hardcode the logic here
     if (typeof event.payload === 'object') {
       let additional = {};
 
-      if (event.channel !== TelemetryChannel.TASK_METRICS) {
-        additional = {
-          cluster_name: clusterInfo?.cluster_name,
-          cluster_uuid: clusterInfo?.cluster_uuid,
-        };
-      } else {
-        additional = {
-          cluster_uuid: clusterInfo?.cluster_uuid,
-        };
-      }
+      const licenseInfo = this.telemetryReceiver?.getLicenseInfo();
+      additional = {
+        cluster_name: clusterInfo?.cluster_name,
+        cluster_uuid: clusterInfo?.cluster_uuid,
+        ...(licenseInfo ? { license: copyLicenseFields(licenseInfo) } : {}),
+      };
 
       event.payload = {
         ...event.payload,

@@ -8,19 +8,20 @@ import React from 'react';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const SearchHomepageHeader = () => (
+import { EndpointsHeaderAction } from './endpoints_header_action';
+
+export interface SearchHomepageHeaderProps {
+  showEndpointsAPIKeys: boolean;
+}
+
+export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHeaderProps) => (
   <EuiPageTemplate.Header
     pageTitle={
-      <EuiTitle data-test-subj="search-homepage-header-title">
-        <h2>
-          <FormattedMessage
-            id="xpack.searchHomepage.pageTitle"
-            defaultMessage="Welcome to Search"
-          />
-        </h2>
+      <EuiTitle data-test-subj="search-homepage-header-title" size="l">
+        <FormattedMessage id="xpack.searchHomepage.pageTitle" defaultMessage="Welcome to Search" />
       </EuiTitle>
     }
     data-test-subj="search-homepage-header"
-    rightSideItems={[]}
+    rightSideItems={[...(showEndpointsAPIKeys ? [<EndpointsHeaderAction />] : [])]}
   />
 );

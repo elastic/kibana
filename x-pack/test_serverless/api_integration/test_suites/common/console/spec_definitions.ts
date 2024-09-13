@@ -17,10 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /api/console/api_server', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it('returns autocomplete definitions', async () => {
       const { body } = await supertest

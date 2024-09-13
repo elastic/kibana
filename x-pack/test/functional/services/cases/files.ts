@@ -33,7 +33,7 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     async searchByFileName(fileName: string) {
       const searchField = await testSubjects.find('cases-files-search');
 
-      searchField.clearValue();
+      await searchField.clearValue();
 
       await searchField.type(fileName);
       await searchField.pressKeys(browser.keys.ENTER);
@@ -47,7 +47,7 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
 
       assertFileExists(index, popoverButtons.length);
 
-      popoverButtons[index].click();
+      await popoverButtons[index].click();
 
       await testSubjects.existOrFail('contextMenuPanelTitle');
     },
@@ -55,7 +55,7 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     async deleteFile(index: number = 0) {
       await this.openActionsPopover(index);
 
-      (await testSubjects.find('cases-files-delete-button', 1000)).click();
+      await (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
       await testSubjects.click('confirmModalConfirmButton');
     },
@@ -63,7 +63,7 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     async openFilePreview(index: number = 0) {
       const row = await this.getFileByIndex(index);
 
-      (await row.findByCssSelector('[data-test-subj="cases-files-name-link"]')).click();
+      await (await row.findByCssSelector('[data-test-subj="cases-files-name-link"]')).click();
     },
 
     async emptyOrFail() {

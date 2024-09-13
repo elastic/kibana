@@ -13,18 +13,10 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-common.PidConfigType",
+        "id": "def-server.PidConfigType",
         "type": "Type",
         "tags": [],
         "label": "PidConfigType",
@@ -41,7 +33,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-common.pidConfig",
+        "id": "def-server.pidConfig",
         "type": "Object",
         "tags": [],
         "label": "pidConfig",
@@ -52,7 +44,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-common.pidConfig.path",
+            "id": "def-server.pidConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -63,7 +55,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-common.pidConfig.schema",
+            "id": "def-server.pidConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -102,5 +94,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

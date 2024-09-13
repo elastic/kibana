@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -69,6 +70,8 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -83,11 +86,6 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import {
-  createVisEmbeddableFromObject,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-} from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -115,18 +113,21 @@ import {
   setSavedObjectsManagement,
   setContentManagement,
   setSavedSearch,
+  setDataViews,
+  setInspector,
+  getTypes,
 } from './services';
-import { VisualizeConstants } from '../common/constants';
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry, SerializedVis } from './types';
+import { ListingViewRegistry } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-import { SerializedVisData } from '../common';
-import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
+import type { VisualizeSerializedState } from './embeddable/types';
+import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -163,7 +164,6 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
-  getAttributeService: EmbeddableStart['getAttributeService'];
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
@@ -181,6 +181,7 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 /**
@@ -308,6 +309,10 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
+        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
+          import('./legacy/embeddable'),
+          import('./visualize_app'),
+        ]);
         const services: VisualizeServices = {
           ...coreStart,
           history,
@@ -332,6 +337,7 @@ export class VisualizationsPlugin
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
+          /** @deprecated */
           createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           scopedHistory: params.history,
           restorePreviousUrl,
@@ -350,7 +356,6 @@ export class VisualizationsPlugin
         };
 
         params.element.classList.add('visAppWrapper');
-        const { renderApp } = await import('./visualize_app');
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
           params.element.classList.add('visEditorScreenshotModeActive');
           // @ts-expect-error TS error, cannot find type declaration for scss
@@ -400,10 +405,31 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
-    const addAggVisAction = new AddAggVisualizationPanelAction();
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
-    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
-    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const {
+        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
+      } = start();
+
+      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
+      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+    });
+    embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
+      onAdd: (container, savedObject) => {
+        container.addNewPanel<VisualizeSerializedState>({
+          panelType: VISUALIZE_EMBEDDABLE_TYPE,
+          initialState: { savedObjectId: savedObject.id },
+        });
+      },
+      embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
+        defaultMessage: 'Visualization',
+      }),
+      getIconForSavedObject: (savedObject) => {
+        const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
+        return getTypes().get(visState.type)?.icon ?? '';
+      },
+    });
 
     contentManagement.registry.register({
       id: CONTENT_ID,
@@ -411,37 +437,6 @@ export class VisualizationsPlugin
         latest: LATEST_VERSION,
       },
       name: 'Visualize Library',
-    });
-
-    embeddable.registerSavedObjectToPanelMethod<
-      VisualizationSavedObjectAttributes,
-      VisualizeByValueInput
-    >(CONTENT_ID, (savedObject) => {
-      const visState = savedObject.attributes.visState;
-
-      // not sure if visState actually is ever undefined, but following the type
-      if (!savedObject.managed || !visState) {
-        return {
-          savedObjectId: savedObject.id,
-        };
-      }
-
-      // data is not always defined, so I added a default value since the extract
-      // routine in the embeddable factory expects it to be there
-      const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-        data?: SerializedVisData;
-      };
-
-      if (!savedVis.data) {
-        savedVis.data = {
-          searchSource: {},
-          aggs: [],
-        };
-      }
-
-      return {
-        savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
-      };
     });
 
     return {
@@ -458,7 +453,6 @@ export class VisualizationsPlugin
       expressions,
       uiActions,
       embeddable,
-      savedObjects,
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
@@ -466,6 +460,8 @@ export class VisualizationsPlugin
       savedObjectsManagement,
       contentManagement,
       savedSearch,
+      dataViews,
+      inspector,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -490,6 +486,8 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
+    setDataViews(dataViews);
+    setInspector(inspector);
 
     if (spaces) {
       setSpaces(spaces);
@@ -498,6 +496,9 @@ export class VisualizationsPlugin
     if (savedObjectsTaggingOss) {
       setSavedObjectTagging(savedObjectsTaggingOss);
     }
+
+    const addAggVisAction = new AddAggVisualizationPanelAction(types);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
 
     return {
       ...types,

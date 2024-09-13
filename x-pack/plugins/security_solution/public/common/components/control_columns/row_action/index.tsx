@@ -7,14 +7,9 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useKibana } from '../../../lib/kibana';
-import { timelineActions } from '../../../../timelines/store';
-import { SecurityPageName } from '../../../../../common/constants';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -23,17 +18,15 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
   ControlColumnProps,
-  ExpandedDetailType,
 } from '../../../../../common/types';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 
-type Props = EuiDataGridCellValueElementProps & {
+export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem;
@@ -74,13 +67,11 @@ const RowActionComponent = ({
   setEventsDeleted,
   width,
   refetch,
-}: Props) => {
+}: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
 
-  const dispatch = useDispatch();
-  const [{ pageName }] = useRouteSpy();
   const { activeStep, isTourShown } = useTourContext();
   const shouldFocusOnOverviewTab =
     (activeStep === AlertsCasesTourSteps.expandEvent ||
@@ -102,98 +93,58 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
-  const showExpandableFlyout =
-    pageName === SecurityPageName.attackDiscovery ? true : !expandableFlyoutDisabled;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const updatedExpandedDetail: ExpandedDetailType = {
-      panelView: 'eventDetail',
-      params: {
-        eventId: eventId ?? '',
-        indexName: indexName ?? '',
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
+        },
       },
-    };
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: tableId,
+      panel: 'right',
+    });
+  }, [eventId, indexName, tableId, openFlyout, shouldFocusOnOverviewTab, telemetry]);
 
-    if (showExpandableFlyout) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
+  const toggleShowNotes = useCallback(() => {
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
         },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: tableId,
-        panel: 'right',
-      });
-    }
-    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
-    // support of old flyout in cases page
-    else if (tableId === TableId.alertsOnCasePage) {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          ...updatedExpandedDetail,
-          id: TimelineId.casePage,
-        })
-      );
-    }
-    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
-    // support of old flyout
-    else {
-      dispatch(
-        dataTableActions.toggleDetailPanel({
-          ...updatedExpandedDetail,
-          tabType,
-          id: tableId,
-        })
-      );
-    }
-  }, [
-    eventId,
-    indexName,
-    showExpandableFlyout,
-    tableId,
-    openFlyout,
-    shouldFocusOnOverviewTab,
-    telemetry,
-    dispatch,
-    tabType,
-  ]);
-
-  const toggleShowNotes = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
+      },
+      left: {
+        id: DocumentDetailsLeftPanelKey,
+        path: {
+          tab: LeftPanelNotesTab,
         },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
         },
-      }),
-    [eventId, indexName, openFlyout, tableId]
-  );
+      },
+    });
+    telemetry.reportOpenNoteInExpandableFlyoutClicked({
+      location: tableId,
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: tableId,
+      panel: 'left',
+    });
+  }, [eventId, indexName, openFlyout, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -224,14 +175,12 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
-          toggleShowNotes={
-            !expandableFlyoutDisabled && securitySolutionNotesEnabled ? toggleShowNotes : undefined
-          }
+          toggleShowNotes={securitySolutionNotesEnabled ? toggleShowNotes : undefined}
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
-          showNotes={!expandableFlyoutDisabled && securitySolutionNotesEnabled ? true : false}
+          showNotes={securitySolutionNotesEnabled ? true : false}
         />
       )}
     </>

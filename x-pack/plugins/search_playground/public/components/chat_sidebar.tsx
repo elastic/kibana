@@ -6,84 +6,91 @@
  */
 
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
+  EuiLink,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useWatch } from 'react-hook-form';
+import { docLinks } from '../../common/doc_links';
+import { EditContextPanel } from './edit_context/edit_context_panel';
+import { ChatForm, ChatFormFields } from '../types';
+import { useManagementLink } from '../hooks/use_management_link';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
-interface ChatSidebarProps {
-  selectedIndicesCount: number;
-}
-
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }) => {
+export const ChatSidebar: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const accordions = [
+  const selectedModel = useWatch<ChatForm, ChatFormFields.summarizationModel>({
+    name: ChatFormFields.summarizationModel,
+  });
+  const managementLink = useManagementLink(selectedModel?.connectorId);
+  const panels = [
     {
-      id: useGeneratedHtmlId({ prefix: 'summarizationAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
         defaultMessage: 'Model settings',
       }),
       children: <SummarizationPanel />,
-      dataTestId: 'summarizationAccordion',
+      extraAction: (
+        <EuiButtonEmpty
+          target="_blank"
+          href={managementLink}
+          data-test-subj="manageConnectorsLink"
+          iconType="wrench"
+          size="s"
+          aria-label={i18n.translate(
+            'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
+            {
+              defaultMessage: 'Manage connector',
+            }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip"
+            defaultMessage="Manage"
+          />
+        </EuiButtonEmpty>
+      ),
     },
     {
-      id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
-      title: i18n.translate('xpack.searchPlayground.sidebar.sourceTitle', {
-        defaultMessage: 'Indices',
+      title: i18n.translate('xpack.searchPlayground.sidebar.contextTitle', {
+        defaultMessage: 'Context',
       }),
-      extraAction: !!selectedIndicesCount && (
-        <EuiText size="xs">
-          <p>
-            {i18n.translate('xpack.searchPlayground.sidebar.sourceIndicesCount', {
-              defaultMessage: '{count, number} {count, plural, one {Index} other {Indices}}',
-              values: { count: Number(selectedIndicesCount) },
-            })}
-          </p>
-        </EuiText>
+      extraAction: (
+        <EuiLink
+          href={docLinks.context}
+          target="_blank"
+          data-test-subj="hidden-fields-documentation-link"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.sidebar.contextLearnMore"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
       ),
-      children: <SourcesPanelSidebar />,
-      dataTestId: 'sourcesAccordion',
+      children: <EditContextPanel />,
     },
   ];
-  const [openAccordionId, setOpenAccordionId] = useState(accordions[0].id);
 
   return (
     <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="none">
-      {accordions.map(({ id, title, extraAction, children, dataTestId }, index) => (
-        <EuiFlexItem
-          key={id}
-          css={{
-            borderBottom: index === accordions.length - 1 ? 'none' : euiTheme.border.thin,
-            padding: `0 ${euiTheme.size.l}`,
-            flexGrow: openAccordionId === id ? 1 : 0,
-            transition: `${euiTheme.animation.normal} ease-in-out`,
-          }}
-        >
-          <EuiAccordion
-            id={id}
-            buttonContent={
-              <EuiTitle size="xs">
-                <h5>{title}</h5>
-              </EuiTitle>
-            }
-            extraAction={extraAction}
-            buttonProps={{ paddingSize: 'l' }}
-            forceState={openAccordionId === id ? 'open' : 'closed'}
-            onToggle={() => setOpenAccordionId(openAccordionId === id ? '' : id)}
-            data-test-subj={dataTestId}
-          >
-            {children}
-            <EuiSpacer size="l" />
-          </EuiAccordion>
+      {panels?.map(({ title, children, extraAction }) => (
+        <EuiFlexItem key={title} grow={false}>
+          <EuiFlexGroup direction="column" css={{ padding: euiTheme.size.l }} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+                <EuiTitle size="xs">
+                  <h4>{title}</h4>
+                </EuiTitle>
+                {extraAction && <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

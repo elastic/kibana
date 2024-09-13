@@ -22,7 +22,6 @@ declare namespace Cypress {
     expectAPIsToHaveBeenCalledWith(params: { apisIntercepted: string[]; value: string }): void;
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
-    dismissServiceGroupsTour(): void;
     withHidden(selector: string, callback: () => void): void;
   }
 }

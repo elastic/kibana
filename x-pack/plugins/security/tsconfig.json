@@ -82,7 +82,11 @@
     "@kbn/core-user-profile-server",
     "@kbn/core-user-profile-browser",
     "@kbn/security-api-key-management",
-    "@kbn/security-form-components"
+    "@kbn/security-form-components",
+    "@kbn/core-security-server-mocks",
+    "@kbn/security-authorization-core",
+    "@kbn/security-role-management-model",
+    "@kbn/security-ui-components",
   ],
   "exclude": [
     "target/**/*",

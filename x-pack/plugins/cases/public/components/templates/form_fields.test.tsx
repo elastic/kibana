@@ -17,6 +17,7 @@ import { useGetChoicesResponse } from '../create/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
 import { FormFields } from './form_fields';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -220,19 +221,19 @@ describe('form fields', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste('Template 1');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(within(templateTags).getByRole('combobox'), 'first');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(within(templateTags).getByRole('combobox'));
+    await userEvent.paste('first');
+    await userEvent.keyboard('{enter}');
 
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
+    await userEvent.click(await screen.findByTestId('template-description-input'));
+    await userEvent.paste('this is a first template');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -258,22 +259,22 @@ describe('form fields', () => {
     );
 
     const caseTitle = await screen.findByTestId('caseTitle');
-    userEvent.paste(within(caseTitle).getByTestId('input'), 'Case with Template 1');
+    await userEvent.click(within(caseTitle).getByTestId('input'));
+    await userEvent.paste('Case with Template 1');
 
     const caseDescription = await screen.findByTestId('caseDescription');
-    userEvent.paste(
-      within(caseDescription).getByTestId('euiMarkdownEditorTextArea'),
-      'This is a case description'
-    );
+    await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste('This is a case description');
 
     const caseTags = await screen.findByTestId('caseTags');
-    userEvent.paste(within(caseTags).getByRole('combobox'), 'template-1');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(within(caseTags).getByRole('combobox'));
+    await userEvent.paste('template-1');
+    await userEvent.keyboard('{enter}');
 
     const caseCategory = await screen.findByTestId('caseCategory');
-    userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -315,14 +316,15 @@ describe('form fields', () => {
       `${textField.key}-${textField.type}-create-custom-field`
     );
 
-    userEvent.clear(textCustomField);
-    userEvent.paste(textCustomField, 'My text test value 1');
+    await userEvent.clear(textCustomField);
+    await userEvent.click(textCustomField);
+    await userEvent.paste('My text test value 1');
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -368,13 +370,13 @@ describe('form fields', () => {
 
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    userEvent.selectOptions(await screen.findByTestId('severitySelect'), '3');
+    await userEvent.selectOptions(await screen.findByTestId('severitySelect'), '3');
 
-    userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '2');
+    await userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '2');
 
-    userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
+    await userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -394,5 +396,48 @@ describe('form fields', () => {
         true
       );
     });
+  });
+
+  it('does not render duplicate template tags', async () => {
+    const newProps = {
+      ...defaultProps,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        templates: [
+          {
+            key: 'test_template_1',
+            name: 'Test',
+            tags: ['one', 'two'],
+            caseFields: {},
+          },
+          {
+            key: 'test_template_2',
+            name: 'Test 2',
+            tags: ['one', 'three'],
+            caseFields: {},
+          },
+        ],
+      },
+    };
+
+    appMockRenderer.render(
+      <FormTestComponent onSubmit={onSubmit} formDefaultValue={formDefaultValue}>
+        <FormFields {...newProps} />
+      </FormTestComponent>
+    );
+
+    const caseTags = await screen.findByTestId('template-tags');
+
+    await userEvent.click(within(caseTags).getByTestId('comboBoxToggleListButton'));
+    await waitForEuiPopoverOpen();
+
+    /**
+     * RTL will throw an error if there are more that one
+     * element matching the text. This ensures that duplicated
+     * tags are removed. Docs: https://testing-library.com/docs/queries/about
+     */
+    expect(await screen.findByText('one'));
+    expect(await screen.findByText('two'));
+    expect(await screen.findByText('three'));
   });
 });

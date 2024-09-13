@@ -10,11 +10,17 @@ import {
   AGENTS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
+import {
+  FILE_STORAGE_DATA_AGENT_INDEX,
+  FILE_STORAGE_METADATA_AGENT_INDEX,
+} from '@kbn/fleet-plugin/server/constants';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
+
+const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -41,23 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
-    });
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-      await supertest
-        .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
-        .set('kbn-xsrf', 'xxxx');
-      await es.transport
-        .request({
-          method: 'DELETE',
-          path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
-        })
-        .catch(() => {});
-    });
 
-    const fleetServerVersion = '8.14.0';
-
-    before(async () => {
       await supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'kibana').send({
         name: 'Fleet Server policy 1',
         id: 'fleet-server-policy',
@@ -84,7 +74,33 @@ export default function (providerContext: FtrProviderContext) {
         'fleet-server-policy',
         fleetServerVersion
       );
+
+      // Make agent 1 upgradeable
+      await es.update({
+        id: 'agent1',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        doc: {
+          local_metadata: {
+            elastic: { agent: { upgradeable: true, version: '8.13.0' } },
+          },
+        },
+      });
     });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await supertest
+        .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
+        .set('kbn-xsrf', 'xxxx');
+      await es.transport
+        .request({
+          method: 'DELETE',
+          path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
+        })
+        .catch(() => {});
+    });
+
+    const fleetServerVersion = '8.14.0';
 
     const READ_SCENARIOS = [
       {
@@ -177,6 +193,66 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
+    const createFileBeforeEach = async () => {
+      await es.index(
+        {
+          id: 'file1.0',
+          refresh: 'wait_for',
+          op_type: 'create',
+          index: FILE_STORAGE_DATA_AGENT_INDEX,
+          document: {
+            bid: 'file1',
+            '@timestamp': new Date().toISOString(),
+            last: true,
+            data: 'test',
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+
+      await es.index(
+        {
+          index: FILE_STORAGE_METADATA_AGENT_INDEX,
+          id: 'file1',
+          refresh: true,
+          op_type: 'create',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            upload_id: 'file1',
+            action_id: `fleet_uploads_test-file1-action`,
+            agent_id: 'agent1',
+            file: {
+              ChunkSize: 4194304,
+              extension: 'zip',
+              hash: {},
+              mime_type: 'application/zip',
+              mode: '0644',
+              name: `elastic-agent-diagnostics-file-name.zip`,
+              path: `/agent/elastic-agent-diagnostics-file-name.zip`,
+              size: 24917,
+              Status: 'READY',
+              type: 'file',
+            },
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+    };
+
+    const deleteFileAfterEach = async () => {
+      await es.deleteByQuery(
+        {
+          index: `${FILE_STORAGE_DATA_AGENT_INDEX},${FILE_STORAGE_METADATA_AGENT_INDEX}`,
+          refresh: true,
+          ignore_unavailable: true,
+          query: {
+            match_all: {},
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+    };
+
     const ROUTES = [
       // READ scenarios
       {
@@ -203,6 +279,13 @@ export default function (providerContext: FtrProviderContext) {
         method: 'POST',
         path: '/api/fleet/agents/agent1/request_diagnostics',
         scenarios: READ_SCENARIOS,
+      },
+      {
+        method: 'GET',
+        path: '/api/fleet/agents/files/file1/elastic-agent-diagnostics-file-name.zip',
+        scenarios: READ_SCENARIOS,
+        beforeEach: createFileBeforeEach,
+        afterEach: deleteFileAfterEach,
       },
 
       // ALL scenarios
@@ -238,20 +321,14 @@ export default function (providerContext: FtrProviderContext) {
         beforeEach: updateAgentBeforeEach,
         afterEach: updateAgentAfterEach,
       },
+      {
+        method: 'DELETE',
+        path: '/api/fleet/agents/files/file1',
+        scenarios: ALL_SCENARIOS,
+        beforeEach: createFileBeforeEach,
+        afterEach: deleteFileAfterEach,
+      },
     ];
-    before(async () => {
-      // Make agent 1 upgradeable
-      await es.update({
-        id: 'agent1',
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        doc: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: '8.13.0' } },
-          },
-        },
-      });
-    });
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

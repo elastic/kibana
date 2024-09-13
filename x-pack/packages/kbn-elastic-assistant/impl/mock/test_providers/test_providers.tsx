@@ -81,6 +81,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             {...providerContext}
+            currentAppId={'test'}
           >
             {children}
           </AssistantProvider>

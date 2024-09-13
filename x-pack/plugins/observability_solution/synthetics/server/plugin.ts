@@ -23,10 +23,9 @@ import {
 import { TelemetryEventsSender } from './telemetry/sender';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
-import { uptimeFeature } from './feature';
-
-import { registerUptimeSavedObjects } from './saved_objects/saved_objects';
-import { UptimeConfig } from '../common/config';
+import { syntheticsFeature } from './feature';
+import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
+import { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
@@ -73,6 +72,7 @@ export class Plugin implements PluginType {
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
+      alerting: plugins.alerting,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -83,11 +83,11 @@ export class Plugin implements PluginType {
 
     this.telemetryEventsSender.setup(plugins.telemetry);
 
-    plugins.features.registerKibanaFeature(uptimeFeature);
+    plugins.features.registerKibanaFeature(syntheticsFeature);
 
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
-    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+    registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     return {};
   }

@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
@@ -22,23 +24,40 @@ import {
   getTimeSeriesColor,
   ChartType,
 } from '../../../../shared/charts/helper/get_timeseries_color';
+import {
+  getMetricsFormula,
+  ChartMetricType,
+} from '../../../../shared/charts/helper/get_metrics_formulas';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn } from '../../../../shared/managed_table';
-import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_metrics';
+import { NotAvailableApmMetrics } from '../../../../shared/not_available_popover/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
-import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
+import { EntityDataStreamType } from '../../../../../../common/entities/types';
+import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { ColumnHeader } from './column_header';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+
+type ServicesDetailedStatisticsAPIResponse =
+  APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
+
+type EntityServiceListItem = APIReturnType<'GET /internal/apm/entities/services'>['services'][0];
+
 export function getServiceColumns({
   query,
   breakpoints,
-  link,
+  timeseriesDataLoading,
+  timeseriesData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
-  link: any;
+  timeseriesDataLoading: boolean;
+  timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
+  const { isSmall, isLarge } = breakpoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   return [
     {
       field: ServiceInventoryFieldName.ServiceName,
@@ -46,7 +65,7 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName }) => (
+      render: (_, { serviceName, agentName, dataStreamTypes }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={serviceName}
@@ -68,10 +87,10 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { environments, signalTypes }) => (
+      render: (_, { environments, dataStreamTypes }) => (
         <EnvironmentBadge
           environments={environments}
-          isMetricsSignalType={signalTypes.includes(SignalTypes.METRICS)}
+          isMetricsSignalType={dataStreamTypes.includes(EntityDataStreamType.METRICS)}
         />
       ),
       align: RIGHT_ALIGNMENT,
@@ -84,17 +103,18 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.latency}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asMillisecondDuration(metrics.latency)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -107,17 +127,18 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asTransactionRate(metrics.throughput)}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.throughput}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -130,59 +151,115 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.failedTransactionRate}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
     },
     {
-      field: ServiceInventoryFieldName.LogRatePerMinute,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
-        defaultMessage: 'Log rate (per min.)',
-      }),
+      field: ServiceInventoryFieldName.logRate,
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRate', {
+            defaultMessage: 'Log rate (per min.)',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="Rate of logs per minute observed for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
-
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            hideSeries
-            valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logRate}
+            valueLabel={asDecimalOrInteger(metrics.logRate)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-        defaultMessage: 'Log error rate',
-      }),
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
+            defaultMessage: 'Log error rate (per min.)',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="Rate of error logs per minute observed for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            hideSeries
-            valueLabel={asPercent(metrics.logErrorRate, 1)}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate}
+            valueLabel={asDecimalOrInteger(metrics.logErrorRate)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },

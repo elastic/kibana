@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   PackName,
@@ -34,6 +34,3 @@ export const CreatePacksRequestBody = z.object({
   shards: Shards.optional(),
   queries: ObjectQueries.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

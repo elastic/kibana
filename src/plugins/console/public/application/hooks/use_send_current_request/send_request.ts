@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -83,7 +84,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       const req = requests.shift()!;
       const path = req.url;
       const method = req.method;
-      let data = collapseLiteralStrings(req.data.join('\n'));
+
+      // If the request data contains multiple data objects (e.g. bulk request)
+      // ES only accepts it if each object is on a single line
+      // Therefore, we need to remove all new line characters from each data object
+      const unformattedData = req.data.map((body) => body.replaceAll('\n', ''));
+
+      let data = collapseLiteralStrings(unformattedData.join('\n'));
       if (data) {
         data += '\n';
       } // append a new line for bulk requests.

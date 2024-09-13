@@ -49,7 +49,7 @@
       "usageCollection",
       "unifiedSearch",
       "fieldFormats",
-      "textBasedLanguages",
+      "esql",
       "savedObjects",
     ],
     "extraPublicDirs": [

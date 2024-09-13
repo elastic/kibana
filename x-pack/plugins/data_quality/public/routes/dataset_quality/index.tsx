@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
+import type { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_NAME } from '../../../common';
@@ -21,7 +21,7 @@ export const DatasetQualityRoute = () => {
     services: { chrome, datasetQuality, notifications, appParams },
   } = useKibanaContextForPlugin();
 
-  useBreadcrumbs(PLUGIN_NAME, appParams, chrome);
+  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
   return (
     <DatasetQualityContextProvider

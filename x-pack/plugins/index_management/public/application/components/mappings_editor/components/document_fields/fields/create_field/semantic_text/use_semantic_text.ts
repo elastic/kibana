@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
-import React, { useEffect, useState } from 'react';
-import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
+import React, { useEffect } from 'react';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { ElserModels } from '@kbn/ml-trained-models-utils';
+import { i18n } from '@kbn/i18n';
+import { useDetailsPageMappingsModelManagement } from '../../../../../../../../hooks/use_details_page_mappings_model_management';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
-import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
+import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
 import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
 
 import { getInferenceEndpoints } from '../../../../../../../services/api';
+import { getFieldByPathName } from '../../../../../lib/utils';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
-  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>> | undefined;
+  setErrorsInTrainedModelDeployment?: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
 }
 interface DefaultInferenceEndpointConfig {
   taskType: InferenceTaskType;
@@ -30,70 +33,51 @@ interface DefaultInferenceEndpointConfig {
 
 export function useSemanticText(props: UseSemanticTextProps) {
   const { form, setErrorsInTrainedModelDeployment, ml } = props;
-  const { inferenceToModelIdMap } = useMappingsState();
+  const { fields, mappingViewFields } = useMappingsState();
+  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
   const dispatch = useDispatch();
-  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
-  const [nameValue, setNameValue] = useState<string>();
-  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
-  const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
-  const [inferenceValue, setInferenceValue] = useState<string>(
-    DefaultInferenceModels.elser_model_2
-  );
   const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
 
-  const useFieldEffect = (
-    semanticTextform: FormHook,
-    fieldName: string,
-    setState: React.Dispatch<React.SetStateAction<string | undefined>>
-  ) => {
-    const fieldValue = semanticTextform.getFields()?.[fieldName]?.value;
-    useEffect(() => {
-      if (typeof fieldValue === 'string') {
-        setState(fieldValue);
+  const fieldTypeValue = form.getFormData()?.type;
+  useEffect(() => {
+    if (fieldTypeValue === 'semantic_text') {
+      const allFields = {
+        byId: {
+          ...fields.byId,
+          ...mappingViewFields.byId,
+        },
+        rootLevelFields: [],
+        aliases: {},
+        maxNestedDepth: 0,
+      };
+      const defaultName = getFieldByPathName(allFields, 'semantic_text') ? '' : 'semantic_text';
+      const referenceField =
+        Object.values(allFields.byId)
+          .find((field) => field.source.type === 'text' && !field.isMultiField)
+          ?.path.join('.') || '';
+      if (!form.getFormData().name) {
+        form.setFieldValue('name', defaultName);
       }
-    }, [semanticTextform, fieldValue, setState]);
-  };
-
-  useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
-  useFieldEffect(form, 'name', setNameValue);
-
-  const fieldTypeValue = form.getFields()?.type?.value;
-  useEffect(() => {
-    if (!Array.isArray(fieldTypeValue) || fieldTypeValue.length === 0) {
-      return;
+      if (!form.getFormData().reference_field) {
+        form.setFieldValue('reference_field', referenceField);
+      }
+      if (!form.getFormData().inference_id) {
+        form.setFieldValue('inference_id', 'elser_model_2');
+      }
     }
-    setSemanticTextFieldType(
-      fieldTypeValue[0]?.value === 'semantic_text' ? fieldTypeValue[0].value : undefined
-    );
-  }, [form, fieldTypeValue]);
-
-  const inferenceId = form.getFields()?.inferenceId?.value;
-  useEffect(() => {
-    if (typeof inferenceId === 'string') {
-      setInferenceIdComboValue(inferenceId);
-    }
-  }, [form, inferenceId, inferenceToModelIdMap]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldTypeValue]);
 
   const createInferenceEndpoint = useCallback(
     async (
-      trainedModelId: ElasticsearchModelDefaultOptions | string,
-      data: Field,
+      trainedModelId: string,
+      inferenceId: string,
       customInferenceEndpointConfig?: CustomInferenceEndpointConfig
     ) => {
-      if (data.inferenceId === undefined) {
-        throw new Error(
-          i18n.translate('xpack.idxMgmt.mappingsEditor.createField.undefinedInferenceIdError', {
-            defaultMessage: 'Inference ID is undefined',
-          })
-        );
-      }
+      const isElser = ElserModels.includes(trainedModelId);
       const defaultInferenceEndpointConfig: DefaultInferenceEndpointConfig = {
-        service:
-          trainedModelId === ElasticsearchModelDefaultOptions.elser ? 'elser' : 'elasticsearch',
-        taskType:
-          trainedModelId === ElasticsearchModelDefaultOptions.elser
-            ? 'sparse_embedding'
-            : 'text_embedding',
+        service: isElser ? 'elser' : 'elasticsearch',
+        taskType: isElser ? 'sparse_embedding' : 'text_embedding',
       };
 
       const modelConfig = customInferenceEndpointConfig
@@ -108,65 +92,69 @@ export function useSemanticText(props: UseSemanticTextProps) {
           };
       const taskType: InferenceTaskType =
         customInferenceEndpointConfig?.taskType ?? defaultInferenceEndpointConfig.taskType;
-      try {
-        await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-          data.inferenceId,
-          taskType,
-          modelConfig
-        );
-      } catch (error) {
-        throw error;
-      }
+
+      await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
     },
     [ml?.mlApi?.inferenceModels]
   );
 
   const handleSemanticText = async (
-    data: Field,
+    data: SemanticTextField,
     customInferenceEndpointConfig?: CustomInferenceEndpointConfig
   ) => {
-    data.inferenceId = inferenceValue;
-    if (data.inferenceId === undefined) {
-      return;
-    }
-    const inferenceData = inferenceToModelIdMap?.[data.inferenceId];
+    const modelIdMap = await fetchInferenceToModelIdMap();
+    const inferenceId = data.inference_id;
+    const inferenceData = modelIdMap?.[inferenceId];
     if (!inferenceData) {
-      return;
+      throw new Error(
+        i18n.translate('xpack.idxMgmt.mappingsEditor.semanticText.inferenceError', {
+          defaultMessage: 'No inference model found for inference ID {inferenceId}',
+          values: { inferenceId },
+        })
+      );
     }
 
     const { trainedModelId } = inferenceData;
-    dispatch({ type: 'field.addSemanticText', value: data });
-
+    dispatch({ type: 'field.add', value: data });
+    const inferenceEndpoints = await getInferenceEndpoints();
+    const hasInferenceEndpoint = inferenceEndpoints.data?.some(
+      (inference) => inference.inference_id === inferenceId
+    );
+    // if inference endpoint exists already, do not create new inference endpoint
+    if (hasInferenceEndpoint) {
+      return;
+    }
     try {
-      // if inference endpoint exists already, do not create inference endpoint
-      const inferenceModels = await getInferenceEndpoints();
-      const inferenceModel: InferenceAPIConfigResponse[] = inferenceModels.data.some(
-        (e: InferenceAPIConfigResponse) => e.model_id === inferenceValue
-      );
-      if (inferenceModel) {
-        return;
-      }
       // Only show toast if it's an internal Elastic model that hasn't been deployed yet
-      if (trainedModelId && inferenceData.isDeployable && !inferenceData.isDeployed) {
-        showSuccessToasts(trainedModelId);
+      await createInferenceEndpoint(
+        trainedModelId,
+        data.inference_id,
+        customInferenceEndpointConfig
+      );
+      if (trainedModelId) {
+        if (inferenceData.isDeployable && !inferenceData.isDeployed) {
+          showSuccessToasts(trainedModelId);
+        }
+        // clear error because we've succeeded here
+        setErrorsInTrainedModelDeployment?.((prevItems) => ({
+          ...prevItems,
+          [data.inference_id]: undefined,
+        }));
       }
-
-      await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
     } catch (error) {
       // trainedModelId is empty string when it's a third party model
       if (trainedModelId) {
-        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
+        setErrorsInTrainedModelDeployment?.((prevItems) => ({
+          ...prevItems,
+          [data.inference_id]: error,
+        }));
       }
       showErrorToasts(error);
     }
   };
 
   return {
-    referenceFieldComboValue,
-    nameValue,
-    inferenceIdComboValue,
-    semanticFieldType,
+    createInferenceEndpoint,
     handleSemanticText,
-    setInferenceValue,
   };
 }

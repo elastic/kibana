@@ -23,7 +23,7 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
@@ -44,6 +44,7 @@ import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
 import endpointMetrics from '../__mocks__/endpoint-metrics.json';
+import prebuiltRulesEvents from '../__mocks__/prebuilt-rules-events.json';
 import endpointMetadata from '../__mocks__/endpoint-metadata.json';
 import endpointPolicy from '../__mocks__/endpoint-policy.json';
 
@@ -51,6 +52,7 @@ const fleetIndex = '.fleet-agents';
 const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
 const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
 const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
+const prebuiltRulesIndex = '.alerts-security.alerts';
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -182,6 +184,10 @@ export async function mockEndpointData(
   await bulkInsert(esClient, endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy));
 }
 
+export async function mockPrebuiltRulesData(esClient: ElasticsearchClient) {
+  await bulkInsert(esClient, prebuiltRulesIndex, updateTimestamps(prebuiltRulesEvents));
+}
+
 export async function initEndpointIndices(esClient: ElasticsearchClient) {
   const mappings: object = {
     dynamic: false,
@@ -253,7 +259,7 @@ export async function createAgentPolicy(
     enabled: true,
     policy_id: 'policy-elastic-agent-on-cloud',
     policy_ids: ['policy-elastic-agent-on-cloud'],
-    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '9.0.0' },
     inputs: [
       {
         config: {
@@ -276,7 +282,7 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.create<unknown>(AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
+  await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
   await packagePolicyService
     .create(soClient, esClient, packagePolicy, {
       id,

@@ -133,7 +133,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             actionParameters: {
               comment:
-                'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
+                'Action triggered from Elastic Security by user [foo] for action [isolate (action id: 123-345-456)]: test comment',
             },
             command: 'contain',
             ids: ['1-2-3'],
@@ -232,7 +232,7 @@ describe('CrowdstrikeActionsClient class', () => {
             command: 'lift_containment',
             ids: ['1-2-3'],
             comment:
-              'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
+              'Action triggered from Elastic Security by user [foo] for action [unisolate (action id: 123-345-456)]: test comment',
           },
         },
       });

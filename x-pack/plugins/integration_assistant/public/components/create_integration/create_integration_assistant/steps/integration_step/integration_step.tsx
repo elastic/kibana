@@ -27,7 +27,7 @@ import { PackageCardPreview } from './package_card_preview';
 import { useActions } from '../../state';
 import * as i18n from './translations';
 
-const MaxLogoSize = 1048576; // One megabyte
+const MaxLogoSize = 1024 * 1024; // One megabyte
 
 const useLayoutStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -92,7 +92,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
 
   return (
     <StepContentWrapper title={i18n.TITLE} subtitle={i18n.DESCRIPTION}>
-      <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+      <EuiPanel paddingSize="none" hasShadow={false} hasBorder data-test-subj="integrationStep">
         <EuiFlexGroup direction="row" gutterSize="none">
           <EuiFlexItem css={styles.left}>
             <EuiForm component="form" fullWidth>
@@ -101,6 +101,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
                   name="title"
                   value={integrationSettings?.title ?? ''}
                   onChange={onChange.title}
+                  data-test-subj="integrationTitleInput"
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.DESCRIPTION_LABEL}>
@@ -108,6 +109,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
                   name="description"
                   value={integrationSettings?.description ?? ''}
                   onChange={onChange.description}
+                  data-test-subj="integrationDescriptionInput"
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.LOGO_LABEL}>
@@ -120,6 +122,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
                     aria-label="Upload an svg logo image"
                     accept="image/svg+xml"
                     isInvalid={logoError != null}
+                    data-test-subj="integrationLogoFilePicker"
                   />
                   <EuiSpacer size="xs" />
                   {logoError && (

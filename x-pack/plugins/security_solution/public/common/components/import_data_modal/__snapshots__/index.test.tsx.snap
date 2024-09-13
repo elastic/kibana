@@ -97,17 +97,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
@@ -295,7 +300,7 @@ Object {
                     subtitle
                   </span>
                   <button
-                    aria-label="Clear selected files"
+                    aria-label="Remove selected files"
                     class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
                     type="button"
                   >
@@ -384,17 +389,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
@@ -582,7 +592,7 @@ Object {
                     subtitle
                   </span>
                   <button
-                    aria-label="Clear selected files"
+                    aria-label="Remove selected files"
                     class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
                     type="button"
                   >
@@ -607,17 +617,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel

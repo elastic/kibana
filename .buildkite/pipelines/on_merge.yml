@@ -16,28 +16,6 @@ steps:
           limit: 1
   - wait
 
-  - label: 'Triggering changes-based pipelines'
-    branches: main
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    # TODO: this can probably be deleted after the migration https://github.com/elastic/kibana-operations/issues/15
-    plugins:
-      - chronotc/monorepo-diff#v2.0.4:
-          watch:
-            - path:
-                - 'versions.json'
-              config:
-                command: 'ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-buildkite-pipelines-deploy main'
-                label: 'Trigger pipeline deploy'
-                agents:
-                  image: family/kibana-ubuntu-2004
-                  imageProject: elastic-images-prod
-                  provider: gcp
-                  machineType: n2-standard-2
-
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
     agents:
@@ -59,7 +37,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       preemptible: true
     key: quick_checks
     timeout_in_minutes: 60
@@ -408,24 +386,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
@@ -611,6 +571,11 @@ steps:
       preemptible: true
     artifact_paths:
       "target/plugin_so_types_snapshot.json"
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - wait: ~
     continue_on_failure: true

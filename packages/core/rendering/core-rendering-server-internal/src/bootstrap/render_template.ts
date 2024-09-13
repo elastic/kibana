@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export interface BootstrapTemplateData {
@@ -80,10 +81,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       var errorTitleEl = document.createElement('h1');
       errorTitleEl.innerText = errorTitle;
       errorTitleEl.style.margin = '20px';
+      errorTitleEl.style.color = '#1a1c21';
 
       var errorTextEl = document.createElement('p');
       errorTextEl.innerText = errorText;
       errorTextEl.style.margin = '20px';
+      errorTextEl.style.color = '#343741';
 
       var errorReloadEl = document.createElement('button');
       errorReloadEl.innerText = errorReload;

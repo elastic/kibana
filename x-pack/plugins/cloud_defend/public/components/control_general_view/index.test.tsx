@@ -44,7 +44,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
@@ -58,8 +58,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a new selector', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -69,7 +69,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
@@ -80,8 +80,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a file response', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -91,7 +91,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
     } catch (err) {
@@ -102,8 +102,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a process response', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -113,7 +113,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.process.responses.length).toBe(
         getAllByTestId('cloud-defend-process-response').length
@@ -130,7 +130,7 @@ describe('<ControlGeneralView />', () => {
       () => getAllByTestId('cloud-defend-selectorcondition-name')[1] as HTMLInputElement
     );
 
-    userEvent.type(input, '2');
+    await userEvent.type(input, '2');
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
     rerender(<WrappedComponent policy={policy} />);
@@ -145,7 +145,7 @@ describe('<ControlGeneralView />', () => {
       () => getAllByTestId('cloud-defend-selectorcondition-name')[2] as HTMLInputElement
     );
 
-    userEvent.type(input, '3');
+    await userEvent.type(input, '3');
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -166,7 +166,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.responses[0].match).toHaveLength(1);
     } catch (err) {
@@ -190,7 +190,7 @@ describe('<ControlGeneralView />', () => {
       />
     );
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
     expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
   });
 
@@ -205,7 +205,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.selectors).toHaveLength(4);
       expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');

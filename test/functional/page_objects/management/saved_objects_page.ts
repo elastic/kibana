@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { keyBy } from 'lodash';
@@ -357,7 +358,7 @@ export class SavedObjectsPageObject extends FtrService {
           error: await error.getVisibleText(),
         };
       })
-    );
+    ).then((result) => result.sort((a, b) => a.id.localeCompare(b.id)));
   }
 
   async getTableSummary() {
@@ -385,6 +386,7 @@ export class SavedObjectsPageObject extends FtrService {
     await this.testSubjects.click('savedObjectsManagementDelete');
     if (confirmDelete) {
       await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.waitForDeleted('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
     }
   }

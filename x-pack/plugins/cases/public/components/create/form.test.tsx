@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { within, fireEvent, waitFor, screen } from '@testing-library/react';
+import { within, waitFor, screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import {
@@ -19,16 +19,18 @@ import { CreateCaseForm } from './form';
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import userEvent from '@testing-library/user-event';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
+jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_all_case_configurations');
@@ -37,6 +39,7 @@ jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners');
 
+const usePostCaseMock = usePostCase as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
@@ -44,19 +47,30 @@ const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 
-const casesFormProps: CreateCaseFormProps = {
-  onCancel: jest.fn(),
-  onSuccess: jest.fn(),
-};
-
 describe('CreateCaseForm', () => {
   const draftStorageKey = 'cases.caseView.createCase.description.markdownEditor';
+  let user: UserEvent;
   let appMockRenderer: AppMockRenderer;
+  let casesFormProps: CreateCaseFormProps;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRenderer = createAppMockRenderer();
+    casesFormProps = {
+      onCancel: jest.fn(),
+      onSuccess: jest.fn(),
+    };
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
+    usePostCaseMock.mockReturnValue({ mutateAsync: jest.fn().mockResolvedValue({ id: '1' }) });
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetSupportedActionConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
@@ -66,6 +80,7 @@ describe('CreateCaseForm', () => {
 
   afterEach(() => {
     sessionStorage.removeItem(draftStorageKey);
+    jest.clearAllMocks();
   });
 
   it('renders with steps', async () => {
@@ -196,11 +211,11 @@ describe('CreateCaseForm', () => {
         />
       );
 
-      const cancelBtn = await screen.findByTestId('create-case-cancel');
+      const cancelBtn = screen.getByTestId('create-case-cancel');
 
-      fireEvent.click(cancelBtn);
+      await user.click(cancelBtn);
 
-      fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+      await user.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       expect(casesFormProps.onCancel).toHaveBeenCalled();
       expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
@@ -214,11 +229,11 @@ describe('CreateCaseForm', () => {
         />
       );
 
-      const submitBtn = await screen.findByTestId('create-case-submit');
+      const submitBtn = screen.getByTestId('create-case-submit');
 
-      fireEvent.click(submitBtn);
+      await user.click(submitBtn);
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(casesFormProps.onSuccess).toHaveBeenCalled();
         expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
       });
@@ -255,7 +270,7 @@ describe('CreateCaseForm', () => {
       appMockRenderer = createAppMockRenderer({ license });
       appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
-      userEvent.selectOptions(
+      await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         selectedTemplate.name
       );
@@ -293,7 +308,7 @@ describe('CreateCaseForm', () => {
       appMockRenderer = createAppMockRenderer({ license });
       appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
-      userEvent.selectOptions(
+      await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         firstTemplate.name
       );
@@ -314,7 +329,7 @@ describe('CreateCaseForm', () => {
 
       expect(title).toHaveValue(firstTemplate.caseFields?.title);
 
-      userEvent.selectOptions(
+      await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         secondTemplate.name
       );
@@ -333,6 +348,74 @@ describe('CreateCaseForm', () => {
       expect(screen.queryByTestId('connector-fields-jira')).not.toBeInTheDocument();
 
       expect(await screen.findByText('No connector selected')).toBeInTheDocument();
+    });
+
+    it('selects the placeholder empty template correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockReturnValue({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            customFields: [
+              {
+                key: 'first_custom_field_key',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+                label: 'My test label 1',
+                defaultValue: 'custom field default value',
+              },
+            ],
+            templates: templatesConfigurationMock,
+            connector: {
+              id: 'servicenow-1',
+              name: 'My SN connector',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          },
+        ],
+      });
+
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+      const firstTemplate = templatesConfigurationMock[4];
+
+      appMockRenderer = createAppMockRenderer({ license });
+      appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+
+      await user.selectOptions(
+        await screen.findByTestId('create-case-template-select'),
+        firstTemplate.name
+      );
+
+      const title = within(await screen.findByTestId('caseTitle')).getByTestId('input');
+      const description = within(await screen.findByTestId('caseDescription')).getByRole('textbox');
+      const tags = within(await screen.findByTestId('caseTags')).getByTestId('comboBoxInput');
+      const category = within(await screen.findByTestId('caseCategory')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      const assignees = within(await screen.findByTestId('caseAssignees')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      const severity = await screen.findByTestId('case-severity-selection');
+      const customField = await screen.findByTestId(
+        'first_custom_field_key-text-create-custom-field'
+      );
+
+      await user.selectOptions(
+        await screen.findByTestId('create-case-template-select'),
+        'No template selected'
+      );
+
+      expect(title).not.toHaveValue();
+      expect(description).not.toHaveValue();
+      expect(tags).not.toHaveValue();
+      expect(category).not.toHaveValue();
+      expect(severity).toHaveTextContent('Low');
+      expect(assignees).not.toHaveValue();
+      expect(customField).toHaveValue('custom field default value');
+      expect(await screen.findByText('My SN connector')).toBeInTheDocument();
     });
   });
 });

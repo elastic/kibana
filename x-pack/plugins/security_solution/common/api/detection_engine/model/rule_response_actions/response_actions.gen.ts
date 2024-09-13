@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type ResponseActionTypes = z.infer<typeof ResponseActionTypes>;
 export const ResponseActionTypes = z.enum(['.osquery', '.endpoint']);
@@ -36,7 +36,7 @@ export const OsqueryQuery = z.object({
    */
   id: z.string(),
   /**
-   * Query to execute
+   * Query to run
    */
   query: z.string(),
   ecs_mapping: EcsMapping.optional(),

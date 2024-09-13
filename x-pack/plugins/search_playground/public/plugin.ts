@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Plugin,
   CoreStart,
   AppMountParameters,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
-import {
+import { Playground, getPlaygroundProvider } from './embeddable';
+import type {
+  AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchPlaygroundConfigType,
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
+import { registerLocators } from './locators';
 
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
@@ -33,13 +35,14 @@ export class SearchPlaygroundPlugin
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies, SearchPlaygroundPluginStart>
+    core: CoreSetup<AppPluginStartDependencies, SearchPlaygroundPluginStart>,
+    deps: AppPluginSetupDependencies
   ): SearchPlaygroundPluginSetup {
     if (!this.config.ui?.enabled) return {};
 
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: '/app/search_playground',
+      appRoute: PLUGIN_PATH,
       title: PLUGIN_NAME,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
@@ -53,6 +56,8 @@ export class SearchPlaygroundPlugin
       },
     });
 
+    registerLocators(deps.share);
+
     return {};
   }
 
@@ -60,7 +65,6 @@ export class SearchPlaygroundPlugin
     docLinks.setDocLinks(core.docLinks.links);
     return {
       PlaygroundProvider: getPlaygroundProvider(core, deps),
-      PlaygroundToolbar,
       Playground,
       PlaygroundHeaderDocs,
     };

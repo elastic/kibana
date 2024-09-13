@@ -8,7 +8,7 @@ components:
   schemas:
     ThreatQuery:
       type: string
-      description: Query to execute
+      description: Query to run
 
     ThreatMapping:
       type: array

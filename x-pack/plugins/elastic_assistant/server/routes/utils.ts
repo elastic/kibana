@@ -13,6 +13,12 @@ import type {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '@kbn/core/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientBedrockChatModel,
+  ActionsClientSimpleChatModel,
+  ActionsClientGeminiChatModel,
+} from '@kbn/langchain/server';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
 export interface OutputError {
@@ -174,3 +180,12 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   };
   return llmTypeDictionary[actionTypeId];
 };
+
+export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
+  llmType === 'openai'
+    ? ActionsClientChatOpenAI
+    : llmType === 'bedrock' && bedrockChatEnabled
+    ? ActionsClientBedrockChatModel
+    : llmType === 'gemini' && bedrockChatEnabled
+    ? ActionsClientGeminiChatModel
+    : ActionsClientSimpleChatModel;

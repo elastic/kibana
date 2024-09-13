@@ -185,7 +185,7 @@ function getInputComponent({
   fieldTestSelector,
   setIsDirty,
 }: InputComponentProps) {
-  const { multi, type, options } = varDef;
+  const { multi, type, options, full_width: fullWidth } = varDef;
   if (multi) {
     return (
       <MultiTextInput
@@ -208,6 +208,7 @@ function getInputComponent({
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           resize="vertical"
+          fullWidth={fullWidth}
           data-test-subj={`textAreaInput-${fieldTestSelector}`}
         />
       );

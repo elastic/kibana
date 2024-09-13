@@ -33,9 +33,14 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
+import {
+  ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
@@ -101,6 +106,7 @@ export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -114,7 +120,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
-    initializeKnowledgeBase: boolean
+    v2KnowledgeBaseEnabled?: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
@@ -213,6 +219,12 @@ export interface AssistantTool {
   getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
+export type AssistantToolLlm =
+  | ActionsClientBedrockChatModel
+  | ActionsClientChatOpenAI
+  | ActionsClientGeminiChatModel
+  | ActionsClientSimpleChatModel;
+
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
@@ -221,7 +233,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  llm?: ActionsClientLlm | AssistantToolLlm;
   logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;

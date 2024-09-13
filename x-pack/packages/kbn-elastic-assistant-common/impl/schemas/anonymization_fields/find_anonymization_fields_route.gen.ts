@@ -11,10 +11,10 @@
  *
  * info:
  *   title: Find AnonymizationFields API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../common_attributes.gen';

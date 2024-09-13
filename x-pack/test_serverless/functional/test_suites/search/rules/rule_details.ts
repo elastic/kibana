@@ -73,13 +73,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginAsViewer();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Header', () => {

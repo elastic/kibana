@@ -22,12 +22,9 @@ import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
-  getPluginNameFromRequest,
+  getSystemPromptFromUserConversation,
   langChainExecute,
-  nonLangChainExecute,
-  updateConversationWithUserInput,
 } from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
@@ -96,41 +93,7 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
-
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const isGraphAvailable =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault &&
-            request.body.isEnabledKnowledgeBase;
-
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          if (!isGraphAvailable && conversationId && conversationsDataClient) {
-            const updatedConversation = await updateConversationWithUserInput({
-              actionsClient,
-              actionTypeId,
-              connectorId,
-              conversationId,
-              conversationsDataClient,
-              logger,
-              replacements: latestReplacements,
-              newMessages: newMessage ? [newMessage] : [],
-              model: request.body.model,
-            });
-            if (updatedConversation == null) {
-              return response.badRequest({
-                body: `conversation id: "${conversationId}" not updated`,
-              });
-            }
-            // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
-              role: c.role,
-              content: c.content,
-            }));
-          }
+          const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
           onLlmResponse = async (
             content: string,
@@ -148,27 +111,17 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
-
-          if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
-            // if not langchain, call execute action directly and return the response:
-            return await nonLangChainExecute({
-              abortSignal,
-              actionsClient,
-              actionTypeId,
-              connectorId,
-              logger,
-              messages: messages ?? [],
-              onLlmResponse,
-              request,
-              response,
-              telemetry,
+          let systemPrompt;
+          if (conversationsDataClient && promptsDataClient && conversationId) {
+            systemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId,
+              promptsDataClient,
             });
           }
-
           return await langChainExecute({
             abortSignal,
             isStream: request.body.subAction !== 'invokeAI',
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             actionsClient,
             actionTypeId,
             connectorId,
@@ -176,13 +129,14 @@ export const postActionsConnectorExecuteRoute = (
             context: ctx,
             getElser,
             logger,
-            messages: (isGraphAvailable && newMessage ? [newMessage] : messages) ?? [],
+            messages: (newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
             request,
             response,
             telemetry,
+            systemPrompt,
           });
         } catch (err) {
           logger.error(err);
@@ -192,8 +146,6 @@ export const postActionsConnectorExecuteRoute = (
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-            isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',

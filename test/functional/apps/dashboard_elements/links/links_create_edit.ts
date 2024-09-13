@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LINKS_PANEL_NAME = 'Some links';
 
   describe('links panel create and edit', () => {
-    describe('creation', async () => {
+    describe('creation', () => {
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -54,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can not add an external link that violates externalLinks.policy', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
         expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can create a new by-reference links panel', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await createSomeLinks();
         await dashboardLinks.toggleSaveByReference(true);
@@ -75,23 +76,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('confirmSaveSavedObjectButton');
         await common.waitForSaveModalToClose();
         await testSubjects.exists('addObjectToDashboardSuccess');
+        await testSubjects.existOrFail('links--component');
+        await dashboardPanelActions.expectLinkedToLibrary(LINKS_PANEL_NAME, false);
 
-        expect(await testSubjects.existOrFail('links--component'));
         expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         await dashboard.clickDiscardChanges();
       });
 
-      describe('by-value links panel', async () => {
+      it('does not close the flyout when the user cancels the save as modal', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+        await createSomeLinks();
+        await dashboardLinks.toggleSaveByReference(true);
+        await dashboardLinks.clickPanelEditorSaveButton();
+
+        await testSubjects.exists('savedObjectSaveModal');
+        await testSubjects.click('saveCancelButton');
+        await testSubjects.existOrFail('links--panelEditor--flyout');
+        await dashboardLinks.clickPanelEditorCloseButton();
+      });
+
+      describe('by-value links panel', () => {
         it('can create a new by-value links panel', async () => {
           await dashboardAddPanel.clickEditorMenuButton();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+          await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
           await dashboardLinks.setLayout('horizontal');
           await createSomeLinks();
           await dashboardLinks.toggleSaveByReference(false);
           await dashboardLinks.clickPanelEditorSaveButton();
           await testSubjects.exists('addObjectToDashboardSuccess');
+          await testSubjects.existOrFail('links--component');
+          await dashboardPanelActions.expectNotLinkedToLibrary();
 
-          expect(await testSubjects.existOrFail('links--component'));
           expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         });
 
@@ -101,8 +117,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
 
           await dashboard.waitForRenderComplete();
-          await dashboardPanelActions.legacySaveToLibrary('Some more links');
-          await testSubjects.existOrFail('addPanelToLibrarySuccess');
+          await dashboardPanelActions.saveToLibrary('Some more links');
+        });
+
+        it('can unlink a panel from the library', async () => {
+          await dashboardPanelActions.unlinkFromLibrary('Some more links');
         });
 
         after(async () => {
@@ -116,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
@@ -136,7 +154,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
@@ -155,7 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.switchToEditMode();
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 

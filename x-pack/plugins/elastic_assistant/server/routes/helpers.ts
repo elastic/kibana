@@ -27,9 +27,12 @@ import { i18n } from '@kbn/i18n';
 import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { FindResponse } from '../ai_assistant_data_clients/find';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
-import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -39,7 +42,6 @@ import {
 import { executeAction, StaticResponse } from '../lib/executor';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
-import { getLangSmithTracer } from './evaluate/utils';
 import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -215,6 +217,39 @@ export const appendMessageToConversation = async ({
   return updatedConversation;
 };
 
+export interface GetSystemPromptFromUserConversationParams {
+  conversationsDataClient: AIAssistantConversationsDataClient;
+  conversationId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): string | undefined => {
+  if (result.total > 0 && result.data.hits.hits.length > 0) {
+    return result.data.hits.hits[0]._source?.content;
+  }
+  return undefined;
+};
+
+export const getSystemPromptFromUserConversation = async ({
+  conversationsDataClient,
+  conversationId,
+  promptsDataClient,
+}: GetSystemPromptFromUserConversationParams): Promise<string | undefined> => {
+  const conversation = await conversationsDataClient.getConversation({ id: conversationId });
+  if (!conversation) {
+    return undefined;
+  }
+  const currentSystemPromptId = conversation.apiConfig?.defaultSystemPromptId;
+  if (!currentSystemPromptId) {
+    return undefined;
+  }
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${currentSystemPromptId}"`,
+  });
+  return extractPromptFromESResult(result);
+};
+
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
@@ -275,57 +310,10 @@ export interface NonLangChainExecuteParams {
   response: KibanaResponseFactory;
   telemetry: AnalyticsServiceSetup;
 }
-export const nonLangChainExecute = async ({
-  messages,
-  abortSignal,
-  actionTypeId,
-  connectorId,
-  logger,
-  actionsClient,
-  onLlmResponse,
-  response,
-  request,
-  telemetry,
-}: NonLangChainExecuteParams) => {
-  logger.debug('Executing via actions framework directly');
-  const result = await executeAction({
-    abortSignal,
-    onLlmResponse,
-    actionsClient,
-    connectorId,
-    actionTypeId,
-    params: {
-      subAction: request.body.subAction,
-      subActionParams: {
-        model: request.body.model,
-        messages,
-        ...(actionTypeId === '.gen-ai'
-          ? { n: 1, stop: null, temperature: 0.2 }
-          : { temperature: 0, stopSequences: [] }),
-      },
-    },
-    logger,
-  });
-
-  telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-    actionTypeId,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
-    model: request.body.model,
-    assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-  });
-  return response.ok({
-    body: result,
-    ...(request.body.subAction === 'invokeAI'
-      ? { headers: { 'content-type': 'application/json' } }
-      : {}),
-  });
-};
 
 export interface LangChainExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
   replacements: Replacements;
-  isEnabledKnowledgeBase: boolean;
   isStream?: boolean;
   onNewReplacements: (newReplacements: Replacements) => void;
   abortSignal: AbortSignal;
@@ -348,12 +336,12 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  systemPrompt?: string;
 }
 export const langChainExecute = async ({
   messages,
   replacements,
   onNewReplacements,
-  isEnabledKnowledgeBase,
   abortSignal,
   telemetry,
   actionTypeId,
@@ -368,11 +356,8 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  systemPrompt,
 }: LangChainExecuteParams) => {
-  // TODO: Add `traceId` to actions request when calling via langchain
-  logger.debug(
-    `Executing via langchain, isEnabledKnowledgeBase: ${isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
-  );
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
     request,
@@ -383,6 +368,8 @@ export const langChainExecute = async ({
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
+  const v2KnowledgeBaseEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -397,19 +384,14 @@ export const langChainExecute = async ({
   const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
   // Create an ElasticsearchStore for KB interactions
-  // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
-  const enableKnowledgeBaseByDefault =
-    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-  const kbDataClient = enableKnowledgeBaseByDefault
-    ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
-    : undefined;
-  const kbIndex =
-    enableKnowledgeBaseByDefault && kbDataClient != null
-      ? kbDataClient.indexTemplateAndPattern.alias
-      : KNOWLEDGE_BASE_INDEX_PATTERN;
+  const kbDataClient =
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled)) ??
+    undefined;
+  const bedrockChatEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(
     esClient,
-    kbIndex,
+    kbDataClient?.indexTemplateAndPattern?.alias ?? '',
     logger,
     telemetry,
     elserId,
@@ -429,7 +411,7 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    isEnabledKnowledgeBase,
+    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,
@@ -445,6 +427,7 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     size: request.body.size,
+    systemPrompt,
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({
@@ -455,18 +438,12 @@ export const langChainExecute = async ({
     },
   };
 
-  // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
-  let result: StreamResponseWithHeaders | StaticReturnType;
-  if (enableKnowledgeBaseByDefault && request.body.isEnabledKnowledgeBase) {
-    result = await callAssistantGraph(executorParams);
-  } else {
-    result = await callAgentExecutor(executorParams);
-  }
+  const result: StreamResponseWithHeaders | StaticReturnType = await callAssistantGraph(
+    executorParams
+  );
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts ?? true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
@@ -475,76 +452,47 @@ export const langChainExecute = async ({
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
-export interface CreateOrUpdateConversationWithParams {
-  logger: Logger;
+export interface CreateConversationWithParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   replacements: Replacements;
   conversationId?: string;
   promptId?: string;
   actionTypeId: string;
   connectorId: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
   newMessages?: Array<Pick<Message, 'content' | 'role'>>;
   model?: string;
-  responseLanguage?: string;
 }
-export const createOrUpdateConversationWithUserInput = async ({
-  logger,
+export const createConversationWithUserInput = async ({
   conversationsDataClient,
   replacements,
   conversationId,
   actionTypeId,
   promptId,
   connectorId,
-  actionsClient,
   newMessages,
   model,
-  responseLanguage,
-}: CreateOrUpdateConversationWithParams) => {
+}: CreateConversationWithParams) => {
   if (!conversationId) {
     if (newMessages && newMessages.length > 0) {
-      const title = await generateTitleForNewChatConversation({
-        message: newMessages[0],
-        actionsClient,
-        actionTypeId,
-        connectorId,
-        logger,
-        model,
-        responseLanguage,
-      });
-      if (title) {
-        return conversationsDataClient.createConversation({
-          conversation: {
-            title,
-            messages: newMessages.map((m) => ({
-              content: m.content,
-              role: m.role,
-              timestamp: new Date().toISOString(),
-            })),
-            replacements,
-            apiConfig: {
-              connectorId,
-              actionTypeId,
-              model,
-              defaultSystemPromptId: promptId,
-            },
+      return conversationsDataClient.createConversation({
+        conversation: {
+          title: NEW_CHAT,
+          messages: newMessages.map((m) => ({
+            content: m.content,
+            role: m.role,
+            timestamp: new Date().toISOString(),
+          })),
+          replacements,
+          apiConfig: {
+            connectorId,
+            actionTypeId,
+            model,
+            defaultSystemPromptId: promptId,
           },
-        });
-      }
+        },
+      });
     }
-    return;
   }
-  return updateConversationWithUserInput({
-    actionsClient,
-    actionTypeId,
-    connectorId,
-    conversationId,
-    conversationsDataClient,
-    logger,
-    replacements,
-    newMessages,
-    model,
-  });
 };
 
 export interface UpdateConversationWithParams {
@@ -680,4 +628,27 @@ export const performChecks = ({
   }
 
   return undefined;
+};
+
+/**
+ * Returns whether the v2 KB is enabled
+ *
+ * @param context - Route context
+ * @param request - Route KibanaRequest
+
+ */
+export const isV2KnowledgeBaseEnabled = ({
+  context,
+  request,
+}: {
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
+  request: KibanaRequest;
+}): boolean => {
+  const pluginName = getPluginNameFromRequest({
+    request,
+    defaultPluginName: DEFAULT_PLUGIN_NAME,
+  });
+  return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 };

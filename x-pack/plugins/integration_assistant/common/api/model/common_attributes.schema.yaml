@@ -16,6 +16,12 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
+    LogSamples:
+      type: array
+      items:
+        type: string
+      description:  String form of the input logsamples.
+
     RawSamples:
       type: array
       items:
@@ -35,6 +41,34 @@ components:
       description: An array of processed documents.
       items:
         type: object
+
+    SamplesFormatName:
+      type: string
+      description: The name of the log samples format.
+      enum:
+        - ndjson
+        - json
+        - csv
+        - structured
+        - unstructured
+        - unsupported
+
+    SamplesFormat:
+      type: object
+      description: Format of the provided log samples.
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/SamplesFormatName"
+        multiline:
+          type: boolean
+          description: For some formats, specifies whether the samples can be multiline.
+        json_path:
+          type: array
+          description: For a JSON format, describes how to get to the sample array from the root of the JSON.
+          items:
+            type: string
 
     Pipeline:
       type: object
@@ -66,14 +100,14 @@ components:
       type: string
       description: The input type for the dataStream to pull logs from.
       enum:
-        - aws_cloudwatch
-        - aws_s3
-        - azure_blob_storage
-        - azure_eventhub
+        - aws-cloudwatch
+        - aws-s3
+        - azure-blob-storage
+        - azure-eventhub
         - cel
         - cloudfoundry
         - filestream
-        - gcp_pubsub
+        - gcp-pubsub
         - gcs
         - http_endpoint
         - journald
@@ -92,6 +126,7 @@ components:
         - rawSamples
         - pipeline
         - docs
+        - samplesFormat
       properties:
         name:
           type: string
@@ -116,6 +151,9 @@ components:
         docs:
           $ref: "#/components/schemas/Docs"
           description: The documents of the dataStream.
+        samplesFormat:
+          $ref: "#/components/schemas/SamplesFormat"
+          description: The format of log samples in this dataStream.
 
     Integration:
       type: object
@@ -143,3 +181,17 @@ components:
         logo:
           type: string
           description: The logo of the integration.
+
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - projectName
+        - apiKey
+      properties:
+        projectName:
+          type: string
+          description: The project name.
+        apiKey:
+          type: string
+          description: The apiKey to use for tracing.

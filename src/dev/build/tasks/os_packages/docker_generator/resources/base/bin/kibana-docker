@@ -40,6 +40,7 @@ kibana_vars=(
     csp.report_uri
     csp.report_to
     csp.report_only.form_action
+    permissionsPolicy.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
@@ -237,6 +238,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.max
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
+    xpack.alerting.maxScheduledPerMinute
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -411,7 +413,11 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
+    xpack.task_manager.discovery.active_nodes_lookback
+    xpack.task_manager.discovery.interval
+    xpack.task_manager.kibanas_per_partition
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate

@@ -26,17 +26,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
   ];
 
   const uiCapabilitiesExceptions = [
-    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
-    'enterpriseSearch',
-    'enterpriseSearchContent',
-    'enterpriseSearchAnalytics',
-    'enterpriseSearchApplications',
-    'enterpriseSearchAISearch',
-    'enterpriseSearchVectorSearch',
-    'enterpriseSearchElasticsearch',
+    // appSearch and workplace Search are loaded but disabled because the ent-search application isn't running.
+    // That means the following capabilities are disabled:
     'appSearch',
     'workplaceSearch',
-    'searchExperiences',
   ];
 
   describe('catalogue', () => {

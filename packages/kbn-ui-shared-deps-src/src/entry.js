@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('./polyfills');
@@ -31,6 +32,7 @@ export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
 export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 export const StyledComponents = require('styled-components');
+export const FastestLevenshtein = require('fastest-levenshtein');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
@@ -60,6 +62,7 @@ export const Fflate = { unzlibSync, strFromU8 };
 export const TsLib = require('tslib');
 export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
+export const KbnCryptoBrowser = require('@kbn/crypto-browser');
 export const KbnEsQuery = require('@kbn/es-query');
 export const KbnSearchErrors = require('@kbn/search-errors');
 export const KbnStd = require('@kbn/std');
@@ -73,3 +76,5 @@ export const ReactQuery = require('@tanstack/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-ast');
+export const KbnEbtTools = require('@kbn/ebt-tools');
+export const ElasticApmRumCore = require('@elastic/apm-rum-core');

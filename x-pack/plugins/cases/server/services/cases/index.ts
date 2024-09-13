@@ -274,7 +274,7 @@ export class CasesService {
     options?: SavedObjectsBulkDeleteOptions;
   }) {
     try {
-      this.log.debug(`Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
+      this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
       await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);

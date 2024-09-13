@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
@@ -33,46 +33,62 @@ import { SearchRow } from '../components/search_row';
 import { NotesUtilityBar } from '../components/utility_bar';
 import { DeleteConfirmModal } from '../components/delete_confirm_modal';
 import * as i18n from '../components/translations';
+import type { OpenTimelineProps } from '../../timelines/components/open_timeline/types';
+import { OpenEventInTimeline } from '../components/open_event_in_timeline';
 
-const columns: Array<EuiBasicTableColumn<Note>> = [
-  {
-    field: 'created',
-    name: i18n.CREATED_COLUMN,
-    sortable: true,
-    render: (created: Note['created']) => <FormattedRelativePreferenceDate value={created} />,
-  },
-  {
-    field: 'createdBy',
-    name: i18n.CREATED_BY_COLUMN,
-  },
-  {
-    field: 'eventId',
-    name: i18n.EVENT_ID_COLUMN,
-    sortable: true,
-  },
-  {
-    field: 'timelineId',
-    name: i18n.TIMELINE_ID_COLUMN,
-  },
-  {
-    field: 'note',
-    name: i18n.NOTE_CONTENT_COLUMN,
-  },
-];
+const columns: (
+  onOpenTimeline: OpenTimelineProps['onOpenTimeline']
+) => Array<EuiBasicTableColumn<Note>> = (onOpenTimeline) => {
+  return [
+    {
+      field: 'created',
+      name: i18n.CREATED_COLUMN,
+      sortable: true,
+      render: (created: Note['created']) => <FormattedRelativePreferenceDate value={created} />,
+    },
+    {
+      field: 'createdBy',
+      name: i18n.CREATED_BY_COLUMN,
+    },
+    {
+      field: 'eventId',
+      name: i18n.EVENT_ID_COLUMN,
+      sortable: true,
+      render: (eventId: Note['eventId']) => <OpenEventInTimeline eventId={eventId} />,
+    },
+    {
+      field: 'timelineId',
+      name: i18n.TIMELINE_ID_COLUMN,
+      render: (timelineId: Note['timelineId']) =>
+        timelineId ? (
+          <EuiLink onClick={() => onOpenTimeline({ timelineId, duplicate: false })}>
+            {i18n.OPEN_TIMELINE}
+          </EuiLink>
+        ) : null,
+    },
+    {
+      field: 'note',
+      name: i18n.NOTE_CONTENT_COLUMN,
+    },
+  ];
+};
 
-const pageSizeOptions = [50, 25, 10, 0];
+const pageSizeOptions = [10, 25, 50, 100];
 
 /**
  * Allows user to search and delete notes.
  * This component uses the same slices of state as the notes functionality of the rest of the Security Solution applicaiton.
  * Therefore, changes made in this page (like fetching or deleting notes) will have an impact everywhere.
  */
-export const NoteManagementPage = () => {
+export const NoteManagementPage = ({
+  onOpenTimeline,
+}: {
+  onOpenTimeline: OpenTimelineProps['onOpenTimeline'];
+}) => {
   const dispatch = useDispatch();
   const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
-  const totalItems = pagination.total ?? 0;
   const notesSearch = useSelector(selectNotesTableSearch);
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const isDeleteModalVisible = pendingDeleteIds.length > 0;
@@ -148,22 +164,22 @@ export const NoteManagementPage = () => {
       },
     ];
     return [
-      ...columns,
+      ...columns(onOpenTimeline),
       {
         name: 'actions',
         actions,
       },
     ];
-  }, [selectRowForDeletion]);
+  }, [selectRowForDeletion, onOpenTimeline]);
 
   const currentPagination = useMemo(() => {
     return {
       pageIndex: pagination.page - 1,
       pageSize: pagination.perPage,
-      totalItemCount: totalItems,
+      totalItemCount: pagination.total,
       pageSizeOptions,
     };
-  }, [pagination, totalItems]);
+  }, [pagination]);
 
   const selection = useMemo(() => {
     return {
@@ -184,7 +200,7 @@ export const NoteManagementPage = () => {
         iconType="error"
         color="danger"
         title={<h2>{i18n.TABLE_ERROR}</h2>}
-        body={<p>{fetchErrorData}</p>}
+        body={<p>{fetchErrorData as React.ReactNode}</p>}
       />
     );
   }

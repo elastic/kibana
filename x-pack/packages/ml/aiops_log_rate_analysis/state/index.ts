@@ -14,7 +14,7 @@ export {
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,
-  setWindowParameters,
+  setChartWindowParameters,
   type BrushSelectionUpdatePayload,
 } from './log_rate_analysis_slice';
 export {

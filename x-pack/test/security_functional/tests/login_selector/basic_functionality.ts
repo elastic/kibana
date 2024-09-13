@@ -132,11 +132,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         full_name: 'Guest',
       });
       await PageObjects.security.loginSelector.login('anonymous', 'anonymous1');
-      await security.user.delete('anonymous_user');
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
+
+      await security.user.delete('anonymous_user');
     });
 
     it('can login after `Unauthorized` error after request authentication preserving original URL', async () => {

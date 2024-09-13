@@ -25,7 +25,6 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -49,11 +48,6 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -631,23 +625,44 @@ describe('StepDefineRule', () => {
   });
 
   describe('AI assistant', () => {
-    beforeEach(() => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-    });
-    it('renders assistant when query is not valid', () => {
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
-        wrapper: TestProviders,
-      });
+    it('renders assistant when query is not valid and not empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
 
       expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
     });
 
-    it('does not render assistant when feature flag is disabled', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
-        wrapper: TestProviders,
-      });
+    it('does not render assistant when query is not valid and empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
 
       expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
@@ -704,7 +719,6 @@ function TestForm({
         setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
-        browserFields={{}}
         isQueryBarValid={true}
         setIsQueryBarValid={jest.fn()}
         setIsThreatQueryBarValid={jest.fn()}

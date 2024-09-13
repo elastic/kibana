@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { queue } from 'async';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import {
-  fetchHistogramsForFields,
-  type SignificantItem,
-  type SignificantItemGroup,
-  type SignificantItemHistogramItem,
-  type NumericChartData,
+import type {
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemGroupHistogram,
+  NumericChartData,
 } from '@kbn/ml-agg-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
-
+import { QUEUE_CHUNKING_SIZE } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import {
   addSignificantItemsGroup,
   addSignificantItemsGroupHistogram,
@@ -27,20 +25,25 @@ import {
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
-
 import { fetchFrequentItemSets } from '@kbn/aiops-log-rate-analysis/queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from '@kbn/aiops-log-rate-analysis/queries/fetch_terms_2_categories_counts';
-import { getGroupFilter } from '@kbn/aiops-log-rate-analysis/queries/get_group_filter';
-import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 import { getSignificantItemGroups } from '@kbn/aiops-log-rate-analysis/queries/get_significant_item_groups';
+import { fetchMiniHistogramsForSignificantGroups } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_groups';
 
-import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
+import {
+  MAX_CONCURRENT_QUERIES,
+  LOADED_FIELD_CANDIDATES,
+  PROGRESS_STEP_P_VALUES,
+  PROGRESS_STEP_GROUPING,
+  PROGRESS_STEP_HISTOGRAMS,
+  PROGRESS_STEP_HISTOGRAMS_GROUPS,
+} from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     responseStream,
     logDebugMessage,
@@ -50,7 +53,7 @@ export const groupingHandlerFactory =
   async (
     significantCategories: SignificantItem[],
     significantTerms: SignificantItem[],
-    overallTimeSeries?: NumericChartData
+    overallTimeSeries?: NumericChartData['data']
   ) => {
     logDebugMessage('Group results.');
 
@@ -81,24 +84,26 @@ export const groupingHandlerFactory =
     );
 
     try {
-      const { fields, itemSets } = await fetchFrequentItemSets(
-        client,
-        requestBody.index,
-        JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
-        significantTerms,
-        requestBody.timeFieldName,
-        requestBody.deviationMin,
-        requestBody.deviationMax,
+      const { fields, itemSets } = await fetchFrequentItemSets({
+        esClient,
         logger,
-        stateHandler.sampleProbability(),
-        responseStream.pushError,
-        abortSignal
-      );
+        emitError: responseStream.pushError,
+        abortSignal,
+        arguments: {
+          index: requestBody.index,
+          searchQuery: JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+          significantItems: significantTerms,
+          timeFieldName: requestBody.timeFieldName,
+          deviationMin: requestBody.deviationMin,
+          deviationMax: requestBody.deviationMax,
+          sampleProbability: stateHandler.sampleProbability(),
+        },
+      });
 
       if (significantCategories.length > 0 && significantTerms.length > 0) {
         const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
           await fetchTerms2CategoriesCounts(
-            client,
+            esClient,
             requestBody,
             JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
             significantTerms,
@@ -136,7 +141,12 @@ export const groupingHandlerFactory =
           responseStream.push(addSignificantItemsGroup(significantItemGroups));
         }
 
-        stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
+        stateHandler.loaded(
+          LOADED_FIELD_CANDIDATES +
+            PROGRESS_STEP_P_VALUES +
+            PROGRESS_STEP_HISTOGRAMS +
+            PROGRESS_STEP_GROUPING
+        );
         pushHistogramDataLoadingState();
 
         if (stateHandler.shouldStop()) {
@@ -147,7 +157,11 @@ export const groupingHandlerFactory =
 
         logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
-        const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
+        const groupHistogramQueueChunks = chunk(significantItemGroups, QUEUE_CHUNKING_SIZE);
+        const loadingStepSize =
+          (1 / groupHistogramQueueChunks.length) * PROGRESS_STEP_HISTOGRAMS_GROUPS;
+
+        const groupHistogramQueue = queue(async function (payload: SignificantItemGroup[]) {
           if (stateHandler.shouldStop()) {
             logDebugMessage('shouldStop abort fetching group histograms.');
             groupHistogramQueue.kill();
@@ -156,72 +170,34 @@ export const groupingHandlerFactory =
           }
 
           if (overallTimeSeries !== undefined) {
-            const histogramQuery = getHistogramQuery(requestBody, getGroupFilter(cpg));
+            let histograms: SignificantItemGroupHistogram[];
 
-            let cpgTimeSeries: NumericChartData;
             try {
-              cpgTimeSeries = (
-                (await fetchHistogramsForFields(
-                  client,
-                  requestBody.index,
-                  histogramQuery,
-                  // fields
-                  [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  // samplerShardSize
-                  -1,
-                  undefined,
-                  abortSignal,
-                  stateHandler.sampleProbability(),
-                  RANDOM_SAMPLER_SEED
-                )) as [NumericChartData]
-              )[0];
+              histograms = await fetchMiniHistogramsForSignificantGroups(
+                esClient,
+                requestBody,
+                payload,
+                overallTimeSeries,
+                logger,
+                stateHandler.sampleProbability(),
+                () => {},
+                abortSignal
+              );
             } catch (e) {
-              if (!isRequestAbortedError(e)) {
-                logger.error(
-                  `Failed to fetch the histogram data for group #${cpg.id}, got: \n${e.toString()}`
-                );
-                responseStream.pushError(
-                  `Failed to fetch the histogram data for group #${cpg.id}.`
-                );
-              }
+              logger.error(
+                `Failed to fetch the histogram data chunk for groups, got: \n${e.toString()}`
+              );
+              responseStream.pushError(`Failed to fetch the histogram data chunk for groups.`);
               return;
             }
-            const histogram: SignificantItemHistogramItem[] =
-              overallTimeSeries.data.map((o) => {
-                const current = cpgTimeSeries.data.find(
-                  (d1) => d1.key_as_string === o.key_as_string
-                ) ?? {
-                  doc_count: 0,
-                };
 
-                return {
-                  key: o.key,
-                  key_as_string: o.key_as_string ?? '',
-                  doc_count_significant_item: current.doc_count,
-                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                };
-              }) ?? [];
-
-            responseStream.push(
-              addSignificantItemsGroupHistogram([
-                {
-                  id: cpg.id,
-                  histogram,
-                },
-              ])
-            );
+            stateHandler.loaded(loadingStepSize, false);
+            pushHistogramDataLoadingState();
+            responseStream.push(addSignificantItemsGroupHistogram(histograms));
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        await groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.push(groupHistogramQueueChunks);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

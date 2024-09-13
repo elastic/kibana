@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/alerts-ui-shared",
   "owner": "@elastic/response-ops"
 }

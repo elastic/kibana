@@ -35,7 +35,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
-} from './task_run_calcultors';
+} from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
@@ -319,6 +319,7 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
 
 const DEFAULT_TASK_RUN_FREQUENCIES = {
   [TaskRunResult.Success]: 0,
+  // @ts-expect-error upgrade typescript v5.1.6
   [TaskRunResult.SuccessRescheduled]: 0,
   [TaskRunResult.RetryScheduled]: 0,
   [TaskRunResult.Failed]: 0,

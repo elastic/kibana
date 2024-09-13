@@ -50,9 +50,13 @@
     "@kbn/calculate-auto",
     "@kbn/discover-plugin",
     "@kbn/shared-ux-prompt-no-data-views-types",
-    "@kbn/core-analytics-server",
-    "@kbn/ebt",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/rison"
   ],
   "exclude": [
     "target/**/*"

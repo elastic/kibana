@@ -3,12 +3,13 @@ info:
   title: Chat Complete API endpoint
   version: '2023-10-31'
 paths:
-  /api/elastic_assistant/chat/complete:
+  /api/security_ai_assistant/chat/complete:
     post:
-      operationId: ChatComplete
       x-codegen-enabled: true
-      description: Creates a model response for the given chat conversation.
-      summary: Creates a model response for the given chat conversation.
+      x-labels: [ess, serverless]
+      operationId: ChatComplete
+      description: Create a model response for the given chat conversation.
+      summary: Create a model response
       tags:
         - Chat Complete API
       requestBody:
@@ -86,7 +87,7 @@ components:
         promptId:
           type: string
         isStream:
-          type: boolean  
+          type: boolean
         responseLanguage:
           type: string
         langSmithProject:

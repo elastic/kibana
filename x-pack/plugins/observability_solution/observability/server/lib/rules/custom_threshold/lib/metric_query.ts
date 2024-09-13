@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Filter } from '@kbn/es-query';
+import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import {
   Aggregators,
   CustomMetricExpressionParams,
@@ -52,6 +52,7 @@ export const createBoolQuery = (
   timeframe: { start: number; end: number },
   timeFieldName: string,
   searchConfiguration: SearchConfigurationType,
+  esQueryConfig: EsQueryConfig,
   additionalQueries: QueryDslQueryContainer[] = []
 ) => {
   const rangeQuery: QueryDslQueryContainer = {
@@ -64,7 +65,7 @@ export const createBoolQuery = (
   };
   const filters = QueryDslQueryContainerToFilter([rangeQuery, ...additionalQueries]);
 
-  return getSearchConfigurationBoolQuery(searchConfiguration, filters);
+  return getSearchConfigurationBoolQuery(searchConfiguration, filters, esQueryConfig);
 };
 
 export const getElasticsearchMetricQuery = (
@@ -74,6 +75,7 @@ export const getElasticsearchMetricQuery = (
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   searchConfiguration: SearchConfigurationType,
+  esQueryConfig: EsQueryConfig,
   lastPeriodEnd?: number,
   groupBy?: string | string[],
   afterKey?: Record<string, string>,
@@ -204,7 +206,7 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const query = createBoolQuery(timeframe, timeFieldName, searchConfiguration);
+  const query = createBoolQuery(timeframe, timeFieldName, searchConfiguration, esQueryConfig);
 
   return {
     track_total_hits: true,

@@ -37,6 +37,8 @@ import {
   usePermissionCheck,
   useStartServices,
   useMultipleAgentPolicies,
+  useGetOutputs,
+  useDefaultOutput,
 } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 
@@ -106,6 +108,16 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     return packagePolicy.policy_ids.length || 0;
   }, []);
 
+  const { data: outputsData, isLoading: isOutputsLoading } = useGetOutputs();
+  const { output: defaultOutputData } = useDefaultOutput();
+  const outputNamesById = useMemo(() => {
+    const outputs = outputsData?.items ?? [];
+    return outputs.reduce<Record<string, string>>((acc, output) => {
+      acc[output.id] = output.name;
+      return acc;
+    }, {});
+  }, [outputsData]);
+
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
       {
@@ -113,8 +125,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         sortable: true,
         truncateText: true,
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
-          defaultMessage: 'Name',
+          defaultMessage: 'Integration policy',
         }),
+        width: '35%',
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
@@ -129,9 +142,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     }
                   : { disabled: true })}
               >
-                <span className="eui-textTruncate" title={value}>
-                  {value}
-                </span>
+                <span className="eui-textTruncate">{value}</span>
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;
@@ -281,9 +292,66 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         },
       },
       {
+        field: 'output_id',
+        name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.outputColumnTitle', {
+          defaultMessage: 'Output',
+        }),
+        render: (outputId: InMemoryPackagePolicy['output_id']) => {
+          if (isOutputsLoading) {
+            return null;
+          }
+          if (outputId) {
+            return <EuiBadge color="hollow">{outputNamesById[outputId] || outputId}</EuiBadge>;
+          }
+          if (agentPolicy.data_output_id) {
+            return (
+              <>
+                <EuiBadge color="default">
+                  {outputNamesById[agentPolicy.data_output_id] || agentPolicy.data_output_id}
+                </EuiBadge>
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.policyDetails.packagePoliciesTable.outputFromParentPolicyText',
+                    {
+                      defaultMessage: 'Output defined in parent agent policy',
+                    }
+                  )}
+                  position="right"
+                  type="iInCircle"
+                  color="subdued"
+                />
+              </>
+            );
+          }
+          if (defaultOutputData) {
+            return (
+              <>
+                <EuiBadge color="default">
+                  {outputNamesById[defaultOutputData.id] || defaultOutputData.id}
+                </EuiBadge>
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.policyDetails.packagePoliciesTable.outputFromFleetSettingsText',
+                    {
+                      defaultMessage: 'Output defined in Fleet settings',
+                    }
+                  )}
+                  position="right"
+                  type="iInCircle"
+                  color="subdued"
+                />
+              </>
+            );
+          }
+        },
+      },
+      {
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
+        width: '70px',
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
@@ -311,8 +379,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       agentPolicy,
       canUseMultipleAgentPolicies,
       canReadAgentPolicies,
-      canWriteIntegrationPolicies,
       getSharedPoliciesNumber,
+      canWriteIntegrationPolicies,
+      isOutputsLoading,
+      defaultOutputData,
+      outputNamesById,
     ]
   );
 

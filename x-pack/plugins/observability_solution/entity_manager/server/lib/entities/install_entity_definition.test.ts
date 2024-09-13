@@ -5,21 +5,32 @@
  * 2.0.
  */
 
+import semver from 'semver';
+import moment from 'moment';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { installBuiltInEntityDefinitions } from './install_entity_definition';
-import { builtInServicesEntityDefinition } from './built_in/services';
+import {
+  installBuiltInEntityDefinitions,
+  installEntityDefinition,
+} from './install_entity_definition';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
+import {
+  generateHistoryIndexTemplateId,
+  generateHistoryIngestPipelineId,
+  generateHistoryTransformId,
+  generateLatestIndexTemplateId,
+  generateLatestIngestPipelineId,
+  generateLatestTransformId,
+} from './helpers/generate_component_id';
 import { generateHistoryTransform } from './transform/generate_history_transform';
 import { generateLatestTransform } from './transform/generate_latest_transform';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
+import { EntityDefinitionIdInvalid } from './errors/entity_definition_id_invalid';
+import { EntityIdConflict } from './errors/entity_id_conflict_error';
 
 const assertHasCreatedDefinition = (
   definition: EntityDefinition,
@@ -27,49 +38,150 @@ const assertHasCreatedDefinition = (
   esClient: ElasticsearchClient
 ) => {
   expect(soClient.create).toBeCalledTimes(1);
-  expect(soClient.create).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition, {
-    id: definition.id,
-    overwrite: true,
+  expect(soClient.create).toBeCalledWith(
+    SO_ENTITY_DEFINITION_TYPE,
+    {
+      ...definition,
+      installStatus: 'installing',
+      installStartedAt: expect.any(String),
+    },
+    {
+      id: definition.id,
+      overwrite: true,
+      managed: definition.managed,
+    }
+  );
+  expect(soClient.update).toBeCalledTimes(1);
+  expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
+    installStatus: 'installed',
   });
+
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
 
   expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
-    id: generateHistoryIngestPipelineId(builtInServicesEntityDefinition),
+    id: generateHistoryIngestPipelineId(definition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: definition.version,
+      managed: definition.managed,
+    },
   });
   expect(esClient.ingest.putPipeline).toBeCalledWith({
-    id: generateLatestIngestPipelineId(builtInServicesEntityDefinition),
+    id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: definition.version,
+      managed: definition.managed,
+    },
   });
 
   expect(esClient.transform.putTransform).toBeCalledTimes(2);
-  expect(esClient.transform.putTransform).toBeCalledWith(
-    generateHistoryTransform(builtInServicesEntityDefinition)
-  );
-  expect(esClient.transform.putTransform).toBeCalledWith(
-    generateLatestTransform(builtInServicesEntityDefinition)
-  );
+  expect(esClient.transform.putTransform).toBeCalledWith(generateHistoryTransform(definition));
+  expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
 };
 
-const assertHasStartedTransform = (definition: EntityDefinition, esClient: ElasticsearchClient) => {
-  expect(esClient.transform.startTransform).toBeCalledTimes(2);
-  expect(esClient.transform.startTransform).toBeCalledWith(
-    {
-      transform_id: generateHistoryTransformId(builtInServicesEntityDefinition),
-    },
-    expect.anything()
-  );
-  expect(esClient.transform.startTransform).toBeCalledWith(
-    {
-      transform_id: generateLatestTransformId(builtInServicesEntityDefinition),
-    },
-    expect.anything()
-  );
-};
-
-const assertHasUninstalledDefinition = (
+const assertHasUpgradedDefinition = (
   definition: EntityDefinition,
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) => {
+  expect(soClient.update).toBeCalledTimes(2);
+  expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
+    ...definition,
+    installStatus: 'upgrading',
+    installStartedAt: expect.any(String),
+  });
+  expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
+    installStatus: 'installed',
+  });
+
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+
+  expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateHistoryIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definitionVersion: definition.version,
+      managed: definition.managed,
+    },
+  });
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateLatestIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definitionVersion: definition.version,
+      managed: definition.managed,
+    },
+  });
+
+  expect(esClient.transform.putTransform).toBeCalledTimes(2);
+  expect(esClient.transform.putTransform).toBeCalledWith(generateHistoryTransform(definition));
+  expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
+};
+
+const assertHasDeletedDefinition = (
+  definition: EntityDefinition,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) => {
+  assertHasDeletedTransforms(definition, esClient);
+
+  expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
+  expect(esClient.ingest.deletePipeline).toBeCalledWith(
+    {
+      id: generateHistoryIngestPipelineId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.ingest.deletePipeline).toBeCalledWith(
+    {
+      id: generateLatestIngestPipelineId(definition),
+    },
+    { ignore: [404] }
+  );
+
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateHistoryIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateLatestIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+
+  expect(soClient.delete).toBeCalledTimes(1);
+  expect(soClient.delete).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id);
+};
+
+const assertHasDeletedTransforms = (
+  definition: EntityDefinition,
   esClient: ElasticsearchClient
 ) => {
   expect(esClient.transform.stopTransform).toBeCalledTimes(2);
@@ -99,14 +211,92 @@ const assertHasUninstalledDefinition = (
   );
 
   expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
-  expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
-  expect(soClient.delete).toBeCalledTimes(1);
 };
 
 describe('install_entity_definition', () => {
+  describe('installEntityDefinition', () => {
+    it('should reject invalid ids', async () => {
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      const soClient = savedObjectsClientMock.create();
+
+      await expect(
+        installEntityDefinition({
+          esClient,
+          soClient,
+          definition: { id: 'a'.repeat(40) } as EntityDefinition,
+          logger: loggerMock.create(),
+        })
+      ).rejects.toThrow(EntityDefinitionIdInvalid);
+    });
+
+    it('should reject if id already exists', async () => {
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: mockEntityDefinition.id,
+            type: 'entity-definition',
+            references: [],
+            score: 0,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'installed',
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      });
+
+      await expect(
+        installEntityDefinition({
+          esClient,
+          soClient,
+          definition: mockEntityDefinition,
+          logger: loggerMock.create(),
+        })
+      ).rejects.toThrow(EntityIdConflict);
+    });
+
+    it('should install a definition', async () => {
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
+
+      await installEntityDefinition({
+        esClient,
+        soClient,
+        definition: mockEntityDefinition,
+        logger: loggerMock.create(),
+      });
+
+      assertHasCreatedDefinition(mockEntityDefinition, soClient, esClient);
+    });
+
+    it('should rollback the installation on failure', async () => {
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
+      esClient.transform.putTransform.mockRejectedValue(new Error('cannot install transform'));
+
+      await expect(
+        installEntityDefinition({
+          esClient,
+          soClient,
+          definition: mockEntityDefinition,
+          logger: loggerMock.create(),
+        })
+      ).rejects.toThrow(/cannot install transform/);
+
+      assertHasDeletedDefinition(mockEntityDefinition, soClient, esClient);
+    });
+  });
+
   describe('installBuiltInEntityDefinitions', () => {
-    it('should install and start definition when not found', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+    it('should install definition when not found', async () => {
+      const builtInDefinitions = [mockEntityDefinition];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       const soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
@@ -114,97 +304,161 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
-      assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasCreatedDefinition(mockEntityDefinition, soClient, esClient);
     });
 
     it('should reinstall when partial state found', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+      const builtInDefinitions = [mockEntityDefinition];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       // mock partially installed definition
       esClient.ingest.getPipeline.mockResolvedValue({});
       esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
       const soClient = savedObjectsClientMock.create();
-      const definitionSOResult = {
+
+      soClient.find.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: builtInServicesEntityDefinition.id,
+            id: mockEntityDefinition.id,
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: builtInServicesEntityDefinition,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'installed',
+            },
           },
         ],
         total: 1,
         page: 1,
         per_page: 10,
-      };
-      soClient.find
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce({
-          saved_objects: [],
-          total: 0,
-          page: 1,
-          per_page: 10,
-        });
+      });
 
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
-      assertHasUninstalledDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
+      assertHasUpgradedDefinition(mockEntityDefinition, soClient, esClient);
     });
 
-    it('should start a stopped definition', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+    it('should reinstall when outdated version', async () => {
+      const updatedDefinition = {
+        ...mockEntityDefinition,
+        version: semver.inc(mockEntityDefinition.version, 'major') ?? '0.0.0',
+      };
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      // mock installed but stopped definition
-      esClient.ingest.getPipeline.mockResolvedValue({
-        [generateHistoryIngestPipelineId(builtInServicesEntityDefinition)]: {},
-        [generateLatestIngestPipelineId(builtInServicesEntityDefinition)]: {},
-      });
-      esClient.transform.getTransformStats.mockResolvedValue({
-        // @ts-expect-error
-        transforms: [{ state: 'stopped' }, { state: 'stopped' }],
-        count: 2,
-      });
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
       const soClient = savedObjectsClientMock.create();
-      soClient.find.mockResolvedValue({
+
+      soClient.find.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: builtInServicesEntityDefinition.id,
+            id: mockEntityDefinition.id,
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: builtInServicesEntityDefinition,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'installed',
+            },
           },
         ],
         total: 1,
         page: 1,
         per_page: 10,
       });
+
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: [updatedDefinition],
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
-      expect(soClient.create).toHaveBeenCalledTimes(0);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
+      assertHasUpgradedDefinition(updatedDefinition, soClient, esClient);
+    });
+
+    it('should reinstall when stale upgrade', async () => {
+      const updatedDefinition = {
+        ...mockEntityDefinition,
+        version: semver.inc(mockEntityDefinition.version, 'major') ?? '0.0.0',
+      };
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: mockEntityDefinition.id,
+            type: 'entity-definition',
+            references: [],
+            score: 0,
+            attributes: {
+              ...mockEntityDefinition,
+              // upgrading for 1h
+              installStatus: 'upgrading',
+              installStartedAt: moment().subtract(1, 'hour').toISOString(),
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      });
+
+      await installBuiltInEntityDefinitions({
+        esClient,
+        soClient,
+        definitions: [updatedDefinition],
+        logger: loggerMock.create(),
+      });
+
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
+      assertHasUpgradedDefinition(updatedDefinition, soClient, esClient);
+    });
+
+    it('should reinstall when failed installation', async () => {
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValue({ transforms: [], count: 0 });
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: mockEntityDefinition.id,
+            type: 'entity-definition',
+            references: [],
+            score: 0,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'failed',
+              installStartedAt: new Date().toISOString(),
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      });
+
+      await installBuiltInEntityDefinitions({
+        esClient,
+        soClient,
+        definitions: [mockEntityDefinition],
+        logger: loggerMock.create(),
+      });
+
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
+      assertHasUpgradedDefinition(mockEntityDefinition, soClient, esClient);
     });
   });
 });

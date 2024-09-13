@@ -23,7 +23,8 @@ import {
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  INFERENCE_ENDPOINTS_PLUGIN,
+  SEARCH_RELEVANCE_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -40,6 +41,8 @@ import {
 import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
+import { LicensingLogic } from '../licensing';
+
 import { generateNavLink } from './nav_link_helpers';
 
 /**
@@ -51,7 +54,11 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
     useValues(KibanaLogic);
+
+  const { hasEnterpriseLicense } = useValues(LicensingLogic);
+
   const indicesNavItems = useIndicesNav();
+
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
@@ -154,25 +161,29 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
         defaultMessage: 'Build',
       }),
     },
-    {
-      id: 'relevance',
-      items: [
-        {
-          id: 'inference_endpoints',
-          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
-            defaultMessage: 'Inference Endpoints',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
-          }),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
-        defaultMessage: 'Relevance',
-      }),
-    },
+    ...(hasEnterpriseLicense
+      ? [
+          {
+            id: 'relevance',
+            items: [
+              {
+                id: 'inference_endpoints',
+                name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+                  defaultMessage: 'Inference Endpoints',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+                }),
+              },
+            ],
+            name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+              defaultMessage: 'Relevance',
+            }),
+          },
+        ]
+      : []),
     {
       id: 'es_getting_started',
       items: [
@@ -192,6 +203,14 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'semanticSearch',
+          name: SEMANTIC_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEMANTIC_SEARCH_PLUGIN.URL,
           }),
         },
         {

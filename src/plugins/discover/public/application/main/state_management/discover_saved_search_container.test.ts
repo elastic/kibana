@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
@@ -14,6 +15,8 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { VIEW_MODE } from '../../../../common/constants';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
@@ -230,6 +233,59 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
       savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+    });
+  });
+
+  describe('isEqualSavedSearch', () => {
+    it('should return true for equal saved searches', () => {
+      const savedSearch1 = savedSearchMock;
+      const savedSearch2 = { ...savedSearchMock };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
+    });
+
+    it('should return false for different saved searches', () => {
+      const savedSearch1 = savedSearchMock;
+      const savedSearch2 = { ...savedSearchMock, title: 'New title' };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
+    });
+
+    it('should return true for saved searches with equal default values of viewMode and false otherwise', () => {
+      const savedSearch1 = { ...savedSearchMock, viewMode: undefined };
+      const savedSearch2 = { ...savedSearchMock, viewMode: VIEW_MODE.DOCUMENT_LEVEL };
+      const savedSearch3 = { ...savedSearchMock, viewMode: VIEW_MODE.AGGREGATED_LEVEL };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
+      expect(isEqualSavedSearch(savedSearch2, savedSearch1)).toBe(true);
+      expect(isEqualSavedSearch(savedSearch1, savedSearch3)).toBe(false);
+      expect(isEqualSavedSearch(savedSearch2, savedSearch3)).toBe(false);
+    });
+
+    it('should return true for saved searches with equal default values of breakdownField and false otherwise', () => {
+      const savedSearch1 = { ...savedSearchMock, breakdownField: undefined };
+      const savedSearch2 = { ...savedSearchMock, breakdownField: '' };
+      const savedSearch3 = { ...savedSearchMock, breakdownField: 'test' };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
+      expect(isEqualSavedSearch(savedSearch2, savedSearch1)).toBe(true);
+      expect(isEqualSavedSearch(savedSearch1, savedSearch3)).toBe(false);
+      expect(isEqualSavedSearch(savedSearch2, savedSearch3)).toBe(false);
+    });
+
+    it('should check searchSource fields', () => {
+      const savedSearch1 = {
+        ...savedSearchMock,
+        searchSource: createSearchSourceMock({
+          index: savedSearchMock.searchSource.getField('index'),
+        }),
+      };
+      const savedSearch2 = {
+        ...savedSearchMock,
+        searchSource: createSearchSourceMock({
+          index: savedSearchMock.searchSource.getField('index'),
+        }),
+      };
+      expect(isEqualSavedSearch(savedSearch1, savedSearch1)).toBe(true);
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
+      savedSearch2.searchSource.setField('query', { language: 'lucene', query: 'test' });
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
     });
   });
 });

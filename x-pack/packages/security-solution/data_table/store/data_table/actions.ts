@@ -7,7 +7,6 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type { ExpandedDetailType } from '../../common/types/detail_panel';
 import type {
   ColumnHeaderOptions,
   SessionViewConfig,
@@ -42,13 +41,6 @@ export const updateColumnWidth = actionCreator<{
   id: string;
   width: number;
 }>('UPDATE_COLUMN_WIDTH');
-
-export type TableToggleDetailPanel = ExpandedDetailType & {
-  tabType?: string;
-  id: string;
-};
-
-export const toggleDetailPanel = actionCreator<TableToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const removeColumn = actionCreator<{
   id: string;

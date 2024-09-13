@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -11,7 +12,7 @@ import fs from 'fs/promises';
 import '../jest_matchers';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType, getBarType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'create_index.test.log');
@@ -26,7 +27,6 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   it('create the index with the correct mappings and meta', async () => {

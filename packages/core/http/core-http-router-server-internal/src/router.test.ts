@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Router, type RouterOptions } from './router';
@@ -48,6 +49,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
           options: {
             deprecated: true,
+            discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
           },
@@ -65,6 +67,7 @@ describe('Router', () => {
         isVersioned: false,
         options: {
           deprecated: true,
+          discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
         },
@@ -164,14 +167,14 @@ describe('Router', () => {
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![200].body()
+          )().response![200].body!()
         )
       ).toBe(true);
       expect(
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![404].body()
+          )().response![404].body!()
         )
       ).toBe(true);
     }
@@ -208,7 +211,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
+        `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
       );
     });
 

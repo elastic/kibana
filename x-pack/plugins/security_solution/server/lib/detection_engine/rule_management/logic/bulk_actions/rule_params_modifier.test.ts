@@ -10,9 +10,7 @@ import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_e
 import type { RuleAlertType } from '../../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
-const mockExperimentalFeatures = {
-  bulkCustomHighlightedFieldsEnabled: true,
-} as ExperimentalFeatures;
+const mockExperimentalFeatures = {} as ExperimentalFeatures;
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {
@@ -730,68 +728,6 @@ describe('ruleParamsModifier', () => {
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
         }
       );
-    });
-
-    describe('feature flag disabled state', () => {
-      test('should throw error on adding investigation fields if feature is disabled', () => {
-        expect(() =>
-          ruleParamsModifier(
-            {
-              ...ruleParamsMock,
-              investigationFields: ['field-1', 'field-2', 'field-3'],
-            } as RuleAlertType['params'],
-            [
-              {
-                type: BulkActionEditTypeEnum.add_investigation_fields,
-                value: { field_names: ['field-4'] },
-              },
-            ],
-            {
-              bulkCustomHighlightedFieldsEnabled: false,
-            } as ExperimentalFeatures
-          )
-        ).toThrow("Custom highlighted fields can't be added. Feature is disabled.");
-      });
-
-      test('should throw error on overwriting investigation fields if feature is disabled', () => {
-        expect(() =>
-          ruleParamsModifier(
-            {
-              ...ruleParamsMock,
-              investigationFields: ['field-1', 'field-2', 'field-3'],
-            } as RuleAlertType['params'],
-            [
-              {
-                type: BulkActionEditTypeEnum.set_investigation_fields,
-                value: { field_names: ['field-4'] },
-              },
-            ],
-            {
-              bulkCustomHighlightedFieldsEnabled: false,
-            } as ExperimentalFeatures
-          )
-        ).toThrow("Custom highlighted fields can't be overwritten. Feature is disabled.");
-      });
-
-      test('should throw error on deleting investigation fields if feature is disabled', () => {
-        expect(() =>
-          ruleParamsModifier(
-            {
-              ...ruleParamsMock,
-              investigationFields: ['field-1', 'field-2', 'field-3'],
-            } as RuleAlertType['params'],
-            [
-              {
-                type: BulkActionEditTypeEnum.delete_investigation_fields,
-                value: { field_names: ['field-1'] },
-              },
-            ],
-            {
-              bulkCustomHighlightedFieldsEnabled: false,
-            } as ExperimentalFeatures
-          )
-        ).toThrow("Custom highlighted fields can't be deleted. Feature is disabled.");
-      });
     });
   });
 

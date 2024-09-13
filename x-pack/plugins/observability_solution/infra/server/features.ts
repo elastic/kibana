@@ -14,6 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -33,10 +34,11 @@ const metricRuleTypes = [
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-    defaultMessage: 'Metrics',
+    defaultMessage: 'Infrastructure',
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -103,6 +105,7 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
   management: {

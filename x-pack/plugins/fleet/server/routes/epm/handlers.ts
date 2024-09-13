@@ -11,6 +11,8 @@ import type { HttpResponseOptions } from '@kbn/core/server';
 
 import { pick } from 'lodash';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
@@ -71,7 +73,7 @@ import {
   FleetError,
   FleetTooManyRequestsError,
 } from '../../errors';
-import { appContextService, checkAllowedPackages } from '../../services';
+import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
@@ -229,8 +231,23 @@ export const getInfoHandler: FleetRequestHandler<
     });
     const flattenedRes = soToInstallationInfo(res) as PackageInfo;
 
+    let metadata: any;
+    if (request.query.withMetadata) {
+      const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+      const { total } = await packagePolicyService.list(allSpaceSoClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+        page: 1,
+        perPage: 0,
+        spaceId: '*',
+      });
+      metadata = {
+        has_policies: total > 0,
+      };
+    }
+
     const body: GetInfoResponse = {
       item: flattenedRes,
+      metadata,
     };
     return response.ok({ body });
   } catch (error) {

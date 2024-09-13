@@ -9,7 +9,7 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SortFieldTimeline, TimelineType } from '../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
@@ -33,8 +33,8 @@ interface Props {
 const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
@@ -47,14 +47,14 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
       queryTimelineById({
         duplicate,
         timelineId,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       });
     },
-    [queryTimelineById, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   const goToTimelines = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,
@@ -80,7 +80,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
 
   const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
-  const timelineType = TimelineType.default;
+  const timelineType = TimelineTypeEnum.default;
   const { timelineStatus } = useTimelineStatus({ timelineType });
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
       },
       search: '',
       sort: {
-        sortField: SortFieldTimeline.updated,
+        sortField: SortFieldTimelineEnum.updated,
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: filterBy === 'favorites',

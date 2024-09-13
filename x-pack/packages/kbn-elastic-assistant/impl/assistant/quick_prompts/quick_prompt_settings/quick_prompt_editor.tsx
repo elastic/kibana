@@ -10,22 +10,26 @@ import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
+import {
+  PromptResponse,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { getRandomEuiColor } from './helpers';
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
-import { QuickPrompt } from '../types';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
 import { useAssistantContext } from '../../../assistant_context';
 import { useQuickPromptEditor } from './use_quick_prompt_editor';
 
-const DEFAULT_COLOR = '#D36086';
-
 interface Props {
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  quickPromptSettings: QuickPrompt[];
+  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
+  quickPromptSettings: PromptResponse[];
   resetSettings?: () => void;
-  selectedQuickPrompt: QuickPrompt | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
+  selectedQuickPrompt: PromptResponse | undefined;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 const QuickPromptSettingsEditorComponent = ({
@@ -34,28 +38,30 @@ const QuickPromptSettingsEditorComponent = ({
   resetSettings,
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: Props) => {
   const { basePromptContexts } = useAssistantContext();
 
   // Prompt
-  const prompt = useMemo(
+  const promptContent = useMemo(
     // Fixing Cursor Jump in text area
-    () => quickPromptSettings.find((p) => p.title === selectedQuickPrompt?.title)?.prompt ?? '',
-    [selectedQuickPrompt?.title, quickPromptSettings]
+    () => quickPromptSettings.find((p) => p.id === selectedQuickPrompt?.id)?.content ?? '',
+    [selectedQuickPrompt?.id, quickPromptSettings]
   );
 
   const handlePromptChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (selectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+        setUpdatedQuickPromptSettings((prev): PromptResponse[] => {
+          const alreadyExists = prev.some((qp) => qp.id === selectedQuickPrompt.id);
 
           if (alreadyExists) {
             return prev.map((qp) => {
-              if (qp.title === selectedQuickPrompt.title) {
+              if (qp.id === selectedQuickPrompt.id) {
                 return {
                   ...qp,
-                  prompt: e.target.value,
+                  content: e.target.value,
                 };
               }
               return qp;
@@ -64,26 +70,56 @@ const QuickPromptSettingsEditorComponent = ({
 
           return prev;
         });
+
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
-  );
-
-  // Color
-  const selectedColor = useMemo(
-    () => selectedQuickPrompt?.color ?? DEFAULT_COLOR,
-    [selectedQuickPrompt?.color]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   const handleColorChange = useCallback<EuiSetColorMethod>(
     (color, { hex, isValid }) => {
       if (selectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+          const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
 
           if (alreadyExists) {
             return prev.map((qp) => {
-              if (qp.title === selectedQuickPrompt.title) {
+              if (qp.name === selectedQuickPrompt.name) {
                 return {
                   ...qp,
                   color,
@@ -94,11 +130,57 @@ const QuickPromptSettingsEditorComponent = ({
           }
           return prev;
         });
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      color,
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      color,
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
+  const setDefaultPromptColor = useCallback((): string => {
+    const randomColor = getRandomEuiColor();
+    handleColorChange(randomColor, { hex: randomColor, isValid: true });
+    return randomColor;
+  }, [handleColorChange]);
+
+  // Color
+  const selectedColor = useMemo(
+    () => selectedQuickPrompt?.color ?? setDefaultPromptColor(),
+    [selectedQuickPrompt?.color, setDefaultPromptColor]
+  );
   // Prompt Contexts
   const selectedPromptContexts = useMemo(
     () =>
@@ -112,11 +194,11 @@ const QuickPromptSettingsEditorComponent = ({
     (pc: PromptContextTemplate[]) => {
       if (selectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+          const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
 
           if (alreadyExists) {
             return prev.map((qp) => {
-              if (qp.title === selectedQuickPrompt.title) {
+              if (qp.name === selectedQuickPrompt.name) {
                 return {
                   ...qp,
                   categories: pc.map((p) => p.category),
@@ -127,15 +209,53 @@ const QuickPromptSettingsEditorComponent = ({
           }
           return prev;
         });
+
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      categories: pc.map((p) => p.category),
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      categories: pc.map((p) => p.category),
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   // When top level quick prompt selection changes
   const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
     onSelectedQuickPromptChange,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   return (
@@ -147,6 +267,7 @@ const QuickPromptSettingsEditorComponent = ({
           quickPrompts={quickPromptSettings}
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
+          selectedColor={selectedColor}
         />
       </EuiFormRow>
 
@@ -158,7 +279,7 @@ const QuickPromptSettingsEditorComponent = ({
           data-test-subj="quick-prompt-prompt"
           onChange={handlePromptChange}
           placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
-          value={prompt}
+          value={promptContent}
           css={css`
             min-height: 150px;
           `}

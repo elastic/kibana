@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -24,14 +25,26 @@ import { RuleType } from '@kbn/triggers-actions-ui-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TypeRegistry } from '../type_registry';
 
+export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
+
 export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
 
 export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
 
 export type RuleTypeParams = Record<string, unknown>;
 
-export interface RuleFormErrors {
-  [key: string]: string | string[] | RuleFormErrors;
+export interface RuleFormBaseErrors {
+  name?: string[];
+  interval?: string[];
+  consumer?: string[];
+  ruleTypeId?: string[];
+  actionConnectors?: string[];
+  alertDelay?: string[];
+  tags?: string[];
+}
+
+export interface RuleFormParamsErrors {
+  [key: string]: string | string[] | RuleFormParamsErrors;
 }
 
 export interface MinimumScheduleInterval {
@@ -81,7 +94,7 @@ export interface RuleTypeParamsExpressionProps<
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;
-  errors: RuleFormErrors;
+  errors: RuleFormParamsErrors;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { QuickPrompts } from './quick_prompts';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
+import { QuickPrompts } from './quick_prompts';
 
 const setInput = jest.fn();
 const setIsSettingsModalVisible = jest.fn();
@@ -19,21 +19,28 @@ const testProps = {
   setInput,
   setIsSettingsModalVisible,
   trackPrompt,
-  isFlyoutMode: false,
+  allPrompts: MOCK_QUICK_PROMPTS,
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
-  knowledgeBase: {
-    isEnabledKnowledgeBase: true,
-  },
 };
 
 const testTitle = 'SPL_QUERY_CONVERSION_TITLE';
 const testPrompt = 'SPL_QUERY_CONVERSION_PROMPT';
 const customTitle = 'A_CUSTOM_OPTION';
+
+jest.mock('react-use', () => ({
+  ...jest.requireActual('react-use'),
+  useMeasure: () => [
+    () => {},
+    {
+      width: 500,
+    },
+  ],
+}));
 
 jest.mock('../../assistant_context', () => ({
   ...jest.requireActual('../../assistant_context'),

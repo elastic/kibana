@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NewTimelineButton } from '../components/new_timeline';
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -33,8 +33,8 @@ export const TimelinesPage = React.memo(() => {
     setImportDataModal(true);
   }, [setImportDataModal]);
 
-  const timelineType: TimelineType =
-    tabName === TimelineType.default ? TimelineType.default : TimelineType.template;
+  const timelineType =
+    tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
   return (
     <>

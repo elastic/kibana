@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateOpenApiDocument } from './generate_oas';
 import { schema, Type } from '@kbn/config-schema';
+import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
+import {
+  sharedOas,
+  createSharedZodSchema,
+  createSharedConfigSchema,
+} from './generate_oas.test.fixture';
 
 interface RecursiveType {
   name: string;
@@ -17,10 +23,57 @@ interface RecursiveType {
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
-    it('generates the expected OpenAPI document', () => {
+    it('generates the expected OpenAPI document for the shared schema', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        bodySchema: createSharedConfigSchema(),
+      });
+      expect(
+        generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toEqual(sharedOas);
+    });
+
+    it('generates the expected OpenAPI document', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              { method: 'get' },
+              { method: 'post' },
+              { method: 'post', path: '/no-xsrf/{id}/{path*}', options: { xsrfRequired: false } },
+              {
+                method: 'delete',
+                validationSchemas: {
+                  request: {},
+                  response: { [200]: { description: 'good response' } },
+                },
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              { method: 'get' },
+              {
+                method: 'post',
+                path: '/no-xsrf/{id}/{path*}',
+                options: { access: 'public', options: { xsrfRequired: false } },
+              },
+            ],
+          },
+        },
       });
       expect(
         generateOpenApiDocument(
@@ -40,7 +93,10 @@ describe('generateOpenApiDocument', () => {
     it('generates references in the expected format', () => {
       const sharedIdSchema = schema.string({ minLength: 1, meta: { description: 'test' } });
       const sharedNameSchema = schema.string({ minLength: 1 });
-      const otherSchema = schema.object({ name: sharedNameSchema, other: schema.string() });
+      const otherSchema = schema.object(
+        { name: sharedNameSchema, other: schema.string() },
+        { meta: { id: 'foo' } }
+      );
       expect(
         generateOpenApiDocument(
           {
@@ -123,6 +179,29 @@ describe('generateOpenApiDocument', () => {
           }
         )
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('Zod', () => {
+    it('generates the expected OpenAPI document for the shared schema', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        bodySchema: createSharedZodSchema(),
+      });
+      expect(
+        generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchObject(sharedOas);
     });
   });
 

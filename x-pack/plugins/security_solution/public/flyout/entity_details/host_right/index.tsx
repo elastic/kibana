@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -21,8 +22,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -112,12 +111,13 @@ export const HostPanel = ({
         id: HostDetailsPanelKey,
         params: {
           name: hostName,
+          scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, isRiskScoreExist]
+    [telemetry, openLeftPanel, hostName, isRiskScoreExist, scopeId]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);

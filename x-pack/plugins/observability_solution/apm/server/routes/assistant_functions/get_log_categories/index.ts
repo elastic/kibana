@@ -14,6 +14,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
+import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
 export interface LogCategory {
   errorCategory: string;
@@ -101,7 +102,7 @@ export async function getLogCategories({
           categories: {
             categorize_text: {
               field: 'message',
-              size: 500,
+              size: 10,
             },
             aggs: {
               sample: {
@@ -146,38 +147,4 @@ export async function getLogCategories({
     logCategories: await Promise.all(promises ?? []),
     entities: flattenObject(sampleDoc),
   };
-}
-
-// field/value pairs should match, or the field should not exist
-export function getShouldMatchOrNotExistFilter(
-  keyValuePairs: Array<{
-    field: string;
-    value?: string;
-  }>
-) {
-  return keyValuePairs
-    .filter(({ value }) => value)
-    .map(({ field, value }) => {
-      return {
-        bool: {
-          should: [
-            {
-              bool: {
-                filter: [{ term: { [field]: value } }],
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    filter: [{ exists: { field } }],
-                  },
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      };
-    });
 }

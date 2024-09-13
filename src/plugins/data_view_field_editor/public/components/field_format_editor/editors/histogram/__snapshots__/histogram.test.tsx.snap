@@ -3,12 +3,7 @@
 exports[`HistogramFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Aggregated number format"
-    labelType="label"
   >
     <EuiSelect
       onChange={[Function]}
@@ -32,10 +27,6 @@ exports[`HistogramFormatEditor should render normally 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <span>
         <EuiLink
@@ -55,7 +46,6 @@ exports[`HistogramFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label="Numeral format pattern (optional)"
-    labelType="label"
   >
     <EuiFieldText
       isInvalid={false}

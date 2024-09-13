@@ -4,11 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type {
-  InvestigateTimeline,
-  InvestigateWidget,
-  InvestigateWidgetCreate,
-  WorkflowBlock,
-} from './types';
 
-export { InvestigateWidgetColumnSpan } from './types';
+export { mergePlainObjects } from './utils/merge_plain_objects';

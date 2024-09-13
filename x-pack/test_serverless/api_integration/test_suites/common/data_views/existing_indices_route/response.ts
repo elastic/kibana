@@ -21,13 +21,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('_existing_indices response', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
     after(async () => {
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('returns an array of existing indices', async () => {

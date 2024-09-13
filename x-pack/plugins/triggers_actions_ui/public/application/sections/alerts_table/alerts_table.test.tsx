@@ -30,14 +30,15 @@ import {
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
-import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableContext } from './contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const mockCaseService = createCasesServiceMock();
 
@@ -230,10 +231,9 @@ describe('AlertsTable', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((props) => {
-        return `${props.colIndex}:${props.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
     useBulkActions: () => [
       {
         id: 0,
@@ -312,14 +312,15 @@ describe('AlertsTable', () => {
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
-    pagination: { pageIndex: 0, pageSize: 1 },
+    pageIndex: 0,
+    pageSize: 1,
     sort: [],
     isLoading: false,
     alerts,
     oldAlertsData,
     ecsAlertsData,
-    getInspectQuery: () => ({ request: [], response: [] }),
-    refetch: () => {},
+    querySnapshot: { request: [], response: [] },
+    refetchAlerts: () => {},
     alertsCount: alerts.length,
     onSortChange: jest.fn(),
     onPageChange: jest.fn(),
@@ -340,7 +341,7 @@ describe('AlertsTable', () => {
   const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(
@@ -369,27 +370,19 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
 
       expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
@@ -398,10 +391,10 @@ describe('AlertsTable', () => {
 
     it('should support pagination', async () => {
       const renderResult = render(
-        <AlertsTableWithProviders {...tableProps} pagination={{ pageIndex: 0, pageSize: 1 }} />
+        <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
       );
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
       expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
@@ -421,7 +414,8 @@ describe('AlertsTable', () => {
       const props = {
         ...tableProps,
         showAlertStatusWithFlapping: true,
-        pagination: { pageIndex: 0, pageSize: 10 },
+        pageIndex: 0,
+        pageSize: 10,
         alertsTableConfiguration: {
           ...alertsTableConfiguration,
           getRenderCellValue: undefined,
@@ -447,7 +441,8 @@ describe('AlertsTable', () => {
               rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
             },
           ],
-          pagination: { pageIndex: 0, pageSize: 1 },
+          pageIndex: 0,
+          pageSize: 1,
         };
         const wrapper = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
@@ -565,7 +560,8 @@ describe('AlertsTable', () => {
           mockedFn = jest.fn();
           customTableProps = {
             ...tableProps,
-            pagination: { pageIndex: 0, pageSize: 10 },
+            pageIndex: 0,
+            pageSize: 10,
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
               useActionsColumn: () => {
@@ -712,7 +708,7 @@ describe('AlertsTable', () => {
       });
 
       it('should show the cases titles correctly', async () => {
-        render(<AlertsTableWithProviders {...props} pagination={{ pageIndex: 0, pageSize: 10 }} />);
+        render(<AlertsTableWithProviders {...props} pageIndex={0} pageSize={10} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
         expect(await screen.findByText('Test case 2')).toBeInTheDocument();
       });
@@ -721,7 +717,8 @@ describe('AlertsTable', () => {
         render(
           <AlertsTableWithProviders
             {...props}
-            pagination={{ pageIndex: 0, pageSize: 10 }}
+            pageIndex={0}
+            pageSize={10}
             cases={{ ...props.cases, isLoading: true }}
           />
         );
@@ -733,7 +730,7 @@ describe('AlertsTable', () => {
         render(<AlertsTableWithProviders {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
-        userEvent.hover(screen.getByText('Test case'));
+        await userEvent.hover(screen.getByText('Test case'));
 
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });

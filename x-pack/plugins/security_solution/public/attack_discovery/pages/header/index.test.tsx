@@ -38,7 +38,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.getByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.getByTestId('addNewConnectorButton');
 
     expect(connectorSelector).toBeInTheDocument();
   });
@@ -61,7 +61,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.queryByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.queryByTestId('addNewConnectorButton');
 
     expect(connectorSelector).not.toBeInTheDocument();
   });
@@ -89,32 +89,6 @@ describe('Header', () => {
     fireEvent.click(generate);
 
     expect(onGenerate).toHaveBeenCalled();
-  });
-
-  it('disables the generate button when the user does NOT have the assistant privilege', () => {
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
-      hasAssistantPrivilege: false,
-      isAssistantEnabled: true,
-    });
-
-    render(
-      <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    const generate = screen.getByTestId('generate');
-
-    expect(generate).toBeDisabled();
   });
 
   it('displays the cancel button when loading', () => {

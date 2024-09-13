@@ -7,17 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.pageTitle', {
-  defaultMessage: 'Detection engine',
-});
-
-export const ALERTS_DOCUMENT_TYPE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.documentTypeTitle',
-  {
-    defaultMessage: 'Alerts',
-  }
-);
-
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -36,13 +25,6 @@ export const ACKNOWLEDGED_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertsTitle',
   {
     defaultMessage: 'Acknowledged',
-  }
-);
-
-export const LOADING_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.loadingAlertsTitle',
-  {
-    defaultMessage: 'Loading Alerts',
   }
 );
 
@@ -295,13 +277,6 @@ export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
   }
 );
 
-export const SIGNAL_STATUS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
 export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
@@ -334,13 +309,6 @@ export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsVie
   defaultMessage: 'Sessions',
 });
 
-export const TAKE_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
-  {
-    defaultMessage: 'Take actions',
-  }
-);
-
 export const STATS_GROUP_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.alertsCount',
   {
@@ -352,20 +320,6 @@ export const STATS_GROUP_HOSTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
   {
     defaultMessage: 'Hosts:',
-  }
-);
-
-export const STATS_GROUP_IPS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.groups.stats.ipsCount',
-  {
-    defaultMessage: `IP's:`,
-  }
-);
-
-export const GROUP_ALERTS_SELECTOR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.selectGroup.title',
-  {
-    defaultMessage: `Group alerts by`,
   }
 );
 

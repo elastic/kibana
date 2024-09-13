@@ -433,6 +433,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_INTENDED_TIMESTAMP",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_INTENDED_TIMESTAMP",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.intended_timestamp\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_LAST_DETECTED",
         "type": "string",
         "tags": [],
@@ -1564,7 +1579,7 @@
         "label": "DefaultAlertFieldName",
         "description": [],
         "signature": [
-          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
+          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.intended_timestamp\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
@@ -1642,6 +1657,21 @@
           "\"event.module\""
         ],
         "path": "packages/kbn-rule-data-utils/src/technical_field_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.EVENT_ORIGINAL",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_ORIGINAL",
+        "description": [],
+        "signature": [
+          "\"event.original\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/legacy_alerts_as_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1834,7 +1864,7 @@
         "label": "STATUS_VALUES",
         "description": [],
         "signature": [
-          "\"in-progress\" | \"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

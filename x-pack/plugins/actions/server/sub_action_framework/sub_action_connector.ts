@@ -24,6 +24,7 @@ import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
+import { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -107,7 +108,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       responseSchema.validate(data);
     } catch (resValidationError) {
       const err = new Error(`Response validation failed (${resValidationError})`);
-      this.logger.debug(`${err.message}:\n${inspect(data, { depth: 10 })}`);
+      this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);
       throw err;
     }
   }
@@ -130,15 +131,18 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   protected abstract getResponseErrorMessage(error: AxiosError): string;
 
-  protected async request<R>({
-    url,
-    data,
-    method = 'get',
-    responseSchema,
-    headers,
-    timeout,
-    ...config
-  }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
+  protected async request<R>(
+    {
+      url,
+      data,
+      method = 'get',
+      responseSchema,
+      headers,
+      timeout,
+      ...config
+    }: SubActionRequestParams<R>,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
       this.ensureUriAllowed(url);
@@ -160,6 +164,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,
+        connectorUsageCollector,
       });
 
       this.validateResponse(responseSchema, res.data);

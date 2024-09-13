@@ -37,7 +37,7 @@ export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  isEnabledKnowledgeBase: boolean;
+  bedrockChatEnabled: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
@@ -54,6 +54,7 @@ export interface AgentExecutorParams<T extends boolean> {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   response?: KibanaResponseFactory;
   size?: number;
+  systemPrompt?: string;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
 }

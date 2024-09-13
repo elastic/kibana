@@ -14,7 +14,7 @@ import type {
 import { dynamic } from '@kbn/shared-ux-utility';
 import { QueryClient } from '@tanstack/react-query';
 
-import { NotebookListValue } from './types';
+import { NotebookListValue, AppMetricsTracker } from './types';
 
 const SearchNotebooksButton = dynamic(async () => ({
   default: (await import('./components/notebooks_button')).SearchNotebooksButton,
@@ -26,6 +26,7 @@ const SearchNotebooksView = dynamic(async () => ({
 export const notebooksConsoleView = (
   core: CoreStart,
   queryClient: QueryClient,
+  usageTracker: AppMetricsTracker,
   clearNotebookList: () => void,
   getNotebookListValue: () => NotebookListValue
 ): EmbeddedConsoleView => {
@@ -37,6 +38,7 @@ export const notebooksConsoleView = (
       <SearchNotebooksView
         core={core}
         queryClient={queryClient}
+        usageTracker={usageTracker}
         getNotebookList={getNotebookListValue}
       />
     ),

@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OpenAPIV3 } from 'openapi-types';
 import {
   getRequestValidation,
+  type RouteMethod,
+  type RouteConfigOptions,
   type RouteConfigOptionsBody,
   type RouterRoute,
   type RouteValidatorConfig,
@@ -59,7 +62,7 @@ export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: st
 };
 
 export const getPathParameters = (path: string): KnownParameters => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+  return Array.from(path.matchAll(/\{([^{}?]+\??)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
     acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
     return acc;
@@ -130,4 +133,34 @@ export const assignToPaths = (
 ): void => {
   const pathName = path.replace('?', '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
+};
+
+export const mergeResponseContent = (
+  a: OpenAPIV3.ResponseObject['content'],
+  b: OpenAPIV3.ResponseObject['content']
+) => {
+  const mergedContent = {
+    ...(a ?? {}),
+    ...(b ?? {}),
+  };
+  return { ...(Object.keys(mergedContent).length ? { content: mergedContent } : {}) };
+};
+
+export const getXsrfHeaderForMethod = (
+  method: RouteMethod,
+  options?: RouteConfigOptions<RouteMethod>
+): OpenAPIV3.ParameterObject[] => {
+  if (method === 'get' || method === 'options' || options?.xsrfRequired === false) return [];
+  return [
+    {
+      description: 'A required header to protect against CSRF attacks',
+      in: 'header',
+      name: 'kbn-xsrf',
+      required: true,
+      schema: {
+        example: 'true',
+        type: 'string',
+      },
+    },
+  ];
 };

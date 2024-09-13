@@ -9,7 +9,8 @@ import { useCallback, useState } from 'react';
 
 import type {
   QueryParams,
-  AlInferenceEndpointsTableState,
+  AllInferenceEndpointsTableState,
+  FilterOptions,
 } from '../components/all_inference_endpoints/types';
 
 import { DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE } from '../components/all_inference_endpoints/constants';
@@ -17,13 +18,15 @@ import { DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE } from '../components/all_infer
 interface UseAllInferenceEndpointsStateReturn {
   queryParams: QueryParams;
   setQueryParams: (queryParam: Partial<QueryParams>) => void;
+  filterOptions: FilterOptions;
+  setFilterOptions: (filterOptions: Partial<FilterOptions>) => void;
 }
 
 export function useAllInferenceEndpointsState(): UseAllInferenceEndpointsStateReturn {
-  const [tableState, setTableState] = useState<AlInferenceEndpointsTableState>(
+  const [tableState, setTableState] = useState<AllInferenceEndpointsTableState>(
     DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE
   );
-  const setState = useCallback((state: AlInferenceEndpointsTableState) => {
+  const setState = useCallback((state: AllInferenceEndpointsTableState) => {
     setTableState(state);
   }, []);
 
@@ -34,7 +37,18 @@ export function useAllInferenceEndpointsState(): UseAllInferenceEndpointsStateRe
     },
     setQueryParams: (newQueryParams: Partial<QueryParams>) => {
       setState({
+        filterOptions: tableState.filterOptions,
         queryParams: { ...tableState.queryParams, ...newQueryParams },
+      });
+    },
+    filterOptions: {
+      ...DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE.filterOptions,
+      ...tableState.filterOptions,
+    },
+    setFilterOptions: (newFilterOptions: Partial<FilterOptions>) => {
+      setState({
+        filterOptions: { ...tableState.filterOptions, ...newFilterOptions },
+        queryParams: tableState.queryParams,
       });
     },
   };

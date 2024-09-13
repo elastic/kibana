@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   Connector,
   DataStreamName,
+  LangSmithOptions,
   PackageName,
   Pipeline,
   RawSamples,
+  SamplesFormat,
 } from '../model/common_attributes';
 import { RelatedAPIResponse } from '../model/response_schemas';
 
@@ -21,8 +23,10 @@ export const RelatedRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
+  samplesFormat: SamplesFormat,
   currentPipeline: Pipeline,
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type RelatedRequestBodyInput = z.input<typeof RelatedRequestBody>;
 

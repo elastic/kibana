@@ -15,8 +15,6 @@
       "alerting",
       "cases",
       "charts",
-      "contentManagement",
-      "controls",
       "dashboard",
       "data",
       "dataViews",
@@ -27,7 +25,6 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
-      "security",
       "taskManager",
       "triggersActionsUi",
       "share",
@@ -37,7 +34,7 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
@@ -47,6 +44,7 @@
       "observabilityAIAssistant"
     ],
     "requiredBundles": [
+      "controls",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

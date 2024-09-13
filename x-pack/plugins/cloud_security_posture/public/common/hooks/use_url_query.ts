@@ -6,7 +6,7 @@
  */
 import { useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { decodeQuery, encodeQuery } from '../navigation/query_utils';
+import { encodeQuery, decodeQuery } from '@kbn/cloud-security-posture';
 
 /**
  * @description uses 'rison' to encode/decode a url query

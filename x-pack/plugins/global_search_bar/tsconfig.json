@@ -15,6 +15,7 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

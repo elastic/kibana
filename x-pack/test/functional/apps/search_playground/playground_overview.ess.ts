@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
@@ -15,7 +14,6 @@ import {
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 
-const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function (ftrContext: FtrProviderContext) {
@@ -56,6 +54,7 @@ export default function (ftrContext: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
       });
 
       describe('with gen ai connectors', () => {
@@ -68,8 +67,8 @@ export default function (ftrContext: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
-        it('hide gen ai panel', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnector();
+        it('show success llm button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
       });
 
@@ -80,7 +79,7 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('creates a connector successfully', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnectorAfterCreatingConnector(
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
             createConnector
           );
         });
@@ -92,18 +91,16 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('show no index callout', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
+        it('show create index button', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
-        it('hide no index callout when index added', async () => {
+        it('show success button when index added', async () => {
           await createIndex();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });
 
         after(async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.removeIndexFromComboBox();
           await esArchiver.unload(esArchiveIndex);
           await browser.refresh();
         });
@@ -116,14 +113,8 @@ export default function (ftrContext: FtrProviderContext) {
           await browser.refresh();
         });
 
-        it('dropdown shows up', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectIndicesInDropdown();
-        });
-
-        it('can select index from dropdown and navigate to chat window', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndStartButtonEnabled(
-            indexName
-          );
+        it('can select index from dropdown and load chat page', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
         });
 
         after(async () => {
@@ -139,7 +130,7 @@ export default function (ftrContext: FtrProviderContext) {
         await createConnector();
         await createIndex();
         await browser.refresh();
-        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage(indexName);
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
@@ -150,9 +141,7 @@ export default function (ftrContext: FtrProviderContext) {
           const conversationInterceptor = proxy.intercept(
             'conversation',
             (body) =>
-              (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).tools?.find(
-                (fn) => fn.function.name === 'title_conversation'
-              ) === undefined
+              body.tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
           );
 
           await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
@@ -177,6 +166,14 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+        });
+
+        it('save selected fields between modes', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
         });
       });
 

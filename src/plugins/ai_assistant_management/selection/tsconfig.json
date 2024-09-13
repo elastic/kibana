@@ -16,7 +16,9 @@
     "@kbn/serverless",
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/config",
+    "@kbn/doc-links"
   ],
   "exclude": ["target/**/*"]
 }

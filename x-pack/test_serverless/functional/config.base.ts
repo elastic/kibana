@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
-
+import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -16,6 +14,7 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
+
     return {
       ...svlSharedConfig.getAll(),
 
@@ -37,7 +36,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ],
       },
       testFiles: options.testFiles,
-
       uiSettings: {
         defaults: {
           'accessibility:disableAnimations': true,
@@ -61,6 +59,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         observabilityLogsExplorer: {
           pathname: '/app/observability-logs-explorer',
+        },
+        observabilityOnboarding: {
+          pathname: '/app/observabilityOnboarding',
         },
         management: {
           pathname: '/app/management',
@@ -111,6 +112,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         fleet: {
           pathname: '/app/fleet',
+        },
+        integrations: {
+          pathname: '/app/integrations',
         },
       },
       // choose where screenshots should be saved

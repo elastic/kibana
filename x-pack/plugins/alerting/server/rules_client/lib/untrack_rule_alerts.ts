@@ -89,7 +89,7 @@ export const untrackRuleAlerts = async (
     } catch (error) {
       // this should not block the rest of the disable process
       context.logger.warn(
-        `rulesClient.disable('${id}') - Could not write untrack events - ${error.message}`
+        `rulesClient.disableRule('${id}') - Could not write untrack events - ${error.message}`
       );
     }
   });

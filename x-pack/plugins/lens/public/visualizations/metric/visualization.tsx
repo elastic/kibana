@@ -7,16 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -35,6 +32,7 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
+import { MetricVisualizationState } from './types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -49,33 +47,6 @@ export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric
     : euiThemeVars.euiColorEmptyShade;
 };
 
-export interface MetricVisualizationState {
-  layerId: string;
-  layerType: LayerType;
-  metricAccessor?: string;
-  secondaryMetricAccessor?: string;
-  maxAccessor?: string;
-  breakdownByAccessor?: string;
-  // the dimensions can optionally be single numbers
-  // computed by collapsing all rows
-  collapseFn?: CollapseFunction;
-  subtitle?: string;
-  secondaryPrefix?: string;
-  progressDirection?: LayoutDirection;
-  showBar?: boolean;
-  color?: string;
-  icon?: string;
-  palette?: PaletteOutput<CustomPaletteParams>;
-  maxCols?: number;
-
-  trendlineLayerId?: string;
-  trendlineLayerType?: LayerType;
-  trendlineTimeAccessor?: string;
-  trendlineMetricAccessor?: string;
-  trendlineSecondaryMetricAccessor?: string;
-  trendlineBreakdownByAccessor?: string;
-}
-
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const isSupportedMetric = (op: OperationMetadata) =>
@@ -86,9 +57,6 @@ const isSupportedDynamicMetric = (op: OperationMetadata) =>
 
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
-});
-const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
 });
 
 const getMetricLayerConfiguration = (
@@ -333,20 +301,20 @@ export const getMetricVisualization = ({
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
       icon: IconChartMetric,
       label: metricLabel,
-      groupLabel: metricGroupLabel,
-      showExperimentalBadge: true,
-      sortPriority: 3,
+      sortPriority: 4,
+      description: i18n.translate('xpack.lens.metric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
+      }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return LENS_METRIC_ID;
-  },
 
   clearLayer(state) {
     const newState = { ...state };

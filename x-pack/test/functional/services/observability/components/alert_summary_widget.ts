@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const COMPACT_COMPONENT_SELECTOR = 'alertSummaryWidgetCompact';
 const COMPACT_TIME_RANGE_TITLE_SELECTOR = 'timeRangeTitle';
-const COMPACT_ACTIVE_ALERTS_SELECTOR = 'activeAlerts';
 
 const FULL_SIZE_COMPONENT_SELECTOR = 'alertSummaryWidgetFullSize';
 
@@ -23,37 +22,42 @@ export function ObservabilityAlertSummaryWidgetProvider({ getService }: FtrProvi
     return await testSubjects.existOrFail(COMPACT_COMPONENT_SELECTOR);
   };
 
-  const getCompactTimeRangeTitle = async () => {
-    return (await testSubjects.find(COMPACT_TIME_RANGE_TITLE_SELECTOR)).getVisibleText();
+  const getFullSizeComponentSelectorOrFail = async () => {
+    return await testSubjects.existOrFail(FULL_SIZE_COMPONENT_SELECTOR);
   };
 
-  const getCompactActiveAlertSelector = async () => {
-    return await testSubjects.find(COMPACT_ACTIVE_ALERTS_SELECTOR);
+  const getCompactTimeRangeTitle = async () => {
+    return (await testSubjects.find(COMPACT_TIME_RANGE_TITLE_SELECTOR)).getVisibleText();
   };
 
   const getCompactWidgetSelector = async () => {
     return await testSubjects.find(COMPACT_COMPONENT_SELECTOR);
   };
 
-  const getFullSizeComponentSelectorOrFail = async () => {
-    return await testSubjects.existOrFail(FULL_SIZE_COMPONENT_SELECTOR);
+  const getActiveAlertSelector = async () => {
+    return await testSubjects.find(ACTIVE_ALERT_SELECTOR);
+  };
+
+  const getTotalAlertSelector = async () => {
+    return await testSubjects.find(TOTAL_ALERT_SELECTOR);
   };
 
   const getActiveAlertCount = async () => {
-    return (await testSubjects.find(ACTIVE_ALERT_SELECTOR)).getVisibleText();
+    return (await getActiveAlertSelector()).getVisibleText();
   };
 
   const getTotalAlertCount = async () => {
-    return (await testSubjects.find(TOTAL_ALERT_SELECTOR)).getVisibleText();
+    return (await getTotalAlertSelector()).getVisibleText();
   };
 
   return {
-    getCompactActiveAlertSelector,
     getCompactComponentSelectorOrFail,
-    getCompactTimeRangeTitle,
     getCompactWidgetSelector,
+    getCompactTimeRangeTitle,
     getFullSizeComponentSelectorOrFail,
-    getActiveAlertCount,
+    getTotalAlertSelector,
+    getActiveAlertSelector,
     getTotalAlertCount,
+    getActiveAlertCount,
   };
 }

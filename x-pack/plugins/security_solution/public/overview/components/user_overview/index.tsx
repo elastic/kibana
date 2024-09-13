@@ -18,7 +18,7 @@ import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -156,7 +156,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+                <RiskScoreDocTooltip anchorPosition="upCenter" />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

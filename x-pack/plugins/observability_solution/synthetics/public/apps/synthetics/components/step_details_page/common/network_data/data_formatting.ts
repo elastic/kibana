@@ -93,16 +93,26 @@ export const getConnectingTime = (connect?: number, ssl?: number) => {
   }
 };
 
-export const getQueryMatcher = (query?: string): ItemMatcher => {
+export const getQueryMatcher = (query?: string): ItemMatcher | undefined => {
   if (!query) {
     return (item: NetworkEvent) => true;
   }
 
-  const regExp = new RegExp(query, 'i');
+  /* RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+   * First, escape all special character to use an exact string match
+   * Next, replace escaped '*' with '.' to match any character and support wildcard search */
+  const formattedQuery = query.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+  const wildcardQuery = formattedQuery.replaceAll('\\*', '.');
 
-  return (item: NetworkEvent) => {
-    return (item.url?.search(regExp) ?? -1) > -1;
-  };
+  try {
+    const regExp = new RegExp(wildcardQuery, 'i');
+
+    return (item: NetworkEvent) => {
+      return (item.url?.search(regExp) ?? -1) > -1;
+    };
+  } catch (e) {
+    // ignore invalid regex
+  }
 };
 
 export const getFilterMatcher = (filters: string[] | undefined): ItemMatcher => {

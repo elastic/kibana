@@ -111,10 +111,10 @@ This page was deleted. See <<development-visualize-index>>.
 
 deprecated::[7.9.0]
 
-Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
-To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
+// Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
+// To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
 
-More information on this new feature is available in <<apm-alerts>>.
+// More information on this new feature is available in <<apm-alerts>>.
 
 [role="exclude",id="development-security-rbac"]
 == Role-based access control
@@ -200,19 +200,19 @@ This content has moved. See <<known-kibana-plugins>>.
 [[trigger-picker]]
 === Picking a trigger for a URL drilldown
 
-This page has moved. Refer to <<url-drilldowns>>.
+This page has moved. Refer to <<create-url-drilldowns>>.
 
 [float]
 [[templating]]
 === URL templating
 
-This page has moved. Refer to <<url_templating-language>>.
+This page has moved. Refer to <<url-templating-language>>.
 
 [float]
 [[variables]]
 === Variables
 
-This page has moved. Refer to <<url-template-variables>>.
+This page has moved. Refer to <<url-template-variable>>.
 
 [float]
 [[time-series-visual-builder]]
@@ -433,3 +433,717 @@ This connector was renamed. Refer to <<openai-action-type>>.
 
 For the most up-to-date API details, refer to the
 {kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.
+
+[role="exclude",id="add-case-connectors"]
+== Add connectors to cases
+
+This content has moved. Refer to <<manage-cases-settings>>.
+
+[role="exclude", id="create-drilldowns"]
+== Create drilldowns
+
+[[url-drilldowns]]
+[[url_templating-language]]
+[[url-template-variables]]
+This content has moved. Refer to <<drilldowns>>.
+
+[role="exclude", id="tsvb"]
+== TSVB
+
+[[tsvb-index-pattern-mode]]
+This content has moved. Refer to <<tsvb-panel>>.
+
+////
+APM redirects
+////
+
+:apm-docs-move-notice: This documentation has moved to the {observability-guide}/apm.html[Observability guide] as of version 8.14.
+
+[role="exclude",id="xpack-apm"]
+== APM
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-ui.html[the APM UI documentation].
+
+[role="exclude",id="apm-ui"]
+== Set up
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-ui.html[the APM UI documentation].
+
+[role="exclude",id="apm-getting-started"]
+== Get started
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm.html[the APM UI documentation].
+
+[role="exclude",id="services"]
+== Services
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-services.html[Services].
+
+[role="exclude",id="traces"]
+== Traces
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-traces.html[Traces].
+
+[role="exclude",id="dependencies"]
+== Dependencies
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-dependencies.html[Dependencies].
+
+[role="exclude",id="service-maps"]
+== Service Map
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-service-maps.html[Service Map].
+
+[float]
+[[service-maps-supported]]
+=== Supported APM agents
+
+Refer to {observability-guide}/apm-service-maps.html#service-maps-supported[Supported APM agents].
+
+[role="exclude",id="service-overview"]
+== Service overview
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-service-overview.html[Service overview].
+
+[float]
+[[service-span-duration]]
+=== Span types average duration and dependencies
+
+Refer to {observability-guide}/apm-service-overview.html#service-span-duration[Service overview].
+
+[role="exclude",id="mobile-service-overview"]
+== Mobile service overview
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-service-overview.html[Mobile service overview].
+
+[role="exclude",id="transactions"]
+== Transactions
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-transactions.html[Transactions].
+
+[role="exclude",id="spans"]
+== Trace sample timeline
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-spans.html[Trace sample timeline].
+
+[role="exclude",id="errors"]
+== Errors
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-errors.html[Errors].
+
+[role="exclude",id="metrics"]
+== Metrics
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-metrics.html[Metrics].
+
+[role="exclude",id="infrastructure"]
+== Infrastructure
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-infrastructure.html[Infrastructure].
+
+[role="exclude",id="logs"]
+== Logs
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-logs.html[Logs].
+
+[role="exclude",id="apm-how-to"]
+== How-to guides
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-how-to-guides.html[How-to guides].
+
+[role="exclude",id="agent-configuration"]
+== Configure APM agents with central config
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-configuration.html[Configure APM agents with central config].
+
+[role="exclude",id="apm-spaces"]
+== Control access to APM data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-spaces.html[Control access to APM data].
+
+[role="exclude",id="apm-alerts"]
+== Create an alert
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-alerts.html[Create an alert].
+
+[role="exclude",id="custom-links"]
+== Create custom links
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-custom-links.html[Create custom links].
+
+[role="exclude",id="filters"]
+== Filter data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-filters.html[Filter data].
+
+[float]
+[[environment-selector]]
+=== Service environment filter
+
+Refer to {observability-guide}/apm-filters.html#environment-selector[Filter data].
+
+[role="exclude",id="correlations"]
+== Find transaction latency and failure correlations
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-correlations.html[Find transaction latency and failure correlations].
+
+[role="exclude",id="agent-explorer"]
+== Identify deployment details for APM agents
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-explorer.html[Identify deployment details for APM agents].
+
+[role="exclude",id="machine-learning-integration"]
+== Integrate with machine learning
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-machine-learning-integration.html[Integrate with machine learning].
+
+[role="exclude",id="mobile-session-explorer"]
+== Exploring mobile sessions with Discover
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-session-explorer.html[Exploring mobile sessions with Discover].
+
+[role="exclude",id="_viewing_sessions_with_discover"]
+== Viewing sessions with Discover
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-mobile-session-explorer.html#viewing-sessions-with-discover[Viewing sessions with Discover].
+
+[role="exclude",id="apm-lambda"]
+== Observe Lambda functions
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-lambda.html[Observe Lambda functions].
+
+[role="exclude",id="advanced-queries"]
+== Query your data
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-advanced-queries.html[Query your data].
+
+[role="exclude",id="storage-explorer"]
+== Storage Explorer
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-storage-explorer.html[Storage Explorer].
+
+[role="exclude",id="transactions-annotations"]
+== Track deployments with annotations
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-transactions-annotations.html[Track deployments with annotations].
+
+[role="exclude",id="apm-app-users"]
+== Users and privileges
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-users.html[Users and privileges].
+
+[role="exclude",id="apm-app-reader"]
+== Create an APM reader user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-reader.html[Create an APM reader user].
+
+[role="exclude",id="apm-app-annotation-user-create"]
+== Create an annotation user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-annotation-user-create.html[Create an annotation user].
+
+[role="exclude",id="apm-app-central-config-user"]
+== Create a central config user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-central-config-user.html[Create a central config user].
+
+[role="exclude",id="apm-app-storage-explorer-user-create"]
+== Create a storage explorer user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-storage-explorer-user-create.html[Create a storage explorer user].
+
+[role="exclude",id="apm-app-api-user"]
+== Create an API user
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-api-user.html[Create an API user].
+
+[role="exclude",id="apm-settings-in-kibana"]
+== Settings
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-settings-in-kibana.html[Settings].
+
+[role="exclude",id="apm-api"]
+== REST API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-api.html[REST API].
+
+[role="exclude",id="agent-config-api"]
+== Agent Configuration API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-config-api.html[Agent Configuration API].
+
+[role="exclude",id="apm-annotation-api"]
+== Annotation API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-annotation-api.html[Annotation API].
+
+[role="exclude",id="rum-sourcemap-api"]
+== RUM source map API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-rum-sourcemap-api.html[RUM source map API].
+
+[role="exclude",id="agent-key-api"]
+== APM agent Key API
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-agent-key-api.html[APM agent Key API].
+
+[role="exclude",id="troubleshooting"]
+== Troubleshooting
+
+{apm-docs-move-notice}
+
+Refer to {observability-guide}/apm-app-troubleshooting.html[Troubleshooting].
+
+:!apm-docs-move-notice:
+
+[role="exclude",id="saved-objects-api-export"]
+== Export objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-import"]
+== Import objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-create"]
+== Bulk create saved objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-delete"]
+== Bulk delete object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-get"]
+== Bulk get objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-resolve"]
+== Bulk resolve objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-update"]
+== Bulk update object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-create"]
+== Create saved objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-delete"]
+==  Delete object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-find"]
+== Find objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-get"]
+== Get object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-resolve-import-errors"]
+== Resolve import errors API
+
+[role="exclude",id="saved-objects-api-resolve"]
+== Resolve object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-rotate-encryption-key"]
+== Rotate encryption key API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-update"]
+== Update object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="data-views-api-get-all"]
+== Get all data views API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-create"]
+== Create runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-delete"]
+== Delete runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-get"]
+== Get runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-update"]
+== Update runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-upsert"]
+== Upsert runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-create"]
+== Create data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-get"]
+== Get default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-set"]
+== Set default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-delete"]
+== Delete data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-get"]
+== Get data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references-preview"]
+== Swap references preview data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references"]
+== Swap references data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-fields-api-update"]
+== Update data view fields API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-update"]
+== Update data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="create-rule-api"]
+== Create rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="delete-rule-api"]
+== Delete rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="disable-rule-api"]
+== Disable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="enable-rule-api"]
+== Enable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="find-rules-api"]
+== Find rules API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-rule-api"]
+== Get rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-alerting-framework-health-api"]
+== Get alerting framework health API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="list-rule-types-api"]
+== Get rule types API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-alert-api"]
+== Mute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-all-alerts-api"]
+== Mute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-alert-api"]
+== Unmute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-all-alerts-api"]
+== Unmute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-rule-api"]
+== Update rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="alerts-api"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-connector-api"]
+== Update connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="list-connector-types-api"]
+== List connector types API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-connector-api"]
+== Get connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-all-connectors-api"]
+== Get all connectors API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="execute-connector-api"]
+== Run connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="delete-connector-api"]
+== Delete connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="create-connector-api"]
+== Create connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="actions-and-connectors-legacy-apis"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="cases-api-add-comment"]
+== Add comment to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-create"]
+== Create case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-cases"]
+== Delete cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-comments"]
+== Delete comments from case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-case-activity"]
+== Find case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-cases"]
+== Find cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-connectors"]
+== Find connectors API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-alerts"]
+== Get alerts attached to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case-activity"]
+== Get case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case"]
+== Get case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-cases-by-alert"]
+== Get cases by alert API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-comments"]
+== Get comments API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-get-configuration"]
+== Get case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-reporters"]
+== Get reporters API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-status"]
+== Get case status API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-tag"]
+== Get tags API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-push"]
+== Push case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-set-configuration"]
+== Set case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-comment"]
+== Update case comment API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-configuration"]
+== Update case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update"]
+== Update cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="machine-learning-api-sync"]
+== Sync {ml} saved objects API
+
+Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].

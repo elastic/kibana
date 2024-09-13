@@ -30,6 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { updateRule } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../../common/constants';
 import {
   Rule,
   RuleFlyoutCloseReason,
@@ -136,7 +137,7 @@ export const RuleEdit = <
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const {
     http,
@@ -204,7 +205,15 @@ export const RuleEdit = <
         isValidRule(rule, ruleErrors, ruleActionsErrors) &&
         !hasActionsWithBrokenConnector
       ) {
-        const newRule = await updateRule({ http, rule, id: rule.id });
+        const { flapping, ...restRule } = rule;
+        const newRule = await updateRule({
+          http,
+          rule: {
+            ...restRule,
+            ...(IS_RULE_SPECIFIC_FLAPPING_ENABLED ? { flapping } : {}),
+          },
+          id: rule.id,
+        });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.saveSuccessNotificationText', {
             defaultMessage: "Updated ''{ruleName}''",
@@ -270,7 +279,7 @@ export const RuleEdit = <
                   <EuiCallOut
                     size="s"
                     color="danger"
-                    iconType="rule"
+                    iconType="error"
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.ruleEdit.disabledActionsWarningTitle',

@@ -9,7 +9,7 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutFooter } from '../../shared/components/flyout_footer';
+import { FlyoutFooter } from '@kbn/security-solution-common';
 import { UserPanelKey } from '../user_right';
 
 export interface UserPreviewPanelFooterProps {
@@ -47,7 +47,7 @@ export const UserPreviewPanelFooter = ({
         <EuiFlexItem grow={false}>
           <EuiLink onClick={openUserFlyout} target="_blank" data-test-subj={'open-user-flyout'}>
             {i18n.translate('xpack.securitySolution.flyout.user.preview.viewDetailsLabel', {
-              defaultMessage: 'Open user details flyout',
+              defaultMessage: 'Show full user details',
             })}
           </EuiLink>
         </EuiFlexItem>

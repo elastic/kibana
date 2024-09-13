@@ -105,7 +105,7 @@ function processAlertsHelper<
   const recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
 
   for (const id in alerts) {
-    if (alerts.hasOwnProperty(id)) {
+    if (Object.hasOwn(alerts, id)) {
       // alerts with scheduled actions are considered "active"
       if (alerts[id].hasScheduledActions()) {
         activeAlerts[id] = alerts[id];
@@ -209,8 +209,8 @@ function processAlertsLimitReached<
 
   // update duration for existing alerts
   for (const id in activeAlerts) {
-    if (activeAlerts.hasOwnProperty(id)) {
-      if (alerts.hasOwnProperty(id)) {
+    if (Object.hasOwn(activeAlerts, id)) {
+      if (Object.hasOwn(alerts, id)) {
         activeAlerts[id] = alerts[id];
       }
       const state = existingAlerts[id].getState();
@@ -241,7 +241,7 @@ function processAlertsLimitReached<
 
   // look for new alerts and add until we hit capacity
   for (const id in alerts) {
-    if (alerts.hasOwnProperty(id) && alerts[id].hasScheduledActions()) {
+    if (Object.hasOwn(alerts, id) && alerts[id].hasScheduledActions()) {
       // if this alert did not exist in previous run, it is considered "new"
       if (!existingAlertIds.has(id)) {
         activeAlerts[id] = alerts[id];

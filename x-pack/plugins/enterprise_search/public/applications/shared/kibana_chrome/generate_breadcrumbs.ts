@@ -14,13 +14,14 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  INFERENCE_ENDPOINTS_PLUGIN,
+  SEARCH_RELEVANCE_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -154,7 +155,7 @@ export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs =
   ]);
 
 export const useEnterpriseSearchRelevanceBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: INFERENCE_ENDPOINTS_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([{ text: SEARCH_RELEVANCE_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
@@ -167,3 +168,6 @@ export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+
+export const useSemanticSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([{ text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

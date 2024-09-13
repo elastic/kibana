@@ -5,41 +5,54 @@
  * 2.0.
  */
 
-import { type IKibanaResponse, IRouter, KibanaRequest } from '@kbn/core/server';
+import { IRouter, KibanaRequest, type IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { asyncForEach } from '@kbn/std';
+import { Client } from 'langsmith';
+import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
-  PostEvaluateRequestQuery,
   PostEvaluateResponse,
-  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/langchain/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from '../knowledge_base/constants';
-import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { EVALUATE } from '../../../common/constants';
-import { performEvaluation } from '../../lib/model_evaluator/evaluation';
-import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
+import { getDefaultArguments } from '@kbn/langchain/server';
+import { StructuredTool } from '@langchain/core/tools';
 import {
-  indexEvaluations,
-  setupEvaluationIndex,
-} from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-
-/**
- * To support additional Agent Executors from the UI, add them to this map
- * and reference your specific AgentExecutor function
- */
-import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+  createOpenAIFunctionsAgent,
+  createStructuredChatAgent,
+  createToolCallingAgent,
+} from 'langchain/agents';
+import { RetrievalQAChain } from 'langchain/chains';
+import { buildResponse } from '../../lib/build_response';
+import { AssistantDataClients } from '../../lib/langchain/executors/types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
+import { ESQL_RESOURCE } from '../knowledge_base/constants';
+import { fetchLangSmithDataset } from './utils';
+import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
+import {
+  DefaultAssistantGraph,
+  getDefaultAssistantGraph,
+} from '../../lib/langchain/graphs/default_assistant_graph/graph';
+import {
+  bedrockToolCallingAgentPrompt,
+  geminiToolCallingAgentPrompt,
+  openAIFunctionAgentPrompt,
+  structuredChatAgentPrompt,
+} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { getLlmClass, getLlmType } from '../utils';
 
 const DEFAULT_SIZE = 20;
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -48,10 +61,12 @@ export const postEvaluateRoute = (
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
-      path: EVALUATE,
-
+      path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
       options: {
         tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(
@@ -60,7 +75,6 @@ export const postEvaluateRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(PostEvaluateBody),
-            query: buildRouteValidationWithZod(PostEvaluateRequestQuery),
           },
           response: {
             200: {
@@ -70,108 +84,91 @@ export const postEvaluateRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<PostEvaluateResponse>> => {
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const actions = ctx.elasticAssistant.actions;
+        const logger = assistantContext.logger.get('evaluate');
         const telemetry = assistantContext.telemetry;
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
-        // Validate evaluation feature is enabled
-        const pluginName = getPluginNameFromRequest({
+        // Perform license, authenticated user and evaluation FF checks
+        const checkResponse = performChecks({
+          authenticatedUser: true,
+          capability: 'assistantModelEvaluation',
+          context: ctx,
+          license: true,
           request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
+          response,
         });
-        const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-        if (!registeredFeatures.assistantModelEvaluation) {
-          return response.notFound();
+        if (checkResponse) {
+          return checkResponse;
         }
 
         try {
           const evaluationId = uuidv4();
           const {
-            evalModel,
-            evaluationType,
-            outputIndex,
+            alertsIndexPattern,
             datasetName,
-            projectName = 'default',
+            graphs: graphNames,
+            langSmithApiKey,
+            connectorIds,
+            size,
+            replacements,
             runName = evaluationId,
-          } = request.query;
-          const { dataset: customDataset = [], evalPrompt } = request.body;
-          const connectorIds = request.query.models?.split(',') || [];
-          const agentNames = request.query.agents?.split(',') || [];
+          } = request.body;
 
-          const dataset =
-            datasetName != null ? await fetchLangSmithDataset(datasetName, logger) : customDataset;
+          const dataset = await fetchLangSmithDataset(datasetName, logger, langSmithApiKey);
+
+          if (dataset.length === 0) {
+            return response.badRequest({
+              body: { message: `No LangSmith dataset found for name: ${datasetName}` },
+            });
+          }
 
           logger.info('postEvaluateRoute:');
           logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
           logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
           logger.info(`Evaluation ID: ${evaluationId}`);
 
-          const totalExecutions = connectorIds.length * agentNames.length * dataset.length;
-          logger.info('Creating agents:');
+          const totalExecutions = connectorIds.length * graphNames.length * dataset.length;
+          logger.info('Creating graphs:');
           logger.info(`\tconnectors/models: ${connectorIds.length}`);
-          logger.info(`\tagents: ${agentNames.length}`);
+          logger.info(`\tgraphs: ${graphNames.length}`);
           logger.info(`\tdataset: ${dataset.length}`);
-          logger.warn(`\ttotal baseline agent executions: ${totalExecutions} `);
+          logger.warn(`\ttotal graph executions: ${totalExecutions} `);
           if (totalExecutions > 50) {
             logger.warn(
-              `Total baseline agent executions >= 50! This may take a while, and cost some money...`
+              `Total baseline graph executions >= 50! This may take a while, and cost some money...`
             );
           }
 
-          // Get the actions plugin start contract from the request context for the agents
-          const actions = (await context.elasticAssistant).actions;
-
-          // Fetch all connectors from the actions plugin, so we can set the appropriate `llmType` on ActionsClientLlm
-          const actionsClient = await actions.getActionsClientWithRequest(request);
-          const connectors = await actionsClient.getBulk({
-            ids: connectorIds,
-            throwIfSystemAction: false,
-          });
-
-          // Fetch any tools registered by the request's originating plugin
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
-
-          // Get a scoped esClient for passing to the agents for retrieval, and
-          // writing results to the output index
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          // Setup graph params
+          // Get a scoped esClient for esStore + writing results to the output index
+          const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
           // Default ELSER model
           const elserId = await getElser();
 
-          // Skeleton request from route to pass to the agents
-          // params will be passed to the actions executor
-          const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
-            ...request,
-            body: {
-              alertsIndexPattern: '',
-              allow: [],
-              allowReplacement: [],
-              subAction: 'invokeAI',
-              // The actionTypeId is irrelevant when used with the invokeAI subaction
-              actionTypeId: '.gen-ai',
-              replacements: {},
-              size: DEFAULT_SIZE,
-              isEnabledKnowledgeBase: true,
-              isEnabledRAGAlerts: true,
-              conversationId: '',
-            },
+          // Data clients
+          const anonymizationFieldsDataClient =
+            (await assistantContext.getAIAssistantAnonymizationFieldsDataClient()) ?? undefined;
+          const conversationsDataClient =
+            (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
+          const kbDataClient =
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
+              v2KnowledgeBaseEnabled
+            )) ?? undefined;
+          const dataClients: AssistantDataClients = {
+            anonymizationFieldsDataClient,
+            conversationsDataClient,
+            kbDataClient,
           };
 
-          // Create an ElasticsearchStore for KB interactions
-          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
-          const enableKnowledgeBaseByDefault =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-          const kbDataClient = enableKnowledgeBaseByDefault
-            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
-            : undefined;
-          const kbIndex =
-            enableKnowledgeBaseByDefault && kbDataClient != null
-              ? kbDataClient.indexTemplateAndPattern.alias
-              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          // esStore
           const esStore = new ElasticsearchStore(
             esClient,
-            kbIndex,
+            kbDataClient?.indexTemplateAndPattern?.alias ?? '',
             logger,
             telemetry,
             elserId,
@@ -179,89 +176,169 @@ export const postEvaluateRoute = (
             kbDataClient
           );
 
-          // Create an array of executor functions to call in batches
-          // One for each connector/model + agent combination
-          // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
-          const agents: AgentExecutorEvaluatorWithMetadata[] = [];
-          connectorIds.forEach((connectorId) => {
-            agentNames.forEach((agentName) => {
-              logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-              const connectorName =
-                getConnectorName(connectorId, connectors) ?? '[unknown connector]';
-              const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
-              agents.push({
-                agentEvaluator: async (langChainMessages, exampleId) => {
-                  const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
-                    actionsClient,
-                    isEnabledKnowledgeBase: true,
-                    assistantTools,
-                    connectorId,
-                    esClient,
-                    esStore,
-                    isStream: false,
-                    langChainMessages,
-                    llmType: 'openai',
-                    logger,
-                    request: skeletonRequest,
-                    traceOptions: {
-                      exampleId,
-                      projectName,
-                      runName: detailedRunName,
-                      evaluationId,
-                      tags: [
-                        'security-assistant-prediction',
-                        ...(connectorName != null ? [connectorName] : []),
-                        runName,
-                      ],
-                      tracers: getLangSmithTracer({
-                        projectName: detailedRunName,
-                        exampleId,
-                        logger,
-                      }),
-                    },
-                    replacements: {},
-                  });
-                  return evalResult.body;
-                },
-                metadata: {
-                  connectorName,
-                  runName: detailedRunName,
-                },
-              });
-            });
+          // Actions
+          const actionsClient = await actions.getActionsClientWithRequest(request);
+          const connectors = await actionsClient.getBulk({
+            ids: connectorIds,
+            throwIfSystemAction: false,
           });
-          logger.info(`Agents created: ${agents.length}`);
 
-          // Evaluator Model is optional to support just running predictions
-          const evaluatorModel =
-            evalModel == null || evalModel === ''
-              ? undefined
-              : new ActionsClientLlm({
+          // Fetch any tools registered to the security assistant
+          const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
+
+          const graphs: Array<{
+            name: string;
+            graph: DefaultAssistantGraph;
+            llmType: string | undefined;
+          }> = await Promise.all(
+            connectors.map(async (connector) => {
+              const llmType = getLlmType(connector.actionTypeId);
+              const isOpenAI = llmType === 'openai';
+              const llmClass = getLlmClass(llmType, true);
+              const createLlmInstance = () =>
+                new llmClass({
                   actionsClient,
-                  connectorId: evalModel,
+                  connectorId: connector.id,
+                  llmType,
                   logger,
-                  model: skeletonRequest.body.model,
+                  temperature: getDefaultArguments(llmType).temperature,
+                  signal: abortSignal,
+                  streaming: false,
+                  maxRetries: 0,
                 });
+              const llm = createLlmInstance();
+              const anonymizationFieldsRes =
+                await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
+                  {
+                    perPage: 1000,
+                    page: 1,
+                  }
+                );
 
-          const { evaluationResults, evaluationSummary } = await performEvaluation({
-            agentExecutorEvaluators: agents,
-            dataset,
-            evaluationId,
-            evaluatorModel,
-            evaluationPrompt: evalPrompt,
-            evaluationType,
-            logger,
-            runName,
-          });
+              const anonymizationFields = anonymizationFieldsRes
+                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+                : undefined;
 
-          logger.info(`Writing evaluation results to index: ${outputIndex}`);
-          await setupEvaluationIndex({ esClient, index: outputIndex, logger });
-          await indexEvaluations({
-            esClient,
-            evaluationResults,
-            evaluationSummary,
-            index: outputIndex,
-            logger,
+              const modelExists = await esStore.isModelInstalled();
+
+              // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+              const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+
+              // Check if KB is available
+              const isEnabledKnowledgeBase =
+                (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
+
+              // Skeleton request from route to pass to the agents
+              // params will be passed to the actions executor
+              const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> =
+                {
+                  ...request,
+                  body: {
+                    alertsIndexPattern: '',
+                    allow: [],
+                    allowReplacement: [],
+                    subAction: 'invokeAI',
+                    // The actionTypeId is irrelevant when used with the invokeAI subaction
+                    actionTypeId: '.gen-ai',
+                    replacements: {},
+                    size: DEFAULT_SIZE,
+                    conversationId: '',
+                  },
+                };
+
+              // Fetch any applicable tools that the source plugin may have registered
+              const assistantToolParams: AssistantToolParams = {
+                anonymizationFields,
+                chain,
+                esClient,
+                isEnabledKnowledgeBase,
+                kbDataClient: dataClients?.kbDataClient,
+                llm,
+                logger,
+                modelExists,
+                request: skeletonRequest,
+                alertsIndexPattern,
+                // onNewReplacements,
+                replacements,
+                size,
+              };
+
+              const tools: StructuredTool[] = assistantTools.flatMap(
+                (tool) => tool.getTool(assistantToolParams) ?? []
+              );
+
+              const agentRunnable = isOpenAI
+                ? await createOpenAIFunctionsAgent({
+                    llm,
+                    tools,
+                    prompt: openAIFunctionAgentPrompt,
+                    streamRunnable: false,
+                  })
+                : llmType && ['bedrock', 'gemini'].includes(llmType)
+                ? createToolCallingAgent({
+                    llm,
+                    tools,
+                    prompt:
+                      llmType === 'bedrock'
+                        ? bedrockToolCallingAgentPrompt
+                        : geminiToolCallingAgentPrompt,
+                    streamRunnable: false,
+                  })
+                : await createStructuredChatAgent({
+                    llm,
+                    tools,
+                    prompt: structuredChatAgentPrompt,
+                    streamRunnable: false,
+                  });
+
+              return {
+                name: `${runName} - ${connector.name}`,
+                llmType,
+                graph: getDefaultAssistantGraph({
+                  agentRunnable,
+                  dataClients,
+                  createLlmInstance,
+                  logger,
+                  tools,
+                  replacements: {},
+                }),
+              };
+            })
+          );
+
+          // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
+          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
+            // Wrapper function for invoking the graph (to parse different input/output formats)
+            const predict = async (input: { input: string }) => {
+              logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
+
+              const r = await graph.invoke(
+                {
+                  input: input.input,
+                  conversationId: undefined,
+                  responseLanguage: 'English',
+                  llmType,
+                  bedrockChatEnabled: true,
+                  isStreaming: false,
+                }, // TODO: Update to use the correct input format per dataset type
+                {
+                  runName,
+                  tags: ['evaluation'],
+                }
+              );
+              const output = r.agentOutcome.returnValues.output;
+              return output;
+            };
+
+            const evalOutput = await evaluate(predict, {
+              data: datasetName ?? '',
+              evaluators: [], // Evals to be managed in LangSmith for now
+              experimentPrefix: name,
+              client: new Client({ apiKey: langSmithApiKey }),
+              // prevent rate limiting and unexpected multiple experiment runs
+              maxConcurrency: 5,
+            });
+            logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });
 
           return response.ok({

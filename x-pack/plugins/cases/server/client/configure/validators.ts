@@ -60,20 +60,21 @@ export const validateTemplatesCustomFieldsInRequest = ({
   }
 
   templates.forEach((template, index) => {
-    if (
-      !template.caseFields ||
-      !template.caseFields.customFields ||
-      !template.caseFields.customFields.length
-    ) {
-      return;
-    }
-
-    if (customFieldsConfiguration === undefined) {
+    if (customFieldsConfiguration === undefined && template.caseFields?.customFields?.length) {
       throw Boom.badRequest('No custom fields configured.');
     }
 
+    if (
+      (!template.caseFields ||
+        !template.caseFields.customFields ||
+        !template.caseFields.customFields.length) &&
+      customFieldsConfiguration?.length
+    ) {
+      throw Boom.badRequest('No custom fields added to template.');
+    }
+
     const params = {
-      requestCustomFields: template.caseFields.customFields,
+      requestCustomFields: template?.caseFields?.customFields,
       customFieldsConfiguration,
     };
 

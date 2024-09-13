@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { InventoryView } from '../../../../../common/inventory_views';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -25,7 +23,7 @@ import {
   useWaffleOptionsContext,
   WaffleLegendOptions,
 } from '../hooks/use_waffle_options';
-import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
+import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../common/inventory/types';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
@@ -33,11 +31,10 @@ import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
-import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => Promise<any>;
+  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
@@ -48,8 +45,6 @@ interface LegendControlOptions {
   bounds: InfraWaffleMapBounds;
   legend: WaffleLegendOptions;
 }
-
-const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
 export const Layout = React.memo(({ currentView, reload, interval, nodes, loading }: Props) => {
   const [showLoading, setShowLoading] = useState(true);
@@ -73,11 +68,6 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
-  const [hostsLinkClicked, setHostsLinkClicked] = useLocalStorage<boolean>(
-    HOSTS_LINK_LOCAL_STORAGE_KEY,
-    false
-  );
-  const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
   const AUTO_REFRESH_INTERVAL = 5 * 1000;
 
   const options = {
@@ -171,24 +161,6 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
-          <EuiFlexItem grow={false}>
-            {!hostsLinkClickedRef.current && nodeType === 'host' && (
-              <TryItButton
-                data-test-subj="inventory-hostsView-link"
-                label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
-                  defaultMessage: 'Introducing a new Hosts analysis experience',
-                })}
-                link={{
-                  app: 'metrics',
-                  pathname: '/hosts',
-                }}
-                experimental
-                onClick={() => {
-                  setHostsLinkClicked(true);
-                }}
-              />
-            )}
-          </EuiFlexItem>
           <EuiFlexItem
             grow={false}
             css={css`

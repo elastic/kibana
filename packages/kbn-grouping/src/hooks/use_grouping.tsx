@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
@@ -31,7 +32,7 @@ export interface UseGrouping<T> {
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit' | 'groupsUnit'
+  'groupPanelRenderer' | 'getGroupStats' | 'onGroupToggle' | 'unit' | 'groupsUnit'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
@@ -56,7 +57,7 @@ export type DynamicGroupingProps<T> = Pick<
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-interface GroupingArgs<T> {
+export interface GroupingArgs<T> {
   componentProps: StaticGroupingProps<T>;
   defaultGroupingOptions: GroupOption[];
   fields: FieldSpec[];

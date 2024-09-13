@@ -53,13 +53,13 @@ export default function ({ getService }: APMFtrContextProvider) {
         );
 
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
 
       return synthtraceEsClient.index(Readable.from(Array.from(events)));
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       return synthtraceEsClient.clean();
     });
 

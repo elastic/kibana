@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
@@ -52,4 +54,19 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
   return config;
 }
 
-export { getAgentImageConfig };
+const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
+  const [kind, cores, addition] = queueName.split('-');
+  const additionalProps =
+    {
+      spot: { preemptible: true },
+      virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+    }[addition] || {};
+
+  return {
+    ...getAgentImageConfig(),
+    machineType: `${kind}-standard-${cores}`,
+    ...additionalProps,
+  };
+};
+
+export { getAgentImageConfig, expandAgentQueue };

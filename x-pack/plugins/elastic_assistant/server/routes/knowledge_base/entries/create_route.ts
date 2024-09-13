@@ -15,9 +15,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  Metadata,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/common_attributes.gen';
-import type { Document } from 'langchain/document';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
@@ -60,17 +58,15 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          logger.debug(`Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const documents: Array<Document<Metadata>> = [
-            {
-              metadata: request.body.metadata,
-              pageContent: request.body.text,
-            },
-          ];
+          // Check mappings and upgrade if necessary -- this route only supports v2 KB, so always `true`
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
+            true
           );
-          const createResponse = await kbDataClient?.addKnowledgeBaseDocuments({ documents });
+
+          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
+          const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
+            knowledgeBaseEntry: request.body,
+          });
 
           if (createResponse == null) {
             return assistantResponse.error({
@@ -78,7 +74,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
               statusCode: 400,
             });
           }
-          return response.ok({ body: KnowledgeBaseEntryResponse.parse(createResponse[0]) });
+          return response.ok({ body: createResponse });
         } catch (err) {
           const error = transformError(err as Error);
           return assistantResponse.error({

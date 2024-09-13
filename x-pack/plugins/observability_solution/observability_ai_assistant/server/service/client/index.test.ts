@@ -14,7 +14,6 @@ import { Subject } from 'rxjs';
 import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
-import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -27,7 +26,6 @@ import { createFunctionResponseMessage } from '../../../common/utils/create_func
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
-import { USER_INSTRUCTIONS_HEADER } from '../util/get_system_message_from_instructions';
 import { observableIntoStream } from '../util/observable_into_stream';
 import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
@@ -35,7 +33,7 @@ type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
-const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\n${USER_INSTRUCTIONS_HEADER}\n\nYou MUST respond in the users preferred language which is: English.`;
+const EXPECTED_STORED_SYSTEM_MESSAGE = `system`;
 
 const nextTick = () => {
   return new Promise(process.nextTick);
@@ -186,7 +184,6 @@ describe('Observability AI Assistant client', () => {
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
       namespace: 'default',
-      resources: createResourceNamesMap(),
       user: {
         name: 'johndoe',
       },
@@ -369,8 +366,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 1,
-                prompt: 84,
-                total: 85,
+                prompt: 33,
+                total: 34,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -426,8 +423,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 6,
-                prompt: 268,
-                total: 274,
+                prompt: 210,
+                total: 216,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -444,8 +441,8 @@ describe('Observability AI Assistant client', () => {
                 title: 'An auto-generated title',
                 token_count: {
                   completion: 6,
-                  prompt: 268,
-                  total: 274,
+                  prompt: 210,
+                  total: 216,
                 },
               },
               labels: {},
@@ -575,8 +572,8 @@ describe('Observability AI Assistant client', () => {
           last_updated: expect.any(String),
           token_count: {
             completion: 2,
-            prompt: 162,
-            total: 164,
+            prompt: 111,
+            total: 113,
           },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
@@ -594,8 +591,8 @@ describe('Observability AI Assistant client', () => {
             title: 'My stored conversation',
             token_count: {
               completion: 2,
-              prompt: 162,
-              total: 164,
+              prompt: 111,
+              total: 113,
             },
           },
           labels: {},
@@ -824,6 +821,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          connectorId: 'foo',
           messages: [
             {
               '@timestamp': expect.any(String),
@@ -1583,36 +1581,6 @@ describe('Observability AI Assistant client', () => {
 
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
       EXPECTED_STORED_SYSTEM_MESSAGE
-    );
-  });
-
-  it("Adds the user's preferred language to the system prompt", async () => {
-    client = createClient();
-    const chatSpy = jest.spyOn(client, 'chat');
-
-    actionsClientMock.execute.mockImplementation(async () => {
-      return {
-        actionId: '',
-        status: 'ok',
-        data: createLlmSimulator().stream,
-      };
-    });
-
-    client
-      .complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('A user message to cause completion')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        title: 'My predefined title',
-        persist: false,
-        responseLanguage: 'Orcish',
-      })
-      .subscribe(() => {}); // To trigger call to chat
-    await nextTick();
-
-    expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      EXPECTED_STORED_SYSTEM_MESSAGE.replace('English', 'Orcish')
     );
   });
 

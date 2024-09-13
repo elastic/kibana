@@ -50,6 +50,7 @@ export function AlertsOverview() {
       },
     },
     uiSettings,
+    observability: { observabilityRuleTypeRegistry },
   } = services;
 
   const useToasts = () => notifications!.toasts;
@@ -70,7 +71,7 @@ export function AlertsOverview() {
   }, [serviceName, environment]);
 
   const onKueryChange = useCallback(
-    (value) => push(history, { query: { kuery: value } }),
+    (value: any) => push(history, { query: { kuery: value } }),
     [history]
   );
 
@@ -109,6 +110,7 @@ export function AlertsOverview() {
               featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
+              cellContext={{ observabilityRuleTypeRegistry }}
             />
           )}
         </EuiFlexItem>

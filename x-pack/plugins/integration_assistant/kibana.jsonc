@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/integration-assistant-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": "@elastic/security-scalability",
   "description": "Plugin implementing the Integration Assistant API and UI",
   "plugin": {
     "id": "integrationAssistant",
@@ -18,5 +18,8 @@
       "actions",
       "stackConnectors",
     ],
+    "requiredBundles": [
+      "kibanaUtils",
+    ]
   }
 }
