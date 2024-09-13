@@ -6,7 +6,6 @@
  */
 
 import { BehaviorSubject, type Observable } from 'rxjs';
-import { useKibana } from '../common/lib/kibana/kibana_react';
 
 type UserUrl = string | undefined;
 
@@ -23,5 +22,3 @@ export class OnboardingService {
     this.usersUrlSubject$.next(userUrl);
   }
 }
-
-export const useOnboardingService = () => useKibana().services.onboarding;

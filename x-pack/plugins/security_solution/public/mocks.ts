@@ -11,7 +11,7 @@ import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
-import { OnboardingService } from './onboarding/onboarding_service';
+import { OnboardingService } from './onboarding/service';
 
 const upselling = new UpsellingService();
 const onboardingService = new OnboardingService();

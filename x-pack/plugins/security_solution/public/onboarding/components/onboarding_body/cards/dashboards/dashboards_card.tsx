@@ -59,22 +59,6 @@ export const DashboardsCard: OnboardingCardComponent = ({ isCardComplete, setExp
                   </EuiLink>
                 }
               />
-              {/* <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="xs">{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <EuiLink onClick={expandIntegrationsCard}>
-                        {i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}
-                        <EuiIcon type="arrowRight" color="primary" size="s" />
-                      </EuiLink>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup> */}
             </>
           )}
         </EuiFlexItem>

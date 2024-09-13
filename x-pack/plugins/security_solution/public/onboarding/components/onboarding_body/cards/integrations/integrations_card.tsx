@@ -11,6 +11,7 @@ import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 
 export const IntegrationsCard: OnboardingCardComponent = ({ setComplete }) => {
+  // TODO: implement. The Button is just for testing purposes
   return (
     <OnboardingCardContentPanel>
       <EuiButton onClick={() => setComplete(false)}>{'Set not complete'}</EuiButton>

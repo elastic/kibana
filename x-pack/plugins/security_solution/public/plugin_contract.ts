@@ -13,7 +13,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
-import { OnboardingService } from './onboarding/onboarding_service';
+import { OnboardingService } from './onboarding/service';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;

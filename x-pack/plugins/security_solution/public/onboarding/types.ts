@@ -40,7 +40,7 @@ export interface OnboardingCardConfig {
    * Function for auto-checking completion for the card
    * @returns Promise for the complete status
    */
-  checkComplete?: () => Promise<boolean>;
+  checkComplete?: OnboardingCardCheckComplete;
   /**
    * The RBAC capability strings required to enable the card. It uses object dot notation. e.g. `'siem.crud'`.
    *

@@ -91,5 +91,4 @@ export const OnboardingHeaderVideoModal = React.memo<OnboardingHeaderVideoModalP
     );
   }
 );
-
 OnboardingHeaderVideoModal.displayName = 'DataIngestionHubVideoModal';
