@@ -17,7 +17,7 @@ export const AddDocumentsCodeExample: React.FC = () => {
       paddingSize="none"
       data-test-subj="SearchIndicesAddDocumentsCode"
     >
-      TODO: WITH DATA TICKET
+      TODO: WITHOUT DATA TICKET
     </EuiPanel>
   );
 };
