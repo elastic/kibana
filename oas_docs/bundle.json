@@ -3185,6 +3185,39 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Create a rule",
@@ -4355,6 +4388,39 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Update a rule",
@@ -4420,6 +4486,39 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Disable a rule",
@@ -4467,6 +4566,39 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Enable a rule",
@@ -4608,6 +4740,39 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Update the API key for a rule",
@@ -4664,6 +4829,39 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Mute an alert",
@@ -4720,6 +4918,39 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "Forbidden"
+                      ],
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        403
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Unmute an alert",
