@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
   RuleSource,
@@ -20,7 +21,6 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 
 export const RULE_DEFAULTS = {
   enabled: false,

@@ -461,7 +461,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "{ readonly impact?: string | undefined; readonly references?: string | undefined; readonly default_value?: string | undefined; readonly id: string; readonly version: string; readonly name: string; readonly tags: string[]; readonly description: string; readonly section: string; readonly audit: string; readonly benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; readonly profile_applicability: string; readonly rationale: string; readonly rego_rule_id: string; readonly remediation: string; }"
+              "{ readonly references?: string | undefined; readonly impact?: string | undefined; readonly default_value?: string | undefined; readonly id: string; readonly version: string; readonly name: string; readonly tags: string[]; readonly description: string; readonly section: string; readonly audit: string; readonly benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; readonly profile_applicability: string; readonly rationale: string; readonly rego_rule_id: string; readonly remediation: string; }"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture-common/types/findings.ts",
             "deprecated": false,
