@@ -77,8 +77,8 @@ describe('LayerHeader', () => {
         },
       }
     );
-    const openChartSwitch = () => {
-      userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
+    const openChartSwitch = async () => {
+      await userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
     };
     const queryChartOptionByLabel = (label: string) => {
       return screen.queryByRole('presentation', { name: label });
@@ -102,10 +102,10 @@ describe('LayerHeader', () => {
     expect(screen.queryByTestId('lnsChartSwitchPopover')).not.toBeInTheDocument();
   });
 
-  it('should not display visualization if hideFromChartSwitch returns true', () => {
+  it('should not display visualization if hideFromChartSwitch returns true', async () => {
     const { openChartSwitch, queryChartOptionByLabel, getAllChartSwitchOptions } =
       renderLayerSettings();
-    openChartSwitch();
+    await openChartSwitch();
     expect(queryChartOptionByLabel('hiddenVis')).not.toBeInTheDocument();
     expect(getAllChartSwitchOptions()).toEqual([
       'testVis:testVis',
@@ -135,12 +135,12 @@ describe('LayerHeader', () => {
     expect(screen.queryByTestId('lnsChartSwitchPopover')).not.toBeInTheDocument();
   });
 
-  it('Discover path: should only allow switch to subtypes when onlyAllowSwitchToSubtypes is true', () => {
+  it('Discover path: should only allow switch to subtypes when onlyAllowSwitchToSubtypes is true', async () => {
     const { openChartSwitch, getAllChartSwitchOptions } = renderLayerSettings({
       onlyAllowSwitchToSubtypes: true,
       activeVisualizationId: 'testVis3',
     });
-    openChartSwitch();
+    await openChartSwitch();
     expect(getAllChartSwitchOptions()).toEqual([
       'testVis3:subvisC1',
       'testVis3:subvisC2',

@@ -133,14 +133,14 @@ describe('SystemPromptSettings', () => {
     fireEvent.click(getByTestId('change-multi'));
 
     expect(setConversationSettings).toHaveReturnedWith({
-      [welcomeConvo.title]: {
+      [welcomeConvo.id]: {
         ...welcomeConvo,
         apiConfig: {
           ...welcomeConvo.apiConfig,
           defaultSystemPromptId: 'mock-system-prompt-1',
         },
       },
-      [alertConvo.title]: {
+      [alertConvo.id]: {
         ...alertConvo,
         apiConfig: {
           ...alertConvo.apiConfig,

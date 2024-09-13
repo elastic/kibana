@@ -139,19 +139,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
-      await synthEsClient.clean();
       await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(1600, 1200);
+
+      return synthEsClient.clean();
     });
 
-    after(async () => {
-      await synthEsClient.clean();
-    });
+    after(() => synthEsClient.clean());
 
     describe('#Asset Type: host', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -159,20 +156,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             hosts: HOSTS,
           })
         );
+
         await navigateToNodeDetails('host-1', 'host', {
           name: 'host-1',
         });
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await pageObjects.timePicker.setAbsoluteRange(
-          START_HOST_DATE.format(DATE_PICKER_FORMAT),
-          END_HOST_DATE.format(DATE_PICKER_FORMAT)
-        );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       it('preserves selected tab between page reloads', async () => {
         await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
@@ -633,8 +625,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Asset type: host with kubernetes section', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateHostsWithK8sNodeData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -651,9 +641,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       describe('Overview Tab', () => {
         before(async () => {
@@ -727,8 +715,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Asset Type: container', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateDockerContainersData({
             from: DATE_WITH_DOCKER_DATA_FROM,
@@ -744,9 +730,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       describe('when container asset view is disabled', () => {
         before(async () => {

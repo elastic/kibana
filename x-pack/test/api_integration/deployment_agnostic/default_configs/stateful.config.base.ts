@@ -19,7 +19,6 @@ import {
   FtrConfigProviderContext,
 } from '@kbn/test';
 import path from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
@@ -44,11 +43,18 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       );
     }
 
+    // if config is executed on CI or locally
+    const isRunOnCI = process.env.CI;
+
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
     const idpPath = require.resolve(
       '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
+    );
+    const samlIdPPlugin = path.resolve(
+      __dirname,
+      '../../../security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
@@ -99,6 +105,17 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
+          ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+          // This ensures that we register the Security SAML API endpoints.
+          // In the real world the SAML config is injected by control plane.
+          `--plugin-path=${samlIdPPlugin}`,
+          '--xpack.cloud.id=ftr_fake_cloud_id',
+          // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
+          // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
+          // Selector is disabled (replicating Serverless configuration). By declaring `cloud-basic` with a higher
+          // order, we indicate that basic authentication can still be used, but only if explicitly requested when the
+          // user navigates to `/login` page directly and enters username and password in the login form.
           '--xpack.security.authc.selector.enabled=false',
           `--xpack.security.authc.providers=${JSON.stringify({
             saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },

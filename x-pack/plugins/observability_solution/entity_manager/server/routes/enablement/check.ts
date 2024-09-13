@@ -6,9 +6,6 @@
  */
 
 import semver from 'semver';
-import { RequestHandlerContext } from '@kbn/core/server';
-import { SetupRouteOptions } from '../types';
-import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import {
   ERROR_API_KEY_NOT_FOUND,
   ERROR_API_KEY_NOT_VALID,
@@ -16,9 +13,12 @@ import {
   ERROR_DEFINITION_STOPPED,
   ERROR_PARTIAL_BUILTIN_INSTALLATION,
 } from '../../../common/errors';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
+import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import { builtInDefinitions } from '../../lib/entities/built_in';
+import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { getClientsFromAPIKey } from '../../lib/utils';
+import { EntityDefinitionWithState } from '../../lib/entities/types';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
  * @openapi
@@ -34,6 +34,7 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  *           application/json:
  *             schema:
  *               type: object
+ *               required: enabled
  *               properties:
  *                 enabled:
  *                  type: boolean
@@ -42,77 +43,74 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  *                  type: string
  *                  example: api_key_not_found
  */
-export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
-  router,
-  server,
-  logger,
-}: SetupRouteOptions<T>) {
-  router.get<unknown, unknown, unknown>(
-    {
-      path: '/internal/entities/managed/enablement',
-      validate: false,
-    },
-    async (context, req, res) => {
-      try {
-        logger.debug('reading entity discovery API key from saved object');
-        const apiKey = await readEntityDiscoveryAPIKey(server);
+export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/managed/enablement',
+  handler: async ({ response, logger, server }) => {
+    try {
+      logger.debug('reading entity discovery API key from saved object');
+      const apiKey = await readEntityDiscoveryAPIKey(server);
 
-        if (apiKey === undefined) {
-          return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_FOUND } });
-        }
-
-        logger.debug('validating existing entity discovery API key');
-        const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
-
-        if (!isValid) {
-          return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
-        }
-
-        const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
-
-        const entityDiscoveryState = await Promise.all(
-          builtInDefinitions.map(async (builtInDefinition) => {
-            const definitions = await findEntityDefinitions({
-              esClient,
-              soClient,
-              id: builtInDefinition.id,
-            });
-
-            return { installedDefinition: definitions[0], builtInDefinition };
-          })
-        ).then((results) =>
-          results.reduce(
-            (state, { installedDefinition, builtInDefinition }) => {
-              return {
-                installed: Boolean(state.installed && installedDefinition?.state.installed),
-                running: Boolean(state.running && installedDefinition?.state.running),
-                outdated:
-                  state.outdated ||
-                  (installedDefinition &&
-                    semver.neq(installedDefinition.version, builtInDefinition.version)),
-              };
-            },
-            { installed: true, running: true, outdated: false }
-          )
-        );
-
-        if (!entityDiscoveryState.installed) {
-          return res.ok({ body: { enabled: false, reason: ERROR_PARTIAL_BUILTIN_INSTALLATION } });
-        }
-
-        if (!entityDiscoveryState.running) {
-          return res.ok({ body: { enabled: false, reason: ERROR_DEFINITION_STOPPED } });
-        }
-
-        if (entityDiscoveryState.outdated) {
-          return res.ok({ body: { enabled: false, reason: ERROR_BUILTIN_UPGRADE_REQUIRED } });
-        }
-
-        return res.ok({ body: { enabled: true } });
-      } catch (err) {
-        logger.error(err);
-        return res.customError({ statusCode: 500, body: err });
+      if (apiKey === undefined) {
+        return response.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_FOUND } });
       }
+
+      logger.debug('validating existing entity discovery API key');
+      const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
+
+      if (!isValid) {
+        return response.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
+      }
+
+      const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+
+      const entityDiscoveryState = await Promise.all(
+        builtInDefinitions.map(async (builtInDefinition) => {
+          const definitions = await findEntityDefinitions({
+            esClient,
+            soClient,
+            id: builtInDefinition.id,
+            includeState: true,
+          });
+
+          return {
+            installedDefinition: definitions[0] as EntityDefinitionWithState,
+            builtInDefinition,
+          };
+        })
+      ).then((results) =>
+        results.reduce(
+          (state, { installedDefinition, builtInDefinition }) => {
+            return {
+              installed: Boolean(state.installed && installedDefinition?.state.installed),
+              running: Boolean(state.running && installedDefinition?.state.running),
+              outdated:
+                state.outdated ||
+                (installedDefinition &&
+                  semver.neq(installedDefinition.version, builtInDefinition.version)),
+            };
+          },
+          { installed: true, running: true, outdated: false }
+        )
+      );
+
+      if (!entityDiscoveryState.installed) {
+        return response.ok({
+          body: { enabled: false, reason: ERROR_PARTIAL_BUILTIN_INSTALLATION },
+        });
+      }
+
+      if (!entityDiscoveryState.running) {
+        return response.ok({ body: { enabled: false, reason: ERROR_DEFINITION_STOPPED } });
+      }
+
+      if (entityDiscoveryState.outdated) {
+        return response.ok({ body: { enabled: false, reason: ERROR_BUILTIN_UPGRADE_REQUIRED } });
+      }
+
+      return response.ok({ body: { enabled: true } });
+    } catch (err) {
+      logger.error(err);
+      return response.customError({ statusCode: 500, body: err });
     }
-  );
-}
+  },
+});
