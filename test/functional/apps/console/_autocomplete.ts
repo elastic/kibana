@@ -332,7 +332,6 @@ GET _search
 
     describe('with conditional templates', () => {
       beforeEach(async () => {
-        // await PageObjects.console.clearEditorText();
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('POST _snapshot/test_repo\n');
       });
