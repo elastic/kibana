@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?';
+export { DemoCard } from './demo_card';

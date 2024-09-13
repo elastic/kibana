@@ -23,7 +23,7 @@ import endpointSvg from './images/endpoint1.svg';
 import cloudSvg from './images/cloud1.svg';
 import siemSvg from './images/siem1.svg';
 import { useNavigateTo } from '../../lib/kibana';
-import { VIDEO_SOURCE } from './constants';
+import { ONBOARDING_VIDEO_SOURCE } from '../../constants';
 import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
 
 const imgUrls = {
@@ -115,7 +115,7 @@ export const EmptyPromptComponent = memo(() => {
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               scrolling="no"
-              src={VIDEO_SOURCE}
+              src={ONBOARDING_VIDEO_SOURCE}
               title={i18n.SIEM_HEADER}
               width="100%"
             />

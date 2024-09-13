@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -15,9 +17,11 @@ import { OnboardingAVCBanner } from './onboarding_avc_banner';
 import { OnboardingHeader } from './onboarding_header';
 import { OnboardingBody } from './onboarding_body';
 import { OnboardingFooter } from './onboarding_footer';
+import { PAGE_CONTENT_WIDTH } from '../constants';
 
 export const OnboardingPage = React.memo(() => {
   const spaceId = useSpaceId();
+  const { euiTheme } = useEuiTheme();
 
   if (!spaceId) {
     return (
@@ -31,9 +35,20 @@ export const OnboardingPage = React.memo(() => {
     <OnboardingContextProvider spaceId={spaceId}>
       <PluginTemplateWrapper paddingSize="none">
         <OnboardingAVCBanner />
-        <OnboardingHeader />
-        <OnboardingBody />
-        <OnboardingFooter />
+        <KibanaPageTemplate.Section
+          grow={true}
+          restrictWidth={PAGE_CONTENT_WIDTH}
+          paddingSize="xl"
+          bottomBorder="extended"
+          style={{ backgroundColor: euiTheme.colors.lightestShade }}
+        >
+          <OnboardingHeader />
+          <OnboardingBody />
+        </KibanaPageTemplate.Section>
+        <EuiSpacer size="l" />
+        <KibanaPageTemplate.Section grow={true} restrictWidth={PAGE_CONTENT_WIDTH} paddingSize="xl">
+          <OnboardingFooter />
+        </KibanaPageTemplate.Section>
       </PluginTemplateWrapper>
     </OnboardingContextProvider>
   );

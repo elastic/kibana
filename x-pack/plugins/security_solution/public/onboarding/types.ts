@@ -18,7 +18,7 @@ export type SetExpandedCardId = (
   options?: { scroll?: boolean }
 ) => void;
 
-export type OnboardingCardComponent = React.FunctionComponent<{
+export type OnboardingCardComponent = React.ComponentType<{
   setComplete: SetComplete;
   isCardComplete: IsCardComplete;
   setExpandedCardId: SetExpandedCardId;

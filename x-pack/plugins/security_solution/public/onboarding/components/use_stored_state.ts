@@ -9,9 +9,10 @@ import { useLocalStorage } from 'react-use';
 import type { OnboardingCardId } from '../constants';
 
 const LocalStorageKey = {
+  avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
+  videoVisited: 'ONBOARDING_HUB.VIDEO_VISITED',
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
   expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
-  avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
 } as const;
 
 /**
@@ -22,14 +23,29 @@ const useDefinedLocalStorage = <T>(key: string, defaultValue: T) => {
   return [value ?? defaultValue, setValue] as const;
 };
 
+/**
+ * Stores the AVC banner dismissed state
+ */
+export const useStoredIsAVCBannerDismissed = () =>
+  useDefinedLocalStorage<boolean>(LocalStorageKey.avcBannerDismissed, false);
+
+/**
+ * Stores the completed card IDs per space
+ */
 export const useStoredCompletedCardIds = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId[]>(`${LocalStorageKey.completeCards}.${spaceId}`, []);
 
+/**
+ * Stores the expanded card ID per space
+ */
 export const useStoredExpandedCardId = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId | null>(
     `${LocalStorageKey.expandedCard}.${spaceId}`,
     null
   );
 
-export const useStoredIsAVCBannerDismissed = () =>
-  useDefinedLocalStorage<boolean>(`${LocalStorageKey.avcBannerDismissed}`, false);
+/**
+ * Stores either the video card has been visited or not, per space
+ */
+export const useStoredHasVideoVisited = (spaceId: string) =>
+  useDefinedLocalStorage<boolean>(`${LocalStorageKey.videoVisited}.${spaceId}`, false);
