@@ -26,7 +26,7 @@ export const ConnectionDetails: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { cloud } = useKibana().services;
 
-  const elasticsearchUrl = cloud.elasticsearchUrl ?? DEFAULT_ELASTICSEARCH_URL;
+  const elasticsearchUrl = cloud?.elasticsearchUrl ?? DEFAULT_ELASTICSEARCH_URL;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">

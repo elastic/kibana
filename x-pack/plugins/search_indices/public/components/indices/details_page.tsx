@@ -115,7 +115,7 @@ export const SearchIndexDetailsPage = () => {
       panelled
       bottomBorder
     >
-      {isIndexError || isMappingsError ? (
+      {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
           indexName={indexName}
           navigateToIndexListPage={navigateToIndexListPage}

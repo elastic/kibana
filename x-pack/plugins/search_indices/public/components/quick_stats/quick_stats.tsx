@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Index } from '@kbn/index-management';
+import type { Index } from '@kbn/index-management-shared-types';
 
 import {
   EuiFlexGroup,
