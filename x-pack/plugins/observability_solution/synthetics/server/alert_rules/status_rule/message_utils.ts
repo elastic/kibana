@@ -105,7 +105,7 @@ export const getMonitorSummary = ({
 
   return {
     checkedAt,
-    locationId: locationId.join(' | '),
+    locationId: locationId?.join?.(' | ') ?? '',
     configId,
     monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
@@ -122,7 +122,6 @@ export const getMonitorSummary = ({
       name: monitorName,
       location: formattedLocationName,
       status: statusMessage,
-      timestamp: monitorInfo['@timestamp'],
       checks,
       downThreshold,
       locationsThreshold,
@@ -228,7 +227,6 @@ export const getReasonMessage = ({
       location,
       downThreshold,
       locationsThreshold,
-      downChecks: checks?.downWithinXChecks ?? 1,
       numberOfChecks,
       checksSummary: checks
         ? i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.checksSummary', {

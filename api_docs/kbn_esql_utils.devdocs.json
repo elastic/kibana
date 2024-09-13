@@ -1441,10 +1441,10 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.retieveMetadataColumns",
+        "id": "def-common.retrieveMetadataColumns",
         "type": "Function",
         "tags": [],
-        "label": "retieveMetadataColumns",
+        "label": "retrieveMetadataColumns",
         "description": [],
         "signature": [
           "(esql: string) => string[]"
@@ -1455,7 +1455,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.retieveMetadataColumns.$1",
+            "id": "def-common.retrieveMetadataColumns.$1",
             "type": "string",
             "tags": [],
             "label": "esql",

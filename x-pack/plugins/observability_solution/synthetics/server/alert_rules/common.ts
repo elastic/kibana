@@ -30,7 +30,7 @@ import {
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
 } from '../../common/constants/synthetics_alerts';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
-import { StatusCheckFilters } from '../../common/runtime_types';
+import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
@@ -202,7 +202,7 @@ export const setRecoveredAlertsContext = ({
       configId,
       locationId: locationIds[0],
     });
-    let monitorSummary: MonitorSummaryStatusRule = getDefaultRecoveredSummary({
+    let monitorSummary: MonitorSummaryStatusRule | undefined = getDefaultRecoveredSummary({
       recoveredAlert,
       tz,
       dateFormat,
@@ -212,7 +212,7 @@ export const setRecoveredAlertsContext = ({
     });
     let lastErrorMessage = alertHit?.['error.message'];
 
-    if (!groupByLocation) {
+    if (!groupByLocation && monitorSummary) {
       const formattedLocationNames = locationName.join(' | ');
       const formattedLocationIds = locationIds.join(' | ');
       monitorSummary.locationNames = formattedLocationNames;
@@ -366,7 +366,7 @@ export const getDefaultRecoveredSummary = ({
       '@timestamp': String(hit['@timestamp']),
       ...(hit['error.message'] ? { error: { message: hit['error.message'] } } : {}),
       ...(hit['url.full'] ? { url: { full: hit['url.full'] } } : {}),
-    },
+    } as unknown as OverviewPing,
     statusMessage: RECOVERED_LABEL,
     locationId,
     configId,

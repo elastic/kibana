@@ -287,6 +287,8 @@ describe('StatusRuleExecutor', () => {
         alertId: 'id1-us_central_qa',
         downThreshold: 1,
         idWithLocation: 'id1-us_central_qa',
+        locationNames: ['Test location'],
+        locationIds: ['test'],
         monitorSummary: {
           checkedAt: '2024-05-13T12:33:37Z',
           checks: { down: 1, downWithinXChecks: 1 },
@@ -304,8 +306,8 @@ describe('StatusRuleExecutor', () => {
           monitorUrl: 'https://www.google.com',
           monitorUrlLabel: 'URL',
           reason:
-            'Monitor "test monitor" from Test location is down. Checked at May 13, 2024 8:33 AM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
-          stateId: null,
+            'Monitor "test monitor" from Test location is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+          stateId: undefined,
           status: 'down',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
@@ -440,6 +442,8 @@ describe('StatusRuleExecutor', () => {
         alertId: 'id1',
         downThreshold: 1,
         idWithLocation: 'id1',
+        locationIds: ['test', 'test'],
+        locationNames: ['Test location', 'Test location'],
         monitorSummary: {
           checkedAt: '2024-05-13T12:33:37Z',
           checks: { down: 1, downWithinXChecks: 1 },
@@ -447,7 +451,7 @@ describe('StatusRuleExecutor', () => {
           downThreshold: 1,
           hostName: undefined,
           lastErrorMessage: undefined,
-          locationId: 'us_central_qa',
+          locationId: 'test | test',
           locationName: 'Test location',
           locationNames: 'Test location | Test location',
           monitorId: 'test',
@@ -457,8 +461,7 @@ describe('StatusRuleExecutor', () => {
           monitorUrl: 'https://www.google.com',
           monitorUrlLabel: 'URL',
           reason:
-            'Monitor "test monitor" is down 1 time from Test location |  1 time from Test location. Alert when down => 1 time within the last 1 checks from at least 1 location.',
-          stateId: null,
+            'Monitor "test monitor" is down 1 time from Test location | 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
           status: 'down',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
