@@ -68,6 +68,7 @@ export class DataTelemetryService {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
+  // @ts-ignore: Unused variable
   private run$ = defer(() => from(this.isTelemetryOptedIn())).pipe(
     takeWhile(() => !this.isStopped),
     tap((isOptedIn) => {
