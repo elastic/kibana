@@ -178,7 +178,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     ).toEqual('127.0.0.1');
   });
 
-  test('it invokes "onChange" when new value created', async () => {
+  test('it invokes "onChange" when new value created', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -204,7 +204,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith('127.0.0.1');
   });
 
-  test('it invokes "onChange" when new value selected', async () => {
+  test('it invokes "onChange" when new value selected', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -230,7 +230,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
   });
 
-  test('it invokes "onChange" with empty value (i.e. clears selection) when new value searched', async () => {
+  test('it invokes "onChange" with empty value (i.e. clears selection) when new value searched', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <AutocompleteFieldMatchComponent
