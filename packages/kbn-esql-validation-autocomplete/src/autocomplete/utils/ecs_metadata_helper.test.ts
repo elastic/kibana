@@ -9,7 +9,6 @@
 
 import type { ESQLRealField } from '../../validation/types';
 import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 describe('enrichFieldsWithECSInfo', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
@@ -42,7 +41,7 @@ describe('enrichFieldsWithECSInfo', () => {
           },
         }),
       }),
-    } as unknown as FieldsMetadataPublicStart;
+    };
     const fieldsMetadataCache = await (
       await fieldsMetadata.getClient()
     ).find({
@@ -79,7 +78,7 @@ describe('enrichFieldsWithECSInfo', () => {
           } as unknown as ECSMetadata,
         }),
       }),
-    } as unknown as FieldsMetadataPublicStart;
+    };
 
     const fieldsMetadataCache = await (
       await fieldsMetadata.getClient()

@@ -65,7 +65,11 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
-    getFieldsMetadata: jest.fn(async () => ({})),
+    getFieldsMetadata: jest.fn(async () => ({
+      find: jest.fn(async () => ({
+        fields: {},
+      })),
+    })),
   };
 }
 

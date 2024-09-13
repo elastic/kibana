@@ -27,12 +27,12 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     if (!cacheEcsMetadata && resourceRetriever?.getFieldsMetadata) {
       // Fetch full list of ECS field
       const client = await resourceRetriever?.getFieldsMetadata();
-      // if (client.find) {
-      //   const metadata = await client?.find({
-      //     attributes: ['type'],
-      //   });
-      //   cacheEcsMetadata = metadata?.fields;
-      // }
+      if (client?.find) {
+        const metadata = await client.find({
+          attributes: ['type'],
+        });
+        cacheEcsMetadata = metadata?.fields;
+      }
     }
     return cacheEcsMetadata;
   };
