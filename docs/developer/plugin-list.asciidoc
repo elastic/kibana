@@ -648,6 +648,10 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|Home of the Inventory plugin, which renders the... inventory.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
 |undefined
 
