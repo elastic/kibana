@@ -13,7 +13,7 @@ import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { i18n } from '@kbn/i18n';
 
-import './log_rate_analysis_info_popover.scss';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 export const LogRateAnalysisInfoPopoverButton: FC<{
   onClick: React.MouseEventHandler<HTMLButtonElement>;
@@ -32,6 +32,8 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
 };
 
 export const LogRateAnalysisInfoPopover: FC = () => {
+  const euiTheme = useEuiTheme();
+
   const showInfoPopover = useAppSelector(
     (s) => s.logRateAnalysisResults.significantItems.length > 0
   );
@@ -101,23 +103,20 @@ export const LogRateAnalysisInfoPopover: FC = () => {
       closePopover={setIsPopoverOpen.bind(null, false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="aiopsLogRateAnalysisInfoPopover__panel"
-      panelPaddingSize="none"
+      panelPaddingSize="m"
     >
       {infoTitle && (
-        <EuiPopoverTitle paddingSize="m">
+        <EuiPopoverTitle>
           {infoTitlePrefix}
           {infoTitle}
         </EuiPopoverTitle>
       )}
 
-      <EuiText
-        className="aiopsLogRateAnalysisInfoPopover__content eui-scrollBar"
-        size="m"
-        tabIndex={0}
-      >
-        {infoContent}
-        {fieldSelectionMessage && ` ${fieldSelectionMessage}`}{' '}
+      <EuiText size="s" css={{ maxWidth: `calc(${euiTheme.euiSizeXL} * 15);` }}>
+        <p>
+          {infoContent}
+          {fieldSelectionMessage && ` ${fieldSelectionMessage}`}
+        </p>
       </EuiText>
     </EuiPopover>
   );
