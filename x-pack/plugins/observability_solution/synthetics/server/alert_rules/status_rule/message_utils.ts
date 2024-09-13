@@ -105,7 +105,7 @@ export const getMonitorSummary = ({
 
   return {
     checkedAt,
-    locationId: locationId.join(' | '),
+    locationId: locationId?.join?.(' | ') ?? '',
     configId,
     monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
