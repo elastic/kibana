@@ -38,11 +38,13 @@ export function InvestigationList() {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [search, setSearch] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string[]>([]);
 
   const { data, isLoading, isError } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
     search,
+    filter: status.map((s) => `investigation.attributes.status:${s}`).join(' OR '),
   });
 
   const investigations = data?.results ?? [];
@@ -102,8 +104,8 @@ export function InvestigationList() {
     {
       field: 'status',
       name: 'Status',
-      render: (status: InvestigationResponse['status']) => {
-        return <InvestigationStatusBadge status={status} />;
+      render: (s: InvestigationResponse['status']) => {
+        return <InvestigationStatusBadge status={s} />;
       },
     },
 
@@ -135,9 +137,8 @@ export function InvestigationList() {
     <EuiFlexGroup direction="column" gutterSize="m">
       <SearchBar
         isLoading={isLoading}
-        onSearch={({ searchValue }) => {
-          setSearch(searchValue);
-        }}
+        onSearch={(value) => setSearch(value)}
+        onStatusFilterChange={(selected) => setStatus(selected)}
       />
       <EuiFlexGroup>
         {isLoading && <EuiLoadingSpinner size="xl" />}

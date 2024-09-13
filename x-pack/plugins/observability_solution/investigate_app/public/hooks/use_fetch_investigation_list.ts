@@ -17,6 +17,7 @@ export interface InvestigationListParams {
   page?: number;
   perPage?: number;
   search?: string;
+  filter?: string;
 }
 
 export interface UseFetchInvestigationListResponse {
@@ -32,6 +33,7 @@ export function useFetchInvestigationList({
   page = 1,
   perPage = DEFAULT_PAGE_SIZE,
   search,
+  filter,
 }: InvestigationListParams = {}): UseFetchInvestigationListResponse {
   const {
     core: {
@@ -45,6 +47,7 @@ export function useFetchInvestigationList({
       page,
       perPage,
       search,
+      filter,
     }),
     queryFn: async ({ signal }) => {
       return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
@@ -53,6 +56,7 @@ export function useFetchInvestigationList({
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
           ...(search !== undefined && { search }),
+          ...(filter !== undefined && { filter }),
         },
         signal,
       });

@@ -50,4 +50,8 @@ function toFilter(params: FindInvestigationsParams): string | undefined {
     const triageStatus: InvestigationStatus = 'triage';
     return `investigation.attributes.origin.id:(${params.alertId}) AND (investigation.attributes.status: ${activeStatus} OR investigation.attributes.status: ${triageStatus})`;
   }
+
+  if (params?.filter) {
+    return params.filter;
+  }
 }
