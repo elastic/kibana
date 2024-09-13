@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ManagedEntityEnabledResponse } from '@kbn/entityManager-plugin/common/types_api';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import React, { createContext } from 'react';
 import {
@@ -44,11 +43,6 @@ interface TourState {
 const TOUR_INITIAL_STATE: TourState = {
   isModalVisible: undefined,
   isTourActive: false,
-};
-
-const INITIAL_STATE: ManagedEntityEnabledResponse = {
-  enabled: false,
-  reason: '',
 };
 
 export function EntityManagerEnablementContextProvider({
