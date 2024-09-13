@@ -126,7 +126,7 @@ export const prettifyQuery = (query: string, isWrapped: boolean): string => {
   return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
 };
 
-export const retieveMetadataColumns = (esql: string): string[] => {
+export const retrieveMetadataColumns = (esql: string): string[] => {
   const { ast } = getAstAndSyntaxErrors(esql);
   const options: ESQLCommandOption[] = [];
 
