@@ -40,7 +40,7 @@ export const OnboardingBody = React.memo(() => {
         setExpandedCardId(null);
       } else {
         setExpandedCardId(cardId);
-        // execute the auto-check for the card when it's been expanded
+        // execute the auto-check for the card when expanded
         checkCardComplete(cardId);
       }
     },

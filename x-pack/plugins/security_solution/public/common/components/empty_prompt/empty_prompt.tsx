@@ -16,6 +16,7 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { OnboardingCardId } from '../../../onboarding/constants';
 import { SecurityPageName } from '../../../../common';
 
 import * as i18n from './translations';
@@ -24,7 +25,6 @@ import cloudSvg from './images/cloud1.svg';
 import siemSvg from './images/siem1.svg';
 import { useNavigateTo } from '../../lib/kibana';
 import { ONBOARDING_VIDEO_SOURCE } from '../../constants';
-import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
 
 const imgUrls = {
   cloud: cloudSvg,
@@ -75,7 +75,7 @@ export const EmptyPromptComponent = memo(() => {
   const navigateToAddIntegrations = useCallback(() => {
     navigateTo({
       deepLinkId: SecurityPageName.landing,
-      path: `#${AddIntegrationsSteps.connectToDataSources}`,
+      path: `#${OnboardingCardId.integrations}`,
     });
   }, [navigateTo]);
 

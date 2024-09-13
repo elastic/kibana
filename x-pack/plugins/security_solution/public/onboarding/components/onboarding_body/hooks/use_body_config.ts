@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { hasCapabilities } from '../../../../common/lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { bodyConfig } from '../body_config';
+import type { OnboardingGroupConfig } from '../../../types';
 
 /**
  * Hook that filters the config based on the user's capabilities and license
@@ -24,7 +25,7 @@ export const useBodyConfig = () => {
     if (!license) {
       return [];
     }
-    return bodyConfig.filter((group) => {
+    return bodyConfig.reduce<OnboardingGroupConfig[]>((filteredGroups, group) => {
       const filteredCards = group.cards.filter((card) => {
         if (card.capabilities) {
           const cardHasCapabilities = hasCapabilities(application.capabilities, card.capabilities);
@@ -43,11 +44,11 @@ export const useBodyConfig = () => {
         return true;
       });
 
-      if (filteredCards.length === 0) {
-        return false;
+      if (filteredCards.length > 0) {
+        filteredGroups.push({ ...group, cards: filteredCards });
       }
-      return true;
-    });
+      return filteredGroups;
+    }, []);
   }, [license, application.capabilities]);
 
   return filteredBodyConfig;
