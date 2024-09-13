@@ -40,15 +40,15 @@ export type DefaultControlApi = PublishesDataLoading &
   HasType &
   HasUniqueId &
   HasParentApi<ControlGroupApi> & {
-    // Can not use HasSerializableState interface
-    // HasSerializableState types serializeState as function returning 'MaybePromise'
-    // Controls serializeState is sync
-    serializeState: () => SerializedPanelState<DefaultControlState>;
-    /** TODO: Make these non-public as part of https://github.com/elastic/kibana/issues/174961 */
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
+
+    // Can not use HasSerializableState interface
+    // HasSerializableState types serializeState as function returning 'MaybePromise'
+    // Controls serializeState is sync
+    serializeState: () => SerializedPanelState<DefaultControlState>;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
