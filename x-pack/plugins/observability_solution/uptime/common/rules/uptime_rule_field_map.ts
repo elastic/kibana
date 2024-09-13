@@ -19,6 +19,7 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'observer.geo.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // monitor status alert fields
@@ -57,10 +58,12 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'location.id': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   'location.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // tls alert fields

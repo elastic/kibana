@@ -59,8 +59,6 @@ export interface MonitorSummaryStatusRule {
   monitorName: string;
   locationName: string;
   locationNames: string;
-  lastErrorMessage: string;
-  stateId: string | null;
   monitorUrlLabel: string;
   monitorTags?: string[];
   downThreshold: number;
@@ -68,5 +66,7 @@ export interface MonitorSummaryStatusRule {
     downWithinXChecks: number;
     down: number;
   };
+  stateId?: string;
+  lastErrorMessage?: string;
   timestamp: string;
 }

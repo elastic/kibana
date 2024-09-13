@@ -24,19 +24,7 @@ export const SyntheticsCommonStateCodec = t.intersection([
 
 export type SyntheticsCommonState = t.TypeOf<typeof SyntheticsCommonStateCodec>;
 
-export const SyntheticsMonitorStatusAlertStateCodec = t.type({
-  configId: t.string,
-  locationId: t.string,
-  locationName: t.string,
-  errorStartedAt: t.string,
-  lastErrorMessage: t.string,
-  stateId: t.string,
-  checks: t.type({
-    total: t.number,
-    down: t.number,
-  }),
-  downThreshold: t.number,
-});
+export const SyntheticsMonitorStatusAlertStateCodec = t.type({});
 
 export type SyntheticsMonitorStatusAlertState = t.TypeOf<
   typeof SyntheticsMonitorStatusAlertStateCodec

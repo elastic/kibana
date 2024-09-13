@@ -148,44 +148,45 @@ export class StatusRuleExecutor {
 
     const { numberOfChecks } = getConditionType(this.params.condition);
 
-    if (enabledMonitorQueryIds.length > 0) {
-      const currentStatus = await queryMonitorStatusAlert(
-        this.esClient,
-        monitorLocationIds,
-        range,
-        enabledMonitorQueryIds,
-        monitorLocationMap,
-        numberOfChecks
-      );
-
-      const { downConfigs, upConfigs } = currentStatus;
-
-      this.debug(
-        `Found ${Object.keys(downConfigs).length} down configs and ${
-          Object.keys(upConfigs).length
-        } up configs`
-      );
-
-      Object.keys(prevDownConfigs).forEach((locId) => {
-        if (!downConfigs[locId] && !upConfigs[locId]) {
-          downConfigs[locId] = prevDownConfigs[locId];
-        }
-      });
-
-      const staleDownConfigs = this.markDeletedConfigs(downConfigs);
-
+    if (enabledMonitorQueryIds.length === 0) {
+      const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
       return {
-        ...currentStatus,
+        downConfigs: { ...prevDownConfigs },
+        upConfigs: {},
         staleDownConfigs,
+        enabledMonitorQueryIds,
         monitorLocationsMap: monitorLocationMap,
       };
     }
-    const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
-    return {
-      downConfigs: { ...prevDownConfigs },
-      upConfigs: {},
-      staleDownConfigs,
+
+    const currentStatus = await queryMonitorStatusAlert(
+      this.esClient,
+      monitorLocationIds,
+      range,
       enabledMonitorQueryIds,
+      monitorLocationMap,
+      numberOfChecks
+    );
+
+    const { downConfigs, upConfigs } = currentStatus;
+
+    this.debug(
+      `Found ${Object.keys(downConfigs).length} down configs and ${
+        Object.keys(upConfigs).length
+      } up configs`
+    );
+
+    Object.keys(prevDownConfigs).forEach((locId) => {
+      if (!downConfigs[locId] && !upConfigs[locId]) {
+        downConfigs[locId] = prevDownConfigs[locId];
+      }
+    });
+
+    const staleDownConfigs = this.markDeletedConfigs(downConfigs);
+
+    return {
+      ...currentStatus,
+      staleDownConfigs,
       monitorLocationsMap: monitorLocationMap,
     };
   }
@@ -268,6 +269,8 @@ export class StatusRuleExecutor {
             statusConfig,
             downThreshold,
             useLatestChecks,
+            locationNames: [statusConfig.ping.observer.geo?.name!],
+            locationIds: [statusConfig.ping.observer.name!],
           });
         }
       });
@@ -295,6 +298,8 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
+            locationNames: configs.map((c) => c.ping.observer.geo?.name!),
+            locationIds: configs.map((c) => c.ping.observer.name!),
           });
         }
       }
@@ -310,7 +315,7 @@ export class StatusRuleExecutor {
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       statusMessage: DOWN_LABEL,
-      locationId,
+      locationId: [locationId],
       configId,
       dateFormat: this.dateFormat ?? 'Y-MM-DD HH:mm:ss',
       tz: this.tz ?? 'UTC',
@@ -346,11 +351,11 @@ export class StatusRuleExecutor {
   }) {
     const { numberOfChecks, downThreshold } = getConditionType(this.params.condition);
     const sampleConfig = statusConfigs[0];
-    const { ping, configId, locationId, checks } = sampleConfig;
+    const { ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       statusMessage: DOWN_LABEL,
-      locationId,
+      locationId: statusConfigs.map((c) => c.ping.observer.name!),
       configId,
       dateFormat: this.dateFormat!,
       tz: this.tz!,
@@ -378,6 +383,8 @@ export class StatusRuleExecutor {
     statusConfig,
     downThreshold,
     useLatestChecks = false,
+    locationNames,
+    locationIds,
   }: {
     idWithLocation: string;
     alertId: string;
@@ -389,6 +396,8 @@ export class StatusRuleExecutor {
     };
     downThreshold: number;
     useLatestChecks?: boolean;
+    locationNames: string[];
+    locationIds: string[];
   }) {
     const { configId, locationId, checks } = statusConfig;
     const { spaceId, startedAt } = this.options;
@@ -424,11 +433,16 @@ export class StatusRuleExecutor {
       [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
     };
 
-    const payload = getMonitorAlertDocument(monitorSummary, useLatestChecks);
+    const alertDocument = getMonitorAlertDocument(
+      monitorSummary,
+      locationNames,
+      locationIds,
+      useLatestChecks
+    );
 
     alertsClient.setAlertData({
       id: alertId,
-      payload,
+      payload: alertDocument,
       context,
     });
   }

@@ -28,19 +28,21 @@ import { UNNAMED_LOCATION } from '../../../common/constants';
 
 export const getMonitorAlertDocument = (
   monitorSummary: MonitorSummaryStatusRule,
+  locationNames: string[],
+  locationIds: string[],
   useLatestChecks: boolean
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
   [MONITOR_NAME]: monitorSummary.monitorName,
   [URL_FULL]: monitorSummary.monitorUrl,
-  [OBSERVER_GEO_NAME]: monitorSummary.locationName,
+  [OBSERVER_GEO_NAME]: locationNames,
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
   [STATE_ID]: monitorSummary.stateId,
-  'location.id': monitorSummary.locationId,
-  'location.name': monitorSummary.locationName,
+  'location.id': locationIds,
+  'location.name': locationNames,
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
   'kibana.alert.evaluation.value':
@@ -51,7 +53,7 @@ export const getMonitorAlertDocument = (
 export interface MonitorSummaryData {
   monitorInfo: OverviewPing;
   statusMessage: string;
-  locationId: string;
+  locationId: string[];
   configId: string;
   dateFormat: string;
   tz: string;
@@ -72,12 +74,15 @@ export const getMonitorSummary = ({
   downThreshold,
   dateFormat,
   statusMessage,
-  checks = { downWithinXChecks: 1, down: 1 },
+  checks,
   locationsThreshold,
   numberOfChecks,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
-  const observerLocation = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const formattedLocationName = Array.isArray(locationName)
+    ? locationName.join(' | ')
+    : locationName;
   const checkedAt = moment(monitorInfo?.['@timestamp'])
     .tz(tz || 'UTC')
     .format(dateFormat);
@@ -96,11 +101,11 @@ export const getMonitorSummary = ({
     browser: 'URL',
   };
   const monitorType = monitorInfo.monitor?.type;
-  const stateId = monitorInfo.state?.id || null;
+  const stateId = monitorInfo.state?.id;
 
   return {
     checkedAt,
-    locationId,
+    locationId: locationId.join(' | '),
     configId,
     monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
@@ -108,13 +113,14 @@ export const getMonitorSummary = ({
     monitorName,
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
-    locationName: monitorInfo.observer?.geo?.name!,
+    locationName: formattedLocationName,
+    locationNames: formattedLocationName,
     hostName: monitorInfo.agent?.name!,
     status: statusMessage,
     stateId,
     [ALERT_REASON_MSG]: getReasonMessage({
       name: monitorName,
-      location: observerLocation,
+      location: formattedLocationName,
       status: statusMessage,
       timestamp: monitorInfo['@timestamp'],
       checks,
@@ -126,7 +132,6 @@ export const getMonitorSummary = ({
     downThreshold,
     timestamp: monitorInfo['@timestamp'],
     monitorTags: monitorInfo.tags,
-    locationNames: monitorInfo.observer?.geo?.name!,
   };
 };
 
@@ -138,81 +143,67 @@ export const getUngroupedReasonMessage = ({
 }: {
   statusConfigs: AlertStatusMetaData[];
   monitorName: string;
-  status?: string;
   params: StatusRuleParams;
+  status?: string;
+  checks?: {
+    downWithinXChecks: number;
+    down: number;
+  };
 }) => {
   const { useLatestChecks, numberOfChecks, timeWindow, downThreshold, locationsThreshold } =
     getConditionType(params.condition);
 
-  if (statusConfigs.length === 1) {
-    const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name!);
-    return i18n.translate(
-      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped',
-      {
-        defaultMessage: `Monitor "{name}" is {status} from {locName}. Alert when down {threshold} {threshold, plural, one {time} other {times}} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
-        values: {
-          locName: locNames[0],
-          name: monitorName,
-          status,
-          threshold: downThreshold,
-          locationsThreshold,
-        },
-      }
-    );
-  } else {
-    return i18n.translate(
-      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
-      {
-        defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
-        values: {
-          name: monitorName,
-          status,
-          threshold: downThreshold,
-          locationsThreshold,
-          condition: useLatestChecks
-            ? i18n.translate(
-                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.latestChecks',
-                {
-                  defaultMessage: 'within the last {checks} checks',
-                  values: { checks: numberOfChecks },
-                }
-              )
-            : i18n.translate(
-                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.timeWindow',
-                {
-                  defaultMessage: 'within the last {time} {unit}',
-                  values: {
-                    time: timeWindow.size,
-                    unit: getTimeUnitLabel(timeWindow),
-                  },
-                }
-              ),
-          locationDetails: statusConfigs
-            .map((c) => {
-              return i18n.translate(
-                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
-                {
-                  defaultMessage:
-                    ' {downCount} {downCount, plural, one {time} other {times}} from {locName}',
-                  values: {
-                    locName: c.ping.observer.geo?.name,
-                    downCount: useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down,
-                  },
-                }
-              );
-            })
-            .join(' | '),
-        },
-      }
-    );
-  }
+  return i18n.translate(
+    'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
+    {
+      defaultMessage: `Monitor "{name}" is {status} {locationDetails}. Alert when down {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
+      values: {
+        name: monitorName,
+        status,
+        threshold: downThreshold,
+        locationsThreshold,
+        condition: useLatestChecks
+          ? i18n.translate(
+              'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.latestChecks',
+              {
+                defaultMessage: 'out of the last {numberOfChecks} checks',
+                values: { numberOfChecks },
+              }
+            )
+          : i18n.translate(
+              'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.timeWindow',
+              {
+                defaultMessage: 'within the last {time} {unit}',
+                values: {
+                  time: timeWindow.size,
+                  unit: getTimeUnitLabel(timeWindow),
+                },
+              }
+            ),
+        locationDetails: statusConfigs
+          .map((c) => {
+            return i18n.translate(
+              'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
+              {
+                defaultMessage:
+                  '{downCount} {downCount, plural, one {time} other {times}} from {locName}',
+                values: {
+                  locName: c.ping.observer.geo?.name,
+                  downCount: useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down,
+                },
+              }
+            );
+          })
+          .join(' | '),
+      },
+    }
+  );
 };
 
 export const getReasonMessage = ({
   name,
   status,
   location,
-  timestamp,
   checks,
   downThreshold,
   locationsThreshold,
@@ -221,7 +212,6 @@ export const getReasonMessage = ({
   name: string;
   location: string;
   status: string;
-  timestamp: string;
   checks?: {
     downWithinXChecks: number;
     down: number;
@@ -230,19 +220,26 @@ export const getReasonMessage = ({
   locationsThreshold: number;
   numberOfChecks: number;
 }) => {
-  const checkedAt = moment(timestamp).format('LLL');
-
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. {checksSummary}Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
       location,
-      checkedAt,
       downThreshold,
       locationsThreshold,
       downChecks: checks?.downWithinXChecks ?? 1,
       numberOfChecks,
+      checksSummary: checks
+        ? i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.checksSummary', {
+            defaultMessage:
+              'Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. ',
+            values: {
+              downChecks: checks.downWithinXChecks,
+              numberOfChecks,
+            },
+          })
+        : '',
     },
   });
 };

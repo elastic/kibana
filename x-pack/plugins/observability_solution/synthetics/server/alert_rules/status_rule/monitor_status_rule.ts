@@ -87,7 +87,6 @@ export const registerSyntheticsStatusCheckRule = (
         basePath,
         spaceId,
         staleDownConfigs,
-        previousDownConfigs: ruleState.meta?.downConfigs || {},
         upConfigs,
         dateFormat,
         tz,
