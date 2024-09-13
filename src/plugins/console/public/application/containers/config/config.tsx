@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
@@ -35,9 +35,11 @@ export function Config({ isVerticalLayout }: Props) {
       >
         <EuiFlexItem>
           <Settings />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem>
           <Variables />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

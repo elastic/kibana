@@ -19,7 +19,10 @@ import {
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   useIsWithinBreakpoints,
+  useEuiOverflowScroll,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
@@ -74,6 +77,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
   const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   const {
     docLinks,
@@ -169,6 +173,10 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       reader.readAsText(file);
     }
   };
+
+  const scrollablePanelStyle = css`
+    ${useEuiOverflowScroll('y', false)}
+  `;
 
   if (error) {
     return (
@@ -299,8 +307,11 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
-        <EuiSplitPanel.Inner paddingSize="none">
-          {currentTab === SHELL_TAB_ID && (
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
+        >
+          {currentView === SHELL_TAB_ID && (
             <Editor
               loading={!done}
               isVerticalLayout={isVerticalLayout}

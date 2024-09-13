@@ -16,11 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
-  const browser = getService('browser');
 
   async function runTemplateTest(type: string, template: string) {
     await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
-    await PageObjects.console.sleepForDebouncePeriod();
+    await PageObjects.console.sleepForDebouncePeriod(500);
     // Prompt autocomplete for 'settings'
     await PageObjects.console.promptAutocomplete('s');
 
@@ -29,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
     await PageObjects.console.pressEnter();
     await retry.try(async () => {
-      await PageObjects.console.copyRequestsToClipboard();
-      const request = await browser.execute(() => navigator.clipboard.readText());
+      const request = await PageObjects.console.getEditorText();
       log.debug(request);
       expect(request).to.contain(`${template}`);
     });
@@ -334,7 +332,7 @@ GET _search
 
     describe('with conditional templates', () => {
       beforeEach(async () => {
-        await PageObjects.console.clearEditorText();
+        await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('POST _snapshot/test_repo\n');
       });
 
