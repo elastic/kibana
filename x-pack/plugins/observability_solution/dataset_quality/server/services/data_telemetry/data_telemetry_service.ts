@@ -39,6 +39,7 @@ import {
   TELEMETRY_TASK_INTERVAL,
   LOGS_DATA_TELEMETRY_TASK_ID,
   TELEMETRY_TASK_TIMEOUT,
+  logsDataTelemetryEventSchema,
 } from './constants';
 import {
   getAllIndices,
@@ -50,7 +51,7 @@ import {
   getIndexFieldStats,
 } from './helpers';
 
-import { DataTelemetryEvent } from './types';
+import { DataTelemetryEvent, LogsDataTelemetryEventTypes } from './types';
 
 export class DataTelemetryService {
   private readonly logger: Logger;
@@ -88,6 +89,11 @@ export class DataTelemetryService {
 
   public setup(analytics: AnalyticsServiceSetup, taskManager: TaskManagerSetupContract) {
     this.analytics = analytics;
+
+    // Register EBT event type
+    analytics.registerEventType(logsDataTelemetryEventSchema);
+
+    // Register Kibana task
     this.registerTask(taskManager);
   }
 
@@ -251,7 +257,18 @@ export class DataTelemetryService {
   }
 
   private async reportEvents(events: DataTelemetryEvent[]) {
-    // TODO: Implement reporting events via analytics service
+    if (events.length) {
+      if (this.analytics) {
+        events.forEach((event) => {
+          this.analytics!.reportEvent(LogsDataTelemetryEventTypes.LogsDataTelemetryEvent, event);
+        });
+      } else {
+        this.logger?.error(
+          `[Logs Data Telemetry] Analytics service is not available: cannot report telemetry events`
+        );
+      }
+    }
+
     return Promise.resolve(events);
   }
 

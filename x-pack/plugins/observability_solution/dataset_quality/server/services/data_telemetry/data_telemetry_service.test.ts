@@ -11,7 +11,11 @@ import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { DataTelemetryEvent } from './types';
-import { BREATHE_DELAY_MEDIUM, MAX_STREAMS_TO_REPORT } from './constants';
+import {
+  BREATHE_DELAY_MEDIUM,
+  logsDataTelemetryEventSchema,
+  MAX_STREAMS_TO_REPORT,
+} from './constants';
 import { DataTelemetryService } from './data_telemetry_service';
 
 // Mock the constants module to speed up and simplify the tests
@@ -50,7 +54,7 @@ describe('DataTelemetryService', () => {
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let runTask: ReturnType<typeof setupMocks>['runTask'];
 
-  describe('Data Telemetry Task', () => {
+  describe('Setup', () => {
     beforeEach(async () => {
       const mocks = setupMocks();
       mockEsClient = mocks.mockEsClient;
@@ -75,6 +79,13 @@ describe('DataTelemetryService', () => {
     afterEach(() => {
       jest.clearAllTimers();
       jest.clearAllMocks();
+    });
+
+    it('should register telemetry event type', () => {
+      expect(mockAnalyticsSetup.registerEventType).toHaveBeenCalledTimes(1);
+      expect(mockAnalyticsSetup.registerEventType).toHaveBeenCalledWith(
+        logsDataTelemetryEventSchema
+      );
     });
 
     it('should trigger task runner run method', async () => {
@@ -211,6 +222,29 @@ describe('DataTelemetryService', () => {
         await runTask();
         await sleepForBreathDelay();
 
+        const expectedEvent1 = {
+          doc_count: 4000 + 500 + 200,
+          failure_store_doc_count: 300,
+          index_count: 2 + 1 + 1,
+          failure_store_index_count: 1,
+          namespace_count: 1 + 1,
+          size_in_bytes: 10089898 + 800000 + 500000,
+          pattern_name: 'test',
+          managed_by: ['fleet'],
+          package_name: ['activemq'],
+          beat: [],
+        };
+        const expectedEvent2 = {
+          beat: [],
+          doc_count: 1700,
+          index_count: 3,
+          namespace_count: 2,
+          package_name: [],
+          pattern_name: 'test-2',
+          shipper: 'custom-2',
+          size_in_bytes: 2300000,
+        };
+
         expect(reportEventsSpy).toHaveBeenCalledTimes(1);
         expect(
           (
@@ -218,20 +252,21 @@ describe('DataTelemetryService', () => {
               [Partial<DataTelemetryEvent>],
               [Partial<DataTelemetryEvent>]
             ]
-          )?.[0]?.[0]
-        ).toEqual(
-          expect.objectContaining({
-            doc_count: 4000 + 500 + 200,
-            failure_store_doc_count: 300,
-            index_count: 2 + 1 + 1,
-            failure_store_index_count: 1,
-            namespace_count: 1 + 1,
-            size_in_bytes: 10089898 + 800000 + 500000,
-            pattern_name: 'test',
-            managed_by: ['fleet'],
-            package_name: ['activemq'],
-            beat: [],
-          })
+          )?.[0]
+        ).toEqual([
+          expect.objectContaining(expectedEvent1),
+          expect.objectContaining(expectedEvent2),
+        ]);
+
+        // Assert that telemetry events are reported via the analytics service
+        expect(mockAnalyticsSetup.reportEvent).toHaveBeenCalledTimes(2); // Two streams of logs
+        expect(mockAnalyticsSetup.reportEvent).toHaveBeenCalledWith(
+          logsDataTelemetryEventSchema.eventType,
+          expect.objectContaining(expectedEvent1)
+        );
+        expect(mockAnalyticsSetup.reportEvent).toHaveBeenCalledWith(
+          logsDataTelemetryEventSchema.eventType,
+          expect.objectContaining(expectedEvent2)
         );
       },
       TEST_TIMEOUT
@@ -420,7 +455,8 @@ function setupMocks() {
   } as unknown as jest.Mocked<Logger>;
 
   const mockAnalyticsSetup = {
-    getTelemetryUrl: jest.fn().mockResolvedValue(new URL('https://telemetry.elastic.co')),
+    registerEventType: jest.fn(),
+    reportEvent: jest.fn(),
   } as unknown as jest.Mocked<AnalyticsServiceSetup>;
 
   const mockTelemetryStart = {
