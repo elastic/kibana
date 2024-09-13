@@ -26,6 +26,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import useAsync from 'react-use/lib/useAsync';
+import { lastValueFrom } from 'rxjs';
+
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
@@ -246,6 +249,30 @@ export function Detail() {
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
+  const { value: hasAgentId } = useAsync(async () => {
+    const resp = await lastValueFrom(
+      services.data.search.search({
+        params: {
+          index: 'logs-*,metrics-*',
+          body: {
+            size: 0,
+            query: {
+              exists: {
+                field: 'agent.id',
+              },
+            },
+          },
+        },
+      })
+    );
+    console.log(resp.rawResponse);
+    const total = resp.rawResponse.hits.total;
+    // total can be a number or a value/relation object, handle both cases
+    if (!total) {
+      return false;
+    }
+    return typeof total === 'number' ? total > 0 : total.value > 0;
+  }, [services.data.search]);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
