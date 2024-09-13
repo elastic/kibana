@@ -36,7 +36,10 @@ export const FormKeyType: React.FC = () => {
         <EuiText size="xs">
           <p>
             <strong>{tokenDescription}</strong>{' '}
-            <EuiLink href={DOCS_HREF}>
+            <EuiLink
+              data-test-subj="enterpriseSearchFormKeyTypeVisitTheDocumentationLink"
+              href={DOCS_HREF}
+            >
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.documentationLink1', {
                 defaultMessage: 'Visit the documentation',
               })}
@@ -49,14 +52,11 @@ export const FormKeyType: React.FC = () => {
       }
     >
       <EuiSelect
+        data-test-subj="enterpriseSearchFormKeyTypeSelect"
         name="token_type"
         options={tokenOptions}
         value={activeApiToken.type}
         onChange={(e) => setTokenType(e.target.value)}
-        placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.credentials.formType.placeholder',
-          { defaultMessage: 'Select a key type' }
-        )}
         disabled={activeApiTokenExists}
         required
         fullWidth

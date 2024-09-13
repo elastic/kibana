@@ -10,24 +10,40 @@ import {
   EuiSpacer,
   EuiButton,
   EuiPageTemplate,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiText,
+  EuiIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { DeleteIndexModal } from './delete_index_modal';
+import { IndexloadingError } from './details_page_loading_error';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, application } = useKibana().services;
+  const { console: consolePlugin, docLinks, application } = useKibana().services;
 
-  const { data: index } = useIndex(indexName);
-  const { data: mappings } = useIndexMapping(indexName);
+  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const {
+    data: mappings,
+    isError: isMappingsError,
+    isInitialLoading: isMappingsInitialLoading,
+  } = useIndexMapping(indexName);
+
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -36,8 +52,58 @@ export const SearchIndexDetailsPage = () => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
 
-  if (!index || !mappings) {
-    return null;
+  const refetchIndex = useCallback(() => {
+    refetch();
+  }, [refetch]);
+  const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
+  const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
+  const moreOptionsPopover = (
+    <EuiPopover
+      isOpen={showMoreOptions}
+      closePopover={() => setShowMoreOptions(!showMoreOptions)}
+      button={
+        <EuiButtonIcon
+          iconType="boxesVertical"
+          onClick={() => setShowMoreOptions(!showMoreOptions)}
+          size="m"
+          data-test-subj="moreOptionsActionButton"
+          aria-label={i18n.translate('xpack.searchIndices.moreOptions.ariaLabel', {
+            defaultMessage: 'More options',
+          })}
+        />
+      }
+    >
+      <EuiContextMenuPanel
+        data-test-subj="moreOptionsContextMenu"
+        items={[
+          <EuiContextMenuItem
+            key="trash"
+            icon={<EuiIcon type="trash" color="danger" />}
+            onClick={() => {
+              setShowDeleteIndexModal(!isShowingDeleteModal);
+            }}
+            size="s"
+            color="danger"
+            data-test-subj="moreOptionsDeleteIndex"
+          >
+            <EuiText size="s" color="danger">
+              {i18n.translate('xpack.searchIndices.moreOptions.deleteIndexLabel', {
+                defaultMessage: 'Delete Index',
+              })}
+            </EuiText>
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
+  );
+  if (isInitialLoading || isMappingsInitialLoading) {
+    return (
+      <SectionLoading>
+        {i18n.translate('xpack.searchIndices.loadingDescription', {
+          defaultMessage: 'Loading index details…',
+        })}
+      </SectionLoading>
+    );
   }
 
   return (
@@ -49,39 +115,73 @@ export const SearchIndexDetailsPage = () => {
       panelled
       bottomBorder
     >
-      <EuiPageSection>
-        <EuiButton
-          data-test-subj="searchIndexDetailsBackToIndicesButton"
-          color="text"
-          iconType="arrowLeft"
-          onClick={navigateToIndexListPage}
-        >
-          <FormattedMessage
-            id="xpack.searchIndices.backToIndicesButtonLabel"
-            defaultMessage="Back to indices"
+      {isIndexError || isMappingsError ? (
+        <IndexloadingError
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+          reloadFunction={refetchIndex}
+        />
+      ) : (
+        <>
+          <EuiPageSection>
+            <EuiButton
+              data-test-subj="backToIndicesButton"
+              color="text"
+              iconType="arrowLeft"
+              onClick={() => navigateToIndexListPage()}
+            >
+              <FormattedMessage
+                id="xpack.searchIndices.backToIndicesButtonLabel"
+                defaultMessage="Back to indices"
+              />
+            </EuiButton>
+          </EuiPageSection>
+          <EuiPageTemplate.Header
+            data-test-subj="searchIndexDetailsHeader"
+            pageTitle={index?.name}
+            rightSideItems={[
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    href={docLinks.links.apiReference}
+                    target="_blank"
+                    iconType="documentation"
+                    data-test-subj="ApiReferenceDoc"
+                  >
+                    {i18n.translate('xpack.searchIndices.indexActionsMenu.apiReference.docLink', {
+                      defaultMessage: 'API Reference',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>{moreOptionsPopover}</EuiFlexItem>
+              </EuiFlexGroup>,
+            ]}
           />
-        </EuiButton>
-      </EuiPageSection>
-      <EuiPageTemplate.Header
-        data-test-subj="searchIndexDetailsHeader"
-        pageTitle={index?.name}
-        rightSideItems={[]}
-      />
-      <div data-test-subj="searchIndexDetailsContent" />
-      <EuiPageTemplate.Section grow={false}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ConnectionDetails />
-          </EuiFlexItem>
-          <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiSpacer size="l" />
 
-        <EuiSpacer size="l" />
+          {isShowingDeleteModal && (
+            <DeleteIndexModal
+              onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
+              indexName={indexName}
+              navigateToIndexListPage={navigateToIndexListPage}
+            />
+          )}
+          <EuiPageTemplate.Section grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ConnectionDetails />
+              </EuiFlexItem>
+              <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+            </EuiFlexGroup>
 
-        <EuiFlexGroup>
-          <QuickStats index={index} mappings={mappings} />
-        </EuiFlexGroup>
-      </EuiPageTemplate.Section>
+            <EuiSpacer size="l" />
+
+            <EuiFlexGroup>
+              <QuickStats index={index} mappings={mappings} />
+            </EuiFlexGroup>
+          </EuiPageTemplate.Section>
+        </>
+      )}
       {embeddableConsole}
     </EuiPageTemplate>
   );
