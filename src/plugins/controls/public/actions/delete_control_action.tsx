@@ -10,44 +10,12 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiIsPresentationContainer,
-  type PresentationContainer,
-} from '@kbn/presentation-containers';
-import {
-  apiCanAccessViewMode,
-  apiHasParentApi,
-  apiHasType,
-  apiHasUniqueId,
-  apiIsOfType,
-  getInheritedViewMode,
-  type EmbeddableApiContext,
-  type HasParentApi,
-  type HasType,
-  type HasUniqueId,
-  type PublishesViewMode,
-} from '@kbn/presentation-publishing';
+import type { HasUniqueId, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_DELETE_CONTROL } from '.';
-import { CONTROL_GROUP_TYPE } from '..';
 import { coreServices } from '../services/kibana_services';
-
-export type DeleteControlActionApi = HasType &
-  HasUniqueId &
-  HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
-
-const isApiCompatible = (api: unknown | null): api is DeleteControlActionApi =>
-  Boolean(
-    apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
-  );
 
 export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_DELETE_CONTROL;
@@ -57,12 +25,10 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   constructor() {}
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
-    if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
-
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.uuid}-delete`}
+          data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-delete`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}
@@ -73,25 +39,23 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   };
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
       defaultMessage: 'Delete',
     });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'trash';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return (
-      isApiCompatible(embeddable) && getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT
-    );
+    const { isCompatible } = await import('./delete_control_action_compatibility_check');
+    return isCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const { compatibilityCheck } = await import('./delete_control_action_compatibility_check');
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
 
     coreServices.overlays
       .openConfirm(
