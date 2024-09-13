@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -18,6 +19,7 @@ import {
   DashboardRenderer,
   DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
@@ -25,13 +27,24 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
-    dashboard?.addNewPanel(
-      {
-        panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
-        initialState: {},
-      },
-      true
-    );
+    if (!dashboard) return;
+    const canceled = false;
+    dashboard
+      .addNewPanel(
+        {
+          panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
+          initialState: {},
+        },
+        true
+      )
+      .then((panelApi) => {
+        if (!canceled && apiHasUniqueId(panelApi)) {
+          dashboard.expandPanel(panelApi.uuid);
+        }
+      })
+      .catch(() => {
+        // ignore error - its an example
+      });
   }, [dashboard]);
 
   return (
@@ -43,7 +56,12 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
         <p>A dashboard with a markdown panel that displays the filters from its control group.</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder={true}>
+      <EuiPanel
+        css={css`
+          height: 350px;
+        `}
+        hasBorder={true}
+      >
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
             const controlGroupState = {};
