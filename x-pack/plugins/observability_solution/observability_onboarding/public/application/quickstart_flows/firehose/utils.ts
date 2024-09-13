@@ -48,3 +48,41 @@ export function buildStackStatusCommand({ stackName }: { stackName: string }) {
     .replace(/\n/g, ' ')
     .replace(/\s\s+/g, ' ');
 }
+
+export function buildCreateStackAWSConsoleURL({
+  templateUrl,
+  stackName,
+  logsStreamName,
+  metricsStreamName,
+  elasticsearchUrl,
+  encodedApiKey,
+}: {
+  templateUrl: string;
+  stackName: string;
+  logsStreamName: string;
+  metricsStreamName: string;
+  elasticsearchUrl: string;
+  encodedApiKey: string;
+}): string {
+  const url = new URL('https://console.aws.amazon.com');
+  const params = new URLSearchParams({
+    templateURL: templateUrl,
+    stackName,
+    /**
+     * 'param_' format is enforced by AWS
+     * but template parameters are in CamelCase
+     * which triggers the eslint rule.
+     */
+    /* eslint-disable @typescript-eslint/naming-convention */
+    param_FirehoseStreamNameForLogs: logsStreamName,
+    param_FirehoseStreamNameForMetrics: metricsStreamName,
+    param_ElasticEndpointURL: elasticsearchUrl,
+    param_ElasticAPIKey: encodedApiKey,
+    /* eslint-enable @typescript-eslint/naming-convention */
+  });
+
+  url.pathname = '/cloudformation/home';
+  url.hash = `/stacks/quickcreate?${params.toString()}`;
+
+  return url.toString();
+}
