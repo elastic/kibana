@@ -11,8 +11,10 @@ import type {
   RuleUpdateProps,
   RulePatchProps,
   RuleObjectId,
-  RuleToImport,
   RuleResponse,
+  ValidatedRuleToImport,
+  RuleToImport,
+  RuleSource,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
@@ -26,7 +28,7 @@ export interface IDetectionRulesClient {
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
-  legacyImportRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
+  legacyImportRule: (args: LegacyImportRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<ImportRuleResponse[]>;
 }
@@ -55,8 +57,14 @@ export interface UpgradePrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-export interface ImportRuleArgs {
+export interface LegacyImportRuleArgs {
   ruleToImport: RuleToImport;
+  overwriteRules?: boolean;
+  allowMissingConnectorSecrets?: boolean;
+}
+
+export interface ImportRuleArgs {
+  ruleToImport: ValidatedRuleToImport & { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
 }

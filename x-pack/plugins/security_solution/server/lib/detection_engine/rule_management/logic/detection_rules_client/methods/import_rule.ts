@@ -14,7 +14,7 @@ import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { createBulkErrorObject } from '../../../../routes/utils';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import type { ImportRuleArgs } from '../detection_rules_client_interface';
+import type { LegacyImportRuleArgs } from '../detection_rules_client_interface';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
@@ -24,7 +24,7 @@ interface ImportRuleOptions {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  importRulePayload: ImportRuleArgs;
+  importRulePayload: LegacyImportRuleArgs;
   mlAuthz: MlAuthz;
 }
 
@@ -36,12 +36,14 @@ export const importRule = async ({
   mlAuthz,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, allowMissingConnectorSecrets } = importRulePayload;
+  // For backwards compatibility in this legacy path, immutable is always false.
+  const rule = { ...ruleToImport, immutable: false };
 
   await validateMlAuth(mlAuthz, ruleToImport.type);
 
   const existingRule = await getRuleByRuleId({
     rulesClient,
-    ruleId: ruleToImport.rule_id,
+    ruleId: rule.rule_id,
   });
 
   if (existingRule && !overwriteRules) {
@@ -56,7 +58,7 @@ export const importRule = async ({
     const ruleWithUpdates = await applyRuleUpdate({
       prebuiltRuleAssetClient,
       existingRule,
-      ruleUpdate: ruleToImport,
+      ruleUpdate: rule,
     });
 
     const updatedRule = await rulesClient.update({
@@ -75,7 +77,7 @@ export const importRule = async ({
     actionsClient,
     rulesClient,
     mlAuthz,
-    rule: ruleToImport,
+    rule,
     allowMissingConnectorSecrets,
   });
 };

@@ -9,10 +9,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import type {
-  RuleResponse,
-  RuleSource,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createBulkErrorObject } from '../../../../routes/utils';
@@ -25,15 +22,11 @@ import { validateMlAuth } from '../utils';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { SERVER_APP_ID } from '../../../../../../../common';
 
-interface ImportRuleWithSourceArgs extends ImportRuleArgs {
-  ruleToImport: ImportRuleArgs['ruleToImport'] & { rule_source: RuleSource; immutable: boolean };
-}
-
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  importRulePayload: ImportRuleWithSourceArgs;
+  importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
 }
 

@@ -22,6 +22,7 @@ import type {
   IDetectionRulesClient,
   ImportRuleArgs,
   ImportRulesArgs,
+  LegacyImportRuleArgs,
   PatchRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
@@ -124,7 +125,7 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async legacyImportRule(args: ImportRuleArgs): Promise<RuleResponse> {
+    async legacyImportRule(args: LegacyImportRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.legacyImportRule', async () => {
         return importRule({
           actionsClient,
