@@ -16,6 +16,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   createExceptionList,
@@ -53,6 +54,11 @@ const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
 const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
 const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
 const prebuiltRulesIndex = '.alerts-security.alerts';
+
+const logger = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -259,7 +265,7 @@ export async function createAgentPolicy(
     enabled: true,
     policy_id: 'policy-elastic-agent-on-cloud',
     policy_ids: ['policy-elastic-agent-on-cloud'],
-    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '9.0.0' },
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.15.1' },
     inputs: [
       {
         config: {
@@ -282,14 +288,25 @@ export async function createAgentPolicy(
     ],
   };
 
+  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch((e) => {
+    logger.error(`>> Error searching for agent: ${e}`);
+  });
   await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
+
+  await packagePolicyService.get(soClient, id).catch((e) => {
+    logger.error(`>> Error searching package policy: ${e}`);
+  });
+
   await packagePolicyService
     .create(soClient, esClient, packagePolicy, {
       id,
       spaceId: 'default',
       bumpRevision: false,
+      force: true,
     })
-    .catch(() => {});
+    .catch((e) => {
+      logger.error(`>> Error creating package policy: ${e}`);
+    });
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
