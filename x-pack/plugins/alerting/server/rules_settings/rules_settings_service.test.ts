@@ -52,25 +52,17 @@ describe('RulesSettingsService', () => {
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toBeUndefined();
+        expect(rulesSettingsService.settings.get('default')).toBeUndefined();
 
         const settings = await rulesSettingsService.getSettings(fakeRequest, 'default');
         expect(rulesSettingsClient.queryDelay().get).toHaveBeenCalledTimes(1);
         expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(1);
 
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toEqual(1677485700000);
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toEqual({ delay: 0 });
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
+        expect(rulesSettingsService.settings.get('default')).toEqual({
+          lastUpdated: 1677485700000,
+          queryDelaySettings: { delay: 0 },
+          flappingSettings: { enabled: true, lookBackWindow: 20, statusChangeThreshold: 4 },
         });
 
         expect(settings.queryDelaySettings).toEqual({ delay: 0 });
@@ -93,22 +85,14 @@ describe('RulesSettingsService', () => {
         });
 
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toBeUndefined();
+        expect(rulesSettingsService.settings.get('default')).toBeUndefined();
 
         const settings = await rulesSettingsService.getSettings(fakeRequest, 'default');
         expect(rulesSettingsClient.queryDelay().get).toHaveBeenCalledTimes(1);
         expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(0);
 
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toBeUndefined();
+        expect(rulesSettingsService.settings.get('default')).toBeUndefined();
 
         expect(settings.queryDelaySettings).toEqual(
           isServerless ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS : DEFAULT_QUERY_DELAY_SETTINGS
@@ -128,18 +112,10 @@ describe('RulesSettingsService', () => {
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toBeUndefined();
+        expect(rulesSettingsService.settings.get('default')).toBeUndefined();
 
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('new-space')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('new-space')).toBeUndefined();
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('new-space')).toBeUndefined();
+        expect(rulesSettingsService.settings.get('new-space')).toBeUndefined();
 
         const settingsDefault = await rulesSettingsService.getSettings(fakeRequest, 'default');
         const settingsNewSpace = await rulesSettingsService.getSettings(fakeRequest, 'new-space');
@@ -147,24 +123,17 @@ describe('RulesSettingsService', () => {
         expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(2);
 
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('default')).toEqual(1677485700000);
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('default')).toEqual({ delay: 13 });
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('default')).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
+        expect(rulesSettingsService.settings.get('default')).toEqual({
+          lastUpdated: 1677485700000,
+          queryDelaySettings: { delay: 13 },
+          flappingSettings: { enabled: true, lookBackWindow: 20, statusChangeThreshold: 4 },
         });
+
         // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.settingsLastUpdated.get('new-space')).toEqual(1677485700000);
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.queryDelaySettings.get('new-space')).toEqual({ delay: 0 });
-        // @ts-ignore - accessing private variable
-        expect(rulesSettingsService.flappingSettings.get('new-space')).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
+        expect(rulesSettingsService.settings.get('new-space')).toEqual({
+          lastUpdated: 1677485700000,
+          queryDelaySettings: { delay: 0 },
+          flappingSettings: { enabled: true, lookBackWindow: 20, statusChangeThreshold: 4 },
         });
 
         expect(settingsNewSpace.queryDelaySettings).toEqual({ delay: 0 });

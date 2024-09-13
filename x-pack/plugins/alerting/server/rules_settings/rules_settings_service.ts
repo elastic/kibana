@@ -28,11 +28,11 @@ interface Settings {
   flappingSettings: RulesSettingsFlappingProperties;
 }
 
+type LastUpdatedSettings = Settings & { lastUpdated: number };
+
 export class RulesSettingsService {
   private defaultQueryDelaySettings: RulesSettingsQueryDelayProperties;
-  private settingsLastUpdated: Map<string, number> = new Map();
-  private queryDelaySettings: Map<string, RulesSettingsQueryDelayProperties> = new Map();
-  private flappingSettings: Map<string, RulesSettingsFlappingProperties> = new Map();
+  private settings: Map<string, LastUpdatedSettings> = new Map();
 
   constructor(private readonly options: RulesSettingsServiceConstructorOptions) {
     this.defaultQueryDelaySettings = options.isServerless
@@ -42,14 +42,11 @@ export class RulesSettingsService {
 
   public async getSettings(request: KibanaRequest, spaceId: string): Promise<Settings> {
     const now = Date.now();
-    if (
-      this.settingsLastUpdated.has(spaceId) &&
-      this.flappingSettings.has(spaceId) &&
-      this.queryDelaySettings.has(spaceId)
-    ) {
-      const lastUpdated = new Date(this.settingsLastUpdated.get(spaceId)!).getTime();
-      const currentFlappingSettings = this.flappingSettings.get(spaceId)!;
-      const currentQueryDelaySettings = this.queryDelaySettings.get(spaceId)!;
+    if (this.settings.has(spaceId)) {
+      const settingsFromLastUpdate = this.settings.get(spaceId)!;
+      const lastUpdated = new Date(settingsFromLastUpdate.lastUpdated).getTime();
+      const currentFlappingSettings = settingsFromLastUpdate.flappingSettings;
+      const currentQueryDelaySettings = settingsFromLastUpdate.queryDelaySettings;
 
       if (now - lastUpdated >= CACHE_INTERVAL_MS) {
         // cache expired, refetch settings
@@ -96,9 +93,7 @@ export class RulesSettingsService {
       rulesSettingsClient.flapping().get()
     );
 
-    this.settingsLastUpdated.set(spaceId, now);
-    this.flappingSettings.set(spaceId, flappingSettings);
-    this.queryDelaySettings.set(spaceId, queryDelaySettings);
+    this.settings.set(spaceId, { lastUpdated: now, queryDelaySettings, flappingSettings });
 
     return { flappingSettings, queryDelaySettings };
   }
