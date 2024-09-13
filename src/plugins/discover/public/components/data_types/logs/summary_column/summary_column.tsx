@@ -14,16 +14,10 @@ import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@ela
 import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
-import {
-  Resource,
-  StaticResource,
-  createResourceFields,
-} from '../../../discover_grid/virtual_columns/logs/resource';
-import {
-  Content,
-  formatJsonDocumentForContent,
-} from '../../../discover_grid/virtual_columns/logs/content';
+import { Resource, StaticResource } from './resource';
+import { Content } from './content';
 import { contentLabel, documentLabel, resourceLabel } from '../translations';
+import { createResourceFields, formatJsonDocumentForContent } from './utils';
 
 export interface SummaryColumnFactoryDeps {
   data: DataPublicPluginStart;
