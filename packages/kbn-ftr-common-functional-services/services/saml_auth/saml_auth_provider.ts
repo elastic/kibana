@@ -23,7 +23,7 @@ export interface RoleCredentials {
 export interface CookieCredentials {
   Cookie: string;
   // supertest.set() expects an object that matches IncomingHttpHeaders type, that needs to accept arbitrary key-value pairs as headers
-  // We extende the interface with an index signature to resolve this.
+  // We extend the interface with an index signature to resolve this.
   [header: string]: string;
 }
 
