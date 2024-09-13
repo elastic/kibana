@@ -1278,6 +1278,7 @@ async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number
 ): Promise<SuggestionRawDefinition[]> {
+  // XXXXXXX here it is
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -1518,6 +1519,7 @@ async function getFunctionArgsSuggestions(
   if (fnDefinition.name === 'count' && !arg) {
     suggestions.push(allStarConstant);
   }
+  // XXXX do a special case here for equals
   return suggestions;
 }
 
