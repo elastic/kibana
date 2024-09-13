@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Key } from 'selenium-webdriver';
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -14,38 +15,48 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const find = getService('find');
+  const logger = getService('log');
 
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
-    const dataView1 = 'filebeat-*';
-    const dataView2 = 'metricbeat-*';
-    const timeFieldName = '@timestamp';
+    const DATA_VIEW_1 = 'filebeat-*';
+    const DATA_VIEW_1_ID = 'data-view-id_1';
+    const DATA_VIEW_1_NAME = 'test-data-view-name_1';
+    const DATA_VIEW_2 = 'metricbeat-*';
+    const DATA_VIEW_2_ID = 'data-view-id_2';
+    const DATA_VIEW_2_NAME = 'test-data-view-name_2';
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       // create two data views
-      await supertest
-        .post(`/api/saved_objects/index-pattern`)
-        .set('kbn-xsrf', 'true')
-        .send({ attributes: { title: dataView1, timeFieldName } });
-      await supertest
-        .post(`/api/saved_objects/index-pattern`)
-        .set('kbn-xsrf', 'true')
-        .send({ attributes: { title: dataView2, timeFieldName } });
+      await observability.alerts.common.createDataView({
+        supertest,
+        name: DATA_VIEW_1_NAME,
+        id: DATA_VIEW_1_ID,
+        title: DATA_VIEW_1,
+        logger,
+      });
+      await observability.alerts.common.createDataView({
+        supertest,
+        name: DATA_VIEW_2_NAME,
+        id: DATA_VIEW_2_ID,
+        title: DATA_VIEW_2,
+        logger,
+      });
       await observability.alerts.common.navigateToRulesPage();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      // This also deletes the created data views
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('shows the custom threshold rule in the observability section', async () => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
-      await testSubjects.existOrFail('observability.rules.custom_threshold-SelectOption');
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
     });
 
@@ -57,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('can add data view', async () => {
       // select data view
       await testSubjects.click('selectDataViewExpression');
-      await testSubjects.setValue('indexPattern-switcher--input', 'metricbeat-*');
+      await testSubjects.setValue('indexPattern-switcher--input', 'test-data-view-name_2');
       const dataViewExpression = await find.byCssSelector(
         '[data-test-subj="indexPattern-switcher--input"]'
       );
@@ -126,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
       await thresholdField1.pressKeys(Key.BACK_SPACE);
       await thresholdField1.type('200');
       const thresholdField2 = await find.byCssSelector('[data-test-subj="alertThresholdInput1"]');
-      thresholdField2.type('250');
+      await thresholdField2.type('250');
       await find.clickByCssSelector('[aria-label="Close"]');
     });
 
@@ -174,38 +185,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('saved the rule correctly', async () => {
-      const { body: rules } = await supertest
-        .post('/internal/alerting/rules/_find')
-        .set('kbn-xsrf', 'true')
-        .send({
-          page: 1,
-          per_page: 10,
-          filter: `{
-            "type": "function",
-            "function": "or",
-            "arguments": [
-              {
-                "type": "function",
-                "function": "is",
-                "arguments": [
-                  {
-                    "type": "literal",
-                    "value": "alert.attributes.alertTypeId",
-                    "isQuoted": false
-                  },
-                  {
-                    "type": "literal",
-                    "value": "observability.rules.custom_threshold",
-                    "isQuoted": false
-                  }
-                ]
-              }
-            ]
-          }`,
-          sort_field: 'name',
-          sort_order: 'asc',
-          filter_consumers: ['apm', 'infrastructure', 'logs', 'uptime', 'slo', 'observability'],
-        });
+      const { body: rules } = await supertest.get('/internal/alerting/rules/_find');
+
       expect(rules.data.length).toEqual(1);
       expect(rules.data[0]).toEqual(
         expect.objectContaining({
@@ -216,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
             alertOnNoData: false,
             criteria: [
               {
-                comparator: '>',
+                comparator: 'notBetween',
                 label: 'test equation',
                 equation: 'A - B',
                 metrics: [
@@ -237,13 +218,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             groupBy: ['docker.container.name'],
-            // searchConfiguration: {
-            //   index: 'ef4deffb-805f-4aed-ad80-f481ee47d40b',
-            //   query: {
-            //     language: 'kuery',
-            //     query: '',
-            //   },
-            // },
+            searchConfiguration: {
+              index: 'data-view-id_2',
+              query: { query: '', language: 'kuery' },
+            },
           }),
         })
       );
