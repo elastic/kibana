@@ -228,7 +228,6 @@ export const getReasonMessage = ({
       location,
       downThreshold,
       locationsThreshold,
-      downChecks: checks?.downWithinXChecks ?? 1,
       numberOfChecks,
       checksSummary: checks
         ? i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.checksSummary', {
