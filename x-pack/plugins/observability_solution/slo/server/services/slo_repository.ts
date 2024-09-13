@@ -18,7 +18,7 @@ export interface SLORepository {
   save(slo: SLODefinition, options?: { throwOnConflict: boolean }): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
-  deleteById(id: string): Promise<void>;
+  deleteById(id: string, ignore404?: boolean): Promise<void>;
   search(
     search: string,
     pagination: Pagination,
@@ -73,7 +73,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return slo;
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteById(id: string, ignore404 = false): Promise<void> {
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: 1,
@@ -82,6 +82,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (response.total === 0) {
+      if (ignore404) {
+        return;
+      }
       throw new SLONotFound(`SLO [${id}] not found`);
     }
 

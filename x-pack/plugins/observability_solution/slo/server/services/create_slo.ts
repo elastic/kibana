@@ -10,6 +10,7 @@ import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -47,62 +48,41 @@ export class CreateSLO {
 
     const rollbackOperations = [];
 
-    await this.repository.save(slo, { throwOnConflict: true });
-    rollbackOperations.push(() => this.repository.deleteById(slo.id));
+    // can be done async as we are not using the result
+    void this.repository.save(slo, { throwOnConflict: true });
+    rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      await retryTransientEsErrors(
-        () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOPipelineTemplate(slo)
-          ),
-        { logger: this.logger }
-      );
-      rollbackOperations.push(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getSLOPipelineId(slo.id, slo.revision) },
-          { ignore: [404] }
-        )
-      );
+      const sloPipelinePromise = this.createPipeline(getSLOPipelineTemplate(slo));
+      rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
-      await this.transformManager.install(slo);
+      const rollupTransformPromise = this.transformManager.install(slo, true);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
-
-      await this.transformManager.start(rollupTransformId);
       rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
 
-      await retryTransientEsErrors(
-        () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
-          ),
-        { logger: this.logger }
+      const summaryPipelinePromise = this.createPipeline(
+        getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
       );
+
       rollbackOperations.push(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-          { ignore: [404] }
-        )
+        this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision))
       );
 
-      await this.summaryTransformManager.install(slo);
+      const summaryTransformPromise = this.summaryTransformManager.install(slo, true);
       rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
-
-      await this.summaryTransformManager.start(summaryTransformId);
       rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
-      await retryTransientEsErrors(
-        () =>
-          this.esClient.index({
-            index: SLO_SUMMARY_TEMP_INDEX_NAME,
-            id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
-            refresh: true,
-          }),
-        { logger: this.logger }
-      );
+      const tempDocPromise = this.createTempSummaryDocument(slo);
+
+      await Promise.all([
+        sloPipelinePromise,
+        rollupTransformPromise,
+        summaryPipelinePromise,
+        summaryTransformPromise,
+        tempDocPromise,
+      ]);
     } catch (err) {
       this.logger.error(
         `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
@@ -124,6 +104,33 @@ export class CreateSLO {
     }
 
     return this.toResponse(slo);
+  }
+
+  async createTempSummaryDocument(slo: SLODefinition) {
+    return await retryTransientEsErrors(
+      () =>
+        this.esClient.index({
+          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+          id: `slo-${slo.id}`,
+          document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
+          refresh: true,
+        }),
+      { logger: this.logger }
+    );
+  }
+
+  async createPipeline(params: IngestPutPipelineRequest) {
+    return await retryTransientEsErrors(
+      () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
+      { logger: this.logger }
+    );
+  }
+
+  async deletePipeline(id: string) {
+    return this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+      { id },
+      { ignore: [404] }
+    );
   }
 
   public async inspect(params: CreateSLOParams): Promise<{

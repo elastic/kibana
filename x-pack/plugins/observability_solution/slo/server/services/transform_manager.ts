@@ -17,7 +17,7 @@ import { TransformGenerator } from './transform_generators';
 type TransformId = string;
 
 export interface TransformManager {
-  install(slo: SLODefinition): Promise<TransformId>;
+  install(slo: SLODefinition, startTransform?: boolean): Promise<TransformId>;
   inspect(slo: SLODefinition): Promise<TransformPutTransformRequest>;
   preview(transformId: TransformId): Promise<void>;
   start(transformId: TransformId): Promise<void>;
@@ -34,7 +34,7 @@ export class DefaultTransformManager implements TransformManager {
     private dataViewService: DataViewsService
   ) {}
 
-  async install(slo: SLODefinition): Promise<TransformId> {
+  async install(slo: SLODefinition, startTransform?: boolean): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
@@ -53,6 +53,9 @@ export class DefaultTransformManager implements TransformManager {
           logger: this.logger,
         }
       );
+      if (startTransform) {
+        await this.start(transformParams.transform_id);
+      }
     } catch (err) {
       this.logger.error(`Cannot create SLO transform for indicator type [${slo.indicator.type}]`);
       if (err.meta?.body?.error?.type === 'security_exception') {
