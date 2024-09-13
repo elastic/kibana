@@ -268,26 +268,22 @@ describe('getInheritedInput', () => {
   });
 
   test('Expanded panel ID change impacts container', async () => {
-    const containerWithoutExpandedPanel = buildMockDashboard({
+    const containerWithoutExpandedPanel = await buildMockDashboard({
       savedObjectId: '123',
       expandedPanelId: undefined,
     });
 
-    containerWithoutExpandedPanel.getOutput$().subscribe(() => {
-      if (containerWithoutExpandedPanel.getOutput().embeddableLoaded['123']) {
-        expect(containerWithoutExpandedPanel.expandedPanelId.value).toBeUndefined();
-      }
+    await containerWithoutExpandedPanel.getOutput$().subscribe(async () => {
+      await expect(containerWithoutExpandedPanel.expandedPanelId.value).toBeUndefined();
     });
 
-    const containerWithExpandedPanel = buildMockDashboard({
+    const containerWithExpandedPanel = await buildMockDashboard({
       savedObjectId: '123',
       expandedPanelId: '1',
     });
 
-    containerWithExpandedPanel.getOutput$().subscribe(() => {
-      if (containerWithExpandedPanel.getOutput().embeddableLoaded['123']) {
-        expect(containerWithExpandedPanel.expandedPanelId.value).toBe('1');
-      }
+    await containerWithExpandedPanel.getOutput$().subscribe(async () => {
+      await expect(containerWithExpandedPanel.expandedPanelId.value).toBe('1');
     });
   });
 });
