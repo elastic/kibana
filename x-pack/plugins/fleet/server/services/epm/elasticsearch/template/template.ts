@@ -1029,7 +1029,7 @@ const updateExistingDataStream = async ({
     settings = simulateResult.template.settings;
     mappings = fillConstantKeywordValues(
       currentBackingIndexConfig?.mappings || {},
-      simulateResult.template.mappings
+      simulateResult.template.mappings || {}
     );
 
     lifecycle = simulateResult.template.lifecycle;
