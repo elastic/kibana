@@ -279,7 +279,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <EuiFormRow
           data-test-subj="summary-row"
           fullWidth
-          error={errors['subActionParams.incident.summary']}
+          error={errors['subActionParams.incident.summary'] as string}
           isInvalid={
             errors['subActionParams.incident.summary'] !== undefined &&
             Number(errors['subActionParams.incident.summary'].length) > 0 &&
@@ -385,7 +385,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         />
         <EuiFormRow
           fullWidth
-          error={errors['subActionParams.incident.otherFields']}
+          error={errors['subActionParams.incident.otherFields'] as string}
           isInvalid={
             errors['subActionParams.incident.otherFields'] !== undefined &&
             Number(errors['subActionParams.incident.otherFields'].length) > 0
