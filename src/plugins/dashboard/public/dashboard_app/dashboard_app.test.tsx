@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { createMemoryHistory } from 'history';
+import { DashboardApp } from './dashboard_app';
+import { render } from '@testing-library/react';
+import { buildMockDashboard } from '../mocks';
+import * as dashboardApiHelpers from '../dashboard_container/external_api/dashboard_api';
+
+/* These tests circumvent the need to test the router and legacy code
+/* the dashboard app will be passed the expanded panel id from the DashboardRouter through mountApp()
+/* @link https://github.com/elastic/kibana/pull/190086/
+*/
+describe('Dashboard App', () => {
+  /**
+   * The buildMockDashboard function within the DashboardRenderer returns the DashboardAPI to the DashboardApp. The dashboard API is needed in the DashboardApp to see if the expandedPanelId BehaviorSubject is called
+   * In this, we are mocking the buildApiFromDashboardContainer function to return the mockDashboard (dashboardAPI) and then have that accessible
+   * for the test that renders the DashboardApp
+   */
+  const mockDashboard = buildMockDashboard();
+  jest.spyOn(dashboardApiHelpers, 'buildApiFromDashboardContainer').mockImplementation(() => {
+    return mockDashboard;
+  });
+  const mockHistory = createMemoryHistory();
+
+  it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
+    const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'next');
+    const historySpy = jest.spyOn(mockHistory, 'replace');
+
+    render(
+      <DashboardApp
+        savedDashboardId=""
+        redirectTo={jest.fn()}
+        history={mockHistory}
+        expandedPanelId="456"
+      />
+    );
+    expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
+    expect(historySpy).toHaveBeenCalledTimes(1);
+
+    // test as if minimizing a maximized panel
+    render(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
+
+    expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
+    expect(historySpy).toHaveBeenCalledTimes(2);
+  });
+});

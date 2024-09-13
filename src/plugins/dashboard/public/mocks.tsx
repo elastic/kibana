@@ -87,11 +87,9 @@ export const mockControlGroupApi = {
 export function buildMockDashboard({
   overrides,
   savedObjectId,
-  expandedPanelId,
 }: {
   overrides?: Partial<DashboardContainerInput>;
   savedObjectId?: string;
-  expandedPanelId?: string;
 } = {}) {
   const initialInput = getSampleDashboardInput(overrides);
   const dashboardContainer = new DashboardContainer(
@@ -101,7 +99,7 @@ export function buildMockDashboard({
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput, lastSavedId: savedObjectId, expandedPanelId }
+    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
   );
   dashboardContainer?.setControlGroupApi(mockControlGroupApi);
   return dashboardContainer;
