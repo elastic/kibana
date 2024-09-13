@@ -53,7 +53,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
     return {};
   }
 
-  const offsetInSeconds = calculateOffset(definition);
+  const offsetInSeconds = `${calculateOffset(definition)}s`;
 
   return definition.metadata.reduce((aggs, metadata) => {
     let agg;
@@ -62,7 +62,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
         filter: {
           range: {
             '@timestamp': {
-              gte: `now-${offsetInSeconds}s`,
+              gte: `now-${offsetInSeconds}`,
             },
           },
         },
@@ -83,7 +83,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${metadata.aggregation.lookbackPeriod}`,
+                    gte: `now-${metadata.aggregation.lookbackPeriod ?? offsetInSeconds}`,
                   },
                 },
               },
