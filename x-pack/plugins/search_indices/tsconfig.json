@@ -26,6 +26,10 @@
     "@kbn/console-plugin",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/index-management-shared-types",
+    "@kbn/try-in-console",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

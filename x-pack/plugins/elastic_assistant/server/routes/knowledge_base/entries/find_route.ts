@@ -21,6 +21,7 @@ import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import { getKBUserFilter } from './utils';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -63,16 +64,19 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
+            true
+          );
           const currentUser = ctx.elasticAssistant.getCurrentUser();
-
+          const userFilter = getKBUserFilter(currentUser);
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
+
           const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ id: "${currentUser?.profile_uid}" }${additionalFilter}`, // TODO: Update filter to include non-user system entries
+            filter: `${userFilter}${additionalFilter}`,
             fields: query.fields,
           });
 

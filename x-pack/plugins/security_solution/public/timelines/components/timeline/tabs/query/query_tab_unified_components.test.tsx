@@ -133,7 +133,7 @@ const mockState = {
 
 mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
 
-const TestWrapper: FunctionComponent = ({ children }) => {
+const TestWrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => {
   return <TestProviders store={createMockStore(mockState)}>{children}</TestProviders>;
 };
 

@@ -13,13 +13,13 @@ import moment from 'moment';
 import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
-import { getInfraHref } from '../links/infra_link';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
@@ -29,8 +29,8 @@ function getInfraMetricsQuery(transaction: Transaction) {
   const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
   return {
-    from: timestamp - fiveMinutes,
-    to: timestamp + fiveMinutes,
+    from: new Date(timestamp - fiveMinutes).toISOString(),
+    to: new Date(timestamp + fiveMinutes).toISOString(),
   };
 }
 
@@ -47,6 +47,7 @@ export const getSections = ({
   environment,
   logsLocators,
   dataViewId,
+  assetDetailsLocator,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -60,6 +61,7 @@ export const getSections = ({
   environment: Environment;
   logsLocators: ReturnType<typeof getLogsLocatorsFromUrlService>;
   dataViewId?: string;
+  assetDetailsLocator?: AssetDetailsLocator;
 }) => {
   if (!transaction) return [];
 
@@ -103,6 +105,10 @@ export const getSections = ({
     time,
   });
 
+  const hasPodLink = !!podId && infraLinksAvailable && !!assetDetailsLocator;
+  const hasContainerLink = !!containerId && infraLinksAvailable && !!assetDetailsLocator;
+  const hasHostLink = !!hostName && infraLinksAvailable && !!assetDetailsLocator;
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -117,13 +123,16 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
         defaultMessage: 'Pod metrics',
       }),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/pod-detail/${podId}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!podId && infraLinksAvailable,
+      href: hasPodLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: podId,
+            assetType: 'pod',
+            assetDetails: {
+              dateRange: infraMetricsQuery,
+            },
+          })
+        : undefined,
+      condition: hasPodLink,
     },
   ];
 
@@ -141,13 +150,14 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel', {
         defaultMessage: 'Container metrics',
       }),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/container-detail/${containerId}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!containerId && infraLinksAvailable,
+      href: hasContainerLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: containerId,
+            assetType: 'container',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasContainerLink,
     },
   ];
 
@@ -165,13 +175,16 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showHostMetricsLinkLabel', {
         defaultMessage: 'Host metrics',
       }),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/host-detail/${hostName}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!hostName && infraLinksAvailable,
+      href: hasHostLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: hostName,
+            assetType: 'host',
+            assetDetails: {
+              dateRange: infraMetricsQuery,
+            },
+          })
+        : undefined,
+      condition: hasHostLink,
     },
     {
       key: 'hostProfilingFlamegraph',

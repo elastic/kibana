@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import React from 'react';
 import { css } from '@emotion/react';
@@ -21,31 +21,34 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
   return (
     <>
       {hasMisconfigurationFindings && (
-        <EuiAccordion
-          initialIsOpen={true}
-          id="entityInsight-accordion"
-          data-test-subj="entityInsightTestSubj"
-          buttonProps={{
-            'data-test-subj': 'entityInsight-accordion-button',
-            css: css`
-              color: ${euiTheme.colors.primary};
-            `,
-          }}
-          buttonContent={
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.insightsTitle"
-                  defaultMessage="Insights"
-                />
-              </h3>
-            </EuiTitle>
-          }
-        >
-          <EuiSpacer size="m" />
-          <MisconfigurationsPreview hostName={hostName} />
-          <EuiSpacer size="m" />
-        </EuiAccordion>
+        <>
+          <EuiHorizontalRule />
+          <EuiAccordion
+            initialIsOpen={true}
+            id="entityInsight-accordion"
+            data-test-subj="entityInsightTestSubj"
+            buttonProps={{
+              'data-test-subj': 'entityInsight-accordion-button',
+              css: css`
+                color: ${euiTheme.colors.primary};
+              `,
+            }}
+            buttonContent={
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.insightsTitle"
+                    defaultMessage="Insights"
+                  />
+                </h3>
+              </EuiTitle>
+            }
+          >
+            <EuiSpacer size="m" />
+            <MisconfigurationsPreview hostName={hostName} />
+            <EuiSpacer size="m" />
+          </EuiAccordion>
+        </>
       )}
     </>
   );
