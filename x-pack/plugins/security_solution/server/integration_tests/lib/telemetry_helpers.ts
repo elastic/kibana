@@ -288,25 +288,26 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch((e) => {
-    logger.error(`>> Error searching for agent: ${e}`);
+  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch(async (e) => {
+    try {
+      return await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id });
+    } catch {
+      logger.error(`>> Error searching for agent: ${e}`);
+    }
   });
-  await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
 
-  await packagePolicyService.get(soClient, id).catch((e) => {
-    logger.error(`>> Error searching package policy: ${e}`);
-  });
-
-  await packagePolicyService
-    .create(soClient, esClient, packagePolicy, {
-      id,
-      spaceId: 'default',
-      bumpRevision: false,
-      force: true,
-    })
-    .catch((e) => {
+  await packagePolicyService.get(soClient, id).catch(async () => {
+    try {
+      return await packagePolicyService.create(soClient, esClient, packagePolicy, {
+        id,
+        spaceId: 'default',
+        bumpRevision: false,
+        force: true,
+      });
+    } catch (e) {
       logger.error(`>> Error creating package policy: ${e}`);
-    });
+    }
+  });
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
