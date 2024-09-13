@@ -46,10 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('spaces', function () {
     before(async () => {
-      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
       });
-      supertestWithAdminScopeAndCookieHeader = await roleScopedSupertest.getSupertestWithRoleScope(
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
         {
           useCookieHeader: true,
@@ -66,6 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
       await asyncForEach(toDelete, async (space) => {
         await deleteSpace(space.id);
       });
+
+      await supertestAdminWithApiKey.destroy();
     });
 
     describe('Create (POST /api/spaces/space)', () => {
