@@ -39,12 +39,13 @@ export function InvestigationList() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [search, setSearch] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
   const { data, isLoading, isError } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
     search,
-    filter: status.map((s) => `investigation.attributes.status:${s}`).join(' OR '),
+    filter: toFilter(status, tags),
   });
 
   const investigations = data?.results ?? [];
@@ -77,8 +78,8 @@ export function InvestigationList() {
     {
       field: 'tags',
       name: 'Tags',
-      render: (tags: InvestigationResponse['tags']) => {
-        return tags.map((tag) => (
+      render: (value: InvestigationResponse['tags']) => {
+        return value.map((tag) => (
           <EuiBadge color={'hollow'} key="tag">
             {tag}
           </EuiBadge>
@@ -139,6 +140,7 @@ export function InvestigationList() {
         isLoading={isLoading}
         onSearch={(value) => setSearch(value)}
         onStatusFilterChange={(selected) => setStatus(selected)}
+        onTagsFilterChange={(selected) => setTags(selected)}
       />
       <EuiFlexGroup>
         {isLoading && <EuiLoadingSpinner size="xl" />}
@@ -158,4 +160,20 @@ export function InvestigationList() {
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
+}
+
+function toFilter(status: string[], tags: string[]) {
+  const statusFitler = status.map((s) => `investigation.attributes.status:${s}`).join(' OR ');
+  const tagsFilter = tags.map((tag) => `investigation.attributes.tags:${tag}`).join(' OR ');
+
+  if (statusFitler && tagsFilter) {
+    return `(${statusFitler}) AND (${tagsFilter})`;
+  }
+  if (statusFitler) {
+    return statusFitler;
+  }
+
+  if (tagsFilter) {
+    return tagsFilter;
+  }
 }

@@ -14,30 +14,31 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useFetchAllInvestigationTags } from '../../../../hooks/use_fetch_all_investigation_tags';
 
-const STATUS_LABEL = i18n.translate('xpack.investigateApp.searchBar.statusFilterButtonLabel', {
-  defaultMessage: 'Status',
+const TAGS_LABEL = i18n.translate('xpack.investigateApp.searchBar.tagsFilterButtonLabel', {
+  defaultMessage: 'Tags',
 });
 
 interface Props {
   isLoading: boolean;
-  onChange: (status: string[]) => void;
+  onChange: (tags: string[]) => void;
 }
 
-export function StatusFilter({ isLoading, onChange }: Props) {
+export function TagsFilter({ isLoading, onChange }: Props) {
+  const { isLoading: isTagsLoading, data: tags } = useFetchAllInvestigationTags();
+  const [items, setItems] = useState<Array<{ label: string; checked?: 'on' | 'off' }>>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const filterStatusPopoverId = useGeneratedHtmlId({
-    prefix: 'filterStatusPopover',
+  const filterTagsPopoverId = useGeneratedHtmlId({
+    prefix: 'filterTagsPopover',
   });
 
-  const [items, setItems] = useState<Array<{ label: string; checked?: 'on' | 'off' }>>([
-    { label: 'triage' },
-    { label: 'active' },
-    { label: 'mitigated' },
-    { label: 'resolved' },
-    { label: 'cancelled' },
-  ]);
+  useEffect(() => {
+    if (tags) {
+      setItems(tags.map((tag) => ({ label: tag })));
+    }
+  }, [tags]);
 
   const button = (
     <EuiFilterButton
@@ -49,13 +50,13 @@ export function StatusFilter({ isLoading, onChange }: Props) {
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
     >
-      {STATUS_LABEL}
+      {TAGS_LABEL}
     </EuiFilterButton>
   );
   return (
     <EuiFilterGroup>
       <EuiPopover
-        id={filterStatusPopoverId}
+        id={filterTagsPopoverId}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
@@ -64,13 +65,13 @@ export function StatusFilter({ isLoading, onChange }: Props) {
         <EuiSelectable
           searchable
           searchProps={{ compressed: true }}
-          aria-label={STATUS_LABEL}
+          aria-label={TAGS_LABEL}
           options={items}
           onChange={(newOptions) => {
             setItems(newOptions);
             onChange(newOptions.filter((item) => item.checked === 'on').map((item) => item.label));
           }}
-          isLoading={isLoading}
+          isLoading={isLoading || isTagsLoading}
         >
           {(list, search) => (
             <div style={{ width: 300 }}>
