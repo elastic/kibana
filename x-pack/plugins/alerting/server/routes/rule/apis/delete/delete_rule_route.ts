@@ -34,6 +34,9 @@ export const deleteRuleRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
         },
       },
     },

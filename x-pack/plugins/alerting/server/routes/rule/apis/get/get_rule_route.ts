@@ -50,6 +50,9 @@ const buildGetRuleRoute = ({
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
         },
       },
     },

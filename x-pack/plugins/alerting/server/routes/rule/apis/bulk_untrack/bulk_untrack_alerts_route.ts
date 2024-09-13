@@ -9,10 +9,10 @@ import {
   BulkUntrackRequestBodyV1,
   bulkUntrackBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_untrack';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
 import { transformBulkUntrackAlertsBodyV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const bulkUntrackAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

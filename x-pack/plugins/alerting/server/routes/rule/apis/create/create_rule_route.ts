@@ -52,6 +52,9 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
+          400: {
+            description: 'Indicates that the requested rule type is not registered.',
+          },
         },
       },
     },

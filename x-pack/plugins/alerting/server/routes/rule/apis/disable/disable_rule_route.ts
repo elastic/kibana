@@ -42,6 +42,9 @@ export const disableRuleRoute = (
             body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
         },
       },
     },
