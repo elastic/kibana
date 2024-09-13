@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { isEmpty, has } from 'lodash';
+import { isEmpty, once } from 'lodash';
 import { Observable, from, map, merge, of, switchMap } from 'rxjs';
 import { ToolSchema, generateFakeToolCallId, isChatCompletionMessageEvent } from '../../../common';
 import {
@@ -15,14 +15,14 @@ import {
   Message,
   MessageRole,
 } from '../../../common/chat_complete';
-import { ToolChoiceType, type ToolOptions } from '../../../common/chat_complete/tools';
+import { ToolChoiceType, type ToolOptions, ToolCall } from '../../../common/chat_complete/tools';
 import { withoutTokenCountEvents } from '../../../common/chat_complete/without_token_count_events';
 import { OutputCompleteEvent, OutputEventType } from '../../../common/output';
 import { withoutOutputUpdateEvents } from '../../../common/output/without_output_update_events';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../../common/tasks/nl_to_esql/correct_common_esql_mistakes';
 import type { InferenceClient } from '../../types';
-import { loadDocuments } from './load_documents';
+import { EsqlDocumentBase } from './doc_base';
 
 type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
   | OutputCompleteEvent<
@@ -31,6 +31,8 @@ type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
     >
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent<TToolOptions>;
+
+const loadDocBase = once(() => EsqlDocumentBase.load());
 
 export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   client,
@@ -71,47 +73,18 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   const messages: Message[] =
     'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
-  return from(loadDocuments()).pipe(
-    switchMap(([systemMessage, esqlDocs]) => {
+  return from(loadDocBase()).pipe(
+    switchMap((docBase) => {
       function askLlmToRespond({
         documentationRequest: { commands, functions },
       }: {
         documentationRequest: { commands?: string[]; functions?: string[] };
       }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
-        const keywords = [
-          ...(commands ?? []),
-          ...(functions ?? []),
-          'SYNTAX',
-          'OVERVIEW',
-          'OPERATORS',
-        ].map((keyword) => keyword.toUpperCase());
+        const keywords = [...(commands ?? []), ...(functions ?? [])];
 
-        const requestedDocumentation = keywords.reduce<Record<string, string>>(
-          (documentation, keyword) => {
-            if (has(esqlDocs, keyword)) {
-              documentation[keyword] = esqlDocs[keyword].data;
-            } else {
-              documentation[keyword] = `
-              ## ${keyword}
-
-              There is no ${keyword} function or command in ES|QL. Do NOT try to use it.
-              `;
-            }
-            return documentation;
-          },
-          {}
-        );
-
-        const fakeRequestDocsToolCall = {
-          function: {
-            name: 'request_documentation',
-            arguments: {
-              commands,
-              functions,
-            },
-          },
-          toolCallId: generateFakeToolCallId(),
-        };
+        const systemMessage = docBase.getSystemMessage();
+        const requestedDocumentation = docBase.getDocumentation(keywords);
+        const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
         return merge(
           of<
@@ -276,3 +249,19 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
     })
   );
 }
+
+const createFakeTooCall = (
+  commands: string[] | undefined,
+  functions: string[] | undefined
+): ToolCall => {
+  return {
+    function: {
+      name: 'request_documentation',
+      arguments: {
+        commands,
+        functions,
+      },
+    },
+    toolCallId: generateFakeToolCallId(),
+  };
+};
