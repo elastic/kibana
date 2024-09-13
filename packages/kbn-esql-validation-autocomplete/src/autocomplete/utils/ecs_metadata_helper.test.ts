@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { enrichFieldsWithMetadata } from './ecs_metadata_helper';
+import type { ESQLRealField } from '../../validation/types';
+import { ECSMetadata, enrichFieldsWithMetadata } from './ecs_metadata_helper';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { ESQLRealField } from '../../..';
 
 describe('enrichFieldsWithMetadata', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
@@ -43,14 +43,22 @@ describe('enrichFieldsWithMetadata', () => {
         }),
       }),
     } as unknown as FieldsMetadataPublicStart;
+    const fieldsMetadataCache = await (
+      await fieldsMetadata.getClient()
+    ).find({
+      attributes: ['type'],
+    });
 
-    const result = await enrichFieldsWithMetadata(columns, fieldsMetadata);
+    const result = await enrichFieldsWithMetadata(
+      columns,
+      fieldsMetadataCache.fields as ECSMetadata
+    );
 
     expect(result).toEqual([
       {
         name: 'ecs.field',
         type: 'text',
-        metadata: { description: 'ECS field description' },
+        isEcs: true,
       },
       { name: 'ecs.fakeBooleanField', type: 'boolean' },
       { name: 'field2', type: 'double' },
@@ -68,19 +76,27 @@ describe('enrichFieldsWithMetadata', () => {
         find: jest.fn().mockResolvedValue({
           fields: {
             'ecs.version': { description: 'ECS version field', type: 'keyword' },
-          },
+          } as unknown as ECSMetadata,
         }),
       }),
     } as unknown as FieldsMetadataPublicStart;
 
-    const result = await enrichFieldsWithMetadata(columns, fieldsMetadata);
+    const fieldsMetadataCache = await (
+      await fieldsMetadata.getClient()
+    ).find({
+      attributes: ['type'],
+    });
+    const result = await enrichFieldsWithMetadata(
+      columns,
+      fieldsMetadataCache.fields as ECSMetadata
+    );
 
     expect(result).toEqual([
-      { name: 'ecs.version', type: 'keyword', metadata: { description: 'ECS version field' } },
+      { name: 'ecs.version', type: 'keyword', isEcs: true },
       {
         name: 'ecs.version.keyword',
         type: 'keyword',
-        metadata: { description: 'ECS version field' },
+        isEcs: true,
       },
       { name: 'field2', type: 'double' },
     ]);
