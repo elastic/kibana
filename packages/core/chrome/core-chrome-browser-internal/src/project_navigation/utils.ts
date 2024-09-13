@@ -274,11 +274,6 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
     );
   }
-  if (renderAs === 'panelOpener' && !link) {
-    throw new Error(
-      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
-    );
-  }
   if (renderAs === 'item' && !link && !onClick) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" or "onClick" must also be provided.`

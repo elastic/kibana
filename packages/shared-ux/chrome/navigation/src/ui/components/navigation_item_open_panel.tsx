@@ -81,13 +81,18 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
+        if (selectedNode?.id === item.id) {
+          closePanel();
+        } else {
+          openPanel(item);
+        }
         return;
       }
       e.preventDefault();
       navigateToUrl(href);
       closePanel();
     },
-    [closePanel, href, navigateToUrl]
+    [closePanel, href, item, navigateToUrl, openPanel, selectedNode]
   );
 
   const onIconClick = useCallback(() => {
@@ -123,7 +128,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             size="s"
             color="text"
             onClick={onIconClick}
-            iconType="spaces"
+            iconType="arrowRight"
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle "{title}" panel navigation',
