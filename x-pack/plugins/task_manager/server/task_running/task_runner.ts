@@ -640,17 +640,20 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
+          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
           return asOk({
-            runAt: getNextRunAt(
-              this.instance.task,
-              {
-                runAt,
-                schedule: reschedule,
-              },
-              this.currentPollInterval
-            ),
+            runAt:
+              runAt ||
+              getNextRunAt(
+                {
+                  runAt: this.instance.task.runAt,
+                  startedAt: this.instance.task.startedAt,
+                  schedule: updatedTaskSchedule,
+                },
+                this.currentPollInterval
+              ),
             state,
-            schedule: reschedule ?? this.instance.task.schedule,
+            schedule: updatedTaskSchedule,
             attempts,
             status: TaskStatus.Idle,
           });

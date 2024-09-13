@@ -9,25 +9,15 @@ import { intervalFromDate } from './intervals';
 import type { ConcreteTaskInstance } from '../task';
 
 export function getNextRunAt(
-  task: ConcreteTaskInstance,
-  taskUpdates: Partial<Pick<ConcreteTaskInstance, 'runAt' | 'schedule'>>,
+  { runAt, startedAt, schedule }: Pick<ConcreteTaskInstance, 'runAt' | 'startedAt' | 'schedule'>,
   taskDelayThresholdForPreciseScheduling: number = 0
 ): Date {
-  const { runAt: originalRunAt, startedAt, schedule } = task;
-  const { runAt: newRunAt, schedule: newSchedule } = taskUpdates;
-
-  if (newRunAt) {
-    return newRunAt;
-  }
-
-  const taskSchedule = newSchedule?.interval ?? schedule?.interval;
-  const taskDelay = startedAt!.getTime() - originalRunAt.getTime();
-  const scheduleFromDate =
-    taskDelay < taskDelayThresholdForPreciseScheduling ? originalRunAt : startedAt!;
+  const taskDelay = startedAt!.getTime() - runAt.getTime();
+  const scheduleFromDate = taskDelay < taskDelayThresholdForPreciseScheduling ? runAt : startedAt!;
 
   // Ensure we also don't schedule in the past by performing the Math.max with Date.now()
   const nextCalculatedRunAt = Math.max(
-    intervalFromDate(scheduleFromDate, taskSchedule)!.getTime(),
+    intervalFromDate(scheduleFromDate, schedule!.interval)!.getTime(),
     Date.now()
   );
 

@@ -981,7 +981,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.state).toEqual({ hey: 'there' });
       expect(instance.enabled).not.toBeDefined();
 
-      expect(getNextRunAtSpy).toHaveBeenCalled();
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that have an schedule', async () => {
@@ -1092,11 +1092,7 @@ describe('TaskManagerRunner', () => {
         validate: true,
       });
 
-      expect(getNextRunAtSpy).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ runAt }),
-        expect.any(Number)
-      );
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -1129,7 +1125,6 @@ describe('TaskManagerRunner', () => {
       });
 
       expect(getNextRunAtSpy).toHaveBeenCalledWith(
-        expect.any(Object),
         expect.objectContaining({ schedule }),
         expect.any(Number)
       );
