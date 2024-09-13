@@ -98,15 +98,6 @@ const mockedResponse = {
   ],
 };
 
-const mockCreatePointInTimeFinder = (response = mockedResponse) => {
-  savedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
-    close: jest.fn(),
-    find: function* asyncGenerator() {
-      yield response;
-    },
-  });
-};
-
 describe('kibana index telemetry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -518,7 +509,12 @@ describe('kibana index telemetry', () => {
 
   describe('getMWTelemetry', () => {
     test('should return MW telemetry', async () => {
-      mockCreatePointInTimeFinder();
+      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: jest.fn().mockImplementation(async function* () {
+          yield mockedResponse;
+        }),
+      });
       const telemetry = await getMWTelemetry({
         savedObjectsClient,
         logger,
@@ -539,7 +535,13 @@ describe('kibana index telemetry', () => {
   });
 
   test('should throw the error', async () => {
-    savedObjectsClient.createPointInTimeFinder = jest.fn().mockRejectedValueOnce(thrownError);
+    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+      close: jest.fn(),
+      find: jest.fn().mockImplementation(async function* () {
+        throw thrownError;
+      }),
+    });
+
     const telemetry = await getMWTelemetry({
       savedObjectsClient,
       logger,

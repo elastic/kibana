@@ -511,7 +511,7 @@ export async function getMWTelemetry({
   logger,
 }: MWOpts): Promise<GetMWTelemetryResults> {
   try {
-    const MWFinder = await savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
+    const MWFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
