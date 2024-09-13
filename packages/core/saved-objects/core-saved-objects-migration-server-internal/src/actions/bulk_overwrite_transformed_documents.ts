@@ -17,7 +17,6 @@ import {
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
-import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
 import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException, IndexNotFound } from '.';
 import type { BulkOperation } from '../model/create_batches';
 
@@ -65,7 +64,6 @@ export const bulkOverwriteTransformedDocuments =
         // system indices puts in place a hard control.
         index,
         require_alias: useAliasToPreventAutoCreate,
-        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         refresh,
         filter_path: ['items.*.error'],
         // we need to unwrap the existing BulkIndexOperationTuple's

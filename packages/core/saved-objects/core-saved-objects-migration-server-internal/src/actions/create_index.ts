@@ -20,12 +20,7 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import {
-  DEFAULT_TIMEOUT,
-  INDEX_AUTO_EXPAND_REPLICAS,
-  INDEX_NUMBER_OF_SHARDS,
-  WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-} from './constants';
+import { DEFAULT_TIMEOUT, INDEX_AUTO_EXPAND_REPLICAS, INDEX_NUMBER_OF_SHARDS } from './constants';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import { isClusterShardLimitExceeded } from './es_errors';
 
@@ -108,9 +103,6 @@ export const createIndex = ({
     return client.indices
       .create({
         index: indexName,
-        // wait up to timeout until the following shards are available before
-        // creating the index: primary, replica (only on multi node clusters)
-        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         // Timeout for the cluster state to update and all shards to become
         // available. If the request doesn't complete within timeout,
         // acknowledged or shards_acknowledged would be false.
