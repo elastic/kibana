@@ -15,7 +15,7 @@ import {
   getRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { getRenderAppWrapper } from './accessors/get_cell_renderers';
+import { getRenderAppWrapper, getRenderDocViewerFlyout } from './accessors/get_cell_renderers';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -23,6 +23,7 @@ export const createLogsDataSourceProfileProvider = (
   profileId: 'logs-data-source-profile',
   profile: {
     getRenderAppWrapper,
+    getRenderDocViewerFlyout,
     getRowIndicatorProvider,
     getCellRenderers,
     getRowAdditionalLeadingControls,

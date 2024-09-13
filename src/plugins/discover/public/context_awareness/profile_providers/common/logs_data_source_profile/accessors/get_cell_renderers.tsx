@@ -11,6 +11,7 @@ import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
 import React, { createContext, useContext } from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
+import { EuiFlyout } from '@elastic/eui';
 import { getSummaryColumn } from '../../../../../components/data_types/logs/summary_column';
 import {
   LOG_LEVEL_FIELDS,
@@ -59,5 +60,14 @@ export const getRenderAppWrapper: DataSourceProfileProvider['profile']['getRende
       <testContext.Provider value="test-override">
         <PrevWrapper>{children}</PrevWrapper>
       </testContext.Provider>
+    );
+  };
+
+export const getRenderDocViewerFlyout: DataSourceProfileProvider['profile']['getRenderDocViewerFlyout'] =
+  () => (props) => {
+    return (
+      <EuiFlyout onClose={props.onClose}>
+        <pre>{JSON.stringify(props.hit, null, 2)}</pre>
+      </EuiFlyout>
     );
   };
