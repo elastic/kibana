@@ -131,7 +131,6 @@
     "@kbn/serverless",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/router-utils",
-    "@kbn/observability-utils"
   ],
   "exclude": ["target/**/*"]
 }
