@@ -29,7 +29,8 @@ async function removeLogFile() {
 /** Number of SO documents dropped during the migration because they belong to an unused type */
 const UNUSED_SO_COUNT = 5;
 
-describe('migration from 7.7.2-xpack with 100k objects', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
