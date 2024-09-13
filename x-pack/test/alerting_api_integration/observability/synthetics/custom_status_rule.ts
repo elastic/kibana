@@ -26,8 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('SyntheticsCustomStatusRule', () => {
     before(async () => {
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, 'synthetics-*']);
       await server.savedObjects.cleanStandardList();
+      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, 'synthetics-*']);
       await ruleHelper.createIndexAction();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       let docs: any[] = [];
 
       it('creates a monitor', async () => {
-        monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LT'));
+        monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
         expect(monitor).to.have.property('id');
 
         docs = await ruleHelper.makeSummaries({
@@ -149,18 +149,34 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(recoveredResponse.hits.hits[1]._source).property('recoveryStatus', 'is now up');
       });
+    });
+
+    describe('NumberOfChecksUngrouped', () => {
+      let ruleId = '';
+      const params = {
+        condition: {
+          locationsThreshold: 1,
+          window: {
+            numberOfChecks: 5,
+          },
+          groupBy: 'none',
+          downThreshold: 5,
+        },
+      };
+      let monitor: any;
+      let docs: any[] = [];
+      it('creates a monitor', async () => {
+        monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
+        expect(monitor).to.have.property('id');
+      });
 
       it('should trigger down for ungrouped', async () => {
-        params.condition.groupBy = 'none';
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'Status based on number of checks',
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);
-
-        monitor = await ruleHelper.addMonitor('Monitor for grouped ' + moment().format('LT'));
-        expect(monitor).to.have.property('id');
 
         docs = await ruleHelper.makeSummaries({
           monitor,
@@ -169,6 +185,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
+          filters: [
+            { term: { 'kibana.alert.status': 'active' } },
+            { term: { 'monitor.id': monitor.id } },
+            { range: { '@timestamp': { gte: docs[0]['@timestamp'] } } },
+          ],
         });
 
         const alert: any = response.hits.hits?.[0]._source;
@@ -185,26 +206,24 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 3,
+          docCountTarget: 1,
         });
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" is down 5 times from Dev Service. Alert when down 5 times out of the last 5 checks from at least 1 location.`
         );
-        expect(downResponse.hits.hits[2]._source).property('locationNames', 'Dev Service');
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
+        expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[2]._source).property('locationId', 'dev');
-
-        await ruleHelper.deleteMonitor(monitor.id);
+        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
     });
 
     describe('NumberOfLocations', () => {
       let ruleId = '';
-      let params: StatusRuleParams = {
+      const params: StatusRuleParams = {
         condition: {
           locationsThreshold: 2,
           window: {
@@ -231,6 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not trigger down alert based on location threshold with one location down', async () => {
+        // first down check from dev 1
         const docs = await ruleHelper.makeSummaries({
           monitor,
           downChecks: 1,
@@ -296,6 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
       ] as AlertStatusMetaData[];
 
       it('should trigger down alert based on location threshold with two locations down', async () => {
+        // 1st down check from dev 2
         await ruleHelper.makeSummaries({
           monitor,
           downChecks: 1,
@@ -304,7 +325,8 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'Dev Service 2',
           },
         });
-        await ruleHelper.makeSummaries({
+        // 2nd down check from dev 1
+        const downDocs = await ruleHelper.makeSummaries({
           monitor,
           downChecks: 1,
         });
@@ -315,6 +337,13 @@ export default function ({ getService }: FtrProviderContext) {
             { term: { 'kibana.alert.status': 'active' } },
             {
               term: { 'monitor.id': monitor.id },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: downDocs[0]['@timestamp'],
+                },
+              },
             },
           ],
         });
@@ -450,23 +479,47 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(downResponse.hits.hits[2]._source).property('locationId', 'dev | dev2');
       });
+    });
+
+    describe('Multi location grouped', () => {
+      let ruleId = '';
+      const params: StatusRuleParams = {
+        condition: {
+          window: {
+            numberOfChecks: 1,
+          },
+          groupBy: 'locationId',
+          locationsThreshold: 1,
+          downThreshold: 1,
+        },
+      };
+
+      let monitor: any;
+
+      it('creates a monitor', async () => {
+        monitor = await ruleHelper.addMonitor('Monitor location based at ' + moment().format('LT'));
+        expect(monitor).to.have.property('id');
+      });
 
       it('creates a custom rule with 1 location threshold ungrouped', async () => {
-        params = {
-          condition: {
-            window: {
-              numberOfChecks: 1,
-            },
-            groupBy: 'locationId',
-            locationsThreshold: 1,
-            downThreshold: 1,
-          },
-        };
         const rule = await ruleHelper.createCustomStatusRule({
           params,
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);
+
+        await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 1,
+          location: {
+            id: 'dev2',
+            label: 'Dev Service 2',
+          },
+        });
+        const downDocs = await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 1,
+        });
 
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
@@ -487,6 +540,7 @@ export default function ({ getService }: FtrProviderContext) {
           alertDetailsUrl: string;
           reason: string;
           locationNames: string;
+          locationId: string;
         }>({
           esClient,
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
@@ -504,7 +558,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(hit).property('locationNames', hit?.locationNames);
           expect(hit).property(
             'linkMessage',
-            `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit.locationId}`
+            `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
           );
         });
       });
