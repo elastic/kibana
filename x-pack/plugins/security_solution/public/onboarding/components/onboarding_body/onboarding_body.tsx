@@ -6,25 +6,26 @@
  */
 
 import React, { Suspense, useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CenteredLoadingSpinner } from '../../../common/components/centered_loading_spinner';
 import type { OnboardingCardId } from '../../constants';
-import { useCardGroupsConfig } from './use_card_groups_config';
+import { useBodyConfig } from './hooks/use_body_config';
 import { useOnboardingContext } from '../onboarding_context';
 import { OnboardingCardGroup } from './onboarding_card_group';
 import { OnboardingCardPanel } from './onboarding_card_panel';
-import { useCheckCompleteCards } from './use_check_complete_cards';
-import { useExpandedCard } from './use_expanded_card';
-import { useCompletedCards } from './use_completed_cards';
+import { useCheckCompleteCards } from './hooks/use_check_complete_cards';
+import { useExpandedCard } from './hooks/use_expanded_card';
+import { useCompletedCards } from './hooks/use_completed_cards';
 
 export const OnboardingBody = React.memo(() => {
   const { spaceId } = useOnboardingContext();
-  const cardGroupsConfig = useCardGroupsConfig();
+  const bodyConfig = useBodyConfig();
 
   const { expandedCardId, setExpandedCardId } = useExpandedCard(spaceId);
   const { isCardComplete, setCardComplete } = useCompletedCards(spaceId);
 
   const { checkAllCardsComplete, checkCardComplete } = useCheckCompleteCards(
-    cardGroupsConfig,
+    bodyConfig,
     setCardComplete
   );
 
@@ -55,7 +56,7 @@ export const OnboardingBody = React.memo(() => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xl">
-      {cardGroupsConfig.map((group, index) => (
+      {bodyConfig.map((group, index) => (
         <EuiFlexItem key={index} grow={false}>
           <EuiSpacer size="xxl" />
           <OnboardingCardGroup title={group.title}>
@@ -70,7 +71,7 @@ export const OnboardingBody = React.memo(() => {
                     isComplete={isCardComplete(id)}
                     onToggleExpanded={createOnToggleExpanded(id)}
                   >
-                    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                    <Suspense fallback={<CenteredLoadingSpinner size="m" />}>
                       <LazyCardComponent
                         setComplete={createSetCardComplete(id)}
                         isCardComplete={isCardComplete}

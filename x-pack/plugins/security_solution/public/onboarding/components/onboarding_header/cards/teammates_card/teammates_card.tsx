@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { useObservable } from 'react-use';
-import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
+import { useOnboardingService } from '../../../../onboarding_service';
 import { LinkCard } from '../common/link_card';
 import teammatesImage from './images/teammates_card.png';
 import darkTeammatesImage from './images/teammates_card_dark.png';
 import * as i18n from './translations';
 
 export const TeammatesCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
-  const { usersUrl$ } = useKibana().services.onboarding;
+  const { usersUrl$ } = useOnboardingService();
   const usersUrl = useObservable(usersUrl$, undefined);
   return (
     <LinkCard

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { OnboardingHeaderVideoModal } from './video_modal';
 import * as i18n from './translations';
 import videoImage from './images/video_card.png';
@@ -14,14 +14,12 @@ import { LinkCard } from '../common/link_card';
 
 export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const closeVideoModal = () => {
+  const closeVideoModal = useCallback(() => {
     setIsModalVisible(false);
-  };
-
-  const showVideoModal = () => {
+  }, []);
+  const showVideoModal = useCallback(() => {
     setIsModalVisible(true);
-  };
+  }, []);
 
   return (
     <>
@@ -36,5 +34,4 @@ export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) =>
     </>
   );
 });
-
 VideoCard.displayName = 'VideoCard';

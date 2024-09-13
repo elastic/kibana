@@ -11,15 +11,15 @@ import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
-import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import { OnboardingService } from './onboarding/onboarding_service';
 
 const upselling = new UpsellingService();
-const onboardingPageService = new OnboardingPageService();
+const onboardingService = new OnboardingService();
 
 export const contractStartServicesMock: ContractStartServices = {
   getComponents$: jest.fn(() => of({})),
   upselling,
-  onboarding: onboardingPageService,
+  onboarding: onboardingService,
 };
 
 const setupMock = (): PluginSetup => ({
@@ -34,7 +34,7 @@ const startMock = (): PluginStart => ({
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
   getUpselling: () => upselling,
-  setOnboardingPageSettings: onboardingPageService,
+  setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
   setIsSolutionNavigationEnabled: jest.fn(),
   getSolutionNavigation: jest.fn(async () => ({
     navigationTree$: of({ body: [], footer: [] }),

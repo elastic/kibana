@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useStoredExpandedCardId } from '../use_stored_state';
-import { HEIGHT_ANIMATION_DURATION } from './onboarding_card_panel.styles';
-import type { OnboardingCardId } from '../../constants';
-import type { SetExpandedCardId } from '../../types';
+import { useStoredExpandedCardId } from '../../../hooks/use_stored_state';
+import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
+import type { OnboardingCardId } from '../../../constants';
+import type { SetExpandedCardId } from '../../../types';
 
 const HEADER_OFFSET = 40;
 

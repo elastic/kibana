@@ -91,7 +91,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
-import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import type { OnboardingService } from './onboarding/onboarding_service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 
 export interface SetupPlugins {
@@ -166,7 +166,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export interface ContractStartServices {
   getComponents$: GetComponents$;
   upselling: UpsellingService;
-  onboarding: OnboardingPageService;
+  onboarding: OnboardingService;
 }
 
 export type StartServices = CoreStart &
@@ -214,7 +214,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-  setOnboardingPageSettings: OnboardingPageService;
+  setOnboardingSettings: OnboardingService['setSettings'];
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
   getSolutionNavigation: () => Promise<SolutionNavigation>;
 }

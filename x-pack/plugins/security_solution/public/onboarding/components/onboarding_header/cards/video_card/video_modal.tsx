@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ONBOARDING_VIDEO_SOURCE } from '../../../../../common/constants';
-import { useStoredHasVideoVisited } from '../../../use_stored_state';
+import { useStoredHasVideoVisited } from '../../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
 import * as i18n from './translations';
 

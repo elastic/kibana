@@ -10,7 +10,7 @@ import type { OnboardingGroupConfig } from '../../types';
 import { integrationsCardConfig } from './cards/integrations';
 import { dashboardsCardConfig } from './cards/dashboards';
 
-export const cardGroupsConfig: OnboardingGroupConfig[] = [
+export const bodyConfig: OnboardingGroupConfig[] = [
   {
     title: i18n.translate('xpack.securitySolution.onboarding.dataGroup.title', {
       defaultMessage: 'Ingest your data',

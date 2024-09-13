@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { OnboardingAVCBanner } from './onboarding_avc_banner';
+export { OnboardingBanner as OnboardingAVCBanner } from './onboarding_banner';

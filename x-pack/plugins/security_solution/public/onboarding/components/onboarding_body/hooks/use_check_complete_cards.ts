@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { OnboardingCardId } from '../../constants';
-import type { OnboardingCardConfig, OnboardingGroupConfig } from '../../types';
+import type { OnboardingCardId } from '../../../constants';
+import type { OnboardingCardConfig, OnboardingGroupConfig } from '../../../types';
 
 /**
  * Hook that implements the functions to call the `checkComplete` function for the cards that have it defined in the config

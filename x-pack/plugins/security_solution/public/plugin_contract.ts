@@ -13,16 +13,16 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
-import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import { OnboardingService } from './onboarding/onboarding_service';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
-  public onboardingPageService: OnboardingPageService;
+  public onboardingService: OnboardingService;
   public isSolutionNavigationEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
-    this.onboardingPageService = new OnboardingPageService();
+    this.onboardingService = new OnboardingService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false); // defaults to classic navigation
@@ -37,7 +37,6 @@ export class PluginContract {
 
   public getStartContract(core: CoreStart): PluginStart {
     return {
-      setOnboardingPageSettings: this.onboardingPageService,
       getNavLinks$: () => navLinks$,
       setComponents: (components) => {
         this.componentsService.setComponents(components);
@@ -49,6 +48,7 @@ export class PluginContract {
         this.isSolutionNavigationEnabled$.next(isSolutionNavigationEnabled);
         updateNavLinks(isSolutionNavigationEnabled, core);
       },
+      setOnboardingSettings: this.onboardingService.setSettings.bind(this.onboardingService),
       getSolutionNavigation: () => lazySolutionNavigation(core),
     };
   }
@@ -57,7 +57,7 @@ export class PluginContract {
     return {
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
-      onboarding: this.onboardingPageService,
+      onboarding: this.onboardingService,
     };
   }
 }

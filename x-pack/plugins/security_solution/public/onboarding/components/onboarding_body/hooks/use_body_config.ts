@@ -7,24 +7,24 @@
 
 import { useObservable } from 'react-use';
 import { useMemo } from 'react';
-import { hasCapabilities } from '../../../common/lib/capabilities';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { cardGroupsConfig } from './card_groups_config';
+import { hasCapabilities } from '../../../../common/lib/capabilities';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { bodyConfig } from '../body_config';
 
 /**
- * Hook that filters the card groups config based on the user's capabilities and license
+ * Hook that filters the config based on the user's capabilities and license
  */
-export const useCardGroupsConfig = () => {
+export const useBodyConfig = () => {
   const { application, licensing } = useKibana().services;
   const license = useObservable(licensing.license$);
 
-  const filteredCardGroupsConfig = useMemo(() => {
+  const filteredBodyConfig = useMemo(() => {
     // Return empty array when the license is not defined. It should always become defined at some point.
-    // This exit case prevents code dependant on the cards config from running multiple times.
+    // This exit case prevents code dependant on the cards config (like completion checks) from running multiple times.
     if (!license) {
       return [];
     }
-    return cardGroupsConfig.filter((group) => {
+    return bodyConfig.filter((group) => {
       const filteredCards = group.cards.filter((card) => {
         if (card.capabilities) {
           const cardHasCapabilities = hasCapabilities(application.capabilities, card.capabilities);
@@ -50,5 +50,5 @@ export const useCardGroupsConfig = () => {
     });
   }, [license, application.capabilities]);
 
-  return filteredCardGroupsConfig;
+  return filteredBodyConfig;
 };

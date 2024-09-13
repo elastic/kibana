@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import { useStoredCompletedCardIds } from '../use_stored_state';
-import type { OnboardingCardId } from '../../constants';
+import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
+import type { OnboardingCardId } from '../../../constants';
 
 /**
  * This hook implements the logic for tracking which onboarding cards have been completed using Local Storage.

@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLoadingSpinner, type EuiLoadingSpinnerProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiLoadingSpinner, useEuiTheme, type EuiLoadingSpinnerProps } from '@elastic/eui';
 
-const centerSpinnerStyle = { display: 'flex', margin: 'auto', marginTop: '10em' };
+interface CenteredLoadingSpinnerProps extends EuiLoadingSpinnerProps {
+  topOffset?: string;
+}
 
-export const CenteredLoadingSpinner = React.memo<EuiLoadingSpinnerProps>(
-  (euiLoadingSpinnerProps) => {
-    return <EuiLoadingSpinner {...euiLoadingSpinnerProps} style={centerSpinnerStyle} />;
+export const CenteredLoadingSpinner = React.memo<CenteredLoadingSpinnerProps>(
+  ({ topOffset, ...euiLoadingSpinnerProps }) => {
+    const { euiTheme } = useEuiTheme();
+    const style = useMemo(
+      () => ({
+        display: 'flex',
+        margin: `${euiTheme.size.xl} auto`,
+        ...(topOffset && { marginTop: topOffset }),
+      }),
+      [topOffset, euiTheme]
+    );
+
+    return <EuiLoadingSpinner {...euiLoadingSpinnerProps} style={style} />;
   }
 );
 CenteredLoadingSpinner.displayName = 'CenteredLoadingSpinner';
