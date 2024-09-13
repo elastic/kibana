@@ -9,10 +9,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButton,
-  EuiFieldSearch,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -26,6 +23,7 @@ import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigatio
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
 import { InvestigationsError } from './investigations_error';
+import { SearchBar } from './search_bar/search_bar';
 
 export function InvestigationList() {
   const {
@@ -135,35 +133,12 @@ export function InvestigationList() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <EuiFlexItem grow>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            data-test-subj="investigateAppInvestigationListFieldSearch"
-            placeholder={i18n.translate(
-              'xpack.investigateApp.investigationList.searchField.placeholder',
-              { defaultMessage: 'Search...' }
-            )}
-            aria-label={i18n.translate(
-              'xpack.investigateApp.investigationList.searchField.placeholder',
-              { defaultMessage: 'Search...' }
-            )}
-            onSearch={(value: string) => {
-              setSearch(value);
-            }}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="investigateAppInvestigationListSearchButton">
-            {i18n.translate('xpack.investigateApp.investigationList.searchButtonLabel', {
-              defaultMessage: 'Search',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <SearchBar
+        isLoading={isLoading}
+        onSearch={({ searchValue }) => {
+          setSearch(searchValue);
+        }}
+      />
       <EuiFlexGroup>
         {isLoading && <EuiLoadingSpinner size="xl" />}
         {isError && <InvestigationsError />}
