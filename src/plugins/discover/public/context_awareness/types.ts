@@ -17,6 +17,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
+import { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -47,6 +48,7 @@ export interface DefaultAppStateExtension {
 
 export interface RowControlsExtensionParams {
   dataView: DataView;
+  query?: DiscoverAppState['query'];
 }
 
 export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };

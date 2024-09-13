@@ -4532,6 +4532,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
@@ -7183,10 +7187,6 @@
               {
                 "plugin": "painlessLab",
                 "path": "x-pack/plugins/painless_lab/server/routes/api/execute.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
               },
               {
                 "plugin": "reporting",

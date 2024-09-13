@@ -66,12 +66,20 @@ export const Editor = memo(
     const dispatch = useRequestActionContext();
     const editorDispatch = useEditorActionContext();
 
-    const [fetchingMappings, setFetchingMappings] = useState(false);
+    const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
     useEffect(() => {
-      const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
+      const debouncedSetFechingAutocompleteEntities = debounce(
+        setFetchingAutocompleteEntities,
+        DEBOUNCE_DELAY
+      );
+      const subscription = getAutocompleteInfo().isLoading$.subscribe(
+        debouncedSetFechingAutocompleteEntities
+      );
+
       return () => {
         subscription.unsubscribe();
+        debouncedSetFechingAutocompleteEntities.cancel();
       };
     }, []);
 
@@ -130,7 +138,7 @@ export const Editor = memo(
 
     return (
       <>
-        {fetchingMappings ? (
+        {fetchingAutocompleteEntities ? (
           <div className="conApp__requestProgressBarContainer">
             <EuiProgress size="xs" color="accent" position="absolute" />
           </div>

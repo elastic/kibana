@@ -45,6 +45,7 @@ import { History } from '../history';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
+import { ImportConfirmModal } from './import_confirm_modal';
 import {
   SHELL_TAB_ID,
   HISTORY_TAB_ID,
@@ -72,6 +73,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
+  const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
 
   const {
     docLinks,
@@ -132,7 +134,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
     if (file) {
       if (file.size > MAX_FILE_UPLOAD_SIZE) {
-        notifications.toasts.addSuccess(
+        notifications.toasts.addWarning(
           i18n.translate('console.notification.error.fileTooBigMessage', {
             defaultMessage: `File size exceeds the 2MB limit.`,
           })
@@ -142,22 +144,21 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
       const reader = new FileReader();
 
+      reader.onerror = () => {
+        notifications.toasts.addWarning(
+          i18n.translate('console.notification.error.failedToReadFile', {
+            defaultMessage: `Failed to read the file you selected.`,
+          })
+        );
+      };
+
       reader.onload = (e) => {
         const fileContent = e?.target?.result;
 
         if (fileContent) {
-          dispatch({
-            type: 'setFileToImport',
-            payload: fileContent as string,
-          });
-
-          notifications.toasts.addSuccess(
-            i18n.translate('console.notification.fileImportedSuccessfully', {
-              defaultMessage: `The file you selected has been imported successfully.`,
-            })
-          );
+          setIsConfirmImportOpen(fileContent as string);
         } else {
-          notifications.toasts.add(
+          notifications.toasts.addWarning(
             i18n.translate('console.notification.error.fileImportNoContent', {
               defaultMessage: `The file you selected doesn't appear to have any content. Please select a different file.`,
             })
@@ -335,6 +336,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
         <div />
       </ConsoleTourStep>
+
+      {isConfirmImportOpen && (
+        <ImportConfirmModal
+          onClose={() => setIsConfirmImportOpen(null)}
+          fileContent={isConfirmImportOpen}
+        />
+      )}
     </div>
   );
 }

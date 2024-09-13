@@ -359,6 +359,8 @@ describe('SpecDefinitionsService', () => {
     expect(endpoints).toEqual({
       endpoint2: {
         id: 'endpoint2',
+        documentation:
+          'https://www.elastic.co/guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html',
         methods: ['POST'],
         patterns: ['/endpoint2'],
       },

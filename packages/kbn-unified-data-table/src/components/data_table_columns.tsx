@@ -358,39 +358,3 @@ export function getEuiGridColumns({
     })
   );
 }
-
-export function canPrependTimeFieldColumn(
-  columns: string[],
-  timeFieldName: string | undefined,
-  columnsMeta: DataTableColumnsMeta | undefined,
-  showTimeCol: boolean,
-  isPlainRecord: boolean
-) {
-  if (!showTimeCol || !timeFieldName) {
-    return false;
-  }
-
-  if (isPlainRecord) {
-    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
-  }
-
-  return true;
-}
-
-export function getVisibleColumns(
-  columns: string[],
-  dataView: DataView,
-  shouldPrependTimeFieldColumn: boolean
-) {
-  const timeFieldName = dataView.timeFieldName;
-
-  if (
-    shouldPrependTimeFieldColumn &&
-    timeFieldName &&
-    !columns.find((col) => col === timeFieldName)
-  ) {
-    return [timeFieldName, ...columns];
-  }
-
-  return columns;
-}

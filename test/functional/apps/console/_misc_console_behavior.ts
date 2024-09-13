@@ -223,6 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Set file to upload and wait for the editor to be updated
         await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.console.acceptFileImport();
         await PageObjects.common.sleep(1000);
 
         await retry.try(async () => {
