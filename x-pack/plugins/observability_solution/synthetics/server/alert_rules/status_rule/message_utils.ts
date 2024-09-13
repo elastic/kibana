@@ -122,7 +122,6 @@ export const getMonitorSummary = ({
       name: monitorName,
       location: formattedLocationName,
       status: statusMessage,
-      timestamp: monitorInfo['@timestamp'],
       checks,
       downThreshold,
       locationsThreshold,
