@@ -117,8 +117,10 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
 
         if (
           !fieldsMetadataClient ||
-          // If not a field, no need to fetch metadata
+          // If item is not a ECS field, no need to fetch metadata
           item.kind !== 4 ||
+          // We set sortText to '1D' for ECS fields, so if not ECS, no need to fetch description
+          item.sortText !== '1D' ||
           typeof item.label !== 'string'
         ) {
           return item;
