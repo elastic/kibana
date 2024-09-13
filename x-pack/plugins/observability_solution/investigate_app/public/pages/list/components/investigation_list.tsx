@@ -30,6 +30,9 @@ export function InvestigationList() {
       uiSettings,
     },
   } = useKibana();
+  const dateFormat = uiSettings.get('dateFormat');
+  const tz = uiSettings.get('dateFormat:tz');
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -37,8 +40,6 @@ export function InvestigationList() {
     page: pageIndex + 1,
     perPage: pageSize,
   });
-  const dateFormat = uiSettings.get('dateFormat');
-  const tz = uiSettings.get('dateFormat:tz');
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" />;
@@ -121,7 +122,7 @@ export function InvestigationList() {
     pageIndex,
     pageSize,
     totalItemCount,
-    pageSizeOptions: [10, 50],
+    pageSizeOptions: [10, 25, 50, 100],
     showPerPageOptions: true,
   };
 
