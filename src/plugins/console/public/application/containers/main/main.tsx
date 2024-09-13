@@ -199,10 +199,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div
-      id="consoleRoot"
-      className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-    >
+    <div id="consoleRoot" className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}>
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
