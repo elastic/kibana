@@ -340,6 +340,7 @@ const AlertsTableStateWithQueryProvider = memo(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],

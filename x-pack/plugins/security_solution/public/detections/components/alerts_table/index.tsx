@@ -53,6 +53,8 @@ import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
+const DEFAULT_DATA_GRID_HEIGHT = 600;
+
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
@@ -158,6 +160,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       sessionViewConfig,
       viewMode: tableView = eventsDefaultModel.viewMode,
       columns,
+      totalCount: count,
     } = getAlertsDefaultModel(license),
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
@@ -290,8 +293,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
-      dynamicRowHeight: isEventRenderedView,
-      height: '600px',
+      // if records are too less, we don't want table to be of fixed height.
+      // it should shrink to the content height.
+      // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
+      height: count >= 10 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
       initialPageSize: 20,
     }),
     [
@@ -308,6 +313,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onLoad,
       sourcererDataView?.runtimeFieldMap,
       isEventRenderedView,
+      count,
     ]
   );
 
