@@ -323,9 +323,9 @@ export class AlertsClient<
 
   public async persistAlerts(): Promise<AlertsAffectedByMaintenanceWindows> {
     // Persist alerts first
-    const didWriteAlerts = await this.persistAlertsHelper();
+    await this.persistAlertsHelper();
 
-    return await this.updatePersistedAlertsWithMaintenanceWindowIds(didWriteAlerts);
+    return await this.updatePersistedAlertsWithMaintenanceWindowIds();
   }
 
   public getAlertsToSerialize() {
@@ -404,7 +404,7 @@ export class AlertsClient<
         `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
         this.logTags
       );
-      return false;
+      return;
     }
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
@@ -609,8 +609,6 @@ export class AlertsClient<
         },
       };
     }
-
-    return alertsToIndex.length > 0;
   }
 
   private async getMaintenanceWindowScopedQueryAlerts({
@@ -680,14 +678,17 @@ export class AlertsClient<
     }
   }
 
-  private async updatePersistedAlertsWithMaintenanceWindowIds(
-    didWriteAlerts: boolean
-  ): Promise<AlertsAffectedByMaintenanceWindows> {
-    // check if there are any new alerts
+  private async updatePersistedAlertsWithMaintenanceWindowIds(): Promise<AlertsAffectedByMaintenanceWindows> {
+    // check if there are any alerts
     const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
+    const activeAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('active'));
+    const recoveredAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('recovered'));
 
-    // return if there are no new alerts written because we only check new alerts against maintenance window filters
-    if (!didWriteAlerts || newAlerts.length === 0 || !this.options.maintenanceWindowsService) {
+    // return if there are no alerts written
+    if (
+      (!newAlerts.length && !activeAlerts.length && !recoveredAlerts.length) ||
+      !this.options.maintenanceWindowsService
+    ) {
       return {
         alertIds: [],
         maintenanceWindowIds: [],

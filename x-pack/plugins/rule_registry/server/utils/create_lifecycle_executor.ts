@@ -218,7 +218,7 @@ export const createLifecycleExecutor =
 
     // load maintenance window ids if there are new alerts
     let maintenanceWindowIds: string[] = [];
-    if (newAlertIds.length && maintenanceWindowsService) {
+    if (allAlertIds.length > 0 && maintenanceWindowsService) {
       const { maintenanceWindowsWithoutScopedQueryIds } =
         await maintenanceWindowsService.loadMaintenanceWindows();
       maintenanceWindowIds = maintenanceWindowsWithoutScopedQueryIds ?? [];

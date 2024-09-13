@@ -817,7 +817,7 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(3);
+          expect(spy).toHaveBeenCalledTimes(5);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
           expect(spy).toHaveBeenNthCalledWith(3, 'new');
