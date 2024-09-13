@@ -49,9 +49,7 @@ import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
-  EDITOR_MAX_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
-  RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
 import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
@@ -104,9 +102,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   // the resizable container is the container that holds the history component or the inline docs
   // they are never open simultaneously
   const [resizableContainerHeight, setResizableContainerHeight] = useState(
-    editorIsInline
-      ? RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING
-      : RESIZABLE_CONTAINER_INITIAL_HEIGHT
+    RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   const [timePickerDate, setTimePickerDate] = useState(moment());
@@ -254,26 +250,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const editorAndResizableContainerMaxHeight = useMemo(() => {
-    const resizableContainerInitiaLHeight = editorIsInline
-      ? RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING
-      : RESIZABLE_CONTAINER_INITIAL_HEIGHT;
-
-    return EDITOR_MAX_HEIGHT + resizableContainerInitiaLHeight;
-  }, [editorIsInline]);
-
-  const currentEntireContainerHeight = useMemo(() => {
-    // 34 is the height of the footer
-    return editorHeight + resizableContainerHeight + 34;
-  }, [editorHeight, resizableContainerHeight]);
-
   const onMouseDownResize = useCallback(
-    (mouseDownEvent, height, maxHeight, setFirstPanelHeight, setSecondPanelHeight) => {
+    (
+      mouseDownEvent,
+      firstPanelHeight,
+      setFirstPanelHeight,
+      secondPanelHeight,
+      setSecondPanelHeight
+    ) => {
       onMouseDownResizeHandler(
         mouseDownEvent,
-        height,
-        maxHeight,
+        firstPanelHeight,
         setFirstPanelHeight,
+        secondPanelHeight,
         setSecondPanelHeight
       );
     },
@@ -281,13 +270,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onKeyDownResize = useCallback(
-    (keyDownEvent, height, maxHeight, setFirstPanelHeight, setSecondPanelHeigh) => {
+    (
+      keyDownEvent,
+      firstPanelHeight,
+      setFirstPanelHeight,
+      secondPanelHeight,
+      setSecondPanelHeight
+    ) => {
       onKeyDownResizeHandler(
         keyDownEvent,
-        height,
-        maxHeight,
+        firstPanelHeight,
         setFirstPanelHeight,
-        setSecondPanelHeigh
+        secondPanelHeight,
+        setSecondPanelHeight
       );
     },
     []
@@ -297,26 +292,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return (
       <ResizableButton
         onMouseDownResizeHandler={(mouseDownEvent) =>
-          onMouseDownResize(
-            mouseDownEvent,
-            editorHeight,
-            editorAndResizableContainerMaxHeight - editorHeight,
-            setEditorHeight,
-            undefined
-          )
+          onMouseDownResize(mouseDownEvent, editorHeight, setEditorHeight, undefined, undefined)
         }
         onKeyDownResizeHandler={(keyDownEvent) =>
-          onKeyDownResize(
-            keyDownEvent,
-            editorHeight,
-            editorAndResizableContainerMaxHeight - editorHeight,
-            setEditorHeight,
-            undefined
-          )
+          onKeyDownResize(keyDownEvent, editorHeight, setEditorHeight, undefined, undefined)
         }
       />
     );
-  }, [onMouseDownResize, editorAndResizableContainerMaxHeight, editorHeight, onKeyDownResize]);
+  }, [onMouseDownResize, editorHeight, onKeyDownResize]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -742,8 +725,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             onMouseDownResize(
               mouseDownEvent,
               editorHeight,
-              currentEntireContainerHeight,
               setEditorHeight,
+              resizableContainerHeight,
               setResizableContainerHeight
             );
           }}
@@ -751,8 +734,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             onKeyDownResize(
               keyDownEvent,
               editorHeight,
-              currentEntireContainerHeight,
               setEditorHeight,
+              resizableContainerHeight,
               setResizableContainerHeight
             )
           }

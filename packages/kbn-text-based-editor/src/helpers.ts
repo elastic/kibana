@@ -14,7 +14,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';
-import { EDITOR_MIN_HEIGHT } from './text_based_languages_editor.styles';
+import {
+  EDITOR_MIN_HEIGHT,
+  EDITOR_MAX_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+} from './text_based_languages_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
@@ -245,8 +249,8 @@ export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core
 export const onMouseDownResizeHandler = (
   mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent,
   height: number,
-  maxHeight: number,
   setHeight: (height: number) => void,
+  secondPanelHeight?: number,
   setSecondPanelHeight?: (height: number) => void
 ) => {
   function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
@@ -260,11 +264,15 @@ export const onMouseDownResizeHandler = (
 
   function onMouseMove(mouseMoveEvent: MouseEvent) {
     const h = startSize - startPosition + mouseMoveEvent.pageY;
-    const firstPanelHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
-    setHeight(firstPanelHeight);
-    if (setSecondPanelHeight) {
-      const secondPanelHeight = Math.min(Math.max(maxHeight - 34 - firstPanelHeight, 0), maxHeight);
-      setSecondPanelHeight?.(secondPanelHeight);
+    const firstPanelHeightValidated = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+    setHeight(firstPanelHeightValidated);
+    if (setSecondPanelHeight && secondPanelHeight) {
+      const maxHeight = height + secondPanelHeight;
+      const secondPanelHeightValidated = Math.min(
+        Math.max(maxHeight - firstPanelHeightValidated, RESIZABLE_CONTAINER_INITIAL_HEIGHT),
+        maxHeight
+      );
+      setSecondPanelHeight?.(secondPanelHeightValidated);
     }
   }
   function onMouseUp() {
@@ -278,17 +286,23 @@ export const onMouseDownResizeHandler = (
 export const onKeyDownResizeHandler = (
   keyDownEvent: React.KeyboardEvent,
   height: number,
-  maxHeight: number,
   setHeight: (height: number) => void,
+  secondPanelHeight?: number,
   setSecondPanelHeight?: (height: number) => void
 ) => {
   let h = height;
   if (keyDownEvent.keyCode === KEYCODE_ARROW_UP || keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
     const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
     h = h + step;
-    const firstPanelHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
-    setHeight(firstPanelHeight);
-    const secondPanelHeight = Math.min(Math.max(maxHeight - 34 - firstPanelHeight, 0), maxHeight);
-    setSecondPanelHeight?.(secondPanelHeight);
+    const firstPanelHeightValidated = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+    setHeight(firstPanelHeightValidated);
+    if (setSecondPanelHeight && secondPanelHeight) {
+      const maxHeight = height + secondPanelHeight;
+      const secondPanelHeightValidated = Math.min(
+        Math.max(maxHeight - firstPanelHeightValidated, RESIZABLE_CONTAINER_INITIAL_HEIGHT),
+        maxHeight
+      );
+      setSecondPanelHeight?.(secondPanelHeightValidated);
+    }
   }
 };
