@@ -382,6 +382,7 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
     ),
     SimplifiedPackagePolicyInputsSchema,
   ]),
+  spaceIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const DryRunPackagePolicySchema = schema.object({
