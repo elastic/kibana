@@ -15,6 +15,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
@@ -84,6 +85,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
    * dismissNotification: Optional, if not passed a toast will appear in the dashboard
    */
 
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} api={dashboard} />,
     <AddFromLibraryButton
@@ -92,12 +94,8 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}
     />,
+    <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />,
   ];
-  if (dashboard.controlGroup) {
-    extraButtons.push(
-      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
-    );
-  }
 
   return (
     <div

@@ -207,7 +207,14 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
  */
 export type RouteValidator<P, Q, B> =
   | RouteValidatorFullConfigRequest<P, Q, B>
-  | RouteValidatorRequestAndResponses<P, Q, B>;
+  | (RouteValidatorRequestAndResponses<P, Q, B> &
+      /* Help TS enforce union discrimination */ NotRouteValidatorFullConfigRequest);
+
+interface NotRouteValidatorFullConfigRequest {
+  params?: never;
+  query?: never;
+  body?: never;
+}
 
 /**
  * A validation schema factory.

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
   const dashboardSettings = getService('dashboardSettings');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('dashboard settings', () => {
     let originalTitles: string[] = [];
@@ -38,11 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      originalTitles = await PageObjects.dashboard.getPanelTitles();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('few panels');
+      await dashboard.switchToEditMode();
+      originalTitles = await dashboard.getPanelTitles();
     });
 
     after(async () => {
@@ -50,21 +50,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to hide all panel titles', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleShowPanelTitles(false);
       await dashboardSettings.clickApplyButton();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
+        const titles = await dashboard.getPanelTitles();
         expect(titles[0]).to.eql(undefined);
       });
     });
 
     it('should be able to unhide all panel titles', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleShowPanelTitles(true);
       await dashboardSettings.clickApplyButton();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
+        const titles = await dashboard.getPanelTitles();
         expect(titles[0]).to.eql(originalTitles[0]);
       });
     });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkDashboardTitle('few panels');
 
       const newTitle = 'My awesome dashboard!!1';
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.setCustomPanelTitle(newTitle);
       await dashboardSettings.clickApplyButton();
 
@@ -81,25 +81,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should disable quick save when the settings are open', async () => {
-      await PageObjects.dashboard.expectQuickSaveButtonEnabled();
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.expectQuickSaveButtonEnabled();
+      await dashboard.openSettingsFlyout();
       await retry.try(async () => {
-        await PageObjects.dashboard.expectQuickSaveButtonDisabled();
+        await dashboard.expectQuickSaveButtonDisabled();
       });
       await dashboardSettings.clickCancelButton();
     });
 
     it('should enable quick save when the settings flyout is closed', async () => {
-      await PageObjects.dashboard.expectQuickSaveButtonEnabled();
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.expectQuickSaveButtonEnabled();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.clickCloseFlyoutButton();
       await retry.try(async () => {
-        await PageObjects.dashboard.expectQuickSaveButtonEnabled();
+        await dashboard.expectQuickSaveButtonEnabled();
       });
     });
 
     it('should warn when creating a duplicate title', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.setCustomPanelTitle('couple panels');
       await dashboardSettings.clickApplyButton(false);
       await retry.try(async () => {
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow duplicate title if warned once', async () => {
       const newTitle = 'couple panels';
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.setCustomPanelTitle(newTitle);
       await dashboardSettings.clickApplyButton(false);
       await retry.try(async () => {

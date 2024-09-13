@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header']);
+  const { dashboard, timePicker, header } = getPageObjects(['dashboard', 'timePicker', 'header']);
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -31,17 +31,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultDataRange();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
+      await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
 
@@ -50,9 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should remove the panel if cancel button is clicked', async () => {
       await testSubjects.click('cancelFlyoutButton');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       await retry.try(async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(0);
       });
     });
@@ -61,11 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
       await testSubjects.click('TextBasedLangEditor-run-query-button');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('applyFlyoutButton');
       expect(await testSubjects.exists('mtrVis')).to.be(true);

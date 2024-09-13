@@ -39,10 +39,9 @@ const props = {
       header: null,
       footer: () => null,
     }),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((rcvProps) => {
-        return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((rcvProps) => {
+      return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
+    }),
   },
   flyoutIndex: 0,
   alertsCount: 4,
