@@ -18,7 +18,7 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 }
 
 // ECS Metadata is very static, so info only needs to be fetched once
-class EcsMetadataCache {
+export class EcsMetadataCache {
   private static instance: EcsMetadataCache;
   private cacheEcsMetadata: Record<string, { type: string; source: string }> | undefined;
 

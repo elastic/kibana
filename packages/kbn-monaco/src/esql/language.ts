@@ -8,6 +8,7 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
+import { EcsMetadataCache } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';
@@ -112,34 +113,35 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!callbacks?.getFieldsMetadata) return item;
-
         const fieldsMetadataClient = await callbacks?.getFieldsMetadata();
+        const fullEcsMetadataList = EcsMetadataCache.getInstance().getMetadata();
+
+        if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
+          return item;
+
+        const strippedFieldName = removeKeywordSuffix(item.label);
 
         if (
-          !fieldsMetadataClient ||
           // If item is not a ECS field, no need to fetch metadata
-          item.kind !== 4 ||
-          // We set sortText to '1D' for ECS fields, so if not ECS, no need to fetch description
-          item.sortText !== '1D' ||
-          typeof item.label !== 'string'
+          item.kind === 4 &&
+          // If not ECS, no need to fetch description
+          Object.hasOwn(fullEcsMetadataList, strippedFieldName)
         ) {
-          return item;
-        }
+          const ecsMetadata = await fieldsMetadataClient.find({
+            fieldNames: [strippedFieldName],
+            attributes: ['description'],
+          });
 
-        const ecsMetadata = await fieldsMetadataClient.find({
-          fieldNames: [removeKeywordSuffix(item.label)],
-          attributes: ['description'],
-        });
-
-        const fieldMetadata = ecsMetadata.fields[item.label as string];
-        if (fieldMetadata && fieldMetadata.description) {
-          const completionItem: monaco.languages.CompletionItem = {
-            ...item,
-            documentation: {
-              value: fieldMetadata.description,
-            },
-          };
-          return completionItem;
+          const fieldMetadata = ecsMetadata.fields[strippedFieldName];
+          if (fieldMetadata && fieldMetadata.description) {
+            const completionItem: monaco.languages.CompletionItem = {
+              ...item,
+              documentation: {
+                value: fieldMetadata.description,
+              },
+            };
+            return completionItem;
+          }
         }
 
         return item;

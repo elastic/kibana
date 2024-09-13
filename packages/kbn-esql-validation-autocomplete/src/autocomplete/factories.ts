@@ -40,6 +40,7 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
 };
+export const ECS_FIELD_SORT_TEXT = '1D';
 
 export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
@@ -150,7 +151,7 @@ export const buildFieldsDefinitionsWithMetadata = (
       kind: 'Variable',
       detail: titleCaseType,
       // If detected to be an ECS field, push it up to the top of the list
-      sortText: field.isEcs ? '1D' : 'D',
+      sortText: field.isEcs ? ECS_FIELD_SORT_TEXT : 'D',
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
