@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
