@@ -63,4 +63,24 @@ describe('calculateRuleSourceForImport', () => {
       immutable: true,
     });
   });
+
+  it('calculates as external without customizations if an exact match is found', () => {
+    const rule = getRulesSchemaMock();
+    rule.rule_id = 'rule_id';
+    const prebuiltRuleAssets = [getPrebuiltRuleMock(rule)];
+
+    const result = calculateRuleSourceForImport({
+      rule,
+      prebuiltRuleAssets,
+      installedRuleIds: ['rule_id'],
+    });
+
+    expect(result).toEqual({
+      ruleSource: {
+        type: 'external',
+        is_customized: false,
+      },
+      immutable: true,
+    });
+  });
 });
