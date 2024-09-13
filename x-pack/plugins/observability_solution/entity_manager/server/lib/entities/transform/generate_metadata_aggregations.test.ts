@@ -115,7 +115,6 @@ describe('Generate Metadata Aggregations for history and latest', () => {
               top_metrics: {
                 metrics: { field: 'agent.name' },
                 sort: { '@timestamp': 'desc' },
-                size: 1,
               },
             },
           },
@@ -297,7 +296,6 @@ describe('Generate Metadata Aggregations for history and latest', () => {
                 sort: {
                   '@timestamp': 'desc',
                 },
-                size: 1,
               },
             },
           },
