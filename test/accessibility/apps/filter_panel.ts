@@ -10,7 +10,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const a11y = getService('a11y');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -18,13 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     it('a11y test on add filter panel', async () => {
-      await PageObjects.discover.openAddFilterPanel();
+      await discover.openAddFilterPanel();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.closeAddFilterPanel();
+      await discover.closeAddFilterPanel();
       await filterBar.addFilter({ field: 'OriginCityName', operation: 'is', value: 'Rome' });
     });
 
