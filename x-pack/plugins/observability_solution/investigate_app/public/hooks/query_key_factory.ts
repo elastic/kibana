@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+'investigations,list,{page:1,perPage:25}';
+
 export const investigationKeys = {
-  all: ['investigation'] as const,
-  list: (params?: { page: number; perPage: number }) =>
-    [...investigationKeys.all, 'list', ...(params ? [params] : [])] as const,
-  fetch: (params: { id: string }) => [...investigationKeys.all, 'fetch', params] as const,
-  notes: ['investigation', 'notes'] as const,
-  fetchNotes: (params: { investigationId: string }) =>
-    [...investigationKeys.notes, 'fetch', params] as const,
-  items: ['investigation', 'items'] as const,
-  fetchItems: (params: { investigationId: string }) =>
-    [...investigationKeys.items, 'fetch', params] as const,
+  all: ['investigations'] as const,
+  lists: () => [...investigationKeys.all, 'list'] as const,
+  list: (params: { page: number; perPage: number }) =>
+    [...investigationKeys.lists(), params] as const,
+  details: () => [...investigationKeys.all, 'detail'] as const,
+  detail: (investigationId: string) => [...investigationKeys.details(), investigationId] as const,
+  detailNotes: (investigationId: string) =>
+    [...investigationKeys.detail(investigationId), 'notes'] as const,
+  detailItems: (investigationId: string) =>
+    [...investigationKeys.detail(investigationId), 'items'] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;

@@ -16,7 +16,6 @@ import {
 import { ProductLine, ProductTier } from './configs';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 
 const mockedUseKibana = mockUseKibana();
@@ -44,9 +43,6 @@ jest.mock('../../../lib/kibana', () => {
 });
 
 jest.mock('./toggle_panel');
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
 
 describe('OnboardingComponent', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -66,7 +62,6 @@ describe('OnboardingComponent', () => {
   };
 
   beforeEach(() => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     mockedContext = createAppRootMockRenderer();
     render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
   });
@@ -79,34 +74,21 @@ describe('OnboardingComponent', () => {
     render();
 
     const pageTitle = renderResult.getByText('Hi UserFullName!');
-    const subtitle = renderResult.getByText(`Get started with Security`);
-    const description = renderResult.getByText(
-      `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
-    );
+    const subtitle = renderResult.getByText(`Welcome to Elastic Security`);
+    const description = renderResult.getByText(`Follow these steps to set up your workspace.`);
 
     expect(pageTitle).toBeInTheDocument();
     expect(subtitle).toBeInTheDocument();
     expect(description).toBeInTheDocument();
   });
 
-  it('should render welcomeHeader and TogglePanel', () => {
+  it('should render dataIngestionHubHeader and TogglePanel', () => {
     render();
-
-    const welcomeHeader = renderResult.getByTestId('welcome-header');
+    const dataIngestionHubHeader = renderResult.getByTestId('data-ingestion-hub-header');
     const togglePanel = renderResult.getByTestId('toggle-panel');
 
-    expect(welcomeHeader).toBeInTheDocument();
-    expect(togglePanel).toBeInTheDocument();
-  });
-
-  it('should render dataIngestionHubHeader if dataIngestionHubEnabled flag is true', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    render();
-
-    const dataIngestionHubHeader = renderResult.getByTestId('data-ingestion-hub-header');
-
     expect(dataIngestionHubHeader).toBeInTheDocument();
+    expect(togglePanel).toBeInTheDocument();
   });
 
   describe('AVC 2024 Results banner', () => {

@@ -10,6 +10,7 @@
 import expect from '@kbn/expect';
 import type { Event, TelemetryCounter } from '@kbn/core/server';
 import type { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../services';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -23,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       .get(`/internal/analytics_plugin_a/stats`)
       .query({ takeNumberOfCounters, eventType: 'test-plugin-lifecycle' })
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
     return resp.body;
@@ -32,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/actions`)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
     return resp.body;

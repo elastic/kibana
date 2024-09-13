@@ -34,6 +34,8 @@ export {
   buildDataTableRecord,
   buildDataTableRecordList,
   createLogsContextService,
+  createDegradedDocsControl,
+  createStacktraceControl,
   fieldConstants,
   formatFieldValue,
   formatHit,

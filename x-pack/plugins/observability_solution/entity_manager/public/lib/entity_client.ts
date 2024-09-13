@@ -20,7 +20,7 @@ import {
 import type { EntityManagerRouteRepository } from '../../server';
 import { EntityManagerUnauthorizedError } from './errors';
 
-type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRepository>;
+type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRepository, {}>;
 
 type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>['query'];
 
@@ -36,7 +36,7 @@ type CreateEntityDefinitionQuery = QueryParamOf<
 >;
 
 export class EntityClient {
-  public readonly repositoryClient: EntityManagerRepositoryClient;
+  public readonly repositoryClient: EntityManagerRepositoryClient['fetch'];
 
   constructor(core: CoreStart | CoreSetup) {
     this.repositoryClient = createRepositoryClient<EntityManagerRouteRepository>(core).fetch;
