@@ -23,7 +23,6 @@ import {
   reviewPrebuiltRulesToUpgrade,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   updateRule,
-  patchRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
@@ -56,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(es, supertest);
 
-          // Increment the version of the installed rule, do NOT update the related esql_query field, and create the new rule assets
+          // Add a v2 rule asset to make the upgrade possible, do NOT update the related esql_query field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
@@ -68,12 +67,12 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
-          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligable for update but esql_query field is NOT returned
+          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update but esql_query field is NOT returned
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
           const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
           expect(fieldDiffObject.esql_query).toBeUndefined();
 
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
           expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
           expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
@@ -96,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
             language: 'esql',
           } as RuleUpdateProps);
 
-          // Increment the version of the installed rule, do NOT update the related esql_query field, and create the new rule assets
+          // Add a v2 rule asset to make the upgrade possible, do NOT update the related esql_query field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
@@ -135,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
             has_base_version: true,
           });
 
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
           expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -151,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(es, supertest);
 
-          // Increment the version of the installed rule, update an esql_query field, and create the new rule assets
+          // Add a v2 rule asset to make the upgrade possible, update an esql_query field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
@@ -190,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
             has_base_version: true,
           });
 
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
           expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -207,12 +206,15 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Customize an esql_query field on the installed rule
-          await patchRule(supertest, log, {
+          await updateRule(supertest, {
+            ...getPrebuiltRuleMock(),
             rule_id: 'rule-1',
+            type: 'esql',
             query: 'FROM query WHERE false',
-          });
+            language: 'esql',
+          } as RuleUpdateProps);
 
-          // Increment the version of the installed rule, update an esql_query field, and create the new rule assets
+          // Add a v2 rule asset to make the upgrade possible, update an esql_query field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
@@ -250,7 +252,7 @@ export default ({ getService }: FtrProviderContext): void => {
             has_update: false,
             has_base_version: true,
           });
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
           expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -261,7 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('when rule field has an update and a custom value that are different - scenario ABC', () => {
-        it('should show a solvable conflict in the upgrade/_review API response', async () => {
+        it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
           // Install base prebuilt detection rule
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(es, supertest);
@@ -275,7 +277,7 @@ export default ({ getService }: FtrProviderContext): void => {
             language: 'esql',
           } as RuleUpdateProps);
 
-          // Increment the version of the installed rule, update an esql_query field, and create the new rule assets
+          // Add a v2 rule asset to make the upgrade possible, update an esql_query field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
@@ -315,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
             has_base_version: true,
           });
 
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
           expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
 
@@ -335,7 +337,7 @@ export default ({ getService }: FtrProviderContext): void => {
             // Clear previous rule assets
             await deleteAllPrebuiltRuleAssets(es, log);
 
-            // Increment the version of the installed rule, but keep esql_query field unchanged
+            // Add a v2 rule asset to make the upgrade possible, but keep esql_query field unchanged
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -348,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // but does NOT contain esql_query field (tags is not present, since scenario -AA is not included in response)
+            // but does NOT contain esql_query field
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
             expect(fieldDiffObject.esql_query).toBeUndefined();
@@ -381,7 +383,7 @@ export default ({ getService }: FtrProviderContext): void => {
               language: 'esql',
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, update an esql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update an esql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',

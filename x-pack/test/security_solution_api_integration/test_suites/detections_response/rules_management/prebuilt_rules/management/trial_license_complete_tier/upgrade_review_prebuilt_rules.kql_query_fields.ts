@@ -13,7 +13,11 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import {
+  getPrebuiltRuleMock,
+  getPrebuiltThreatMatchRuleMock,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -71,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
             await installPrebuiltRules(es, supertest);
 
-            // Increment the version of the installed rule, do NOT update the related kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, do NOT update the related kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -84,12 +88,12 @@ export default ({ getService }: FtrProviderContext): void => {
             ];
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
-            // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligable for update but kql_query field is NOT returned
+            // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update but kql_query field is NOT returned
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
             expect(fieldDiffObject.kql_query).toBeUndefined();
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
             expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
@@ -106,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
             await installPrebuiltRules(es, supertest);
 
-            // Increment the version of the installed rule, do NOT update the related kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, do NOT update the related kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -117,12 +121,12 @@ export default ({ getService }: FtrProviderContext): void => {
             ];
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
-            // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligable for update but kql_query field is NOT returned
+            // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update but kql_query field is NOT returned
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
             expect(fieldDiffObject.kql_query).toBeUndefined();
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
             expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
@@ -152,7 +156,7 @@ export default ({ getService }: FtrProviderContext): void => {
               saved_id: undefined,
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, do NOT update the related kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, do NOT update the related kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -194,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -224,7 +228,7 @@ export default ({ getService }: FtrProviderContext): void => {
               saved_id: 'saved-query-id',
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, do NOT update the related kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, do NOT update the related kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -268,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -289,7 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
             await installPrebuiltRules(es, supertest);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -335,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -354,7 +358,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
             await installPrebuiltRules(es, supertest);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -392,7 +396,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -419,7 +423,7 @@ export default ({ getService }: FtrProviderContext): void => {
               query: 'query string = false',
             });
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -466,7 +470,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_update: false,
               has_base_version: true,
             });
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -493,7 +497,7 @@ export default ({ getService }: FtrProviderContext): void => {
               saved_id: 'new-saved-query-id',
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -530,7 +534,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_update: false,
               has_base_version: true,
             });
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
@@ -543,7 +547,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('when rule field has an update and a custom value that are different - scenario ABC', () => {
         describe('when current version is different type than base and target', () => {
-          it('should show a solvable conflict in the upgrade/_review API response', async () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
             // Install base prebuilt detection rule
             await createHistoricalPrebuiltRuleAssetSavedObjects(
               es,
@@ -562,7 +566,7 @@ export default ({ getService }: FtrProviderContext): void => {
               saved_id: 'saved-query-id',
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -607,7 +611,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
 
@@ -618,7 +622,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('when all versions are inline query type', () => {
-          it('should show a solvable conflict in the upgrade/_review API response', async () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
             // Install base prebuilt detection rule
             await createHistoricalPrebuiltRuleAssetSavedObjects(
               es,
@@ -632,7 +636,7 @@ export default ({ getService }: FtrProviderContext): void => {
               query: 'query string = false',
             });
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -681,7 +685,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
 
@@ -708,7 +712,7 @@ export default ({ getService }: FtrProviderContext): void => {
               saved_id: 'new-saved-query-id',
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -747,7 +751,257 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: true,
             });
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+          });
+        });
+
+        describe('when rule type is threat match', () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+              createRuleAssetSavedObject({
+                ...getPrebuiltThreatMatchRuleMock(),
+                threat_filters: [],
+              } as PrebuiltRuleAsset),
+            ]);
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a threat_query on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltThreatMatchRuleMock(),
+              rule_id: 'rule-1',
+              threat_query: '*',
+              threat_filters: [],
+            } as RuleUpdateProps);
+
+            // Add a v2 rule asset to make the upgrade possible, update a threat_query field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                ...getPrebuiltThreatMatchRuleMock(),
+                threat_query: `*:'new query'`,
+                threat_filters: [],
+                version: 2,
+              } as PrebuiltRuleAsset),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
+            // and threat_query field update has conflict
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.threat_query).toEqual({
+              base_version: {
+                type: KqlQueryType.inline_query,
+                query: '*:*',
+                language: 'kuery',
+                filters: [],
+              },
+              current_version: {
+                type: KqlQueryType.inline_query,
+                query: '*',
+                language: 'kuery',
+                filters: [],
+              },
+              target_version: {
+                type: KqlQueryType.inline_query,
+                query: `*:'new query'`,
+                language: 'kuery',
+                filters: [],
+              },
+              merged_version: {
+                type: KqlQueryType.inline_query,
+                query: '*',
+                language: 'kuery',
+                filters: [],
+              },
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              has_update: true,
+              has_base_version: true,
+            });
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+          });
+        });
+
+        describe('when rule type is threshold', () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                type: 'threshold',
+                query: 'query string = true',
+                threshold: {
+                  field: 'some.field',
+                  value: 4,
+                },
+              }),
+            ]);
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a kql_query field on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltRuleMock(),
+              rule_id: 'rule-1',
+              type: 'threshold',
+              query: 'query string = false',
+              threshold: {
+                field: 'some.field',
+                value: 4,
+              },
+            } as RuleUpdateProps);
+
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 2,
+                type: 'threshold',
+                query: 'new query string = true',
+                threshold: {
+                  field: 'some.field',
+                  value: 4,
+                },
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
+            // and kql_query field update has conflict
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.kql_query).toEqual({
+              base_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = true',
+                language: 'kuery',
+                filters: [],
+              },
+              current_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = false',
+                language: 'kuery',
+                filters: [],
+              },
+              target_version: {
+                type: KqlQueryType.inline_query,
+                query: 'new query string = true',
+                language: 'kuery',
+                filters: [],
+              },
+              merged_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = false',
+                language: 'kuery',
+                filters: [],
+              },
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              has_update: true,
+              has_base_version: true,
+            });
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+          });
+        });
+
+        describe('when rule type is new_terms', () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                type: 'new_terms',
+                query: 'query string = true',
+                new_terms_fields: ['user.name'],
+                history_window_start: 'now-7d',
+              }),
+            ]);
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a kql_query field on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltRuleMock(),
+              rule_id: 'rule-1',
+              type: 'new_terms',
+              query: 'query string = false',
+              new_terms_fields: ['user.name'],
+              history_window_start: 'now-7d',
+            } as RuleUpdateProps);
+
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 2,
+                type: 'new_terms',
+                query: 'new query string = true',
+                new_terms_fields: ['user.name'],
+                history_window_start: 'now-7d',
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
+            // and kql_query field update has conflict
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.kql_query).toEqual({
+              base_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = true',
+                language: 'kuery',
+                filters: [],
+              },
+              current_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = false',
+                language: 'kuery',
+                filters: [],
+              },
+              target_version: {
+                type: KqlQueryType.inline_query,
+                query: 'new query string = true',
+                language: 'kuery',
+                filters: [],
+              },
+              merged_version: {
+                type: KqlQueryType.inline_query,
+                query: 'query string = false',
+                language: 'kuery',
+                filters: [],
+              },
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              has_update: true,
+              has_base_version: true,
+            });
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2); // `version` is considered an updated field
             expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
 
@@ -768,7 +1022,7 @@ export default ({ getService }: FtrProviderContext): void => {
             // Clear previous rule assets
             await deleteAllPrebuiltRuleAssets(es, log);
 
-            // Increment the version of the installed rule, but keep kql_query field unchanged
+            // Add a v2 rule asset to make the upgrade possible, but keep kql_query field unchanged
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
@@ -782,13 +1036,13 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // but does NOT contain kql_query field (tags is not present, since scenario -AA is not included in response)
+            // but does NOT contain kql_query field
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
             expect(fieldDiffObject.kql_query).toBeUndefined();
 
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // version is considered conflict
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // `version` is considered conflict
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
@@ -816,7 +1070,7 @@ export default ({ getService }: FtrProviderContext): void => {
               filters: [],
             } as RuleUpdateProps);
 
-            // Increment the version of the installed rule, update a kql_query field, and create the new rule assets
+            // Add a v2 rule asset to make the upgrade possible, update a kql_query field, and create the new rule assets
             const updatedRuleAssetSavedObjects = [
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
