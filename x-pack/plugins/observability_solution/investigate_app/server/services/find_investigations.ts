@@ -11,6 +11,7 @@ import {
   findInvestigationsResponseSchema,
 } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
+import { InvestigationStatus } from '../models/investigation';
 
 export async function findInvestigations(
   params: FindInvestigationsParams,
@@ -18,21 +19,23 @@ export async function findInvestigations(
 ): Promise<FindInvestigationsResponse> {
   const investigations = await repository.search(toFilter(params), toPagination(params));
 
-  return findInvestigationsResponseSchema.encode(investigations);
+  return findInvestigationsResponseSchema.parse(investigations);
 }
 
 function toPagination(params: FindInvestigationsParams) {
   const DEFAULT_PER_PAGE = 10;
   const DEFAULT_PAGE = 1;
   return {
-    page: params.page ? parseInt(params.page, 10) : DEFAULT_PAGE,
-    perPage: params.perPage ? parseInt(params.perPage, 10) : DEFAULT_PER_PAGE,
+    page: params?.page ? parseInt(params.page, 10) : DEFAULT_PAGE,
+    perPage: params?.perPage ? parseInt(params.perPage, 10) : DEFAULT_PER_PAGE,
   };
 }
 
 function toFilter(params: FindInvestigationsParams) {
-  if (params.alertId) {
-    return `investigation.attributes.origin.id:(${params.alertId}) AND investigation.attributes.status: ongoing`;
+  if (params?.alertId) {
+    const activeStatus: InvestigationStatus = 'active';
+    const triageStatus: InvestigationStatus = 'triage';
+    return `investigation.attributes.origin.id:(${params.alertId}) AND (investigation.attributes.status: ${activeStatus} OR investigation.attributes.status: ${triageStatus})`;
   }
   return '';
 }

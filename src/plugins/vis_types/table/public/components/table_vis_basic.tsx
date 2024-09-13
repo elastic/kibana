@@ -110,7 +110,7 @@ export const TableVisBasic = memo(
         defaultMessage: 'Data table visualization',
       });
 
-    const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+    const onColumnResize = useCallback<NonNullable<EuiDataGridProps['onColumnResize']>>(
       ({ columnId, width }) => {
         const colIndex = columns.findIndex((c) => c.id === columnId);
         setColumnsWidth({

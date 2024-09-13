@@ -148,6 +148,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
+    application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),

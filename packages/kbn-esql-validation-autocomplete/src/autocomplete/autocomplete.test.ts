@@ -8,7 +8,7 @@
  */
 
 import { suggest } from './autocomplete';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
@@ -747,8 +747,8 @@ describe('autocomplete', () => {
     describe('function arguments', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
-        evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
-          .literalSuggestions ?? [];
+        scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
+          .params?.[0].literalSuggestions ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
