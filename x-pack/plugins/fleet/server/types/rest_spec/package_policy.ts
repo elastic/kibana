@@ -71,14 +71,10 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: schema.oneOf(
-    [CreatePackagePolicyRequestBodySchema, SimplifiedCreatePackagePolicyRequestBodySchema],
-    {
-      meta: {
-        description: 'You should use inputs as an object and not use the deprecated inputs array.',
-      },
-    }
-  ),
+  body: schema.oneOf([
+    CreatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
   query: schema.object({
     format: schema.maybe(
       schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
