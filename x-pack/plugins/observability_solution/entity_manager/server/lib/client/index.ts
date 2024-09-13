@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { findEntityDefinitions } from '../entities/find_entity_definition';
 import type { EntityDefinitionWithState } from '../entities/types';
 
@@ -16,7 +17,7 @@ export class EntityManagerClient {
   ) {}
 
   findEntityDefinitions({ page, perPage }: { page?: number; perPage?: number } = {}): Promise<
-    EntityDefinitionWithState[]
+    EntityDefinition[] | EntityDefinitionWithState[]
   > {
     return findEntityDefinitions({
       esClient: this.esClient.asCurrentUser,

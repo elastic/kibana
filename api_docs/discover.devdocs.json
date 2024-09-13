@@ -1562,9 +1562,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "savedSearch",
                 "scope": "common",
@@ -1572,7 +1572,7 @@
                 "section": "def-common.SavedSearch",
                 "text": "SavedSearch"
               },
-              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -1584,27 +1584,7 @@
               },
               ", R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "savedSearch",
-                "scope": "common",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.SavedSearch",
-                "text": "SavedSearch"
-              },
-              ">; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "savedSearch",
-                "scope": "common",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.SavedSearch",
-                "text": "SavedSearch"
-              },
-              "> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -1658,7 +1638,27 @@
                 "section": "def-common.SavedSearch",
                 "text": "SavedSearch"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">; }"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
