@@ -33,7 +33,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  describe('alerts as data flapping', () => {
+  describe('alerts as data flapping', function () {
+    this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,

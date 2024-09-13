@@ -7,26 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { investigationResponseSchema } from './investigation';
 
-const findInvestigationsParamsSchema = t.partial({
-  query: t.partial({
-    alertId: t.string,
-    page: t.string,
-    perPage: t.string,
-  }),
+const findInvestigationsParamsSchema = z
+  .object({
+    query: z
+      .object({
+        alertId: z.string(),
+        page: z.string(),
+        perPage: z.string(),
+      })
+      .partial(),
+  })
+  .partial();
+
+const findInvestigationsResponseSchema = z.object({
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+  results: z.array(investigationResponseSchema),
 });
 
-const findInvestigationsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(investigationResponseSchema),
-});
-
-type FindInvestigationsParams = t.TypeOf<typeof findInvestigationsParamsSchema.props.query>;
-type FindInvestigationsResponse = t.OutputOf<typeof findInvestigationsResponseSchema>;
+type FindInvestigationsParams = z.infer<typeof findInvestigationsParamsSchema.shape.query>;
+type FindInvestigationsResponse = z.output<typeof findInvestigationsResponseSchema>;
 
 export { findInvestigationsParamsSchema, findInvestigationsResponseSchema };
 export type { FindInvestigationsParams, FindInvestigationsResponse };

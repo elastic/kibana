@@ -32,6 +32,13 @@ describe('AutocompleteFieldMatchComponent', () => {
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
 
+  const findEuiComboBox = () =>
+    wrapper.find(EuiComboBox).props() as unknown as {
+      onChange: (a: EuiComboBoxOptionOption[]) => void;
+      onSearchChange: (a: string) => void;
+      onCreateOption: (a: string) => void;
+    };
+
   beforeEach(() => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
@@ -171,7 +178,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     ).toEqual('127.0.0.1');
   });
 
-  test('it invokes "onChange" when new value created', async () => {
+  test('it invokes "onChange" when new value created', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -192,16 +199,12 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    (
-      wrapper.find(EuiComboBox).props() as unknown as {
-        onCreateOption: (a: string) => void;
-      }
-    ).onCreateOption('127.0.0.1');
+    findEuiComboBox().onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith('127.0.0.1');
   });
 
-  test('it invokes "onChange" when new value selected', async () => {
+  test('it invokes "onChange" when new value selected', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -222,13 +225,37 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    (
-      wrapper.find(EuiComboBox).props() as unknown as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }
-    ).onChange([{ label: 'value 1' }]);
+    findEuiComboBox().onChange([{ label: 'value 1' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
+  });
+
+  test('it invokes "onChange" with empty value (i.e. clears selection) when new value searched', () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldMatchComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue="value 1"
+      />
+    );
+
+    act(() => {
+      findEuiComboBox().onSearchChange('value 12');
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('');
   });
 
   test('should show the warning helper text if the new value contains spaces when change', async () => {
@@ -259,13 +286,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    await waitFor(() =>
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ label: ' value 1 ' }])
-    );
+    await waitFor(() => findEuiComboBox().onChange([{ label: ' value 1 ' }]));
     wrapper.update();
     expect(mockOnChange).toHaveBeenCalledWith(' value 1 ');
 
@@ -293,11 +314,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('value 1');
+      findEuiComboBox().onSearchChange('value 1');
     });
 
     expect(useFieldValueAutocomplete).toHaveBeenCalledWith({
@@ -313,6 +330,54 @@ describe('AutocompleteFieldMatchComponent', () => {
       selectedField: getField('machine.os.raw'),
     });
   });
+
+  test('it refreshes autocomplete with search query when input field is cleared', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue="windows"
+      />
+    );
+
+    act(() => {
+      findEuiComboBox().onSearchChange('value 1');
+    });
+    act(() => {
+      findEuiComboBox().onSearchChange('');
+    });
+
+    // 1st call is initial render, 2nd call sets the search query:
+    expect(useFieldValueAutocomplete).toHaveBeenNthCalledWith(2, {
+      autocompleteService: autocompleteStartMock,
+      fieldValue: 'windows',
+      indexPattern: { fields, id: '1234', title: 'logstash-*' },
+      operatorType: 'match',
+      query: 'value 1',
+      selectedField: getField('machine.os.raw'),
+    });
+    // last call is the refresh when input field is cleared
+    expect(useFieldValueAutocomplete).toHaveBeenLastCalledWith({
+      autocompleteService: autocompleteStartMock,
+      fieldValue: 'windows',
+      indexPattern: { fields, id: '1234', title: 'logstash-*' },
+      operatorType: 'match',
+      query: '',
+      selectedField: getField('machine.os.raw'),
+    });
+  });
+
   test('should show the warning helper text if the new value contains spaces when searching a new query', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -333,11 +398,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange(' value 1');
+      findEuiComboBox().onSearchChange(' value 1');
     });
 
     wrapper.update();
@@ -345,6 +406,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+
   test('should show the warning helper text if selectedValue contains spaces when editing', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -368,6 +430,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+
   test('should not show the warning helper text if selectedValue is falsy', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent

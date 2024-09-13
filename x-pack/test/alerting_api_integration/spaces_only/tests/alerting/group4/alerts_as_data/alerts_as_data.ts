@@ -61,7 +61,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('alerts as data', () => {
+  describe('alerts as data', function () {
+    this.tags('skipFIPS');
     afterEach(async () => {
       await objectRemover.removeAll();
       await es.deleteByQuery({
