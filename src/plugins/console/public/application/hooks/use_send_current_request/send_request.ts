@@ -129,7 +129,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           }
 
           if (isMultiRequest) {
-            value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+            value = `# ${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
           }
 
           results.push({

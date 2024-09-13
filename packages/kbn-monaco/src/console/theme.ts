@@ -38,26 +38,16 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
         ['constant.numeric'],
         makeHighContrastColor(euiThemeVars.euiColorAccentText)(background)
       ),
-      ...buildRuleGroup(
-        ['status.info'],
-        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
-      ),
-      ...buildRuleGroup(
-        ['status.success'],
-        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorSuccess)
-      ),
-      ...buildRuleGroup(
-        ['status.redirect'],
-        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
-      ),
-      ...buildRuleGroup(
-        ['status.warning'],
-        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorWarning)
-      ),
-      ...buildRuleGroup(
-        ['status.error'],
-        makeHighContrastColor('#FFFFFF')(euiThemeVars.euiColorDanger)
-      ),
+      ...buildRuleGroup(['comment.info'], euiThemeVars.euiTextColor),
+      ...buildRuleGroup(['comment.success'], euiThemeVars.euiColorSuccessText),
+      ...buildRuleGroup(['comment.redirect'], euiThemeVars.euiTextColor),
+      ...buildRuleGroup(['comment.warning'], euiThemeVars.euiColorWarningText),
+      ...buildRuleGroup(['comment.error'], euiThemeVars.euiColorDangerText),
+      ...buildRuleGroup(['status.info'], euiThemeVars.euiTextColor, true),
+      ...buildRuleGroup(['status.success'], euiThemeVars.euiColorSuccessText, true),
+      ...buildRuleGroup(['status.redirect'], euiThemeVars.euiTextColor, true),
+      ...buildRuleGroup(['status.warning'], euiThemeVars.euiColorWarningText, true),
+      ...buildRuleGroup(['status.error'], euiThemeVars.euiColorDangerText, true),
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
     ],

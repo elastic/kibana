@@ -25,21 +25,31 @@ export const consoleOutputLexerRules: monaco.languages.IMonarchLanguage = {
     comments: [
       // Line comment indicated by #
       // Everything after the # character is matched, stopping right before the status code and status text at the end if they are present
-      matchTokensWithEOL('comment', /# .+?(?=\s+\d{3}(?: \w+)*$)/, 'root', 'status'),
+      matchTokensWithEOL('comment.info', /# .+?(?=\s+\[\b1\d{2}(?: \w+)*\]$)/, 'root', 'status'),
+      matchTokensWithEOL('comment.success', /# .+?(?=\s+\[\b2\d{2}(?: \w+)*\]$)/, 'root', 'status'),
+      matchTokensWithEOL(
+        'comment.redirect',
+        /# .+?(?=\s+\[\b3\d{2}(?: \w+)*\]$)/,
+        'root',
+        'status'
+      ),
+      matchTokensWithEOL('comment.warning', /# .+?(?=\s+\[\b4\d{2}(?: \w+)*\]$)/, 'root', 'status'),
+      matchTokensWithEOL('comment.error', /# .+?(?=\s+\[\b5\d{2}(?: \w+)*\]$)/, 'root', 'status'),
+      // matchTokensWithEOL('comment', /# .+?(?=\s+\[\d{3}(?: \w+)*$)/, 'root', 'status'),
       ...consoleSharedLexerRules.tokenizer.comments,
     ],
     status: [
       // Following HTTP response status codes conventions
       // Informational responses (status codes 100 – 199)
-      matchTokensWithEOL('status.info', /\b1\d{2}(?: \w+)*$/, 'root'),
+      matchTokensWithEOL('status.info', /\[\b1\d{2}(?: \w+)*\]$/, 'root'),
       // Successful responses (status codes 200 – 299)
-      matchTokensWithEOL('status.success', /\b2\d{2}(?: \w+)*$/, 'root'),
+      matchTokensWithEOL('status.success', /\[\b2\d{2}(?: \w+)*\]$/, 'root'),
       // Redirection messages (status codes 300 – 399)
-      matchTokensWithEOL('status.redirect', /\b3\d{2}(?: \w+)*$/, 'root'),
+      matchTokensWithEOL('status.redirect', /\[\b3\d{2}(?: \w+)*\]$/, 'root'),
       // Client error responses (status codes 400 – 499)
-      matchTokensWithEOL('status.warning', /\b4\d{2}(?: \w+)*$/, 'root'),
+      matchTokensWithEOL('status.warning', /\[\b4\d{2}(?: \w+)*\]$/, 'root'),
       // Server error responses (status codes 500 – 599)
-      matchTokensWithEOL('status.error', /\b5\d{2}(?: \w+)*$/, 'root'),
+      matchTokensWithEOL('status.error', /\[\b5\d{2}(?: \w+)*\]$/, 'root'),
     ],
   },
 };
