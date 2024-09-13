@@ -99,7 +99,10 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
 
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        data-test-subj="editSpaceContentTabLoadingIndicator"
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xxl" />
         </EuiFlexItem>
@@ -113,6 +116,7 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
 
   return (
     <EuiBasicTable
+      data-test-subj="editSpaceContentTab"
       tableCaption={i18n.translate('xpack.spaces.management.editSpaceContent.listTableCaption', {
         defaultMessage: 'List of saved object content within the space',
       })}

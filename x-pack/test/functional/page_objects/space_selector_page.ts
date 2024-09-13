@@ -290,7 +290,7 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async currentSelectedSpaceTitle() {
-    const spacesNavSelector = await this.find.byCssSelector('[data-test-subj="spacesNavSelector"]');
+    const spacesNavSelector = await this.testSubjects.find('spacesNavSelector');
     return spacesNavSelector.getAttribute('title');
   }
 }

@@ -142,6 +142,7 @@ const getTableColumns = ({
           icon: 'lock',
           href: '#',
           target: '_self',
+          'data-test-subj': 'spaceRoleCellActionLocked',
           name: (role) =>
             isRoleReserved(role)
               ? i18n.translate(
@@ -171,6 +172,7 @@ const getTableColumns = ({
         {
           type: 'icon',
           icon: 'pencil',
+          'data-test-subj': 'spaceRoleCellEditAction',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.title',
             { defaultMessage: 'Remove from space' }
@@ -192,6 +194,7 @@ const getTableColumns = ({
           type: 'icon',
           icon: 'trash',
           color: 'danger',
+          'data-test-subj': 'spaceRoleCellDeleteAction',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.remove.title',
             { defaultMessage: 'Remove from space' }
@@ -275,6 +278,7 @@ export const SpaceAssignedRolesTable = ({
     return {
       box: {
         incremental: true,
+        'data-test-subj': 'spaceAssignedRolesSearchBox',
         placeholder: i18n.translate(
           'xpack.spaces.management.spaceDetails.roles.searchField.placeholder',
           { defaultMessage: 'Search' }
@@ -301,7 +305,7 @@ export const SpaceAssignedRolesTable = ({
     const pageSize = pagination.size;
     const pageIndex = pagination.index;
 
-    const selectableRoles = rolesInView.filter((role) => isEditableRole(role));
+    const selectableRoles = rolesInView.filter((role) => isEditableRole(role) && !isReadOnly);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="xs">
@@ -331,83 +335,90 @@ export const SpaceAssignedRolesTable = ({
                 </span>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isBulkActionContextOpen}
-                closePopover={setBulkActionContextOpen.bind(null, false)}
-                anchorPosition="downCenter"
-                button={
-                  <EuiButtonEmpty
-                    size="s"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    disabled={!selectedRoles.length}
-                    onClick={setBulkActionContextOpen.bind(null, true)}
-                  >
-                    {i18n.translate(
-                      'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.contextMenuOpener',
-                      { defaultMessage: 'Bulk actions' }
-                    )}
-                  </EuiButtonEmpty>
-                }
-              >
-                <EuiContextMenu
-                  size="s"
-                  initialPanelId={0}
-                  panels={[
-                    {
-                      id: 0,
-                      size: 's',
-                      width: 180,
-                      items: [
-                        {
-                          icon: <EuiIcon type="trash" color="danger" />,
-                          name: (
-                            <EuiTextColor color="danger">
-                              {i18n.translate(
-                                'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.remove',
-                                { defaultMessage: 'Remove from space' }
-                              )}
-                            </EuiTextColor>
-                          ),
-                          onClick: async () => {
-                            onClickBulkRemove(selectedRoles);
-                            setBulkActionContextOpen(false);
-                          },
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {Boolean(selectableRoles.length) &&
-                React.createElement(EuiButtonEmpty, {
-                  size: 's',
-                  ...(Boolean(selectedRoles.length)
-                    ? {
-                        iconType: 'crossInCircle',
-                        onClick: setSelectedRoles.bind(null, []),
-                        children: i18n.translate(
-                          'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
-                          { defaultMessage: 'Clear selection' }
-                        ),
+            <React.Fragment>
+              {!isReadOnly && (
+                <React.Fragment>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      isOpen={isBulkActionContextOpen}
+                      closePopover={setBulkActionContextOpen.bind(null, false)}
+                      anchorPosition="downCenter"
+                      button={
+                        <EuiButtonEmpty
+                          size="s"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          disabled={!selectedRoles.length}
+                          data-test-subj="bulkActionsContextMenuOpener"
+                          onClick={setBulkActionContextOpen.bind(null, true)}
+                        >
+                          {i18n.translate(
+                            'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.contextMenuOpener',
+                            { defaultMessage: 'Bulk actions' }
+                          )}
+                        </EuiButtonEmpty>
                       }
-                    : {
-                        iconType: 'pagesSelect',
-                        onClick: setSelectedRoles.bind(null, selectableRoles),
-                        children: i18n.translate(
-                          'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                    >
+                      <EuiContextMenu
+                        size="s"
+                        initialPanelId={0}
+                        panels={[
                           {
-                            defaultMessage:
-                              'Select {count, plural, one {role} other {all {count} roles}}',
-                            values: { count: selectableRoles.length },
-                          }
-                        ),
-                      }),
-                })}
-            </EuiFlexItem>
+                            id: 0,
+                            size: 's',
+                            width: 180,
+                            items: [
+                              {
+                                icon: <EuiIcon type="trash" color="danger" />,
+                                name: (
+                                  <EuiTextColor color="danger">
+                                    {i18n.translate(
+                                      'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.remove',
+                                      { defaultMessage: 'Remove from space' }
+                                    )}
+                                  </EuiTextColor>
+                                ),
+                                onClick: async () => {
+                                  onClickBulkRemove(selectedRoles);
+                                  setBulkActionContextOpen(false);
+                                },
+                              },
+                            ],
+                          },
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {Boolean(selectableRoles.length) &&
+                      React.createElement(EuiButtonEmpty, {
+                        size: 's',
+                        ...(Boolean(selectedRoles.length)
+                          ? {
+                              iconType: 'crossInCircle',
+                              onClick: setSelectedRoles.bind(null, []),
+                              children: i18n.translate(
+                                'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
+                                { defaultMessage: 'Clear selection' }
+                              ),
+                            }
+                          : {
+                              iconType: 'pagesSelect',
+                              onClick: setSelectedRoles.bind(null, selectableRoles),
+                              children: i18n.translate(
+                                'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                                {
+                                  defaultMessage:
+                                    'Select {count, plural, one {role} other {all {count} roles}}',
+                                  values: { count: selectableRoles.length },
+                                }
+                              ),
+                            }),
+                      })}
+                  </EuiFlexItem>
+                </React.Fragment>
+              )}
+            </React.Fragment>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -416,6 +427,7 @@ export const SpaceAssignedRolesTable = ({
       </EuiFlexGroup>
     );
   }, [
+    isReadOnly,
     isBulkActionContextOpen,
     onClickBulkRemove,
     pagination.index,
@@ -461,6 +473,7 @@ export const SpaceAssignedRolesTable = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiInMemoryTable<Role>
+          data-test-subj="spaceAssignedRolesTable"
           search={searchElementDefinition}
           childrenBetween={tableHeader}
           itemId="name"

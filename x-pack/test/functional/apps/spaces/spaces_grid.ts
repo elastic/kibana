@@ -16,7 +16,6 @@ export default function spaceDetailsViewFunctionalTests({
   const PageObjects = getPageObjects(['common', 'settings', 'spaceSelector']);
   const spacesService = getService('spaces');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
 
   const testSpacesIds = [
@@ -52,7 +51,7 @@ export default function spaceDetailsViewFunctionalTests({
     });
 
     it('should list all the spaces populated', async () => {
-      const renderedSpaceRow = await find.allByCssSelector('[data-test-subj*=spacesListTableRow-]');
+      const renderedSpaceRow = await testSubjects.findAll('*spacesListTableRow-');
 
       expect(renderedSpaceRow.length).to.equal(testSpacesIds.length + 1);
     });
