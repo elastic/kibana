@@ -374,6 +374,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           histogramBarTarget,
         };
       },
+      // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: async () => {
         return await fieldsMetadata?.getClient();
       },
