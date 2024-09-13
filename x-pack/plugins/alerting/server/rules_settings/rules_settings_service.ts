@@ -16,10 +16,11 @@ import {
 } from '../types';
 import { withAlertingSpan } from '../task_runner/lib';
 
-const CACHE_INTERVAL_MS = 60000; // 1 minute cache
+export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 export interface RulesSettingsServiceConstructorOptions {
   readonly isServerless: boolean;
+  cacheInterval?: number;
   logger: Logger;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
 }
@@ -32,10 +33,14 @@ interface Settings {
 type LastUpdatedSettings = Settings & { lastUpdated: number };
 
 export class RulesSettingsService {
+  private cacheIntervalMs = DEFAULT_CACHE_INTERVAL_MS;
   private defaultQueryDelaySettings: RulesSettingsQueryDelayProperties;
   private settings: Map<string, LastUpdatedSettings> = new Map();
 
   constructor(private readonly options: RulesSettingsServiceConstructorOptions) {
+    if (options.cacheInterval) {
+      this.cacheIntervalMs = options.cacheInterval;
+    }
     this.defaultQueryDelaySettings = options.isServerless
       ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS
       : DEFAULT_QUERY_DELAY_SETTINGS;
@@ -49,7 +54,7 @@ export class RulesSettingsService {
       const currentFlappingSettings = settingsFromLastUpdate.flappingSettings;
       const currentQueryDelaySettings = settingsFromLastUpdate.queryDelaySettings;
 
-      if (now - lastUpdated >= CACHE_INTERVAL_MS) {
+      if (now - lastUpdated >= this.cacheIntervalMs) {
         // cache expired, refetch settings
         try {
           return await this.fetchSettings(request, spaceId, now);

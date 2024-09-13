@@ -89,7 +89,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       it(`should write alert docs during rule execution with flapping.enabled: ${enableFlapping}`, async () => {
         await setFlappingSettings(enableFlapping);
         // wait so cache expires
-        await setTimeoutAsync(60000);
+        await setTimeoutAsync(10000);
 
         const pattern = {
           alertA: [true, true, true], // stays active across executions

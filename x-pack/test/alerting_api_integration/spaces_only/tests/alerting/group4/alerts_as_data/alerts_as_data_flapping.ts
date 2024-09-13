@@ -59,7 +59,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(60000);
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
@@ -192,7 +192,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(60000);
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false, true].concat(
@@ -322,7 +322,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(60000);
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, true, false, false, false, false, false, false],
@@ -382,7 +382,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
       // wait so cache expires
-      await setTimeoutAsync(60000);
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
