@@ -16,12 +16,17 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+
+const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields: deepMockedFields,
+});
 
 describe('ContextAppContent test', () => {
   const mountComponent = async ({

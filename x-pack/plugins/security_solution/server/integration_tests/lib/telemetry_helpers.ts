@@ -259,7 +259,7 @@ export async function createAgentPolicy(
     enabled: true,
     policy_id: 'policy-elastic-agent-on-cloud',
     policy_ids: ['policy-elastic-agent-on-cloud'],
-    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '9.0.0' },
     inputs: [
       {
         config: {
