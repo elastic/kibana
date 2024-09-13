@@ -94,4 +94,6 @@ export interface AlertingUsage {
     avg: number;
     max: number;
   };
+  count_alerts_total: number;
+  count_alerts_by_rule_type: Record<string, number>;
 }

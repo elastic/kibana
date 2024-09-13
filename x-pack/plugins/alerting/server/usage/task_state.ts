@@ -194,6 +194,8 @@ export const stateSchemaByVersion = {
         schema.string(),
         schema.recordOf(schema.string(), schema.number())
       ),
+      count_alerts_total: schema.number(),
+      count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
     }),
   },
 };
@@ -272,4 +274,6 @@ export const emptyState: LatestTaskStateSchema = {
   percentile_num_generated_actions_by_type_per_day: {},
   percentile_num_alerts_per_day: {},
   percentile_num_alerts_by_type_per_day: {},
+  count_alerts_total: 0,
+  count_alerts_by_rule_type: {},
 };

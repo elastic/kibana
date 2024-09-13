@@ -38,6 +38,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       },
     });
     let apiUrl: string;
+    const rulesWithAAD: string[] = [];
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -53,6 +54,15 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     after(async () => {
       simulator.close();
       await esTestIndexTool.destroy();
+
+      const deletePromises = rulesWithAAD.map((id) => {
+        return es.deleteByQuery({
+          index: '.internal.alerts-*',
+          query: { term: { 'kibana.alert.rule.uuid': id } },
+        });
+      });
+
+      Promise.all(deletePromises);
     });
 
     async function createConnector(opts: {
@@ -216,6 +226,30 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
+
+        // AAD rule
+        const ruleWithAadId = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '1h' },
+            notify_when: 'onActiveAlert',
+            throttle: null,
+            params: {
+              index: '.kibana-alerting-test-data',
+              reference: 'test',
+            },
+            actions: [
+              {
+                id: noopConnectorId,
+                group: 'default',
+                params: {},
+              },
+            ],
+          },
+        });
+
+        rulesWithAAD.push(ruleWithAadId);
       }
     }
 
@@ -280,7 +314,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     function verifyAlertingTelemetry(telemetry: any) {
       logger.info(`alerting telemetry - ${JSON.stringify(telemetry)}`);
       // total number of enabled rules
-      expect(telemetry.count_active_total).to.equal(12);
+      expect(telemetry.count_active_total).to.equal(15);
 
       // total number of disabled rules
       expect(telemetry.count_disabled_total).to.equal(3);
@@ -306,10 +340,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('0.3333333333333333s');
+      expect(telemetry.throttle_time.avg).to.equal('0.2857142857142857s');
       expect(telemetry.throttle_time.max).to.equal('1s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(0.3333333333333333);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(0.2857142857142857);
       expect(telemetry.throttle_time_number_s.max).to.equal(1);
 
       // schedule interval stats
@@ -482,10 +516,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_rules_by_execution_status.warning).to.equal(0);
 
       // number of rules that has tags
-      expect(telemetry.count_rules_with_tags).to.equal(15);
+      expect(telemetry.count_rules_with_tags).to.equal(18);
       // rules grouped by notify when
       expect(telemetry.count_rules_by_notify_when.on_action_group_change).to.equal(0);
-      expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(0);
+      expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(3);
       expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(15);
       // rules snoozed
       expect(telemetry.count_rules_snoozed).to.equal(0);
@@ -494,12 +528,16 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // rules with muted alerts
       expect(telemetry.count_rules_with_muted_alerts).to.equal(0);
       // Connector types grouped by consumers
-      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(6);
+      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(9);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__throw).to.equal(3);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.__slack).to.equal(3);
 
       expect(telemetry.count_rules_by_execution_status_per_day.failure > 0).to.be(true);
       expect(telemetry.count_rules_by_execution_status_per_day.success > 0).to.be(true);
+
+      // AAD alert counts
+      expect(telemetry.count_alerts_total).to.be(6);
+      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(6);
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
@@ -558,7 +596,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         alertingTelemetry = JSON.parse(taskState!);
         expect(alertingTelemetry.runs > 0).to.be(true);
-        expect(alertingTelemetry.count_total).to.equal(15);
+        expect(alertingTelemetry.count_total).to.equal(18);
       });
 
       verifyAlertingTelemetry(alertingTelemetry);

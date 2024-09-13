@@ -234,6 +234,8 @@ export function createAlertingUsageCollector(
             p90: {},
             p99: {},
           },
+          count_alerts_total: 0,
+          count_alerts_by_rule_type: {},
         };
       }
     },
@@ -302,6 +304,8 @@ export function createAlertingUsageCollector(
       percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
       percentile_num_alerts_per_day: byPercentileSchema,
       percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
+      count_alerts_total: { type: 'long' },
+      count_alerts_by_rule_type: byTypeSchema,
     },
   });
 }
