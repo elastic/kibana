@@ -14,9 +14,12 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -49,11 +52,19 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const [dismissedLogsOnlyEmptyState, setDismissedLogsOnlyEmptyState] = useLocalStorage(
+    `apm.dismissedLogsOnlyEmptyState.overview`,
+    false
+  );
+
   const hasSignal =
     serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
 
   const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
+  const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  // Shows APM overview when entity has APM signal or when Entity centric is not enabled
   const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
@@ -69,23 +80,36 @@ export function ServiceOverview() {
   }
 
   return (
-    <AnnotationsContextProvider
-      serviceName={serviceName}
-      environment={environment}
-      start={start}
-      end={end}
-    >
-      <ChartPointerEventContextProvider>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {showApmOverview ? <ApmOverview /> : null}
-          {/* Only shows Logs overview when entity has Logs signal */}
-          {hasLogsSignal ? (
-            <EuiFlexItem>
-              <LogsOverview hasApmSignal={hasApmSignal} />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </ChartPointerEventContextProvider>
-    </AnnotationsContextProvider>
+    <>
+      <SearchBar showTimeComparison showTransactionTypeSelector />
+      <AnnotationsContextProvider
+        serviceName={serviceName}
+        environment={environment}
+        start={start}
+        end={end}
+      >
+        <ChartPointerEventContextProvider>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {showApmOverview ? <ApmOverview /> : null}
+            {/* Only shows Logs overview when entity has Logs signal */}
+            {hasLogsSignal ? (
+              <>
+                {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
+                  <EuiFlexItem>
+                    <ServiceTabEmptyState
+                      id="serviceOverview"
+                      onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <LogsOverview />
+                </EuiFlexItem>
+              </>
+            ) : null}
+          </EuiFlexGroup>
+        </ChartPointerEventContextProvider>
+      </AnnotationsContextProvider>
+    </>
   );
 }

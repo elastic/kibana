@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
 import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../es_fields';
-import { existsQuery, kqlQuery } from '../../utils/es_queries';
+import { kqlQuery } from '../../utils/es_queries';
 
 export interface LogsErrorRateTimeseries {
   esClient: ElasticsearchClient;
@@ -81,7 +81,6 @@ export function createGetLogErrorRateTimeseries() {
       query: {
         bool: {
           filter: [
-            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
             {
               terms: {
