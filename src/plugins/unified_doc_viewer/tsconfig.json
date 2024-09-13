@@ -31,7 +31,6 @@
     "@kbn/ui-theme",
     "@kbn/discover-shared-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/unified-data-table",
     "@kbn/core-notifications-browser",
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
