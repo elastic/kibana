@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 /**
@@ -15,8 +16,9 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
  * @param options Options object
  * @returns If the root profile is loading
  */
-export const useRootProfile = ({ solutionNavId }: { solutionNavId: string | null }) => {
-  const { profilesManager } = useDiscoverServices();
+export const useRootProfile = () => {
+  const { profilesManager, core } = useDiscoverServices();
+  const solutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
   const [rootProfileLoading, setRootProfileLoading] = useState(true);
 
   useEffect(() => {
