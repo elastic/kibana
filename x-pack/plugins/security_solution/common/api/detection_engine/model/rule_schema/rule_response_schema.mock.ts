@@ -47,7 +47,6 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   risk_score: 55,
   risk_score_mapping: [],
   rule_id: 'query-rule-id',
-  rule_source: { type: 'internal' },
   interval: '5m',
   exceptions_list: getListArrayMock(),
   related_integrations: [],
