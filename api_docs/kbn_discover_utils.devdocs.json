@@ -45,7 +45,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, isAnchor: boolean | undefined) => ",
+          " | undefined, isAnchor: boolean | undefined, options: { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; } | undefined) => ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -121,6 +121,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecord.$4.flattenedFieldsComparator",
+                "type": "Function",
+                "tags": [],
+                "label": "flattenedFieldsComparator",
+                "description": [],
+                "signature": [
+                  "((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1988,7 +2015,7 @@
             "section": "def-common.EsHitRecord",
             "text": "EsHitRecord"
           },
-          " extends Omit<DiscoverSearchHit, \"_id\" | \"_source\" | \"_index\">"
+          " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
         ],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
