@@ -66,7 +66,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
         {
           rule_id: 'rule-2',
@@ -80,7 +79,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
       ]);
     });
@@ -135,7 +133,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
         {
           rule_id: 'rule-2',
@@ -149,7 +146,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
       ]);
     });
@@ -184,7 +180,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
         {
           rule_id: 'rule-2',
@@ -198,7 +193,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
       ]);
     });
@@ -232,7 +226,6 @@ describe('create_rules_stream_from_ndjson', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        immutable: false,
       });
       expect(resultOrError[1].message).toEqual(
         `Expected property name or '}' in JSON at position 1`
@@ -249,7 +242,6 @@ describe('create_rules_stream_from_ndjson', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        immutable: false,
       });
     });
 
@@ -282,7 +274,6 @@ describe('create_rules_stream_from_ndjson', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        immutable: false,
       });
       expect(resultOrError[1].message).toContain(
         `name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more`
@@ -299,7 +290,6 @@ describe('create_rules_stream_from_ndjson', () => {
         severity: 'low',
         interval: '5m',
         type: 'query',
-        immutable: false,
       });
     });
 
@@ -358,7 +348,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
           investigation_fields: {
             field_names: ['foo', 'bar'],
           },
@@ -375,7 +364,6 @@ describe('create_rules_stream_from_ndjson', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          immutable: false,
         },
       ]);
     });
