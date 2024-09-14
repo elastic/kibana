@@ -83,7 +83,7 @@ export const registerProfileProviders = async ({
  * @param options Register enabled profile providers options
  */
 export const registerEnabledProfileProviders = <
-  TProvider extends BaseProfileProvider<{}>,
+  TProvider extends BaseProfileProvider<{}, {}>,
   TService extends BaseProfileService<TProvider, {}>
 >({
   profileService,
