@@ -72,7 +72,7 @@ export const HostPanelContent = ({
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
-      <EntityInsight hostName={hostName} />
+      <EntityInsight name={hostName} fieldName={'host.name'} />
     </FlyoutBody>
   );
 };

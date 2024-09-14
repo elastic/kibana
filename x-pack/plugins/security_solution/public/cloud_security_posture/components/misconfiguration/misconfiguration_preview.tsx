@@ -17,10 +17,12 @@ import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -120,9 +122,15 @@ const MisconfigurationPreviewScore = ({
   );
 };
 
-export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => {
+export const MisconfigurationsPreview = ({
+  name,
+  fieldName,
+}: {
+  name: string;
+  fieldName: 'host.name' | 'user.name';
+}) => {
   const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    query: buildEntityFlyoutPreviewQuery(fieldName, name),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -133,33 +141,49 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
 
   const { euiTheme } = useEuiTheme();
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
-  const hostNameFilterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
+  // const hostNameFilterQuery = useMemo(
+  //   () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+  //   [hostName]
+  // );
+
+  const buildFilterQuery = useMemo(
+    () => (fieldName === 'host.name' ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
+    [fieldName, name]
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.host,
-    filterQuery: hostNameFilterQuery,
+    riskEntity: fieldName === 'host.name' ? RiskScoreEntity.host : RiskScoreEntity.user,
+    filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
   const { data: hostRisk } = riskScoreState;
-  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-  const isRiskScoreExist = !!hostRiskData?.host.risk;
+  const riskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist =
+    fieldName === 'host.name'
+      ? !!(riskData as HostRiskScore)?.host.risk
+      : !!(riskData as UserRiskScore)?.user.risk;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const isPreviewMode = false;
   const goToEntityInsightTab = useCallback(() => {
     openLeftPanel({
-      id: HostDetailsPanelKey,
-      params: {
-        name: hostName,
-        isRiskScoreExist,
-        hasMisconfigurationFindings,
-        path: { tab: 'csp_insights' },
-      },
+      id: fieldName === 'host.name' ? HostDetailsPanelKey : UserDetailsPanelKey,
+      params:
+        fieldName === 'host.name'
+          ? {
+              name,
+              isRiskScoreExist,
+              hasMisconfigurationFindings,
+              path: { tab: 'csp_insights' },
+            }
+          : {
+              user: { name, email: ['ALPHA'] },
+              isRiskScoreExist,
+              hasMisconfigurationFindings,
+            },
+      path: { tab: 'csp_insights' },
     });
-  }, [hasMisconfigurationFindings, hostName, isRiskScoreExist, openLeftPanel]);
+  }, [fieldName, hasMisconfigurationFindings, isRiskScoreExist, name, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode

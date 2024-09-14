@@ -13,7 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 
-export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
+export const EntityInsight = <T,>({
+  name,
+  fieldName,
+}: {
+  name: string;
+  fieldName: 'host.name' | 'user.name';
+}) => {
   const { euiTheme } = useEuiTheme();
   const getSetupStatus = useCspSetupStatusApi();
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
@@ -45,7 +51,7 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
             }
           >
             <EuiSpacer size="m" />
-            <MisconfigurationsPreview hostName={hostName} />
+            <MisconfigurationsPreview name={name} fieldName={fieldName} />
             <EuiSpacer size="m" />
           </EuiAccordion>
         </>

@@ -23,6 +23,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityInsight } from '../../../cloud_security_posture/components';
 
 interface UserPanelContentProps {
   userName: string;
@@ -89,6 +90,7 @@ export const UserPanelContent = ({
           openDetailsPanel={openDetailsPanel}
         />
       )}
+      <EntityInsight name={userName} fieldName={'user.name'} />
     </FlyoutBody>
   );
 };
