@@ -69,7 +69,7 @@ describe('HostDetailsPanel', () => {
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        hasMisconfigurationFindingsForThisQuery={false}
+        hasMisconfigurationFindings={false}
       />,
       {
         wrapper: TestProviders,
@@ -84,7 +84,7 @@ describe('HostDetailsPanel', () => {
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        hasMisconfigurationFindingsForThisQuery={true}
+        hasMisconfigurationFindings={true}
       />,
       {
         wrapper: TestProviders,

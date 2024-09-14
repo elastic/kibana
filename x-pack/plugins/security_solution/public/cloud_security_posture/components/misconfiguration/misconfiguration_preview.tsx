@@ -132,7 +132,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
   const failedFindings = data?.count.failed || 0;
 
   const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindingsForThisQuery = passedFindings > 0 || failedFindings > 0;
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
@@ -155,11 +155,11 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
       params: {
         name: hostName,
         isRiskScoreExist,
-        hasMisconfigurationFindingsForThisQuery,
+        hasMisconfigurationFindings,
         path: { tab: 'csp_insights' },
       },
     });
-  }, [hasMisconfigurationFindingsForThisQuery, hostName, isRiskScoreExist, openLeftPanel]);
+  }, [hasMisconfigurationFindings, hostName, isRiskScoreExist, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -178,7 +178,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
   return (
     <ExpandablePanel
       header={{
-        iconType: hasMisconfigurationFindingsForThisQuery ? 'arrowStart' : '',
+        iconType: hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -192,12 +192,12 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
             />
           </EuiText>
         ),
-        link: hasMisconfigurationFindingsForThisQuery ? link : undefined,
+        link: hasMisconfigurationFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasMisconfigurationFindingsForThisQuery ? (
+        {hasMisconfigurationFindings ? (
           <MisconfigurationPreviewScore
             passedFindings={passedFindings}
             failedFindings={failedFindings}

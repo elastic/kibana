@@ -105,7 +105,7 @@ export const HostPanel = ({
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
 
-  const hasMisconfigurationFindingsForThisQuery = passedFindings > 0 || failedFindings > 0;
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
   useQueryInspector({
     deleteQuery,
@@ -129,18 +129,11 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
-          hasMisconfigurationFindingsForThisQuery,
+          hasMisconfigurationFindings,
         },
       });
     },
-    [
-      telemetry,
-      openLeftPanel,
-      hostName,
-      scopeId,
-      isRiskScoreExist,
-      hasMisconfigurationFindingsForThisQuery,
-    ]
+    [telemetry, openLeftPanel, hostName, scopeId, isRiskScoreExist, hasMisconfigurationFindings]
   );
 
   const openDefaultPanel = useCallback(
@@ -180,7 +173,7 @@ export const HostPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (isRiskScoreExist || hasMisconfigurationFindingsForThisQuery)
+                !isPreviewMode && (isRiskScoreExist || hasMisconfigurationFindings)
               }
               expandDetails={openDefaultPanel}
             />
