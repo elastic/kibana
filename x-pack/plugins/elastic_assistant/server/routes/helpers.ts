@@ -30,7 +30,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -610,7 +610,7 @@ export const getIsKnowledgeBaseEnabled = async (
       if (isModelDeployed) {
         esqlExists =
           (
-            await kbDataClient.getKnowledgeBaseDocumentEntries({
+            await kbDataClient.getKnowledgeBaseDocuments({
               query: ESQL_DOCS_LOADED_QUERY,
               required: true,
             })
