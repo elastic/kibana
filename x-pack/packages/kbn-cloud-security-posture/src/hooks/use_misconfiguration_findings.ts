@@ -6,6 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';
@@ -15,13 +16,14 @@ import type {
   LatestFindingsResponse,
   UseMisconfigurationOptions,
 } from '../../type';
+
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 import {
   buildMisconfigurationsFindingsQuery,
   getMisconfigurationAggregationCount,
 } from '../utils/hooks_utils';
 
-export const useMisconfigurationPreview = (options: UseMisconfigurationOptions) => {
+export const useMisconfigurationFindings = (options: UseMisconfigurationOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -29,19 +31,24 @@ export const useMisconfigurationPreview = (options: UseMisconfigurationOptions) 
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
   return useQuery(
-    ['csp_misconfiguration_preview', { params: options }, rulesStates],
+    ['csp_misconfiguration_findings', { params: options }, rulesStates],
     async () => {
       const {
-        rawResponse: { aggregations },
+        rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
           params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );
-      if (!aggregations && !options.ignore_unavailable)
-        throw new Error('expected aggregations to be defined');
+      if (!aggregations) throw new Error('expected aggregations to be defined');
+
       return {
-        count: getMisconfigurationAggregationCount(aggregations?.count?.buckets),
+        count: getMisconfigurationAggregationCount(aggregations.count.buckets),
+        rows: hits.hits.map((finding) => ({
+          result: finding._source?.result,
+          rule: finding?._source?.rule,
+          resource: finding?._source?.resource,
+        })) as Array<Pick<CspFinding, 'result' | 'rule' | 'resource'>>,
       };
     },
     {
