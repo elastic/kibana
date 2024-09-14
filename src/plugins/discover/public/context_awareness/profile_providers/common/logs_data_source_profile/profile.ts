@@ -15,12 +15,15 @@ import {
   getRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { getRenderAppWrapper, getRenderDocViewerFlyout } from './accessors/get_cell_renderers';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
-): DataSourceProfileProvider => ({
+): DataSourceProfileProvider<{ foo?: string }> => ({
   profileId: 'logs-data-source-profile',
   profile: {
+    getRenderAppWrapper,
+    getRenderDocViewerFlyout,
     getRowIndicatorProvider,
     getCellRenderers,
     getRowAdditionalLeadingControls,
@@ -34,7 +37,7 @@ export const createLogsDataSourceProfileProvider = (
 
     return {
       isMatch: true,
-      context: { category: DataSourceCategory.Logs },
+      context: { category: DataSourceCategory.Logs, foo: 'bar' },
     };
   },
 });

@@ -176,11 +176,13 @@ export class ProfilesManager {
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
-      this.rootProfileService.getProfile(this.rootContext$.getValue()),
-      this.dataSourceProfileService.getProfile(this.dataSourceContext$.getValue()),
-      this.documentProfileService.getProfile(
-        recordHasContext(record) ? record.context : this.documentProfileService.defaultContext
-      ),
+      this.rootProfileService.getProfile({ context: this.rootContext$.getValue() }),
+      this.dataSourceProfileService.getProfile({ context: this.dataSourceContext$.getValue() }),
+      this.documentProfileService.getProfile({
+        context: recordHasContext(record)
+          ? record.context
+          : this.documentProfileService.defaultContext,
+      }),
     ];
   }
 

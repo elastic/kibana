@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { createContext, useContext } from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EuiFlyout } from '@elastic/eui';
 import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -22,4 +25,36 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       }),
       {}
     ),
+    'error.message': function ErrorMessage(params) {
+      const errorMessage = getFieldValue(params.row, 'error.message');
+      const test = useContext(testContext);
+      return (
+        <>
+          {test}: {errorMessage}
+        </>
+      );
+    },
   });
+
+const testContext = createContext('test');
+
+export const getRenderAppWrapper: DataSourceProfileProvider<{
+  foo?: string;
+}>['profile']['getRenderAppWrapper'] =
+  (PrevWrapper, { context }) =>
+  ({ children }) => {
+    return (
+      <testContext.Provider value={context.foo ?? ''}>
+        <PrevWrapper>{children}</PrevWrapper>
+      </testContext.Provider>
+    );
+  };
+
+export const getRenderDocViewerFlyout: DataSourceProfileProvider['profile']['getRenderDocViewerFlyout'] =
+  () => (props) => {
+    return (
+      <EuiFlyout onClose={props.onClose}>
+        <pre>{JSON.stringify(props.hit, null, 2)}</pre>
+      </EuiFlyout>
+    );
+  };
