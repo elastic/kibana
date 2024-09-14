@@ -19,7 +19,7 @@ import { getRenderAppWrapper, getRenderDocViewerFlyout } from './accessors/get_c
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
-): DataSourceProfileProvider => ({
+): DataSourceProfileProvider<{ foo?: string }> => ({
   profileId: 'logs-data-source-profile',
   profile: {
     getRenderAppWrapper,
@@ -37,7 +37,7 @@ export const createLogsDataSourceProfileProvider = (
 
     return {
       isMatch: true,
-      context: { category: DataSourceCategory.Logs },
+      context: { category: DataSourceCategory.Logs, foo: 'bar' },
     };
   },
 });

@@ -133,9 +133,7 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
           return accessor;
         }
 
-        return (prev: AppliedProfile[keyof AppliedProfile]) => {
-          return accessor(prev, context);
-        };
+        return (prev: AppliedProfile[keyof AppliedProfile]) => accessor(prev, context);
       },
     });
   }
