@@ -22,7 +22,6 @@ import {
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import {
-  ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -93,9 +92,9 @@ export class DataTelemetryService {
   }
 
   public async start(
-    telemetryStart?: TelemetryPluginStart,
-    core?: CoreStart,
-    taskManager?: TaskManagerStartContract
+    telemetryStart: TelemetryPluginStart,
+    core: CoreStart,
+    taskManager: TaskManagerStartContract
   ) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
@@ -122,11 +121,10 @@ export class DataTelemetryService {
         timeout: `${TELEMETRY_TASK_TIMEOUT}m`,
         maxAttempts: 1, // Do not retry
 
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: () => {
           return {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
-              const { state } = taskInstance;
               service.logger.debug(`[Logs Data Telemetry] Running task`);
 
               try {
@@ -135,13 +133,9 @@ export class DataTelemetryService {
                     service.logger.debug(`[Logs Data Telemetry] Task completed`);
                   },
                 });
-
-                return { state };
               } catch (e) {
                 service.logger.error(e);
               }
-
-              return { state };
             },
             async cancel() {
               service.logger.debug(`[Logs Data Telemetry] Task cancelled`);
