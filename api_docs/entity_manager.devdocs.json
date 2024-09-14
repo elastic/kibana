@@ -367,7 +367,7 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          ">; \"GET /internal/entities/definition\": ",
+          ">; \"GET /internal/entities/definition/{id?}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -375,7 +375,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /internal/entities/definition\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { page?: number | undefined; perPage?: number | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; }; }>, ",
+          "<\"GET /internal/entities/definition/{id?}\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>; path: Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; }, { id?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }; path: { id?: string | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }; path: { id?: string | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
           {
