@@ -45,10 +45,10 @@ export interface RootContext {
   solutionType: SolutionType;
 }
 
-export type RootProfileProvider = AsyncProfileProvider<
+export type RootProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
   RootProfile,
   RootProfileProviderParams,
-  RootContext
+  RootContext & TProviderContext
 >;
 
 export class RootProfileService extends AsyncProfileService<

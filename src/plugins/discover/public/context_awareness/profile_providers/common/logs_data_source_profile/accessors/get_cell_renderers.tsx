@@ -38,11 +38,13 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
 
 const testContext = createContext('test');
 
-export const getRenderAppWrapper: DataSourceProfileProvider['profile']['getRenderAppWrapper'] =
-  (PrevWrapper) =>
+export const getRenderAppWrapper: DataSourceProfileProvider<{
+  foo?: string;
+}>['profile']['getRenderAppWrapper'] =
+  (PrevWrapper, context) =>
   ({ children }) => {
     return (
-      <testContext.Provider value="test-override">
+      <testContext.Provider value={context.foo ?? ''}>
         <PrevWrapper>{children}</PrevWrapper>
       </testContext.Provider>
     );
