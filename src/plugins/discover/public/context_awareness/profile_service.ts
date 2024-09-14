@@ -10,7 +10,12 @@
 /* eslint-disable max-classes-per-file */
 
 import { isFunction } from 'lodash';
-import type { AppliedProfile, ComposableProfile, PartialProfile } from './composable_profile';
+import type {
+  AppliedProfile,
+  ComposableAccessorParams,
+  ComposableProfile,
+  PartialProfile,
+} from './composable_profile';
 
 /**
  * The profile provider resolution result
@@ -118,8 +123,12 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
    * @param context A context object returned by a provider's `resolve` method
    * @returns The profile associated with the provided context object applied to the methods
    */
-  public getProfile(context: ContextWithProfileId<TContext>): AppliedProfile {
-    const provider = this.providers.find((current) => current.profileId === context.profileId);
+  public getProfile(
+    params: ComposableAccessorParams<ContextWithProfileId<TContext>>
+  ): AppliedProfile {
+    const provider = this.providers.find(
+      (current) => current.profileId === params.context.profileId
+    );
 
     if (!provider?.profile) {
       return EMPTY_PROFILE;
@@ -133,7 +142,7 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
           return accessor;
         }
 
-        return (prev: AppliedProfile[keyof AppliedProfile]) => accessor(prev, context);
+        return (prev: AppliedProfile[keyof AppliedProfile]) => accessor(prev, params);
       },
     });
   }

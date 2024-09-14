@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -16,6 +16,7 @@ import { RootProfileProvider, SolutionType } from '../../../profiles';
 
 interface ExampleRootProfileContext {
   count$: BehaviorSubject<number>;
+  selectedAgentName$: BehaviorSubject<string | undefined>;
 }
 
 export const createExampleRootProfileProvider =
@@ -23,8 +24,29 @@ export const createExampleRootProfileProvider =
     profileId: 'example-root-profile',
     isExperimental: true,
     profile: {
+      getRenderAppWrapper: (PrevWrapper, params) => {
+        return function AppWrapper({ children }) {
+          const selectedAgentName = useObservable(params.context.selectedAgentName$);
+
+          return (
+            <PrevWrapper>
+              {children}
+              {selectedAgentName && (
+                <EuiFlyout
+                  type="push"
+                  onClose={() => {
+                    params.context.selectedAgentName$.next(undefined);
+                  }}
+                >
+                  <div>agent name: {selectedAgentName}</div>
+                </EuiFlyout>
+              )}
+            </PrevWrapper>
+          );
+        };
+      },
       getCellRenderers:
-        (prev, { count$ }) =>
+        (prev, { context: { count$, selectedAgentName$ } }) =>
         () => ({
           ...prev(),
           '@timestamp': function Timestamp(props) {
@@ -50,6 +72,23 @@ export const createExampleRootProfileProvider =
               </>
             );
           },
+          'agent.name': function AgentName(props) {
+            const agentName = getFieldValue(props.row, 'agent.name');
+
+            return (
+              <EuiBadge
+                color="hollow"
+                title={agentName}
+                onClick={() => {
+                  selectedAgentName$.next(agentName + ` (${props.row.id})`);
+                }}
+                onClickAriaLabel="Select agent name"
+                data-test-subj="exampleRootProfileAgentName"
+              >
+                {agentName}
+              </EuiBadge>
+            );
+          },
         }),
     },
     resolve: (params) => {
@@ -59,7 +98,11 @@ export const createExampleRootProfileProvider =
 
       return {
         isMatch: true,
-        context: { solutionType: SolutionType.Default, count$: new BehaviorSubject(0) },
+        context: {
+          solutionType: SolutionType.Default,
+          count$: new BehaviorSubject(0),
+          selectedAgentName$: new BehaviorSubject<string | undefined>(undefined),
+        },
       };
     },
   });

@@ -41,7 +41,7 @@ const testContext = createContext('test');
 export const getRenderAppWrapper: DataSourceProfileProvider<{
   foo?: string;
 }>['profile']['getRenderAppWrapper'] =
-  (PrevWrapper, context) =>
+  (PrevWrapper, { context }) =>
   ({ children }) => {
     return (
       <testContext.Provider value={context.foo ?? ''}>

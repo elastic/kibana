@@ -14,10 +14,17 @@ import type { Profile } from './types';
  */
 export type PartialProfile = Partial<Profile>;
 
+export interface ComposableAccessorParams<TContext> {
+  context: TContext;
+}
+
 /**
  * An accessor function that allows retrieving the extension point result from previous profiles
  */
-type ComposableAccessor<TPrev, TContext> = (prev: TPrev, context: TContext) => TPrev;
+type ComposableAccessor<TPrev, TContext> = (
+  prev: TPrev,
+  params: ComposableAccessorParams<TContext>
+) => TPrev;
 
 /**
  * A partial profile implementation that supports composition across multiple profiles
