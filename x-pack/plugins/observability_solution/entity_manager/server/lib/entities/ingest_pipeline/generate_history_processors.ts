@@ -11,6 +11,7 @@ import {
   cleanScript,
 } from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function mapDestinationToPainless(field: string) {
   return `
@@ -44,6 +45,39 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
       value: `{{entity.identity.${key.field}}}`,
     },
   }));
+}
+
+function getCustomIngestPipelines(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
+      },
+    },
+  ];
 }
 
 export function generateHistoryProcessors(definition: EntityDefinition) {
@@ -162,30 +196,6 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@platform`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-history@platform`,
-      },
-    },
-
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@custom`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-history@custom`,
-      },
-    },
+    ...getCustomIngestPipelines(definition),
   ];
 }

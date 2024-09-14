@@ -23,6 +23,10 @@ export const getUpdateScript = ({
           ctx._source.api_config.remove('model');
           ctx._source.api_config.remove('provider');
         }
+        // an update to apiConfig that does not contain defaultSystemPromptId should remove it
+        if (params.assignEmpty == true || (params.containsKey('api_config') && !params.api_config.containsKey('default_system_prompt_id'))) {
+          ctx._source.api_config.remove('default_system_prompt_id');
+        }
         if (params.assignEmpty == true || params.api_config.containsKey('action_type_id')) {
           ctx._source.api_config.action_type_id = params.api_config.action_type_id;
         }
