@@ -7,44 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const eventTypeSchema = t.union([
-  t.literal('annotation'),
-  t.literal('alert'),
-  t.literal('error_rate'),
-  t.literal('latency'),
-  t.literal('anomaly'),
+const eventTypeSchema = z.union([
+  z.literal('annotation'),
+  z.literal('alert'),
+  z.literal('error_rate'),
+  z.literal('latency'),
+  z.literal('anomaly'),
 ]);
 
-const annotationEventSchema = t.type({
-  type: t.string,
-  end: t.union([t.string, t.undefined]),
+const annotationEventSchema = z.object({
+  type: z.union([z.string(), z.undefined()]),
+  end: z.union([z.string(), z.undefined()]),
 });
 
-const alertStatusSchema = t.union([
-  t.literal('active'),
-  t.literal('flapping'),
-  t.literal('recovered'),
-  t.literal('untracked'),
+const alertStatusSchema = z.union([
+  z.literal('active'),
+  z.literal('flapping'),
+  z.literal('recovered'),
+  z.literal('untracked'),
 ]);
 
-const alertEventSchema = t.type({
+const alertEventSchema = z.object({
   status: alertStatusSchema,
 });
 
-const eventSchema = t.intersection([
-  t.type({
-    id: t.string,
-    title: t.string,
-    description: t.string,
-    timestamp: t.number,
+const eventSchema = z.intersection(
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    timestamp: z.number(),
     type: eventTypeSchema,
   }),
-  t.partial({
-    details: t.union([annotationEventSchema, alertEventSchema]),
-    source: t.record(t.string, t.any),
-  }),
-]);
+  z
+    .object({
+      details: z.union([annotationEventSchema, alertEventSchema]),
+      source: z.record(z.string(), z.any()),
+    })
+    .partial()
+);
 
 export { eventSchema };

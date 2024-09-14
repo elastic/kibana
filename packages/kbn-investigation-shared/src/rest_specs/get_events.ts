@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { eventResponseSchema } from './event';
 
-const getEventsParamsSchema = t.partial({
-  query: t.partial({
-    rangeFrom: t.string,
-    rangeTo: t.string,
-    source: t.string,
-  }),
-});
+const getEventsParamsSchema = z
+  .object({
+    query: z
+      .object({
+        rangeFrom: z.string(),
+        rangeTo: z.string(),
+        source: z.string(),
+      })
+      .partial(),
+  })
+  .partial();
 
-const getEventsResponseSchema = t.array(eventResponseSchema);
+const getEventsResponseSchema = z.array(eventResponseSchema);
 
-type GetEventsParams = t.TypeOf<typeof getEventsParamsSchema.props.query>;
-type GetEventsResponse = t.OutputOf<typeof getEventsResponseSchema>;
+type GetEventsParams = z.infer<typeof getEventsParamsSchema.shape.query>;
+type GetEventsResponse = z.output<typeof getEventsResponseSchema>;
 
 export { getEventsParamsSchema, getEventsResponseSchema };
 export type { GetEventsParams, GetEventsResponse };

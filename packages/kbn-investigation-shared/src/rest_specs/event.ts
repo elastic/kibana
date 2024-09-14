@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { eventSchema } from '../schema';
 
 const eventResponseSchema = eventSchema;
 
-type EventResponse = t.OutputOf<typeof eventResponseSchema>;
+type EventResponse = z.output<typeof eventResponseSchema>;
 
 export { eventResponseSchema };
 export type { EventResponse };

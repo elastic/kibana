@@ -45,9 +45,9 @@ export async function getAnnotationEvents(
   esClient: ElasticsearchClient,
   annotationsClient: ScopedAnnotationsClient
 ): Promise<GetEventsResponse> {
-  const startInMs = datemath.parse(params.rangeFrom ?? 'now-15m')!.valueOf();
-  const endInMs = datemath.parse(params.rangeTo ?? 'now')!.valueOf();
-  const sourceJson = params.source ? JSON.parse(params.source) : {};
+  const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
+  const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
+  const sourceJson = params?.source ? JSON.parse(params?.source) : {};
 
   const body = {
     size: 100,
@@ -83,7 +83,7 @@ export async function getAnnotationEvents(
 
       return {
         id: hit._id as string,
-        title: _source.title,
+        title: _source.annotation.title,
         description: _source.message,
         timestamp: new Date(_source['@timestamp']).getTime(),
         type: 'annotation' as const,
@@ -100,7 +100,7 @@ export async function getAnnotationEvents(
       };
     });
 
-    return getEventsResponseSchema.encode(events);
+    return getEventsResponseSchema.parse(events);
   } catch (error) {
     // index is only created when an annotation has been indexed,
     // so we should handle this error gracefully
@@ -112,9 +112,9 @@ export async function getAlertEvents(
   params: GetEventsParams,
   alertsClient: any
 ): Promise<GetEventsResponse> {
-  const startInMs = datemath.parse(params.rangeFrom ?? 'now-15m')!.valueOf();
-  const endInMs = datemath.parse(params.rangeTo ?? 'now')!.valueOf();
-  const sourceJson = params.source ? JSON.parse(params.source) : {};
+  const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
+  const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
+  const sourceJson = params?.source ? JSON.parse(params?.source) : {};
 
   const body = {
     size: 100,
@@ -148,5 +148,5 @@ export async function getAlertEvents(
     };
   });
 
-  return getEventsResponseSchema.encode(events);
+  return getEventsResponseSchema.parse(events);
 }
