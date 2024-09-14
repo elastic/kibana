@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
 import { prebuiltRulesImportHelperMock } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper.mock';
@@ -17,7 +17,7 @@ import { createBulkErrorObject } from '../../../routes/utils';
 
 describe('importRules', () => {
   const { clients, context } = requestContextMock.createTools();
-  const ruleToImport = getImportRulesSchemaMock();
+  const ruleToImport = getValidatedRuleToImportMock();
 
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPrebuiltRulesImportHelper: ReturnType<typeof prebuiltRulesImportHelperMock.create>;
@@ -115,11 +115,11 @@ describe('importRules', () => {
   });
 
   describe('compatibility with prebuilt rules', () => {
-    let prebuiltRuleToImport: ReturnType<typeof getImportRulesSchemaMock>;
+    let prebuiltRuleToImport: ReturnType<typeof getValidatedRuleToImportMock>;
 
     beforeEach(() => {
       prebuiltRuleToImport = {
-        ...getImportRulesSchemaMock(),
+        ...getValidatedRuleToImportMock(),
         immutable: true,
         version: 1,
       };

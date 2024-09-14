@@ -59,7 +59,7 @@ describe('importRules', () => {
   });
 
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
-    clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
+    clients.detectionRulesClient.legacyImportRule.mockImplementationOnce(async () => {
       throw createBulkErrorObject({
         ruleId: ruleToImport.rule_id,
         statusCode: 409,
@@ -88,7 +88,7 @@ describe('importRules', () => {
   });
 
   it('creates rule if no matching existing rule found', async () => {
-    clients.detectionRulesClient.importRule.mockResolvedValue({
+    clients.detectionRulesClient.legacyImportRule.mockResolvedValue({
       ...getRulesSchemaMock(),
       rule_id: ruleToImport.rule_id,
     });
