@@ -12,7 +12,6 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 
-import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
   getCompatibleSearchTechniques,
   OptionsListSearchTechnique,
@@ -25,6 +24,8 @@ import {
 import { pluginServices } from '../../services';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlEditorProps } from '../../types';
 
 const selectionOptions = [
   {
