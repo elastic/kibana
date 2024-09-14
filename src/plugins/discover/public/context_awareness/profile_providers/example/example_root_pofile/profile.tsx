@@ -10,30 +10,56 @@
 import { EuiBadge } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 
-export const createExampleRootProfileProvider = (): RootProfileProvider => ({
-  profileId: 'example-root-profile',
-  isExperimental: true,
-  profile: {
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
-      '@timestamp': (props) => {
-        const timestamp = getFieldValue(props.row, '@timestamp');
+interface ExampleRootProfileContext {
+  count$: BehaviorSubject<number>;
+}
 
-        return (
-          <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">
-            {timestamp}
-          </EuiBadge>
-        );
-      },
-    }),
-  },
-  resolve: (params) => {
-    if (params.solutionNavId != null) {
-      return { isMatch: false };
-    }
+export const createExampleRootProfileProvider =
+  (): RootProfileProvider<ExampleRootProfileContext> => ({
+    profileId: 'example-root-profile',
+    isExperimental: true,
+    profile: {
+      getCellRenderers:
+        (prev, { count$ }) =>
+        () => ({
+          ...prev(),
+          '@timestamp': function Timestamp(props) {
+            const timestamp = getFieldValue(props.row, '@timestamp');
+            const count = useObservable(count$, 0);
 
-    return { isMatch: true, context: { solutionType: SolutionType.Default } };
-  },
-});
+            return (
+              <>
+                <div>
+                  <EuiBadge
+                    color="hollow"
+                    title={timestamp}
+                    onClick={() => {
+                      count$.next(count + 1);
+                    }}
+                    onClickAriaLabel="Increment count"
+                    data-test-subj="exampleRootProfileTimestamp"
+                  >
+                    {timestamp}
+                  </EuiBadge>
+                </div>
+                <div>Count: {count}</div>
+              </>
+            );
+          },
+        }),
+    },
+    resolve: (params) => {
+      if (params.solutionNavId != null) {
+        return { isMatch: false };
+      }
+
+      return {
+        isMatch: true,
+        context: { solutionType: SolutionType.Default, count$: new BehaviorSubject(0) },
+      };
+    },
+  });
