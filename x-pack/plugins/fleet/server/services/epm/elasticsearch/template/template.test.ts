@@ -1867,6 +1867,110 @@ describe('EPM template', () => {
         },
       });
     });
+
+    it('should fill constant keywords from previous mappings', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+                value: 'some_value',
+              },
+            },
+          },
+        },
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+              value: 'some_value',
+            },
+          },
+        },
+        write_index_only: true,
+      });
+    });
+
+    it('should not error when previous mappings are not found', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {},
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {},
+        write_index_only: true,
+      });
+    });
+
     it('should rollover on expected error', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
