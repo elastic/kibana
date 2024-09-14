@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { GetProfilesOptions } from '../profiles_manager';
 
@@ -18,6 +18,7 @@ import type { GetProfilesOptions } from '../profiles_manager';
  */
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { profilesManager } = useDiscoverServices();
+  const skipInitialSet = useRef(true);
   const [profiles, setProfiles] = useState(() => profilesManager.getProfiles({ record }));
   const profiles$ = useMemo(
     () => profilesManager.getProfiles$({ record }),
@@ -26,11 +27,11 @@ export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
 
   useEffect(() => {
     const subscription = profiles$.subscribe((newProfiles) => {
-      setProfiles((currentProfiles) => {
-        return currentProfiles.every((profile, i) => profile === newProfiles[i])
-          ? currentProfiles
-          : newProfiles;
-      });
+      if (!skipInitialSet.current) {
+        setProfiles(newProfiles);
+      }
+
+      skipInitialSet.current = false;
     });
 
     return () => {

@@ -9,8 +9,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ComposableProfile, PartialProfile } from './composable_profile';
-import type { Profile } from './types';
+import { isFunction } from 'lodash';
+import type { AppliedProfile, ComposableProfile, PartialProfile } from './composable_profile';
 
 /**
  * The profile provider resolution result
@@ -41,7 +41,7 @@ export type ContextWithProfileId<TContext> = TContext & { profileId: string };
 /**
  * The base profile provider interface
  */
-export interface BaseProfileProvider<TProfile extends PartialProfile> {
+export interface BaseProfileProvider<TProfile extends PartialProfile, TContext> {
   /**
    * The unique profile ID
    */
@@ -49,7 +49,7 @@ export interface BaseProfileProvider<TProfile extends PartialProfile> {
   /**
    * The composable profile implementation
    */
-  profile: ComposableProfile<TProfile>;
+  profile: ComposableProfile<TProfile, TContext>;
   /**
    * Set the `isExperimental` flag to `true` for any profile which is under development and should not be enabled by default.
    *
@@ -68,7 +68,7 @@ export interface BaseProfileProvider<TProfile extends PartialProfile> {
  * A synchronous profile provider interface
  */
 export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile> {
+  extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -81,7 +81,7 @@ export interface ProfileProvider<TProfile extends PartialProfile, TParams, TCont
  * An asynchronous profile provider interface
  */
 export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile> {
+  extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -97,7 +97,7 @@ const EMPTY_PROFILE = {};
 /**
  * The base profile service implementation
  */
-export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{}>, TContext> {
+export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{}, {}>, TContext> {
   protected readonly providers: TProvider[] = [];
 
   /**
@@ -114,13 +114,30 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
   }
 
   /**
-   * Returns the composable profile associated with the provided context object
+   * Returns the associated profile with the provided context object applied to the methods
    * @param context A context object returned by a provider's `resolve` method
-   * @returns The composable profile associated with the context
+   * @returns The profile associated with the provided context object applied to the methods
    */
-  public getProfile(context: ContextWithProfileId<TContext>): ComposableProfile<Profile> {
+  public getProfile(context: ContextWithProfileId<TContext>): AppliedProfile {
     const provider = this.providers.find((current) => current.profileId === context.profileId);
-    return provider?.profile ?? EMPTY_PROFILE;
+
+    if (!provider?.profile) {
+      return EMPTY_PROFILE;
+    }
+
+    return new Proxy<AppliedProfile>(provider.profile, {
+      get: (target, prop, receiver) => {
+        const accessor = Reflect.get(target, prop, receiver);
+
+        if (!isFunction(accessor)) {
+          return accessor;
+        }
+
+        return (prev: AppliedProfile[keyof AppliedProfile]) => {
+          return accessor(prev, context);
+        };
+      },
+    });
   }
 }
 

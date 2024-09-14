@@ -17,13 +17,19 @@ export type PartialProfile = Partial<Profile>;
 /**
  * An accessor function that allows retrieving the extension point result from previous profiles
  */
-export type ComposableAccessor<T> = (getPrevious: T) => T;
+type ComposableAccessor<TPrev, TContext> = (prev: TPrev, context: TContext) => TPrev;
 
 /**
  * A partial profile implementation that supports composition across multiple profiles
  */
-export type ComposableProfile<TProfile extends PartialProfile = Profile> = {
-  [TKey in keyof TProfile]?: ComposableAccessor<TProfile[TKey]>;
+export type ComposableProfile<TProfile extends PartialProfile, TContext> = {
+  [TKey in keyof TProfile]?: ComposableAccessor<TProfile[TKey], TContext>;
+};
+
+type AppliedAccessor<TPrev> = (prev: TPrev) => TPrev;
+
+export type AppliedProfile = {
+  [TKey in keyof Profile]?: AppliedAccessor<Profile[TKey]>;
 };
 
 /**
@@ -34,7 +40,7 @@ export type ComposableProfile<TProfile extends PartialProfile = Profile> = {
  * @returns The merged extension point accessor function
  */
 export const getMergedAccessor = <TKey extends keyof Profile>(
-  profiles: ComposableProfile[],
+  profiles: AppliedProfile[],
   key: TKey,
   baseImpl: Profile[TKey]
 ) => {
