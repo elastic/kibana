@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
@@ -28,8 +28,12 @@ export function FiltersSection({
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
 }) {
+  const updatedFilters = useMemo(
+    () => filters.map((filter) => ({ ...filter, isInitializing: false })),
+    [filters]
+  );
+
   const onChangeFilter = (key: Filter['key'], value: Filter['value'], idx: number) => {
-    const updatedFilters = filters.map((filter) => ({ ...filter, isInitializing: false }));
     updatedFilters[idx] = { key, value, isInitializing: true };
     onChangeFilters(updatedFilters);
   };
@@ -49,7 +53,6 @@ export function FiltersSection({
   };
 
   const handleAddFilter = () => {
-    const updatedFilters = filters.map((filter) => ({ ...filter, isInitializing: false }));
     onChangeFilters([...updatedFilters, { key: '', value: '', isInitializing: true }]);
   };
 

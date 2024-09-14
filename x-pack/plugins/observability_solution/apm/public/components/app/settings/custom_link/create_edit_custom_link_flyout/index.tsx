@@ -36,7 +36,7 @@ interface Props {
   customLinkId?: string;
 }
 
-const filtersEmptyState: Filter[] = [{ key: '', value: '', isInitializing: true }];
+const filtersEmptyState: Filter[] = [{ key: '', value: '', isInitializing: false }];
 
 export function CreateEditCustomLinkFlyout({
   onClose,
@@ -72,6 +72,11 @@ export function CreateEditCustomLinkFlyout({
     onSave();
   };
 
+  const disableFetchingFilters = () => {
+    const updatedFilters = filters.map((filter) => ({ ...filter, isInitializing: false }));
+    setFilters(updatedFilters);
+  };
+
   return (
     <form onSubmit={onSubmit} id="customLink_form">
       <EuiFlyout ownFocus onClose={onClose} size="m">
@@ -101,7 +106,13 @@ export function CreateEditCustomLinkFlyout({
 
           <EuiSpacer size="l" />
 
-          <LinkSection label={label} onChangeLabel={setLabel} url={url} onChangeUrl={setUrl} />
+          <LinkSection
+            label={label}
+            onChangeLabel={setLabel}
+            url={url}
+            onChangeUrl={setUrl}
+            onFocus={disableFetchingFilters}
+          />
 
           <EuiSpacer size="l" />
 
