@@ -14,7 +14,7 @@ import {
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EuiCallOut } from '@elastic/eui';
-import { EsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { EsqlQueryResult } from '../../util/run_esql_query';
 import { LoadingPanel } from '../loading_panel';
 import { useKibana } from '../../hooks/use_kibana';
 

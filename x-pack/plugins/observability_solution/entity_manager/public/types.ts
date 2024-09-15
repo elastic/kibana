@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '@kbn/observability-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -28,7 +24,6 @@ import type { EntityClient } from './lib/entity_client';
 
 export interface EntityManagerPluginSetup {
   data: DataPublicPluginSetup;
-  observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   serverless?: ServerlessPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -45,7 +40,6 @@ export interface EntityManagerPluginStart {
   cloud?: CloudStart;
   serverless?: ServerlessPluginStart;
   usageCollection: UsageCollectionStart;
-  observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
 }
 

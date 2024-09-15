@@ -16,7 +16,6 @@
       "security",
       "encryptedSavedObjects",
       "lens",
-      "observability",
       "observabilityShared",
       "embeddable",
       "presentationUtil",
