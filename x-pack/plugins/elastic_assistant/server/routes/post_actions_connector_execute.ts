@@ -21,7 +21,11 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telem
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
+import {
+  appendAssistantMessageToConversation,
+  getIsKnowledgeBaseEnabled,
+  langChainExecute,
+} from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -131,11 +135,17 @@ export const postActionsConnectorExecuteRoute = (
           if (onLlmResponse) {
             await onLlmResponse(error.message, {}, true);
           }
+
+          const kbDataClient =
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isEnabledKnowledgeBase = await getIsKnowledgeBaseEnabled(kbDataClient);
+
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
+            isEnabledKnowledgeBase,
           });
 
           return resp.error({

@@ -28,8 +28,9 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -400,12 +401,15 @@ export const langChainExecute = async ({
     executorParams
   );
 
+  const { esqlExists, isModelDeployed } = await getIsKnowledgeBaseEnabled(kbDataClient);
+
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
+    isEnabledKnowledgeBase: isModelDeployed && esqlExists,
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
@@ -586,4 +590,39 @@ export const performChecks = ({
   }
 
   return undefined;
+};
+
+/**
+ * Telemetry function to determine whether knowledge base has been installed
+ * @param kbDataClient
+ */
+export const getIsKnowledgeBaseEnabled = async (
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
+): Promise<{
+  esqlExists: boolean;
+  isModelDeployed: boolean;
+}> => {
+  let esqlExists = false;
+  let isModelDeployed = false;
+  if (kbDataClient != null) {
+    try {
+      isModelDeployed = await kbDataClient.isModelDeployed();
+      if (isModelDeployed) {
+        esqlExists =
+          (
+            await kbDataClient.getKnowledgeBaseDocuments({
+              query: ESQL_DOCS_LOADED_QUERY,
+              required: true,
+            })
+          ).length > 0;
+      }
+    } catch (e) {
+      /* if telemetry related requests fail, fallback to default values */
+    }
+  }
+
+  return {
+    esqlExists,
+    isModelDeployed,
+  };
 };
