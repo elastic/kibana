@@ -41,9 +41,13 @@ export const entityLatestSchema = z
   })
   .and(entityMetadataSchema);
 
+export type EntityLatestDoc = z.infer<typeof entityLatestSchema>;
+
 export const entityHistorySchema = z
   .object({
     '@timestamp': z.string(),
     entity: entityBaseSchema,
   })
   .and(entityMetadataSchema);
+
+export type EntityHistoryDoc = z.infer<typeof entityHistorySchema>;

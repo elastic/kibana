@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EntityDefinition } from '@kbn/entities-schema';
 
 // state is the *live* state of the definition. since a definition
@@ -14,3 +15,7 @@ import { EntityDefinition } from '@kbn/entities-schema';
 export type EntityDefinitionWithState = EntityDefinition & {
   state: { installed: boolean; running: boolean };
 };
+
+export const ENTITY_MANAGER_LABEL = i18n.translate('xpack.entityManager.entityManagerLabel', {
+  defaultMessage: 'Entity Manager',
+});
