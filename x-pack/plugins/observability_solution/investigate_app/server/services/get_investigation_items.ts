@@ -17,5 +17,5 @@ export async function getInvestigationItems(
 ): Promise<GetInvestigationItemsResponse> {
   const investigation = await repository.findById(investigationId);
 
-  return getInvestigationItemsResponseSchema.encode(investigation.items);
+  return getInvestigationItemsResponseSchema.parse(investigation.items);
 }
