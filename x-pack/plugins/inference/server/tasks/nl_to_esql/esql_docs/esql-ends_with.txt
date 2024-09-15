@@ -1,8 +1,23 @@
-## ENDS_WITH
+# ENDS_WITH
 
-The `ENDS_WITH` function returns a boolean that indicates whether a keyword string ends with another string.
+The ENDS_WITH function checks if a given string ends with a specified suffix.
 
-### Examples
+## Syntax
+
+`ENDS_WITH(str, suffix)`
+
+### Parameters
+
+#### str
+
+This is the string expression that you want to check.
+
+#### suffix
+
+The string expression that will be checked if it is the ending of the first string.
+
+## Examples
+
 
 ```esql
 FROM employees
