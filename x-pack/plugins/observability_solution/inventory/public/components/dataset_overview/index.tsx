@@ -45,6 +45,9 @@ export function DatasetOverview() {
       title: i18n.translate('xpack.inventory.datastreamOverview.breadcrumbTitle', {
         defaultMessage: 'Overview',
       }),
+      params: {
+        path: { id },
+      },
     };
   }, []);
 
@@ -52,6 +55,7 @@ export function DatasetOverview() {
     if (logsQueryResult.value) {
       return getInitialColumnsForLogs({
         datatable: logsQueryResult.value,
+        typeDefinitions: [],
       });
     }
     return undefined;

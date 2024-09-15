@@ -22,10 +22,12 @@ export function ControlledEsqlGrid({
   query,
   result,
   initialColumns,
+  analysisId,
 }: {
   query: string;
   result: AbortableAsyncState<EsqlQueryResult>;
   initialColumns?: DatatableColumn[];
+  analysisId?: string;
 }) {
   const {
     dependencies: {
@@ -55,6 +57,7 @@ export function ControlledEsqlGrid({
 
   return (
     <ESQLDataGrid
+      key={analysisId}
       rows={datatable.rows}
       columns={datatable.columns}
       initialColumns={initialColumns}

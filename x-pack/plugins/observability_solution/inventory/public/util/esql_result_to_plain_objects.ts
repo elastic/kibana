@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsqlQueryResult } from '../hooks/use_esql_query_result';
+import { EsqlQueryResult } from './run_esql_query';
 
 export function esqlResultToPlainObjects<T extends Record<string, any>>(
   result: EsqlQueryResult

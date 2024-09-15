@@ -14,7 +14,9 @@
       "dataViews",
       "data",
       "fieldFormats",
-      "unifiedSearch"
+      "unifiedSearch",
+      "datasetQuality",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact",

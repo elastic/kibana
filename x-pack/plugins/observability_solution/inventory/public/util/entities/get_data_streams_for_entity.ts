@@ -9,13 +9,13 @@ import type { Required } from 'utility-types';
 import type { Entity, EntityTypeDefinition } from '../../../common/entities';
 import { InventoryAPIClient } from '../../api';
 
-export function getDataStreamsForEntity({
+export function getDataStreamsForEntity<TEntity extends Entity>({
   entity,
   typeDefinition,
   inventoryAPIClient,
   signal,
 }: {
-  entity: Entity;
+  entity: TEntity;
   typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
   inventoryAPIClient: InventoryAPIClient;
   signal: AbortSignal;

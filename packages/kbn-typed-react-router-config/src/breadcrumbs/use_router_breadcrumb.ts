@@ -9,11 +9,11 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
-import { RouteMap, useCurrentRoute } from '../..';
+import { PathsOf, RouteMap, useCurrentRoute } from '../..';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
-type UseBreadcrumbs<TRouteMap extends RouteMap> = (
-  callback: () => Breadcrumb<TRouteMap> | Array<Breadcrumb<TRouteMap>>,
+type UseBreadcrumbs<TRouteMap extends RouteMap> = <TPath extends PathsOf<TRouteMap>>(
+  callback: () => Breadcrumb<TRouteMap, TPath> | Array<Breadcrumb<TRouteMap, TPath>>,
   fnDeps: unknown[]
 ) => void;
 

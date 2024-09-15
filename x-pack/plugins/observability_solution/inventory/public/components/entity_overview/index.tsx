@@ -13,29 +13,38 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { take } from 'lodash';
+import { take, uniqueId } from 'lodash';
 import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 import { Required } from 'utility-types';
-import { css } from '@emotion/css';
 import { Entity, EntityTypeDefinition } from '../../../common/entities';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
-import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
+import { useKibana } from '../../hooks/use_kibana';
 import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
 import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
-import { useKibana } from '../../hooks/use_kibana';
 import { InventorySearchBar } from '../inventory_search_bar';
 
 export function EntityOverview({
   entity,
   typeDefinition,
+  allTypeDefinitions,
+  dataStreams,
+  dataStreamsWithIntegrations,
 }: {
   entity: Entity<Record<string, any>>;
   typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
+  allTypeDefinitions: EntityTypeDefinition[];
+  dataStreams: Array<{ name: string }>;
+  dataStreamsWithIntegrations?: Array<{
+    name: string;
+    integration?: { name: string };
+    dashboards?: unknown[];
+  }>;
 }) {
   const { start, end } = useMemo(() => {
     const endM = moment();
@@ -46,7 +55,6 @@ export function EntityOverview({
   }, []);
 
   const {
-    services: { inventoryAPIClient },
     dependencies: {
       start: { dataViews },
     },
@@ -57,20 +65,14 @@ export function EntityOverview({
 
   const [selectedDataStream, setSelectedDataStream] = useState<string>('');
 
-  const entityDataStreamsFetch = useAbortableAsync(
-    ({ signal }) => {
-      return getDataStreamsForEntity({
-        entity,
-        typeDefinition,
-        inventoryAPIClient,
-        signal,
-      });
-    },
-    [entity, typeDefinition, inventoryAPIClient]
+  const queriedDataStreams = useMemo(
+    () =>
+      selectedDataStream ? [selectedDataStream] : dataStreams.map((dataStream) => dataStream.name),
+    [selectedDataStream, dataStreams]
   );
 
   const queries = useMemo(() => {
-    if (!entityDataStreamsFetch.value?.dataStreams.length) {
+    if (!queriedDataStreams.length) {
       return undefined;
     }
 
@@ -79,9 +81,7 @@ export function EntityOverview({
       identityFields: typeDefinition.discoveryDefinition.identityFields,
     });
 
-    const indexPatterns = entityDataStreamsFetch.value.dataStreams.map(
-      (dataStream) => dataStream.name
-    );
+    const indexPatterns = queriedDataStreams;
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
@@ -94,7 +94,7 @@ export function EntityOverview({
       histogramQuery,
       baseDslFilter,
     };
-  }, [entityDataStreamsFetch.value?.dataStreams, typeDefinition, entity]);
+  }, [queriedDataStreams, typeDefinition, entity]);
 
   const logsQueryResult = useEsqlQueryResult({
     query: queries?.logsQuery,
@@ -114,24 +114,31 @@ export function EntityOverview({
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
-      return getInitialColumnsForLogs({
-        datatable: logsQueryResult.value,
-      });
+      return {
+        analysis: getInitialColumnsForLogs({
+          datatable: logsQueryResult.value,
+          typeDefinitions: allTypeDefinitions.filter(
+            (definitionAtIndex) =>
+              definitionAtIndex.discoveryDefinition?.type !==
+                typeDefinition.discoveryDefinition.type &&
+              definitionAtIndex.discoveryDefinition?.type !== 'data_stream'
+          ),
+        }),
+        analysisId: uniqueId(),
+      };
     }
     return undefined;
-  }, [logsQueryResult]);
+  }, [logsQueryResult, allTypeDefinitions, typeDefinition]);
 
   const dataViewsFetch = useAbortableAsync(() => {
-    if (!entityDataStreamsFetch.value?.dataStreams.length) {
+    if (!queriedDataStreams.length) {
       return Promise.resolve([]);
     }
 
     return dataViews
       .create(
         {
-          title: entityDataStreamsFetch.value.dataStreams
-            .map((dataStream) => dataStream.name)
-            .join(','),
+          title: queriedDataStreams.join(','),
           timeFieldName: '@timestamp',
         },
         false, // skip fetch fields
@@ -140,7 +147,7 @@ export function EntityOverview({
       .then((response) => {
         return [response];
       });
-  }, [dataViews, entityDataStreamsFetch.value]);
+  }, [dataViews, queriedDataStreams]);
 
   const fetchedDataViews = useMemo(() => dataViewsFetch.value ?? [], [dataViewsFetch.value]);
 
@@ -182,7 +189,7 @@ export function EntityOverview({
               margin-left: 4px;
             `}
             options={[
-              ...(entityDataStreamsFetch.loading
+              ...(!dataStreams.length
                 ? []
                 : [
                     {
@@ -193,19 +200,19 @@ export function EntityOverview({
                           defaultMessage:
                             '{count,plural, one {# data stream} other {All # data streams}}',
                           values: {
-                            count: entityDataStreamsFetch.value?.dataStreams.length,
+                            count: dataStreams.length,
                           },
                         }
                       ),
                     },
                   ]),
-              ...(entityDataStreamsFetch.value?.dataStreams.map((dataStream) => ({
+              ...(dataStreams.map((dataStream) => ({
                 value: dataStream.name,
                 inputDisplay: dataStream.name,
               })) ?? []),
             ]}
             valueOfSelected={selectedDataStream}
-            isLoading={entityDataStreamsFetch.loading}
+            isLoading={!dataStreamsWithIntegrations}
             onChange={(next) => {
               setSelectedDataStream(next);
             }}
@@ -232,7 +239,7 @@ export function EntityOverview({
       </EuiPanel>
       <EuiPanel hasShadow={false} hasBorder>
         <EuiFlexGroup direction="column">
-          {columnAnalysis?.constants.length ? (
+          {columnAnalysis?.analysis.constants.length ? (
             <>
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiTitle size="xs">
@@ -243,17 +250,17 @@ export function EntityOverview({
                   </h3>
                 </EuiTitle>
                 <EuiFlexGroup direction="row" wrap gutterSize="xs">
-                  {take(columnAnalysis.constants, 10).map((constant) => (
+                  {take(columnAnalysis.analysis.constants, 10).map((constant) => (
                     <EuiBadge color="hollow" key={constant.name}>{`${constant.name}:${
                       constant.value === '' || constant.value === 0 ? '(empty)' : constant.value
                     }`}</EuiBadge>
                   ))}
-                  {columnAnalysis.constants.length > 10 ? (
+                  {columnAnalysis.analysis.constants.length > 10 ? (
                     <EuiText size="xs">
                       {i18n.translate('xpack.inventory.entityOverview.moreTextLabel', {
                         defaultMessage: '{overflowCount} more',
                         values: {
-                          overflowCount: columnAnalysis.constants.length - 20,
+                          overflowCount: columnAnalysis.analysis.constants.length - 20,
                         },
                       })}
                     </EuiText>
@@ -264,9 +271,10 @@ export function EntityOverview({
           ) : null}
           {queries?.logsQuery ? (
             <ControlledEsqlGrid
+              analysisId={columnAnalysis?.analysisId}
               query={queries?.logsQuery}
               result={logsQueryResult}
-              initialColumns={columnAnalysis?.initialColumns}
+              initialColumns={columnAnalysis?.analysis.initialColumns}
             />
           ) : null}
         </EuiFlexGroup>
