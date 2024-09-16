@@ -433,6 +433,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -518,6 +568,56 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -592,6 +692,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -659,6 +809,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -742,6 +942,56 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -820,6 +1070,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -894,6 +1194,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
@@ -961,6 +1311,56 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured.",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is system action.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
             "description": "Indicates a successful call."
           }
         },
