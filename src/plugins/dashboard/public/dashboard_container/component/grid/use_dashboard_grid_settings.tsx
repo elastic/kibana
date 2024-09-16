@@ -12,15 +12,18 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 
 export const useDashboardGridSettings = (panelsInOrder: string[]) => {
-  const dashboard = useDashboardContainer();
+  const dashboardApi = useDashboardApi();
   const { euiTheme } = useEuiTheme();
 
-  const panels = dashboard.select((state) => state.explicitInput.panels);
-  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const [panels, viewMode] = useBatchedPublishingSubjects(
+    dashboardApi.panels$,
+    dashboardApi.viewMode
+  );
 
   const layouts = useMemo(() => {
     return {

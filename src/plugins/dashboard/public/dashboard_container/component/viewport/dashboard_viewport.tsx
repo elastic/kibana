@@ -22,9 +22,9 @@ import {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
@@ -42,17 +42,31 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const dashboard = useDashboardContainer();
-
-  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
-  const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
+  const dashboardApi = useDashboardApi();
   const [hasControls, setHasControls] = useState(false);
-  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
-  const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
-  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
-  const description = dashboard.select((state) => state.explicitInput.description);
-  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
-  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const [
+    controlGroupApi,
+    dashboardTitle,
+    description,
+    expandedPanelId,
+    focusedPanelId,
+    panels,
+    viewMode,
+    useMargins,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.controlGroupApi$,
+    dashboardApi.panelTitle,
+    dashboardApi.panelDescription,
+    dashboardApi.expandedPanelId,
+    dashboardApi.focusedPanelId$,
+    dashboardApi.panels$,
+    dashboardApi.viewMode,
+    dashboardApi.useMargins$
+  );
+
+  const panelCount = useMemo(() => {
+    return Object.keys(panels).length;
+  }, [panels]);
 
   const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
@@ -60,6 +74,18 @@ export const DashboardViewportComponent = () => {
     dshDashboardViewport: true,
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
+
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      setHasControls(Object.keys(children).length > 0);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
 
   useEffect(() => {
     if (!controlGroupApi) {
@@ -104,19 +130,19 @@ export const DashboardViewportComponent = () => {
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={dashboard.getInput().id}
+            key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
             maybeId={'control_group'}
             getParentApi={() => {
               return {
-                ...dashboard,
-                getSerializedStateForChild: dashboard.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboard.getRuntimeStateForControlGroup,
+                ...dashboardApi,
+                getSerializedStateForChild: dashboardApi.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboardApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboard.setControlGroupApi(api)}
+            onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}
           />
         </div>
       ) : null}
@@ -143,11 +169,11 @@ export const DashboardViewportComponent = () => {
 // because ExitFullScreenButton sets isFullscreenMode to false on unmount while rerendering.
 // This specifically fixed maximizing/minimizing panels without exiting fullscreen mode.
 const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
-  const dashboard = useDashboardContainer();
+  const dashboardApi = useDashboardApi();
 
-  const isFullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
-  const isEmbeddedExternally = dashboard.select(
-    (state) => state.componentState.isEmbeddedExternally
+  const [isFullScreenMode, isEmbeddedExternally] = useBatchedPublishingSubjects(
+    dashboardApi.fullScreenMode$,
+    dashboardApi.embeddedExternally$
   );
 
   return (
@@ -156,7 +182,7 @@ const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
       {isFullScreenMode && (
         <EuiPortal>
           <ExitFullScreenButton
-            onExit={() => dashboard.dispatch.setFullScreenMode(false)}
+            onExit={() => dashboardApi.setFullScreenMode(false)}
             toggleChrome={!isEmbeddedExternally}
           />
         </EuiPortal>

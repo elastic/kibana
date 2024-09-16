@@ -50,7 +50,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription, first, skipWhile, switchMap } from 'rxjs';
@@ -59,8 +59,13 @@ import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE, DashboardApi } from '../..';
+import {
+  DashboardAttributes,
+  DashboardContainerInput,
+  DashboardPanelMap,
+  DashboardPanelState,
+} from '../../../common';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -82,7 +87,12 @@ import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api'
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, DashboardReduxState, UnsavedPanelState } from '../types';
+import {
+  DashboardPublicState,
+  DashboardReduxState,
+  DashboardStateFromSettingsFlyout,
+  UnsavedPanelState,
+} from '../types';
 import {
   addFromLibrary,
   addOrUpdateEmbeddable,
@@ -103,6 +113,7 @@ import {
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -124,15 +135,6 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   DashboardReduxState,
   typeof dashboardContainerReducers
 >;
-
-export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
-export const useDashboardContainer = (): DashboardContainer => {
-  const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
-  if (dashboard == null) {
-    throw new Error('useDashboardContainer must be used inside DashboardContainerContext.');
-  }
-  return dashboard!;
-};
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
@@ -300,6 +302,8 @@ export class DashboardContainer
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
 
+    this.uuid = this.getInput().id;
+
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
     this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
@@ -310,6 +314,16 @@ export class DashboardContainer
     );
     this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
     this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
+    this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
+    this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
+    this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
+    this.animatePanelTransforms$ = new BehaviorSubject(
+      this.getState().componentState.animatePanelTransforms
+    );
+    this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
+    this.embeddedExternally$ = new BehaviorSubject(
+      this.getState().explicitInput.isEmbeddedExternally
+    );
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -337,6 +351,22 @@ export class DashboardContainer
         if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
           this.hasOverlays$.next(state.componentState.hasOverlays);
         }
+        if (this.useMargins$.value !== state.explicitInput.useMargins) {
+          this.useMargins$.next(state.explicitInput.useMargins);
+        }
+        if (this.scrollToPanelId$.value !== state.componentState.scrollToPanelId) {
+          this.scrollToPanelId$.next(state.componentState.scrollToPanelId);
+        }
+        if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
+          this.highlightPanelId$.next(state.componentState.highlightPanelId);
+        }
+        if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
+          this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
+        }
+        if (this.embeddedExternally$.value !== state.explicitInput.isEmbeddedExternally) {
+          this.embeddedExternally$.next(state.explicitInput.isEmbeddedExternally);
+        }
+        // panels updated in setPanels since panels isEqual check has performance concerns
       })
     );
 
@@ -455,9 +485,9 @@ export class DashboardContainer
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
         >
-          <DashboardContainerContext.Provider value={this}>
+          <DashboardContext.Provider value={this as DashboardApi}>
             <DashboardViewport />
-          </DashboardContainerContext.Provider>
+          </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
       </KibanaRenderContextProvider>,
       dom
@@ -558,6 +588,13 @@ export class DashboardContainer
   public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
   public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
   public hasOverlays$: BehaviorSubject<boolean | undefined>;
+  public useMargins$: BehaviorSubject<boolean>;
+  public scrollToPanelId$: BehaviorSubject<string | undefined>;
+  public highlightPanelId$: BehaviorSubject<string | undefined>;
+  public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
+  public panels$: BehaviorSubject<DashboardPanelMap>;
+  public embeddedExternally$: BehaviorSubject<boolean | undefined>;
+  public uuid: string;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
@@ -824,6 +861,26 @@ export class DashboardContainer
     return this.getState().explicitInput.panels;
   };
 
+  public getSettings = (): DashboardStateFromSettingsFlyout => {
+    const state = this.getState();
+    return {
+      description: state.explicitInput.description,
+      hidePanelTitles: state.explicitInput.hidePanelTitles,
+      lastSavedId: state.componentState.lastSavedId,
+      syncColors: state.explicitInput.syncColors,
+      syncCursor: state.explicitInput.syncCursor,
+      syncTooltips: state.explicitInput.syncTooltips,
+      tags: state.explicitInput.tags,
+      timeRestore: state.explicitInput.timeRestore,
+      title: state.explicitInput.title,
+      useMargins: state.explicitInput.useMargins,
+    };
+  };
+
+  public setSettings = (settings: DashboardStateFromSettingsFlyout) => {
+    this.dispatch.setStateFromSettingsFlyout(settings);
+  };
+
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
   };
@@ -935,6 +992,11 @@ export class DashboardContainer
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
     this.setScrollToPanelId(id);
+  };
+
+  public setPanels = (panels: DashboardPanelMap) => {
+    this.dispatch.setPanels(panels);
+    this.panels$.next(panels);
   };
 
   // ------------------------------------------------------------------------------------------------------

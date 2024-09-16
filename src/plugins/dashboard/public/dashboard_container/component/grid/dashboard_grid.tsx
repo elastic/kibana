@@ -17,23 +17,26 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
-  const dashboard = useDashboardContainer();
-  const panels = dashboard.select((state) => state.explicitInput.panels);
-  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
-  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
-  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
-  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
-  const animatePanelTransforms = dashboard.select(
-    (state) => state.componentState.animatePanelTransforms
-  );
+  const dashboardApi = useDashboardApi();
+
+  const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.animatePanelTransforms$,
+      dashboardApi.expandedPanelId,
+      dashboardApi.focusedPanelId$,
+      dashboardApi.panels$,
+      dashboardApi.useMargins$,
+      dashboardApi.viewMode
+    );
 
   /**
    *  Track panel maximized state delayed by one tick and use it to prevent
@@ -96,10 +99,10 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         {} as { [key: string]: DashboardPanelState }
       );
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dashboard.dispatch.setPanels(updatedPanels);
+        dashboardApi.setPanels(updatedPanels);
       }
     },
-    [dashboard, panels, viewMode]
+    [dashboardApi, panels, viewMode]
   );
 
   const classes = classNames({
