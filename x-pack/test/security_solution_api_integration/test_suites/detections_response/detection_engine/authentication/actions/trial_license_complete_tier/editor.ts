@@ -8,6 +8,7 @@
 import TestAgent from 'supertest/lib/agent';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   deleteAllAlerts,
   deleteAllRules,
@@ -18,6 +19,7 @@ import {
   getWebHookAction,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteConnector } from '../../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -26,10 +28,16 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   let editor: TestAgent;
+  let webhookAction: RuleAction;
 
   describe('@serverless @serverlessQA editor actions API behaviors', () => {
     before(async () => {
       editor = await utils.createSuperTest('editor');
+      webhookAction = await createWebHookRuleAction(supertest);
+    });
+
+    after(async () => {
+      await deleteConnector(supertest, webhookAction.id);
     });
 
     beforeEach(async () => {
@@ -48,11 +56,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // Expected 200, getting 401
-    describe.skip('update action', () => {
+    describe('update action', () => {
       it('should return 200 for editor', async () => {
-        const webhookAction = await createWebHookRuleAction(supertest);
-
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -83,11 +88,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // Expected 200, getting 401
-    describe.skip('remove action', () => {
+    describe('remove action', () => {
       it('should return 200 for editor', async () => {
-        const webhookAction = await createWebHookRuleAction(supertest);
-
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')

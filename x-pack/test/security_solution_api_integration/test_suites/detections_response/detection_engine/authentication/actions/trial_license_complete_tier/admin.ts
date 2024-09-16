@@ -8,6 +8,7 @@
 import TestAgent from 'supertest/lib/agent';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   deleteAllAlerts,
   deleteAllRules,
@@ -18,6 +19,7 @@ import {
   getWebHookAction,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteConnector } from '../../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
@@ -25,12 +27,18 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   let admin: TestAgent;
+  let webhookAction: RuleAction;
 
   describe('@serverless @serverlessQA admin actions API behaviors', () => {
     before(async () => {
       admin = await utils.createSuperTest('admin');
       await deleteAllRules(admin, log);
       await deleteAllAlerts(admin, log, es);
+      webhookAction = await createWebHookRuleAction(admin);
+    });
+
+    after(async () => {
+      await deleteConnector(admin, webhookAction.id);
     });
 
     afterEach(async () => {
@@ -51,8 +59,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('update action', () => {
       it('should return 200 for admin', async () => {
-        const webhookAction = await createWebHookRuleAction(admin);
-
         await admin
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -85,8 +91,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('remove action', () => {
       it('should return 200 for admin', async () => {
-        const webhookAction = await createWebHookRuleAction(admin);
-
         await admin
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
