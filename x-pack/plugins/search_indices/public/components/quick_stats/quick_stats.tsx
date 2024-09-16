@@ -39,7 +39,7 @@ export const SetupAISearchButton: React.FC = () => {
           <EuiText>
             <h6>
               {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_description', {
-                defaultMessage: 'Use Elastic to build powerful AI Search',
+                defaultMessage: 'Build AI-powered search experiences with Elastic',
               })}
             </h6>
           </EuiText>
@@ -51,7 +51,7 @@ export const SetupAISearchButton: React.FC = () => {
             data-test-subj="setupAISearchButton"
           >
             {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
-              defaultMessage: 'Setup now',
+              defaultMessage: 'Set up now',
             })}
           </EuiButton>
         </EuiFlexItem>

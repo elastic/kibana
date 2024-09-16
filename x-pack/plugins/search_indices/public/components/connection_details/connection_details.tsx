@@ -31,7 +31,7 @@ export const ConnectionDetails: React.FC = () => {
           <h1>
             <FormattedMessage
               id="xpack.searchIndices.connectionDetails.endpointTitle"
-              defaultMessage="Endpoint"
+              defaultMessage="Elasticsearch URL"
             />
           </h1>
         </EuiTitle>
