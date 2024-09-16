@@ -8,7 +8,6 @@
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
@@ -149,5 +148,4 @@ export type ChatModels =
   | ActionsClientChatOpenAI
   | ActionsClientBedrockChatModel
   | ActionsClientSimpleChatModel
-  | ActionsClientChatVertexAI
   | ActionsClientGeminiChatModel;
