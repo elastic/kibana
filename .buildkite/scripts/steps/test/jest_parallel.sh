@@ -54,8 +54,8 @@ echo "
   output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 # while read -r config; do
-for _ in {1..50}; do
-  $config="x-pack/plugins/cases/jest.config.js"
+for _ in {1..10}; do
+  config="x-pack/plugins/cases/jest.config.js"
   echo "--- $ node scripts/jest --config $config"
 
   # --trace-warnings to debug
