@@ -9,24 +9,13 @@
 
 import { z } from '@kbn/zod';
 
-const itemSchema = z.object({
-  title: z.string(),
-  type: z.string(),
-  params: z.record(z.string(), z.any()),
+const getAllInvestigationTagsParamsSchema = z.object({
+  query: z.object({}),
 });
 
-const investigationItemSchema = z.intersection(
-  z.object({
-    id: z.string(),
-    createdAt: z.number(),
-    createdBy: z.string(),
-    updatedAt: z.number(),
-  }),
-  itemSchema
-);
+const getAllInvestigationTagsResponseSchema = z.string().array();
 
-type Item = z.infer<typeof itemSchema>;
-type InvestigationItem = z.infer<typeof investigationItemSchema>;
+type GetAllInvestigationTagsResponse = z.output<typeof getAllInvestigationTagsResponseSchema>;
 
-export type { Item, InvestigationItem };
-export { investigationItemSchema, itemSchema };
+export { getAllInvestigationTagsParamsSchema, getAllInvestigationTagsResponseSchema };
+export type { GetAllInvestigationTagsResponse };
