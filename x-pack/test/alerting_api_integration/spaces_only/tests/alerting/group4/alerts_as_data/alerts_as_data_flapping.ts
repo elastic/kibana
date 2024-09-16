@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
@@ -33,7 +34,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  describe('alerts as data flapping', () => {
+  describe('alerts as data flapping', function () {
+    this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
@@ -61,6 +63,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 4,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
@@ -192,6 +196,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 4,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false, true].concat(
@@ -320,6 +326,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 3,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, true, false, false, false, false, false, false],
@@ -378,6 +386,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 5,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(10000);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(

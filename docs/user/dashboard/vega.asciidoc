@@ -1,5 +1,5 @@
 [[vega]]
-=== Vega
+=== Custom visualizations with Vega
 
 *Vega* and *Vega-Lite* are both grammars for creating custom visualizations. They are recommended for advanced users who are comfortable writing {es} queries manually.
 *Vega-Lite* is a good starting point for users who are new to both grammars, but they are not compatible.

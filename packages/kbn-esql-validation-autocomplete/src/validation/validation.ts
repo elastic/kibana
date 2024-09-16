@@ -90,7 +90,7 @@ function validateFunctionLiteralArg(
   if (isLiteralItem(actualArg)) {
     if (
       actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -99,7 +99,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
@@ -199,11 +199,7 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (
-      'noNestingFunctions' in parameterDefinition &&
-      parameterDefinition.noNestingFunctions &&
-      fnDef.type === argFn.type
-    ) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',

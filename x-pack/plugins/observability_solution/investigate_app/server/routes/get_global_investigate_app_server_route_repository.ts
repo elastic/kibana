@@ -13,6 +13,7 @@ import {
   deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
+  getAllInvestigationTagsParamsSchema,
   getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
@@ -27,14 +28,15 @@ import { deleteInvestigation } from '../services/delete_investigation';
 import { deleteInvestigationItem } from '../services/delete_investigation_item';
 import { deleteInvestigationNote } from '../services/delete_investigation_note';
 import { findInvestigations } from '../services/find_investigations';
+import { getAllInvestigationTags } from '../services/get_all_investigation_tags';
 import { getInvestigation } from '../services/get_investigation';
+import { getInvestigationItems } from '../services/get_investigation_items';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
-import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
-import { getInvestigationItems } from '../services/get_investigation_items';
-import { updateInvestigationNote } from '../services/update_investigation_note';
-import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigation } from '../services/update_investigation';
+import { updateInvestigationItem } from '../services/update_investigation_item';
+import { updateInvestigationNote } from '../services/update_investigation_note';
+import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -96,7 +98,7 @@ const updateInvestigationRoute = createInvestigateAppServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    return await updateInvestigation(params.path.investigationId, params.body, {
+    return await updateInvestigation(params.path.investigationId, params.body ?? {}, {
       repository,
       user,
     });
@@ -135,6 +137,20 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
       repository,
       user,
     });
+  },
+});
+
+const getAllInvestigationTagsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/_tags 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getAllInvestigationTagsParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await getAllInvestigationTags(repository);
   },
 });
 
@@ -296,6 +312,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...deleteInvestigationItemRoute,
     ...updateInvestigationItemRoute,
     ...getInvestigationItemsRoute,
+    ...getAllInvestigationTagsRoute,
   };
 }
 

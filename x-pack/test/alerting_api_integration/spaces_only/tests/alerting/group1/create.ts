@@ -41,217 +41,223 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       return scheduledTask._source!;
     }
 
-    it('should handle create alert request appropriately', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
+    describe('create alert', function () {
+      this.tags('skipFIPS');
+      it('should handle create alert request appropriately', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
           })
-        );
+          .expect(200);
 
-      expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-      expect(response.body).to.eql({
-        id: response.body.id,
-        name: 'abc',
-        tags: ['foo'],
-        actions: [
-          {
-            id: createdAction.id,
-            connector_type_id: createdAction.connector_type_id,
-            group: 'default',
-            params: {},
-            uuid: response.body.actions[0].uuid,
-          },
-        ],
-        enabled: true,
-        rule_type_id: 'test.noop',
-        revision: 0,
-        running: false,
-        consumer: 'alertsFixture',
-        params: {},
-        created_by: null,
-        schedule: { interval: '1m' },
-        scheduled_task_id: response.body.scheduled_task_id,
-        updated_by: null,
-        api_key_owner: null,
-        api_key_created_by_user: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: response.body.created_at,
-        updated_at: response.body.updated_at,
-        execution_status: response.body.execution_status,
-        ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-        ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-      });
-      expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
-      expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
-      expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
-      if (response.body.next_run) {
-        expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
-      }
-      expect(typeof response.body.scheduled_task_id).to.be('string');
-      const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
-      expect(taskRecord.type).to.eql('task');
-      expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-      expect(JSON.parse(taskRecord.task.params)).to.eql({
-        alertId: response.body.id,
-        spaceId: Spaces.space1.id,
-        consumer: 'alertsFixture',
-      });
-      expect(taskRecord.task.enabled).to.eql(true);
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: RULE_SAVED_OBJECT_TYPE,
-        id: response.body.id,
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          );
+
+        expect(response.status).to.eql(200);
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+        expect(response.body).to.eql({
+          id: response.body.id,
+          name: 'abc',
+          tags: ['foo'],
+          actions: [
+            {
+              id: createdAction.id,
+              connector_type_id: createdAction.connector_type_id,
+              group: 'default',
+              params: {},
+              uuid: response.body.actions[0].uuid,
+            },
+          ],
+          enabled: true,
+          rule_type_id: 'test.noop',
+          revision: 0,
+          running: false,
+          consumer: 'alertsFixture',
+          params: {},
+          created_by: null,
+          schedule: { interval: '1m' },
+          scheduled_task_id: response.body.scheduled_task_id,
+          updated_by: null,
+          api_key_owner: null,
+          api_key_created_by_user: null,
+          throttle: '1m',
+          notify_when: 'onThrottleInterval',
+          mute_all: false,
+          muted_alert_ids: [],
+          created_at: response.body.created_at,
+          updated_at: response.body.updated_at,
+          execution_status: response.body.execution_status,
+          ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+          ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+        });
+        expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+        expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+        expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
+        if (response.body.next_run) {
+          expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+        }
+        expect(typeof response.body.scheduled_task_id).to.be('string');
+        const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
+        expect(taskRecord.type).to.eql('task');
+        expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+        expect(JSON.parse(taskRecord.task.params)).to.eql({
+          alertId: response.body.id,
+          spaceId: Spaces.space1.id,
+          consumer: 'alertsFixture',
+        });
+        expect(taskRecord.task.enabled).to.eql(true);
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: response.body.id,
+        });
       });
     });
 
-    it('should store references correctly for actions', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-              {
-                id: 'my-slack1',
-                group: 'default',
-                params: {
-                  message: 'something important happened!',
-                },
-              },
-            ],
+    describe('store references correctly', function () {
+      this.tags('skipFIPS');
+      it('should store references correctly for actions', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
           })
-        );
+          .expect(200);
 
-      expect(response.status).to.eql(200);
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'my-slack1',
+                  group: 'default',
+                  params: {
+                    message: 'something important happened!',
+                  },
+                },
+              ],
+            })
+          );
 
-      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+        expect(response.status).to.eql(200);
 
-      expect(response.body).to.eql({
-        id: response.body.id,
-        name: 'abc',
-        tags: ['foo'],
-        actions: [
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        expect(response.body).to.eql({
+          id: response.body.id,
+          name: 'abc',
+          tags: ['foo'],
+          actions: [
+            {
+              id: createdAction.id,
+              connector_type_id: createdAction.connector_type_id,
+              group: 'default',
+              params: {},
+              uuid: response.body.actions[0].uuid,
+            },
+            {
+              id: 'my-slack1',
+              group: 'default',
+              connector_type_id: '.slack',
+              params: {
+                message: 'something important happened!',
+              },
+              uuid: response.body.actions[1].uuid,
+            },
+          ],
+          enabled: true,
+          rule_type_id: 'test.noop',
+          revision: 0,
+          running: false,
+          consumer: 'alertsFixture',
+          params: {},
+          created_by: null,
+          schedule: { interval: '1m' },
+          scheduled_task_id: response.body.scheduled_task_id,
+          updated_by: null,
+          api_key_owner: null,
+          api_key_created_by_user: null,
+          throttle: '1m',
+          notify_when: 'onThrottleInterval',
+          mute_all: false,
+          muted_alert_ids: [],
+          created_at: response.body.created_at,
+          updated_at: response.body.updated_at,
+          execution_status: response.body.execution_status,
+          ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+          ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+        });
+
+        if (response.body.next_run) {
+          expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+        }
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
           {
-            id: createdAction.id,
-            connector_type_id: createdAction.connector_type_id,
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${response.body.id}`,
+          },
+          { meta: true }
+        );
+        expect(esResponse.statusCode).to.eql(200);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+        expect(rawActions).to.eql([
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test.noop',
             group: 'default',
             params: {},
-            uuid: response.body.actions[0].uuid,
+            uuid: rawActions[0].uuid,
           },
           {
-            id: 'my-slack1',
+            actionRef: 'preconfigured:my-slack1',
+            actionTypeId: '.slack',
             group: 'default',
-            connector_type_id: '.slack',
             params: {
               message: 'something important happened!',
             },
-            uuid: response.body.actions[1].uuid,
+            uuid: rawActions[1].uuid,
           },
-        ],
-        enabled: true,
-        rule_type_id: 'test.noop',
-        revision: 0,
-        running: false,
-        consumer: 'alertsFixture',
-        params: {},
-        created_by: null,
-        schedule: { interval: '1m' },
-        scheduled_task_id: response.body.scheduled_task_id,
-        updated_by: null,
-        api_key_owner: null,
-        api_key_created_by_user: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: response.body.created_at,
-        updated_at: response.body.updated_at,
-        execution_status: response.body.execution_status,
-        ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-        ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-      });
+        ]);
 
-      if (response.body.next_run) {
-        expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
-      }
+        const references = esResponse.body._source?.references ?? [];
 
-      const esResponse = await es.get<SavedObject<RawRule>>(
-        {
-          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          id: `alert:${response.body.id}`,
-        },
-        { meta: true }
-      );
-      expect(esResponse.statusCode).to.eql(200);
-      const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
-      expect(rawActions).to.eql([
-        {
-          actionRef: 'action_0',
-          actionTypeId: 'test.noop',
-          group: 'default',
-          params: {},
-          uuid: rawActions[0].uuid,
-        },
-        {
-          actionRef: 'preconfigured:my-slack1',
-          actionTypeId: '.slack',
-          group: 'default',
-          params: {
-            message: 'something important happened!',
-          },
-          uuid: rawActions[1].uuid,
-        },
-      ]);
-
-      const references = esResponse.body._source?.references ?? [];
-
-      expect(references.length).to.eql(1);
-      expect(references[0]).to.eql({
-        id: createdAction.id,
-        name: 'action_0',
-        type: 'action',
+        expect(references.length).to.eql(1);
+        expect(references[0]).to.eql({
+          id: createdAction.id,
+          name: 'action_0',
+          type: 'action',
+        });
       });
     });
 
@@ -716,7 +722,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', () => {
+    describe('legacy', function () {
+      this.tags('skipFIPS');
       it('should handle create alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)

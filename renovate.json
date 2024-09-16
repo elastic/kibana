@@ -285,8 +285,7 @@
         "@testing-library/jest-dom",
         "@testing-library/react",
         "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
+        "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -372,7 +371,6 @@
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:kibana-management",
-        "team:kibana-gis",
         "team:security-solution"
       ],
       "matchBaseBranches": ["main"],

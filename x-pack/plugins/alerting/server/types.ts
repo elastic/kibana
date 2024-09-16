@@ -11,7 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import z from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -36,7 +36,7 @@ import {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
-} from './rules_settings_client';
+} from './rules_settings';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
