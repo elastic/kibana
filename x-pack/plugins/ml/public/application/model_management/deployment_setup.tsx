@@ -589,7 +589,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
             &nbsp;
             <EuiLink href={cloudInfo.cloudUrl} target="_blank" external>
               <FormattedMessage
-                id="xpack.ml.common.readDocumentationLink"
+                id="xpack.ml.trainedModels.modelsList.startDeployment.cloudConsoleLink"
                 defaultMessage="Go to cloud console"
               />
             </EuiLink>
