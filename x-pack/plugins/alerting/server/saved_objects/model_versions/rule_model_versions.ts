@@ -6,13 +6,28 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawRuleSchemaV1 } from '../schemas/raw_rule';
+import { rawRuleSchemaV1, rawRuleSchemaV2 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
       create: rawRuleSchemaV1,
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          'monitoring.run.last_run.metrics.gap_range.from': { type: 'date' },
+          'monitoring.run.last_run.metrics.gap_range.to': { type: 'date' },
+          'monitoring.run.last_run.metrics.gap_range': { type: 'object' },
+        },
+      },
+    ],
+    schemas: {
+      create: rawRuleSchemaV2,
     },
   },
 };
