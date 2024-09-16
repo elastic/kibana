@@ -7,9 +7,14 @@
 
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
+import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { useKibana } from './use_kibana';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+
+interface UseIsNavControlVisibleProps {
+  coreStart: CoreStart;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+}
 
 function getVisibility(
   appId: string | undefined,
@@ -30,17 +35,11 @@ function getVisibility(
   return categoryId === DEFAULT_APP_CATEGORIES.observability.id;
 }
 
-export function useIsNavControlVisible() {
+export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
-  const {
-    services: {
-      application: { currentAppId$, applications$ },
-      plugins: {
-        start: { aiAssistantManagementSelection },
-      },
-    },
-  } = useKibana();
+  const { currentAppId$, applications$ } = coreStart.application;
+  const { aiAssistantManagementSelection } = pluginsStart;
 
   useEffect(() => {
     const appSubscription = combineLatest([

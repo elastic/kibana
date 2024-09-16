@@ -38,7 +38,7 @@ const mockStorage = {
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
     {children}
   </QueryClientProvider>
@@ -150,7 +150,10 @@ describe('useColumns', () => {
   test('onColumnResize', async () => {
     const localDefaultColumns = [...defaultColumns];
     const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
-    const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(
+    const { result, rerender } = renderHook<
+      React.PropsWithChildren<UseColumnsArgs>,
+      UseColumnsResp
+    >(
       () =>
         useColumns({
           defaultColumns,
@@ -182,7 +185,7 @@ describe('useColumns', () => {
 
   test('check if initial width for the last column does not exist', async () => {
     const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+    const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
       () =>
         useColumns({
           defaultColumns,
@@ -207,7 +210,7 @@ describe('useColumns', () => {
     const alertsFields = {
       testField: { name: 'testField', type: 'string', searchable: true, aggregatable: true },
     };
-    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+    const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
       () =>
         useColumns({
           alertsFields,
@@ -227,7 +230,7 @@ describe('useColumns', () => {
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -249,7 +252,7 @@ describe('useColumns', () => {
 
     test('show all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -278,7 +281,7 @@ describe('useColumns', () => {
 
     test('should populate visibleColumns correctly', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -296,7 +299,10 @@ describe('useColumns', () => {
     test('should change visibleColumns if provided defaultColumns change', async () => {
       let localDefaultColumns = [...defaultColumns];
       let localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
-      const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result, rerender } = renderHook<
+        React.PropsWithChildren<UseColumnsArgs>,
+        UseColumnsResp
+      >(
         () =>
           useColumns({
             defaultColumns: localDefaultColumns,
@@ -333,7 +339,10 @@ describe('useColumns', () => {
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result, waitFor } = renderHook<
+        React.PropsWithChildren<UseColumnsArgs>,
+        UseColumnsResp
+      >(
         () =>
           useColumns({
             defaultColumns,
@@ -352,7 +361,7 @@ describe('useColumns', () => {
   describe('onToggleColumns', () => {
     test('should update the list of columns when on Toggle Columns is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -373,7 +382,7 @@ describe('useColumns', () => {
 
     test('should update the list of visible columns when onToggleColumn is called', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -402,7 +411,7 @@ describe('useColumns', () => {
 
     test('should update the column details in the storage when onToggleColumn is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -435,7 +444,7 @@ describe('useColumns', () => {
   describe('onResetColumns', () => {
     test('should restore visible columns defaults', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,

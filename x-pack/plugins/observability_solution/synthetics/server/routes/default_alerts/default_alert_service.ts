@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { savedObjectsAdapter } from '../../saved_objects';
@@ -65,25 +66,35 @@ export class DefaultAlertService {
     };
   }
 
+  getMinimumRuleInterval() {
+    const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
+    const minimumIntervalInMs = parseDuration(minimumInterval.value);
+    const defaultIntervalInMs = parseDuration('1m');
+    const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
+    return interval;
+  }
+
   setupStatusRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
   setupTlsRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
@@ -139,11 +150,12 @@ export class DefaultAlertService {
   }
 
   async updateStatusRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.updateDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        '1m'
+        minimumRuleInterval
       );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
@@ -154,8 +166,13 @@ export class DefaultAlertService {
   }
 
   async updateTlsRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+      return this.updateDefaultAlert(
+        SYNTHETICS_TLS_RULE,
+        `Synthetics internal TLS rule`,
+        minimumRuleInterval
+      );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
       await rulesClient.bulkDeleteRules({
@@ -169,6 +186,8 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
+      const currentIntervalInMs = parseDuration(alert.schedule.interval);
+      const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getAlertActions(ruleType);
       const {
         actions: actionsFromRules = [],
@@ -180,7 +199,10 @@ export class DefaultAlertService {
           actions,
           name: alert.name,
           tags: alert.tags,
-          schedule: alert.schedule,
+          schedule: {
+            interval:
+              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+          },
           params: alert.params,
         },
       });

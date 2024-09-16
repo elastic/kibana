@@ -13,6 +13,7 @@ import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ruleType as alwaysFiringRule } from './rule_types/always_firing';
 import { ruleType as peopleInSpaceRule } from './rule_types/astros';
 import { ruleType as patternRule } from './rule_types/pattern';
@@ -42,40 +43,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      privileges: {
-        all: {
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: [],
-        },
-        read: {
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: [],
-        },
-      },
-    });
-
-    features.registerKibanaFeature({
-      id: 'alertingExampleRule',
-      name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
-        defaultMessage: 'Alerting Examples Rule',
-      }),
-      app: [],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       alerting: [
         {
           ruleTypeId: alwaysFiringRule.id,

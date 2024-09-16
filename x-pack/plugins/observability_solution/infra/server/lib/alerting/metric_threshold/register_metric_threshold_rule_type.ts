@@ -18,7 +18,7 @@ import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/conve
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
@@ -51,7 +51,8 @@ import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 export function registerMetricThresholdRuleType(
   alertingPlugin: AlertingServerSetup,
   libs: InfraBackendLibs,
-  { featureFlags }: InfraConfig
+  { featureFlags }: InfraConfig,
+  locators: InfraLocators
 ) {
   if (!featureFlags.metricThresholdAlertRuleEnabled) {
     return;
@@ -145,7 +146,7 @@ export function registerMetricThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: createMetricThresholdExecutor(libs),
+    executor: createMetricThresholdExecutor(libs, locators),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [

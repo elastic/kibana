@@ -32,7 +32,6 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
   AlertingEventLogger,
@@ -94,6 +93,7 @@ import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
@@ -145,17 +145,14 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 const rulesClient = rulesClientMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
+const rulesSettingsService = rulesSettingsServiceMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const services = alertsMock.createRuleExecutorServices();
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
 
 const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-  actionsConfigMap: {
-    default: {
-      max: 10000,
-    },
-  },
+  actionsConfigMap: { default: { max: 1000 } },
   actionsPlugin: actionsMock.createStart(),
   alertsService,
   backfillClient,
@@ -170,12 +167,12 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   executionContext: executionContextServiceMock.createInternalStartContract(),
   getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
   getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClient),
-  getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
   kibanaBaseUrl: 'https://localhost:5601',
   logger,
   maxAlerts: 1000,
   maxEphemeralActionsPerRule: 10,
   ruleTypeRegistry,
+  rulesSettingsService,
   savedObjects: savedObjectsService,
   share: {} as SharePluginStart,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),

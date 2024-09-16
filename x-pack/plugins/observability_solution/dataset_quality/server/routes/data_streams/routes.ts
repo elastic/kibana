@@ -15,6 +15,7 @@ import {
   NonAggregatableDatasets,
   DegradedFieldResponse,
   DatasetUserPrivileges,
+  DegradedFieldValues,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -25,6 +26,7 @@ import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { getDegradedFields } from './get_degraded_fields';
+import { getDegradedFieldValues } from './get_degraded_field_values';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -192,6 +194,33 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const degradedFieldValuesRoute = createDatasetQualityServerRoute({
+  endpoint:
+    'GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+      degradedField: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DegradedFieldValues> {
+    const { context, params } = resources;
+    const { dataStream, degradedField } = params.path;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getDegradedFieldValues({
+      esClient,
+      dataStream,
+      degradedField,
+    });
+  },
+});
+
 const dataStreamSettingsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
   params: t.type({
@@ -258,6 +287,7 @@ export const dataStreamsRouteRepository = {
   ...nonAggregatableDatasetsRoute,
   ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,
+  ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
 };

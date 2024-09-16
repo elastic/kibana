@@ -71,7 +71,9 @@
     "@kbn/observability-plugin",
     "@kbn/esql-datagrid",
     "@kbn/alerting-comparators",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/inference-plugin"
   ],
   "exclude": ["target/**/*"]
 }

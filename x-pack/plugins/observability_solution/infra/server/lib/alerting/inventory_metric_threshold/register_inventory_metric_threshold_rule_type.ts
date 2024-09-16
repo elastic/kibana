@@ -24,7 +24,7 @@ import {
 } from '../../../../common/http_api';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
@@ -83,7 +83,8 @@ const groupActionVariableDescription = i18n.translate(
 export function registerInventoryThresholdRuleType(
   alertingPlugin: AlertingServerSetup,
   libs: InfraBackendLibs,
-  { featureFlags }: InfraConfig
+  { featureFlags }: InfraConfig,
+  locators: InfraLocators
 ) {
   if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
     return;
@@ -123,7 +124,7 @@ export function registerInventoryThresholdRuleType(
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: createInventoryMetricThresholdExecutor(libs),
+    executor: createInventoryMetricThresholdExecutor(libs, locators),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },

@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const integrationPackages = ['nginx', 'apm'];
 
   async function callApiAs(integration: string) {
-    const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
+    const user = 'datasetQualityMonitorUser' as DatasetQualityApiClientKey;
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/integrations/{integration}/dashboards',
       params: {

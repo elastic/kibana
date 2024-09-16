@@ -14,8 +14,9 @@ paths:
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
       description: >-
-        The bulk action is applied to all anonymization fields that match the
-        filter or to the list of anonymization fields by their IDs.
+        Apply a bulk action to multiple anonymization fields. The bulk action is
+        applied to all anonymization fields that match the filter or to the list
+        of anonymization fields by their IDs.
       operationId: PerformAnonymizationFieldsBulkAction
       requestBody:
         content:
@@ -63,13 +64,13 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Applies a bulk action to multiple anonymization fields
+      summary: Apply a bulk action to anonymization fields
       tags:
         - Security AI Assistant API
         - Bulk API
   /api/security_ai_assistant/anonymization_fields/_find:
     get:
-      description: Finds anonymization fields that match the given query.
+      description: Get a list of all anonymization fields.
       operationId: FindAnonymizationFields
       parameters:
         - in: query
@@ -149,13 +150,13 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Finds anonymization fields that match the given query.
+      summary: Get anonymization fields
       tags:
         - Security AI Assistant API
         - AnonymizationFields API
   /api/security_ai_assistant/chat/complete:
     post:
-      description: Creates a model response for the given chat conversation.
+      description: Create a model response for the given chat conversation.
       operationId: ChatComplete
       requestBody:
         content:
@@ -184,13 +185,13 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Creates a model response for the given chat conversation.
+      summary: Create a model response
       tags:
         - Security AI Assistant API
         - Chat Complete API
   /api/security_ai_assistant/current_user/conversations:
     post:
-      description: Create a conversation
+      description: Create a new Security AI Assistant conversation.
       operationId: CreateConversation
       requestBody:
         content:
@@ -224,7 +225,7 @@ paths:
         - Conversation API
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
-      description: Finds conversations that match the given query.
+      description: Get a list of all conversations for the current user.
       operationId: FindConversations
       parameters:
         - in: query
@@ -304,13 +305,13 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Finds conversations that match the given query.
+      summary: Get conversations
       tags:
         - Security AI Assistant API
         - Conversations API
   '/api/security_ai_assistant/current_user/conversations/{id}':
     delete:
-      description: Deletes a single conversation using the `id` field.
+      description: Delete an existing conversation using the conversation ID.
       operationId: DeleteConversation
       parameters:
         - description: The conversation's `id` value.
@@ -339,12 +340,12 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Deletes a single conversation using the `id` field.
+      summary: Delete a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
     get:
-      description: Read a single conversation
+      description: Get the details of an existing conversation using the conversation ID.
       operationId: ReadConversation
       parameters:
         - description: The conversation's `id` value.
@@ -373,12 +374,12 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Read a single conversation
+      summary: Get a conversation
       tags:
         - Security AI Assistant API
         - Conversations API
     put:
-      description: Update a single conversation
+      description: Update an existing conversation using the conversation ID.
       operationId: UpdateConversation
       parameters:
         - description: The conversation's `id` value.
@@ -420,8 +421,9 @@ paths:
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       description: >-
-        The bulk action is applied to all prompts that match the filter or to
-        the list of prompts by their IDs.
+        Apply a bulk action to multiple prompts. The bulk action is applied to
+        all prompts that match the filter or to the list of prompts by their
+        IDs.
       operationId: PerformPromptsBulkAction
       requestBody:
         content:
@@ -469,13 +471,13 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Applies a bulk action to multiple prompts
+      summary: Apply a bulk action to prompts
       tags:
         - Security AI Assistant API
         - Bulk API
   /api/security_ai_assistant/prompts/_find:
     get:
-      description: Finds prompts that match the given query.
+      description: Get a list of all prompts.
       operationId: FindPrompts
       parameters:
         - in: query
@@ -555,7 +557,7 @@ paths:
                   statusCode:
                     type: number
           description: Generic Error
-      summary: Finds prompts that match the given query.
+      summary: Get prompts
       tags:
         - Security AI Assistant API
         - Prompts API

@@ -15,7 +15,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['canvas']);
+  const { canvas } = getPageObjects(['canvas']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -27,8 +27,8 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.load(archive);
 
       // load test workpad
-      await PageObjects.canvas.goToListingPage();
-      await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
+      await canvas.goToListingPage();
+      await canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {
@@ -51,7 +51,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await monacoEditor.waitCodeEditorReady(codeEditorSubj);
 
       // open the expression editor
-      await PageObjects.canvas.openExpressionEditor();
+      await canvas.openExpressionEditor();
       await monacoEditor.waitCodeEditorReady('canvasExpressionInput');
 
       // select markdown content and clear it

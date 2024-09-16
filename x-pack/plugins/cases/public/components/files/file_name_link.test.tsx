@@ -35,7 +35,7 @@ describe('FileNameLink', () => {
 
     expect(nameLink).toBeInTheDocument();
 
-    userEvent.click(nameLink);
+    await userEvent.click(nameLink);
 
     expect(defaultProps.showPreview).toHaveBeenCalled();
   });
@@ -52,7 +52,7 @@ describe('FileNameLink', () => {
 
     expect(nameLink).toBeInTheDocument();
 
-    userEvent.click(nameLink);
+    await userEvent.click(nameLink);
 
     expect(defaultProps.showPreview).not.toHaveBeenCalled();
   });

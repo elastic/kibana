@@ -52,7 +52,7 @@ describe('IlmPhaseFilter', () => {
   });
 
   describe('when dropdown opened', () => {
-    it('shows remaining disabled options', () => {
+    it('shows remaining disabled options', async () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
@@ -62,7 +62,7 @@ describe('IlmPhaseFilter', () => {
       );
       const searchInput = screen.getByTestId('comboBoxSearchInput');
 
-      userEvent.click(searchInput);
+      await userEvent.click(searchInput);
 
       expect(screen.getByTitle('frozen')).toHaveAttribute('role', 'option');
       expect(screen.getByTitle('frozen')).toBeDisabled();
@@ -81,7 +81,7 @@ describe('IlmPhaseFilter', () => {
         </TestExternalProviders>
       );
 
-      userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
 
       await waitFor(() =>
         expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES)
@@ -119,10 +119,8 @@ describe('IlmPhaseFilter', () => {
         expect(screen.getByPlaceholderText('Select one or more ILM phases')).toBeInTheDocument();
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
-        userEvent.click(searchInput);
-        userEvent.hover(screen.getByText(option.toLowerCase()), undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(searchInput);
+        await userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
 
         await waitFor(() =>
           expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription)

@@ -34,6 +34,7 @@ import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { slo, SO_SLO_TYPE } from './saved_objects';
@@ -94,6 +95,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       }),
       order: 1200,
       category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
       alerting: alertingFeatures,

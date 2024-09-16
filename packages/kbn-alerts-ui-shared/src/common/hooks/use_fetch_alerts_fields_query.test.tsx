@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { FC } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
@@ -18,7 +18,7 @@ const { QueryClient, QueryClientProvider } = ReactQuery;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -61,7 +61,10 @@ describe('useFetchAlertsFieldsQuery', () => {
 
   it('should correctly override the `enabled` option', () => {
     const { rerender } = renderHook(
-      ({ ruleTypeIds, enabled }: { ruleTypeIds: AlertConsumers[]; enabled?: boolean }) =>
+      ({
+        ruleTypeIds,
+        enabled,
+      }: React.PropsWithChildren<{ ruleTypeIds: string[]; enabled?: boolean }>) =>
         useFetchAlertsFieldsQuery({ http: mockHttpClient, ruleTypeIds }, { enabled }),
       {
         wrapper,

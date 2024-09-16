@@ -169,7 +169,7 @@ export function createDegradedFieldsRecord({
             .defaults({
               'trace.id': generateShortId(),
               'agent.name': 'synth-agent',
-              'cloud.availability_zone': MORE_THAN_1024_CHARS,
+              test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
             })
             .timestamp(timestamp),
           log
@@ -213,5 +213,7 @@ const CLUSTER = [
 
 const SERVICE_NAMES = [`synth-service-0`, `synth-service-1`, `synth-service-2`];
 
-const MORE_THAN_1024_CHARS =
+export const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
+export const ANOTHER_1024_CHARS =
+  'grape fig tangerine tangerine kiwi lemon papaya cherry nectarine papaya mango cherry nectarine fig cherry fig grape mango mango quince fig strawberry mango quince date kiwi quince raspberry apple kiwi banana quince fig papaya grape mango cherry banana mango cherry lemon cherry tangerine fig quince quince papaya tangerine grape strawberry banana kiwi grape mango papaya nectarine banana nectarine kiwi papaya lemon apple lemon orange fig cherry grape apple nectarine papaya orange fig papaya date mango papaya mango cherry tangerine papaya apple banana papaya cherry strawberry grape raspberry lemon date papaya mango kiwi cherry fig banana banana apple date strawberry mango tangerine date lemon kiwi quince date orange orange papaya date apple fig tangerine quince tangerine date papaya banana banana orange raspberry papaya apple nectarine lemon raspberry raspberry mango cherry kiwi cherry cherry nectarine cherry date strawberry banana orange mango mango tangerine quince papaya papaya kiwi papaya strawberry date mango';
