@@ -14,7 +14,7 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { jobCloningService } from '../../../services/job_cloning_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
@@ -82,14 +82,14 @@ export function isResettable(jobs) {
 
 export function forceStartDatafeeds(
   toastNotifications,
-  mlJobService,
+  mlApi,
   jobs,
   start,
   end,
   finish = () => {}
 ) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
-  mlJobService
+  mlApi.jobs
     .forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
       showResults(toastNotifications, resp, DATAFEED_STATE.STARTED);
@@ -106,9 +106,9 @@ export function forceStartDatafeeds(
     });
 }
 
-export function stopDatafeeds(toastNotifications, mlJobService, jobs, finish = () => {}) {
+export function stopDatafeeds(toastNotifications, mlApi, jobs, finish = () => {}) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
-  mlJobService
+  mlApi.jobs
     .stopDatafeeds(datafeedIds)
     .then((resp) => {
       showResults(toastNotifications, resp, DATAFEED_STATE.STOPPED);
@@ -214,12 +214,16 @@ function showResults(toastNotifications, resp, action) {
   }
 }
 
-export async function cloneJob(toastNotifications, application, mlApi, mlJobService, jobId) {
+export async function cloneJob(toastNotifications, application, mlApi, jobId) {
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForCloning(mlApi, jobId),
       loadFullJob(mlApi, jobId),
     ]);
+
+    const tempJobCloningData = {
+      skipTimeRangeStep: false,
+    };
 
     const createdBy = originalJob?.custom_settings?.created_by;
     if (
@@ -228,9 +232,9 @@ export async function cloneJob(toastNotifications, application, mlApi, mlJobServ
       createdBy !== CREATED_BY_LABEL.ADVANCED
     ) {
       // if the job is from a wizards, i.e. contains a created_by property
-      // use tempJobCloningObjects to temporarily store the job
-      mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
-      mlJobService.tempJobCloningObjects.job = cloneableJob;
+      // use tempJobCloningData to temporarily store the job
+      tempJobCloningData.createdBy = originalJob?.custom_settings?.created_by;
+      tempJobCloningData.job = cloneableJob;
 
       if (
         originalJob.data_counts.earliest_record_timestamp !== undefined &&
@@ -256,25 +260,27 @@ export async function cloneJob(toastNotifications, application, mlApi, mlJobServ
           end = originalJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
-        mlJobService.tempJobCloningObjects.start = start;
-        mlJobService.tempJobCloningObjects.end = end;
+        tempJobCloningData.start = start;
+        tempJobCloningData.end = end;
       }
     } else {
-      // otherwise use the tempJobCloningObjects
-      mlJobService.tempJobCloningObjects.job = cloneableJob;
+      // otherwise tempJobCloningData
+      tempJobCloningData.job = cloneableJob;
       // resets the createdBy field in case it still retains previous settings
-      mlJobService.tempJobCloningObjects.createdBy = undefined;
+      tempJobCloningData.createdBy = undefined;
     }
     if (datafeed !== undefined) {
-      mlJobService.tempJobCloningObjects.datafeed = datafeed;
+      tempJobCloningData.datafeed = datafeed;
     }
 
     if (originalJob.calendars) {
-      mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
+      tempJobCloningData.calendars = await mlCalendarService.fetchCalendarsByIds(
         mlApi,
         originalJob.calendars
       );
     }
+
+    jobCloningService.stashJobCloningData(tempJobCloningData);
 
     application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
@@ -288,9 +294,9 @@ export async function cloneJob(toastNotifications, application, mlApi, mlJobServ
   }
 }
 
-export function closeJobs(toastNotifications, mlJobService, jobs, finish = () => {}) {
+export function closeJobs(toastNotifications, mlApi, jobs, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
-  mlJobService
+  mlApi.jobs
     .closeJobs(jobIds)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_STATE.CLOSED);
@@ -309,12 +315,12 @@ export function closeJobs(toastNotifications, mlJobService, jobs, finish = () =>
 
 export function resetJobs(
   toastNotifications,
-  mlJobService,
+  mlApi,
   jobIds,
   deleteUserAnnotations,
   finish = () => {}
 ) {
-  mlJobService
+  mlApi.jobs
     .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_ACTION.RESET);
@@ -333,14 +339,14 @@ export function resetJobs(
 
 export function deleteJobs(
   toastNotifications,
-  mlJobService,
+  mlApi,
   jobs,
   deleteUserAnnotations,
   deleteAlertingRules,
   finish = () => {}
 ) {
   const jobIds = jobs.map((j) => j.id);
-  mlJobService
+  mlApi.jobs
     .deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_STATE.DELETED);
@@ -448,25 +454,4 @@ function jobTagFilter(jobs, value) {
       .map((t) => t.join(':'))
       .find((t) => value.some((t1) => t1 === t));
   });
-}
-// check to see if a job has been stored in mlJobService.tempJobCloningObjects
-// if it has, return an object with the minimum properties needed for the
-// start datafeed modal.
-export function checkForAutoStartDatafeed(mlJobService) {
-  const job = mlJobService.tempJobCloningObjects.job;
-  const datafeed = mlJobService.tempJobCloningObjects.datafeed;
-  if (job !== undefined) {
-    mlJobService.tempJobCloningObjects.job = undefined;
-    mlJobService.tempJobCloningObjects.datafeed = undefined;
-    mlJobService.tempJobCloningObjects.createdBy = undefined;
-
-    const hasDatafeed = isPopulatedObject(datafeed);
-    const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
-    return {
-      id: job.job_id,
-      hasDatafeed,
-      latestTimestampSortValue: 0,
-      datafeedId,
-    };
-  }
 }

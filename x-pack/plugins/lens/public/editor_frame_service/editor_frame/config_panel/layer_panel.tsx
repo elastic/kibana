@@ -569,7 +569,8 @@ export function LayerPanel(props: LayerPanelProps) {
                                 }}
                                 message={{
                                   severity: messages[0]?.severity,
-                                  content: messages[0]?.shortMessage || messages[0]?.longMessage,
+                                  content: (messages[0]?.shortMessage ||
+                                    messages[0]?.longMessage) as React.ReactNode,
                                 }}
                               >
                                 {layerDatasource ? (

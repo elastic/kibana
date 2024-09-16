@@ -40,10 +40,10 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('https://elastic.co');
   });
 
-  it('returns empty value in case no param', () => {
+  it('returns same value in case no param', () => {
     const result = replaceStringWithParams('${homePageUrl}', {}, logger);
 
-    expect(result).toEqual('');
+    expect(result).toEqual('${homePageUrl}');
   });
 
   it('works on objects', () => {
@@ -74,6 +74,46 @@ describe('replaceStringWithParams', () => {
     );
 
     expect(result).toEqual('Basic https://elastic.co https://elastic.co/product');
+  });
+
+  it('works on multiple without spaces', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1}',
+      { homePageUrl: 'https://elastic.co', homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.cohttps://elastic.co/product');
+  });
+
+  it('works on multiple without spaces and one missing', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1}',
+      { homePageUrl: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.co${homePageUrl1}');
+  });
+
+  it('works on multiple without with default', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1:test}',
+      { homePageUrl: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.cotest');
+  });
+
+  it('works on multiple with multiple defaults', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl:test}${homePageUrl1:test4}',
+      { homePageUrl3: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic testtest4');
   });
 
   it('works with default value', () => {
@@ -143,6 +183,36 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('Basic  ${} value');
   });
 
+  it('works with ${host.name} for missing params', () => {
+    const result = replaceStringWithParams(
+      'Basic  ${host.name} value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  ${host.name} value');
+  });
+
+  it('works with ${host.name} one missing params', () => {
+    const result = replaceStringWithParams(
+      'Basic ${host.name} ${homePageUrl1} value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic ${host.name} https://elastic.co/product value');
+  });
+
+  it('works with ${host.name} just missing params', () => {
+    const result = replaceStringWithParams(
+      '${host.name} ${homePageUrl1}',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('${host.name} https://elastic.co/product');
+  });
+
   it('works with } ${abc} as part of value', () => {
     const result = replaceStringWithParams(
       'Basic } ${homePageUrl1} value',
@@ -161,5 +231,11 @@ describe('replaceStringWithParams', () => {
     );
 
     expect(result).toEqual('Basic https://elastic.co/product { value');
+  });
+
+  it("returns value as string | null when no params and it's an object", () => {
+    const result = replaceStringWithParams({}, { param: '1' }, logger);
+
+    expect(result).toEqual({});
   });
 });

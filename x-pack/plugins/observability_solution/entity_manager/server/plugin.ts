@@ -30,8 +30,11 @@ import {
   EntityManagerServerSetup,
 } from './types';
 
-export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
-export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntityManagerServerPluginSetup {}
+export interface EntityManagerServerPluginStart {
+  getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+}
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
   schema: configSchema,
@@ -56,7 +59,10 @@ export class EntityManagerServerPlugin
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: EntityManagerPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    plugins: EntityManagerPluginSetupDependencies
+  ): EntityManagerServerPluginSetup {
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
     plugins.encryptedSavedObjects.registerType({
@@ -76,9 +82,7 @@ export class EntityManagerServerPlugin
         server: this.server,
         getScopedClient: async ({ request }: { request: KibanaRequest }) => {
           const [coreStart] = await core.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-          const soClient = coreStart.savedObjects.getScopedClient(request);
-          return new EntityClient({ esClient, soClient, logger: this.logger });
+          return this.getScopedClient({ request, coreStart });
         },
       },
       core,
@@ -88,7 +92,22 @@ export class EntityManagerServerPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: EntityManagerPluginStartDependencies) {
+  private async getScopedClient({
+    request,
+    coreStart,
+  }: {
+    request: KibanaRequest;
+    coreStart: CoreStart;
+  }) {
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asSecondaryAuthUser;
+    const soClient = coreStart.savedObjects.getScopedClient(request);
+    return new EntityClient({ esClient, soClient, logger: this.logger });
+  }
+
+  public start(
+    core: CoreStart,
+    plugins: EntityManagerPluginStartDependencies
+  ): EntityManagerServerPluginStart {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -114,7 +133,11 @@ export class EntityManagerServerPlugin
       })
       .catch((err) => this.logger.error(err));
 
-    return {};
+    return {
+      getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+        return this.getScopedClient({ request, coreStart: core });
+      },
+    };
   }
 
   public stop() {}

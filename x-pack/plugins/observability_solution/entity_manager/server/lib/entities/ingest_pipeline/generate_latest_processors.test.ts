@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { entityDefinition } from '../helpers/fixtures/entity_definition';
+import { entityDefinition, builtInEntityDefinition } from '../helpers/fixtures';
 import { generateLatestProcessors } from './generate_latest_processors';
 
 describe('generateLatestProcessors(definition)', () => {
-  it('should genearte a valid pipeline', () => {
+  it('should generate a valid pipeline for custom definition', () => {
     const processors = generateLatestProcessors(entityDefinition);
+    expect(processors).toMatchSnapshot();
+  });
+
+  it('should generate a valid pipeline for builtin definition', () => {
+    const processors = generateLatestProcessors(builtInEntityDefinition);
     expect(processors).toMatchSnapshot();
   });
 });
