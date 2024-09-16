@@ -29,6 +29,7 @@ import {
   DeleteOnePackagePolicyResponseSchema,
   UpgradePackagePoliciesResponseBodySchema,
   DryRunPackagePoliciesResponseBodySchema,
+  OrphanedPackagePoliciesResponseSchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
 
@@ -165,7 +166,20 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {}, // TODO
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  items: schema.arrayOf(PackagePolicyResponseSchema),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getOrphanedPackagePolicies
     );
@@ -187,10 +201,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: CreatePackagePolicyRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  item: PackagePolicyResponseSchema,
-                }),
+              body: () => OrphanedPackagePoliciesResponseSchema,
             },
             400: {
               body: genericErrorResponse,

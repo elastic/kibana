@@ -41,6 +41,7 @@ import {
   DeleteOnePackagePolicyResponseSchema,
   UpgradePackagePoliciesResponseBodySchema,
   DryRunPackagePoliciesResponseBodySchema,
+  OrphanedPackagePoliciesResponseSchema,
 } from '../../types';
 import type { PackagePolicy } from '../../types';
 
@@ -53,6 +54,7 @@ import {
   deletePackagePolicyHandler,
   dryRunUpgradePackagePolicyHandler,
   getOnePackagePolicyHandler,
+  getOrphanedPackagePolicies,
   getPackagePoliciesHandler,
   upgradePackagePolicyHandler,
 } from './handlers';
@@ -134,6 +136,7 @@ jest.mock('../../services/agent_policy', () => {
     agentPolicyService: {
       get: jest.fn(),
       update: jest.fn(),
+      list: jest.fn(),
     },
   };
 });
@@ -143,63 +146,17 @@ jest.mock('../../services/epm/packages', () => {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
     getInstallation: jest.fn(),
+    getInstallations: jest.fn().mockResolvedValue({
+      saved_objects: [
+        {
+          attributes: { name: 'a-package', version: '1.0.0' },
+        },
+      ],
+    }),
   };
 });
 
-const testPackagePolicy: PackagePolicy = {
-  agents: 100,
-  created_at: '2022-12-19T20:43:45.879Z',
-  created_by: 'elastic',
-  description: '',
-  enabled: true,
-  id: '123',
-  inputs: [
-    {
-      streams: [
-        {
-          id: '1',
-          compiled_stream: {},
-          enabled: true,
-          keep_enabled: false,
-          release: 'beta',
-          vars: { var: { type: 'text', value: 'value', frozen: false } },
-          config: { config: { type: 'text', value: 'value', frozen: false } },
-          data_stream: { dataset: 'apache.access', type: 'logs', elasticsearch: {} },
-        },
-      ],
-      compiled_input: '',
-      id: '1',
-      enabled: true,
-      type: 'logs',
-      policy_template: '',
-      keep_enabled: false,
-      vars: { var: { type: 'text', value: 'value', frozen: false } },
-      config: { config: { type: 'text', value: 'value', frozen: false } },
-    },
-  ],
-  vars: { var: { type: 'text', value: 'value', frozen: false } },
-  name: 'Package Policy 123',
-  namespace: 'default',
-  package: {
-    name: 'a-package',
-    title: 'package A',
-    version: '1.0.0',
-    experimental_data_stream_features: [{ data_stream: 'logs', features: { tsdb: true } }],
-    requires_root: false,
-  },
-  policy_id: 'agent-policy-id-a',
-  policy_ids: ['agent-policy-id-a'],
-  revision: 1,
-  updated_at: '2022-12-19T20:43:45.879Z',
-  updated_by: 'elastic',
-  version: '1.0.0',
-  secret_references: [
-    {
-      id: 'ref1',
-    },
-  ],
-  spaceIds: ['space1'],
-};
+let testPackagePolicy: PackagePolicy;
 
 describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
@@ -218,6 +175,60 @@ describe('When calling package policy', () => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
+    testPackagePolicy = {
+      agents: 100,
+      created_at: '2022-12-19T20:43:45.879Z',
+      created_by: 'elastic',
+      description: '',
+      enabled: true,
+      id: '123',
+      inputs: [
+        {
+          streams: [
+            {
+              id: '1',
+              compiled_stream: {},
+              enabled: true,
+              keep_enabled: false,
+              release: 'beta',
+              vars: { var: { type: 'text', value: 'value', frozen: false } },
+              config: { config: { type: 'text', value: 'value', frozen: false } },
+              data_stream: { dataset: 'apache.access', type: 'logs', elasticsearch: {} },
+            },
+          ],
+          compiled_input: '',
+          id: '1',
+          enabled: true,
+          type: 'logs',
+          policy_template: '',
+          keep_enabled: false,
+          vars: { var: { type: 'text', value: 'value', frozen: false } },
+          config: { config: { type: 'text', value: 'value', frozen: false } },
+        },
+      ],
+      vars: { var: { type: 'text', value: 'value', frozen: false } },
+      name: 'Package Policy 123',
+      namespace: 'default',
+      package: {
+        name: 'a-package',
+        title: 'package A',
+        version: '1.0.0',
+        experimental_data_stream_features: [{ data_stream: 'logs', features: { tsdb: true } }],
+        requires_root: false,
+      },
+      policy_id: 'agent-policy-id-a',
+      policy_ids: ['agent-policy-id-a'],
+      revision: 1,
+      updated_at: '2022-12-19T20:43:45.879Z',
+      updated_by: 'elastic',
+      version: '1.0.0',
+      secret_references: [
+        {
+          id: 'ref1',
+        },
+      ],
+      spaceIds: ['space1'],
+    };
   });
 
   afterEach(() => {
@@ -601,9 +612,36 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: { items },
       });
-      BulkGetPackagePoliciesResponseBodySchema.validate({ items });
       const validationResp = BulkGetPackagePoliciesResponseBodySchema.validate({ items });
       expect(validationResp).toEqual({ items });
+    });
+  });
+
+  describe('orphaned package policies api handler', () => {
+    it('should return valid response', async () => {
+      const items: PackagePolicy[] = [testPackagePolicy];
+      const expectedResponse = {
+        items,
+        total: 1,
+      };
+      packagePolicyServiceMock.list.mockResolvedValue({
+        items: [testPackagePolicy],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      });
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 20,
+      });
+      await getOrphanedPackagePolicies(context, {} as any, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expectedResponse,
+      });
+      const validationResp = OrphanedPackagePoliciesResponseSchema.validate(expectedResponse);
+      expect(validationResp).toEqual(expectedResponse);
     });
   });
 
@@ -621,6 +659,46 @@ describe('When calling package policy', () => {
       });
       const validationResp = PackagePolicyResponseSchema.validate(testPackagePolicy);
       expect(validationResp).toEqual(testPackagePolicy);
+    });
+
+    it('should return valid response simplified format', async () => {
+      packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          packagePolicyId: '1',
+        },
+        query: {
+          format: 'simplified',
+        },
+      });
+      await getOnePackagePolicyHandler(context, request, response);
+      const simplifiedPackagePolicy = {
+        ...testPackagePolicy,
+        inputs: {
+          logs: {
+            enabled: true,
+            streams: {
+              'apache.access': {
+                enabled: true,
+                vars: {
+                  var: 'value',
+                },
+              },
+            },
+            vars: {
+              var: 'value',
+            },
+          },
+        },
+        vars: {
+          var: 'value',
+        },
+      };
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: simplifiedPackagePolicy },
+      });
+      const validationResp = PackagePolicyResponseSchema.validate(simplifiedPackagePolicy);
+      expect(validationResp).toEqual(simplifiedPackagePolicy);
     });
   });
 

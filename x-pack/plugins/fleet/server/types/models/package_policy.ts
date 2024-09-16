@@ -371,6 +371,11 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
   agents: schema.maybe(schema.number()),
 });
 
+export const OrphanedPackagePoliciesResponseSchema = schema.object({
+  items: schema.arrayOf(PackagePolicyResponseSchema),
+  total: schema.number(),
+});
+
 export const DryRunPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.maybe(schema.string()),
