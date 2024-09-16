@@ -17,6 +17,7 @@ import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { getClientsFromAPIKey } from '../../lib/utils';
+import { EntityDefinitionWithState } from '../../lib/entities/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -68,9 +69,13 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
             esClient,
             soClient,
             id: builtInDefinition.id,
+            includeState: true,
           });
 
-          return { installedDefinition: definitions[0], builtInDefinition };
+          return {
+            installedDefinition: definitions[0] as EntityDefinitionWithState,
+            builtInDefinition,
+          };
         })
       ).then((results) =>
         results.reduce(

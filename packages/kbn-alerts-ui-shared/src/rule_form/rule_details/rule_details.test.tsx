@@ -52,10 +52,10 @@ describe('RuleDetails', () => {
     });
   });
 
-  test('Should allow tags to be changed', () => {
+  test('Should allow tags to be changed', async () => {
     render(<RuleDetails />);
 
-    userEvent.type(screen.getByTestId('comboBoxInput'), 'tag{enter}');
+    await userEvent.type(screen.getByTestId('comboBoxInput'), 'tag{enter}');
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setTags',
       payload: ['tag'],

@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import type { HttpSetup } from '@kbn/core/public';
 import { DetectionRuleCounter } from './detection_rule_counter';
 import { TestProvider } from '../test/test_provider';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
@@ -20,8 +21,22 @@ jest.mock('../common/api/use_fetch_detection_rules_alerts_status', () => ({
   useFetchDetectionRulesAlertsStatus: jest.fn(),
 }));
 
+const MOCK_TIMEOUT = 100;
+
 describe('DetectionRuleCounter', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     jest.restoreAllMocks();
   });
   it('should render loading skeleton when both rules and alerts are loading', () => {
@@ -105,7 +120,13 @@ describe('DetectionRuleCounter', () => {
       isLoading: false,
       isFetching: false,
     });
-    const createRuleFn = jest.fn(() => Promise.resolve({} as RuleResponse));
+    const createRuleFn = jest.fn(
+      (async () =>
+        await new Promise((resolve) =>
+          setTimeout(() => resolve({ name: 'the-rule-name', id: 'the-rule-id' }), MOCK_TIMEOUT)
+        )) as unknown as (http: HttpSetup) => Promise<RuleResponse>
+    );
+
     const { getByTestId, queryByTestId } = render(
       <TestProvider>
         <DetectionRuleCounter tags={['tag1', 'tag2']} createRuleFn={createRuleFn} />
@@ -114,10 +135,14 @@ describe('DetectionRuleCounter', () => {
 
     // Trigger createDetectionRuleOnClick
     const createRuleLink = getByTestId('csp:findings-flyout-create-detection-rule-link');
-    userEvent.click(createRuleLink);
+    await user.click(createRuleLink);
 
-    const loadingSpinner = getByTestId('csp:findings-flyout-detection-rule-counter-loading');
-    expect(loadingSpinner).toBeInTheDocument();
+    await waitFor(() => {
+      const loadingSpinner = getByTestId('csp:findings-flyout-detection-rule-counter-loading');
+      expect(loadingSpinner).toBeInTheDocument();
+    });
+
+    jest.advanceTimersByTime(MOCK_TIMEOUT + 10);
 
     (useFetchDetectionRulesByTags as jest.Mock).mockReturnValue({
       data: { total: 1 },
