@@ -580,7 +580,12 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
@@ -601,7 +606,12 @@ describe('Alerts Client', () => {
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -669,7 +679,12 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should update unflattened ongoing alerts in existing index', async () => {
@@ -772,7 +787,12 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should not update ongoing alerts in existing index when they are not in the processed alerts', async () => {
@@ -859,7 +879,12 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should recover recovered alerts in existing index', async () => {
@@ -953,7 +978,12 @@ describe('Alerts Client', () => {
               getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should recover unflattened recovered alerts in existing index', async () => {
@@ -1112,7 +1142,12 @@ describe('Alerts Client', () => {
               },
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should use startedAt time if provided', async () => {
@@ -1223,7 +1258,12 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should use runTimestamp time if provided', async () => {
@@ -1336,7 +1376,12 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should not try to index if no alerts', async () => {
@@ -1423,7 +1468,12 @@ describe('Alerts Client', () => {
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should log if alert to update belongs to a non-standard index', async () => {
@@ -1504,7 +1554,12 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should log and swallow error if bulk indexing throws error', async () => {
@@ -1533,7 +1588,12 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
         });
 
         test('should not persist alerts if shouldWrite is false', async () => {
@@ -2160,8 +2220,8 @@ describe('Alerts Client', () => {
             // @ts-ignore
             .mockResolvedValueOnce({});
 
-          // @ts-expect-error
-          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds(true);
+          // @ts-ignore - accessing private function
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Agent as SuperTestAgent } from 'supertest';
@@ -109,6 +110,9 @@ export const createMaintenanceWindow = async ({
     .expect(200);
 
   objectRemover.add(Spaces.space1.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+  // wait so cache expires
+  await setTimeoutAsync(10000);
   return window;
 };
 

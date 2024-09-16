@@ -8,6 +8,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
@@ -1682,6 +1683,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, window3.id, 'rules/maintenance_window', 'alerting', true);
 
+          // wait so cache expires
+          await setTimeoutAsync(10000);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1782,6 +1786,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
           objectRemover.add(space.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+          // wait so cache expires
+          await setTimeoutAsync(10000);
 
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)

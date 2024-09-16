@@ -69,7 +69,6 @@ import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
 import { GetTimeRangeResult } from './lib/get_time_range';
-import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -115,8 +114,8 @@ export interface RuleExecutorServices<
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   getDataViews: () => Promise<DataViewsContract>;
+  getMaintenanceWindowIds: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
-  maintenanceWindowsService?: MaintenanceWindowsService;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;
   savedObjectsClient: SavedObjectsClientContract;

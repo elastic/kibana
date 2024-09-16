@@ -65,12 +65,8 @@ const augmentAlerts = async <T>({
   intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
-  let maintenanceWindowIds: string[] = [];
-  if (alerts.length > 0 && options.services.maintenanceWindowsService) {
-    const { maintenanceWindowsWithoutScopedQueryIds } =
-      await options.services.maintenanceWindowsService.loadMaintenanceWindows();
-    maintenanceWindowIds = maintenanceWindowsWithoutScopedQueryIds ?? [];
-  }
+  const maintenanceWindowIds: string[] =
+    alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
 
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;

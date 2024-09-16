@@ -217,6 +217,19 @@ export class RuleTypeRunner<
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
                   getDataViews: executorServices.getDataViews,
+                  getMaintenanceWindowIds: async () => {
+                    if (context.maintenanceWindowsService) {
+                      const { maintenanceWindowsWithoutScopedQueryIds } =
+                        await context.maintenanceWindowsService.loadMaintenanceWindows({
+                          eventLogger: context.alertingEventLogger,
+                          request: context.request,
+                          ruleTypeCategory: ruleType.category,
+                          spaceId: context.spaceId,
+                        });
+                      return maintenanceWindowsWithoutScopedQueryIds ?? [];
+                    }
+                    return [];
+                  },
                   getSearchSourceClient: async () => {
                     if (!wrappedSearchSourceClient) {
                       wrappedSearchSourceClient =
@@ -224,7 +237,6 @@ export class RuleTypeRunner<
                     }
                     return wrappedSearchSourceClient.searchSourceClient;
                   },
-                  maintenanceWindowsService: context.maintenanceWindowsService,
                   ruleMonitoringService: executorServices.ruleMonitoringService,
                   ruleResultService: executorServices.ruleResultService,
                   savedObjectsClient: executorServices.savedObjectsClient,

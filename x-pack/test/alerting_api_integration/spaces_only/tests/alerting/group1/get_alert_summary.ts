@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -307,6 +307,9 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           'alerting',
           true
         );
+
+        // wait so cache expires
+        await setTimeoutAsync(10000);
 
         // pattern of when the rule should fire
         const pattern = {

@@ -83,12 +83,10 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
@@ -98,6 +96,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -108,7 +107,6 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 }));
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
-
 jest.mock('../monitoring/rule_result_service');
 
 jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
@@ -159,7 +157,6 @@ describe('Task Runner', () => {
     getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
-  const maintenanceWindowClient = maintenanceWindowClientMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
   const rulesSettingsService = rulesSettingsServiceMock.create();
 
@@ -235,7 +232,6 @@ describe('Task Runner', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue([]);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -246,6 +242,10 @@ describe('Task Runner', () => {
     rulesSettingsService.getSettings.mockResolvedValue({
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+    });
+    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
     });
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
@@ -643,6 +643,21 @@ describe('Task Runner', () => {
   );
 
   test('skips alert notification if there are active maintenance windows', async () => {
+    const mw = [
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-2',
+      } as MaintenanceWindow,
+    ];
+    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
+    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: mw,
+      maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -669,29 +684,16 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-      {
-        ...getMockMaintenanceWindow(),
-        id: 'test-id-2',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
-
-    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',
       logAlert: 2,
-      maintenanceWindowIds,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
       1,
@@ -716,6 +718,18 @@ describe('Task Runner', () => {
   });
 
   test('skips alert notification if active maintenance window contains the rule type category', async () => {
+    const mw = [
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+    ];
+    const maintenanceWindowIds = ['test-id-1'];
+    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: mw,
+      maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -742,26 +756,16 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
-
-    const maintenanceWindowIds = ['test-id-1'];
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',
       logAlert: 2,
-      maintenanceWindowIds,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
       1,
@@ -785,6 +789,10 @@ describe('Task Runner', () => {
   });
 
   test('allows alert notification if active maintenance window does not contain the rule type category', async () => {
+    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -811,13 +819,6 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['something-else'] as unknown as MaintenanceWindow['categoryIds'],
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();

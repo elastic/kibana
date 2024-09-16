@@ -348,7 +348,12 @@ describe('Legacy Alerts Client', () => {
       '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
     });
 
-    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+      eventLogger: alertingEventLogger,
+      request: fakeRequest,
+      ruleTypeCategory: 'test',
+      spaceId: 'space1',
+    });
   });
 
   test('processAlerts() should set maintenance windows IDs on new alerts', async () => {
@@ -420,7 +425,12 @@ describe('Legacy Alerts Client', () => {
       alertDelay: 5,
     });
 
-    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
+    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+      eventLogger: alertingEventLogger,
+      request: fakeRequest,
+      ruleTypeCategory: 'test',
+      spaceId: 'space1',
+    });
 
     expect(getAlertsForNotification).toHaveBeenCalledWith(
       {

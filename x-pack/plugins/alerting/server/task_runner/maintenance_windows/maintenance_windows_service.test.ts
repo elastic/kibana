@@ -5,26 +5,21 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { MaintenanceWindowsService } from './maintenance_windows_service';
 import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
-import { getMaintenanceWindows } from './get_maintenance_windows';
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../common';
-
-jest.mock('./get_maintenance_windows', () => {
-  const originalModule = jest.requireActual('./get_maintenance_windows');
-  return {
-    ...originalModule,
-    getMaintenanceWindows: jest.fn(),
-  };
-});
+import { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
+import { FilterStateStore } from '@kbn/es-query';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger = loggingSystemMock.createLogger();
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
+let fakeTimer: sinon.SinonFakeTimers;
 
 const maintenanceWindows = [
   {
@@ -60,120 +55,319 @@ const fakeRequest = {
 } as unknown as KibanaRequest;
 
 describe('MaintenanceWindowsService', () => {
+  beforeAll(() => {
+    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T08:15:00.000Z'));
+  });
+
   beforeEach(() => {
+    fakeTimer.reset();
     jest.clearAllMocks();
   });
 
-  test('should load maintenance windows', async () => {
-    (getMaintenanceWindows as jest.Mock).mockReturnValueOnce(maintenanceWindows);
+  afterAll(() => fakeTimer.restore());
+
+  test('should load maintenance windows if none in cache', async () => {
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      alertingEventLogger,
       getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
 
-    maintenanceWindowsService.initialize({
+    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
       request: fakeRequest,
-      ruleId: '1',
-      ruleTypeId: 'category',
-      ruleTypeCategory: 'example-rule-type',
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
+
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toEqual({
+      lastUpdated: 1677485700000,
+      activeMaintenanceWindows: maintenanceWindows,
     });
 
-    const result = await maintenanceWindowsService.loadMaintenanceWindows();
-    expect(result.maintenanceWindows).toEqual(maintenanceWindows);
-    expect(result.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
+    expect(windows.maintenanceWindows).toEqual(maintenanceWindows);
+    expect(windows.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
 
-    expect(getMaintenanceWindows).toHaveBeenCalledTimes(1);
-    expect(getMaintenanceWindows).toHaveBeenCalledWith({
-      fakeRequest,
-      getMaintenanceWindowClientWithRequest: expect.any(Function),
-      logger,
-      ruleId: '1',
-      ruleTypeId: 'category',
-      ruleTypeCategory: 'example-rule-type',
-    });
-
-    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledTimes(1);
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
       'test-id1',
       'test-id2',
     ]);
   });
 
+  test('should return empty arrays if fetch settings errors and nothing in cache', async () => {
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
+
+    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
+
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
+
+    expect(windows.maintenanceWindows).toEqual([]);
+    expect(windows.maintenanceWindowsWithoutScopedQueryIds).toEqual([]);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
+  });
+
+  test('should fetch maintenance windows per space', async () => {
+    const newSpaceMW = [
+      {
+        ...getMockMaintenanceWindow(),
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-new-space-id2',
+      },
+    ];
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(newSpaceMW);
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('new-space')).toBeUndefined();
+
+    const windowsDefault = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    const windowsNewSpace = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'new-space',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(2);
+
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('default')).toEqual({
+      lastUpdated: 1677485700000,
+      activeMaintenanceWindows: maintenanceWindows,
+    });
+    // @ts-ignore - accessing private variable
+    expect(maintenanceWindowsService.windows.get('new-space')).toEqual({
+      lastUpdated: 1677485700000,
+      activeMaintenanceWindows: newSpaceMW,
+    });
+
+    expect(windowsDefault.maintenanceWindows).toEqual(maintenanceWindows);
+    expect(windowsDefault.maintenanceWindowsWithoutScopedQueryIds).toEqual([
+      'test-id1',
+      'test-id2',
+    ]);
+
+    expect(windowsNewSpace.maintenanceWindows).toEqual(newSpaceMW);
+    expect(windowsNewSpace.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-new-space-id2']);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id1',
+      'test-id2',
+    ]);
+  });
+
+  test('should use cached windows if cache has not expired', async () => {
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+
+    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    fakeTimer.tick(30000);
+    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
+
+    expect(windows1.maintenanceWindows).toEqual(maintenanceWindows);
+    expect(windows1.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
+    expect(windows1).toEqual(windows2);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id1',
+      'test-id2',
+    ]);
+  });
+
+  test('should refetch windows if cache has expired', async () => {
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
+      maintenanceWindows[0],
+    ]);
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+
+    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    fakeTimer.tick(61000);
+    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(2);
+
+    expect(windows1.maintenanceWindows).toEqual(maintenanceWindows);
+    expect(windows1.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
+    expect(windows2.maintenanceWindows).toEqual([maintenanceWindows[0]]);
+    expect(windows2.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1']);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id1',
+      'test-id2',
+    ]);
+  });
+
+  test('should return cached windows if refetching throws an error', async () => {
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+
+    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+    fakeTimer.tick(61000);
+    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'rule-category',
+    });
+
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(2);
+
+    expect(windows1.maintenanceWindows).toEqual(maintenanceWindows);
+    expect(windows1.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
+    expect(windows1).toEqual(windows2);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id1',
+      'test-id2',
+    ]);
+  });
+
+  test('should filter by rule category', async () => {
+    const mw = [
+      {
+        ...maintenanceWindows[0],
+        categoryIds: ['observability', 'management'] as MaintenanceWindowCategoryIds,
+      },
+      maintenanceWindows[1],
+    ];
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+
+    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'securitySolution',
+    });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
+
+    expect(windows.maintenanceWindows).toEqual([maintenanceWindows[1]]);
+    expect(windows.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id2']);
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id2']);
+  });
+
   test('should not call alertingEventLogger.setMaintenanceWindowIds if all maintenance windows have scoped queries', async () => {
-    const mwWithScopedQuery = maintenanceWindows.map((mw) => ({ ...mw, scopedQuery: 'test' }));
-    (getMaintenanceWindows as jest.Mock).mockReturnValueOnce(mwWithScopedQuery);
+    const mw = maintenanceWindows.map((window) => ({
+      ...window,
+      scopedQuery: {
+        kql: "_id: '1234'",
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+              key: 'kibana.alert.action_group',
+              field: 'kibana.alert.action_group',
+              params: {
+                query: 'test',
+              },
+              type: 'phrase',
+            },
+            $state: {
+              store: FilterStateStore.APP_STATE,
+            },
+            query: {
+              match_phrase: {
+                'kibana.alert.action_group': 'test',
+              },
+            },
+          },
+        ],
+      },
+    }));
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      alertingEventLogger,
       getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
-    maintenanceWindowsService.initialize({
+    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
       request: fakeRequest,
-      ruleId: '1',
-      ruleTypeId: 'category',
-      ruleTypeCategory: 'example-rule-type',
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'securitySolution',
     });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
 
-    const result = await maintenanceWindowsService.loadMaintenanceWindows();
-    expect(result.maintenanceWindows).toEqual(mwWithScopedQuery);
-    expect(result.maintenanceWindowsWithoutScopedQueryIds).toEqual([]);
-
-    expect(getMaintenanceWindows).toHaveBeenCalledTimes(1);
-    expect(getMaintenanceWindows).toHaveBeenCalledWith({
-      fakeRequest,
-      getMaintenanceWindowClientWithRequest: expect.any(Function),
-      logger,
-      ruleId: '1',
-      ruleTypeId: 'category',
-      ruleTypeCategory: 'example-rule-type',
-    });
+    expect(windows.maintenanceWindows).toEqual(mw);
+    expect(windows.maintenanceWindowsWithoutScopedQueryIds).toEqual([]);
 
     expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
-  });
-
-  test('should not load maintenance windows if not initialized', async () => {
-    const maintenanceWindowsService = new MaintenanceWindowsService({
-      alertingEventLogger,
-      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
-      logger,
-    });
-
-    const result = await maintenanceWindowsService.loadMaintenanceWindows();
-    expect(result.maintenanceWindows).toEqual([]);
-    expect(result.maintenanceWindowsWithoutScopedQueryIds).toEqual([]);
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      `Not loading maintenance windows because the service is not initialized.`
-    );
-    expect(getMaintenanceWindows).not.toHaveBeenCalled();
-    expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
-  });
-
-  test('should not load maintenance windows if already loaded', async () => {
-    (getMaintenanceWindows as jest.Mock).mockReturnValueOnce(maintenanceWindows);
-    const maintenanceWindowsService = new MaintenanceWindowsService({
-      alertingEventLogger,
-      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
-      logger,
-    });
-
-    maintenanceWindowsService.initialize({
-      request: fakeRequest,
-      ruleId: '1',
-      ruleTypeId: 'category',
-      ruleTypeCategory: 'example-rule-type',
-    });
-
-    const result1 = await maintenanceWindowsService.loadMaintenanceWindows();
-    const result2 = await maintenanceWindowsService.loadMaintenanceWindows();
-
-    expect(result1.maintenanceWindows).toEqual(maintenanceWindows);
-    expect(result1.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1', 'test-id2']);
-    expect(result1).toEqual(result2);
-
-    expect(getMaintenanceWindows).toHaveBeenCalledTimes(1);
-    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledTimes(1);
   });
 });

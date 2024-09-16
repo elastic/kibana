@@ -187,7 +187,10 @@ describe('Task Runner Cancel', () => {
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-
+    maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
+    });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);

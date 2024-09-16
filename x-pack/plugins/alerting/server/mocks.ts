@@ -23,7 +23,6 @@ import {
   PublicRuleMonitoringService,
 } from './types';
 import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
-import { maintenanceWindowsServiceMock } from './task_runner/maintenance_windows/maintenance_windows_service.mock';
 
 export { rulesClientMock };
 
@@ -170,8 +169,8 @@ const createRuleExecutorServicesMock = <
     },
     alertsClient: publicAlertsClientMock.create(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
     getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
-    maintenanceWindowsService: maintenanceWindowsServiceMock.create(),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

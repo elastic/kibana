@@ -51,40 +51,6 @@ export class MaintenanceWindowsService {
     }
   }
 
-  public async getMaintenanceWindows(
-    opts: GetMaintenanceWindowsOpts
-  ): Promise<MaintenanceWindow[]> {
-    const now = Date.now();
-    if (this.windows.has(opts.spaceId)) {
-      const windowsFromLastUpdate = this.windows.get(opts.spaceId)!;
-      const lastUpdated = new Date(windowsFromLastUpdate.lastUpdated).getTime();
-
-      if (now - lastUpdated >= this.cacheIntervalMs) {
-        // cache expired, refetch settings
-        try {
-          return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
-        } catch (err) {
-          // return cached settings on error
-          this.options.logger.debug(
-            `Failed to fetch maintenance windows after cache expiration, using cached windows: ${err.message}`
-          );
-          return windowsFromLastUpdate.activeMaintenanceWindows;
-        }
-      } else {
-        return windowsFromLastUpdate.activeMaintenanceWindows;
-      }
-    } else {
-      // nothing in cache, fetch settings
-      try {
-        return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
-      } catch (err) {
-        // return default settings on error
-        this.options.logger.debug(`Failed to fetch initial maintenance windows: ${err.message}`);
-        return [];
-      }
-    }
-  }
-
   public async loadMaintenanceWindows(
     opts: LoadMaintenanceWindowsOpts
   ): Promise<MaintenanceWindowData> {
@@ -117,6 +83,40 @@ export class MaintenanceWindowsService {
     }
 
     return { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds };
+  }
+
+  private async getMaintenanceWindows(
+    opts: GetMaintenanceWindowsOpts
+  ): Promise<MaintenanceWindow[]> {
+    const now = Date.now();
+    if (this.windows.has(opts.spaceId)) {
+      const windowsFromLastUpdate = this.windows.get(opts.spaceId)!;
+      const lastUpdated = new Date(windowsFromLastUpdate.lastUpdated).getTime();
+
+      if (now - lastUpdated >= this.cacheIntervalMs) {
+        // cache expired, refetch settings
+        try {
+          return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
+        } catch (err) {
+          // return cached settings on error
+          this.options.logger.debug(
+            `Failed to fetch maintenance windows after cache expiration, using cached windows: ${err.message}`
+          );
+          return windowsFromLastUpdate.activeMaintenanceWindows;
+        }
+      } else {
+        return windowsFromLastUpdate.activeMaintenanceWindows;
+      }
+    } else {
+      // nothing in cache, fetch settings
+      try {
+        return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
+      } catch (err) {
+        // return default settings on error
+        this.options.logger.debug(`Failed to fetch initial maintenance windows: ${err.message}`);
+        return [];
+      }
+    }
   }
 
   private async fetchMaintenanceWindows(
