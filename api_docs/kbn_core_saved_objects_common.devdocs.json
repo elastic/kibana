@@ -1657,19 +1657,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "canvas",
@@ -1912,11 +1912,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
