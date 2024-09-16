@@ -20,18 +20,16 @@ import { State } from '../store/state';
 
 describe('PreviewSection', () => {
   const context: State = {
-    data: {
-      panels: {
-        byId: {
-          flyout: {
-            right: undefined,
-            left: undefined,
-            preview: [
-              {
-                id: 'key',
-              },
-            ],
-          },
+    panels: {
+      byId: {
+        flyout: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
         },
       },
     },

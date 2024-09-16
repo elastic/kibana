@@ -33,10 +33,8 @@ const registeredPanels: Panel[] = [
 describe('ExpandableFlyout', () => {
   it(`shouldn't render flyout if no panels`, () => {
     const state: State = {
-      data: {
-        panels: {
-          byId: {},
-        },
+      panels: {
+        byId: {},
       },
     };
 
@@ -51,16 +49,14 @@ describe('ExpandableFlyout', () => {
 
   it('should render right section', () => {
     const state = {
-      data: {
-        panels: {
-          byId: {
-            [id]: {
-              right: {
-                id: 'key',
-              },
-              left: undefined,
-              preview: undefined,
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key',
             },
+            left: undefined,
+            preview: undefined,
           },
         },
       },
@@ -77,16 +73,14 @@ describe('ExpandableFlyout', () => {
 
   it('should render left section', () => {
     const state = {
-      data: {
-        panels: {
-          byId: {
-            [id]: {
-              right: undefined,
-              left: {
-                id: 'key',
-              },
-              preview: undefined,
+      panels: {
+        byId: {
+          [id]: {
+            right: undefined,
+            left: {
+              id: 'key',
             },
+            preview: undefined,
           },
         },
       },
@@ -103,18 +97,16 @@ describe('ExpandableFlyout', () => {
 
   it('should render preview section', () => {
     const state = {
-      data: {
-        panels: {
-          byId: {
-            [id]: {
-              right: undefined,
-              left: undefined,
-              preview: [
-                {
-                  id: 'key',
-                },
-              ],
-            },
+      panels: {
+        byId: {
+          [id]: {
+            right: undefined,
+            left: undefined,
+            preview: [
+              {
+                id: 'key',
+              },
+            ],
           },
         },
       },
@@ -131,16 +123,14 @@ describe('ExpandableFlyout', () => {
 
   it('should not render flyout when right has value but does not matches registered panels', () => {
     const state = {
-      data: {
-        panels: {
-          byId: {
-            [id]: {
-              right: {
-                id: 'key1',
-              },
-              left: undefined,
-              preview: undefined,
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key1',
             },
+            left: undefined,
+            preview: undefined,
           },
         },
       },
@@ -158,16 +148,14 @@ describe('ExpandableFlyout', () => {
 
   it('should render the menu to change display options', () => {
     const state = {
-      data: {
-        panels: {
-          byId: {
-            [id]: {
-              right: {
-                id: 'key',
-              },
-              left: undefined,
-              preview: undefined,
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key',
             },
+            left: undefined,
+            preview: undefined,
           },
         },
       },

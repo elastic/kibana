@@ -11,12 +11,12 @@ import { createContext } from 'react';
 import { createDispatchHook, createSelectorHook, ReactReduxContextValue } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
-import { dataReducer } from './reducers';
+import { panelsReducer } from './reducers';
 import { initialState, State } from './state';
 
 export const store = configureStore({
   reducer: {
-    data: dataReducer,
+    panels: panelsReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });
@@ -31,9 +31,7 @@ export const useSelector = createSelectorHook(Context);
 
 const stateSelector = (state: State) => state;
 
-const dataSelector = createSelector(stateSelector, (state) => state.data);
-
-const panelsSelector = createSelector(dataSelector, (state) => state.panels);
+const panelsSelector = createSelector(stateSelector, (state) => state.panels);
 export const selectPanelsById = (id: string) =>
   createSelector(panelsSelector, (state) => state.byId[id] || {});
 export const selectNeedsSync = () => createSelector(panelsSelector, (state) => state.needsSync);

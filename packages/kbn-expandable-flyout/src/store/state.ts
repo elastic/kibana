@@ -44,24 +44,13 @@ export const initialPanelsState: PanelsState = {
   needsSync: false,
 };
 
-export interface DataState {
+export interface State {
   /**
-   * All panels information
+   * All panels related information
    */
   panels: PanelsState;
 }
 
-export const initialDataState: DataState = {
-  panels: initialPanelsState,
-};
-
-export interface State {
-  /**
-   * All data related information
-   */
-  data: DataState;
-}
-
 export const initialState: State = {
-  data: initialDataState,
+  panels: initialPanelsState,
 };

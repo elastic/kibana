@@ -28,17 +28,15 @@ describe('UrlSynchronizer', () => {
     const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
 
     const initialState: State = {
-      data: {
-        panels: {
-          byId: {
-            [urlKey]: {
-              right: { id: 'key1' },
-              left: { id: 'key11' },
-              preview: undefined,
-            },
+      panels: {
+        byId: {
+          [urlKey]: {
+            right: { id: 'key1' },
+            left: { id: 'key11' },
+            preview: undefined,
           },
-          needsSync: true,
         },
+        needsSync: true,
       },
     };
 
@@ -59,11 +57,9 @@ describe('UrlSynchronizer', () => {
       change$: mockChange$,
     });
     const initialState: State = {
-      data: {
-        panels: {
-          byId: {},
-          needsSync: true,
-        },
+      panels: {
+        byId: {},
+        needsSync: true,
       },
     };
 
@@ -89,17 +85,15 @@ describe('UrlSynchronizer', () => {
       change$: mockChange$,
     });
     const initialState: State = {
-      data: {
-        panels: {
-          byId: {
-            [urlKey]: {
-              right: { id: 'key1' },
-              left: { id: 'key2' },
-              preview: undefined,
-            },
+      panels: {
+        byId: {
+          [urlKey]: {
+            right: { id: 'key1' },
+            left: { id: 'key2' },
+            preview: undefined,
           },
-          needsSync: true,
         },
+        needsSync: true,
       },
     };
 
