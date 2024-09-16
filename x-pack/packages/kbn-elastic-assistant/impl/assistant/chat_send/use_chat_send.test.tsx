@@ -64,10 +64,11 @@ describe('use chat send', () => {
   });
   it('handleOnChatCleared clears the conversation', async () => {
     (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
-    const { result } = renderHook(() => useChatSend(testProps), {
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await act(async () => {
+    await waitForNextUpdate();
+    act(() => {
       result.current.handleOnChatCleared();
     });
     expect(clearConversation).toHaveBeenCalled();
@@ -112,7 +113,7 @@ describe('use chat send', () => {
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result } = renderHook(
+    const { result, waitForNextUpdate } = renderHook(
       () =>
         useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
@@ -120,7 +121,10 @@ describe('use chat send', () => {
       }
     );
 
-    result.current.handleRegenerateResponse();
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleRegenerateResponse();
+    });
     expect(removeLastMessage).toHaveBeenCalledWith('welcome-id');
 
     await waitFor(() => {
@@ -131,10 +135,13 @@ describe('use chat send', () => {
   });
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps), {
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleChatSend(promptText);
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleChatSend(promptText);
+    });
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
@@ -143,6 +150,7 @@ describe('use chat send', () => {
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
       });
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
         conversationId: testProps.currentConversation?.title,
@@ -150,6 +158,7 @@ describe('use chat send', () => {
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
       });
     });
   });
