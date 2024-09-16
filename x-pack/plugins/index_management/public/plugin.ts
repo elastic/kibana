@@ -48,8 +48,8 @@ export class IndexMgmtUIPlugin
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
-    enableSizeAndDocCount: boolean;
     enableDataStreamStats: boolean;
+    enableSizeAndDocCount: boolean;
     editableIndexSettings: 'all' | 'limited';
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
@@ -67,8 +67,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
-      enableSizeAndDocCount,
       enableDataStreamStats,
+      enableSizeAndDocCount,
       editableIndexSettings,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
@@ -79,8 +79,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
-      enableSizeAndDocCount: enableSizeAndDocCount ?? true,
       enableDataStreamStats: enableDataStreamStats ?? true,
+      enableSizeAndDocCount: enableSizeAndDocCount ?? false,
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
