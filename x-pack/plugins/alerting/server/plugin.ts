@@ -116,6 +116,7 @@ import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/t
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
+import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -604,10 +605,14 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       eventLogger: this.eventLogger!,
       executionContext: core.executionContext,
-      getMaintenanceWindowClientWithRequest,
       getRulesClientWithRequest,
       kibanaBaseUrl: this.kibanaBaseUrl,
       logger,
+      maintenanceWindowsService: new MaintenanceWindowsService({
+        cacheInterval: this.config.rulesSettings.cacheInterval,
+        getMaintenanceWindowClientWithRequest,
+        logger,
+      }),
       maxAlerts: this.config.rules.run.alerts.max,
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       ruleTypeRegistry: this.ruleTypeRegistry!,

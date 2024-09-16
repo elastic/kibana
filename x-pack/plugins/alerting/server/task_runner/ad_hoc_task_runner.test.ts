@@ -30,7 +30,6 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
@@ -94,6 +93,7 @@ import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
@@ -142,7 +142,7 @@ const dataViewsMock = {
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const maintenanceWindowClient = maintenanceWindowClientMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const rulesClient = rulesClientMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 const rulesSettingsService = rulesSettingsServiceMock.create();
@@ -165,7 +165,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   encryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   executionContext: executionContextServiceMock.createInternalStartContract(),
-  getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+  maintenanceWindowsService,
   getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
   kibanaBaseUrl: 'https://localhost:5601',
   logger,

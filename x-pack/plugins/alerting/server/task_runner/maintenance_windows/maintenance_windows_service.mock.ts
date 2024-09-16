@@ -8,7 +8,7 @@
 const createMaintenanceWindowsServiceMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
-      initialize: jest.fn(),
+      getMaintenanceWindows: jest.fn(),
       loadMaintenanceWindows: jest.fn(),
     };
   });

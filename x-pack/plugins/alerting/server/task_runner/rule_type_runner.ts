@@ -31,7 +31,6 @@ import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
 import { withAlertingSpan } from './lib';
 import { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
-import { MaintenanceWindowsService } from './maintenance_windows';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -89,7 +88,6 @@ interface RunOpts<
       nowDate?: string
     ) => { dateStart: string; dateEnd: string };
   };
-  maintenanceWindowsService?: MaintenanceWindowsService;
   rule: RuleData<Params>;
   ruleType: NormalizedRuleType<
     Params,
@@ -146,7 +144,6 @@ export class RuleTypeRunner<
     alertsClient,
     executionId,
     executorServices,
-    maintenanceWindowsService,
     rule,
     ruleType,
     startedAt,
@@ -227,7 +224,7 @@ export class RuleTypeRunner<
                     }
                     return wrappedSearchSourceClient.searchSourceClient;
                   },
-                  maintenanceWindowsService,
+                  maintenanceWindowsService: context.maintenanceWindowsService,
                   ruleMonitoringService: executorServices.ruleMonitoringService,
                   ruleResultService: executorServices.ruleResultService,
                   savedObjectsClient: executorServices.savedObjectsClient,
@@ -354,7 +351,6 @@ export class RuleTypeRunner<
     );
 
     alertsClient.logAlerts({
-      eventLogger: context.alertingEventLogger,
       ruleRunMetricsStore: context.ruleRunMetricsStore,
       shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(
         ruleType.cancelAlertsOnRuleTimeout

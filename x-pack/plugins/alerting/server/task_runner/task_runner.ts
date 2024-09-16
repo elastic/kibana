@@ -64,7 +64,6 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
 import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { MaintenanceWindowsService } from './maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
@@ -135,7 +134,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
-  private maintenanceWindowsService: MaintenanceWindowsService;
   private ruleTypeRunner: RuleTypeRunner<
     Params,
     ExtractedParams,
@@ -202,11 +200,6 @@ export class TaskRunner<
       timer: this.timer,
     });
     this.ruleResult = new RuleResultService();
-    this.maintenanceWindowsService = new MaintenanceWindowsService({
-      alertingEventLogger: this.alertingEventLogger,
-      getMaintenanceWindowClientWithRequest: this.context.getMaintenanceWindowClientWithRequest,
-      logger: this.logger,
-    });
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -302,8 +295,10 @@ export class TaskRunner<
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
+      maintenanceWindowsService: this.context.maintenanceWindowsService,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelaySettings.delay,
+      request: fakeRequest,
       ruleId,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -323,7 +318,6 @@ export class TaskRunner<
         executionId: this.executionId,
         logger: this.logger,
         maxAlerts: this.context.maxAlerts,
-        maintenanceWindowsService: this.maintenanceWindowsService,
         rule: {
           id: rule.id,
           name: rule.name,
@@ -363,7 +357,6 @@ export class TaskRunner<
       alertsClient,
       executionId: this.executionId,
       executorServices,
-      maintenanceWindowsService: this.maintenanceWindowsService,
       rule,
       ruleType: this.ruleType,
       startedAt: this.taskInstance.startedAt!,
@@ -528,14 +521,6 @@ export class TaskRunner<
 
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
-
-      // Load the maintenance windows
-      this.maintenanceWindowsService.initialize({
-        request: runRuleParams.fakeRequest,
-        ruleId,
-        ruleTypeId: this.ruleType.id,
-        ruleTypeCategory: this.ruleType.category,
-      });
 
       (async () => {
         try {

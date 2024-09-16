@@ -124,9 +124,12 @@ export class AlertsClient<
       ActionGroupIds,
       RecoveryActionGroupId
     >({
+      alertingEventLogger: this.options.alertingEventLogger,
       logger: this.options.logger,
       maintenanceWindowsService: this.options.maintenanceWindowsService,
+      request: this.options.request,
       ruleType: this.options.ruleType,
+      spaceId: this.options.spaceId,
     });
     this.indexTemplateAndPattern = getIndexTemplateAndPattern({
       context: this.options.ruleType.alerts?.context!,
@@ -696,7 +699,12 @@ export class AlertsClient<
     }
 
     const { maintenanceWindows } =
-      await this.options.maintenanceWindowsService.loadMaintenanceWindows();
+      await this.options.maintenanceWindowsService.loadMaintenanceWindows({
+        eventLogger: this.options.alertingEventLogger,
+        request: this.options.request,
+        ruleTypeCategory: this.ruleType.category,
+        spaceId: this.options.spaceId,
+      });
 
     const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
       maintenanceWindows: maintenanceWindows ?? [],

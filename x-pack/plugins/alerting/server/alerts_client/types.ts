@@ -115,7 +115,6 @@ export interface ProcessAlertsOpts {
 }
 
 export interface LogAlertsOpts {
-  eventLogger: AlertingEventLogger;
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }

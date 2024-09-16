@@ -78,6 +78,7 @@ import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter'
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import { KibanaRequest } from '@kbn/core/server';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -294,6 +295,22 @@ const defaultExecutionOpts = {
   startedAt: null,
 };
 
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
+
 const ruleInfo = `for test.rule-type:1 'rule-name'`;
 const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
@@ -319,13 +336,16 @@ describe('Alerts Client', () => {
         jest.clearAllMocks();
         logger = loggingSystemMock.createLogger();
         alertsClientParams = {
+          alertingEventLogger,
           logger,
           elasticsearchClientPromise: Promise.resolve(clusterClient),
+          request: fakeRequest,
           ruleType,
           maintenanceWindowsService,
           namespace: 'default',
           rule: alertRuleData,
           kibanaVersion: '8.9.0',
+          spaceId: 'space1',
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
         maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
@@ -352,11 +372,7 @@ describe('Alerts Client', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           alertDelay: 0,
         };
-        logAlertsOpts = {
-          eventLogger: alertingEventLogger,
-          shouldLogAlerts: false,
-          ruleRunMetricsStore,
-        };
+        logAlertsOpts = { shouldLogAlerts: false, ruleRunMetricsStore };
       });
 
       describe('initializeExecution()', () => {
@@ -1522,6 +1538,7 @@ describe('Alerts Client', () => {
 
         test('should not persist alerts if shouldWrite is false', async () => {
           alertsClientParams = {
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             maintenanceWindowsService,
@@ -1532,10 +1549,12 @@ describe('Alerts Client', () => {
                 shouldWrite: false,
               },
             },
+            request: fakeRequest,
             namespace: 'default',
             rule: alertRuleData,
             kibanaVersion: '8.9.0',
             dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+            spaceId: 'space1',
           };
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams

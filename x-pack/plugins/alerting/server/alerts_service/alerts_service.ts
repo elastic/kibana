@@ -234,12 +234,15 @@ export class AlertsService implements IAlertsService {
       ActionGroupIds,
       RecoveryActionGroupId
     >({
+      alertingEventLogger: opts.alertingEventLogger,
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType: opts.ruleType,
       maintenanceWindowsService: opts.maintenanceWindowsService,
       namespace: opts.namespace,
+      request: opts.request,
       rule: opts.rule,
+      spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       dataStreamAdapter: this.dataStreamAdapter,
     });

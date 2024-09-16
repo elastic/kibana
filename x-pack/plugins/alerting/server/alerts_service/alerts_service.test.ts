@@ -22,13 +22,32 @@ import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 jest.mock('../alerts_client');
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
+const alertingEventLogger = alertingEventLoggerMock.create();
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
 const SimulateTemplateResponse = {
   template: {
@@ -1510,10 +1529,13 @@ describe('Alerts Service', () => {
           );
 
           await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1530,12 +1552,15 @@ describe('Alerts Service', () => {
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1568,10 +1593,13 @@ describe('Alerts Service', () => {
             async () => alertsService.isInitialized() === true
           );
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1619,10 +1647,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1653,12 +1684,15 @@ describe('Alerts Service', () => {
           }
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1722,10 +1756,13 @@ describe('Alerts Service', () => {
           // call createAlertsClient at the same time which will trigger the retries
           const result = await Promise.all([
             alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
               maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1741,10 +1778,13 @@ describe('Alerts Service', () => {
               },
             }),
             alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
               maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1775,12 +1815,15 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1836,10 +1879,13 @@ describe('Alerts Service', () => {
           );
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1856,12 +1902,15 @@ describe('Alerts Service', () => {
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1925,10 +1974,13 @@ describe('Alerts Service', () => {
             }
 
             return await alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
               maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1952,12 +2004,15 @@ describe('Alerts Service', () => {
 
           expect(AlertsClient).toHaveBeenCalledTimes(2);
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2026,10 +2081,13 @@ describe('Alerts Service', () => {
             }
 
             return await alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
               maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2094,10 +2152,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2162,10 +2223,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2228,10 +2292,13 @@ describe('Alerts Service', () => {
           );
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
             maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

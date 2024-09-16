@@ -17,6 +17,8 @@ import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import { KibanaRequest } from '@kbn/core/server';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const scheduleActions = jest.fn();
@@ -83,6 +85,7 @@ jest.mock('../task_runner/log_alerts', () => ({ logAlerts: jest.fn() }));
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
+const alertingEventLogger = alertingEventLoggerMock.create();
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
@@ -118,6 +121,22 @@ const testAlert2 = {
   },
 };
 
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
+
 const defaultExecutionOpts = {
   maxAlerts: 1000,
   ruleLabel: `test: rule-name`,
@@ -137,7 +156,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('initializeExecution() should create alert factory with given alerts', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -154,7 +180,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('factory() should call getPublicAlertFactory on alert factory', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -163,7 +196,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('getAlert() should pass through to alert factory function', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -172,7 +212,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('checkLimitUsage() should pass through to alert factory function', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -181,7 +228,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('hasReachedAlertLimit() should pass through to alert factory function', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -235,7 +289,14 @@ describe('Legacy Alerts Client', () => {
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -337,7 +398,14 @@ describe('Legacy Alerts Client', () => {
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution({
       ...defaultExecutionOpts,
@@ -378,7 +446,14 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
-    const alertsClient = new LegacyAlertsClient({ logger, ruleType, maintenanceWindowsService });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
     expect(alertsClient.isTrackedAlert('1')).toBe(true);

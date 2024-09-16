@@ -56,7 +56,6 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -64,6 +63,7 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -85,6 +85,7 @@ const dataViewsMock = {
   getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const alertsService = alertsServiceMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -140,12 +141,10 @@ describe('Task Runner Cancel', () => {
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
-    getMaintenanceWindowClientWithRequest: jest
-      .fn()
-      .mockReturnValue(maintenanceWindowClientMock.create()),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger,
+    maintenanceWindowsService,
     maxAlerts: 1000,
     maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry,
@@ -187,9 +186,6 @@ describe('Task Runner Cancel', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
-    taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
-      maintenanceWindowClientMock.create()
-    );
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);

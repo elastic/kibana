@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
@@ -35,11 +35,15 @@ import {
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface LegacyAlertsClientParams {
+  alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
+  request: KibanaRequest;
   ruleType: UntypedNormalizedRuleType;
+  spaceId: string;
 }
 
 export class LegacyAlertsClient<
@@ -172,7 +176,12 @@ export class LegacyAlertsClient<
         keys(processedAlertsRecovered).length > 0
       ) {
         const { maintenanceWindowsWithoutScopedQueryIds } =
-          await this.options.maintenanceWindowsService.loadMaintenanceWindows();
+          await this.options.maintenanceWindowsService.loadMaintenanceWindows({
+            eventLogger: this.options.alertingEventLogger,
+            request: this.options.request,
+            ruleTypeCategory: this.options.ruleType.category,
+            spaceId: this.options.spaceId,
+          });
 
         for (const id in processedAlertsNew) {
           if (Object.hasOwn(processedAlertsNew, id)) {
@@ -208,10 +217,10 @@ export class LegacyAlertsClient<
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
   }
 
-  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
+  public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
-      alertingEventLogger: eventLogger,
+      alertingEventLogger: this.options.alertingEventLogger,
       newAlerts: this.processedAlerts.new,
       activeAlerts: this.processedAlerts.activeCurrent,
       recoveredAlerts: this.processedAlerts.recoveredCurrent,

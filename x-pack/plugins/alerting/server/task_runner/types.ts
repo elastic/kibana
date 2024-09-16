@@ -45,7 +45,6 @@ import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
   CombinedSummarizedAlerts,
-  MaintenanceWindowClientApi,
   RawRule,
   RulesClientApi,
   RuleTypeRegistry,
@@ -57,6 +56,7 @@ import { BackfillClient } from '../backfill_client/backfill_client';
 import { ElasticsearchError } from '../lib';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RulesSettingsService } from '../rules_settings';
+import { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -140,8 +140,10 @@ export type Executable<
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
   flappingSettings?: RulesSettingsFlappingProperties;
+  maintenanceWindowsService?: MaintenanceWindowsService;
   namespace?: string;
   queryDelaySec?: number;
+  request: KibanaRequest;
   ruleId: string;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -167,10 +169,10 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   eventLogger: IEventLogger;
   executionContext: ExecutionContextStart;
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
+  maintenanceWindowsService: MaintenanceWindowsService;
   maxAlerts: number;
   maxEphemeralActionsPerRule: number;
   ruleTypeRegistry: RuleTypeRegistry;

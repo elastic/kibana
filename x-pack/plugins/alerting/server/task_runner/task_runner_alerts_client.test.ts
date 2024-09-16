@@ -109,6 +109,7 @@ import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance
 import { MaintenanceWindowsService } from './maintenance_windows';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -130,6 +131,22 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
@@ -211,10 +228,10 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient,
       eventLogger: eventLoggerMock.create(),
       executionContext: executionContextServiceMock.createInternalStartContract(),
-      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
       getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
       kibanaBaseUrl: 'https://localhost:5601',
       logger,
+      maintenanceWindowsService,
       maxAlerts: 1000,
       maxEphemeralActionsPerRule: 10,
       ruleTypeRegistry,
@@ -258,9 +275,6 @@ describe('Task Runner', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
         });
-        taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
-          maintenanceWindowClient
-        );
         mockedRuleTypeSavedObject.monitoring!.run.history = [];
         mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
@@ -697,9 +711,11 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+          request: fakeRequest,
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
           maintenanceWindowsService,
+          spaceId: 'default',
         });
 
         testCorrectAlertsClientUsed({
@@ -785,6 +801,8 @@ describe('Task Runner', () => {
         expect(mockAlertsService.createAlertsClient).not.toHaveBeenCalled();
         expect(logger.error).not.toHaveBeenCalled();
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+          request: fakeRequest,
+          spaceId: 'default',
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
           maintenanceWindowsService,

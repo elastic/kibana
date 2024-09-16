@@ -7,21 +7,17 @@
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { MaintenanceWindow } from '../../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
+import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
 import { MaintenanceWindowClientApi } from '../../types';
 import { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
+import { withAlertingSpan } from '../lib';
+
+export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 interface MaintenanceWindowServiceOpts {
-  alertingEventLogger: AlertingEventLogger;
+  cacheInterval?: number;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   logger: Logger;
-}
-
-interface InitializeOpts {
-  request: KibanaRequest;
-  ruleId: string;
-  ruleTypeId: string;
-  ruleTypeCategory: string;
 }
 
 interface MaintenanceWindowData {
@@ -29,71 +25,113 @@ interface MaintenanceWindowData {
   maintenanceWindowsWithoutScopedQueryIds: string[];
 }
 
+interface GetMaintenanceWindowsOpts {
+  request: KibanaRequest;
+  spaceId: string;
+}
+
+type LoadMaintenanceWindowsOpts = GetMaintenanceWindowsOpts & {
+  eventLogger: AlertingEventLogger;
+  ruleTypeCategory: string;
+};
+
+interface LastUpdatedWindows {
+  lastUpdated: number;
+  activeMaintenanceWindows: MaintenanceWindow[];
+}
+
 export class MaintenanceWindowsService {
-  private readonly logger: Logger;
-  private request?: KibanaRequest;
-  private ruleId?: string;
-  private ruleTypeId?: string;
-  private ruleTypeCategory?: string;
-  private isInitialized: boolean = false;
-  private isLoaded: boolean = false;
-  private maintenanceWindows: MaintenanceWindow[] = [];
-  private maintenanceWindowsWithoutScopedQueryIds: string[] = [];
+  private cacheIntervalMs = DEFAULT_CACHE_INTERVAL_MS;
+
+  private windows: Map<string, LastUpdatedWindows> = new Map();
 
   constructor(private readonly options: MaintenanceWindowServiceOpts) {
-    this.logger = options.logger;
+    if (options.cacheInterval) {
+      this.cacheIntervalMs = options.cacheInterval;
+    }
   }
 
-  public initialize(opts: InitializeOpts) {
-    this.request = opts.request;
-    this.ruleId = opts.ruleId;
-    this.ruleTypeCategory = opts.ruleTypeCategory;
-    this.ruleTypeId = opts.ruleTypeId;
-    this.isInitialized = true;
+  public async getMaintenanceWindows(
+    opts: GetMaintenanceWindowsOpts
+  ): Promise<MaintenanceWindow[]> {
+    const now = Date.now();
+    if (this.windows.has(opts.spaceId)) {
+      const windowsFromLastUpdate = this.windows.get(opts.spaceId)!;
+      const lastUpdated = new Date(windowsFromLastUpdate.lastUpdated).getTime();
+
+      if (now - lastUpdated >= this.cacheIntervalMs) {
+        // cache expired, refetch settings
+        try {
+          return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
+        } catch (err) {
+          // return cached settings on error
+          this.options.logger.debug(
+            `Failed to fetch maintenance windows after cache expiration, using cached windows: ${err.message}`
+          );
+          return windowsFromLastUpdate.activeMaintenanceWindows;
+        }
+      } else {
+        return windowsFromLastUpdate.activeMaintenanceWindows;
+      }
+    } else {
+      // nothing in cache, fetch settings
+      try {
+        return await this.fetchMaintenanceWindows(opts.request, opts.spaceId, now);
+      } catch (err) {
+        // return default settings on error
+        this.options.logger.debug(`Failed to fetch initial maintenance windows: ${err.message}`);
+        return [];
+      }
+    }
   }
 
-  public async loadMaintenanceWindows(): Promise<MaintenanceWindowData> {
-    if (this.isLoaded) {
-      // don't load if already loaded
-      return {
-        maintenanceWindows: this.maintenanceWindows,
-        maintenanceWindowsWithoutScopedQueryIds: this.maintenanceWindowsWithoutScopedQueryIds,
-      };
-    }
+  public async loadMaintenanceWindows(
+    opts: LoadMaintenanceWindowsOpts
+  ): Promise<MaintenanceWindowData> {
+    const activeMaintenanceWindows = await this.getMaintenanceWindows({
+      request: opts.request,
+      spaceId: opts.spaceId,
+    });
 
-    if (!this.isInitialized) {
-      this.logger.warn(`Not loading maintenance windows because the service is not initialized.`);
-      return {
-        maintenanceWindows: [],
-        maintenanceWindowsWithoutScopedQueryIds: [],
-      };
-    }
-
-    this.maintenanceWindows = await getMaintenanceWindows({
-      fakeRequest: this.request!,
-      getMaintenanceWindowClientWithRequest: this.options.getMaintenanceWindowClientWithRequest,
-      logger: this.logger,
-      ruleId: this.ruleId!,
-      ruleTypeId: this.ruleTypeId!,
-      ruleTypeCategory: this.ruleTypeCategory!,
+    // Only look at maintenance windows for this rule category
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(opts.ruleTypeCategory)) {
+        return true;
+      }
+      return false;
     });
 
     // Set the event log MW Id field the first time with MWs without scoped queries
-    this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-      maintenanceWindows: this.maintenanceWindows,
+    const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
+      maintenanceWindows,
       withScopedQuery: false,
     });
 
-    if (this.maintenanceWindowsWithoutScopedQueryIds.length) {
-      this.options.alertingEventLogger.setMaintenanceWindowIds(
-        this.maintenanceWindowsWithoutScopedQueryIds
-      );
+    if (maintenanceWindowsWithoutScopedQueryIds.length) {
+      opts.eventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
     }
 
-    this.isLoaded = true;
-    return {
-      maintenanceWindows: this.maintenanceWindows,
-      maintenanceWindowsWithoutScopedQueryIds: this.maintenanceWindowsWithoutScopedQueryIds,
-    };
+    return { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds };
+  }
+
+  private async fetchMaintenanceWindows(
+    request: KibanaRequest,
+    spaceId: string,
+    now: number
+  ): Promise<MaintenanceWindow[]> {
+    return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
+      const maintenanceWindowClient = this.options.getMaintenanceWindowClientWithRequest(request);
+      const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
+      this.windows.set(spaceId, {
+        lastUpdated: now,
+        activeMaintenanceWindows,
+      });
+      return activeMaintenanceWindows;
+    });
   }
 }
