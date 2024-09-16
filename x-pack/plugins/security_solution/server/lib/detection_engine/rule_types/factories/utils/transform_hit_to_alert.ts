@@ -22,7 +22,7 @@ import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_f
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
-import { traverseDoc } from './strip_non_ecs_fields';
+import { traverseAndMutateDoc } from './strip_non_ecs_fields';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
 
@@ -116,8 +116,10 @@ export const transformHitToAlert = ({
       result: validatedSource,
       removed: removedSourceFields,
       fieldsToAdd,
-    } = traverseDoc(mergedDoc._source);
+    } = traverseAndMutateDoc(mergedDoc._source);
 
+    // The `alertFields` we add to alerts contain `event.kind: 'signal'` in dot notation. To avoid duplicating `event.kind`,
+    // we remove any existing `event.kind` field here before we merge `alertFields` into `validatedSource` later on
     if (robustGet({ key: EVENT_KIND, document: validatedSource }) != null) {
       robustSet({ key: EVENT_KIND, document: validatedSource, valueToSet: undefined });
     }

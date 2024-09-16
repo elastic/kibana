@@ -165,15 +165,21 @@ const bannedFields = ['kibana', 'signal', 'threshold_result', ALERT_THRESHOLD_RE
  * is computationally expensive so we only want to traverse it once, therefore a few distinct cases are handled in this function:
  * 1. Fields that we must explicitly remove, like `kibana` and `signal`, fields, are removed from the document.
  * 2. Fields that are incompatible with ECS are removed.
- * 3. All `event.*` fields are collected so we can copy them to `kibana.alert.original_event` after traversing the document.
+ * 3. All `event.*` fields are collected and returned in `fieldsToAdd` as `kibana.alert.original_event.*` so we can add them after traversing the document.
  * @param document The document to traverse
  * @returns The mutated document, a list of removed fields, and a list of new fields to add
  */
-export const traverseDoc = <T extends SourceFieldRecord>(document: T) => {
-  return internalTraverseDoc({ document, path: [], topLevel: true, removed: [], fieldsToAdd: [] });
+export const traverseAndMutateDoc = <T extends SourceFieldRecord>(document: T) => {
+  return internalTraverseAndMutateDoc({
+    document,
+    path: [],
+    topLevel: true,
+    removed: [],
+    fieldsToAdd: [],
+  });
 };
 
-const internalTraverseDoc = <T extends SourceFieldRecord>({
+const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
   document,
   path,
   topLevel,
@@ -219,7 +225,7 @@ const internalTraverseDoc = <T extends SourceFieldRecord>({
         deleted = true;
         removed.push({ key: fullPath, value });
       } else if (isSearchTypesRecord(value)) {
-        internalTraverseDoc({
+        internalTraverseAndMutateDoc({
           document: value,
           path: fullPathArray,
           topLevel: false,
@@ -279,7 +285,13 @@ const traverseArray = ({
       removed.push({ key: pathString, value });
       return false;
     } else if (isSearchTypesRecord(value)) {
-      internalTraverseDoc({ document: value, path, topLevel: false, removed, fieldsToAdd });
+      internalTraverseAndMutateDoc({
+        document: value,
+        path,
+        topLevel: false,
+        removed,
+        fieldsToAdd,
+      });
       return Object.keys(value).length > 0;
     } else {
       return true;

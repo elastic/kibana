@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { traverseDoc } from './strip_non_ecs_fields';
+import { traverseAndMutateDoc } from './strip_non_ecs_fields';
 
 describe('traverseDoc', () => {
   it('should not strip ECS compliant fields', () => {
@@ -19,14 +19,14 @@ describe('traverseDoc', () => {
       },
     };
 
-    const { result, removed } = traverseDoc(document);
+    const { result, removed } = traverseAndMutateDoc(document);
 
     expect(result).toEqual(document);
     expect(removed).toEqual([]);
   });
 
   it('should strip source object field if ECS mapping is not object', () => {
-    const { result, removed } = traverseDoc({
+    const { result, removed } = traverseAndMutateDoc({
       agent: {
         name: {
           first: 'test-1',
@@ -54,7 +54,7 @@ describe('traverseDoc', () => {
   });
 
   it('should strip source keyword field if ECS mapping is object', () => {
-    const { result, removed } = traverseDoc({
+    const { result, removed } = traverseAndMutateDoc({
       agent: 'test',
       message: 'test message',
     });
@@ -74,7 +74,7 @@ describe('traverseDoc', () => {
   // https://github.com/elastic/sdh-security-team/issues/736
   describe('fields that exists in the alerts mapping but not in local ECS(ruleRegistry) definition', () => {
     it('should strip object type "device" field if it is supplied as a keyword', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         device: 'test',
         message: 'test message',
       });
@@ -94,7 +94,7 @@ describe('traverseDoc', () => {
 
   describe('array fields', () => {
     it('should not strip arrays of objects when an object is expected', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         agent: [{ name: 'agent-1' }, { name: 'agent-2' }],
         message: 'test message',
       });
@@ -107,7 +107,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip conflicting fields in array of objects', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         agent: [
           {
             name: 'agent-1',
@@ -135,7 +135,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip conflicting array of keyword fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         agent: ['agent-1', 'agent-2'],
         message: 'test message',
       });
@@ -156,7 +156,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip conflicting array of object fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         agent: { name: [{ conflict: 'agent-1' }, { conflict: 'agent-2' }], type: 'filebeat' },
         message: 'test message',
       });
@@ -178,7 +178,7 @@ describe('traverseDoc', () => {
     });
 
     it('should entirely strip objects that end up empty in arrays', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         agent: [{ name: { conflict: 'agent-1' } }, { name: 'test' }],
         message: 'test message',
       });
@@ -198,7 +198,7 @@ describe('traverseDoc', () => {
 
   describe('dot notation', () => {
     it('should strip conflicting fields that use dot notation', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.conflict': 'some-value',
         message: 'test message',
       });
@@ -216,7 +216,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip conflicting fields that use dot notation and is an array', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.text': ['1'],
         message: 'test message',
       });
@@ -234,7 +234,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip conflicting fields that use dot notation and is an empty array but not report the empty array as removed', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.text': [],
         message: 'test message',
       });
@@ -247,7 +247,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip valid ECS fields that use dot notation', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name': 'some name',
         'agent.build.original': 'v10',
         message: 'test message',
@@ -266,7 +266,7 @@ describe('traverseDoc', () => {
   describe('non-ECS fields', () => {
     it('should not strip non-ECS fields that don`t conflict', () => {
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           non_ecs_object: {
             field1: 'value1',
           },
@@ -286,7 +286,7 @@ describe('traverseDoc', () => {
 
     it('should not strip non-ECS fields that don`t conflict even when nested inside ECS fieldsets', () => {
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           agent: {
             non_ecs_object: {
               field1: 'value1',
@@ -313,7 +313,7 @@ describe('traverseDoc', () => {
 
   describe('ip field', () => {
     it('should not strip valid CIDR', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         source: {
           ip: '192.168.0.0',
           name: 'test source',
@@ -330,7 +330,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip invalid ip', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         source: {
           ip: 'invalid-ip',
           name: 'test source',
@@ -351,7 +351,7 @@ describe('traverseDoc', () => {
 
   describe('nested field', () => {
     it('should strip invalid nested', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         threat: {
           enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
           'indicator.port': 443,
@@ -376,7 +376,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip valid values', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         threat: {
           enrichments: [
             {
@@ -401,7 +401,7 @@ describe('traverseDoc', () => {
 
   describe('date field', () => {
     it('should strip invalid date', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         event: {
           created: true,
           category: 'start',
@@ -422,7 +422,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip string or number date field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         event: {
           created: '2020-12-12',
           end: [2345562, '2022-10-12'],
@@ -441,7 +441,7 @@ describe('traverseDoc', () => {
 
   describe('long field', () => {
     it('should strip invalid long field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         client: {
           bytes: 'non-valid',
         },
@@ -457,7 +457,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip invalid long field with space in it', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         client: {
           bytes: '24 ',
         },
@@ -474,7 +474,7 @@ describe('traverseDoc', () => {
   });
   describe('numeric field', () => {
     it('should strip invalid float field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': 'non-valid',
       });
 
@@ -488,7 +488,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip invalid scaled_float field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         host: {
           'cpu.usage': 'non-valid',
         },
@@ -504,7 +504,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip string float field with space', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': '24 ',
       });
 
@@ -515,7 +515,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip string scaled_float field with space', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'host.cpu.usage': '24 ',
       });
 
@@ -526,7 +526,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip valid number in string field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         host: {
           'cpu.usage': '1234',
         },
@@ -541,7 +541,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip array of valid numeric fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': [458.3333, '45.3', 10, 0, -667.23],
       });
 
@@ -554,7 +554,7 @@ describe('traverseDoc', () => {
 
   describe('boolean field', () => {
     it('should strip invalid boolean fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': ['conflict', 'true', 5, 'False', 'ee', 'True'],
       });
 
@@ -586,7 +586,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip invalid boolean True', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': 'True',
       });
 
@@ -600,7 +600,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip valid boolean fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': ['true', 'false', true, false, ''],
       });
 
@@ -611,7 +611,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip valid boolean fields nested in array', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': [[true, false], ''],
       });
 
@@ -625,7 +625,7 @@ describe('traverseDoc', () => {
   // geo_point is too complex so we going to skip its validation
   describe('geo_point field', () => {
     it('should not strip invalid geo_point field', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'client.location.geo': 'invalid geo_point',
       });
 
@@ -637,7 +637,7 @@ describe('traverseDoc', () => {
 
     it('should not strip valid geo_point fields', () => {
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           'client.geo.location': [0, 90],
         }).result
       ).toEqual({
@@ -645,7 +645,7 @@ describe('traverseDoc', () => {
       });
 
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           'client.geo.location': {
             type: 'Point',
             coordinates: [-88.34, 20.12],
@@ -659,7 +659,7 @@ describe('traverseDoc', () => {
       });
 
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           'client.geo.location': 'POINT (-71.34 41.12)',
         }).result
       ).toEqual({
@@ -667,7 +667,7 @@ describe('traverseDoc', () => {
       });
 
       expect(
-        traverseDoc({
+        traverseAndMutateDoc({
           client: {
             geo: {
               location: {
@@ -692,7 +692,7 @@ describe('traverseDoc', () => {
 
   describe('globally ignored fields', () => {
     it('should strip out globally ignored top level fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         kibana: 'test-value',
         non_ecs_field: 'value',
       });
@@ -709,7 +709,7 @@ describe('traverseDoc', () => {
     });
 
     it('should strip out globally ignored nested fields', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'kibana.test': 'test-value',
         non_ecs_field: 'value',
       });
@@ -726,7 +726,7 @@ describe('traverseDoc', () => {
     });
 
     it('should not strip out fields that use ignored field names as a prefix', () => {
-      const { result, removed } = traverseDoc({
+      const { result, removed } = traverseAndMutateDoc({
         kibana_test_prefix: 'test-value',
         non_ecs_field: 'value',
       });
@@ -741,14 +741,14 @@ describe('traverseDoc', () => {
 
   describe('fieldsToAdd', () => {
     it('should extract a nested event field to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({ event: { action: 'test' } });
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ event: { action: 'test' } });
       expect(result).toEqual({ event: { action: 'test' } });
       expect(removed).toEqual([]);
       expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.action', value: 'test' }]);
     });
 
     it('should extract multiple nested event fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
         event: { action: 'test', field2: 'test2' },
       });
       expect(result).toEqual({ event: { action: 'test', field2: 'test2' } });
@@ -760,14 +760,14 @@ describe('traverseDoc', () => {
     });
 
     it('should extract a dot notation event field to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({ 'event.action': 'test' });
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ 'event.action': 'test' });
       expect(result).toEqual({ 'event.action': 'test' });
       expect(removed).toEqual([]);
       expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.action', value: 'test' }]);
     });
 
     it('should extract multiple dot notation event fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
         'event.action': 'test',
         'event.field2': 'test2',
       });
@@ -780,7 +780,7 @@ describe('traverseDoc', () => {
     });
 
     it('should extract mixed notation fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
         event: { 'field.subfield': 'test', 'field2.subfield': 'test2' },
       });
       expect(result).toEqual({
@@ -794,7 +794,7 @@ describe('traverseDoc', () => {
     });
 
     it('should extract mixed notation with dot notation first to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
         'event.field': { subfield: 'test', subfield2: 'test2' },
       });
       expect(result).toEqual({
@@ -808,21 +808,23 @@ describe('traverseDoc', () => {
     });
 
     it('should not extract original event fields if they are not top level', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({ 'top_field.event.action': 'test' });
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+        'top_field.event.action': 'test',
+      });
       expect(result).toEqual({ 'top_field.event.action': 'test' });
       expect(removed).toEqual([]);
       expect(fieldsToAdd).toEqual([]);
     });
 
     it('should not duplicate added fields', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({ event: { event: 'test' } });
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ event: { event: 'test' } });
       expect(result).toEqual({ event: { event: 'test' } });
       expect(removed).toEqual([]);
       expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.event', value: 'test' }]);
     });
 
     it('should work on multiple levels of nesting', () => {
-      const { result, removed, fieldsToAdd } = traverseDoc({
+      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
         event: { field: { subfield: 'test', subfield2: 'test2' } },
       });
       expect(result).toEqual({
