@@ -309,7 +309,7 @@ describe('Task Runner', () => {
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
-
+        
         expect(mockAlertsService.createAlertsClient).toHaveBeenCalledWith({
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
@@ -334,7 +334,7 @@ describe('Task Runner', () => {
           alertsClientToUse: mockAlertsClient,
           alertsClientNotToUse: mockLegacyAlertsClient,
         });
-
+        
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
