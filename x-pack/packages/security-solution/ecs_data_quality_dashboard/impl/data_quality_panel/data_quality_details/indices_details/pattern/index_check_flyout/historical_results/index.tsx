@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -21,7 +22,6 @@ import {
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
-import * as i18n from './translations';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../contexts/historical_results_context';
 import { FAIL, PASS } from '../../translations';
@@ -40,6 +40,14 @@ import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { StyledAccordion, StyledFilterGroupFlexItem, StyledText } from './styles';
 import { useFetchHistoricalResultsAbortControllers } from './hooks/use_fetch_historical_results_abort_controllers';
+import {
+  ALL,
+  COUNTED_INCOMPATIBLE_FIELDS,
+  ERROR_LOADING_HISTORICAL_RESULTS,
+  LOADING_HISTORICAL_RESULTS,
+  NO_HISTORICAL_RESULTS,
+  TOTAL_CHECKS,
+} from './translations';
 
 export interface Props {
   indexName: string;
@@ -220,11 +228,11 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
   );
 
   if (historicalResultsState.isLoading) {
-    return <LoadingEmptyPrompt loading={i18n.LOADING_HISTORICAL_RESULTS} />;
+    return <LoadingEmptyPrompt loading={LOADING_HISTORICAL_RESULTS} />;
   }
 
   if (historicalResultsState.error) {
-    return <ErrorEmptyPrompt title={i18n.ERROR_LOADING_HISTORICAL_RESULTS} />;
+    return <ErrorEmptyPrompt title={ERROR_LOADING_HISTORICAL_RESULTS} />;
   }
 
   return (
@@ -248,7 +256,7 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
                 }
               }}
             >
-              {i18n.ALL}
+              {ALL}
             </EuiFilterButton>
             <EuiFilterButton
               hasActiveFilters={fetchHistoricalResultsQueryState.outcome === 'pass'}
@@ -304,37 +312,41 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
       </EuiFlexGroup>
       <EuiSpacer />
       <StyledText size="s">
-        {i18n.TOTAL_CHECKS(historicalResultsState.total, totalResultsFormatted)}
+        {TOTAL_CHECKS(historicalResultsState.total, totalResultsFormatted)}
       </StyledText>
-      {results.map((result) => (
-        <Fragment key={result.checkedAt}>
-          <EuiSpacer />
-          <StyledAccordion
-            id={historicalResultsAccordionId}
-            buttonElement="div"
-            buttonContent={
-              <EuiFlexGroup wrap={true} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <IndexResultBadge incompatible={result.incompatibleFieldCount} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <StyledText size="s">{getFormattedCheckTime(result.checkedAt)}</StyledText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <EuiTextColor color={getCheckTextColor(result.incompatibleFieldCount)}>
-                      {formatNumber(result.incompatibleFieldCount)}
-                    </EuiTextColor>{' '}
-                    {i18n.COUNTED_INCOMPATIBLE_FIELDS(result.incompatibleFieldCount)}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            {'Todo'}
-          </StyledAccordion>
-        </Fragment>
-      ))}
+      {results.length > 0 ? (
+        results.map((result) => (
+          <Fragment key={result.checkedAt}>
+            <EuiSpacer />
+            <StyledAccordion
+              id={historicalResultsAccordionId}
+              buttonElement="div"
+              buttonContent={
+                <EuiFlexGroup wrap={true} alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <IndexResultBadge incompatible={result.incompatibleFieldCount} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={true}>
+                    <StyledText size="s">{getFormattedCheckTime(result.checkedAt)}</StyledText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <EuiTextColor color={getCheckTextColor(result.incompatibleFieldCount)}>
+                        {formatNumber(result.incompatibleFieldCount)}
+                      </EuiTextColor>{' '}
+                      {COUNTED_INCOMPATIBLE_FIELDS(result.incompatibleFieldCount)}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              {'Todo'}
+            </StyledAccordion>
+          </Fragment>
+        ))
+      ) : (
+        <EuiEmptyPrompt iconType="clockCounter" title={<h2>{NO_HISTORICAL_RESULTS}</h2>} />
+      )}
       {results.length > 0 && (
         <>
           <EuiSpacer />

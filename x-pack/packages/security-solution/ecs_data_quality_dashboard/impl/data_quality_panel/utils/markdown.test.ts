@@ -28,9 +28,11 @@ import {
   getResultEmoji,
   getSameFamilyBadge,
   getStatsRollupMarkdownComment,
+  getSummaryMarkdownComment,
   getSummaryTableMarkdownComment,
   getSummaryTableMarkdownHeader,
   getSummaryTableMarkdownRow,
+  getTabCountsMarkdownComment,
 } from './markdown';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockAllowedValues } from '../mock/allowed_values/mock_allowed_values';
@@ -850,5 +852,19 @@ describe('getAllIncompatibleMarkdownComments', () => {
       '### **Incompatible fields** `0` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
       '\n\n\n',
     ]);
+  });
+});
+
+describe('getSummaryMarkdownComment', () => {
+  test('it returns the expected markdown comment', () => {
+    expect(getSummaryMarkdownComment(indexName)).toEqual('### auditbeat-custom-index-1\n');
+  });
+});
+
+describe('getTabCountsMarkdownComment', () => {
+  test('it returns a comment with the expected counts', () => {
+    expect(getTabCountsMarkdownComment(mockPartitionedFieldMetadata)).toBe(
+      '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
+    );
   });
 });

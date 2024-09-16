@@ -233,21 +233,6 @@ export const CHECKING_INDEX = i18n.translate(
   }
 );
 
-export const MISSING_TIMESTAMP_CALLOUT = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.missingTimestampCallout',
-  {
-    defaultMessage:
-      'Consider adding an @timestamp (date) field mapping to this index, as required by the Elastic Common Schema (ECS), because:',
-  }
-);
-
-export const MISSING_TIMESTAMP_CALLOUT_TITLE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.missingTimestampCalloutTitle',
-  {
-    defaultMessage: 'Missing an @timestamp (date) field mapping for this index',
-  }
-);
-
 export const CUSTOM_CALLOUT = ({ fieldCount, version }: { fieldCount: number; version: string }) =>
   i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.indexProperties.customCallout', {
     values: { fieldCount, version },
