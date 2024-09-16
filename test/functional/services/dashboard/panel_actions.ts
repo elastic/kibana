@@ -122,7 +122,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickPanelActionByTitle(testSubject: string, title = '') {
     this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
-    await this.clickPanelActionByTitle(testSubject, title);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.clickPanelAction(testSubject, wrapper);
   }
 
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
