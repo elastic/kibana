@@ -47,7 +47,7 @@ export function useInventoryRouter(): StatefulInventoryRouter {
         navigateToApp('entities', { path: next, replace: true });
       },
       link: (path, ...args) => {
-        return http.basePath.prepend('/app/observability/entities' + link(path, ...args));
+        return http.basePath.prepend('/app/entities' + link(path, ...args));
       },
     }),
     [navigateToApp, http.basePath]

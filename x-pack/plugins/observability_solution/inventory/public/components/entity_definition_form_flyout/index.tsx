@@ -22,27 +22,32 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { v4 } from 'uuid';
-import { EntityTypeDefinition } from '../../../common/entities';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
+import { InventoryEntityDefinition } from '../../../common/entities';
 
 export function EntityDefinitionFormFlyout({
   definition,
   onClose,
   onSubmit,
 }: {
-  definition: Partial<Required<EntityTypeDefinition>['discoveryDefinition']>;
+  definition: Partial<InventoryEntityDefinition>;
   onClose: () => void;
-  onSubmit: (definition: Required<EntityTypeDefinition>['discoveryDefinition']) => Promise<void>;
+  onSubmit: (definition: InventoryEntityDefinition) => Promise<void>;
 }) {
   const {
     dependencies: {
-      start: { dataViews },
+      start: { dataViews, data },
     },
     services: { inventoryAPIClient },
   } = useKibana();
   const [values, setValues] = useState(definition);
+
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   useEffect(() => {
     setValues({
@@ -57,19 +62,29 @@ export function EntityDefinitionFormFlyout({
   const dataStreamsFetch = useAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient
-        .fetch('GET /internal/inventory/datasets', {
+        .fetch('POST /internal/inventory/entities', {
           signal,
+          params: {
+            body: {
+              kuery: 'entity.type == "data_stream"',
+              start,
+              end,
+            },
+          },
         })
         .then((response) => {
-          return response.datasets.map((dataset) => ({ value: dataset.id, label: dataset.name }));
+          return response.entities.map((entity) => ({
+            value: entity.displayName,
+            label: entity.displayName,
+          }));
         });
     },
-    [inventoryAPIClient]
+    [inventoryAPIClient, start, end]
   );
 
   const suggestedFieldNamesFetch = useAbortableAsync(
     async ({ signal }) => {
-      const indexPatterns = values.indexPatterns ?? [];
+      const indexPatterns = values.sources?.flatMap((source) => source.indexPatterns) ?? [];
 
       if (!indexPatterns.length) {
         return [];
@@ -90,7 +105,7 @@ export function EntityDefinitionFormFlyout({
           return specs.map((spec) => ({ label: spec.name, value: spec.name }));
         });
     },
-    [values.indexPatterns, dataViews]
+    [values.sources, dataViews]
   );
 
   const formId = useGeneratedHtmlId();
@@ -99,17 +114,20 @@ export function EntityDefinitionFormFlyout({
 
   const disabled = isManaged;
 
+  const indexPatterns = useMemo(() => {
+    return values.sources?.flatMap((source) => source.indexPatterns);
+  }, [values.sources]);
+
+  const hasIndexPatterns = !!indexPatterns?.length;
+
   const isValid =
-    !!values.name &&
-    !!values.type &&
-    !!values.indexPatterns?.length &&
-    !!values.identityFields?.length;
+    !!values.type && !!values.label && !!hasIndexPatterns && !!values.identityFields?.length;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{definition.name}</h2>
+          <h2>{definition.label}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -127,11 +145,11 @@ export function EntityDefinitionFormFlyout({
                   defaultMessage: 'Services, hosts, etc',
                 }
               )}
-              value={values.name}
+              value={values.label}
               disabled={disabled}
-              isInvalid={displayErrors && !values.name}
+              isInvalid={displayErrors && !values.label}
               onChange={(event) => {
-                setValues((prev) => ({ ...prev, name: event.target.value }));
+                setValues((prev) => ({ ...prev, label: event.target.value }));
               }}
             />
           </EuiFormRow>
@@ -143,6 +161,12 @@ export function EntityDefinitionFormFlyout({
             <EuiComboBox
               singleSelection
               noSuggestions
+              placeholder={i18n.translate(
+                'xpack.inventory.entityDefinitionFormFlyout.typePlaceholder',
+                {
+                  defaultMessage: 'service, host, etc`',
+                }
+              )}
               selectedOptions={[
                 ...(values.type ? [{ label: values.type, value: values.type }] : []),
               ]}
@@ -169,21 +193,29 @@ export function EntityDefinitionFormFlyout({
           >
             <EuiComboBox
               options={dataStreamsFetch.value ?? []}
-              selectedOptions={values.indexPatterns?.map(
+              selectedOptions={indexPatterns?.map(
                 (indexPattern) => ({ value: indexPattern, label: indexPattern } ?? [])
               )}
               onChange={(next) => {
                 setValues((prev) => ({
                   ...prev,
-                  indexPatterns: next.map((option) => option.value as string),
+                  sources: [
+                    {
+                      indexPatterns: next.map((option) => option.value as string),
+                    },
+                  ],
                 }));
               }}
               isDisabled={disabled}
-              isInvalid={displayErrors && !values.indexPatterns?.length}
+              isInvalid={displayErrors && !indexPatterns?.length}
               onCreateOption={(next) => {
                 setValues((prev) => ({
                   ...prev,
-                  indexPatterns: (prev.indexPatterns || []).concat(next),
+                  sources: [
+                    {
+                      indexPatterns: [...(prev.sources?.[0].indexPatterns || []), next],
+                    },
+                  ],
                 }));
               }}
             />
@@ -239,7 +271,6 @@ export function EntityDefinitionFormFlyout({
                   metadata: next.map((option) => ({
                     source: option.value as string,
                     destination: option.value as string,
-                    limit: 10,
                   })),
                 }));
               }}
@@ -261,25 +292,27 @@ export function EntityDefinitionFormFlyout({
               } else {
                 setSubmitting(true);
                 onSubmit({
-                  history: {
-                    timestampField: '@timestamp',
-                    interval: '1m',
-                    settings: {
-                      lookbackPeriod: '10m',
-                      frequency: '2m',
-                      syncDelay: '2m',
+                  definitionType: 'inventory',
+                  displayNameTemplate: values
+                    .identityFields!.map((field) => `{{${field.field}}}`)
+                    .join(''),
+                  sources: values.sources!,
+                  extractionDefinitions: [
+                    {
+                      metadata:
+                        values.metadata?.map((metadataOption) => ({
+                          ...metadataOption,
+                          limit: 10,
+                        })) ?? [],
+                      source: values.sources![0],
                     },
-                  },
-                  id: v4().substring(0, 32),
+                  ],
+                  id: v4().substr(0, 16),
+                  identityFields: values.identityFields!,
+                  label: values.label!,
                   managed: false,
-                  name: '',
-                  indexPatterns: [],
-                  type: '',
-                  version: '1.0.0',
-                  identityFields: [],
-                  displayNameTemplate: `${
-                    values.identityFields?.map((field) => `{{${field.field}}}`).join('') ?? ''
-                  }`,
+                  metadata: values.metadata ?? [],
+                  type: values.type!,
                   ...values,
                 }).finally(() => {
                   setSubmitting(false);

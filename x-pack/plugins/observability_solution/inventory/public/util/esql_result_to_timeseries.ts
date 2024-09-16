@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { orderBy } from 'lodash';
-import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { EsqlQueryResult } from '../hooks/use_esql_query_result';
+import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
 interface Timeseries<T extends string> {
   id: string;
@@ -19,12 +19,12 @@ export function esqlResultToTimeseries<T extends string>({
   result,
   metricNames,
 }: {
-  result: AbortableAsyncState<EsqlQueryResult>;
+  result: AbortableAsyncState<ESQLSearchResponse>;
   metricNames: T[];
 }): Array<Timeseries<T>> {
   const columns = result.value?.columns;
 
-  const rows = result.value?.rows;
+  const rows = result.value?.values;
 
   if (!columns?.length || !rows?.length) {
     return [];

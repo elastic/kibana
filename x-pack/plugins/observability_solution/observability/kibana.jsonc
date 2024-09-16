@@ -52,8 +52,7 @@
       "serverless",
       "guidedOnboarding",
       "observabilityAIAssistant",
-      "investigate",
-      "inventory"
+      "investigate"
     ],
     "requiredBundles": [
       "data",

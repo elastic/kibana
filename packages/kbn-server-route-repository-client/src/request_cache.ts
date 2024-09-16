@@ -9,16 +9,12 @@
 
 import { once } from 'lodash';
 import { HttpFetchOptions } from '@kbn/core-http-browser';
+import { RequestCacheOptions } from '@kbn/server-route-repository-utils';
 
 type Request = Pick<HttpFetchOptions, 'body' | 'query' | 'method'> & { pathname: string };
 
 export interface RequestCache {
   fetch<T>(request: Request, options: RequestCacheOptions, cb: () => Promise<T>): Promise<T>;
-}
-
-export interface RequestCacheOptions {
-  mode: 'always' | 'default' | 'never';
-  type?: 'inMemory';
 }
 
 interface Storage {
@@ -59,16 +55,18 @@ export function createRequestCache(): RequestCache {
     fetch: async (request, options, cb) => {
       const method = request.method || 'GET';
 
-      const shouldCache =
+      const shouldCacheRequest =
         options.mode !== 'never' && (options.mode === 'always' || method.toLowerCase() === 'get');
 
-      if (!shouldCache) {
+      if (!shouldCacheRequest) {
         return cb();
       }
 
+      const shouldFetchFromCache = shouldCacheRequest && !options.refresh;
+
       const [id, client] = await Promise.all([getId(request), getInMemoryClient()]);
 
-      if (client.has(id)) {
+      if (shouldFetchFromCache && client.has(id)) {
         return client.get(id) as any;
       }
 

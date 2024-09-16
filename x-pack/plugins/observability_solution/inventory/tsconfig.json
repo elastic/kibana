@@ -41,10 +41,16 @@
     "@kbn/data-plugin",
     "@kbn/es-types",
     "@kbn/field-types",
-    "@kbn/utility-types",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
     "@kbn/zod",
     "@kbn/sse-utils",
+    "@kbn/deeplinks-analytics",
+    "@kbn/field-formats-plugin",
+    "@kbn/es-query",
+    "@kbn/unified-search-plugin",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/share-plugin",
+    "@kbn/safer-lodash-set",
   ]
 }

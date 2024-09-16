@@ -8,7 +8,11 @@
 import semver from 'semver';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import {
+  EntityDefinition,
+  EntityDefinitionUpdate,
+  EntityDefinitionWithState,
+} from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import {
   generateHistoryIndexTemplateId,
@@ -39,7 +43,6 @@ import { generateEntitiesLatestIndexTemplateConfig } from './templates/entities_
 import { generateEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
-import { EntityDefinitionWithState } from './types';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { stopTransforms } from './stop_transforms';
 import { deleteTransforms } from './delete_transforms';

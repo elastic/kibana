@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { Required } from 'utility-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Entity, EntityTypeDefinition } from '../../../common/entities';
+import { Entity, IdentityField } from '../../../common/entities';
 
 export function getEntitySourceDslFilter({
   entity,
   identityFields,
 }: {
   entity: Entity;
-  identityFields: Required<EntityTypeDefinition>['discoveryDefinition']['identityFields'];
+  identityFields: IdentityField[];
 }): QueryDslQueryContainer[] {
   return [
     {

@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { EntityTypeDefinition } from '../../../common/entities';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { InventoryEntityDefinition } from '../../../common/entities';
 import { EntityDefinitionFormFlyout } from '../entity_definition_form_flyout';
 
-const emptyDefinition: Partial<Required<EntityTypeDefinition>['discoveryDefinition']> = {};
+const emptyDefinition: Partial<InventoryEntityDefinition> = {};
 
 export function CreateEntityTypeDefinitionButton({
   onSubmit,
 }: {
-  onSubmit: (definition: Required<EntityTypeDefinition>['discoveryDefinition']) => Promise<void>;
+  onSubmit: (definition: InventoryEntityDefinition) => Promise<void>;
 }) {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 

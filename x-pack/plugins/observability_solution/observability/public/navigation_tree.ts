@@ -49,22 +49,19 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
             },
           },
-          ...(pluginsStart.inventory
-            ? [
-                {
-                  link: 'inventory' as const,
-                  getIsActive: ({
-                    pathNameSerialized,
-                    prepend,
-                  }: {
-                    pathNameSerialized: string;
-                    prepend: (path: string) => string;
-                  }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/observability/inventory'));
-                  },
-                },
-              ]
-            : []),
+          {
+            link: 'entities' as const,
+            getIsActive: ({
+              pathNameSerialized,
+              prepend,
+            }: {
+              pathNameSerialized: string;
+              prepend: (path: string) => string;
+            }) => {
+              return pathNameSerialized.startsWith(prepend('/app/entities'));
+            },
+          },
+
           {
             link: 'observability-overview:alerts',
           },

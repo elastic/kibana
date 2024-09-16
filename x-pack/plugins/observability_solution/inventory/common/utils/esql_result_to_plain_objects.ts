@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EsqlQueryResult } from './run_esql_query';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
 export function esqlResultToPlainObjects<T extends Record<string, any>>(
-  result: EsqlQueryResult
+  result: ESQLSearchResponse
 ): T[] {
-  return result.rows.map((row) => {
+  return result.values.map((row) => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {
       const column = result.columns[index];
       acc[column.name] = value;

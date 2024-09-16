@@ -6,10 +6,14 @@
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useMemo, useState } from 'react';
-import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { keyBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
+import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
+import { toEntity } from '../../../common/utils/to_entity';
 
 export function EntityTable({
   type,
@@ -19,10 +23,17 @@ export function EntityTable({
   dslFilter?: QueryDslQueryContainer[];
 }) {
   const {
+    services: { inventoryAPIClient },
     dependencies: {
-      start: { dataViews },
+      start: { dataViews, data },
     },
   } = useKibana();
+
+  const {
+    timeRange,
+    setTimeRange,
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   const query = useMemo(() => {
     const commands = ['FROM entities-*-latest'];
@@ -39,37 +50,99 @@ export function EntityTable({
   const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
   const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
 
-  const queryResult = useEsqlQueryResult({
-    query,
-    kqlFilter: persistedKqlFilter,
-    dslFilter,
-  });
+  const [selectedType, setSelectedType] = useState(type);
+
+  const queryParams = useMemo(() => {
+    return {
+      query,
+      kuery: persistedKqlFilter,
+      dslFilter: [
+        ...(dslFilter ?? []),
+        {
+          range: {
+            'entity.lastSeenTimestamp': {
+              gte: start,
+            },
+          },
+        },
+        {
+          range: {
+            'entity.firstSeenTimestamp': {
+              lte: end,
+            },
+          },
+        },
+      ],
+    };
+  }, [query, persistedKqlFilter, start, end, dslFilter]);
+
+  const queryFetch = useAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('POST /internal/inventory/esql', {
+        signal,
+        params: {
+          body: {
+            operationName: 'list_entities',
+            ...queryParams,
+            dslFilter: [
+              ...queryParams.dslFilter,
+              ...(selectedType !== 'all'
+                ? [
+                    {
+                      term: {
+                        'entity.type': selectedType,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+      });
+    },
+    [queryParams, inventoryAPIClient, selectedType]
+  );
+
+  const availableTypesFetch = useAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient
+        .fetch('POST /internal/inventory/esql', {
+          signal,
+          params: {
+            body: {
+              ...queryParams,
+              operationName: 'list_entity_types_for_query',
+              query: queryParams.query + '| STATS BY entity.type',
+            },
+          },
+        })
+        .then((response) => {
+          return response.values.map((row) => {
+            return row[0] as string;
+          });
+        });
+    },
+    [queryParams, inventoryAPIClient]
+  );
+
+  const typeDefinitionsFetch = useAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/definition/inventory', {
+        signal,
+      });
+    },
+    [inventoryAPIClient]
+  );
 
   const entityRows = useMemo(() => {
-    const columns = queryResult.value?.columns ?? [];
-    const rows = queryResult.value?.rows ?? [];
-
-    if (!columns.length || !rows.length) {
+    if (!queryFetch.value) {
       return [];
     }
 
-    return rows
-      .map((row) => {
-        return row.reduce<Record<string, unknown>>((acc, value, index) => {
-          const column = columns[index];
-          acc[column.name] = value;
-          return acc;
-        }, {});
-      })
-      .map((record) => {
-        return {
-          id: record['entity.displayName'] as string,
-          type: record['entity.type'] as string,
-          name: record['entity.displayName'] as string,
-        };
-      });
-  }, [queryResult.value]);
-
+    return esqlResultToPlainObjects(queryFetch.value).map((row) => {
+      return toEntity(row);
+    });
+  }, [queryFetch.value]);
   const [pagination, setPagination] = useState<{ pageSize: number; pageIndex: number }>({
     pageSize: 10,
     pageIndex: 0,
@@ -90,10 +163,45 @@ export function EntityTable({
       });
   }, [dataViews]);
 
+  const availableTypes = useMemo(() => {
+    if (!availableTypesFetch.value) {
+      return undefined;
+    }
+    const typeDefinitionsByType = keyBy(
+      typeDefinitionsFetch.value?.definitions,
+      (definition) => definition.type
+    );
+
+    return [
+      {
+        value: 'all',
+        label: i18n.translate('xpack.inventory.entityTable.allOptionLabel', {
+          defaultMessage: 'All',
+        }),
+      },
+      ...availableTypesFetch.value.map((availableType) => {
+        const typeDefinition = typeDefinitionsByType[availableType];
+        return typeDefinition
+          ? {
+              value: availableType,
+              label: typeDefinition.label,
+            }
+          : {
+              value: availableType,
+              label: availableType,
+            };
+      }),
+    ];
+  }, [availableTypesFetch.value, typeDefinitionsFetch.value]);
+
   return (
     <ControlledEntityTable
+      timeRange={timeRange}
+      onTimeRangeChange={(nextTimeRange) => {
+        setTimeRange(nextTimeRange);
+      }}
       rows={entityRows}
-      loading={queryResult.loading}
+      loading={queryFetch.loading}
       kqlFilter={displayedKqlFilter}
       onKqlFilterChange={(next) => {
         setDisplayedKqlFilter(next);
@@ -108,6 +216,11 @@ export function EntityTable({
       totalItemCount={entityRows.length}
       columns={[]}
       dataViews={dataViewsFetch.value}
+      showTypeSelect={type === 'all'}
+      availableTypes={availableTypes}
+      onSelectedTypeChange={(nextType) => {
+        setSelectedType(nextType);
+      }}
     />
   );
 }

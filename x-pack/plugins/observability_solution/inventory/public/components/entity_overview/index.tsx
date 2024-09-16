@@ -17,10 +17,9 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { take, uniqueId } from 'lodash';
-import moment from 'moment';
 import React, { useMemo, useState } from 'react';
-import { Required } from 'utility-types';
-import { Entity, EntityTypeDefinition } from '../../../common/entities';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import { Entity, EntityDefinition } from '../../../common/entities';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { useKibana } from '../../hooks/use_kibana';
 import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
@@ -36,9 +35,9 @@ export function EntityOverview({
   dataStreams,
   dataStreamsWithIntegrations,
 }: {
-  entity: Entity<Record<string, any>>;
-  typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
-  allTypeDefinitions: EntityTypeDefinition[];
+  entity: Entity;
+  typeDefinition: EntityDefinition;
+  allTypeDefinitions: EntityDefinition[];
   dataStreams: Array<{ name: string }>;
   dataStreamsWithIntegrations?: Array<{
     name: string;
@@ -46,19 +45,16 @@ export function EntityOverview({
     dashboards?: unknown[];
   }>;
 }) {
-  const { start, end } = useMemo(() => {
-    const endM = moment();
-    return {
-      start: moment(endM).subtract(60, 'minutes').valueOf(),
-      end: endM.valueOf(),
-    };
-  }, []);
-
   const {
     dependencies: {
-      start: { dataViews },
+      start: { dataViews, data },
     },
   } = useKibana();
+
+  const {
+    timeRange,
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
   const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
@@ -78,7 +74,7 @@ export function EntityOverview({
 
     const baseDslFilter = getEntitySourceDslFilter({
       entity,
-      identityFields: typeDefinition.discoveryDefinition.identityFields,
+      identityFields: typeDefinition.identityFields,
     });
 
     const indexPatterns = queriedDataStreams;
@@ -100,28 +96,29 @@ export function EntityOverview({
     query: queries?.logsQuery,
     start,
     end,
-    kqlFilter: persistedKqlFilter,
+    kuery: persistedKqlFilter ?? '',
     dslFilter: queries?.baseDslFilter,
+    operationName: 'get_logs_for_entity',
   });
 
   const histogramQueryResult = useEsqlQueryResult({
     query: queries?.histogramQuery,
     start,
     end,
-    kqlFilter: persistedKqlFilter,
+    kuery: persistedKqlFilter ?? '',
     dslFilter: queries?.baseDslFilter,
+    operationName: 'get_histogram_for_entity',
   });
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
       return {
         analysis: getInitialColumnsForLogs({
-          datatable: logsQueryResult.value,
+          response: logsQueryResult.value,
           typeDefinitions: allTypeDefinitions.filter(
             (definitionAtIndex) =>
-              definitionAtIndex.discoveryDefinition?.type !==
-                typeDefinition.discoveryDefinition.type &&
-              definitionAtIndex.discoveryDefinition?.type !== 'data_stream'
+              definitionAtIndex.type !== typeDefinition.type &&
+              definitionAtIndex.type !== 'data_stream'
           ),
         }),
         analysisId: uniqueId(),
@@ -171,6 +168,8 @@ export function EntityOverview({
               defaultMessage: 'Filter data by using KQL',
             })}
             dataViews={fetchedDataViews}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
           />
         </EuiFlexItem>
         <EuiFlexItem

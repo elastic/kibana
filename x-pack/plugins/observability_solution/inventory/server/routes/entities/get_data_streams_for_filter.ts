@@ -9,24 +9,31 @@ import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/e
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { chunk, compact, uniqBy } from 'lodash';
 import pLimit from 'p-limit';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 
 export async function getDataStreamsForFilter({
+  esClient,
   kql,
   indexPatterns,
-  esClient,
+  start,
+  end,
 }: {
-  kql: string;
   esClient: ObservabilityElasticsearchClient;
+  kql: string;
   indexPatterns: string[];
+  start: number;
+  end: number;
 }): Promise<Array<{ name: string }>> {
   const indicesResponse = await esClient.search('get_data_streams_for_entities', {
     index: indexPatterns,
     timeout: '1ms',
+    terminate_after: 1,
     size: 0,
     track_total_hits: false,
+    request_cache: false,
     query: {
       bool: {
-        filter: [...excludeFrozenQuery(), ...kqlQuery(kql)],
+        filter: [...excludeFrozenQuery(), ...kqlQuery(kql), ...rangeQuery(start, end)],
       },
     },
     aggs: {
@@ -54,10 +61,12 @@ export async function getDataStreamsForFilter({
         });
 
         return compact(
-          resolveIndicesResponse.indices.map(
-            (index) =>
-              (index.name.includes(':') ? index.name.split(':')[0] + ':' : '') + index.data_stream
-          )
+          resolveIndicesResponse.indices
+            .filter((index) => index.data_stream)
+            .map(
+              (index) =>
+                (index.name.includes(':') ? index.name.split(':')[0] + ':' : '') + index.data_stream
+            )
         ).map((dataStream) => ({ name: dataStream }));
       });
     })

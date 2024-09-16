@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Entity } from './entities';
-
 type MetricType =
   | 'count'
   | 'count_distinct'
@@ -23,10 +21,12 @@ interface MetricFormat {
   type: MetricFormatType;
 }
 
-type MetricEntityBase<
+interface MetricEntityBase<
   TMetricType extends MetricType,
   TAdditionalProperties extends Record<string, any> = {}
-> = Entity<{
+> {
+  type: string;
+  label: string;
   metric: {
     type: TMetricType;
     format: MetricFormat;
@@ -34,7 +34,7 @@ type MetricEntityBase<
       field?: string;
     };
   } & TAdditionalProperties;
-}>;
+}
 
 type CountMetric = MetricEntityBase<'count', {}>;
 type CountDistinctMetric = MetricEntityBase<'count_distinct', { field: string }>;
@@ -44,6 +44,11 @@ type SumMetric = MetricEntityBase<'sum', { field: string }>;
 type MinMetric = MetricEntityBase<'min', { field: string }>;
 type MaxMetric = MetricEntityBase<'max', { field: string }>;
 type PercentileMetric = MetricEntityBase<'percentile', { field: string; percentile: number }>;
+
+export interface MetricDefinition {
+  filter?: string;
+  metric: Metric;
+}
 
 export type Metric =
   | CountMetric

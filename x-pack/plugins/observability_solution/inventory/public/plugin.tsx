@@ -56,7 +56,7 @@ export class InventoryPlugin
         defaultMessage: 'Entities',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/observability/entities',
+      appRoute: '/app/entities',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav'],
       order: 8001,

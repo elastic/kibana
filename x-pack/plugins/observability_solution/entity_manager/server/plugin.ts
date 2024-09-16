@@ -65,6 +65,7 @@ export class EntityManagerServerPlugin
   ): EntityManagerServerPluginSetup {
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
+
     plugins.encryptedSavedObjects.registerType({
       type: EntityDiscoveryApiKeyType.name,
       attributesToEncrypt: new Set(['apiKey']),

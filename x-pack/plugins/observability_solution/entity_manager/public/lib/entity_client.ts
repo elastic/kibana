@@ -6,14 +6,13 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import {
   ClientRequestParamsOf,
   RouteRepositoryClient,
   createRepositoryClient,
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import type { RequestCacheOptions } from '@kbn/server-route-repository-client/src/request_cache';
 import {
   DisableManagedEntityResponse,
   EnableManagedEntityResponse,
@@ -22,12 +21,7 @@ import {
 import type { EntityManagerRouteRepository } from '../../server';
 import { EntityManagerUnauthorizedError } from './errors';
 
-type EntityManagerRepositoryClient = RouteRepositoryClient<
-  EntityManagerRouteRepository,
-  {
-    caching?: RequestCacheOptions;
-  }
->;
+type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRepository, {}>;
 
 type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>['query'];
 

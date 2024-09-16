@@ -5,37 +5,47 @@
  * 2.0.
  */
 
-import type { Required } from 'utility-types';
-import type { Entity, EntityTypeDefinition } from '../../../common/entities';
+import type { Entity, EntityDataSource, IdentityField } from '../../../common/entities';
 import { InventoryAPIClient } from '../../api';
 
 export function getDataStreamsForEntity<TEntity extends Entity>({
   entity,
-  typeDefinition,
+  identityFields,
+  sources,
   inventoryAPIClient,
   signal,
+  start,
+  end,
 }: {
   entity: TEntity;
-  typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
+  identityFields: IdentityField[];
+  sources: EntityDataSource[];
   inventoryAPIClient: InventoryAPIClient;
   signal: AbortSignal;
+  start: number;
+  end: number;
 }) {
-  return inventoryAPIClient.fetch('POST /internal/inventory/entities/data_streams_for_entity', {
-    signal,
-    params: {
-      body: {
-        indexPatterns: typeDefinition.discoveryDefinition.indexPatterns,
-        kql: typeDefinition.discoveryDefinition.identityFields
-          .map(({ field }) => {
-            const value = entity.properties[field];
-            if (value === null || value === undefined || value === '') {
-              return `(NOT ${field}:*)`;
-            }
+  return inventoryAPIClient.fetch(
+    'POST /internal/inventory/data_streams/find_datastreams_for_filter',
+    {
+      signal,
+      params: {
+        body: {
+          start,
+          end,
+          indexPatterns: sources.flatMap((source) => source.indexPatterns),
+          kql: identityFields
+            .map(({ field }) => {
+              const value = entity.properties[field];
+              if (value === null || value === undefined || value === '') {
+                return `(NOT ${field}:*)`;
+              }
 
-            return [field, typeof value === 'string' ? `"${value}"` : value].join(':');
-          })
-          .join(' AND '),
+              return [field, typeof value === 'string' ? `"${value}"` : value].join(':');
+            })
+            .join(' AND '),
+        },
       },
-    },
-  });
+    }
+  );
 }

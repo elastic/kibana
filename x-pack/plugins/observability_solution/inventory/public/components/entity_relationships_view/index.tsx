@@ -7,13 +7,12 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import { parse, render } from 'mustache';
 import pLimit from 'p-limit';
 import React from 'react';
-import { Required } from 'utility-types';
-import { parse, render } from 'mustache';
-import { Entity, EntityTypeDefinition } from '../../../common/entities';
+import { Entity, EntityDefinition, InventoryEntityDefinition } from '../../../common/entities';
 import { useKibana } from '../../hooks/use_kibana';
-import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
 import { getEntitiesFromSource } from '../../util/entities/get_entities_from_source';
 import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
 import { EntityTable } from '../entity_table';
@@ -22,10 +21,12 @@ export function EntityRelationshipsView({
   entity,
   typeDefinition,
   allTypeDefinitions,
+  dataStreams,
 }: {
   entity: Entity;
-  typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
-  allTypeDefinitions: EntityTypeDefinition[];
+  typeDefinition: InventoryEntityDefinition;
+  allTypeDefinitions: EntityDefinition[];
+  dataStreams: Array<{ name: string }>;
 }) {
   const {
     dependencies: {
@@ -34,19 +35,9 @@ export function EntityRelationshipsView({
     services: { inventoryAPIClient },
   } = useKibana();
 
-  const entityDataStreamsFetch = useAbortableAsync(
-    ({ signal }) => {
-      return getDataStreamsForEntity({
-        entity,
-        inventoryAPIClient,
-        signal,
-        typeDefinition,
-      });
-    },
-    [entity, typeDefinition, inventoryAPIClient]
-  );
-
-  const dataStreams = entityDataStreamsFetch.value?.dataStreams;
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   const relationshipsFetch = useAbortableAsync(
     async ({ signal }): Promise<undefined | QueryDslQueryContainer[]> => {
@@ -56,11 +47,11 @@ export function EntityRelationshipsView({
 
       const entityFilter = getEntitySourceDslFilter({
         entity,
-        identityFields: typeDefinition.discoveryDefinition.identityFields,
+        identityFields: typeDefinition.identityFields,
       });
 
       const allOtherDefinitions = allTypeDefinitions.filter((currentDefinition) => {
-        return currentDefinition.discoveryDefinition?.id !== typeDefinition.discoveryDefinition?.id;
+        return currentDefinition.id !== typeDefinition.id;
       });
 
       const limiter = pLimit(5);
@@ -72,12 +63,14 @@ export function EntityRelationshipsView({
               const entitiesForDefinition = await getEntitiesFromSource({
                 dslFilter: entityFilter,
                 indexPatterns: dataStreams.map((dataStream) => dataStream.name),
-                data,
                 definition: currentDefinition,
                 signal,
+                start,
+                end,
+                inventoryAPIClient,
               });
 
-              const tpl = currentDefinition.discoveryDefinition?.displayNameTemplate!;
+              const tpl = currentDefinition.displayNameTemplate!;
               parse(tpl);
 
               const entityQueries = entitiesForDefinition.flatMap((foundEntity) => {
@@ -94,14 +87,28 @@ export function EntityRelationshipsView({
                             'entity.displayName.keyword': displayName,
                           },
                         },
-                        { term: { 'entity.type': currentDefinition.discoveryDefinition?.type } },
+                        { term: { 'entity.type': currentDefinition.type } },
                       ],
                     },
                   },
                 ];
               });
 
-              return entityQueries;
+              return entityQueries.length
+                ? entityQueries
+                : [
+                    {
+                      bool: {
+                        must_not: [
+                          {
+                            term: {
+                              'entity.type': currentDefinition.type,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ];
             });
           })
         )
@@ -114,9 +121,20 @@ export function EntityRelationshipsView({
             minimum_should_match: 1,
           },
         },
+        {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'entity.type': typeDefinition.type,
+                },
+              },
+            ],
+          },
+        },
       ];
     },
-    [dataStreams, entity, typeDefinition, allTypeDefinitions, data]
+    [dataStreams, entity, typeDefinition, allTypeDefinitions, inventoryAPIClient, start, end]
   );
 
   const dslFilter = relationshipsFetch.value;

@@ -54,8 +54,6 @@ export type AppId =
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
-export type EntityLinkId = 'datasets';
-
 export type ObservabilityOverviewLinkId =
   | 'alerts'
   | 'cases'
@@ -98,5 +96,4 @@ export type DeepLinkId =
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
-  | `${ObltProfilingApp}:${ProfilingLinkId}`
-  | `${EntityApp}:${EntityLinkId}`;
+  | `${ObltProfilingApp}:${ProfilingLinkId}`;

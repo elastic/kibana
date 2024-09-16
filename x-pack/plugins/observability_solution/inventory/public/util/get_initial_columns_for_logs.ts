@@ -6,17 +6,17 @@
  */
 
 import { isArray } from 'lodash';
-import { EntityTypeDefinition } from '../../common/entities';
-import { EsqlQueryResult } from './run_esql_query';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { EntityDefinition } from '../../common/entities';
 
-type Column = EsqlQueryResult['columns'][number];
+type Column = ESQLSearchResponse['columns'][number];
 
 interface ColumnExtraction {
   constants: Array<{ name: string; value: unknown }>;
   initialColumns: Column[];
 }
 
-function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
+function analyzeColumnValues(response: ESQLSearchResponse): Array<{
   name: string;
   unique: boolean;
   constant: boolean;
@@ -24,15 +24,15 @@ function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
   index: number;
   column: Column;
 }> {
-  return datatable.columns.map((column, index) => {
+  return response.columns.map((column, index) => {
     const values = new Set<unknown>();
-    for (const row of datatable.rows) {
+    for (const row of response.values) {
       const val = row[index];
       values.add(isArray(val) ? val.map(String).join(',') : val);
     }
     return {
       name: column.name,
-      unique: values.size === datatable.rows.length,
+      unique: values.size === response.values.length,
       constant: values.size === 1,
       empty: Array.from(values.values()).every((value) => !value),
       index,
@@ -42,16 +42,16 @@ function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
 }
 
 export function getInitialColumnsForLogs({
-  datatable,
+  response,
   typeDefinitions,
 }: {
-  datatable: EsqlQueryResult;
-  typeDefinitions: EntityTypeDefinition[];
+  response: ESQLSearchResponse;
+  typeDefinitions: EntityDefinition[];
 }): ColumnExtraction {
-  const analyzedColumns = analyzeColumnValues(datatable);
+  const analyzedColumns = analyzeColumnValues(response);
 
   const withoutUselessColumns = analyzedColumns.filter(({ column, empty, constant, unique }) => {
-    return empty === false && constant === false && !(column.meta.esType === 'keyword' && unique);
+    return empty === false && constant === false && !(column.type === 'keyword' && unique);
   });
 
   const constantColumns = analyzedColumns.filter(({ constant }) => constant);
@@ -76,7 +76,7 @@ export function getInitialColumnsForLogs({
 
   const allIdentityFields = new Set<string>([
     ...typeDefinitions.flatMap(
-      (definition) => definition.discoveryDefinition?.identityFields.map(({ field }) => field) ?? []
+      (definition) => definition.identityFields.map(({ field }) => field) ?? []
     ),
   ]);
 
@@ -98,7 +98,7 @@ export function getInitialColumnsForLogs({
   }
 
   const constants = constantColumns.map(({ name, index, column }) => {
-    return { name, value: datatable.rows[0][index] };
+    return { name, value: response.values[0][index] };
   });
 
   return {

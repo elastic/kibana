@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EntityDefinitionWithState, EntityDefintionResponse } from '@kbn/entities-schema';
+import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
@@ -79,11 +79,6 @@ function Listing({ definition }: ListingProps) {
       </EuiFlexGroup>
     </EuiPanel>
   );
-}
-
-interface Props {
-  definitions?: EntityDefintionResponse['definitions'];
-  isLoading?: boolean;
 }
 
 export function DefinitionListing() {

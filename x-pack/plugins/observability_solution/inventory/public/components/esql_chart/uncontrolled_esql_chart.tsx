@@ -13,13 +13,17 @@ export function UncontrolledEsqlChart<T extends string>({
   query,
   metricNames,
   height,
+  start,
+  end,
 }: {
   id: string;
   query: string;
   metricNames: T[];
   height: number;
+  start: number;
+  end: number;
 }) {
-  const result = useEsqlQueryResult({ query });
+  const result = useEsqlQueryResult({ query, start, end, operationName: 'visualize' });
 
   return <ControlledEsqlChart metricNames={metricNames} height={height} id={id} result={result} />;
 }

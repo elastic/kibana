@@ -6,6 +6,6 @@
  */
 import React from 'react';
 
-export function DatasetManagementView() {
+export function DataStreamManagementView() {
   return <></>;
 }
