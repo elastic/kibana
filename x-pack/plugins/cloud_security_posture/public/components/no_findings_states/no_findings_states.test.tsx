@@ -12,6 +12,10 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { NoFindingsStates } from './no_findings_states';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import * as benchmarksHandlers from '../../../server/routes/benchmarks/benchmarks.handlers.mock';
+import {
+  PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
+  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
+} from '../cloud_posture_page';
 
 const server = setupMockServer();
 
@@ -28,11 +32,11 @@ describe('NoFindingsStates', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText(/Elastic’s Cloud Security Posture Management/i)).toBeInTheDocument();
+      expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Already using a cloud security product?/i)).toBeInTheDocument();
+      expect(screen.getByTestId(THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT)).toBeInTheDocument();
     });
 
     await waitFor(() => {
