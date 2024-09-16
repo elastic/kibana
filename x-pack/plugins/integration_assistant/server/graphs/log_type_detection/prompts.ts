@@ -22,6 +22,7 @@ Here is some context for you to reference for your task, read it carefully as yo
     `Looking at the log samples , our goal is to identify the syslog type based on the guidelines below.
 <guidelines>
 - Go through each log sample and identify the log format type.
+- If the samples have a timestamp , loglevel in the beginning information then set "header: true".
 - If the samples have a syslog header then set "header: true" , else set "header: false". If you are unable to determine the syslog header presence then set "header: false".
 - If the syslog samples have structured body then classify it as "log_type: structured".
 - If the syslog samples have unstructured body then classify it as "log_type: unstructured".

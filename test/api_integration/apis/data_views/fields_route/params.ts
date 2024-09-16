@@ -9,6 +9,7 @@
 
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -27,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('requires a pattern query param', () =>
       supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
@@ -35,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts include_unmapped param', () =>
       supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: '*',
           include_unmapped: true,
@@ -45,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('rejects unexpected query params', () =>
       supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: randomness.word(),
           [randomness.word()]: randomness.word(),
@@ -56,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts a JSON formatted fields query param', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: JSON.stringify(['baz']),
@@ -66,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: ['baz', 'foo'],
@@ -76,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts single array fields query param', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: ['baz'],
@@ -86,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts single fields query param', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: 'baz',
@@ -96,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('rejects a comma-separated list of fields', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: 'foo,bar',
@@ -108,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts a JSON formatted meta_fields query param', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: JSON.stringify(['meta']),
@@ -118,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts meta_fields query param in string array', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: ['_id', 'meta'],
@@ -128,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts single meta_fields query param', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: ['_id'],
@@ -138,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('rejects a comma-separated list of meta_fields', () =>
         supertest
           .get(FIELDS_PATH)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: 'foo,bar',
