@@ -175,6 +175,8 @@
   height: 100%;
 
   .embPanel__hoverActionsWrapper {
+    transition: all $euiAnimSpeedSlow;
+    transition-delay: 1000ms;
     height: $euiSizeXL;
     position: absolute;
     top: 0;
@@ -185,6 +187,21 @@
     min-width: 100%;
     z-index: -1;
     pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+  }
+
+  .embPanel__hoverActions {
+    transition: all $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+    transition-delay: 500ms;
+    opacity: 0;
+    padding: $euiSizeXS;
+    display: flex;
+    flex-wrap: nowrap;
+    border: $euiBorderThin;
+  
+    background-color: $euiColorEmptyShade;
+    height: $euiSizeXL;
+  
+    pointer-events: all; // Re-enable pointer-events for hover actions
   }
 
   .embPanel--dragHandle {
@@ -202,25 +219,15 @@
   &:hover .embPanel__hoverActionsWrapper,
   &:focus-within .embPanel__hoverActionsWrapper,
   .embPanel__hoverActionsWrapper--openContextMenu {
-    transition: all z-index $euiAnimSpeedSlow;
+    transition: all $euiAnimSpeedFast;
     z-index: $euiZLevel9;
     top: -$euiSizeXL;
 
     .embPanel__hoverActions {
+      transition: all $euiAnimSpeedFast;
       opacity: 1;
     }
   }
 }
 
-.embPanel__hoverActions {
-  opacity: 0;
-  padding: $euiSizeXS;
-  display: flex;
-  flex-wrap: nowrap;
-  border: $euiBorderThin;
 
-  background-color: $euiColorEmptyShade;
-  height: $euiSizeXL;
-
-  pointer-events: all; // Re-enable pointer-events for hover actions
-}
