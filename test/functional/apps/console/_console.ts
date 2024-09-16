@@ -91,6 +91,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('tabs navigation', () => {
+      let currentUrl: string;
+
+      beforeEach(async () => {
+        // Starting from Shell tab
+        await PageObjects.console.openConsole();
+      });
+
+      it('navigating to a tab updates the URL', async () => {
+        // Verify url at initial tab - Shell
+        currentUrl = await browser.getCurrentUrl();
+        expect(await PageObjects.console.isShellOpen()).to.be(true);
+        expect(currentUrl).to.contain(`/shell`);
+
+        // Select History tab and verify URL
+        await PageObjects.console.openHistory();
+        expect(await PageObjects.console.isHistoryOpen()).to.be(true);
+        currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain(`/history`);
+
+        // Select Config tab and verify URL
+        await PageObjects.console.openConfig();
+        expect(await PageObjects.console.isConfigOpen()).to.be(true);
+        currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain(`/config`);
+      });
+
+      it('tabs should be navigable through URL', async () => {
+        const shellTabUrl = await browser.getCurrentUrl();
+
+        // Navigate to History tab via URL
+        await browser.get(shellTabUrl.replace('/shell', '/history'));
+        currentUrl = await browser.getCurrentUrl();
+        log.debug('Current URL: ' + currentUrl);
+        expect(currentUrl).to.contain(`/history`);
+        expect(await PageObjects.console.isHistoryOpen()).to.be(true);
+
+        // Navigate to Config tab via URL
+        await browser.get(shellTabUrl.replace('/shell', '/config'));
+        currentUrl = await browser.getCurrentUrl();
+        log.debug('Current URL: ' + currentUrl);
+        expect(currentUrl).to.contain(`/config`);
+        expect(await PageObjects.console.isConfigOpen()).to.be(true);
+
+        // Navigate to Shell tab via URL
+        await browser.get(currentUrl.replace('/config', '/shell'));
+        currentUrl = await browser.getCurrentUrl();
+        log.debug('Current URL: ' + currentUrl);
+        expect(currentUrl).to.contain(`/shell`);
+        expect(await PageObjects.console.isShellOpen()).to.be(true);
+      });
+    });
+
     describe('with kbn: prefix in request', () => {
       before(async () => {
         await PageObjects.console.clearEditorText();

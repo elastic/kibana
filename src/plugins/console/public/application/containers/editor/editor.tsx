@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiResizableContainer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -46,14 +45,13 @@ const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
-  containerWidth: number;
+  isVerticalLayout: boolean;
   inputEditorValue: string;
   setInputEditorValue: (value: string) => void;
 }
 
 export const Editor = memo(
-  ({ loading, containerWidth, inputEditorValue, setInputEditorValue }: Props) => {
-    const { euiTheme } = useEuiTheme();
+  ({ loading, isVerticalLayout, inputEditorValue, setInputEditorValue }: Props) => {
     const {
       services: { storage, objectStorageClient },
     } = useServicesContext();
@@ -147,8 +145,9 @@ export const Editor = memo(
         ) : null}
         <EuiResizableContainer
           style={{ height: '100%' }}
-          direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+          direction={isVerticalLayout ? 'vertical' : 'horizontal'}
           onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+          data-test-subj="consoleEditorContainer"
         >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>

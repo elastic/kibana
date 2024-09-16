@@ -8,18 +8,16 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
 
 export interface Props {
-  containerWidth: number;
+  isVerticalLayout: boolean;
 }
 
-export function Config({ containerWidth }: Props) {
-  const { euiTheme } = useEuiTheme();
-
+export function Config({ isVerticalLayout }: Props) {
   return (
     <EuiPanel
       color="subdued"
@@ -27,10 +25,11 @@ export function Config({ containerWidth }: Props) {
       hasShadow={false}
       borderRadius="none"
       css={{ height: '100%' }}
+      data-test-subj="consoleConfigPanel"
     >
       <EuiFlexGroup
         gutterSize="xl"
-        direction={containerWidth < euiTheme.breakpoint.l ? 'column' : 'row'}
+        direction={isVerticalLayout ? 'column' : 'row'}
         // Turn off default responsiveness
         responsive={false}
       >

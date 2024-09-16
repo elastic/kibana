@@ -162,6 +162,11 @@ export class MonacoEditorActionsProvider {
 
   private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
+
+    if (!model) {
+      return [];
+    }
+
     const selection = this.editor.getSelection();
     if (!model || !selection) {
       return Promise.resolve([]);
@@ -175,6 +180,9 @@ export class MonacoEditorActionsProvider {
     startLineNumber: number,
     endLineNumber: number
   ): Promise<AdjustedParsedRequest[]> {
+    if (!model) {
+      return [];
+    }
     const parsedRequests = await this.parsedRequestsProvider.getRequests();
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {

@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
-  useResizeObserver,
+  useIsWithinBreakpoints,
   useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
@@ -61,29 +61,30 @@ import {
 } from './constants';
 
 interface MainProps {
+  currentTabProp?: string;
   isEmbeddable?: boolean;
 }
 
 // 2MB limit (2 * 1024 * 1024 bytes)
 const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024;
 
-export function Main({ isEmbeddable = false }: MainProps) {
+export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const dispatch = useEditorActionContext();
   const requestDispatch = useRequestActionContext();
   const { currentView } = useEditorReadContext();
+  const currentTab = currentTabProp ?? currentView;
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
   const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
 
-  const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
-  const containerDimensions = useResizeObserver(resizeRef);
-
   const {
     docLinks,
-    services: { notifications },
+    services: { notifications, routeHistory },
   } = useServicesContext();
+
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -108,6 +109,14 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
+
+  const updateTab = (tab: string) => {
+    if (routeHistory) {
+      routeHistory?.push(`/console/${tab}`);
+    } else {
+      dispatch({ type: 'setCurrentView', payload: tab });
+    }
+  };
 
   const toggleFullscreen = () => {
     const isEnabled = !isFullscreenOpen;
@@ -198,11 +207,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div
-      id="consoleRoot"
-      className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-      ref={setResizeRef}
-    >
+    <div id="consoleRoot" className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}>
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
@@ -213,8 +218,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               <TopNavMenu
                 disabled={!done}
                 items={getTopNavConfig({
-                  selectedTab: currentView,
-                  setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
+                  selectedTab: currentTab,
+                  setSelectedTab: (tab) => updateTab(tab),
                 })}
                 tourStepProps={consoleTourStepProps}
               />
@@ -275,7 +280,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 closePopover={() => setIsHelpOpen(false)}
                 resetTour={() => {
                   setIsHelpOpen(false);
-                  dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
+                  updateTab(SHELL_TAB_ID);
                   actions.resetTour();
                 }}
               />
@@ -306,16 +311,16 @@ export function Main({ isEmbeddable = false }: MainProps) {
           paddingSize="none"
           css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
         >
-          {currentView === SHELL_TAB_ID && (
+          {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
-              containerWidth={containerDimensions.width}
+              isVerticalLayout={isVerticalLayout}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />
           )}
-          {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
-          {currentView === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
+          {currentTab === HISTORY_TAB_ID && <History isVerticalLayout={isVerticalLayout} />}
+          {currentTab === CONFIG_TAB_ID && <Config isVerticalLayout={isVerticalLayout} />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner
@@ -325,7 +330,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
           color="plain"
         >
           <EuiButtonEmpty
-            onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
+            onClick={() => updateTab(CONFIG_TAB_ID)}
             iconType="editorCodeBlock"
             size="xs"
             color="text"

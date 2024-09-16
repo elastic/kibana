@@ -288,6 +288,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleHistoryButton');
   }
 
+  public async isShellOpen() {
+    return await this.testSubjects.exists('consoleEditorContainer');
+  }
+
+  public async isConfigOpen() {
+    return await this.testSubjects.exists('consoleConfigPanel');
+  }
+
+  public async isHistoryOpen() {
+    return await this.testSubjects.exists('consoleHistoryPanel');
+  }
+
   public async openSettings() {
     await this.testSubjects.click('consoleConfigButton');
   }

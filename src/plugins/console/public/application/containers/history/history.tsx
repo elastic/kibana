@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SHELL_TAB_ID } from '../main';
 import { HistoryEmptyPrompt } from './history_empty';
 import { useServicesContext } from '../../contexts';
 import { useEditorActionContext } from '../../contexts/editor_context';
@@ -77,13 +78,13 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
 };
 
 interface Props {
-  containerWidth: number;
+  isVerticalLayout: boolean;
 }
 
-export function History({ containerWidth }: Props) {
+export function History({ isVerticalLayout }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { history },
+    services: { history, routeHistory },
   } = useServicesContext();
   const dispatch = useEditorActionContext();
 
@@ -110,6 +111,8 @@ export function History({ containerWidth }: Props) {
 
   const restoreRequestFromHistory = useCallback(
     (restoreMethod: RestoreMethod) => {
+      routeHistory?.push(`/console/${SHELL_TAB_ID}`);
+
       const formattedRequest = getFormattedRequest(viewingReq as ESRequest);
 
       dispatch({
@@ -120,7 +123,7 @@ export function History({ containerWidth }: Props) {
         },
       });
     },
-    [viewingReq, dispatch]
+    [viewingReq, dispatch, routeHistory]
   );
 
   useEffect(() => {
@@ -153,10 +156,11 @@ export function History({ containerWidth }: Props) {
       hasShadow={false}
       borderRadius="none"
       css={{ height: '100%' }}
+      data-test-subj="consoleHistoryPanel"
     >
       <EuiResizableContainer
         style={{ height: '100%' }}
-        direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+        direction={isVerticalLayout ? 'vertical' : 'horizontal'}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>

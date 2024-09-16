@@ -80,8 +80,8 @@ export class ConsoleUIPlugin
         title: i18n.translate('console.consoleDisplayName', {
           defaultMessage: 'Console',
         }),
-        enableRouting: false,
-        mount: async ({ element }) => {
+        enableRouting: true,
+        mount: async ({ element, history }) => {
           const [core] = await getStartServices();
 
           const {
@@ -99,6 +99,7 @@ export class ConsoleUIPlugin
             notifications,
             usageCollection,
             element,
+            history,
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
           });
