@@ -70,13 +70,14 @@ export const IconButtonGroup = ({
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
-    const { label, title = label, ...rest } = button;
+    const { label, ...rest } = button;
     return {
       ...rest,
-      'aria-label': title ?? label,
+      'aria-label': label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
-      title,
+      title: '',
+      toolTipContent: label,
       css: [iconButtonGroupStyles.button],
     };
   });
