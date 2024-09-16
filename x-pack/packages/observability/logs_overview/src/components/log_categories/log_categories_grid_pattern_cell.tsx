@@ -48,11 +48,11 @@ export const LogCategoriesGridPatternCell: React.FC<LogCategoriesGridPatternCell
 
   return (
     <pre>
-      <div css={separatorStyle}>…</div>
+      <div css={separatorStyle}>*</div>
       {termsList.map((term, index) => (
         <React.Fragment key={index}>
           <div css={termStyle}>{term}</div>
-          <div css={separatorStyle}>…</div>
+          <div css={separatorStyle}>*</div>
         </React.Fragment>
       ))}
     </pre>
