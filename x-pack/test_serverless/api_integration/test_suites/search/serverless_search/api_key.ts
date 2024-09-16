@@ -17,22 +17,20 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
   const log = getService('log');
-  let supertestDeveloperWithApiKey: SupertestWithRoleScopeType;
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('API Key routes', function () {
     describe('GET api_keys', function () {
       before(async () => {
-        supertestDeveloperWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope(
-          'developer',
-          {
+        supertestDeveloperWithCookieCredentials =
+          await roleScopedSupertest.getSupertestWithRoleScope('developer', {
             useCookieHeader: true,
             withInternalHeaders: true,
-          }
-        );
+          });
       });
 
       it('return apiKeys', async () => {
-        const { body } = await supertestDeveloperWithApiKey
+        const { body } = await supertestDeveloperWithCookieCredentials
           .get(`${API_BASE_PATH}/api_keys`)
           .expect(200);
 
