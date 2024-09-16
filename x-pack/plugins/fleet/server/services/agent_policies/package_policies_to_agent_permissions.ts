@@ -269,10 +269,6 @@ function connectorServicePermissions(packagePolicyId: string): [string, Security
       cluster: ['manage_connector'],
       indices: [
         {
-          names: ['traces-*', 'logs-*', 'metrics-*'],
-          privileges: ['auto_configure', 'create_doc'],
-        },
-        {
           names: ['.elastic-connectors*'],
           privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
         },
