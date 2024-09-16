@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import { EuiFlyout, useEuiTheme, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import {
+  EuiFlyout,
+  useEuiTheme,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiSpacer
+} from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
 import { getESQLDocsSections } from '../../sections';
@@ -74,6 +81,10 @@ function DocumentationFlyout({
           size={DEFAULT_WIDTH}
         >
           <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h3>ES|QL quick reference</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
             <DocumentationNavigation
               searchText={searchText}
               setSearchText={setSearchText}

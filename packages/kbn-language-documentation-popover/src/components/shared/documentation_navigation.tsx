@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiLink,
-  useEuiTheme,
-  EuiFieldSearch,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiLink, EuiText, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface DocumentationNavProps {
@@ -28,73 +20,50 @@ interface DocumentationNavProps {
 }
 
 function DocumentationNav({
-  searchText,
-  setSearchText,
   onNavigationChange,
   filteredGroups,
   linkToDocumentation,
   selectedSection,
 }: DocumentationNavProps) {
-  const { euiTheme } = useEuiTheme();
 
   return (
     <>
-      {linkToDocumentation && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-items: flex-end;
-            padding-top: ${euiTheme.size.xs};
-          `}
-        >
-          <EuiLink
-            external
-            href={linkToDocumentation}
-            target="_blank"
-            data-test-subj="language-documentation-navigation-link"
-          >
-            {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
-              defaultMessage: 'View full ES|QL documentation',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-      <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding: ${euiTheme.size.s} 0;
-          `}
-        >
-          <EuiFieldSearch
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-            }}
-            data-test-subj="language-documentation-navigation-search"
-            placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
-              defaultMessage: 'Search',
-            })}
+      <EuiFlexGroup gutterSize="s" responsive={false} direction="row" alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
             fullWidth
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiComboBox
-            aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
-              defaultMessage: 'Navigate through the documentation',
-            })}
-            placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
-              defaultMessage: 'Commands and functions',
-            })}
-            data-test-subj="language-documentation-navigation-dropdown"
-            options={filteredGroups}
-            selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
-            singleSelection={{ asPlainText: true }}
-            onChange={onNavigationChange}
-            compressed
-            fullWidth
-          />
+            label="Search or select topic"
+            labelAppend={linkToDocumentation && (
+              <EuiText size="xs">
+                <EuiLink
+                  external
+                  href={linkToDocumentation}
+                  target="_blank"
+                  data-test-subj="language-documentation-navigation-link"
+                >
+                  {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
+                    defaultMessage: 'View full ES|QL documentation',
+                  })}
+                </EuiLink>
+              </EuiText>
+              )}
+            >
+            <EuiComboBox
+              aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
+                defaultMessage: 'Navigate through the documentation',
+              })}
+              placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
+                defaultMessage: 'Commands and functions',
+              })}
+              data-test-subj="language-documentation-navigation-dropdown"
+              options={filteredGroups}
+              selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
+              singleSelection={{ asPlainText: true }}
+              onChange={onNavigationChange}
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
