@@ -27,6 +27,8 @@ import {
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
+import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalies_table_utils';
+
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../components/rule_editor';
 import { formatValue } from '../../formatters/format_value';
@@ -474,13 +476,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     function showAnomalyPopover(marker, circle) {
       const anomalyTime = marker.date;
 
-      // The table items could be aggregated, so we have to find the item
-      // that has the closest timestamp to the selected anomaly from the chart.
-      const tableItem = that.props.tableData.anomalies.reduce((closestItem, currentItem) => {
-        const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
-        const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
-        return currentItemDelta < closestItemDelta ? currentItem : closestItem;
-      }, that.props.tableData.anomalies[0]);
+      const tableItem = getTableItemClosestToTimestamp(that.props.tableData.anomalies, anomalyTime);
 
       if (tableItem) {
         // Overwrite the timestamp of the possibly aggregated table item with the
