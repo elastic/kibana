@@ -19,8 +19,8 @@ interface GetDefaultCapacityOpts {
 const HEAP_TO_CAPACITY_MAP = [
   { minHeap: 0, maxHeap: 1, capacity: 10 },
   { minHeap: 1, maxHeap: 2, capacity: 15 },
-  { minHeap: 2, maxHeap: 4, capacity: 25, backgroundTaskNodeOnly: false },
-  { minHeap: 2, maxHeap: 4, capacity: 50, backgroundTaskNodeOnly: true },
+  { minHeap: 2, maxHeap: 16, capacity: 25, backgroundTaskNodeOnly: false },
+  { minHeap: 2, maxHeap: 16, capacity: 50, backgroundTaskNodeOnly: true },
 ];
 
 export function getDefaultCapacity({

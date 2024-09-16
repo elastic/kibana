@@ -54,6 +54,6 @@ export {
 
 export { MAJOR_VERSION } from './plugin';
 
-export { Section, IndexDetailsSection } from '@kbn/index-management';
-export type { IndexDetailsTab, IndexDetailsTabId } from '@kbn/index-management';
+export { Section, IndexDetailsSection } from '@kbn/index-management-shared-types';
+export type { IndexDetailsTab, IndexDetailsTabId } from '@kbn/index-management-shared-types';
 export * from './allow_auto_create';
