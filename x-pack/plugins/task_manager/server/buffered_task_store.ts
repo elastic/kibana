@@ -69,9 +69,22 @@ export class BufferedTaskStore implements Updatable {
   }
 
   public async partialUpdate(
-    doc: PartialConcreteTaskInstance
-  ): Promise<PartialConcreteTaskInstance> {
-    return await unwrapPromise(this.bufferedPartialUpdate(doc));
+    partialDoc: PartialConcreteTaskInstance,
+    options: { validate: boolean; doc: ConcreteTaskInstance }
+  ): Promise<ConcreteTaskInstance> {
+    // merge the partial updates with the doc and validate
+    this.taskStore.taskValidator.getValidatedTaskInstanceForUpdating(
+      { ...options.doc, ...partialDoc },
+      { validate: options.validate }
+    );
+
+    const result = await unwrapPromise(this.bufferedPartialUpdate(partialDoc));
+
+    // merge the partial update result with the doc and validate
+    return this.taskStore.taskValidator.getValidatedTaskInstanceFromReading(
+      { ...options.doc, ...result },
+      { validate: options.validate }
+    );
   }
 
   public async remove(id: string): Promise<void> {

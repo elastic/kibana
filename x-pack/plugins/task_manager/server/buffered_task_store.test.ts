@@ -214,8 +214,51 @@ describe('Buffered Task Store', () => {
 
       taskStore.bulkPartialUpdate.mockResolvedValue([asOk(partialTask)]);
 
-      expect(await bufferedStore.partialUpdate(partialTask)).toMatchObject(partialTask);
+      expect(
+        await bufferedStore.partialUpdate(partialTask, { validate: true, doc: task })
+      ).toMatchObject(partialTask);
       expect(taskStore.bulkPartialUpdate).toHaveBeenCalledWith([partialTask]);
+
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        { ...task, ...partialTask },
+        { validate: true }
+      );
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledWith(
+        { ...task, ...partialTask },
+        { validate: true }
+      );
+    });
+
+    test(`doesn't validate when specified`, async () => {
+      const taskStore = taskStoreMock.create();
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+
+      const task = taskManagerMock.createTask();
+      const partialTask = {
+        id: task.id,
+        version: task.version,
+        status: 'running' as TaskStatus,
+      };
+
+      taskStore.bulkPartialUpdate.mockResolvedValue([asOk(partialTask)]);
+
+      expect(
+        await bufferedStore.partialUpdate(partialTask, { validate: false, doc: task })
+      ).toMatchObject(partialTask);
+      expect(taskStore.bulkPartialUpdate).toHaveBeenCalledWith([partialTask]);
+
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        { ...task, ...partialTask },
+        { validate: false }
+      );
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledWith(
+        { ...task, ...partialTask },
+        { validate: false }
+      );
     });
 
     test('handles partially successful bulkPartialUpdate, resolving each call appropriately', async () => {
@@ -251,9 +294,9 @@ describe('Buffered Task Store', () => {
       ]);
 
       const results = [
-        bufferedStore.partialUpdate(partialTasks[0]),
-        bufferedStore.partialUpdate(partialTasks[1]),
-        bufferedStore.partialUpdate(partialTasks[2]),
+        bufferedStore.partialUpdate(partialTasks[0], { validate: true, doc: tasks[0] }),
+        bufferedStore.partialUpdate(partialTasks[1], { validate: true, doc: tasks[1] }),
+        bufferedStore.partialUpdate(partialTasks[2], { validate: true, doc: tasks[2] }),
       ];
       expect(await results[0]).toMatchObject(partialTasks[0]);
       await expect(results[1]).rejects.toMatchInlineSnapshot(`
@@ -309,10 +352,10 @@ describe('Buffered Task Store', () => {
       ]);
 
       const results = [
-        bufferedStore.partialUpdate(partialTasks[0]),
-        bufferedStore.partialUpdate(partialTasks[1]),
-        bufferedStore.partialUpdate(partialTasks[2]),
-        bufferedStore.partialUpdate(partialTasks[3]),
+        bufferedStore.partialUpdate(partialTasks[0], { validate: true, doc: tasks[0] }),
+        bufferedStore.partialUpdate(partialTasks[1], { validate: true, doc: tasks[1] }),
+        bufferedStore.partialUpdate(partialTasks[2], { validate: true, doc: tasks[2] }),
+        bufferedStore.partialUpdate(partialTasks[3], { validate: true, doc: tasks[3] }),
       ];
       expect(await results[0]).toMatchObject(partialTasks[0]);
       await expect(results[1]).rejects.toMatchInlineSnapshot(`
