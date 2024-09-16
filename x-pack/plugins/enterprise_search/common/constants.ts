@@ -194,7 +194,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
   URL: '/app/enterprise_search/semantic_search',
 };
 
-export const INFERENCE_ENDPOINTS_PLUGIN = {
+export const SEARCH_RELEVANCE_PLUGIN = {
   ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
     defaultMessage: 'Inference Endpoints',
@@ -203,7 +203,7 @@ export const INFERENCE_ENDPOINTS_PLUGIN = {
     defaultMessage: 'Relevance',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
-    defaultMessage: 'View for managing inference endpoints.',
+    defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
   }),
   URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',

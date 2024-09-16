@@ -25,6 +25,13 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         );
       });
     },
+    async expectToBeOnIndexListPage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain(
+          '/app/management/data/index_management/indices'
+        );
+      });
+    },
     async expectIndexNameToExist() {
       await testSubjects.existOrFail('indexNameField');
     },
@@ -47,6 +54,20 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       await testSubjects.existOrFail('createIndexBtn');
       expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
       await testSubjects.click('createIndexBtn');
+    },
+    async expectCreateIndexCodeView() {
+      await testSubjects.existOrFail('createIndexCodeView');
+    },
+    async expectCreateIndexUIView() {
+      await testSubjects.existOrFail('createIndexUIView');
+    },
+    async clickUIViewButton() {
+      await testSubjects.existOrFail('createIndexUIViewBtn');
+      await testSubjects.click('createIndexUIViewBtn');
+    },
+    async clickCodeViewButton() {
+      await testSubjects.existOrFail('createIndexCodeViewBtn');
+      await testSubjects.click('createIndexCodeViewBtn');
     },
   };
 }
