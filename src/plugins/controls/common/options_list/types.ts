@@ -30,6 +30,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
+  compressed?: boolean;
 }
 
 export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;

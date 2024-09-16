@@ -48,11 +48,13 @@ export type DefaultControlApi = PublishesDataLoading &
     setBlockingError: (error: Error | undefined) => void;
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
+    compressed: PublishingSubject<boolean | undefined>;
   };
 
 export interface DefaultControlState {
   grow?: boolean;
   width?: ControlWidth;
+  compressed?: boolean;
 }
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<

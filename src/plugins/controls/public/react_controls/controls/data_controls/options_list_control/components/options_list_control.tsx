@@ -46,6 +46,7 @@ export const OptionsListControl = ({
     excludeSelected,
     existsSelected,
     selectedOptions,
+    compressed,
     invalidSelections,
     field,
     loading,
@@ -55,6 +56,7 @@ export const OptionsListControl = ({
     stateManager.exclude,
     stateManager.existsSelected,
     stateManager.selectedOptions,
+    stateManager.compressed,
     api.invalidSelections$,
     api.field$,
     api.dataLoading,
@@ -174,7 +176,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed className={controlPanelClassName}>
+    <EuiFilterGroup fullWidth compressed={compressed ?? true} className={controlPanelClassName}>
       <EuiInputPopover
         id={popoverId}
         ownFocus

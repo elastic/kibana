@@ -98,6 +98,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     defaultPanelTitle,
     grow,
     width,
+    compressed,
     labelPosition,
     disabledActionIds,
     rawViewMode,
@@ -108,6 +109,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.defaultPanelTitle,
     api?.grow,
     api?.width,
+    api?.compressed,
     api?.parentApi?.labelPosition,
     api?.parentApi?.disabledActionIds,
     viewModeSubject
@@ -162,7 +164,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
-            compressed
+            compressed={compressed ?? true}
             className={classNames(
               'controlFrame__formControlLayout',
               {

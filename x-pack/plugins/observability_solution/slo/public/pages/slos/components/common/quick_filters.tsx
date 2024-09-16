@@ -69,6 +69,7 @@ export function QuickFilters({
               selectedOptions: getSelectedOptions(statusFilter),
               existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
               placeholder: ALL_LABEL,
+              compressed: false,
             },
             'slo-status-filter'
           );
@@ -84,6 +85,7 @@ export function QuickFilters({
               exclude: statusFilter?.meta?.negate,
               existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
               placeholder: ALL_LABEL,
+              compressed: false,
             },
             'slo-tags-filter'
           );

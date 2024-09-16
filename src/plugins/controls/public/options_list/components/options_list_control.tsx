@@ -60,6 +60,7 @@ export const OptionsListControl = ({
 
   const loading = optionsList.select((state) => state.output.loading);
   const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const compressed = optionsList.select((state) => state.explicitInput.compressed);
   const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   useEffect(() => {
@@ -215,7 +216,7 @@ export const OptionsListControl = ({
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
-      compressed
+      compressed={compressed ?? true}
     >
       <EuiInputPopover
         id={popoverId}
