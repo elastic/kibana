@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe.only('edit embeddable redirects', () => {
+  describe('edit embeddable redirects', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
