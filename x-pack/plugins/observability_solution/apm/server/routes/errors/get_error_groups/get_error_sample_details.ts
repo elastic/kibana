@@ -61,15 +61,14 @@ export async function getErrorSampleDetails({
           ],
         },
       },
+      fields: ['*'],
     },
-    fields: ['*'],
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
-  // const error = resp.hits.hits[0]?._source;
 
-  const error = resp.hits.hits[0]?.fields;
-  const errorNorm = normalizeFields(error);
+  // const error = resp.hits.hits[0]?.fields;
+  const errorNorm = normalizeFields(resp.hits.hits[0]?.fields) as unknown as APMError;
   const transactionId = errorNorm?.transaction?.id;
   const traceId = errorNorm?.trace?.id;
 

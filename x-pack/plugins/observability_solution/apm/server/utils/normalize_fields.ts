@@ -14,8 +14,13 @@ export const normalizeFields = (
 
   for (const [key, value] of Object.entries(fields)) {
     const normalizedValue = Array.isArray(value) && value.length > 0 ? value[0] : value;
+    // This function will be fixed in https://github.com/elastic/kibana/issues/192749
+    const arrayValue =
+      Array.isArray(value) && (value.length > 1 || key === 'process.args')
+        ? value
+        : normalizedValue;
 
-    set(normalizedFields, key, normalizedValue);
+    set(normalizedFields, key, arrayValue);
   }
 
   return normalizedFields;

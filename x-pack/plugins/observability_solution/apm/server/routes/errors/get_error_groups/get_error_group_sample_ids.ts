@@ -75,8 +75,7 @@ export async function getErrorGroupSampleIds({
     },
   });
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const source = item.fields;
-    return source.error?.id;
+    return item.fields['error.id']?.[0] as string;
   });
 
   return {

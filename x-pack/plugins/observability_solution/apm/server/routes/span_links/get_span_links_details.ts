@@ -29,6 +29,7 @@ import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 async function fetchSpanLinksDetails({
   apmEventClient,
@@ -68,6 +69,21 @@ async function fetchSpanLinksDetails({
       SERVICE_ENVIRONMENT,
     ],
     body: {
+      fields: [
+        TRACE_ID,
+        SPAN_ID,
+        TRANSACTION_ID,
+        SERVICE_NAME,
+        SPAN_NAME,
+        TRANSACTION_NAME,
+        TRANSACTION_DURATION,
+        SPAN_DURATION,
+        PROCESSOR_EVENT,
+        SPAN_SUBTYPE,
+        SPAN_TYPE,
+        AGENT_NAME,
+        SERVICE_ENVIRONMENT,
+      ],
       track_total_hits: false,
       size: 1000,
       query: {
@@ -106,11 +122,11 @@ async function fetchSpanLinksDetails({
 
   const spanIdsMap = keyBy(spanLinks, 'span.id');
 
-  return response.hits.hits.filter(({ _source: source }) => {
+  return response.hits.hits.filter(({ fields }) => {
     // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
     // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
-    if (source.processor.event === ProcessorEvent.span) {
-      const span = source as SpanRaw;
+    if (fields['processor.event']?.[0] === ProcessorEvent.span) {
+      const span = normalizeFields(fields) as unknown as SpanRaw;
       const hasSpanId = spanIdsMap[span.span.id] || false;
       return hasSpanId;
     }

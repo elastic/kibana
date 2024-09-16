@@ -11,6 +11,7 @@ import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { normalizeFields } from '../../../utils/normalize_fields';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -690,10 +691,14 @@ export const tasks: TelemetryTask[] = [
           sort: {
             '@timestamp': 'desc',
           },
+          fields: ['*'],
         },
       });
 
-      const hit = response.hits.hits[0]?._source as Pick<Transaction | Span | APMError, 'observer'>;
+      const hit = normalizeFields(response.hits.hits[0]?.fields) as Pick<
+        Transaction | Span | APMError,
+        'observer'
+      >;
 
       if (!hit || !hit.observer?.version) {
         return {};

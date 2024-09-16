@@ -114,18 +114,18 @@ export async function getTraceItems({
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
+      fields: [
+        TIMESTAMP,
+        TRACE_ID,
+        TRANSACTION_ID,
+        PARENT_ID,
+        SERVICE_NAME,
+        ERROR_ID,
+        ERROR_LOG_MESSAGE,
+        ERROR_EXCEPTION,
+        ERROR_GROUP_ID,
+      ],
     },
-    fields: [
-      TIMESTAMP,
-      TRACE_ID,
-      TRANSACTION_ID,
-      PARENT_ID,
-      SERVICE_NAME,
-      ERROR_ID,
-      ERROR_LOG_MESSAGE,
-      ERROR_EXCEPTION,
-      ERROR_GROUP_ID,
-    ],
   });
 
   const traceResponsePromise = getTraceDocsPaginated({
@@ -146,8 +146,12 @@ export async function getTraceItems({
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
 
-  const traceDocs = traceResponse.hits.map((hit) => normalizeFields(hit.fields));
-  const errorDocs = errorResponse.hits.hits.map((hit) => normalizeFields(hit.fields));
+  const traceDocs = traceResponse.hits.map(
+    (hit) => normalizeFields(hit.fields) as unknown as WaterfallTransaction | WaterfallSpan
+  );
+  const errorDocs = errorResponse.hits.hits.map(
+    (hit) => normalizeFields(hit.fields) as unknown as WaterfallError
+  );
 
   return {
     exceedsMax,

@@ -39,6 +39,7 @@ export async function getLinkedParentsOfSpan({
     },
     _source: [SPAN_LINKS],
     body: {
+      fields: [SPAN_LINKS],
       track_total_hits: false,
       size: 1,
       query: {

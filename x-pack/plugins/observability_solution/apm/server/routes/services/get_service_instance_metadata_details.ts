@@ -20,6 +20,7 @@ import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Host } from '../../../typings/es_schemas/raw/fields/host';
 import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;
@@ -66,11 +67,16 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
             },
           },
+          fields: ['*'],
         },
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    return maybe(
+      normalizeFields(
+        response.hits.hits[0]?.fields
+      ) as unknown as ServiceInstanceMetadataDetailsResponse
+    );
   }
 
   async function getTransactionEventSample() {
@@ -85,11 +91,12 @@ export async function getServiceInstanceMetadataDetails({
           terminate_after: 1,
           size: 1,
           query: { bool: { filter } },
+          fields: ['*'],
         },
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    return maybe(normalizeFields(response.hits.hits[0]?.fields));
   }
 
   async function getTransactionMetricSample() {
@@ -108,10 +115,11 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
             },
           },
+          fields: ['*'],
         },
       }
     );
-    return maybe(response.hits.hits[0]?._source);
+    return maybe(normalizeFields(response.hits.hits[0]?.fields));
   }
 
   // we can expect the most detail of application metrics,

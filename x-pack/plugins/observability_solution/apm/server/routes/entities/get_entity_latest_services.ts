@@ -17,6 +17,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { entitiesRangeQuery } from './get_entities';
 import { EntityLatestServiceRaw, EntityType } from './types';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export async function getEntityLatestServices({
   entitiesESClient,
@@ -41,6 +42,7 @@ export async function getEntityLatestServices({
         size,
         track_total_hits: false,
         _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
+        fields: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
         query: {
           bool: {
             filter: [
@@ -54,7 +56,7 @@ export async function getEntityLatestServices({
         },
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) => normalizeFields(hit?.fields) as unknown as EntityLatestServiceRaw);
 
   return latestEntityServices;
 }
