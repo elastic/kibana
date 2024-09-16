@@ -276,7 +276,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('600px', '375px');
     });
 
-    it('gauge size (absolute pixels) - major arc', async () => {
+    // Fails in chrome 128+
+    it.skip('gauge size (absolute pixels) - major arc', async () => {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
       });
