@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn, euiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiDataGridColumn, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
