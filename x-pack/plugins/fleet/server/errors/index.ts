@@ -59,7 +59,7 @@ export class AgentlessAgentCreateError extends FleetError {
 
 export class AgentlessPackagePolicyRequestError extends FleetError {
   constructor(message: string) {
-    super(`Unable to create agentless integration. ${message}`);
+    super(`Unable to create integration. ${message}`);
   }
 }
 

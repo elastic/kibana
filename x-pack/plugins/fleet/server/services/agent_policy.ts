@@ -441,7 +441,7 @@ class AgentPolicyService {
       if (givenPolicy?.supports_agentless && !givenPolicy.id) {
         const integrationName = givenPolicy.name.split(' ').pop();
         throw new AgentlessPackagePolicyRequestError(
-          `${givenPolicy.name} already exist. Please rename ${integrationName} integration.`
+          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
         );
       }
     }
