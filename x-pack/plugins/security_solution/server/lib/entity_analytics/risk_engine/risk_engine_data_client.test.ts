@@ -18,6 +18,7 @@ import type { RiskEngineConfiguration } from '../types';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from '../utils/transforms';
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
@@ -359,37 +360,50 @@ describe('RiskEngineDataClient', () => {
     });
 
     describe('tearDownRiskEngine', () => {
-      const mockTaskManagerStart = taskManagerMock.createStart();
+      let riskEngineCurrentStatusMock: jest.SpyInstance;
+
+      beforeEach(() => {
+        riskEngineCurrentStatusMock = jest.spyOn(
+          RiskEngineDataClient.prototype,
+          'getCurrentStatus'
+        );
+      });
 
       it('should delete the risk engine object and task if it exists', async () => {
+        const mockTaskManagerStart = taskManagerMock.createStart();
+        riskEngineCurrentStatusMock.mockImplementation(() => {
+          return RiskEngineStatusEnum.ENABLED;
+        });
         mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
         const riskScoreDataClient = riskScoreDataClientMock.create();
         await riskEngineDataClient.tearDown({
           taskManager: mockTaskManagerStart,
           riskScoreDataClient,
         });
-
         expect(mockSavedObjectClient.delete).toHaveBeenCalledTimes(1);
         expect(mockTaskManagerStart.remove).toHaveBeenCalledTimes(1);
         expect(riskScoreDataClient.tearDown).toHaveBeenCalledTimes(1);
       });
 
-      it('should return errors when exception is thrown ', async () => {
-        const error = new Error('testError');
-        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
-        mockTaskManagerStart.remove.mockRejectedValueOnce(error);
-        mockSavedObjectClient.delete.mockRejectedValueOnce(error);
-
+      it('should return errors when engine is disabled ', async () => {
+        riskEngineCurrentStatusMock.mockImplementation(() => {
+          return RiskEngineStatusEnum.DISABLED;
+        });
+        const error = new Error('Risk engine is disabled or deleted already.');
+        const mockTaskManagerStart = taskManagerMock.createStart();
         const errors = await riskEngineDataClient.tearDown({
           taskManager: mockTaskManagerStart,
           riskScoreDataClient: riskScoreDataClientMock.create(),
         });
-
-        expect(errors).toEqual([error, error]);
+        expect(errors).toEqual([error]);
       });
 
       it('should return errors from riskScoreDataClient.tearDown ', async () => {
-        const error = new Error('testError');
+        riskEngineCurrentStatusMock.mockImplementation(() => {
+          return RiskEngineStatusEnum.DISABLED;
+        });
+        const error = new Error('Risk engine is disabled or deleted already.');
+        const mockTaskManagerStart = taskManagerMock.createStart();
         mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
         const riskScoreDataClient = riskScoreDataClientMock.create();
         riskScoreDataClient.tearDown.mockResolvedValueOnce([error]);

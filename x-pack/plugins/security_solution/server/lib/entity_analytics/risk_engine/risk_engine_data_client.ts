@@ -265,7 +265,7 @@ export class RiskEngineDataClient {
       const riskScoreErrors = await riskScoreDataClient.tearDown();
       errors.concat(riskScoreErrors);
     } else {
-      errors.push(new Error('Risk engine is disabled or deleted already.'));
+      errors.push(Error('Risk engine is disabled or deleted already.'));
     }
 
     return errors;
