@@ -13,7 +13,7 @@ import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
-const ESQL_RESOURCE = 'esql';
+export const ESQL_RESOURCE = 'esql';
 
 interface Props {
   display?: 'mini';
