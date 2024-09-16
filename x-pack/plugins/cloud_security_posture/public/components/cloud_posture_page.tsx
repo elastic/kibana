@@ -18,8 +18,6 @@ export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
 export const THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT = '3p-integrations-no-findings-prompt';
-export const THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
-  '3p-no-findings-prompt-wiz-integration-button';
 export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
 export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';

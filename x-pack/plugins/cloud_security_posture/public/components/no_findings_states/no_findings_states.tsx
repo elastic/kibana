@@ -30,12 +30,12 @@ import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
+  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from '../test_subjects';
 import {
   CloudPosturePage,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
   THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
 import cloudsSVG from '../../assets/illustrations/clouds.svg';

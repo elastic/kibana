@@ -17,11 +17,13 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     let findings: typeof PageObjects.findings;
     let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
     let notInstalledCSP: typeof findings.notInstalledCSP;
+    let thirdPartyIntegrationsNoFindingsPrompt: typeof findings.thirdPartyIntegrationsNoFindingsPrompt;
 
     beforeEach(async () => {
       findings = PageObjects.findings;
       notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
       notInstalledCSP = findings.notInstalledCSP;
+      thirdPartyIntegrationsNoFindingsPrompt = findings.thirdPartyIntegrationsNoFindingsPrompt;
 
       await findings.waitForPluginInitialized();
     });
@@ -33,6 +35,13 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
+      const createPackageHeaderElementExists = await testSubjects.exists(
+        'createPackagePolicy_pageTitle'
+      );
+
+      if (!createPackageHeaderElementExists) {
+        throw new Error('Integration installation page not found');
+      }
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
@@ -44,6 +53,13 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledCSP.navigateToAction('cspm-not-installed-action');
+      const createPackageHeaderElementExists = await testSubjects.exists(
+        'createPackagePolicy_pageTitle'
+      );
+
+      if (!createPackageHeaderElementExists) {
+        throw new Error('Integration installation page not found');
+      }
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
@@ -55,7 +71,33 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledCSP.navigateToAction('kspm-not-installed-action');
+      const createPackageHeaderElementExists = await testSubjects.exists(
+        'createPackagePolicy_pageTitle'
+      );
+
+      if (!createPackageHeaderElementExists) {
+        throw new Error('Integration installation page not found');
+      }
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+    });
+
+    it('clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration overview page', async () => {
+      await findings.navigateToMisconfigurations();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const element = await thirdPartyIntegrationsNoFindingsPrompt.getElement();
+      expect(element).to.not.be(null);
+
+      await thirdPartyIntegrationsNoFindingsPrompt.navigateToAction(
+        '3p-no-findings-prompt-wiz-integration-button'
+      );
+      const integrationPageHeaderElementExists = await testSubjects.exists('headerLeft');
+
+      if (!integrationPageHeaderElementExists) {
+        throw new Error('Integration overview page not found');
+      }
+
+      await PageObjects.common.waitUntilUrlIncludes('wiz/overview');
     });
   });
 };

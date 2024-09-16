@@ -32,7 +32,8 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
 export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
 export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
 export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
-
+export const THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
+  '3p-no-findings-prompt-wiz-integration-button';
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
 export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
