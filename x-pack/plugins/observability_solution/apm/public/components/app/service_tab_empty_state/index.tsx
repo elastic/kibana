@@ -50,7 +50,7 @@ const learnMoreLink = {
 };
 
 const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
-const defaultAddDataTelemetryParqams: EntityInventoryAddDataParams = {
+const defaultAddDataTelemetryParams: EntityInventoryAddDataParams = {
   view: 'add_apm_cta',
 };
 
@@ -72,7 +72,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   );
 
   function handleAddAPMClick() {
-    services.telemetry.reportEntityInventoryAddData(defaultAddDataTelemetryParqams);
+    services.telemetry.reportEntityInventoryAddData(defaultAddDataTelemetryParams);
   }
 
   function handleTryItClick() {
