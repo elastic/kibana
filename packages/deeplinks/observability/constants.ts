@@ -30,3 +30,5 @@ export const INVESTIGATE_APP_ID = 'investigate';
 export const OBLT_UX_APP_ID = 'ux';
 
 export const OBLT_PROFILING_APP_ID = 'profiling';
+
+export const INVENTORY_APP_ID = 'inventory';

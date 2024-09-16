@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { Index } from '@kbn/index-management';
+import type { Index } from '@kbn/index-management-shared-types';
 import { useQuery } from '@tanstack/react-query';
+import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 
 const POLLING_INTERVAL = 15 * 1000;
 export const useIndex = (indexName: string) => {
   const { http } = useKibana().services;
-  const queryKey = ['fetchIndex', indexName];
+  const queryKey = [QueryKeys.FetchIndex, indexName];
   const result = useQuery({
     queryKey,
     refetchInterval: POLLING_INTERVAL,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
-    retry: true,
+    retry: 3,
     queryFn: () =>
       http.fetch<Index>(`/internal/index_management/indices/${encodeURIComponent(indexName)}`),
   });
