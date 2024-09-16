@@ -59,11 +59,7 @@ import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import { RootProfileService } from './context_awareness/profiles/root_profile';
 import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
-import {
-  ProfilesManager,
-  ProfilesManagerEbtContext,
-  EBT_NO_ACTIVE_PROFILES,
-} from './context_awareness/profiles_manager';
+import { ProfilesManager, ProfilesManagerEbtContext } from './context_awareness/profiles_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -153,7 +149,9 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
-    const ebtContext$ = new BehaviorSubject({ dscActiveProfiles: EBT_NO_ACTIVE_PROFILES });
+    const ebtContext$: ProfilesManagerEbtContext = new BehaviorSubject({
+      dscActiveProfiles: [] as string[],
+    });
 
     core.analytics.registerContextProvider({
       name: 'dsc_active_profiles',

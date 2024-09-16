@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, map, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -39,8 +39,9 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
-export type ProfilesManagerEbtContext = BehaviorSubject<{ dscActiveProfiles: string[] }>;
-export const EBT_NO_ACTIVE_PROFILES = ['default'];
+export type ProfilesManagerEbtContext = BehaviorSubject<{
+  dscActiveProfiles: string[];
+}>;
 
 /**
  * Options for the `getProfiles` method
@@ -136,6 +137,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
   }
@@ -197,18 +199,19 @@ export class ProfilesManager {
    */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
-      tap(() => {
-        const dscActiveProfiles = [
-          this.rootContext$.getValue().profileId,
-          this.dataSourceContext$.getValue().profileId,
-        ];
-        // console.log(dscActiveProfiles);
-        this.ebtContext$?.next({
-          dscActiveProfiles,
-        });
-      }),
       map(() => this.getProfiles(options))
     );
+  }
+
+  /**
+   * Tracks the active profiles in the EBT context
+   */
+  private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
+    const dscActiveProfiles = [rootContextProfileId, dataSourceContextProfileId];
+    // console.log('dscActiveProfiles', dscActiveProfiles);
+    this.ebtContext$?.next({
+      dscActiveProfiles,
+    });
   }
 }
 
