@@ -444,9 +444,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         endpointContext.service
           .getTelemetryService()
           .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
-            agentType: req.body.agent_type,
-            command,
-            error: err,
+            responseActions: {
+              agentType: req.body.agent_type || 'endpoint',
+              command,
+              error: err,
+            },
           });
       }
 

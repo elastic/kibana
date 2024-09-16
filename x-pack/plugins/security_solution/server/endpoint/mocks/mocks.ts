@@ -9,6 +9,7 @@
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
+  analyticsServiceMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -144,6 +145,7 @@ export const createMockEndpointAppContextServiceSetupContract =
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
+      telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
     };
   };
 

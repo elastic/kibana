@@ -534,6 +534,84 @@ describe('Response actions', () => {
       );
     });
 
+    describe('Telemetry', () => {
+      it.each([
+        ['execute', EXECUTE_ROUTE],
+        ['get-file', GET_FILE_ROUTE],
+        ['running-processes', GET_PROCESSES_ROUTE],
+        ['isolate', ISOLATE_HOST_ROUTE_V2],
+        ['kill-process', KILL_PROCESS_ROUTE],
+        ['scan', SCAN_ROUTE],
+        ['suspend-process', SUSPEND_PROCESS_ROUTE],
+        ['unisolate', UNISOLATE_HOST_ROUTE_V2],
+        ['upload', UPLOAD_ROUTE],
+      ])('sends analytics when %s action is created', async (command, route) => {
+        endpointContext.experimentalFeatures = {
+          ...endpointContext.experimentalFeatures,
+          responseActionsTelemetryEnabled: true,
+        };
+
+        await callRoute(route, {
+          body: { endpoint_ids: ['XYZ'], parameters: { path: '/home/usr/' } },
+          version: '2023-10-31',
+        });
+
+        expect(
+          (await endpointAppContextService.getTelemetryService().reportEvent) as jest.Mock
+        ).toHaveBeenCalledWith('endpoint_response_action_sent', {
+          responseActions: expect.objectContaining({
+            actionId: expect.any(String),
+            agentType: 'endpoint',
+            command,
+            endpointIds: ['agent-a'],
+          }),
+        });
+      });
+
+      it.each([
+        ['execute', EXECUTE_ROUTE],
+        ['get-file', GET_FILE_ROUTE],
+        ['running-processes', GET_PROCESSES_ROUTE],
+        ['isolate', ISOLATE_HOST_ROUTE_V2],
+        ['kill-process', KILL_PROCESS_ROUTE],
+        ['scan', SCAN_ROUTE],
+        ['suspend-process', SUSPEND_PROCESS_ROUTE],
+        ['unisolate', UNISOLATE_HOST_ROUTE_V2],
+        ['upload', UPLOAD_ROUTE],
+      ])('sends error analytics for %s action creation failure', async (command, route) => {
+        endpointContext.experimentalFeatures = {
+          ...endpointContext.experimentalFeatures,
+          responseActionsTelemetryEnabled: true,
+        };
+
+        const expectedError = new Error('Uh oh!');
+        await callRoute(
+          route,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters: { path: '/home/usr/', timeout: 12000 } },
+            version: '2023-10-31',
+            indexErrorResponse: {
+              statusCode: 500,
+              body: {
+                result: expectedError.message,
+              },
+            },
+          },
+          { endpointDsExists: true }
+        );
+
+        expect(
+          (await endpointAppContextService.getTelemetryService().reportEvent) as jest.Mock
+        ).toHaveBeenCalledWith('endpoint_response_action_sent_error', {
+          responseActions: expect.objectContaining({
+            agentType: 'endpoint',
+            command,
+            error: expect.any(ResponseActionsClientError),
+          }),
+        });
+      });
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
