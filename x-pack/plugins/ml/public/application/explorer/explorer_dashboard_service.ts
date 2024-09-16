@@ -52,7 +52,7 @@ export const explorerAction$ = new Subject<ExplorerAction>();
 const explorerFilteredAction$ = explorerAction$.pipe(
   // consider observables as side-effects
   flatMap((action: ExplorerAction) =>
-    isObservable(action) ? action : (from([action]) as Observable<ExplorerActions>)
+    isObservable(action) ? action : (from([action]) as Observable<ExplorerAction>)
   ),
   distinctUntilChanged(isEqual)
 );
