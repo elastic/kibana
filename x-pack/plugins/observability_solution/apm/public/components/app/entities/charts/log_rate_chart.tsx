@@ -121,11 +121,7 @@ export function LogRateChart({ height }: { height: number }) {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <ExploreLogsButton
-              start={start}
-              end={end}
-              kuery={`log.level: * AND service.name: "${serviceName}"`}
-            />
+            <ExploreLogsButton start={start} end={end} kuery={`service.name: "${serviceName}"`} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

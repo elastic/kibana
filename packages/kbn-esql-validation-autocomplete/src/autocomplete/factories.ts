@@ -175,6 +175,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
@@ -196,7 +197,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
@@ -272,7 +273,7 @@ export const buildPoliciesDefinitions = (
 ): SuggestionRawDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    text: getSafeInsertText(label, { dashSupported: true }),
+    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -282,6 +283,7 @@ export const buildPoliciesDefinitions = (
       },
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildMatchingFieldsDefinition = (
@@ -290,7 +292,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: getSafeInsertText(label),
+    text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -302,6 +304,7 @@ export const buildMatchingFieldsDefinition = (
       }
     ),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildOptionDefinition = (
@@ -438,6 +441,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?t_start': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?t_end': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;

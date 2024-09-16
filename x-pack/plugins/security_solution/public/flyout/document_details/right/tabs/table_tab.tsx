@@ -26,6 +26,7 @@ import type { EventFieldsData } from '../../../../common/components/event_detail
 import { CellActions } from '../../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isInTableScope, isTimelineScope } from '../../../../helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
@@ -77,12 +78,27 @@ export type ColumnsProvider = (providerOptions: {
    */
   scopeId: string;
   /**
+   * Id of the rule
+   */
+  ruleId: string;
+  /**
+   * Whether the preview link is in preview mode
+   */
+  isPreview: boolean;
+  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue: (field: string) => string | null;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
-export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, getLinkValue }) => [
+export const getColumns: ColumnsProvider = ({
+  browserFields,
+  eventId,
+  scopeId,
+  getLinkValue,
+  ruleId,
+  isPreview,
+}) => [
   {
     field: 'field',
     name: (
@@ -113,6 +129,8 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
             eventId={eventId}
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
+            ruleId={ruleId}
+            isPreview={isPreview}
             values={values}
           />
         </CellActions>
@@ -127,8 +145,9 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
 export const TableTab = memo(() => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
 
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, isPreview } =
     useDocumentDetailsContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
     pageIndex: 0,
@@ -199,8 +218,10 @@ export const TableTab = memo(() => {
         eventId,
         scopeId,
         getLinkValue,
+        ruleId,
+        isPreview,
       }),
-    [browserFields, eventId, scopeId, getLinkValue]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview]
   );
 
   return (
