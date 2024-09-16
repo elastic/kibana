@@ -33,11 +33,11 @@ export interface ProfileProviderServices {
  * @returns Profile provider services
  */
 export const createProfileProviderServices = async (
-  _deps: ProfileProviderDeps = {}
+  deps: ProfileProviderDeps = {}
 ): Promise<ProfileProviderServices> => {
   return {
     logsContextService: await createLogsContextService({
-      logsDataAccessPlugin: _deps.logsDataAccessPlugin,
+      logsDataAccessPlugin: deps.logsDataAccessPlugin,
     }),
   };
 };

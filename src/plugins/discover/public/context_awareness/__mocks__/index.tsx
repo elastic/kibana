@@ -172,7 +172,7 @@ export const createContextAwarenessMocks = ({
   };
 };
 
-export const createProfileProviderServicesMock = () => {
+const createProfileProviderServicesMock = () => {
   return {
     logsContextService: createLogsContextServiceMock(),
   };

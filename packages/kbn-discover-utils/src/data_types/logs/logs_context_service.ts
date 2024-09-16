@@ -34,7 +34,7 @@ export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom
 export const createLogsContextService = async ({
   logsDataAccessPlugin,
 }: LogsContextServiceDeps) => {
-  let logSources;
+  let logSources: string[] | undefined;
 
   if (logsDataAccessPlugin) {
     const logSourcesService = logsDataAccessPlugin.services.logSourcesService;
