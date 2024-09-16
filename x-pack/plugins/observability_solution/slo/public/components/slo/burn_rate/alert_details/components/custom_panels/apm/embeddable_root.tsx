@@ -84,6 +84,7 @@ export function APMEmbeddableRoot({
       type={embeddableId}
       getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: input }) })}
       hidePanelChrome={true}
+      className="observability-slo"
     />
   );
 }

@@ -35,8 +35,10 @@ import './options_list.scss';
 
 export const OptionsListControl = ({
   controlPanelClassName,
+  className,
 }: {
   controlPanelClassName: string;
+  className?: string;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { api, stateManager, displaySettings } = useOptionsListContext();
@@ -174,7 +176,11 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed className={controlPanelClassName}>
+    <EuiFilterGroup
+      fullWidth
+      className={controlPanelClassName}
+      compressed={className === 'observability-slo' ? false : true}
+    >
       <EuiInputPopover
         id={popoverId}
         ownFocus

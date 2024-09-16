@@ -213,3 +213,12 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 }
+
+.observability-slo {
+  .controlsWrapper {
+    min-height: $euiSize * 4;
+  }
+  .controlsFrame__draggable {
+    height: $euiButtonHeight;
+  }
+}

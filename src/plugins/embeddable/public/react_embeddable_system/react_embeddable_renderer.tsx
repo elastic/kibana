@@ -76,6 +76,7 @@ export const ReactEmbeddableRenderer = <
    * as it changes. This is **not** expected to change over the lifetime of the component.
    */
   onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
+  className?: string;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
   const firstLoadCompleteTime = useRef<number | null>(null);

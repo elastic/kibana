@@ -69,3 +69,17 @@
     padding-inline-start: $euiSizeXS * .5; // skinny icon
   }
 }
+
+.observability-slo {
+  .controlPanel {
+    height: $euiButtonHeight;
+
+    &--labelWrapper {
+      height: 100%;
+    }
+
+    .controlPanel--label {
+      height: 100%;
+    }
+  }
+}

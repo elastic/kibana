@@ -40,6 +40,7 @@ export interface ControlGroupRendererProps {
   timeRange?: TimeRange;
   query?: Query;
   dataLoading?: boolean;
+  className?: string;
 }
 
 export const ControlGroupRenderer = ({
@@ -50,6 +51,7 @@ export const ControlGroupRenderer = ({
   query,
   viewMode,
   dataLoading,
+  className,
 }: ControlGroupRendererProps) => {
   const id = useMemo(() => uuidv4(), []);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -187,6 +189,7 @@ export const ControlGroupRenderer = ({
       }}
       hidePanelChrome
       panelProps={{ hideLoader: true }}
+      className={className}
     />
   );
 };

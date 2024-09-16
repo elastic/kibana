@@ -18,6 +18,7 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
+  className?: string;
 }
 
 export function TimeSliderSlidingWindowRange(props: Props) {
@@ -36,7 +37,7 @@ export function TimeSliderSlidingWindowRange(props: Props) {
       step={props.stepSize}
       ticks={props.ticks}
       isDraggable
-      compressed
+      compressed={props.className !== 'observability-slo' ? true : false}
     />
   );
 }

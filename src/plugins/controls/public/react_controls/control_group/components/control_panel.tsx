@@ -61,6 +61,7 @@ const DragHandle = ({
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
   uuid,
+  className,
 }: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const {
@@ -157,12 +158,12 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           data-test-subj="control-frame-title"
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
-          display="rowCompressed"
+          display={className === 'observability-slo' ? undefined : 'rowCompressed'}
         >
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
-            compressed
+            compressed={className === 'observability-slo' ? false : true}
             className={classNames(
               'controlFrame__formControlLayout',
               {
