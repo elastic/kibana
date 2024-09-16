@@ -11,6 +11,9 @@ Object {
     ],
   },
   "body": Object {
+    "fields": Array [
+      "*",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -40,9 +43,6 @@ Object {
     "terminate_after": 1,
     "track_total_hits": false,
   },
-  "fields": Array [
-    "*",
-  ],
 }
 `;
 

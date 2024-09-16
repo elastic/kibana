@@ -18,7 +18,7 @@ export const normalizeFields = (
     const arrayValue =
       Array.isArray(value) && (value.length > 1 || key === 'process.args')
         ? value
-        : normalizedValue;
+        : normalizedValue ?? '';
 
     set(normalizedFields, key, arrayValue);
   }
