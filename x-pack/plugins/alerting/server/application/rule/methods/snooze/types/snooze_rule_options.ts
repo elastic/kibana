@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../../common/routes/rule/request';
+import { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../routes/schemas/rule/request';
 
 export interface SnoozeRuleOptions {
   id: string;

@@ -10,7 +10,7 @@ import {
   RuleParamsV1,
   RuleLastRunV1,
   MonitoringV1,
-} from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/response';
 import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
 export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {

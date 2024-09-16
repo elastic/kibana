@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { RewriteResponseCase } from '@kbn/actions-plugin/common';
-import type { RuleTagsFormattedResponse } from '../../../../../../../common/routes/rule/apis/tags';
+import type { RuleTagsFormattedResponse } from '../../../../../schemas/rule/apis/tags';
 
 export const transformRuleTagsBodyResponse: RewriteResponseCase<RuleTagsFormattedResponse> = ({
   perPage,

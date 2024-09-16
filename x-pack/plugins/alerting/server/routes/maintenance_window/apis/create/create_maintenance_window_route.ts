@@ -18,7 +18,7 @@ import {
   createBodySchemaV1,
   CreateMaintenanceWindowRequestBodyV1,
   CreateMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/create';
+} from '../../../schemas/maintenance_window/apis/create';
 import { transformCreateBodyV1 } from './transforms';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 

@@ -13,7 +13,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../
 import {
   EnableRuleRequestParamsV1,
   enableRuleRequestParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/enable';
+} from '../../../schemas/rule/apis/enable';
 
 export const enableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

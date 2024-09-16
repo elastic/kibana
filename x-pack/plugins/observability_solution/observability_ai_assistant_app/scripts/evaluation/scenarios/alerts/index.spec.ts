@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import type { RuleResponse } from '@kbn/alerting-plugin/server/routes/schemas/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';

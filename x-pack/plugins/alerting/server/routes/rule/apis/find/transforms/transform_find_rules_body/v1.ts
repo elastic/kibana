@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesRequestQueryV1 } from '../../../../../../../common/routes/rule/apis/find';
+import type { FindRulesRequestQueryV1 } from '../../../../../schemas/rule/apis/find';
 import { FindRulesOptions } from '../../../../../../application/rule/methods/find';
 
 export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRulesOptions => {

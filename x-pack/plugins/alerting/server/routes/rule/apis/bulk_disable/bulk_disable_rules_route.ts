@@ -14,8 +14,8 @@ import {
   bulkDisableRulesRequestBodySchemaV1,
   BulkDisableRulesRequestBodyV1,
   BulkDisableRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/bulk_disable';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/bulk_disable';
+import type { RuleParamsV1 } from '../../../schemas/rule/response';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { Rule } from '../../../../application/rule/types';
 

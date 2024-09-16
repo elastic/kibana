@@ -18,7 +18,7 @@ import {
   bulkGetBodySchemaV1,
   BulkGetMaintenanceWindowsRequestBodyV1,
   BulkGetMaintenanceWindowsResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/bulk_get';
+} from '../../../schemas/maintenance_window/apis/bulk_get';
 import { transformBulkGetResultToResponseV1 } from './transforms';
 
 export const bulkGetMaintenanceWindowRoute = (

@@ -17,7 +17,7 @@ import {
   aggregateRulesRequestBodySchemaV1,
   AggregateRulesRequestBodyV1,
   AggregateRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/aggregate';
+} from '../../../schemas/rule/apis/aggregate';
 import { formatDefaultAggregationResult } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
 import { DefaultRuleAggregationResult } from './types';

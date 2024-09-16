@@ -8,7 +8,7 @@ import { IRouter } from '@kbn/core/server';
 import {
   BulkUntrackRequestBodyV1,
   bulkUntrackBodySchemaV1,
-} from '../../../../../common/routes/rule/apis/bulk_untrack';
+} from '../../../schemas/rule/apis/bulk_untrack';
 import { transformBulkUntrackAlertsBodyV1 } from './transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';

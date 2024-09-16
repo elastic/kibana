@@ -6,7 +6,7 @@
  */
 
 import type { FindBackfillResult } from '../../../../../../application/backfill/methods/find/types';
-import { FindBackfillResponseBodyV1 } from '../../../../../../../common/routes/backfill/apis/find';
+import { FindBackfillResponseBodyV1 } from '../../../../../schemas/backfill/apis/find';
 import { transformBackfillToBackfillResponseV1 } from '../../../../transforms';
 
 export const transformResponse = ({

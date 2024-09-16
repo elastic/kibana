@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkUntrackByQueryRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_untrack_by_query';
+import type { BulkUntrackByQueryRequestBodyV1 } from '../../../../../schemas/rule/apis/bulk_untrack_by_query';
 
 export const transformBulkUntrackAlertsByQueryBody = ({
   query,

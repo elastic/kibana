@@ -7,7 +7,7 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
+import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/find';
 import { useCallback } from 'react';
 import { findBackfillsForRules } from '../api';
 

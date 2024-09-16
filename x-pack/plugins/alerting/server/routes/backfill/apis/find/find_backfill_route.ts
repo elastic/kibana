@@ -9,7 +9,7 @@ import {
   findQuerySchemaV1,
   FindBackfillRequestQueryV1,
   FindBackfillResponseV1,
-} from '../../../../../common/routes/backfill/apis/find';
+} from '../../../schemas/backfill/apis/find';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {

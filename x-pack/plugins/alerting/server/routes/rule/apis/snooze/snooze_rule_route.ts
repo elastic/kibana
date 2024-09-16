@@ -7,10 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import {
-  snoozeBodySchema,
-  snoozeParamsSchema,
-} from '../../../../../common/routes/rule/apis/snooze';
+import { snoozeBodySchema, snoozeParamsSchema } from '../../../schemas/rule/apis/snooze';
 import { ILicenseState, RuleMutedError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../types';

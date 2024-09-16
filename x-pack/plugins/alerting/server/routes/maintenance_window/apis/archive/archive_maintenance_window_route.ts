@@ -20,7 +20,7 @@ import {
   ArchiveMaintenanceWindowRequestBodyV1,
   ArchiveMaintenanceWindowRequestParamsV1,
   ArchiveMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/archive';
+} from '../../../schemas/maintenance_window/apis/archive';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const archiveMaintenanceWindowRoute = (

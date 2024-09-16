@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CreateRuleAction,
-  CreateRuleRequestBodyV1,
-} from '../../../../../../../common/routes/rule/apis/create';
+import { CreateRuleAction, CreateRuleRequestBodyV1 } from '../../../../../schemas/rule/apis/create';
 import { transformCreateBody } from './v1';
 
 describe('Transform actions V1', () => {

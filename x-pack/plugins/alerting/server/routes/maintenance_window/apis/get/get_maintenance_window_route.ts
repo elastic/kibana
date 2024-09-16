@@ -18,7 +18,7 @@ import {
   getParamsSchemaV1,
   GetMaintenanceWindowRequestParamsV1,
   GetMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/get';
+} from '../../../schemas/maintenance_window/apis/get';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const getMaintenanceWindowRoute = (

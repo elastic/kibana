@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../../common/routes/rule/request';
+import { ruleSnoozeScheduleSchema as ruleSnoozeScheduleRequestSchema } from '../../../../../routes/schemas/rule/request';
 
 export const snoozeRuleBodySchema = schema.object({
   snoozeSchedule: ruleSnoozeScheduleRequestSchema,

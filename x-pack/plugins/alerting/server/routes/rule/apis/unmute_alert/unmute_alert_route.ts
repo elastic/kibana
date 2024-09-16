@@ -12,7 +12,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../
 import {
   unmuteAlertParamsSchemaV1,
   UnmuteAlertRequestParamsV1,
-} from '../../../../../common/routes/rule/apis/unmute_alert';
+} from '../../../schemas/rule/apis/unmute_alert';
 import { transformRequestParamsToApplicationV1 } from './transforms';
 
 export const unmuteAlertRoute = (

@@ -11,7 +11,7 @@ import { verifyAccessAndContext } from '../../../lib';
 import {
   deleteRuleRequestParamsSchemaV1,
   DeleteRuleRequestParamsV1,
-} from '../../../../../common/routes/rule/apis/delete';
+} from '../../../schemas/rule/apis/delete';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const deleteRuleRoute = (

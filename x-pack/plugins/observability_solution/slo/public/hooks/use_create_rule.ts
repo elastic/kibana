@@ -12,7 +12,7 @@ import { v4 } from 'uuid';
 import type {
   CreateRuleRequestBody,
   CreateRuleResponse,
-} from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+} from '@kbn/alerting-plugin/server/routes/schemas/rule/apis/create';
 import { useKibana } from '../utils/kibana_react';
 
 export function useCreateRule<Params extends RuleTypeParams = never>() {

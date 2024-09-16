@@ -10,7 +10,7 @@ import { transformRuleTagsQueryRequestV1 } from './transforms';
 import {
   ruleTagsRequestQuerySchemaV1,
   RuleTagsRequestQueryV1,
-} from '../../../../../common/routes/rule/apis/tags';
+} from '../../../schemas/rule/apis/tags';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';

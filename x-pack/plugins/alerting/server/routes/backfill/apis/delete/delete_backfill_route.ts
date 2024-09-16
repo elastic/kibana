@@ -8,7 +8,7 @@ import { IRouter } from '@kbn/core/server';
 import {
   deleteParamsSchemaV1,
   DeleteBackfillRequestParamsV1,
-} from '../../../../../common/routes/backfill/apis/delete';
+} from '../../../schemas/backfill/apis/delete';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';

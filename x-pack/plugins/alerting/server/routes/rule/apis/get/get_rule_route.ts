@@ -8,7 +8,7 @@
 import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../schemas/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import {
   AlertingRequestHandlerContext,
@@ -17,11 +17,8 @@ import {
 } from '../../../../types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 
-import type {
-  GetRuleRequestParamsV1,
-  GetRuleResponseV1,
-} from '../../../../../common/routes/rule/apis/get';
-import { getRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/get';
+import type { GetRuleRequestParamsV1, GetRuleResponseV1 } from '../../../schemas/rule/apis/get';
+import { getRuleRequestParamsSchemaV1 } from '../../../schemas/rule/apis/get';
 
 interface BuildGetRulesRouteParams {
   licenseState: ILicenseState;

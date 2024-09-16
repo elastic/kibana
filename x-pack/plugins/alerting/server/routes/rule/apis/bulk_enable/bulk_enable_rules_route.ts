@@ -13,8 +13,8 @@ import {
   bulkEnableBodySchemaV1,
   BulkEnableRulesRequestBodyV1,
   BulkEnableRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/bulk_enable';
-import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/bulk_enable';
+import { RuleParamsV1 } from '../../../schemas/rule/response';
 import { transformBulkEnableResponseV1 } from './transforms';
 
 export const bulkEnableRulesRoute = ({

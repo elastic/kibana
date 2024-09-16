@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import {

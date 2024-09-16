@@ -14,7 +14,7 @@ import {
 } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import type { FindMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/find/types';
-import type { FindMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/find';
+import type { FindMaintenanceWindowsResponseV1 } from '../../../schemas/maintenance_window/apis/find';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const findMaintenanceWindowsRoute = (

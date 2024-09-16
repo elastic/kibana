@@ -17,7 +17,7 @@ import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import {
   deleteParamsSchemaV1,
   DeleteMaintenanceWindowRequestParamsV1,
-} from '../../../../../common/routes/maintenance_window/apis/delete';
+} from '../../../schemas/maintenance_window/apis/delete';
 
 export const deleteMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

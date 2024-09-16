@@ -12,7 +12,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../
 import {
   muteAlertParamsSchemaV1,
   MuteAlertRequestParamsV1,
-} from '../../../../../common/routes/rule/apis/mute_alert';
+} from '../../../schemas/rule/apis/mute_alert';
 
 export const muteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

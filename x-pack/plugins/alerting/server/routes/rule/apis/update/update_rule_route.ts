@@ -12,12 +12,9 @@ import type {
   UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
   UpdateRuleResponseV1,
-} from '../../../../../common/routes/rule/apis/update';
-import {
-  updateBodySchemaV1,
-  updateParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/update';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/update';
+import { updateBodySchemaV1, updateParamsSchemaV1 } from '../../../schemas/rule/apis/update';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../schemas/rule/response';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
 import { transformUpdateBodyV1 } from './transforms';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../../common/routes/maintenance_window/apis/update';
+import { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../schemas/maintenance_window/apis/update';
 import { UpdateMaintenanceWindowParams } from '../../../../../../application/maintenance_window/methods/update/types';
 
 export const transformUpdateBody = (

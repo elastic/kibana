@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkEnableRulesResponseV1 } from '../../../../../../../common/routes/rule/apis/bulk_enable';
-import { RuleParamsV1 } from '../../../../../../../common/routes/rule/response';
+import { BulkEnableRulesResponseV1 } from '../../../../../schemas/rule/apis/bulk_enable';
+import { RuleParamsV1 } from '../../../../../schemas/rule/response';
 import { BulkEnableRulesResult } from '../../../../../../application/rule/methods/bulk_enable/types';
 import { transformRuleToRuleResponseV1 } from '../../../../transforms';
 import { Rule, RuleParams } from '../../../../../../application/rule/types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
-import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/response';
+import type { MaintenanceWindowResponse } from '../../../server/routes/schemas/maintenance_window/response';
 import type { MaintenanceWindow } from '../../../common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
