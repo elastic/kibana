@@ -10,19 +10,15 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
-import minimatch from 'minimatch';
-
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
-import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { serverless, stateful } from '../../ftr_configs_manifests.json';
+// import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { expandAgentQueue } from '#pipeline-utils';
 
-const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
+// const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -109,93 +105,93 @@ function getTrackedBranch(): string {
   return branch;
 }
 
-function isObj(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null;
-}
+// function isObj(x: unknown): x is Record<string, unknown> {
+//   return typeof x === 'object' && x !== null;
+// }
+//
+// interface FtrConfigsManifest {
+//   defaultQueue?: string;
+//   disabled?: string[];
+//   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
+// }
 
-interface FtrConfigsManifest {
-  defaultQueue?: string;
-  disabled?: string[];
-  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
-
-function getEnabledFtrConfigs(patterns?: string[]) {
-  const configs: {
-    enabled: Array<string | { [configPath: string]: { queue: string } }>;
-    defaultQueue: string | undefined;
-  } = { enabled: [], defaultQueue: undefined };
-  const uniqueQueues = new Set<string>();
-
-  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    try {
-      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
-      if (!isObj(ymlData)) {
-        throw new Error('expected yaml file to parse to an object');
-      }
-      const manifest = ymlData as FtrConfigsManifest;
-
-      configs.enabled.push(...(manifest?.enabled ?? []));
-      if (manifest.defaultQueue) {
-        uniqueQueues.add(manifest.defaultQueue);
-      }
-    } catch (_) {
-      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
-    }
-  }
-
-  try {
-    if (configs.enabled.length === 0) {
-      throw new Error('expected yaml files to have at least 1 "enabled" key');
-    }
-    if (uniqueQueues.size !== 1) {
-      throw Error(
-        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
-          ...uniqueQueues,
-        ].join(' ')}`
-      );
-    }
-    configs.defaultQueue = uniqueQueues.values().next().value;
-
-    if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
-        (p): p is string | { [configPath: string]: { queue: string } } =>
-          typeof p === 'string' ||
-          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
-      )
-    ) {
-      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
-  - {configPath}:
-      queue: {queueName}`);
-    }
-    if (typeof configs.defaultQueue !== 'string') {
-      throw new Error('expected yaml file to have a string "defaultQueue" key');
-    }
-
-    const defaultQueue = configs.defaultQueue;
-    const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
-      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
-      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
-
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
-        continue;
-      }
-
-      const group = ftrConfigsByQueue.get(queue);
-      if (group) {
-        group.push(path);
-      } else {
-        ftrConfigsByQueue.set(queue, [path]);
-      }
-    }
-    return { defaultQueue, ftrConfigsByQueue };
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
-}
+// function getEnabledFtrConfigs(patterns?: string[]) {
+//   const configs: {
+//     enabled: Array<string | { [configPath: string]: { queue: string } }>;
+//     defaultQueue: string | undefined;
+//   } = { enabled: [], defaultQueue: undefined };
+//   const uniqueQueues = new Set<string>();
+//
+//   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+//     try {
+//       const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+//       if (!isObj(ymlData)) {
+//         throw new Error('expected yaml file to parse to an object');
+//       }
+//       const manifest = ymlData as FtrConfigsManifest;
+//
+//       configs.enabled.push(...(manifest?.enabled ?? []));
+//       if (manifest.defaultQueue) {
+//         uniqueQueues.add(manifest.defaultQueue);
+//       }
+//     } catch (_) {
+//       const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+//       throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+//     }
+//   }
+//
+//   try {
+//     if (configs.enabled.length === 0) {
+//       throw new Error('expected yaml files to have at least 1 "enabled" key');
+//     }
+//     if (uniqueQueues.size !== 1) {
+//       throw Error(
+//         `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+//           ...uniqueQueues,
+//         ].join(' ')}`
+//       );
+//     }
+//     configs.defaultQueue = uniqueQueues.values().next().value;
+//
+//     if (
+//       !Array.isArray(configs.enabled) ||
+//       !configs.enabled.every(
+//         (p): p is string | { [configPath: string]: { queue: string } } =>
+//           typeof p === 'string' ||
+//           (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+//       )
+//     ) {
+//       throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
+//   - {configPath}:
+//       queue: {queueName}`);
+//     }
+//     if (typeof configs.defaultQueue !== 'string') {
+//       throw new Error('expected yaml file to have a string "defaultQueue" key');
+//     }
+//
+//     const defaultQueue = configs.defaultQueue;
+//     const ftrConfigsByQueue = new Map<string, string[]>();
+//     for (const enabled of configs.enabled) {
+//       const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+//       const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+//
+//       if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+//         continue;
+//       }
+//
+//       const group = ftrConfigsByQueue.get(queue);
+//       if (group) {
+//         group.push(path);
+//       } else {
+//         ftrConfigsByQueue.set(queue, [path]);
+//       }
+//     }
+//     return { defaultQueue, ftrConfigsByQueue };
+//   } catch (_) {
+//     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+//     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
+//   }
+// }
 
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
@@ -291,13 +287,13 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
+  // const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
+  //   ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+  //       cwd: process.cwd(),
+  //       absolute: false,
+  //       ignore: DISABLED_JEST_CONFIGS,
+  //     })
+  //   : [];
 
   // if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
   //   throw new Error('unable to find any unit, integration, or FTR configs');
