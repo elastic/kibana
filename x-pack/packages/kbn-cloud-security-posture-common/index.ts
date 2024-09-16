@@ -17,7 +17,7 @@ export type {
   BaseCspSetupStatus,
   CspSetupStatus,
 } from './types/status';
-export type { CspFinding } from './types/findings';
+export type { CspFinding, CspFindingResult } from './types/findings';
 export type { BenchmarksCisId } from './types/benchmark';
 export * from './constants';
 export {
