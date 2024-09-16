@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import {
@@ -13,7 +14,6 @@ import {
 } from '@kbn/management-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
-// import { ConfigSchema } from './config';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
@@ -209,27 +209,156 @@ describe('Spaces plugin', () => {
     });
   });
 
-  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
+  describe('hasOnlyDefaultSpace', () => {
+    it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
 
-    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
-    const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
+      const spacesSetup = plugin.setup(coreSetup, {});
+      const spacesStart = plugin.start(coreStart);
 
-    expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
-    expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+      expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
+      expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+    });
+
+    it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
+      const spacesSetup = plugin.setup(coreSetup, {});
+      const spacesStart = plugin.start(coreStart);
+
+      expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
+      expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
+    });
   });
 
-  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
+  describe('isSolutionViewEnabled', () => {
+    it('when onCloud, not serverless and allowSolutionVisibility is "true"', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+      const cloud = cloudMock.createSetup();
+      cloud.isCloudEnabled = true;
 
-    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
-    const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext(
+          { allowSolutionVisibility: true },
+          { buildFlavor: 'traditional' }
+        )
+      );
+      const spacesSetup = plugin.setup(coreSetup, { cloud });
+      const spacesStart = plugin.start(coreStart);
 
-    expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
-    expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
+      expect(spacesSetup.isSolutionViewEnabled).toBe(true);
+      expect(spacesStart.isSolutionViewEnabled).toBe(true);
+    });
+
+    it('when not onCloud and allowSolutionVisibility is "true"', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      {
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: true }, // it is true but we are not onCloud
+            { buildFlavor: 'traditional' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, {});
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(false); // so it should be false
+        expect(spacesStart.isSolutionViewEnabled).toBe(false);
+      }
+
+      {
+        // unless the forceSolutionVisibility flag is set
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: false, forceSolutionVisibility: true },
+            { buildFlavor: 'traditional' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, {}); // we are not onCloud but forceSolutionVisibility is true
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(true);
+        expect(spacesStart.isSolutionViewEnabled).toBe(true);
+      }
+    });
+
+    it('when onCloud, not serverless and allowSolutionVisibility is "false"', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+      const cloud = cloudMock.createSetup();
+      cloud.isCloudEnabled = true;
+
+      {
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: false },
+            { buildFlavor: 'traditional' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, { cloud });
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(false);
+        expect(spacesStart.isSolutionViewEnabled).toBe(false);
+      }
+
+      {
+        // unless the forceSolutionVisibility flag is set
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: false, forceSolutionVisibility: true },
+            { buildFlavor: 'traditional' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, { cloud });
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(true);
+        expect(spacesStart.isSolutionViewEnabled).toBe(true);
+      }
+    });
+
+    it('when onCloud and serverless', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+      const cloud = cloudMock.createSetup();
+      cloud.isCloudEnabled = true;
+
+      {
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: true },
+            { buildFlavor: 'serverless' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, { cloud });
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(false);
+        expect(spacesStart.isSolutionViewEnabled).toBe(false);
+      }
+
+      {
+        // unless the forceSolutionVisibility flag is set
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext(
+            { allowSolutionVisibility: true, forceSolutionVisibility: true },
+            { buildFlavor: 'serverless' }
+          )
+        );
+        const spacesSetup = plugin.setup(coreSetup, { cloud });
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(true);
+        expect(spacesStart.isSolutionViewEnabled).toBe(true);
+      }
+    });
   });
 });
