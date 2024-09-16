@@ -41,3 +41,10 @@ export const COUNTED_INCOMPATIBLE_FIELDS = (count: number) =>
 export const ALL = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.all', {
   defaultMessage: 'All',
 });
+
+export const NO_HISTORICAL_RESULTS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResults',
+  {
+    defaultMessage: 'No historical results',
+  }
+);

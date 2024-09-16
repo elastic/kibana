@@ -33,7 +33,7 @@ import { getLegendItems } from './utils/get_legend_items';
 import {
   ChartFlexItem,
   LegendContainer,
-} from '../../indices_details/pattern/index_check_flyout/latest_results/index_check_fields/tabs/styles';
+} from '../../indices_details/pattern/index_check_flyout/latest_results/index_check_fields/styles';
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px

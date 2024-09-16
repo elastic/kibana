@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
 import { IlmPhase, PatternRollup } from '../../../../../../types';
 import { INCOMPATIBLE_TAB_ID } from './constants';
-import { getTabs } from './tabs/helpers';
+import { getTabs } from './utils/get_tabs';
 import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { EMPTY_METADATA } from '../../../../../../constants';
 
