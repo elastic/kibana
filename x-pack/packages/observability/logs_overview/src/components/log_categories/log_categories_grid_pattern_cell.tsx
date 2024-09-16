@@ -34,8 +34,6 @@ export const LogCategoriesGridPatternCell: React.FC<LogCategoriesGridPatternCell
   const commonStyle = css`
     display: inline-block;
     font-family: ${euiTheme.font.familyCode};
-    font-weight: ${euiTheme.font.weight.semiBold};
-    ${euiFontSize(theme, 'xs')};
     margin-right: ${euiTheme.size.xs};
   `;
 
@@ -45,15 +43,16 @@ export const LogCategoriesGridPatternCell: React.FC<LogCategoriesGridPatternCell
 
   const separatorStyle = css`
     ${commonStyle};
-    color: ${euiTheme.colors.subduedText};
+    color: ${euiTheme.colors.successText};
   `;
 
   return (
     <pre>
+      <div css={separatorStyle}>…</div>
       {termsList.map((term, index) => (
         <React.Fragment key={index}>
           <div css={termStyle}>{term}</div>
-          {index !== termsList.length - 1 && <div css={separatorStyle}>*</div>}
+          <div css={separatorStyle}>…</div>
         </React.Fragment>
       ))}
     </pre>

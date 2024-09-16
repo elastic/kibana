@@ -274,7 +274,6 @@ const esCategoryBucketSchema = z.object({
 
 type EsCategoryBucket = z.output<typeof esCategoryBucketSchema>;
 
-// TODO: implement rarity criteria
 const isRareInHistogram = (histogram: EsHistogram): boolean =>
   histogram.filter((bucket) => bucket.documentCount > 0).length <
   histogram.length * rarityThreshold;
