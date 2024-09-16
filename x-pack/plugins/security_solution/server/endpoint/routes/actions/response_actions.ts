@@ -415,7 +415,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           responseActions: {
             actionId,
             agentType: data.agentType,
-            command: data.command,
+            command,
             endpointIds: data.agents,
             isAutomated: data.createdBy === 'unknown',
           },
@@ -443,7 +443,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       if (endpointContext.experimentalFeatures.responseActionsTelemetryEnabled) {
         endpointContext.service
           .getTelemetryService()
-          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, { error: err });
+          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+            agentType: req.body.agent_type,
+            command,
+            error: err,
+          });
       }
 
       return errorHandler(logger, res, err);

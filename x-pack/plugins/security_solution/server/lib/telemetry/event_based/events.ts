@@ -257,6 +257,8 @@ const getUploadStatus = (stats?: BulkUpsertAssetCriticalityRecordsResponse['stat
 
 export const ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT: EventTypeOpts<{
   responseActions: {
+    agentType: ResponseActionAgentType;
+    command: ResponseActionsApiCommandNames;
     error: string;
   };
 }> = {
@@ -264,6 +266,20 @@ export const ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT: EventTypeOpts<{
   schema: {
     responseActions: {
       properties: {
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
         error: {
           type: 'text',
           _meta: {
