@@ -43,6 +43,11 @@ describe('getCustomCellPopoverRenderer', () => {
 
     expect(setCellPopoverPropsMocks).toHaveBeenCalledWith({
       panelClassName: 'unifiedDataTable__cellPopover',
+      panelProps: {
+        css: {
+          maxInlineSize: 'min(75vw, 600px) !important',
+        },
+      },
     });
   });
 });

@@ -21,7 +21,10 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import { createProfileProviderServices } from '../profile_providers/profile_provider_services';
+import {
+  ProfileProviderServices,
+  createProfileProviderServices,
+} from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = ({
@@ -156,7 +159,7 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock
   );
 
-  const profileProviderServices = createProfileProviderServices();
+  const profileProviderServices = createProfileProviderServicesMock();
 
   return {
     rootProfileProviderMock,
@@ -170,4 +173,8 @@ export const createContextAwarenessMocks = ({
     profilesManagerMock,
     profileProviderServices,
   };
+};
+
+export const createProfileProviderServicesMock = () => {
+  return {} as ProfileProviderServices;
 };

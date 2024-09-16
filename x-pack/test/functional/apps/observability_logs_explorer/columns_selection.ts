@@ -9,7 +9,7 @@ import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from './config';
 
-const defaultLogColumns = ['@timestamp', 'resource', 'content'];
+const defaultLogColumns = ['@timestamp', 'Summary'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -57,32 +57,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               to,
               mode: 'absolute',
             },
-            columns: [
-              {
-                smartField: 'resource',
-                type: 'smart-field',
-                fallbackFields: ['host.name', 'service.name'],
-              },
-              {
-                smartField: 'content',
-                type: 'smart-field',
-                fallbackFields: ['message'],
-              },
-              { field: 'data_stream.namespace', type: 'document-field' },
-            ],
+            columns: [{ field: 'data_stream.namespace', type: 'document-field' }],
           },
         });
 
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
-            ...defaultLogColumns,
+            '@timestamp',
             'data_stream.namespace',
           ]);
         });
       });
     });
 
-    describe('render content virtual column properly', () => {
+    describe.skip('render content virtual column properly', () => {
       it('should render log level and log message when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElementExcludingControlColumns(0, 2);
@@ -151,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('render resource virtual column properly', () => {
+    describe.skip('render resource virtual column properly', () => {
       it('should render service name and host name when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElementExcludingControlColumns(0, 1);
