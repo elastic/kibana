@@ -52,6 +52,7 @@ export interface AssistantTelemetry {
     actionTypeId: string;
     model?: string;
     provider?: string;
+    isEnabledKnowledgeBase: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
