@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
 import {
   initializePathScript,
   cleanScript,
 } from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
-function mapDestinationToPainless(field: string) {
+function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
+  if (aggregation.type === 'terms') {
+    return `ctx.entity.metadata.${destination}.keySet()`;
+  } else if (aggregation.type === 'top_value') {
+    return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
+  }
+}
+
+function mapDestinationToPainless(metadata: MetadataField) {
+  const field = metadata.destination;
   return `
     ${initializePathScript(field)}
-    ctx.${field} = ctx.entity.metadata.${field}.keySet();
+    ctx.${field} = ${getMetadataSourceField(metadata)};
   `;
 }
 
@@ -24,15 +34,27 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return '';
   }
 
-  return definition.metadata.reduce((acc, def) => {
-    const destination = def.destination;
+  return definition.metadata.reduce((acc, metadata) => {
+    const { destination, source } = metadata;
     const optionalFieldPath = destination.replaceAll('.', '?.');
-    const next = `
-      if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
-        ${mapDestinationToPainless(destination)}
-      }
-    `;
-    return `${acc}\n${next}`;
+
+    if (metadata.aggregation.type === 'terms') {
+      const next = `
+        if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
+          ${mapDestinationToPainless(metadata)}
+        }
+      `;
+      return `${acc}\n${next}`;
+    } else if (metadata.aggregation.type === 'top_value') {
+      const next = `
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
+          ${mapDestinationToPainless(metadata)}
+        }
+      `;
+      return `${acc}\n${next}`;
+    }
+
+    return acc;
   }, '');
 }
 
@@ -44,6 +66,39 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
       value: `{{entity.identity.${key.field}}}`,
     },
   }));
+}
+
+function getCustomIngestPipelines(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
+      },
+    },
+  ];
 }
 
 export function generateHistoryProcessors(definition: EntityDefinition) {
@@ -162,30 +217,6 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@platform`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-history@platform`,
-      },
-    },
-
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@custom`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-history@custom`,
-      },
-    },
+    ...getCustomIngestPipelines(definition),
   ];
 }

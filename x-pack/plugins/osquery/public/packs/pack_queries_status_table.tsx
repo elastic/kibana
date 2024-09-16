@@ -427,7 +427,7 @@ const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId,
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiNotificationBadge color="subdued" data-test-subj="docs-count-badge">
-          {lastResultsData?.docCount ?? 0}
+          {(lastResultsData?.docCount as number) ?? 0}
         </EuiNotificationBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -487,7 +487,7 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiNotificationBadge color={errorsData?.total ? 'accent' : 'subdued'}>
-            {errorsData?.total ?? 0}
+            {(errorsData?.total as number) ?? 0}
           </EuiNotificationBadge>
         </EuiFlexItem>
 
