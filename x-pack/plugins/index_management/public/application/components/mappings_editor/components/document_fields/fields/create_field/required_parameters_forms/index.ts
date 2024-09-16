@@ -29,9 +29,9 @@ export const getRequiredParametersFormForType = (
   type: MainType,
   subType?: SubType
 ): ComponentType<ComponentProps> | undefined => {
-  const typeDefinition = TYPE_DEFINITION[type];
-
   if (subType) {
+    const typeDefinition = TYPE_DEFINITION[type];
+
     return typeDefinition.subTypes?.types.includes(subType)
       ? typeToParametersFormMap[subType]
       : undefined;
