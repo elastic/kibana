@@ -20,24 +20,15 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import {
-  AlertsLocatorParams,
-  TimeUnitChar,
-  alertsLocatorID,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -108,8 +99,13 @@ type MetricThresholdAlertReporter = (params: {
   thresholds?: Array<number | null>;
 }) => void;
 
+// TODO: Refactor the executor code to have better flow-control with better
+// reasoning of different state/conditions for improved maintainability
 export const createMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, metricsExplorerLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -120,11 +116,6 @@ export const createMetricThresholdExecutor =
       MetricThresholdAlert
     >
   ) => {
-    const { share } = libs.plugins;
-    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
-    const assetDetailsLocator =
-      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-
     const startTime = Date.now();
 
     const {
@@ -215,12 +206,12 @@ export const createMetricThresholdExecutor =
           reason,
           timestamp,
           value: null,
+          // TODO: Check if we need additionalContext here or not?
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
             groupBy,
             assetDetailsLocator,
+            metricsExplorerLocator,
           }),
         };
 
@@ -425,11 +416,11 @@ export const createMetricThresholdExecutor =
             }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
             groupBy,
             assetDetailsLocator,
+            metricsExplorerLocator,
+            additionalContext,
           }),
           ...additionalContext,
         };
@@ -484,11 +475,11 @@ export const createMetricThresholdExecutor =
         timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
-          spaceId,
           timestamp: indexedStartedAt,
           groupBy,
           assetDetailsLocator,
+          metricsExplorerLocator,
+          additionalContext,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),

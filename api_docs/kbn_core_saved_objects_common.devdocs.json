@@ -1657,19 +1657,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "canvas",
@@ -1912,11 +1912,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2359,6 +2359,34 @@
             "path": "src/plugins/embeddable/common/lib/inject.ts"
           },
           {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
@@ -2433,34 +2461,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
           },
           {
             "plugin": "lens",

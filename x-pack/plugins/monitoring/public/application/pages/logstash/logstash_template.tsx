@@ -17,7 +17,7 @@ interface LogstashTemplateProps extends PageTemplateProps {
   tabsDisabled?: boolean;
 }
 
-export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
+export const LogstashTemplate: React.FC<React.PropsWithChildren<LogstashTemplateProps>> = ({
   cluster,
   instance,
   pipelineId,

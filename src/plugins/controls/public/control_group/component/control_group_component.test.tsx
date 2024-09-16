@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,7 +16,6 @@ import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Provider } from 'react-redux';
-import { OptionsListEmbeddableFactory } from '../..';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../../../common';
 import { mockControlGroupContainer, mockControlGroupInput } from '../../../common/mocks';
 import { RangeSliderEmbeddableFactory } from '../../range_slider';
@@ -23,6 +23,7 @@ import { pluginServices } from '../../services';
 import { ControlGroupContainerContext } from '../embeddable/control_group_container';
 import { ControlGroupComponentState, ControlGroupInput } from '../types';
 import { ControlGroup } from './control_group_component';
+import { OptionsListEmbeddableFactory } from '../../options_list';
 
 jest.mock('@dnd-kit/core', () => ({
   /** DnD kit has a memory leak based on this layout measuring strategy on unmount; setting it to undefined prevents this */
@@ -168,7 +169,7 @@ describe('Control group component', () => {
     applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
     expect(applyButton).toBeEnabled();
 
-    userEvent.click(applyButton);
+    await userEvent.click(applyButton);
     expect(controlGroupContainer.publishFilters).toBeCalledWith(unpublishedFilters);
   });
 

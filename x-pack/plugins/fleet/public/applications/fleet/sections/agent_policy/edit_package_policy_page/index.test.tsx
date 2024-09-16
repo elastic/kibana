@@ -564,6 +564,7 @@ describe('edit package policy page', () => {
           policy_ids: ['agent-policy-1', 'agent-policy-2'],
         })
       );
+      expect(sendGetAgentStatus).toHaveBeenCalledTimes(1);
     });
 
     it('should not remove managed policy when policies are modified', async () => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
@@ -19,8 +20,11 @@ import {
   ZodParamsObject,
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge } from 'lodash';
+import { Observable, isObservable } from 'rxjs';
+import { ServerSentEvent } from '@kbn/sse-utils';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { makeZodValidationObject } from './make_zod_validation_object';
@@ -88,6 +92,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
         if (isKibanaResponse(result)) {
           return result;
+        } else if (isObservable(result)) {
+          return response.ok({
+            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>),
+          });
         } else {
           const body = result || {};
           return response.ok({ body });

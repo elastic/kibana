@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/entityManager
 title: "entityManager"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the entityManager plugin
-date: 2024-08-30
+date: 2024-09-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'entityManager']
 ---
 import entityManagerObj from './entity_manager.devdocs.json';
@@ -21,20 +21,26 @@ Contact [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entiti
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 16 | 0 | 16 | 1 |
+| 20 | 0 | 20 | 3 |
 
 ## Client
 
+### Setup
+<DocDefinitionList data={[entityManagerObj.client.setup]}/>
+
+### Start
+<DocDefinitionList data={[entityManagerObj.client.start]}/>
+
 ### Classes
 <DocDefinitionList data={entityManagerObj.client.classes}/>
-
-### Interfaces
-<DocDefinitionList data={entityManagerObj.client.interfaces}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={entityManagerObj.client.misc}/>
 
 ## Server
+
+### Setup
+<DocDefinitionList data={[entityManagerObj.server.setup]}/>
 
 ### Start
 <DocDefinitionList data={[entityManagerObj.server.start]}/>

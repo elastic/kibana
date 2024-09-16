@@ -11,7 +11,7 @@ import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
@@ -116,7 +116,7 @@ export const useGetAnalytics = (
   setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
   blockRefresh: boolean
 ): GetAnalytics => {
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   let concurrentLoads = 0;
 
@@ -130,8 +130,8 @@ export const useGetAnalytics = (
       }
 
       try {
-        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics();
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats();
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)

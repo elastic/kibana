@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { render } from '@testing-library/react';
 import { ReactElement } from 'react';
 import { ElementType } from 'react';
@@ -45,7 +47,7 @@ describe('generateLinedRulesMenuItems', () => {
 
     result.map((link) => {
       const wrapper = render(link);
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.container).toMatchSnapshot();
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem1a2b3c'));
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestLeftIcon'));
     });
@@ -54,7 +56,7 @@ describe('generateLinedRulesMenuItems', () => {
     const result: ReactElement[] = getSecurityLinkAction(dataTestSubj);
 
     const wrapper = render(result[1]);
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem2a2b3c'));
   });
 });

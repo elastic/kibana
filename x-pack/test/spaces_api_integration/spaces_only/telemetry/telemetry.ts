@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const usageAPI = getService('usageAPI');
 
-  describe('Verify disabledFeatures telemetry payloads', async () => {
+  describe('Verify disabledFeatures telemetry payloads', () => {
     before(async () => {
       await spacesService.create({
         id: 'space-1',
@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitoring: 0,
         apm: 0,
         enterpriseSearch: 0,
+        searchInferenceEndpoints: 0,
         siem: 0,
         securitySolutionCases: 0,
         securitySolutionAssistant: 0,
