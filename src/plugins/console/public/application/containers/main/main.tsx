@@ -311,7 +311,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           paddingSize="none"
           css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
         >
-          {currentView === SHELL_TAB_ID && (
+          {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
               isVerticalLayout={isVerticalLayout}
