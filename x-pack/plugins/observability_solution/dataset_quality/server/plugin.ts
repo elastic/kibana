@@ -30,8 +30,6 @@ export class DatasetQualityServerPlugin implements Plugin {
     core: CoreSetup<DatasetQualityPluginStartDependencies, DatasetQualityPluginStart>,
     plugins: DatasetQualityPluginSetupDependencies
   ) {
-    this.logger.debug('dataset_quality: Setup');
-
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -65,8 +63,6 @@ export class DatasetQualityServerPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: DatasetQualityPluginStartDependencies) {
-    this.logger.debug('dataset_quality: Started');
-
     // Start Data Telemetry Service
     this.dataTelemetryService.start(plugins.telemetry, core, plugins.taskManager).catch((error) => {
       this.logger.error(`[Data Telemetry Service]: ${error}`);
