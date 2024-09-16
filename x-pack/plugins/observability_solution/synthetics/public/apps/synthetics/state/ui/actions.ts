@@ -32,5 +32,3 @@ export const toggleIntegrationsPopover = createAction<PopoverState>(
 );
 
 export const setSelectedMonitorId = createAction<string>('[UI] SET MONITOR ID');
-export const setRefreshPausedAction = createAction<boolean>('[UI] SET REFRESH PAUSED');
-export const setRefreshIntervalAction = createAction<number>('[UI] SET REFRESH INTERVAL');
