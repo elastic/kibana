@@ -170,6 +170,7 @@ const checkIndexHasFindings = async (
           ],
         },
       },
+      ignore_unavailable: true,
     });
 
     // Check the number of hits

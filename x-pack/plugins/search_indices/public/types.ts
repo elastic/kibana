@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -23,6 +24,7 @@ export interface AppPluginStartDependencies {
 
 export interface SearchIndicesAppPluginStartDependencies {
   console?: ConsolePluginStart;
+  cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
 }
@@ -40,4 +42,35 @@ export interface AppUsageTracker {
   click: (eventName: string | string[]) => void;
   count: (eventName: string | string[]) => void;
   load: (eventName: string | string[]) => void;
+}
+
+export interface CodeSnippetParameters {
+  indexName?: string;
+  apiKey?: string;
+  elasticsearchURL: string;
+}
+export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
+
+export interface CodeLanguage {
+  id: string;
+  title: string;
+  icon: string;
+  codeBlockLanguage: string;
+}
+
+export interface CreateIndexCodeDefinition {
+  installCommand?: string;
+  createIndex: CodeSnippetFunction;
+}
+
+export interface CreateIndexCodeExamples {
+  sense: CreateIndexCodeDefinition;
+  curl: CreateIndexCodeDefinition;
+  python: CreateIndexCodeDefinition;
+  javascript: CreateIndexCodeDefinition;
+}
+
+export interface CreateIndexLanguageExamples {
+  default: CreateIndexCodeDefinition;
+  dense_vector: CreateIndexCodeDefinition;
 }
