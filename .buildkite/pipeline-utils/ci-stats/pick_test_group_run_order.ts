@@ -390,7 +390,7 @@ export async function pickTestGroupRunOrder() {
   const unit = getRunGroup(bk, types, UNIT_TYPE);
   // const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
 
-  const configCounter = 0;
+  // const configCounter = 0;
   // let groupCounter = 0;
 
   // the relevant data we will use to define the pipeline steps
@@ -440,7 +440,7 @@ export async function pickTestGroupRunOrder() {
   // }
 
   // write the config for each step to an artifact that can be used by the individual jest jobs
-  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
+  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
   // if (ftrConfigsIncluded) {
