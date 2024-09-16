@@ -7,14 +7,12 @@
 
 import datemath from '@elastic/datemath';
 import { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   GetEventsParams,
   GetEventsResponse,
   getEventsResponseSchema,
 } from '@kbn/investigation-shared';
-import { Annotation } from '@kbn/observability-plugin/common/annotations';
-import { ScopedAnnotationsClient, unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -44,73 +42,42 @@ export function rangeQuery(
 
 export async function getAnnotationEvents(
   params: GetEventsParams,
-  esClient: ElasticsearchClient,
   annotationsClient: ScopedAnnotationsClient
 ): Promise<GetEventsResponse> {
-  const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
-  const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
-  const filterJSON = params?.filter ? JSON.parse(params.filter) : {};
+  const response = await annotationsClient.find({
+    start: params?.rangeFrom,
+    end: params?.rangeTo,
+    filter: params?.filter,
+  });
 
-  const body = {
-    size: 100,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(startInMs, endInMs),
-          ...Object.keys(filterJSON).map((filterKey) => ({
-            term: { [filterKey]: filterJSON[filterKey] },
-          })),
-        ],
-      },
-    },
-  };
+  // we will return only "point_in_time" annotations
+  const events = response.items
+    .filter((item) => !item.event?.end)
+    .map((item) => {
+      const hostName = item.host?.name;
+      const serviceName = item.service?.name;
+      const serviceVersion = item.service?.version;
+      const sloId = item.slo?.id;
+      const sloInstanceId = item.slo?.instanceId;
 
-  try {
-    const response = await unwrapEsResponse(
-      esClient.search(
-        {
-          index: annotationsClient.index,
-          body,
+      return {
+        id: item.id,
+        title: item.annotation.title,
+        description: item.message,
+        timestamp: new Date(item['@timestamp']).getTime(),
+        eventType: 'annotation',
+        annotationType: item.annotation.type,
+        source: {
+          ...(hostName ? { 'host.name': hostName } : undefined),
+          ...(serviceName ? { 'service.name': serviceName } : undefined),
+          ...(serviceVersion ? { 'service.version': serviceVersion } : undefined),
+          ...(sloId ? { 'slo.id': sloId } : undefined),
+          ...(sloInstanceId ? { 'slo.instanceId': sloInstanceId } : undefined),
         },
-        { meta: true }
-      )
-    );
+      };
+    });
 
-    // we will return only "point_in_time" annotations
-    const events = response.hits.hits
-      .filter((hit) => !(hit._source as Annotation).event?.end)
-      .map((hit) => {
-        const _source = hit._source as Annotation;
-        const hostName = _source.host?.name;
-        const serviceName = _source.service?.name;
-        const serviceVersion = _source.service?.version;
-        const sloId = _source.slo?.id;
-        const sloInstanceId = _source.slo?.instanceId;
-
-        return {
-          id: hit._id,
-          title: _source.annotation.title,
-          description: _source.message,
-          timestamp: new Date(_source['@timestamp']).getTime(),
-          eventType: 'annotation',
-          annotationType: _source.annotation.type,
-          source: {
-            ...(hostName ? { 'host.name': hostName } : undefined),
-            ...(serviceName ? { 'service.name': serviceName } : undefined),
-            ...(serviceVersion ? { 'service.version': serviceVersion } : undefined),
-            ...(sloId ? { 'slo.id': sloId } : undefined),
-            ...(sloInstanceId ? { 'slo.instanceId': sloInstanceId } : undefined),
-          },
-        };
-      });
-
-    return getEventsResponseSchema.parse(events);
-  } catch (error) {
-    // index is only created when an annotation has been indexed,
-    // so we should handle this error gracefully
-    return [];
-  }
+  return getEventsResponseSchema.parse(events);
 }
 
 export async function getAlertEvents(

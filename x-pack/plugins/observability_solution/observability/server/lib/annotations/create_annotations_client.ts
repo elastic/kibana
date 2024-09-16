@@ -263,26 +263,27 @@ export function createAnnotationsClient(params: {
                     lte: end ?? 'now',
                   },
                 },
-                ...(filterJSON ? termsFilter : []),
               },
-              !filterJSON
-                ? {
-                    bool: {
-                      should: [
-                        ...(serviceName
-                          ? [
-                              {
-                                term: {
-                                  'service.name': serviceName,
+              ...(filterJSON
+                ? termsFilter
+                : [
+                    {
+                      bool: {
+                        should: [
+                          ...(serviceName
+                            ? [
+                                {
+                                  term: {
+                                    'service.name': serviceName,
+                                  },
                                 },
-                              },
-                            ]
-                          : []),
-                        ...shouldClauses,
-                      ],
+                              ]
+                            : []),
+                          ...shouldClauses,
+                        ],
+                      },
                     },
-                  }
-                : {},
+                  ]),
             ],
           },
         },
