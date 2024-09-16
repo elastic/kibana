@@ -133,6 +133,7 @@ export class SpaceTestApiClient {
   async deleteAgentPolicy(agentPolicyId: string, spaceId?: string) {
     await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/delete`)
+      .auth(this.auth.username, this.auth.password)
       .send({
         agentPolicyId,
       })
@@ -142,6 +143,7 @@ export class SpaceTestApiClient {
   async getAgentPolicy(policyId: string, spaceId?: string): Promise<GetOneAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
       .expect(200);
 
     return res;
@@ -172,6 +174,7 @@ export class SpaceTestApiClient {
   async getAgentPolicies(spaceId?: string): Promise<GetAgentPoliciesResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .auth(this.auth.username, this.auth.password)
       .expect(200);
 
     return res;
@@ -482,6 +485,7 @@ export class SpaceTestApiClient {
   async postEnableSpaceAwareness(spaceId?: string): Promise<any> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .set('elastic-api-version', '1');
 
