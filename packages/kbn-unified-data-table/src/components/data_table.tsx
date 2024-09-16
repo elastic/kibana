@@ -40,6 +40,7 @@ import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
+  RowControlColumn,
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
@@ -57,7 +58,6 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  RowControlColumn,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
