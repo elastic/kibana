@@ -120,8 +120,11 @@ export const ThresholdExpression = ({
       repositionOnScroll
     >
       <div>
-        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
-          <>{comparators[comparator].text}</>
+        <ClosablePopoverTitle
+          onClose={() => setAlertThresholdPopoverOpen(false)}
+          dataTestSubj="thresholdPopoverTitle"
+        >
+          {comparators[comparator].text}
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

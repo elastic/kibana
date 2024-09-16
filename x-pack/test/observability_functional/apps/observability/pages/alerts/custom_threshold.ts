@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const logger = getService('log');
+  const retry = getService('retry');
 
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
@@ -73,6 +74,10 @@ export default ({ getService }: FtrProviderContext) => {
         '[data-test-subj="indexPattern-switcher--input"]'
       );
       await dataViewExpression.pressKeys(Key.ENTER);
+      await retry.waitFor('data view selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === 'DATA VIEW\ntest-data-view-name_2';
+      });
     });
 
     it('can select aggregation', async () => {
@@ -112,6 +117,10 @@ export default ({ getService }: FtrProviderContext) => {
       await customEquationField.click();
       await customEquationField.type('A - B');
       await testSubjects.click('o11yClosablePopoverTitleButton');
+      await retry.waitFor('custom equation update to happen', async () => {
+        const customEquation = await testSubjects.find('customEquation');
+        return (await customEquation.getVisibleText()) === 'EQUATION\nA - B';
+      });
     });
 
     it('can set threshold', async () => {
@@ -139,6 +148,10 @@ export default ({ getService }: FtrProviderContext) => {
       const thresholdField2 = await find.byCssSelector('[data-test-subj="alertThresholdInput1"]');
       await thresholdField2.type('250');
       await find.clickByCssSelector('[aria-label="Close"]');
+      await retry.waitFor('comparator selection to happen', async () => {
+        const customEquation = await testSubjects.find('thresholdPopover');
+        return (await customEquation.getVisibleText()) === 'IS NOT BETWEEN\n200 AND 250';
+      });
     });
 
     it('can set equation label', async () => {
