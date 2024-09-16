@@ -54,51 +54,49 @@ echo "
   output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 # while read -r config; do
-for _ in {1..10}; do
-  config="x-pack/plugins/cases/jest.config.js"
-  echo "--- $ node scripts/jest --config $config"
+config="x-pack/plugins/cases/jest.config.js"
+echo "--- $ node scripts/jest --config $config"
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
+# --trace-warnings to debug
+# Node.js process-warning detected:
+# Warning: Closing file descriptor 24 on garbage collection
+cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+echo "actual full command is:"
+echo "$cmd"
+echo ""
 
-  start=$(date +%s)
+start=$(date +%s)
 
-  # prevent non-zero exit code from breaking the loop
-  set +e
-  eval "$cmd"
-  lastCode=$?
-  set -e
+# prevent non-zero exit code from breaking the loop
+set +e
+eval "$cmd"
+lastCode=$?
+set -e
 
-  timeSec=$(($(date +%s) - start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec / 60))
-    sec=$((timeSec - (min * 60)))
-    duration="${min}m ${sec}s"
+timeSec=$(($(date +%s) - start))
+if [[ $timeSec -gt 60 ]]; then
+  min=$((timeSec / 60))
+  sec=$((timeSec - (min * 60)))
+  duration="${min}m ${sec}s"
+else
+  duration="${timeSec}s"
+fi
+
+results+=("- $config
+  duration: ${duration}
+  result: ${lastCode}")
+
+if [ $lastCode -ne 0 ]; then
+  exitCode=10
+  echo "Jest exited with code $lastCode"
+  echo "^^^ +++"
+
+  if [[ "$failedConfigs" ]]; then
+    failedConfigs="${failedConfigs}"$'\n'"$config"
   else
-    duration="${timeSec}s"
+    failedConfigs="$config"
   fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done
+fi
 # done <<< "$configs"
 
 if [[ "$failedConfigs" ]]; then
