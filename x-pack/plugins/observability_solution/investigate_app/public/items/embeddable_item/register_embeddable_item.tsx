@@ -89,7 +89,10 @@ function LegacyEmbeddable({ type, config, timeRange: { from, to }, savedObjectId
         from,
         to,
       },
-      overrides: { axisX: { hide: true }, axisLeft: { style: { axisTitle: { visible: false } } } },
+      overrides: {
+        axisX: { hide: true },
+        axisLeft: { style: { axisTitle: { visible: false } } },
+      },
     };
 
     if (savedObjectId) {
