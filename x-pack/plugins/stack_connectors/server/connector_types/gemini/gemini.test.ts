@@ -239,6 +239,10 @@ describe('GeminiConnector', () => {
             content: 'What is the capital of France?',
           },
         ],
+        toolConfig: {
+          mode: 'ANY' as const,
+          allowedFunctionNames: ['foo', 'bar'],
+        },
       };
 
       it('the API call is successful with correct request parameters', async () => {
@@ -259,6 +263,12 @@ describe('GeminiConnector', () => {
               generation_config: {
                 temperature: 0,
                 maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
@@ -298,6 +308,12 @@ describe('GeminiConnector', () => {
               generation_config: {
                 temperature: 0,
                 maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },

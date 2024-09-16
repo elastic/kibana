@@ -9,22 +9,13 @@ import { EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ErrorEmptyPrompt } from './error_empty_prompt';
-import {
-  defaultSort,
-  getIlmExplainPhaseCounts,
-  getPageIndex,
-  getSummaryTableItems,
-  MIN_PAGE_SIZE,
-  shouldCreateIndexNames,
-  shouldCreatePatternRollup,
-} from './helpers';
 import { getTotalPatternIncompatible, getTotalPatternIndicesChecked } from '../../../utils/stats';
 import { getIndexNames, getPatternDocsCount, getPatternSizeInBytes } from './utils/stats';
 import { LoadingEmptyPrompt } from './loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
 import { RemoteClustersCallout } from './remote_clusters_callout';
 import { SummaryTable } from './summary_table';
-import { getSummaryTableColumns } from './summary_table/helpers';
+import { getSummaryTableColumns } from './summary_table/utils/columns';
 import * as i18n from './translations';
 import type { PatternRollup, SelectedIndex, SortConfig } from '../../../types';
 import { useIlmExplain } from './hooks/use_ilm_explain';
@@ -34,6 +25,13 @@ import { PatternAccordion, PatternAccordionChildren } from './styles';
 import { IndexCheckFlyout } from './index_check_flyout';
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
 import { useIndicesCheckContext } from '../../../contexts/indices_check_context';
+import { getSummaryTableItems } from '../../../utils/get_summary_table_items';
+import { defaultSort } from '../../../constants';
+import { MIN_PAGE_SIZE } from './constants';
+import { getIlmExplainPhaseCounts } from './utils/ilm_explain';
+import { shouldCreateIndexNames } from './utils/should_create_index_names';
+import { shouldCreatePatternRollup } from './utils/should_create_pattern_rollup';
+import { getPageIndex } from './utils/get_page_index';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 
@@ -117,7 +115,7 @@ const PatternComponent: React.FC<Props> = ({
   }, []);
 
   const handleFlyoutIndexExpandAction = useCallback(
-    (indexName) => {
+    (indexName: string) => {
       checkIndex({
         abortController: flyoutIndexExpandActionAbortControllerRef.current,
         indexName,
@@ -132,7 +130,7 @@ const PatternComponent: React.FC<Props> = ({
   );
 
   const handleTableRowIndexCheckNowAction = useCallback(
-    (indexName) => {
+    (indexName: string) => {
       checkIndex({
         abortController: tableRowIndexCheckNowActionAbortControllerRef.current,
         indexName,

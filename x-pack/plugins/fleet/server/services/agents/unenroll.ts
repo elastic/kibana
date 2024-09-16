@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -49,6 +51,7 @@ export async function unenrollAgent(
     revoke?: boolean;
   }
 ) {
+  await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
   if (!options?.force) {
     await unenrollAgentIsAllowed(soClient, esClient, agentId);
   }
@@ -56,10 +59,12 @@ export async function unenrollAgent(
     return forceUnenrollAgent(esClient, soClient, agentId);
   }
   const now = new Date().toISOString();
+  const currentSpaceId = getCurrentNamespace(soClient);
   await createAgentAction(esClient, {
     agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
+    namespaces: [currentSpaceId],
   });
   await updateAgent(esClient, agentId, {
     unenrollment_started_at: now,
@@ -76,27 +81,37 @@ export async function unenrollAgents(
     showInactive?: boolean;
   }
 ): Promise<{ actionId: string }> {
+  const spaceId = getCurrentNamespace(soClient);
+
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await unenrollBatch(soClient, esClient, givenAgents, options);
+    return await unenrollBatch(soClient, esClient, givenAgents, {
+      ...options,
+      spaceId,
+    });
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+  const namespaceFilter = await agentsKueryNamespaceFilter(spaceId);
+  const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
   const res = await getAgentsByKuery(esClient, soClient, {
-    kuery: options.kuery,
+    kuery,
     showInactive: options.showInactive ?? false,
     page: 1,
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, soClient, options);
-    return await unenrollBatch(soClient, esClient, givenAgents, options);
+    return await unenrollBatch(soClient, esClient, res.agents, {
+      ...options,
+      spaceId,
+    });
   } else {
     return await new UnenrollActionRunner(
       esClient,
       soClient,
       {
         ...options,
+        spaceId,
         batchSize,
         total: res.total,
       },
@@ -120,5 +135,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
-  await updateActionsForForceUnenroll(esClient, [agent.id], uuidv4(), 1);
+  await updateActionsForForceUnenroll(esClient, soClient, [agent.id], uuidv4(), 1);
 }

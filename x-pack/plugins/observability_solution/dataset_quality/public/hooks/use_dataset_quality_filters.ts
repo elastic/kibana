@@ -8,12 +8,14 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
-import { QualityIndicators } from '../../common/types';
+import { KNOWN_TYPES } from '../../common/constants';
+import { DataStreamType, QualityIndicators } from '../../common/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
 import { QualityItem } from '../components/dataset_quality/filters/qualities_selector';
+import { Item } from '../components/dataset_quality/filters/selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
@@ -22,13 +24,14 @@ export const useDatasetQualityFilters = () => {
     service,
     (state) =>
       state.matches('integrations.fetching') &&
-      (state.matches('datasets.fetching') || state.matches('degradedDocs.fetching'))
+      (state.matches('stats.datasets.fetching') || state.matches('stats.degradedDocs.fetching'))
   );
 
   const {
     timeRange,
     integrations: selectedIntegrations,
     namespaces: selectedNamespaces,
+    types: selectedTypes,
     qualities: selectedQualities,
     query: selectedQuery,
   } = useSelector(service, (state) => state.context.filters);
@@ -169,6 +172,25 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
+  const typeItems: Item[] = useMemo(() => {
+    return KNOWN_TYPES.map((type) => ({
+      label: type,
+      checked: selectedTypes.includes(type) ? 'on' : undefined,
+    }));
+  }, [selectedTypes]);
+
+  const onTypesChange = useCallback(
+    (newTypeItems: Item[]) => {
+      service.send({
+        type: 'UPDATE_TYPES',
+        types: newTypeItems
+          .filter((quality) => quality.checked === 'on')
+          .map((type) => type.label as DataStreamType),
+      });
+    },
+    [service]
+  );
+
   const onQueryChange = useCallback(
     (query: string) => {
       service.send({
@@ -187,9 +209,11 @@ export const useDatasetQualityFilters = () => {
     integrations: integrationItems,
     namespaces: namespaceItems,
     qualities: qualityItems,
+    types: typeItems,
     onIntegrationsChange,
     onNamespacesChange,
     onQualitiesChange,
+    onTypesChange,
     isLoading,
     selectedQuery,
     onQueryChange,

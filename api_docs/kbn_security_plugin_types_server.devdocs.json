@@ -4285,12 +4285,24 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4323,26 +4335,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",

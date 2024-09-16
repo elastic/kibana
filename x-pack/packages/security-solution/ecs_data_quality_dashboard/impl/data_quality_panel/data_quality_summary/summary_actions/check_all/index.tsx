@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAllIndicesToCheck } from './helpers';
+import { getAllIndicesToCheck } from './utils/get_all_indices_to_check';
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
 import { checkIndex } from '../../../utils/check_index';
 import { useDataQualityContext } from '../../../data_quality_context';

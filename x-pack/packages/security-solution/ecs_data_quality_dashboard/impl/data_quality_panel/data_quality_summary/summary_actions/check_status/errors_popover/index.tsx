@@ -16,15 +16,24 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import {
+  COPY_TO_CLIPBOARD,
+  ERRORS_CALLOUT_SUMMARY,
+  ERRORS_MAY_OCCUR,
+  INDEX,
+  MANAGE,
+  MONITOR,
+  OR,
+  READ,
+  THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
+  VIEW_INDEX_METADATA,
+} from '../../../../translations';
 import { ErrorsViewer } from './errors_viewer';
 import { ERRORS_CONTAINER_MAX_WIDTH } from './errors_viewer/helpers';
-import {
-  getErrorsMarkdownTable,
-  getErrorsMarkdownTableRows,
-} from '../../../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
-import * as i18n from './translations';
 import type { ErrorSummary } from '../../../../types';
-import { ERROR, INDEX, PATTERN } from './errors_viewer/translations';
+import { getErrorsMarkdownTable, getErrorsMarkdownTableRows } from '../../utils/markdown';
+import { ERROR, ERRORS, PATTERN } from '../../translations';
+import { COPIED_ERRORS_TOAST_TITLE, VIEW_ERRORS } from './translations';
 
 const CallOut = styled(EuiCallOut)`
   max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;
@@ -45,28 +54,28 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
       errorSummary,
       getMarkdownTableRows: getErrorsMarkdownTableRows,
       headerNames: [PATTERN, INDEX, ERROR],
-      title: i18n.ERRORS,
+      title: ERRORS,
     });
     copyToClipboard(markdown);
 
     closePopover();
 
     addSuccessToast({
-      title: i18n.COPIED_ERRORS_TOAST_TITLE,
+      title: COPIED_ERRORS_TOAST_TITLE,
     });
   }, [addSuccessToast, closePopover, errorSummary]);
 
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        aria-label={i18n.VIEW_ERRORS}
+        aria-label={VIEW_ERRORS}
         data-test-subj="viewErrors"
         disabled={errorSummary.length === 0}
         flush="both"
         onClick={onClick}
         size="xs"
       >
-        {i18n.VIEW_ERRORS}
+        {VIEW_ERRORS}
       </EuiButtonEmpty>
     ),
     [errorSummary.length, onClick]
@@ -80,32 +89,32 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
       isOpen={isPopoverOpen}
       panelPaddingSize="s"
     >
-      <CallOut color="danger" data-test-subj="callout" size="s" title={i18n.ERRORS}>
-        <p>{i18n.ERRORS_CALLOUT_SUMMARY}</p>
+      <CallOut color="danger" data-test-subj="callout" size="s" title={ERRORS}>
+        <p>{ERRORS_CALLOUT_SUMMARY}</p>
 
-        <p>{i18n.ERRORS_MAY_OCCUR}</p>
+        <p>{ERRORS_MAY_OCCUR}</p>
 
-        <span>{i18n.THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
+        <span>{THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
         <ul>
           <li>
-            <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>
+            <EuiCode>{MONITOR}</EuiCode> {OR} <EuiCode>{MANAGE}</EuiCode>
           </li>
           <li>
-            <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
+            <EuiCode>{VIEW_INDEX_METADATA}</EuiCode>
           </li>
           <li>
-            <EuiCode>{i18n.READ}</EuiCode>
+            <EuiCode>{READ}</EuiCode>
           </li>
         </ul>
 
         <EuiButtonEmpty
-          aria-label={i18n.COPY_TO_CLIPBOARD}
+          aria-label={COPY_TO_CLIPBOARD}
           data-test-subj="copyToClipboard"
           flush="both"
           onClick={onCopy}
           size="xs"
         >
-          {i18n.COPY_TO_CLIPBOARD}
+          {COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>
       </CallOut>
 

@@ -35,17 +35,14 @@ import type {
   TelemetryEvents,
 } from '../../types';
 import {
-  getIlmPhase,
-  getIndexIncompatible,
-} from '../../data_quality_details/indices_details/pattern/helpers';
-import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
 import { UseResultsRollupReturnValue } from './types';
 import { useIsMounted } from '../use_is_mounted';
-import { getDocsCount, getSizeInBytes } from '../../utils/stats';
+import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
+import { getIlmPhase } from '../../utils/get_ilm_phase';
 
 interface Props {
   ilmPhases: string[];

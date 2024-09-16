@@ -19,6 +19,7 @@ const useSummaryPanel = () => {
     isSizeStatsAvailable,
     canUserMonitorDataset,
     canUserMonitorAnyDataStream,
+    loading,
   } = useDatasetQualityTable();
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -32,7 +33,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsQualityLoading = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+    state.matches('stats.degradedDocs.fetching')
   );
 
   /*
@@ -42,8 +43,9 @@ const useSummaryPanel = () => {
     (item) => item.userPrivileges?.canMonitor ?? true
   );
 
-  const isUserAuthorizedForDataset =
-    canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams;
+  const isUserAuthorizedForDataset = !loading
+    ? canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams
+    : true;
 
   /*
     Datasets Activity
@@ -57,7 +59,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsActivityLoading = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+    state.matches('stats.datasets.fetching')
   );
 
   /*
@@ -70,7 +72,8 @@ const useSummaryPanel = () => {
 
   const isEstimatedDataLoading = useSelector(
     service,
-    (state) => state.matches('datasets.fetching') || state.matches('degradedDocs.fetching')
+    (state) =>
+      state.matches('stats.datasets.fetching') || state.matches('stats.degradedDocs.fetching')
   );
 
   return {

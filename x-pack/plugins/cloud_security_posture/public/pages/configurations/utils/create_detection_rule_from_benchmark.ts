@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
-import { CspBenchmarkRule } from '../../../../common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
 import { createDetectionRule } from '../../../common/api/create_detection_rule';

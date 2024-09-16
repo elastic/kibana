@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
+
+import { getIlmPhase } from '../../../../utils/get_ilm_phase';
 import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
@@ -28,7 +30,6 @@ import { EMPTY_STAT } from '../../../../constants';
 import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexProperties } from './index_properties';
-import { getIlmPhase } from '../helpers';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
 import { CHECK_NOW } from './translations';

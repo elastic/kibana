@@ -19,7 +19,12 @@ import type {
   SortField,
 } from '../../../../../common/search_strategy';
 import { NetworkUsersFields } from '../../../../../common/search_strategy';
-import type { Criteria, ItemsPerRow, SortingBasicTable } from '../../../components/paginated_table';
+import type {
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+  SortingBasicTable,
+} from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getUsersColumns } from './columns';
@@ -70,7 +75,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const getUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
   const { activePage, sort, limit } = useDeepEqualSelector(getUsersSelector);
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
@@ -82,7 +87,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [dispatch, type]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({

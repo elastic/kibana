@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { InvestigationDetails as Component } from '.';
 import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
+import { InvestigationDetails as Component } from './investigation_details';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
@@ -20,7 +21,7 @@ export default meta;
 
 const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {},
-  render: (props) => <Component investigationId="123" />,
+  render: (props) => <Component user={mockAuthenticatedUser()} />,
 };
 
 export const InvestigateViewStory: ComponentStoryObj<typeof Component> = {

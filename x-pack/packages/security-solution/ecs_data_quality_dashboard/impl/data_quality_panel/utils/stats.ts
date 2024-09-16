@@ -7,6 +7,20 @@
 
 import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
 
+export const getIndexIncompatible = ({
+  indexName,
+  results,
+}: {
+  indexName: string;
+  results: Record<string, DataQualityCheckResult> | undefined;
+}): number | undefined => {
+  if (results == null || results[indexName] == null) {
+    return undefined;
+  }
+
+  return results[indexName].incompatible;
+};
+
 export const getSizeInBytes = ({
   indexName,
   stats,
@@ -45,3 +59,20 @@ export const getTotalPatternIncompatible = (
 
   return allResults.reduce<number>((acc, { incompatible }) => acc + (incompatible ?? 0), 0);
 };
+
+export const getDocsCountPercent = ({
+  docsCount,
+  locales,
+  patternDocsCount,
+}: {
+  docsCount: number;
+  locales?: string | string[];
+  patternDocsCount: number;
+}): string =>
+  patternDocsCount !== 0
+    ? Number(docsCount / patternDocsCount).toLocaleString(locales, {
+        style: 'percent',
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 1,
+      })
+    : '';

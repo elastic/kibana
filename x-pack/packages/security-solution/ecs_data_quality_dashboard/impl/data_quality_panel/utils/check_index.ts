@@ -13,11 +13,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { getUnallowedValueRequestItems } from './get_unallowed_value_request_items';
-import {
-  getMappingsProperties,
-  getSortedPartitionedFieldMetadata,
-} from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
-import * as i18n from '../data_quality_summary/summary_actions/check_all/translations';
+import * as i18n from '../translations';
 import type {
   OnCheckCompleted,
   PartitionedFieldMetadata,
@@ -27,6 +23,7 @@ import type {
 import { fetchMappings } from './fetch_mappings';
 import { fetchUnallowedValues, getUnallowedValues } from './fetch_unallowed_values';
 import { EcsFlatTyped } from '../constants';
+import { getMappingsProperties, getSortedPartitionedFieldMetadata } from './metadata';
 
 export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   all: [],

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useRef } from 'react';
@@ -169,11 +170,11 @@ export const getDocumentationSections = async (language: string) => {
       sourceCommands,
       processingCommands,
       initialSection,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators,
-    } = await import('./esql_documentation_sections');
+    } = await import('./inline_documentation/esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ES|QL',
@@ -183,7 +184,7 @@ export const getDocumentationSections = async (language: string) => {
     groups.push(
       sourceCommands,
       processingCommands,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators
@@ -193,14 +194,6 @@ export const getDocumentationSections = async (language: string) => {
       initialSection,
     };
   }
-};
-
-export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
-  const pipes = code?.split('|');
-  const codeNoLines = pipes?.map((pipe) => {
-    return pipe.replaceAll('\n', '').trim();
-  });
-  return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
 
 export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
@@ -256,20 +249,22 @@ const getIntegrations = async (core: CoreStart) => {
   // and this needs to be done in various places in the codebase which use the editor
   // https://github.com/elastic/kibana/issues/186061
   const response = (await core.http
-    .get(INTEGRATIONS_API, { query: undefined, version: API_VERSION })
+    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch integrations', error);
     })) as IntegrationsResponse;
 
   return (
-    response?.items?.map((source) => ({
-      name: source.name,
-      hidden: false,
-      title: source.title,
-      dataStreams: source.dataStreams,
-      type: 'Integration',
-    })) ?? []
+    response?.items
+      ?.filter(({ dataStreams }) => dataStreams.length)
+      .map((source) => ({
+        name: source.name,
+        hidden: false,
+        title: source.title,
+        dataStreams: source.dataStreams,
+        type: 'Integration',
+      })) ?? []
   );
 };
 

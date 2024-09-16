@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -16,6 +17,7 @@ import {
   EuiPanel,
   EuiButtonGroup,
   toSentenceCase,
+  Direction,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -107,8 +109,8 @@ export function DataViewsList({
   );
 
   const onChangeSortDirection = useCallback(
-    (value) => {
-      sortingService.setDirection(value);
+    (value: string) => {
+      sortingService.setDirection(value as Direction);
       setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
     },
     [sortingService]

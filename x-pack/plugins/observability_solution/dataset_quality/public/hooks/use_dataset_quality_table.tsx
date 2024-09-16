@@ -48,8 +48,7 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       !state.context.dataStreamStats ||
-      !state.context.dataStreamStats.length ||
-      state.context.dataStreamStats.some((s) => s.userPrivileges.canMonitor)
+      state.context.datasets.some((s) => s.userPrivileges?.canMonitor)
   );
 
   const {
@@ -66,15 +65,15 @@ export const useDatasetQualityTable = () => {
   const loading = useSelector(
     service,
     (state) =>
-      state.matches('datasets.fetching') ||
+      state.matches('stats.datasets.fetching') ||
       state.matches('integrations.fetching') ||
-      state.matches('degradedDocs.fetching')
+      state.matches('stats.degradedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+    state.matches('stats.datasets.fetching')
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+    state.matches('stats.degradedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);

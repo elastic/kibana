@@ -46,6 +46,10 @@ const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumn
   defaultMessage: 'Namespace',
 });
 
+const typeColumnName = i18n.translate('xpack.datasetQuality.typeColumnName', {
+  defaultMessage: 'Type',
+});
+
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
   defaultMessage: 'Size',
 });
@@ -210,6 +214,15 @@ export const getDatasetQualityTableColumns = ({
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
+      ),
+      width: '160px',
+    },
+    {
+      name: typeColumnName,
+      field: 'type',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.type}</EuiBadge>
       ),
       width: '160px',
     },

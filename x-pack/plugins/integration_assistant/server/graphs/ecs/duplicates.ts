@@ -6,9 +6,9 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { EcsNodeParams } from './types';
 import type { EcsMappingState } from '../../types';
 import { ECS_DUPLICATES_PROMPT } from './prompts';
+import type { EcsNodeParams } from './types';
 
 export async function handleDuplicates({
   state,
@@ -16,13 +16,18 @@ export async function handleDuplicates({
 }: EcsNodeParams): Promise<Partial<EcsMappingState>> {
   const outputParser = new JsonOutputParser();
   const ecsDuplicatesGraph = ECS_DUPLICATES_PROMPT.pipe(model).pipe(outputParser);
+  const usesFinalMapping = state?.useFinalMapping;
+  const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
 
-  const currentMapping = await ecsDuplicatesGraph.invoke({
+  const result = await ecsDuplicatesGraph.invoke({
     ecs: state.ecs,
-    current_mapping: JSON.stringify(state.currentMapping, null, 2),
+    current_mapping: JSON.stringify(mapping, null, 2),
     ex_answer: state.exAnswer,
     duplicate_fields: state.duplicateFields,
   });
 
-  return { currentMapping, lastExecutedChain: 'duplicateFields' };
+  return {
+    [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,
+    lastExecutedChain: 'duplicateFields',
+  };
 }

@@ -9,14 +9,11 @@ import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
-import {
-  getMappingsProperties,
-  getSortedPartitionedFieldMetadata,
-} from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/helpers';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValues } from './fetch_unallowed_values';
 import { getUnallowedValueRequestItems } from './get_unallowed_value_request_items';
 import { EcsFlatTyped, EMPTY_STAT } from '../constants';
+import { getMappingsProperties, getSortedPartitionedFieldMetadata } from './metadata';
 
 let mockFetchMappings = jest.fn(
   (_: { abortController: AbortController; patternOrIndexName: string }) =>

@@ -66,3 +66,25 @@ components:
           properties:
             docs:
               $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+    
+    AnalyzeLogsAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        additionalProcessors:
+          type: array
+          items:
+            $ref: "./processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+        results:
+          type: object
+          required:
+            - parsedSamples
+            - samplesFormat
+          properties:
+            samplesFormat:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/SamplesFormat"
+            parsedSamples:
+              type: array
+              items:
+                type: string

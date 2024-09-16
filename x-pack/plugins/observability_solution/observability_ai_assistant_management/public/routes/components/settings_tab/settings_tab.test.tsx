@@ -9,10 +9,7 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
-import {
-  aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
-} from '@kbn/observability-ai-assistant-plugin/server';
+import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { uiSettings } from '../../../../common/ui_settings';
 
 jest.mock('../../../hooks/use_app_context');
@@ -76,13 +73,6 @@ describe('SettingsTab', () => {
         target: { value: 'observability-ai-assistant-*' },
       });
 
-      fireEvent.change(
-        getByTestId(`management-settings-editField-${aiAssistantResponseLanguage}`),
-        {
-          target: { value: 'da' },
-        }
-      );
-
       fireEvent.click(getByTestId('observabilityAiAssistantManagementBottomBarActionsButton'));
 
       await waitFor(() => expect(windowLocationReloadMock).toHaveBeenCalledTimes(1));
@@ -97,7 +87,6 @@ describe('SettingsTab', () => {
         aiAssistantLogsIndexPattern,
         'observability-ai-assistant-*'
       );
-      expect(settingsClientSet).toBeCalledWith(aiAssistantResponseLanguage, 'da');
     });
   });
 });
