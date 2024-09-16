@@ -14,6 +14,7 @@ import {
   DatasetQualityApiError,
 } from './common/dataset_quality_api_supertest';
 import { DatasetQualityFtrContextProvider } from './common/services';
+import { getBackingIndexNameWithoutLastPart } from './utils';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
@@ -97,16 +98,23 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(resp.body).eql(defaultDataStreamPrivileges);
     });
 
-    it('returns "createdOn" correctly', async () => {
+    it('returns "createdOn" and "lastBackingIndexName" correctly', async () => {
       const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
         esClient,
         `${type}-${dataset}-${namespace}`
       );
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+      expect(resp.body.lastBackingIndexName).to.be(
+        `${getBackingIndexNameWithoutLastPart({
+          type,
+          dataset,
+          namespace,
+        })}-000001`
+      );
     });
 
-    it('returns "createdOn" correctly for rolled over dataStream', async () => {
+    it('returns "createdOn" and "lastBackingIndexName" correctly for rolled over dataStream', async () => {
       await rolloverDataStream(esClient, `${type}-${dataset}-${namespace}`);
       const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
         esClient,
@@ -114,6 +122,9 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       );
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+      expect(resp.body.lastBackingIndexName).to.be(
+        `${getBackingIndexNameWithoutLastPart({ type, dataset, namespace })}-000002`
+      );
     });
   });
 }

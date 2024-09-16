@@ -119,7 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
         const resp = await callApiAs(
           'datasetQualityMonitorUser',
-          `${type}-${dataset}-${namespace}`,
+          dataStream,
           'cloud.region',
           `${getBackingIndexNameWithoutLastPart({
             type,

@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_stream_details'));
     loadTestFile(require.resolve('./data_stream_settings'));
     loadTestFile(require.resolve('./degraded_field_values'));
+    loadTestFile(require.resolve('./degraded_field_analyze'));
   });
 }
