@@ -6,12 +6,19 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EntityDetailView } from '../entity_detail_view';
+import { EntityDetailViewWithoutParams } from '../entity_detail_view';
 import { DataStreamManagementView } from '../data_stream_management_view';
+import { useInventoryParams } from '../../hooks/use_inventory_params';
 
 export function DataStreamDetailView() {
+  const {
+    path: { displayName, tab },
+  } = useInventoryParams('/data_stream/{displayName}/{tab}');
   return (
-    <EntityDetailView
+    <EntityDetailViewWithoutParams
+      type="data_stream"
+      displayName={displayName}
+      tab={tab}
       getAdditionalTabs={() => [
         {
           name: 'management',

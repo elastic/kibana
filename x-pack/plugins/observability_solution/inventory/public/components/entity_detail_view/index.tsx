@@ -46,15 +46,17 @@ interface Tab {
   content: React.ReactElement;
 }
 
-export function EntityDetailView({
+export function EntityDetailViewWithoutParams({
+  tab,
+  displayName,
+  type,
   getAdditionalTabs,
 }: {
+  tab: string;
+  displayName: string;
+  type: string;
   getAdditionalTabs?: (dependencies: TabDependencies) => Tab[];
 }) {
-  const {
-    path: { type, displayName, tab },
-  } = useInventoryParams('/{type}/{displayName}/{tab}');
-
   const {
     dependencies: {
       start: { data },
@@ -376,4 +378,12 @@ export function EntityDetailView({
       {selectedTab.content}
     </EuiFlexGroup>
   );
+}
+
+export function EntityDetailView() {
+  const {
+    path: { type, displayName, tab },
+  } = useInventoryParams('/{type}/{displayName}/{tab}');
+
+  return <EntityDetailViewWithoutParams type={type} displayName={displayName} tab={tab} />;
 }
