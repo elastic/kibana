@@ -279,6 +279,21 @@
       },
       {
         "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.GetEntityDefinitionQuerySchema",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEntityDefinitionQuerySchema",
+        "description": [],
+        "signature": [
+          "{ includeState: boolean; page?: number | undefined; perPage?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.KeyMetric",
         "type": "Type",
         "tags": [],
@@ -702,7 +717,7 @@
         "label": "getEntityDefinitionQuerySchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>"
+          "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/get.ts",
         "deprecated": false,
