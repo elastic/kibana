@@ -246,11 +246,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       kibanaUrl
     ).toString();
 
-    const confDownloadUrl = new URL(
-      core.setup.http.staticAssets.getPluginAssetHref('integrations.conf'),
-      kibanaUrl
-    ).toString();
-
     return {
       onboardingFlow,
       ingestApiKey: ingestApiKey.encoded,
@@ -258,7 +253,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       elasticAgentVersion,
       kibanaUrl,
       scriptDownloadUrl,
-      confDownloadUrl,
     };
   },
 });

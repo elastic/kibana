@@ -26,7 +26,6 @@ ingest_api_key_encoded=""
 kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
-integration_config_file=""
 
 help() {
   echo "Usage: sudo ./auto-detect.sh <arguments>"
@@ -37,7 +36,6 @@ help() {
   echo "  --kibana-url=<value>  Kibana API endpoint."
   echo "  --id=<value>   Onboarding flow ID."
   echo "  --ea-version=<value>   Elastic Agent version."
-  echo "  --integration-config-file=<value>   Configuration file (.conf) containing integration details, patterns, and titles."
   exit 1
 }
 
@@ -76,10 +74,6 @@ for i in "$@"; do
     shift
     elastic_agent_version="${i#*=}"
     ;;
-  --integration-config-file=*)
-    shift
-    integration_config_file="${i#*=}"
-    ;;
   --help)
     help
     ;;
@@ -95,7 +89,6 @@ ensure_argument "$ingest_api_key_encoded" "--ingest-key"
 ensure_argument "$kibana_api_endpoint" "--kibana-url"
 ensure_argument "$onboarding_flow_id" "--id"
 ensure_argument "$elastic_agent_version" "--ea-version"
-ensure_argument "$integration_config_file" "--integration-config-file"
 
 known_integrations_list_string=""
 selected_known_integrations_array=()
@@ -353,16 +346,15 @@ detect_known_integrations() {
   # Even when there is no system logs on the host,
   # System integration will still be able to to collect metrics.
   known_integrations_list_string+="system"$'\n'
+  integrations_config_url="${kibana_api_endpoint}/plugins/observabilityOnboarding/assets/integrations.conf"
 
-  curl -L -O "${integration_config_file}" --silent --fail
-  config_file="./integrations.conf"
-
+  integrations_config=$(curl "${integrations_config_url}" --silent --fail)
   local integration=""
   local patterns=()
 
   # Debug: Check if the config file exists
-  if [[ ! -f "$config_file" ]]; then
-    echo "Config file not found: $config_file"
+  if [[ -z "$integrations_config" ]]; then
+    echo "Failed to retrieve config file"
     exit 1
   fi
 
@@ -406,7 +398,7 @@ detect_known_integrations() {
       # Capture multi-line patterns if not directly following "patterns="
       patterns+=("$(echo "$line" | xargs)") # Trim leading/trailing spaces
     fi
-  done <"$config_file"
+  done <<< "$integrations_config"
 
   # Check patterns for the last section
   if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then

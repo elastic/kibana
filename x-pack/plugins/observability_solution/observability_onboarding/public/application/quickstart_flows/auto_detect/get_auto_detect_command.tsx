@@ -20,7 +20,6 @@ export function getAutoDetectCommand(
       --install-key=${options.installApiKey}
       --ingest-key=${options.ingestApiKey}
       --ea-version=${options.elasticAgentVersion}
-      --integration-config-file=${options.confDownloadUrl}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {
