@@ -138,13 +138,6 @@ export const RESERVED_CONFIG_YML_KEYS = [
   'worker',
 ];
 
-export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
-  outputType.Elasticsearch,
-  outputType.RemoteElasticsearch,
-];
-
-export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
-
 export const kafkaTopicsOptions = [
   {
     id: kafkaTopicsType.Static,
@@ -164,4 +157,26 @@ export const KAFKA_DYNAMIC_FIELDS = [
   'data_stream.namespace',
   '@timestamp',
   'event.dataset',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
+
+export const LOGSTASH_API_KEY_INDICES_PRIVILEGES = ['auto_configure', 'create_doc'];
+
+export const LOGSTASH_API_KEY_INDICES = [
+  'logs-*-*',
+  'metrics-*-*',
+  'traces-*-*',
+  'synthetics-*-*',
+  '.logs-endpoint.diagnostic.collection-*',
+  '.logs-endpoint.action.responses-*',
+  'profiling-*',
+  '.profiling-*',
 ];
