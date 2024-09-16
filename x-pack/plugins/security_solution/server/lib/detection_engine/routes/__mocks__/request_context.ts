@@ -72,6 +72,7 @@ export const createMockClients = () => {
     riskEngineDataClient: riskEngineDataClientMock.create(),
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+    entityStoreDataClient: entityStoreDataClientMock.create(),
 
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
@@ -159,6 +160,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
+    getEntityStoreDataClient: jest.fn(() => client.entityStoreDataClient),
   };
 };
 
