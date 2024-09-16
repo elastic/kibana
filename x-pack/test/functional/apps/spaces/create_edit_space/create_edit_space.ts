@@ -83,6 +83,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(`space-avatar-${spaceId}`);
         expect(await testSubjects.getVisibleText(`space-avatar-${spaceId}`)).to.be(spaceInitials);
       });
+
+      it('allows changing space avatar', async () => {
+        await testSubjects.click(`${spaceId}-hyperlink`);
+        await testSubjects.existOrFail('spaces-view-page > generalPanel');
+
+        await testSubjects.click('image');
+
+        const avatarPath = require.resolve('./acme_logo.png');
+        log.debug(`Importing file '${avatarPath}' ...`);
+        await PageObjects.common.setFileInputPath(avatarPath);
+
+        await testSubjects.click('save-space-button');
+        await testSubjects.existOrFail('spaces-grid-page'); // wait for grid page to reload
+        await testSubjects.existOrFail(`space-avatar-${spaceId}`);
+        const avatarEl = await testSubjects.find(`space-avatar-${spaceId}`);
+        expect(await avatarEl.getAttribute('role')).to.be('img'); // expect that the space uses image avatar
+      });
     });
 
     describe('solution view', () => {
