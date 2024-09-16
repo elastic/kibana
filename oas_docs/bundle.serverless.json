@@ -1678,6 +1678,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "from": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "to": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "from",
+                                        "to"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -2865,6 +2884,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "from": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "to": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "from",
+                                        "to"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -4034,6 +4072,25 @@
                                       "description": "Duration in seconds of rule run gap.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "from": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "to": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "from",
+                                        "to"
+                                      ],
+                                      "type": "object"
                                     },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
@@ -5440,6 +5497,25 @@
                                       "description": "Duration in seconds of rule run gap.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "from": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "to": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "from",
+                                        "to"
+                                      ],
+                                      "type": "object"
                                     },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
