@@ -1279,7 +1279,7 @@
             "label": "reportAssistantMessageSent",
             "description": [],
             "signature": [
-              "(params: { conversationId: string; role: string; actionTypeId: string; model?: string | undefined; provider?: string | undefined; }) => void"
+              "(params: { conversationId: string; role: string; actionTypeId: string; model?: string | undefined; provider?: string | undefined; isEnabledKnowledgeBase: boolean; }) => void"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1353,6 +1353,17 @@
                     "signature": [
                       "string | undefined"
                     ],
+                    "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantMessageSent.$1.isEnabledKnowledgeBase",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isEnabledKnowledgeBase",
+                    "description": [],
                     "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2039,7 +2050,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined"
+              "{ connectorId: string; actionTypeId: string; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2326,7 +2337,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; actionTypeId: string; model?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; } | undefined"
+              "{ connectorId: string; actionTypeId: string; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
             "deprecated": false,
