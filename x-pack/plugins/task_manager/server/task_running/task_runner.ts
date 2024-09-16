@@ -41,6 +41,7 @@ import {
   TaskManagerStat,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   CancelFunction,
   CancellableTask,
@@ -294,6 +295,10 @@ export class TaskManagerRunner implements TaskRunner {
    * running a task, the task should be deleted instead of ran.
    */
   public get isAdHocTaskAndOutOfAttempts() {
+    if (this.instance.task.status === 'running') {
+      // This function gets called with tasks marked as running when using MGET, so attempts is already incremented
+      return !this.instance.task.schedule && this.instance.task.attempts > this.getMaxAttempts();
+    }
     return !this.instance.task.schedule && this.instance.task.attempts >= this.getMaxAttempts();
   }
 
@@ -709,7 +714,7 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
-    const debugLogger = this.logger.get(`metrics-debugger`);
+    const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
 

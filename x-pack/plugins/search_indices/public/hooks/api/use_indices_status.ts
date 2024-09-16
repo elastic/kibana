@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { GET_STATUS_ROUTE } from '../../../common/routes';
 import type { IndicesStatusResponse } from '../../../common/types';
+import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
 
@@ -21,7 +22,7 @@ export const useIndicesStatusQuery = (pollingInterval = DEFAULT_INDICES_POLLING_
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     retry: true,
-    queryKey: ['fetchSearchIndicesStatus'],
+    queryKey: [QueryKeys.FetchSearchIndicesStatus],
     queryFn: () => http.get<IndicesStatusResponse>(GET_STATUS_ROUTE),
   });
 };

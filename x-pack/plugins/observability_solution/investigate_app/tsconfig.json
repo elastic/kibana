@@ -57,5 +57,6 @@
     "@kbn/presentation-containers",
     "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
+    "@kbn/zod",
   ],
 }

@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export let core: CoreStart;
