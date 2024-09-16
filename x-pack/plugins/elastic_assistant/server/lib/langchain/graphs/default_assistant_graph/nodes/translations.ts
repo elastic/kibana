@@ -18,4 +18,4 @@ export const BEDROCK_SYSTEM_PROMPT = `Use tools as often as possible, as they ha
 
 export const VERTEX_SYSTEM_PROMPT =
   `ALWAYS use the provided tools, as they have access to the latest data and syntax.` +
-  "Do not alter the tool response. The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question.";
+  "Do not alter the tool response. The final response will be the only output the user sees and should be a complete answer to the user's question.";

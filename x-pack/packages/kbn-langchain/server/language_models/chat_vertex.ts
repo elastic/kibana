@@ -20,7 +20,6 @@ import {
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AIMessage } from '@langchain/core/messages';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
 import {
   isAIMessage,
@@ -34,12 +33,10 @@ import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatVertexAI } from '@langchain/google-vertexai';
 import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { AbstractGoogleLLMConnection } from '@langchain/google-common';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
-import { AbstractGoogleLLMConnection } from '@langchain/google-common';
-import type { GoogleBaseLLMInput } from '@langchain/google-common/dist/types';
-import { GoogleAbstractedClient } from '@langchain/google-common/dist/auth';
-import { GoogleAuthOptions } from 'google-auth-library';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 // import { baseMessageToContent } from '@langchain/google-common/dist/utils/gemini';
 const DEFAULT_GEMINI_TEMPERATURE = 0;
 function messageKwargsToParts(kwargs) {
@@ -336,19 +333,22 @@ export interface CoolThing extends ChatConnection {
   maxTokens?: number;
 }
 
+// only implements non-streaming requests
+// stream is handled by ActionsClientChatVertexAI.*_streamResponseChunks
 class ActionsClientGoogleAIConnection<AuthOptions> extends ChatConnection<AuthOptions> {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   temperature: number;
   model?: string;
   constructor(fields, caller, client, streaming, actionsClient, connectorId) {
-    super(fields, caller, client, streaming);
+    super(fields, caller, client, false);
     Object.defineProperty(this, 'convertSystemMessageToHumanContent', {
       enumerable: true,
       configurable: true,
       writable: true,
       value: void 0,
     });
+
     this.convertSystemMessageToHumanContent = fields?.convertSystemMessageToHumanContent ?? true;
     console.log('23334 BEHERE', { actionsClient, connectorId });
 
@@ -357,21 +357,9 @@ class ActionsClientGoogleAIConnection<AuthOptions> extends ChatConnection<AuthOp
     this.temperature = fields.temperature;
     this.model = fields.model;
   }
-  //
-  // #actionsClient: PublicMethodsOf<ActionsClient>;
-  // convertSystemMessageToHumanContent: boolean;
+
   async _request(data, options) {
-    console.log('23334 DATA', data);
-    console.log('23334 options', options);
-    console.log('23334 this', this);
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
-      console.log('23334 subActionParams', {
-        model: this.model,
-        messages: data?.contents,
-        tools: data?.tools,
-        temperature: this.temperature,
-        actionId: this.connectorId,
-      });
       try {
         const requestBody = {
           actionId: this.connectorId,
@@ -385,7 +373,6 @@ class ActionsClientGoogleAIConnection<AuthOptions> extends ChatConnection<AuthOp
             },
           },
         };
-
         const actionResult = (await this.actionsClient.execute(requestBody)) as {
           status: string;
           data: EnhancedGenerateContentResponse;
@@ -406,7 +393,6 @@ class ActionsClientGoogleAIConnection<AuthOptions> extends ChatConnection<AuthOp
             throw new Error(errorMessage);
           }
         }
-        console.log('23334 actionResult.data', actionResult.data);
         return actionResult;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
@@ -420,32 +406,27 @@ class ActionsClientGoogleAIConnection<AuthOptions> extends ChatConnection<AuthOp
   }
 }
 
-export class ActionsClientChatVertexAI<AuthOptions> extends ChatVertexAI {
+export class ActionsClientChatVertexAI extends ChatVertexAI {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
-  #temperature: number;
   #model?: string;
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
       maxOutputTokens: props.maxTokens ?? 2048,
+      temperature: props.temperature ?? DEFAULT_GEMINI_TEMPERATURE,
     });
     // LangChain needs model to be defined for logging purposes
     this.model = props.model ?? this.model;
     // If model is not specified by consumer, the connector will define it so do not pass
     // a LangChain default to the actionsClient
     this.#model = props.model;
-    this.#temperature = props.temperature ?? DEFAULT_GEMINI_TEMPERATURE;
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
-    this.connectorId = connectorId;
-    console.log('63334this', {
-      ...this,
-    });
+
     this.connection = new ActionsClientGoogleAIConnection(
       {
         ...this,
-        temperature: this.#temperature,
       },
       this.caller,
       () => {},
@@ -455,151 +436,16 @@ export class ActionsClientChatVertexAI<AuthOptions> extends ChatVertexAI {
     );
   }
 
-  buildConnection(
-    fields: GoogleBaseLLMInput<GoogleAuthOptions<AuthOptions>>,
-    client: GoogleAbstractedClient
-  ) {
-    // this.connection = this.connection(fields, client);
-    // this._buildConnection(fields, client);
-    // this.connection = new ActionsClientGoogleAIConnection(
-    //   {
-    //     ...fields,
-    //     ...this,
-    //     // temperature: this.#temperature,
-    //   },
-    //   this.caller,
-    //   client,
-    //   false,
-    //   `ok`, // using the getter instead
-    //   'cd'
-    // );
-    console.log('buildConnection44', fields, client);
+  buildConnection() {
+    // prevent ChatVertexAI from overwriting our this.connection defined in super
   }
-  // async request(input, parameters, options) {
-  //   try {
-  //     const requestBody = {
-  //       actionId: this.#connectorId,
-  //       params: {
-  //         subAction: 'invokeAIRaw',
-  //         subActionParams: {
-  //           model: this.#model,
-  //           messages: parameters?.contents,
-  //           tools: parameters?.tools,
-  //           temperature: this.#temperature,
-  //         },
-  //       },
-  //     };
-  //
-  //     const actionResult = (await this.#actionsClient.execute(requestBody)) as {
-  //       status: string;
-  //       data: EnhancedGenerateContentResponse;
-  //       message?: string;
-  //       serviceMessage?: string;
-  //     };
-  //
-  //     if (actionResult.status === 'error') {
-  //       throw new Error(
-  //         `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-  //       );
-  //     }
-  //
-  //     if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
-  //       // handle bad finish reason
-  //       const errorMessage = convertResponseBadFinishReasonToErrorMsg(actionResult.data);
-  //       if (errorMessage != null) {
-  //         throw new Error(errorMessage);
-  //       }
-  //     }
-  //
-  //     return {
-  //       response: {
-  //         ...actionResult.data,
-  //         functionCalls: () =>
-  //           actionResult.data?.candidates?.[0]?.content?.parts[0].functionCall
-  //             ? [actionResult.data?.candidates?.[0]?.content.parts[0].functionCall]
-  //             : [],
-  //       },
-  //     };
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   } catch (e: any) {
-  //     // TODO: Improve error handling
-  //     if (e.message?.includes('400 Bad Request')) {
-  //       e.status = 400;
-  //     }
-  //     throw e;
-  //   }
-  // }
-  //
-  // async _request(
-  //   data: { contents: string; tools: Array<StructuredToolInterface | RunnableToolLike> },
-  //   options
-  // ) {
-  //   console.log('MyREQUEST44');
-  //   // ): Promise<GenerateContentResult> {
-  //   return this.caller.callWithOptions({ signal: options?.signal }, async () => {
-  //     console.log('WHATISDATA', data);
-  //     console.log('WHATISoptions', options);
-  //     try {
-  //       const requestBody = {
-  //         actionId: this.#connectorId,
-  //         params: {
-  //           subAction: 'invokeAIRaw',
-  //           subActionParams: {
-  //             model: this.#model,
-  //             messages: data?.contents,
-  //             tools: data?.tools,
-  //             temperature: this.#temperature,
-  //           },
-  //         },
-  //       };
-  //
-  //       const actionResult = (await this.#actionsClient.execute(requestBody)) as {
-  //         status: string;
-  //         data: EnhancedGenerateContentResponse;
-  //         message?: string;
-  //         serviceMessage?: string;
-  //       };
-  //
-  //       if (actionResult.status === 'error') {
-  //         throw new Error(
-  //           `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-  //         );
-  //       }
-  //
-  //       if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
-  //         // handle bad finish reason
-  //         const errorMessage = convertResponseBadFinishReasonToErrorMsg(actionResult.data);
-  //         if (errorMessage != null) {
-  //           throw new Error(errorMessage);
-  //         }
-  //       }
-  //
-  //       return {
-  //         response: {
-  //           ...actionResult.data,
-  //           functionCalls: () =>
-  //             actionResult.data?.candidates?.[0]?.content?.parts[0].functionCall
-  //               ? [actionResult.data?.candidates?.[0]?.content.parts[0].functionCall]
-  //               : [],
-  //         },
-  //       };
-  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     } catch (e: any) {
-  //       // TODO: Improve error handling
-  //       if (e.message?.includes('400 Bad Request')) {
-  //         e.status = 400;
-  //       }
-  //       throw e;
-  //     }
-  //   });
-  // }
 
   async *_streamResponseChunks(
     messages: BaseMessage[],
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
-    const prompt = convertBaseMessagesToContent(messages, this._isMultimodalModel);
+    const prompt = convertBaseMessagesToContent(messages, false);
     const parameters = this.invocationParams(options);
     const request = {
       ...parameters,
@@ -627,7 +473,7 @@ export class ActionsClientChatVertexAI<AuthOptions> extends ChatVertexAI {
               acc.push(item);
               return acc;
             }, []),
-            temperature: this.#temperature,
+            temperature: this.temperature,
             tools: request.tools,
           },
         },

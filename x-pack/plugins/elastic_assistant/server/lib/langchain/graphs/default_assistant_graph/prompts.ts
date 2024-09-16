@@ -9,7 +9,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import {
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
-  VERTEX_SYSTEM_PROMPT,
+  GEMINI_SYSTEM_PROMPT,
 } from './nodes/translations';
 
 export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
@@ -23,7 +23,7 @@ export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
 export const systemPrompts = {
   openai: DEFAULT_SYSTEM_PROMPT,
   bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
-  gemini: `${DEFAULT_SYSTEM_PROMPT} ${VERTEX_SYSTEM_PROMPT}`,
+  gemini: `${DEFAULT_SYSTEM_PROMPT} ${GEMINI_SYSTEM_PROMPT}`,
   structuredChat: `Respond to the human as helpfully and accurately as possible. You have access to the following tools:
 
 {tools}
