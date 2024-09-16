@@ -16,7 +16,6 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -88,7 +87,6 @@ const appDependencies: AppDependencies = {
   theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
-  savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
