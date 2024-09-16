@@ -34,7 +34,6 @@ const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
 });
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
@@ -46,20 +45,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     beforeEach(async () => {
-      await deleteAllExceptions(supertest, log);
-      await deleteAllRules(supertest, log);
+      await deleteAllExceptions(admin, log);
+      await deleteAllRules(admin, log);
     });
 
     after(async () => {
-      await deleteAllExceptions(supertest, log);
-      await deleteAllRules(supertest, log);
+      await deleteAllExceptions(admin, log);
+      await deleteAllRules(admin, log);
     });
 
     // Expected 200, receiving 401
-    describe.skip('add rule_default exception', () => {
+    describe('add rule_default exception', () => {
       it('should return 200 for admin', async () => {
-        const rule = await createRule(supertest, log, getCustomQueryRuleParams());
-        await supertest
+        const rule = await createRule(admin, log, getCustomQueryRuleParams());
+        await admin
           .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -71,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // Unexpected 401
-    describe.skip('find rule exception references', () => {
+    describe('find rule exception references', () => {
       it('should return 200 for admin', async () => {
         // create exception list
         const newExceptionList: CreateExceptionListSchema = {
@@ -80,14 +79,14 @@ export default ({ getService }: FtrProviderContext): void => {
           namespace_type: 'single',
           type: ExceptionListTypeEnum.DETECTION,
         };
-        const exceptionList = await createExceptionList(supertest, log, newExceptionList);
-        const exceptionList2 = await createExceptionList(supertest, log, {
+        const exceptionList = await createExceptionList(admin, log, newExceptionList);
+        const exceptionList2 = await createExceptionList(admin, log, {
           ...newExceptionList,
           list_id: 'i_exist_2',
         });
 
         // create rule
-        await createRule(supertest, log, {
+        await createRule(admin, log, {
           ...getCustomQueryRuleParams(),
           exceptions_list: [
             {

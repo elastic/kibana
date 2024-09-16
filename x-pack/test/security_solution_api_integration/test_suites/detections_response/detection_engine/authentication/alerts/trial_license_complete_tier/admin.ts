@@ -36,7 +36,6 @@ const query = {
 };
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
   const esArchiver = getService('esArchiver');
@@ -55,8 +54,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     beforeEach(async () => {
-      await deleteAllRules(supertest, log);
-      await createAlertsIndex(supertest, log);
+      await deleteAllRules(admin, log);
+      await createAlertsIndex(admin, log);
     });
 
     after(async () => {
@@ -64,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
+      await deleteAllAlerts(admin, log, es);
     });
 
     describe('find alerts', () => {
@@ -77,17 +76,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // Receiving 201 unexpectedly
-    describe.skip('set alert tags', () => {
+    describe('set alert tags', () => {
       it('should return 200 for admin', async () => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getAlertsByIds(supertest, log, [id]);
+        const { id } = await createRule(admin, log, rule);
+        await waitForRuleSuccess({ supertest: admin, log, id });
+        await waitForAlertsToBePresent(admin, log, 10, [id]);
+        const alerts = await getAlertsByIds(admin, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await admin
@@ -104,16 +102,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // Receiving 201 unexpectedly
-    describe.skip('update alert status', () => {
+    describe('update alert status', () => {
       it('should return 200 for admin', async () => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const { id } = await createRule(admin, log, rule);
+        await waitForRuleSuccess({ supertest: admin, log, id });
+        await waitForAlertsToBePresent(admin, log, 10, [id]);
 
         await admin
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
@@ -123,17 +120,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // Receiving 201 unexpectedly
-    describe.skip('assign alert', () => {
+    describe('assign alert', () => {
       it('should return 200 for admin', async () => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getAlertsByIds(supertest, log, [id]);
+        const { id } = await createRule(admin, log, rule);
+        await waitForRuleSuccess({ supertest: admin, log, id });
+        await waitForAlertsToBePresent(admin, log, 10, [id]);
+        const alerts = await getAlertsByIds(admin, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id!);
         const alertId = alertIds[0];
 
