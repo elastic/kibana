@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { faker } from '@faker-js/faker';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
