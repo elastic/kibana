@@ -168,7 +168,8 @@ export const TopValues: FC<Props> = ({
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
-      className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
+      css={css({ width: '95%', overflow: 'hidden' })}
+      className={classNames('dvPanel--uniform', compressed ? 'dvPanel--compressed' : undefined)}
     >
       <ExpandedRowFieldHeader>
         {showSampledValues ? (
