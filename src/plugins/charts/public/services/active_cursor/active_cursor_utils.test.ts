@@ -138,7 +138,7 @@ describe('active_cursor_utils', () => {
         `);
       });
 
-      test('should return isDateHistogram true in ase the datatable is powered with ES|QL', () => {
+      test('should return isDateHistogram true in case the datatable is powered by ES|QL', () => {
         expect(
           parseSyncOptions({
             datatables: [
