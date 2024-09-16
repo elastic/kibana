@@ -18,15 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
-
-const DEFAULT_ELASTICSEARCH_URL = 'http://localhost:9200';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectionDetails: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { cloud } = useKibana().services;
-
-  const elasticsearchUrl = cloud?.elasticsearchUrl ?? DEFAULT_ELASTICSEARCH_URL;
+  const elasticsearchUrl = useElasticsearchUrl();
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
