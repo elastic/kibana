@@ -249,20 +249,22 @@ const getIntegrations = async (core: CoreStart) => {
   // and this needs to be done in various places in the codebase which use the editor
   // https://github.com/elastic/kibana/issues/186061
   const response = (await core.http
-    .get(INTEGRATIONS_API, { query: undefined, version: API_VERSION })
+    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch integrations', error);
     })) as IntegrationsResponse;
 
   return (
-    response?.items?.map((source) => ({
-      name: source.name,
-      hidden: false,
-      title: source.title,
-      dataStreams: source.dataStreams,
-      type: 'Integration',
-    })) ?? []
+    response?.items
+      ?.filter(({ dataStreams }) => dataStreams.length)
+      .map((source) => ({
+        name: source.name,
+        hidden: false,
+        title: source.title,
+        dataStreams: source.dataStreams,
+        type: 'Integration',
+      })) ?? []
   );
 };
 
