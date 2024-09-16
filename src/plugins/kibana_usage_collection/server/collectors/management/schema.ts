@@ -694,4 +694,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:newLogsOverview': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the new logs overview component.',
+    },
+  },
 };
