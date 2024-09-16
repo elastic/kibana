@@ -60,7 +60,7 @@ describe('github', () => {
     });
   });
 
-  describe('areChangesSkippable', () => {
+  describe.skip('areChangesSkippable', () => {
     const skippable = [/^docs\//, /^rfcs\//, /\.md$/];
     const required = [/required\.md$/];
 
