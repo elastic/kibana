@@ -38,11 +38,7 @@ import {
   DEFAULT_PROMPTS,
 } from '../../assistant/settings/use_settings_updater/use_settings_updater';
 import { AddEntryButton } from './add_entry_button';
-import {
-  DEFAULT_FLYOUT_TITLE,
-  SEARCH_PLACEHOLDER,
-  KNOWLEDGE_BASE_DOCUMENTATION,
-} from './translations';
+import * as i18n from './translations';
 import { Flyout } from '../../assistant/common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { IndexEntryEditor } from './index_entry_editor';
@@ -140,7 +136,11 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return !isEsqlSystemEntry(entry);
         },
-        onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {},
+        onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
+          const entry = entries.data.find((e) => e.id === id);
+          setSelectedEntry(entry);
+          openFlyout();
+        },
       }),
     [deleteEntry, entries.data, getColumns, openFlyout]
   );
@@ -162,7 +162,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
       ),
       box: {
         incremental: true,
-        placeholder: SEARCH_PLACEHOLDER,
+        placeholder: i18n.SEARCH_PLACEHOLDER,
       },
       filters: [
         {
@@ -178,6 +178,18 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     }),
     [entries.data, onDocumentClicked, onIndexClicked]
   );
+
+  const flyoutTitle = useMemo(() => {
+    // @ts-expect-error TS doesn't understand that selectedEntry is a partial
+    if (selectedEntry?.id != null) {
+      return selectedEntry.type === DocumentEntryType.value
+        ? i18n.EDIT_DOCUMENT_FLYOUT_TITLE
+        : i18n.EDIT_INDEX_FLYOUT_TITLE;
+    }
+    return selectedEntry?.type === DocumentEntryType.value
+      ? i18n.NEW_DOCUMENT_FLYOUT_TITLE
+      : i18n.NEW_INDEX_FLYOUT_TITLE;
+  }, [selectedEntry]);
 
   if (!enableKnowledgeBaseByDefault) {
     return (
@@ -202,7 +214,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
                   href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
                   target="_blank"
                 >
-                  {KNOWLEDGE_BASE_DOCUMENTATION}
+                  {i18n.KNOWLEDGE_BASE_DOCUMENTATION}
                 </EuiLink>
               ),
             }}
@@ -224,7 +236,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
       />
       <Flyout
         flyoutVisible={isFlyoutVisible}
-        title={selectedEntry?.type || DEFAULT_FLYOUT_TITLE} // TODO Update title `New Index Entry` or `New Document Entry`
+        title={flyoutTitle}
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
@@ -237,7 +249,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
               setEntry={setSelectedEntry}
             />
           ) : (
-            <IndexEntryEditor entry={selectedEntry as IndexEntry} />
+            <IndexEntryEditor entry={selectedEntry as IndexEntry} setEntry={setSelectedEntry} />
           )}
         </>
       </Flyout>

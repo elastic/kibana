@@ -44,7 +44,6 @@ export const useKnowledgeBaseTable = () => {
       isDeleteEnabled,
       isEditEnabled,
       onEntryNameClicked,
-      onSpaceNameClicked,
       onDeleteActionClicked,
       onEditActionClicked,
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
@@ -74,6 +73,7 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_AUTHOR,
           render: (entry: KnowledgeBaseEntryResponse) => {
+            // TODO: Look up user from `createdBy` id if privileges allow
             const userName = entry.users?.[0]?.name ?? 'Unknown';
             const badgeItem = isEsqlSystemEntry(entry) ? 'Elastic' : userName;
             const userImage = isEsqlSystemEntry(entry) ? (
@@ -122,19 +122,6 @@ export const useKnowledgeBaseTable = () => {
               ? '1'
               : '-';
           },
-        },
-        {
-          name: i18n.COLUMN_SPACE,
-          render: ({ namespace }: { namespace: string }) => (
-            <EuiAvatar
-              size="s"
-              type="space"
-              name={namespace}
-              color={'#7DDED8'}
-              casing={'capitalize'}
-            />
-          ),
-          sortable: ({ namespace }: KnowledgeBaseEntryResponse) => namespace,
         },
         {
           name: i18n.COLUMN_CREATED,

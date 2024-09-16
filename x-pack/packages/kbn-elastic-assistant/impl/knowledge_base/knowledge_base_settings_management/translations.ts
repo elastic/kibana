@@ -91,6 +91,34 @@ export const DEFAULT_FLYOUT_TITLE = i18n.translate(
   }
 );
 
+export const NEW_INDEX_FLYOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newIndexEntryFlyoutTitle',
+  {
+    defaultMessage: 'New index entry',
+  }
+);
+
+export const EDIT_INDEX_FLYOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.editIndexEntryFlyoutTitle',
+  {
+    defaultMessage: 'Edit index entry',
+  }
+);
+
+export const NEW_DOCUMENT_FLYOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newDocumentEntryFlyoutTitle',
+  {
+    defaultMessage: 'New document entry',
+  }
+);
+
+export const EDIT_DOCUMENT_FLYOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.editDocumentEntryFlyoutTitle',
+  {
+    defaultMessage: 'Edit document entry',
+  }
+);
+
 export const MANUAL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.manualButtonLabel',
   {
@@ -224,6 +252,13 @@ export const ENTRY_DESCRIPTION_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionInputLabel',
   {
     defaultMessage: 'Description',
+  }
+);
+
+export const ENTRY_QUERY_DESCRIPTION_INPUT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionInputLabel',
+  {
+    defaultMessage: 'Query Description',
   }
 );
 

@@ -98,9 +98,9 @@ export const transformToCreateSchema = ({
     created_by: user.profile_uid ?? 'unknown',
     updated_at: createdAt,
     updated_by: user.profile_uid ?? 'unknown',
-    name: entry.type,
+    name: entry.name,
     namespace: spaceId,
-    type: spaceId,
+    type: entry.type,
     users: global
       ? []
       : [
@@ -129,6 +129,7 @@ export const transformToCreateSchema = ({
   return {
     ...base,
     kb_resource: entry.kbResource,
+    required: entry.required ?? false,
     source: entry.source,
     text: entry.text,
     vector: undefined,

@@ -7,11 +7,10 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiPopover,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
@@ -44,6 +43,27 @@ export const AddEntryButton: React.FC<Props> = React.memo(
     }, [closePopover, onDocumentClicked]);
 
     const onButtonClick = useCallback(() => setIsPopoverOpen((prevState) => !prevState), []);
+
+    const items = [
+      <EuiContextMenuItem
+        aria-label={i18n.INDEX}
+        key={i18n.INDEX}
+        icon="index"
+        onClick={handleIndexClicked}
+        disabled={!isIndexAvailable}
+      >
+        {i18n.INDEX}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        aria-label={i18n.DOCUMENT}
+        key={i18n.DOCUMENT}
+        icon="document"
+        onClick={handleDocumentClicked}
+        disabled={!isDocumentAvailable}
+      >
+        {i18n.DOCUMENT}
+      </EuiContextMenuItem>,
+    ];
     return onIndexClicked || onDocumentClicked ? (
       <EuiPopover
         button={
@@ -56,34 +76,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
         closePopover={closePopover}
         anchorPosition="downLeft"
       >
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          {onIndexClicked != null && (
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                aria-label={i18n.INDEX}
-                iconType="index"
-                onClick={handleIndexClicked}
-                disabled={!isIndexAvailable}
-                color="text"
-              >
-                {i18n.INDEX}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {onDocumentClicked != null && (
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                aria-label={i18n.DOCUMENT}
-                iconType="document"
-                onClick={handleDocumentClicked}
-                disabled={!isDocumentAvailable}
-                color="text"
-              >
-                {i18n.DOCUMENT}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiContextMenuPanel size="s" items={items} />
       </EuiPopover>
     ) : null;
   }
