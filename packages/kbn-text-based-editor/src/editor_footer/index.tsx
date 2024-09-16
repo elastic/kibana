@@ -10,15 +10,27 @@
 import React, { memo, useState, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCode,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import { LanguageDocumentationInline } from '@kbn/language-documentation-popover';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  LanguageDocumentationInline,
+  LanguageDocumentationFlyout,
+} from '@kbn/language-documentation-popover';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
+import type { TextBasedEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -45,6 +57,7 @@ interface EditorFooterProps {
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   isInCompactMode?: boolean;
+  displayDocumentationAsFlyout?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -64,9 +77,12 @@ export const EditorFooter = memo(function EditorFooter({
   setIsHistoryOpen,
   hideQueryHistory,
   isInCompactMode,
+  displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
+  const kibana = useKibana<TextBasedEditorDeps>();
+  const { docLinks } = kibana.services;
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
@@ -272,6 +288,26 @@ export const EditorFooter = memo(function EditorFooter({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
+              )}
+              {displayDocumentationAsFlyout && !Boolean(editorIsInline) && (
+                <>
+                  <EuiButtonEmpty
+                    iconType="documentation"
+                    color="text"
+                    data-test-subj="TextBasedLangEditor-documentation"
+                    size="m"
+                    onClick={() => toggleLanguageComponent()}
+                    css={css`
+                      cursor: pointer;
+                    `}
+                  />
+                  <LanguageDocumentationFlyout
+                    searchInDescription
+                    linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+                    isHelpMenuOpen={isLanguageComponentOpen}
+                    onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
+                  />
+                </>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>

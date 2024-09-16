@@ -79,6 +79,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
+  displayDocumentationAsFlyout,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -734,6 +735,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
+        displayDocumentationAsFlyout={displayDocumentationAsFlyout}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}
