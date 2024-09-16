@@ -48,6 +48,7 @@ export async function getAnnotationEvents(
     start: params?.rangeFrom,
     end: params?.rangeTo,
     filter: params?.filter,
+    size: 100,
   });
 
   // we will return only "point_in_time" annotations

@@ -251,7 +251,7 @@ export function createAnnotationsClient(params: {
 
       const result = await esClient.search({
         index: readIndex,
-        size: size || 10000,
+        size: size ?? 10000,
         ignore_unavailable: true,
         query: {
           bool: {
