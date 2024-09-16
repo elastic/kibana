@@ -31,6 +31,7 @@
     "@kbn/doc-links",
     "@kbn/index-management-shared-types",
     "@kbn/try-in-console",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",
