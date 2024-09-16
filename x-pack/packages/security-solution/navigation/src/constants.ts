@@ -45,6 +45,7 @@ export enum ExternalPageName {
   mlAnomalyDetection = 'ml:anomalyDetection',
   mlAnomalyExplorer = 'ml:anomalyExplorer',
   mlSingleMetricViewer = 'ml:singleMetricViewer',
+  mlSuppliedConfigurations = 'ml:suppliedConfigurations',
   mlSettings = 'ml:settings',
   mlDataFrameAnalytics = 'ml:dataFrameAnalytics',
   mlResultExplorer = 'ml:resultExplorer',

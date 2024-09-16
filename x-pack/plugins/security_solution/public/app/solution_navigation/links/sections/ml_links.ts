@@ -62,6 +62,7 @@ export const mlNavCategories: SolutionLinkCategory[] = [
       ExternalPageName.mlAnomalyDetection,
       ExternalPageName.mlAnomalyExplorer,
       ExternalPageName.mlSingleMetricViewer,
+      ExternalPageName.mlSuppliedConfigurations,
       ExternalPageName.mlSettings,
     ],
   },
@@ -137,6 +138,12 @@ export const mlNavLinks: SolutionNavLink[] = [
     title: i18n.SINGLE_METRIC_VIEWER_TITLE,
     landingIcon: IconVisualizationLazy,
     description: i18n.SINGLE_METRIC_VIEWER_DESC,
+  },
+  {
+    id: ExternalPageName.mlSuppliedConfigurations,
+    title: i18n.SUPPLIED_CONFIGURATIONS_TITLE,
+    landingIcon: IconJobsLazy,
+    description: i18n.SUPPLIED_CONFIGURATIONS_DESC,
   },
   {
     id: ExternalPageName.mlSettings,

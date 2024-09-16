@@ -111,6 +111,18 @@ export const SINGLE_METRIC_VIEWER_DESC = i18n.translate(
     defaultMessage: 'Single metric viewer page',
   }
 );
+export const SUPPLIED_CONFIGURATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.suppliedConfigurations.title',
+  {
+    defaultMessage: 'Supplied configurations',
+  }
+);
+export const SUPPLIED_CONFIGURATIONS_DESC = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.suppliedConfigurations.desc',
+  {
+    defaultMessage: 'Supplied configurations page',
+  }
+);
 export const SETTINGS_TITLE = i18n.translate('xpack.securitySolution.navLinks.ml.settings.title', {
   defaultMessage: 'Settings',
 });
