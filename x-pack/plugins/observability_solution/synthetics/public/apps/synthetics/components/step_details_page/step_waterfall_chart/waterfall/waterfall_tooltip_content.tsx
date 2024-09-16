@@ -25,7 +25,8 @@ const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
 `;
 
 export const WaterfallTooltipContent: React.FC<Props> = ({ text, url, index }) => {
-  const { data, renderTooltipItem, sidebarItems, metadata } = useWaterfallContext();
+  const { renderTooltipItem, sidebarItems, metadata } = useWaterfallContext();
+  // the passed index is base 1, so we need to subtract 1 to get the correct index
   const metadataEntry = metadata?.[index - 1];
   const tooltipItems = metadataEntry?.networkItemTooltipProps;
   const showTooltip = metadataEntry?.showTooltip;

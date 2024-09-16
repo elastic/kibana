@@ -171,6 +171,7 @@ export const getSeriesAndDomain = (
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     const offsetValue = getValueForOffset(item);
     let currentOffset = offsetValue - zeroOffset;
+    const requestStart = currentOffset;
     const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     if (isHighlighted) {
       totalHighlightedRequests++;
@@ -257,7 +258,7 @@ export const getSeriesAndDomain = (
         item,
         index,
         showTooltip,
-        requestStart: currentOffset,
+        requestStart,
         dateFormatter,
         networkItemTooltipProps,
       })

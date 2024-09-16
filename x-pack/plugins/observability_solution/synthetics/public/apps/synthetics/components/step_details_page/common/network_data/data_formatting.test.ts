@@ -12,8 +12,14 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
-import { WaterfallDataEntry } from './types';
+import {
+  MimeType,
+  FriendlyFlyoutLabels,
+  FriendlyTimingLabels,
+  Timings,
+  Metadata,
+  WaterfallTooltipItem,
+} from './types';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { mockMoment } from '../../../../utils/formatting/test_helpers';
 import { NetworkEvent } from '../../../../../../../common/runtime_types';
@@ -247,11 +253,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#b0c9e0",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#b0c9e0",
-              "value": "Queued / Blocked: 0.9ms",
-            },
           },
           "x": 0,
           "y": 0.8540000017092098,
@@ -262,11 +263,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#aad9cc",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#aad9cc",
-              "value": "DNS: 4ms",
-            },
           },
           "x": 0,
           "y": 4.413999999087537,
@@ -277,11 +273,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#c8b8dc",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#c8b8dc",
-              "value": "Connecting: 26ms",
-            },
           },
           "x": 0,
           "y": 30.135000000882428,
@@ -292,11 +283,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#e5c7d7",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#e5c7d7",
-              "value": "TLS: 55ms",
-            },
           },
           "x": 0,
           "y": 85.52200000121957,
@@ -307,11 +293,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#f3b3a6",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#f3b3a6",
-              "value": "Sending request: 0.4ms",
-            },
           },
           "x": 0,
           "y": 85.88200000303914,
@@ -322,11 +303,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#e7664c",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#e7664c",
-              "value": "Waiting (TTFB): 35ms",
-            },
           },
           "x": 0,
           "y": 120.4600000019127,
@@ -337,11 +313,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#9170b8",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#9170b8",
-              "value": "Content downloading (CSS): 0.6ms",
-            },
           },
           "x": 0,
           "y": 121.01200000324752,
@@ -352,11 +323,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#b0c9e0",
             "id": 1,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#b0c9e0",
-              "value": "Queued / Blocked: 85ms",
-            },
           },
           "x": 1,
           "y": 84.90799999795854,
@@ -367,11 +333,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#f3b3a6",
             "id": 1,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#f3b3a6",
-              "value": "Sending request: 0.2ms",
-            },
           },
           "x": 1,
           "y": 85.14699999883305,
@@ -382,11 +343,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#e7664c",
             "id": 1,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#e7664c",
-              "value": "Waiting (TTFB): 53ms",
-            },
           },
           "x": 1,
           "y": 137.70799999925657,
@@ -397,11 +353,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#da8b45",
             "id": 1,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#da8b45",
-              "value": "Content downloading (JS): 3ms",
-            },
           },
           "x": 1,
           "y": 140.7760000010603,
@@ -420,11 +371,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#b0c9e0",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#b0c9e0",
-              "value": "Queued / Blocked: 0.9ms",
-            },
           },
           "x": 0,
           "y": 0.8540000017092098,
@@ -435,11 +381,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#aad9cc",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#aad9cc",
-              "value": "DNS: 4ms",
-            },
           },
           "x": 0,
           "y": 4.413999999087537,
@@ -450,11 +391,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#c8b8dc",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#c8b8dc",
-              "value": "Connecting: 26ms",
-            },
           },
           "x": 0,
           "y": 30.135000000882428,
@@ -465,11 +401,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#e5c7d7",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#e5c7d7",
-              "value": "TLS: 55ms",
-            },
           },
           "x": 0,
           "y": 85.52200000121957,
@@ -480,11 +411,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#f3b3a6",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#f3b3a6",
-              "value": "Sending request: 0.4ms",
-            },
           },
           "x": 0,
           "y": 85.88200000303914,
@@ -495,11 +421,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#e7664c",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#e7664c",
-              "value": "Waiting (TTFB): 35ms",
-            },
           },
           "x": 0,
           "y": 120.4600000019127,
@@ -510,11 +431,6 @@ describe('getSeriesAndDomain', () => {
             "colour": "#9170b8",
             "id": 0,
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#9170b8",
-              "value": "Content downloading (CSS): 0.6ms",
-            },
           },
           "x": 0,
           "y": 121.01200000324752,
@@ -524,11 +440,6 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#da8b45",
             "isHighlighted": true,
-            "showTooltip": true,
-            "tooltipProps": Object {
-              "colour": "#da8b45",
-              "value": "Content downloading (JS): 3ms",
-            },
           },
           "x": 1,
           "y": 3.714999998046551,
@@ -546,8 +457,6 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "",
             "isHighlighted": true,
-            "showTooltip": false,
-            "tooltipProps": undefined,
           },
           "x": 0,
           "y": 0,
@@ -614,8 +523,10 @@ describe('getSeriesAndDomain', () => {
                 "value": undefined,
               },
             ],
+            "networkItemTooltipProps": Array [],
             "requestHeaders": undefined,
             "responseHeaders": undefined,
+            "showTooltip": false,
             "url": "file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js",
             "x": 0,
           },
@@ -625,8 +536,6 @@ describe('getSeriesAndDomain', () => {
             "config": Object {
               "colour": "",
               "isHighlighted": true,
-              "showTooltip": false,
-              "tooltipProps": undefined,
             },
             "x": 0,
             "y": 0,
@@ -660,23 +569,21 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
-    const { series } = getSeriesAndDomain(
+    const { series, metadata } = getSeriesAndDomain(
       networkItemsWithUnknownMimeType,
       false,
       mockDateFormatter
     );
     /* verify that raw mime type appears in the tooltip config and that
      * the colour is mapped to mime type other */
-    const contentDownloadingConfigItem = series.find((item: WaterfallDataEntry) => {
-      const { tooltipProps } = item.config;
-      if (tooltipProps && typeof tooltipProps.value === 'string') {
+    const contentDownloadingConfigItem = metadata[0].networkItemTooltipProps.find(
+      (item: WaterfallTooltipItem) => {
         return (
-          tooltipProps.value.includes('application/x-unknown') &&
-          tooltipProps.colour === colourPalette[MimeType.Other]
+          item.value.includes('application/x-unknown') &&
+          item.colour === colourPalette[MimeType.Other]
         );
       }
-      return false;
-    });
+    );
     expect(contentDownloadingConfigItem).toBeDefined();
   });
 
