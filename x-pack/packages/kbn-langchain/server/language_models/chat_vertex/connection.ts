@@ -15,7 +15,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { AsyncCaller } from '@langchain/core/utils/async_caller';
-import { convertResponseBadFinishReasonToErrorMsg } from '.';
+import { convertResponseBadFinishReasonToErrorMsg } from '../gemini_utils';
 
 // only implements non-streaming requests
 // stream is handled by ActionsClientChatVertexAI.*_streamResponseChunks
