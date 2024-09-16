@@ -40,7 +40,9 @@ export function registerAnalyzeLogsRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeLogsResponse>> => {
-        const { logSamples, langSmithOptions } = req.body;
+        const { packageName, dataStreamName, logSamples, langSmithOptions } = req.body;
+        const services = await context.resolve(['core']);
+        const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
@@ -72,9 +74,11 @@ export function registerAnalyzeLogsRoutes(
           };
 
           const logFormatParameters = {
+            packageName,
+            dataStreamName,
             logSamples,
           };
-          const graph = await getLogFormatDetectionGraph({ model });
+          const graph = await getLogFormatDetectionGraph({ model, client });
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported') {

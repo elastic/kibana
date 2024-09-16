@@ -99,7 +99,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
                 <AddApmData
                   data-test-subj="ServiceTabEmptyStateAddApmButton"
                   size="m"
-                  fill={true}
+                  fill
                   onClick={handleAddAPMClick}
                 />
               </EuiFlexItem>

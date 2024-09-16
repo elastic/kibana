@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route';
 import type { BuildIntegrationRequestBody } from '../build_integration/build_integration';
 import type { CategorizationRequestBody } from '../categorization/categorization_route';
 import type { EcsMappingRequestBody } from '../ecs/ecs_route';
@@ -61,6 +62,7 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   rawSamples,
+  samplesFormat: { name: 'ndjson' },
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({
@@ -72,6 +74,7 @@ export const getEcsMappingRequestMock = (): EcsMappingRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   connectorId: 'test-connector-id',
+  samplesFormat: { name: 'json', multiline: false },
 });
 
 export const getRelatedRequestMock = (): RelatedRequestBody => ({
@@ -80,4 +83,12 @@ export const getRelatedRequestMock = (): RelatedRequestBody => ({
   rawSamples,
   connectorId: 'test-connector-id',
   currentPipeline: getPipelineMock(),
+  samplesFormat: { name: 'structured', multiline: false },
+});
+
+export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({
+  dataStreamName: 'test-data-stream-name',
+  packageName: 'test-package-name',
+  connectorId: 'test-connector-id',
+  logSamples: rawSamples,
 });

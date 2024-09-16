@@ -9,6 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const ADDITIONAL_FIELDS = i18n.translate('xpack.cases.additionalFields', {
-  defaultMessage: 'Additional fields',
+export const CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields', {
+  defaultMessage: 'Custom fields',
 });
