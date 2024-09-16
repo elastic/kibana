@@ -29,17 +29,16 @@ export interface PartialFieldsMetadataClient {
 }
 
 /** @public **/
+export interface ESQLSourceResult {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams?: Array<{ name: string; title?: string }>;
+  type?: string;
+}
+
 export interface ESQLCallbacks {
-  getSources?: CallbackFn<
-    {},
-    {
-      name: string;
-      hidden: boolean;
-      title?: string;
-      dataStreams?: Array<{ name: string; title?: string }>;
-      type?: string;
-    }
-  >;
+  getSources?: CallbackFn<{}, ESQLSourceResult>;
   getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
   getPolicies?: CallbackFn<
     {},
