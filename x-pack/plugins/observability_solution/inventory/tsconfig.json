@@ -36,7 +36,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/es-types",
     "@kbn/entities-schema",
-    "@kbn/observability-plugin",
     "@kbn/apm-data-access-plugin",
   ]
 }
