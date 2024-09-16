@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   ];
 
   async function callApiAs() {
-    const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
+    const user = 'datasetQualityMonitorUser' as DatasetQualityApiClientKey;
 
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/integrations',

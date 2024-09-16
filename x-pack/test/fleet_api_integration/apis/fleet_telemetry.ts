@@ -41,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450

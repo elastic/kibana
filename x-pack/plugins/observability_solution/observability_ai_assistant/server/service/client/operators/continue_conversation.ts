@@ -33,7 +33,7 @@ import { createFunctionResponseMessage } from '../../../../common/utils/create_f
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../../chat_function_client';
-import type { ChatFunctionWithoutConnector } from '../../types';
+import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
@@ -53,15 +53,17 @@ function executeFunctionAndCatchError({
   signal,
   logger,
   tracer,
+  connectorId,
 }: {
   name: string;
   args: string | undefined;
   functionClient: ChatFunctionClient;
   messages: Message[];
-  chat: ChatFunctionWithoutConnector;
+  chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   logger: Logger;
   tracer: LangTracer;
+  connectorId: string;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -75,11 +77,13 @@ function executeFunctionAndCatchError({
             return chat(operationName, {
               ...params,
               tracer: nextTracer,
+              connectorId,
             }).pipe(hide());
           },
           args,
           signal,
           messages,
+          connectorId,
         })
       );
 
@@ -176,10 +180,11 @@ export function continueConversation({
   logger,
   disableFunctions,
   tracer,
+  connectorId,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
-  chat: ChatFunctionWithoutConnector;
+  chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
   adHocInstructions: AdHocInstruction[];
@@ -191,6 +196,7 @@ export function continueConversation({
         except: string[];
       };
   tracer: LangTracer;
+  connectorId: string;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -228,6 +234,7 @@ export function continueConversation({
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
         tracer,
+        connectorId,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
@@ -302,6 +309,7 @@ export function continueConversation({
       signal,
       logger,
       tracer,
+      connectorId,
     });
   }
 
@@ -329,6 +337,7 @@ export function continueConversation({
               logger,
               disableFunctions,
               tracer,
+              connectorId,
             });
           })
         )

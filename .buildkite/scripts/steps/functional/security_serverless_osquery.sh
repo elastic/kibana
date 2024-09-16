@@ -4,11 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-# TODO: remove the line below to use build artifacts for tests.
-# in addition to remove the line, we will have to expose the kibana install dir into the downloaded build location
-# by exporting a var like:
-# export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
-node scripts/build_kibana_platform_plugins.js
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 export JOB=kibana-osquery-cypress-serverless
 
