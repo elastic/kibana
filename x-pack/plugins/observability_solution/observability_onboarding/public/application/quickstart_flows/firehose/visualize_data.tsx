@@ -25,7 +25,7 @@ import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list'
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 
-const FETCH_INTERVAL = 30000;
+const FETCH_INTERVAL = 5000;
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
 export function VisualizeData() {
@@ -49,10 +49,7 @@ export function VisualizeData() {
     });
   }, []);
   const {
-    services: {
-      notifications,
-      context: { isDev },
-    },
+    services: { notifications },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
@@ -96,16 +93,13 @@ export function VisualizeData() {
 
   const awsServiceGetStartedConfigList = useAWSServiceGetStartedList();
 
-  useInterval(
-    () => {
-      if (REQUEST_PENDING_STATUS_LIST.includes(status)) {
-        return;
-      }
+  useInterval(() => {
+    if (REQUEST_PENDING_STATUS_LIST.includes(status)) {
+      return;
+    }
 
-      refetch();
-    },
-    isDev ? 2000 : FETCH_INTERVAL
-  );
+    refetch();
+  }, FETCH_INTERVAL);
 
   if (populatedAWSLogsIndexList === undefined) {
     return null;

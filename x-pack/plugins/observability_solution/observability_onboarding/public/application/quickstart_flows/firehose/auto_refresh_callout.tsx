@@ -40,7 +40,7 @@ export function AutoRefreshCallout() {
               {i18n.translate(
                 'xpack.observability_onboarding.firehosePanel.autorefreshCalloutLabel',
                 {
-                  defaultMessage: 'Auto-refreshing every 30 s',
+                  defaultMessage: 'Auto-refreshing every 5 s',
                 }
               )}
             </p>

@@ -44,7 +44,7 @@ export function CreateStackInAWSConsole({
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
-            defaultMessage="Review all the pre-filled parameters and submit the form to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter, metrics stream, and necessary IAM roles. Keep this page open, and return once you've submitted the form."
+            defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter, metrics stream, and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
           />
         </p>
       </EuiText>

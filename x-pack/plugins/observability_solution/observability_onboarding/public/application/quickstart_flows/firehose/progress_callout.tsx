@@ -11,6 +11,29 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { ProgressIndicator } from '../shared/progress_indicator';
 
+const SUPPORTED_SERVICES = [
+  'API Gateway',
+  'AWS Usage',
+  'CloudTrail',
+  'DynamoDB',
+  'EBS',
+  'EC2',
+  'ECS',
+  'ELB',
+  'EMR',
+  'Kinesis Data Stream',
+  'Lambda',
+  'MSK',
+  'NAT Gateway',
+  'RDS',
+  'Route53',
+  'S3',
+  'SNS',
+  'SQS',
+  'VPC',
+  'VPN',
+];
+
 export function ProgressCallout() {
   return (
     <ProgressIndicator
@@ -20,8 +43,7 @@ export function ProgressCallout() {
           <EuiText>
             <p>
               {i18n.translate('xpack.observability_onboarding.firehosePanel.waitingForDataTitle', {
-                defaultMessage:
-                  'Retrieving data from Amazon Data Firehose... Detecting available services',
+                defaultMessage: 'Retrieving data from Amazon Data Firehose',
               })}
             </p>
           </EuiText>
@@ -36,114 +58,9 @@ export function ProgressCallout() {
                 </strong>
                 <EuiHorizontalRule margin="xs" />
                 <ul>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.apiGatewayLabel',
-                      { defaultMessage: 'API Gateway' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.awsUsageLabel',
-                      { defaultMessage: 'AWS Usage' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.cloudtrailLabel',
-                      { defaultMessage: 'CloudTrail' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.dynamodbLabel',
-                      { defaultMessage: 'DynamoDB' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.ebsLabel', {
-                      defaultMessage: 'EBS',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.ecLabel', {
-                      defaultMessage: 'EC2',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.ecsLabel', {
-                      defaultMessage: 'ECS',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.elbLabel', {
-                      defaultMessage: 'ELB',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.emrLabel', {
-                      defaultMessage: 'EMR',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.kinesisDataStreamLabel',
-                      { defaultMessage: 'Kinesis Data Stream' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.lambdaLabel',
-                      { defaultMessage: 'Lambda' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.mskLabel', {
-                      defaultMessage: 'MSK',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.natGatewayLabel',
-                      { defaultMessage: 'NAT Gateway' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.rdsLabel', {
-                      defaultMessage: 'RDS',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.progressCallout.li.routeLabel',
-                      { defaultMessage: 'Route53' }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.sLabel', {
-                      defaultMessage: 'S3',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.snsLabel', {
-                      defaultMessage: 'SNS',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.sqsLabel', {
-                      defaultMessage: 'SQS',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.vpcLabel', {
-                      defaultMessage: 'VPC',
-                    })}
-                  </li>
-                  <li>
-                    {i18n.translate('xpack.observability_onboarding.progressCallout.li.vpnLabel', {
-                      defaultMessage: 'VPN',
-                    })}
-                  </li>
+                  {SUPPORTED_SERVICES.map((service) => (
+                    <li key={service}>{service}</li>
+                  ))}
                   <li>
                     {i18n.translate(
                       'xpack.observability_onboarding.progressCallout.li.otherLabel',

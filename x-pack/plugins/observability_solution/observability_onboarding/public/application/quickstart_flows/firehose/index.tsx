@@ -96,7 +96,7 @@ export function FirehosePanel() {
             <p>
               <FormattedMessage
                 id="xpack.observability_onboarding.firehosePanel.prerequisitesDocumentation"
-                defaultMessage="{documentationLink} for more info"
+                defaultMessage="{documentationLink} for more info."
                 values={{
                   documentationLink: (
                     <EuiLink
@@ -183,7 +183,6 @@ export function FirehosePanel() {
                 data-test-subj="observabilityOnboardingFirehosePanelDownloadCloudFormationTemplateButton"
                 href={FIREHOSE_CLOUDFORMATION_TEMPLATE_URL}
                 download={true}
-                target="_blank"
                 iconType="download"
               >
                 {i18n.translate(
