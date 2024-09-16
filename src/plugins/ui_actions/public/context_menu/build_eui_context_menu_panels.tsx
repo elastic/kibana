@@ -196,8 +196,7 @@ export async function buildContextMenuForActions({
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   const sortedPanels = Object.values(panels).sort((a, b) => {
-    const orderComparison = (b._order || 0) - (a._order || 0);
-    return orderComparison;
+    return (b._order || 0) - (a._order || 0);
   });
 
   for (const panel of sortedPanels) {
