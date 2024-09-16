@@ -101,7 +101,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
                   defaultMessage: 'Index Size',
                 }),
-                description: index.size ?? 0,
+                description: index.size ?? '0b',
               },
             ]}
             first
