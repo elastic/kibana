@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { renderWithReduxStore } from '../../../mocks';
-import { act, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
