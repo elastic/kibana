@@ -29,11 +29,11 @@ describe('multi select filter', () => {
     const t0 = performance.now();
     render(<MultiSelectFilter {...props} />);
     const t1 = performance.now();
-    console.log(`Call to render took ${t1 - t0} milliseconds.`);
+    console.log(`2.1 Call to render took ${t1 - t0} milliseconds.`);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     const t2 = performance.now();
-    console.log(`Call to click took ${t2 - t1} milliseconds.`);
+    console.log(`2.2 Call to click took ${t2 - t1} milliseconds.`);
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('4 options')).toBeInTheDocument();
