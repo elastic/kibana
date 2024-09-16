@@ -337,7 +337,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const extractDefaultDynamicKafkaTopics = (
     o: KafkaOutput
   ): Array<EuiComboBoxOptionOption<string>> => {
-    if (!o.topics || o.topics.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
+    if (
+      !o?.topics ||
+      o.topics?.length === 0 ||
+      (o.topics && !o.topics[0]?.topic?.includes('%{['))
+    ) {
       return [];
     }
     const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
@@ -358,7 +362,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const kafkaOutput = output as KafkaOutput;
 
   const extractDefaultStaticKafkaTopic = (o: KafkaOutput): string => {
-    if (!o.topics || o.topics.length <= 0 || (o.topics && o.topics[0].topic?.includes('%{['))) {
+    if (
+      !o?.topics ||
+      o.topics?.length === 0 ||
+      (o.topics && o?.topics.length > 0 && o.topics[0].topic?.includes('%{['))
+    ) {
       return '';
     }
 
