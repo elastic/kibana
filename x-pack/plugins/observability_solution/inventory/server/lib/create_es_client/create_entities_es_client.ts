@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-shared-plugin/common/utils/unwrap_es_response';
-import { withApmSpan } from '../../utils/with_apm_span';
+// import { withApmSpan } from '../../utils/with_apm_span';
 
 const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
@@ -50,8 +50,8 @@ export function createEntitiesESClient({
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
     const controller = new AbortController();
 
-    const promise = withApmSpan(operationName, () => {
-      return cancelEsRequestOnAbort(
+    const promise = // withApmSpan(operationName, () => {
+      cancelEsRequestOnAbort(
         esClient.search(
           { ...searchRequest, index: [indexName], ignore_unavailable: true },
           {
@@ -64,8 +64,8 @@ export function createEntitiesESClient({
         request,
         controller
       );
-    });
-
+    // });
+    //
     return unwrapEsResponse(promise);
   }
 
