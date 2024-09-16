@@ -83,6 +83,15 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
+          id: 'dev2',
+          label: 'Dev Service 2',
+          geo: { lat: 0, lon: 0 },
+          url: 'mockDevUrl',
+          isServiceManaged: true,
+          status: 'experimental',
+          isInvalid: false,
+        },
+        {
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
