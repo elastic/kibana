@@ -30,6 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await queryBar.setQuery('agent.name : *agentless*');
       await queryBar.submitQuery();
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       const agentlessFindingsRowsCount = await findings
         .createDataTableObject('latest_findings_table')
