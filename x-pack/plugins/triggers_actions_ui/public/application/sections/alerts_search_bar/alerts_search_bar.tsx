@@ -19,6 +19,7 @@ import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
+import { cloneDeep } from 'lodash';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
@@ -170,8 +171,10 @@ export function AlertsSearchBar({
   }, [initialFilters, onFiltersUpdated, quickFilters, showFilterBar]);
 
   useEffect(() => {
-    if (initialFilters) {
-      dataService.query.filterManager.addFilters(initialFilters);
+    let isFirstRender = true;
+
+    if (initialFilters?.length && isFirstRender) {
+      dataService.query.filterManager.addFilters(cloneDeep(initialFilters));
     }
 
     const subscription = dataService.query.state$.subscribe((state) => {
@@ -181,11 +184,12 @@ export function AlertsSearchBar({
     });
 
     return () => {
+      isFirstRender = false;
       subscription.unsubscribe();
       dataService.query.filterManager.removeAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialFilters]);
 
   return (
     <SearchBar
