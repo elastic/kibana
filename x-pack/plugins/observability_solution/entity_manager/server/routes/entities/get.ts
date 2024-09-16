@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { z } from '@kbn/zod';
-import { RequestHandlerContext } from '@kbn/core/server';
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
-import { SetupRouteOptions } from '../types';
+import { z } from '@kbn/zod';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
  * @openapi
@@ -18,6 +16,12 @@ import { SetupRouteOptions } from '../types';
  *     tags:
  *       - definitions
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The entity definition ID
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id'
+ *         required: false
  *       - in: query
  *         name: page
  *         schema:
@@ -26,6 +30,10 @@ import { SetupRouteOptions } from '../types';
  *         name: perPage
  *         schema:
  *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *       - in: query
+ *         name: includeState
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/includeState'
  *     responses:
  *       200:
  *         description: OK
@@ -39,42 +47,27 @@ import { SetupRouteOptions } from '../types';
  *                   items:
  *                     allOf:
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
- *                       - type: object
- *                         properties:
- *                           state:
- *                            type: object
- *                            properties:
- *                              installed:
- *                                type: boolean
- *                              running:
- *                                type: boolean
  */
-export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-  getScopedClient,
-  logger,
-}: SetupRouteOptions<T>) {
-  router.get<{ id?: string }, { page?: number; perPage?: number }, unknown>(
-    {
-      path: '/internal/entities/definition/{id?}',
-      validate: {
-        query: getEntityDefinitionQuerySchema.strict(),
-        params: z.object({ id: z.optional(z.string()) }),
-      },
-    },
-    async (context, request, res) => {
-      try {
-        const client = await getScopedClient({ request });
-        const result = await client.getEntityDefinitions({
-          page: request.query.page,
-          perPage: request.query.perPage,
-        });
+export const getEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/definition/{id?}',
+  params: z.object({
+    query: getEntityDefinitionQuerySchema,
+    path: z.object({ id: z.optional(z.string()) }),
+  }),
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
+    try {
+      const client = await getScopedClient({ request });
+      const result = await client.getEntityDefinitions({
+        id: params.path?.id,
+        page: params.query.page,
+        perPage: params.query.perPage,
+        includeState: params.query.includeState,
+      });
 
-        return res.ok({ body: result });
-      } catch (e) {
-        logger.error(e);
-        return res.customError({ body: e, statusCode: 500 });
-      }
+      return response.ok({ body: result });
+    } catch (e) {
+      logger.error(e);
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});

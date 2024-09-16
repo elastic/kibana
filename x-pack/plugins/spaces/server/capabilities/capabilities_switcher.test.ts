@@ -21,11 +21,13 @@ const features = [
     name: 'Feature 1',
     app: [],
     category: { id: 'enterpriseSearch' },
+    scope: ['spaces', 'security'],
   },
   {
     id: 'feature_2',
     name: 'Feature 2',
     app: ['feature2'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],
@@ -46,6 +48,7 @@ const features = [
     id: 'feature_3',
     name: 'Feature 3',
     app: ['feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -67,6 +70,7 @@ const features = [
     id: 'feature_4',
     name: 'Feature 4',
     app: ['feature3', 'feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
