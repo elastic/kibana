@@ -1,8 +1,24 @@
-## LEFT
+# LEFT
 
-The `LEFT` function returns the substring that extracts a specified number of characters from a string, starting from the left.
+The LEFT function returns a substring from the beginning of a specified string.
 
-### Examples
+## Syntax
+
+`LEFT(string, length)`
+
+### Parameters
+
+#### string
+
+The string from which a substring will be extracted.
+
+#### length
+
+The number of characters to extract from the string.
+
+## Examples
+
+The following example extracts the first three characters from the `last_name` field:
 
 ```esql
 FROM employees

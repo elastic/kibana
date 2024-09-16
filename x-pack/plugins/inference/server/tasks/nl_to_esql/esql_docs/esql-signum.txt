@@ -1,8 +1,18 @@
-## SIGNUM
+# SIGNUM
 
-The `SIGNUM` function returns the sign of the given number. It returns -1 for negative numbers, 0 for 0, and 1 for positive numbers.
+The SIGNUM function returns the sign of a given number. It outputs `-1` for negative numbers, `0` for `0`, and `1` for positive numbers.
 
-### Examples
+## Syntax
+
+`SIGNUM(number)`
+
+### Parameters
+
+#### number
+
+A numeric expression.
+
+## Examples
 
 ```esql
 ROW d = 100.0

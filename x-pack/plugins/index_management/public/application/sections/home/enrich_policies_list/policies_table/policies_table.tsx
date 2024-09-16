@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { useAppContext } from '../../../../app_context';
 
