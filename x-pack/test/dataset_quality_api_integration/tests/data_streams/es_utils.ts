@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 export async function addIntegrationToLogIndexTemplate({
   esClient,
@@ -72,4 +73,15 @@ export function getBackingIndexNameWithoutLastPart({
   namespace: string;
 }) {
   return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
+}
+
+export async function setDataStreamSettings(
+  esClient: Client,
+  name: string,
+  settings: IndicesIndexSettings
+) {
+  return esClient.indices.putSettings({
+    index: name,
+    settings,
+  });
 }
