@@ -150,14 +150,14 @@ export class DiscoverPlugin
     this.stopUrlTracking = stopUrlTracker;
 
     const ebtContext$: ProfilesManagerEbtContext = new BehaviorSubject({
-      dscActiveProfiles: [] as string[],
+      dscContextProfiles: [] as string[],
     });
 
     core.analytics.registerContextProvider({
-      name: 'dsc_active_profiles',
+      name: 'dsc_context_profiles',
       context$: ebtContext$,
       schema: {
-        dscActiveProfiles: {
+        dscContextProfiles: {
           type: 'array',
           items: {
             type: 'keyword',
@@ -361,7 +361,7 @@ export class DiscoverPlugin
       new RootProfileService(),
       new DataSourceProfileService(),
       new DocumentProfileService(),
-      undefined // TODO?
+      undefined
     );
   }
 
@@ -392,7 +392,6 @@ export class DiscoverPlugin
       };
     };
 
-    // TODO: enable for the embeddable too?
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const profilesManager = await this.createProfilesManager();

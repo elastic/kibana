@@ -40,7 +40,7 @@ interface DataTableRecordWithContext extends DataTableRecord {
 }
 
 export type ProfilesManagerEbtContext = BehaviorSubject<{
-  dscActiveProfiles: string[];
+  dscContextProfiles: string[];
 }>;
 
 /**
@@ -207,10 +207,13 @@ export class ProfilesManager {
    * Tracks the active profiles in the EBT context
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
-    const dscActiveProfiles = [rootContextProfileId, dataSourceContextProfileId];
-    // console.log('dscActiveProfiles', dscActiveProfiles);
+    const dscContextProfiles = [rootContextProfileId, dataSourceContextProfileId];
+    // if (this.ebtContext$) {
+    //   console.log('dscContextProfiles', dscContextProfiles);
+    // }
+    // EBT context was enabled only for Discover pages and not for Dashboard panels, Log Explorer, Security Solution, etc.
     this.ebtContext$?.next({
-      dscActiveProfiles,
+      dscContextProfiles,
     });
   }
 }
