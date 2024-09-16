@@ -7,18 +7,18 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
-    agents:
-      machineType: n2-standard-16
-      preemptible: true
-    key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/build_kibana.sh
+  #   label: Build Kibana Distribution and Plugins
+  #   agents:
+  #     machineType: n2-standard-16
+  #     preemptible: true
+  #   key: build
+  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+  #   timeout_in_minutes: 90
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
 
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
