@@ -78,7 +78,9 @@ export function InvestigationList() {
     },
     {
       field: 'tags',
-      name: 'Tags',
+      name: i18n.translate('xpack.investigateApp.investigationList.tagsLabel', {
+        defaultMessage: 'Tags',
+      }),
       render: (value: InvestigationResponse['tags']) => {
         return value.map((tag) => (
           <EuiBadge color={'hollow'} key="tag">
