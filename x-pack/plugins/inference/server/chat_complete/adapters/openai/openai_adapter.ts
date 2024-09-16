@@ -95,7 +95,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       }),
       filter(
         (line): line is OpenAI.ChatCompletionChunk =>
-          'object' in line && line.object === 'chat.completion.chunk'
+          'object' in line && line.object === 'chat.completion.chunk' && line.choices.length > 0
       ),
       map((chunk): ChatCompletionChunkEvent => {
         const delta = chunk.choices[0].delta;

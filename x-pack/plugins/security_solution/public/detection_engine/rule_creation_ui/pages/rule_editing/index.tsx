@@ -436,11 +436,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const onSubmit = useCallback(async () => {
     setNonBlockingRuleErrors([]);
 
+    const actionsStepFormValid = await actionsStepForm.validate();
+    if (rule.immutable) {
+      // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
+      // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
+      // We will need to remove this condition once rule customization work is done.
+      if (actionsStepFormValid) {
+        await saveChanges();
+      }
+      return;
+    }
+
     const defineStepFormValid = await defineStepForm.validate();
     const aboutStepFormValid = await aboutStepForm.validate();
     const scheduleStepFormValid = await scheduleStepForm.validate();
-    const actionsStepFormValid = await actionsStepForm.validate();
-
     if (
       defineStepFormValid &&
       aboutStepFormValid &&
@@ -465,6 +474,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       showSaveWithErrorsModal();
     }
   }, [
+    rule.immutable,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
