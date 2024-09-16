@@ -64,12 +64,9 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     // We only allow "solution" to be set on cloud environments, not on prem
     // unless the forceSolutionVisibility flag is set
-    let allowSolutionVisibility = this.config.allowSolutionVisibility;
-    if (this.config.forceSolutionVisibility) {
-      allowSolutionVisibility = true;
-    } else if (!onCloud || this.isServerless) {
-      allowSolutionVisibility = false;
-    }
+    const allowSolutionVisibility =
+      (onCloud && !this.isServerless && this.config.allowSolutionVisibility) ||
+      Boolean(this.config.forceSolutionVisibility);
 
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
