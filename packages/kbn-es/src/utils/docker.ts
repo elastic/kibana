@@ -110,8 +110,6 @@ const DOCKER_REGISTRY = 'docker.elastic.co';
 const DOCKER_BASE_CMD = [
   'run',
 
-  '--rm',
-
   '-t',
 
   '--net',
@@ -147,8 +145,6 @@ export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SE
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
 const SHARED_SERVERLESS_PARAMS = [
   'run',
-
-  '--rm',
 
   '--detach',
 
@@ -382,7 +378,6 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 }
 
 /**
- *
  * Pull a Docker image if needed. Ensures latest image.
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
@@ -417,6 +412,24 @@ export async function printESImageInfo(log: ToolingLog, image: string) {
   log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
 }
 
+export async function cleanUpDanglingContainers(log: ToolingLog) {
+  log.info(chalk.bold('Cleaning up dangling Docker containers.'));
+
+  try {
+    const serverlessContainerNames = SERVERLESS_NODES.map(({ name }) => name);
+
+    for (const name of serverlessContainerNames) {
+      await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
+        // Ignore errors if the container doesn't exist
+      });
+    }
+
+    log.success('Cleaned up dangling Docker containers.');
+  } catch (e) {
+    log.error(e);
+  }
+}
+
 export async function detectRunningNodes(
   log: ToolingLog,
   options: ServerlessOptions | DockerOptions
@@ -428,19 +441,19 @@ export async function detectRunningNodes(
   }, []);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
-  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+  const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
 
-  if (runningNodes.length) {
+  if (runningNodeIds.length) {
     if (options.kill) {
       log.info(chalk.bold('Killing running ES Nodes.'));
-      await execa('docker', ['kill'].concat(runningNodes));
-
-      return;
+      await execa('docker', ['kill'].concat(runningNodeIds));
+    } else {
+      throw createCliError(
+        'ES has already been started, pass --kill to automatically stop the nodes on startup.'
+      );
     }
-
-    throw createCliError(
-      'ES has already been started, pass --kill to automatically stop the nodes on startup.'
-    );
+  } else {
+    log.info('No running nodes detected.');
   }
 }
 
@@ -458,6 +471,7 @@ async function setupDocker({
 }) {
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
+  await cleanUpDanglingContainers(log);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
   await printESImageInfo(log, image);
@@ -748,6 +762,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
 
+  // This is where nodes are started
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
       await runServerlessEsNode(log, {
