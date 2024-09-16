@@ -48,8 +48,8 @@ export async function getSpan({
             ]),
           },
         },
+        fields: ['*'],
       },
-      fields: ['*'],
     }),
     parentTransactionId
       ? getTransaction({

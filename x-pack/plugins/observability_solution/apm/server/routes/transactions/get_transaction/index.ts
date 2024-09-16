@@ -49,8 +49,8 @@ export async function getTransaction({
           ]),
         },
       },
+      fields: ['*'],
     },
-    fields: ['*'],
   });
 
   const fields = resp.hits.hits[0]?.fields;

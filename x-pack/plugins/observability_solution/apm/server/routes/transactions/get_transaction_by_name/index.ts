@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { normalizeFields } from '../../../utils/normalize_fields';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
@@ -48,12 +49,12 @@ export async function getTransactionByName({
           ]),
         },
       },
+      fields: ['*'],
     },
-    fields: ['*'],
   });
 
   const fields = resp.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields);
+  const fieldsNorm = normalizeFields(fields) as unknown as Transaction;
 
   return fieldsNorm;
 }
