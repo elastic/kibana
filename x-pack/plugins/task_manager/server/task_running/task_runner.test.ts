@@ -9,6 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
+import { BehaviorSubject } from 'rxjs';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -41,10 +42,13 @@ import {
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
 import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import * as nextRunAtUtils from '../lib/get_next_run_at';
+import { configMock } from '../config.mock';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -963,6 +967,8 @@ describe('TaskManagerRunner', () => {
       expect(instance.params).not.toBeDefined();
       expect(instance.enabled).not.toBeDefined();
       expect(instance.state).toEqual({ hey: 'there' });
+
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that have an schedule', async () => {
@@ -993,6 +999,8 @@ describe('TaskManagerRunner', () => {
       expect(instance.runAt?.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
       expect(instance.runAt?.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
       expect(instance.enabled).not.toBeDefined();
+
+      expect(getNextRunAtSpy).toHaveBeenCalled();
     });
 
     test('expiration returns time after which timeout will have elapsed from start', async () => {
@@ -1068,6 +1076,8 @@ describe('TaskManagerRunner', () => {
 
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
       expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -1096,6 +1106,11 @@ describe('TaskManagerRunner', () => {
 
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
       expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+
+      expect(getNextRunAtSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule }),
+        expect.any(Number)
+      );
     });
 
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -2284,6 +2299,32 @@ describe('TaskManagerRunner', () => {
 
       expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
     });
+
+    it(`should return true if attempts = max attempts and in claiming status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Claiming,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
+    });
+
+    it(`should return false if attempts = max attempts and in running status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Running,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
   });
 
   describe('removeTask()', () => {
@@ -2433,12 +2474,15 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
-      eventLoopDelayConfig: {
-        monitor: true,
-        warn_threshold: 5000,
-      },
+      config: configMock.create({
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
+        },
+      }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      pollIntervalConfiguration$: new BehaviorSubject(500),
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

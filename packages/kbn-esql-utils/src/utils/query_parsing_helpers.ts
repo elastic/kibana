@@ -24,7 +24,7 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.text).join(',');
+  return indices?.map((index) => index.name).join(',');
 }
 
 // For ES|QL we consider stats and keep transformational command
@@ -126,7 +126,7 @@ export const prettifyQuery = (query: string, isWrapped: boolean): string => {
   return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
 };
 
-export const retieveMetadataColumns = (esql: string): string[] => {
+export const retrieveMetadataColumns = (esql: string): string[] => {
   const { ast } = getAstAndSyntaxErrors(esql);
   const options: ESQLCommandOption[] = [];
 

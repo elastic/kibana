@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +19,6 @@ import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrid
 import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
 import type { Options } from '../register_items';
 import { getDateHistogramResults } from './get_date_histogram_results';
-
-const lensClassName = css`
-  height: 100%;
-`;
 
 interface Props {
   suggestion: Suggestion;
@@ -127,41 +122,33 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     [dataView, lens, dateHistogramResults]
   );
 
+  // in the case of a lnsDatatable, we want to render the preview of the histogram and not the datable (input) itself
   if (input.attributes.visualizationType === 'lnsDatatable') {
     let innerElement: React.ReactElement;
     if (previewInput.error) {
       innerElement = <ErrorMessage error={previewInput.error} />;
     } else if (previewInput.value) {
-      innerElement = <lens.EmbeddableComponent {...previewInput.value} />;
+      innerElement = (
+        <lens.EmbeddableComponent
+          {...previewInput.value}
+          style={{ height: 128 }}
+          overrides={{ axisX: { hide: true } }}
+        />
+      );
     } else {
       innerElement = <EuiLoadingSpinner size="s" />;
     }
-    return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem
-          grow={false}
-          className={css`
-            > div {
-              height: 196px;
-            }
-          `}
-        >
-          {innerElement}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+
+    return <EuiFlexItem grow={true}>{innerElement}</EuiFlexItem>;
   }
 
   return (
-    <EuiFlexItem
-      grow={true}
-      className={css`
-        > div {
-          height: 196px;
-        }
-      `}
-    >
-      <lens.EmbeddableComponent {...input} className={lensClassName} />
+    <EuiFlexItem grow={true}>
+      <lens.EmbeddableComponent
+        {...input}
+        style={{ height: 128 }}
+        overrides={{ axisX: { hide: true } }}
+      />
     </EuiFlexItem>
   );
 }
