@@ -24,6 +24,7 @@ interface StreamGraphParams {
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
   logger: Logger;
+  isOssLlm?: boolean;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceOptions?: TraceOptions;
@@ -36,15 +37,18 @@ interface StreamGraphParams {
  * @param assistantGraph
  * @param inputs
  * @param logger
+ * @param isOssLlm
  * @param onLlmResponse
  * @param request
  * @param traceOptions
  */
+/* eslint complexity: ["error", 210]*/
 export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
   logger,
+  isOssLlm,
   onLlmResponse,
   request,
   traceOptions,
@@ -138,61 +142,75 @@ export const streamGraph = async ({
       if (done) return;
 
       const event = value;
-      // only process events that are part of the agent run
-      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
-        if (event.name === 'ActionsClientChatOpenAI') {
-          if (event.event === 'on_llm_stream') {
-            const chunk = event.data?.chunk;
-            const msg = chunk.message;
-            if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-              // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-              // however, no harm to keep it in
-              /* empty */
-            } else if (!didEnd) {
-              push({ payload: msg.content, type: 'content' });
-              finalMessage += msg.content;
-            }
-          } else if (event.event === 'on_llm_end' && !didEnd) {
-            const generations = event.data.output?.generations[0];
-            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-              handleStreamEnd(generations[0]?.text ?? finalMessage);
-            }
+
+      const processOpenAIEvent = () => {
+        if (event.event === 'on_llm_stream') {
+          const chunk = event.data?.chunk;
+          const msg = chunk.message;
+          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
+            // however, no harm to keep it in
+            /* empty */
+          } else if (!didEnd) {
+            push({ payload: msg.content, type: 'content' });
+            finalMessage += msg.content;
+          }
+        } else if (event.event === 'on_llm_end' && !didEnd) {
+          const generations = event.data.output?.generations[0];
+          if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+            handleStreamEnd(generations[0]?.text ?? finalMessage);
           }
         }
-        if (event.name === 'ActionsClientSimpleChatModel') {
-          if (event.event === 'on_llm_stream') {
-            const chunk = event.data?.chunk;
+      };
 
-            const msg = chunk.content;
-            if (finalOutputIndex === -1) {
-              currentOutput += msg;
-              // Remove whitespace to simplify parsing
-              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
-              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
-                const nonStrippedToken = '"action_input": "';
-                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
-                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
-                extraOutput = currentOutput.substring(contentStartIndex);
+      const processSimpleChatModelEvent = () => {
+        // console.log(`[TEST][ActionsClientSimpleChatModel] currentOutput: ${currentOutput}`);
+        if (event.event === 'on_llm_stream') {
+          const chunk = event.data?.chunk;
+
+          const msg = isOssLlm ? chunk.message.content : chunk.content;
+          if (finalOutputIndex === -1) {
+            currentOutput += msg;
+            // Remove whitespace to simplify parsing
+            const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+            if (noWhitespaceOutput.includes(finalOutputStartToken)) {
+              const nonStrippedToken = '"action_input": "';
+              finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+              const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
+              extraOutput = currentOutput.substring(contentStartIndex);
+              push({ payload: extraOutput, type: 'content' });
+              finalMessage += extraOutput;
+            }
+          } else if (!streamingFinished && !didEnd) {
+            const finalOutputEndIndex = msg.search(finalOutputStopRegex);
+            if (finalOutputEndIndex !== -1) {
+              extraOutput = msg.substring(0, finalOutputEndIndex);
+              streamingFinished = true;
+              if (extraOutput.length > 0) {
                 push({ payload: extraOutput, type: 'content' });
                 finalMessage += extraOutput;
               }
-            } else if (!streamingFinished && !didEnd) {
-              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
-              if (finalOutputEndIndex !== -1) {
-                extraOutput = msg.substring(0, finalOutputEndIndex);
-                streamingFinished = true;
-                if (extraOutput.length > 0) {
-                  push({ payload: extraOutput, type: 'content' });
-                  finalMessage += extraOutput;
-                }
-              } else {
-                push({ payload: chunk.content, type: 'content' });
-                finalMessage += chunk.content;
-              }
+            } else {
+              push({ payload: msg, type: 'content' });
+              finalMessage += msg;
             }
-          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
-            handleStreamEnd(finalMessage);
           }
+        } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
+          handleStreamEnd(finalMessage);
+        }
+      };
+
+      // only process events that are part of the agent run
+      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        if (event.name === 'ActionsClientChatOpenAI') {
+          if (isOssLlm) {
+            processSimpleChatModelEvent();
+          } else {
+            processOpenAIEvent();
+          }
+        }
+        if (event.name === 'ActionsClientSimpleChatModel') {
+          processSimpleChatModelEvent();
         }
       }
 
