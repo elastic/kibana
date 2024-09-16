@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { mapValues } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { registerServerRoutes } from './routes/register_routes';
 import { InventoryRouteHandlerResources } from './routes/types';
 import type {
@@ -66,6 +67,7 @@ export class InventoryPlugin
       },
       async (context, request, response) => {
         const datastream = request.body.datastream;
+        let affectedDatastreams: string[] = [datastream];
         const change = request.body.change;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const templates = await esClient.transport.request({
@@ -74,13 +76,20 @@ export class InventoryPlugin
         });
         let matchingTemplate = null;
         try {
-          matchingTemplate = templates.index_templates.find((template) => {
-            const patterns: string[] = template.index_template.index_patterns;
-            return patterns.some((pattern) => {
-              const patternToRegex = pattern.replace(/\*/g, '.*').replace(/\./g, '\\.');
-              return new RegExp(patternToRegex).test(datastream);
+          const allMatchingTemplates = templates.index_templates
+            .filter((template) => {
+              const patterns: string[] = template.index_template.index_patterns;
+              const matches = patterns.some((pattern) => {
+                const patternToRegex = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*');
+                return new RegExp(patternToRegex).test(datastream);
+              });
+              return matches;
+            })
+            .sort((a, b) => {
+              // sort by the priority key (highest priority first)
+              return b.index_template.priority - a.index_template.priority;
             });
-          });
+          matchingTemplate = allMatchingTemplates[0];
         } catch (e) {
           return response.customError({ statusCode: 500, body: e });
         }
@@ -89,6 +98,17 @@ export class InventoryPlugin
             statusCode: 404,
             body: `No matching template found for datastream ${datastream}`,
           });
+        } else {
+          // check which existing data streams match the matchingTemplate
+          const allDataStreams = await esClient.transport.request({
+            method: 'GET',
+            path: '/_data_stream',
+          });
+          affectedDatastreams = allDataStreams.data_streams
+            .filter((dataStream) => {
+              return dataStream.template === matchingTemplate.name;
+            })
+            .map((dataStream) => dataStream.name);
         }
         // /_index_template/_simulate_index/data stream-*
         const finalIndex = await esClient.transport.request({
@@ -117,99 +137,121 @@ export class InventoryPlugin
         }
 
         let pipelineObj = null;
-        try {
+        // if matching template is the managed logs template, we need to "fork" it and create a custom index template for this datastream first
+        if (matchingTemplate.name === 'logs') {
+          const newPipelineName = datastream;
+          console.log(matchingTemplate.index_template);
+          plan.push({
+            title: 'Create custom index template',
+            method: 'PUT',
+            path: `/_index_template/${datastream}@template`,
+            body: {
+              ...matchingTemplate.index_template,
+              priority: matchingTemplate.index_template.priority + 100,
+              template: {
+                ...matchingTemplate.index_template?.template,
+                settings: {
+                  ...matchingTemplate.index_template?.template?.settings,
+                  index: {
+                    ...matchingTemplate.index_template?.template?.settings?.index,
+                    default_pipeline: newPipelineName,
+                  },
+                },
+              },
+              index_patterns: [datastream],
+            },
+          });
+          plan.push({
+            title: 'Create custom pipeline',
+            method: 'PUT',
+            path: `/_ingest/pipeline/${newPipelineName}`,
+            body: {
+              description: 'Custom pipeline for datastream',
+              processors: [
+                {
+                  // call logs default pipeline first
+                  pipeline: {
+                    name: 'logs@default-pipeline',
+                  },
+                },
+                change,
+              ],
+            },
+          });
+          plan.push({
+            title: 'Roll over data stream',
+            method: 'POST',
+            path: `/${datastream}/_rollover`,
+          });
           pipelineObj = await esClient.transport.request({
             method: 'GET',
             path: `/_ingest/pipeline/${defaultPipeline}`,
           });
-          const p = pipelineObj[defaultPipeline];
-          const customPipelineIsCalled = p.processors.some((processor) => {
-            return (
-              processor.pipeline !== undefined &&
-              processor.pipeline.name === `${matchingTemplate.name}@custom`
-            );
-          });
-          if (!customPipelineIsCalled) {
+        } else {
+          try {
+            pipelineObj = await esClient.transport.request({
+              method: 'GET',
+              path: `/_ingest/pipeline/${defaultPipeline}`,
+            });
+            const p = pipelineObj[defaultPipeline];
+            const customPipelineIsCalled = p.processors.some((processor) => {
+              return (
+                processor.pipeline !== undefined &&
+                processor.pipeline.name === `${matchingTemplate.name}@custom`
+              );
+            });
+            if (!customPipelineIsCalled) {
+              plan.push({
+                title: 'Call custom pipeline from default pipeline',
+                method: 'PUT',
+                path: `/_ingest/pipeline/${defaultPipeline}`,
+                body: {
+                  ...p,
+                  processors: [...p.processors, change],
+                },
+              });
+            } else {
+              try {
+                const customPipeline = (
+                  await esClient.transport.request({
+                    method: 'GET',
+                    path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
+                  })
+                )[matchingTemplate.name + '@custom'];
+                plan.push({
+                  title: 'Extend custom pipeline',
+                  method: 'PUT',
+                  body: {
+                    ...customPipeline,
+                    processors: [...customPipeline.processors, change],
+                  },
+                });
+              } catch (e) {
+                // custom pipeline doesn't exist, plan to create
+
+                plan.push({
+                  title: 'Create custom pipeline',
+                  method: 'PUT',
+                  path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
+                  body: {
+                    processors: [change],
+                  },
+                });
+              }
+            }
+          } catch (e) {
+            console.log(e);
+            // pipeline doesn't exist, plan to create
             plan.push({
-              title: 'Call custom pipeline from default pipeline',
+              title: 'Create default pipeline',
               method: 'PUT',
               path: `/_ingest/pipeline/${defaultPipeline}`,
               body: {
-                ...p,
-                processors: [
-                  ...p.processors,
-                  {
-                    pipeline: {
-                      name: `${matchingTemplate.name}@custom`,
-                    },
-                  },
-                ],
-              },
-            });
-            plan.push({
-              title: 'Create custom pipeline',
-              method: 'PUT',
-              path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
-              body: {
+                description: 'Default pipeline for datastream',
                 processors: [change],
               },
             });
-          } else {
-            try {
-              const customPipeline = (
-                await esClient.transport.request({
-                  method: 'GET',
-                  path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
-                })
-              )[matchingTemplate.name + '@custom'];
-              plan.push({
-                title: 'Extend custom pipeline',
-                method: 'PUT',
-                body: {
-                  ...customPipeline,
-                  processors: [...customPipeline.processors, change],
-                },
-              });
-            } catch (e) {
-              // custom pipeline doesn't exist, plan to create
-
-              plan.push({
-                title: 'Create custom pipeline',
-                method: 'PUT',
-                path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
-                body: {
-                  processors: [change],
-                },
-              });
-            }
           }
-        } catch (e) {
-          console.log(e);
-          // pipeline doesn't exist, plan to create
-          plan.push({
-            title: 'Create default pipeline',
-            method: 'PUT',
-            path: `/_ingest/pipeline/${defaultPipeline}`,
-            body: {
-              description: 'Default pipeline for datastream',
-              processors: [
-                {
-                  pipeline: {
-                    name: `${matchingTemplate.name}@custom`,
-                  },
-                },
-              ],
-            },
-          });
-          // plan to create the custom pipeline
-          plan.push({
-            title: 'Create custom pipeline',
-            method: 'PUT',
-            path: `/_ingest/pipeline/${matchingTemplate.name}@custom`,
-            body: {
-              processors: [change],
-            },
-          });
         }
 
         let docs;
@@ -220,8 +262,16 @@ export class InventoryPlugin
             method: 'GET',
             path: `${datastream}/_search`,
             body: {
-              size: 5,
+              size: 50,
               sort: [{ '@timestamp': { order: 'desc' } }],
+              query:
+                request.body.filter !== ''
+                  ? {
+                      bool: {
+                        filter: [...kqlQuery(request.body.filter)],
+                      },
+                    }
+                  : undefined,
             },
           });
           console.log(r);
@@ -254,6 +304,85 @@ export class InventoryPlugin
       }
     );
 
+    router.get(
+      {
+        path: '/api/datastream_retention_info/{datastream}',
+        validate: {
+          params: schema.object({
+            datastream: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // fetch the datastream
+        const datastream = request.params.datastream;
+        const datastreamInfo = (
+          await esClient.transport.request({
+            method: 'GET',
+            path: `/_data_stream/${datastream}`,
+          })
+        ).data_streams[0];
+
+        const template = (
+          await esClient.transport.request({
+            method: 'GET',
+            path: `/_index_template/${datastreamInfo.template}`,
+          })
+        ).index_templates[0];
+        const allDataStreams = await esClient.transport.request({
+          method: 'GET',
+          path: '/_data_stream',
+        });
+        const affectedDatastreams = allDataStreams.data_streams
+          .filter((dataStream) => {
+            return dataStream.template === template.name;
+          })
+          .map((dataStream) => dataStream.name);
+        // check whether prefer_ilm is set - if yes, fetch the ILM policy
+        let ilmPolicy = null;
+        if (datastreamInfo.prefer_ilm && datastreamInfo.ilm_policy) {
+          ilmPolicy = await esClient.transport.request({
+            method: 'GET',
+            path: `/_ilm/policy/${datastreamInfo.ilm_policy}`,
+          });
+        }
+        return response.ok({
+          body: {
+            datastreamInfo,
+            template,
+            ilmPolicy,
+            affectedDatastreams,
+          },
+        });
+      }
+    );
+
+    router.get(
+      {
+        path: '/api/reroute_targets',
+        validate: {},
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const datastreams: any = await esClient.transport.request({
+          method: 'GET',
+          path: '/_data_stream',
+        });
+        // go through all datastreams and check whether they follow the <type>-<dataset>-<namespace> notation. If yes, add the dataset to a set. In the end, return the set as a list
+        const datasets = new Set<string>();
+        datastreams.data_streams.forEach((datastream: any) => {
+          const parts = datastream.name.split('-');
+          if (parts.length === 3) {
+            datasets.add(parts[1]);
+          }
+        });
+        return response.ok({
+          body: Array.from(datasets),
+        });
+      }
+    );
+
     router.post(
       {
         path: '/api/test_reroute',
@@ -261,12 +390,14 @@ export class InventoryPlugin
           body: schema.object({
             datastream: schema.string(),
             code: schema.string(),
+            filter: schema.string(),
           }),
         },
       },
       async (context, request, response) => {
         try {
           const datastream = request.body.datastream;
+          let affectedDatastreams: string[] = [datastream];
           const change = JSON.parse(request.body.code);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const templates = await esClient.transport.request({
@@ -297,6 +428,17 @@ export class InventoryPlugin
               statusCode: 404,
               body: `No matching template found for datastream ${datastream}`,
             });
+          } else {
+            // check which existing data streams match the matchingTemplate
+            const allDataStreams = await esClient.transport.request({
+              method: 'GET',
+              path: '/_data_stream',
+            });
+            affectedDatastreams = allDataStreams.data_streams
+              .filter((dataStream) => {
+                return dataStream.template === matchingTemplate.name;
+              })
+              .map((dataStream) => dataStream.name);
           }
           // /_index_template/_simulate_index/data stream-*
           const finalIndex = await esClient.transport.request({
@@ -395,10 +537,7 @@ export class InventoryPlugin
                   path: `/_ingest/pipeline/${defaultPipeline}`,
                   body: {
                     ...p,
-                    processors: [
-                      ...p.processors,
-                      change,
-                    ],
+                    processors: [...p.processors, change],
                   },
                 });
               } else {
@@ -470,6 +609,14 @@ export class InventoryPlugin
               body: {
                 size: 100,
                 sort: [{ '@timestamp': { order: 'desc' } }],
+                query:
+                  request.body.filter !== ''
+                    ? {
+                        bool: {
+                          filter: [...kqlQuery(request.body.filter)],
+                        },
+                      }
+                    : undefined,
               },
             });
             console.log(r);
@@ -501,6 +648,7 @@ export class InventoryPlugin
               plan,
               docs,
               simulatedRun,
+              affectedDatastreams,
             },
           });
         } catch (e) {

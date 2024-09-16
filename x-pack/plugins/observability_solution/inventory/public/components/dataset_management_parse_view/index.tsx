@@ -18,10 +18,12 @@ import {
   EuiTab,
   EuiTabs,
   EuiDataGrid,
-  EuiFlexItem,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { calculateDiff } from '@kbn/unified-data-table/src/components/compare_documents/hooks/calculate_diff';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
@@ -29,7 +31,26 @@ import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_log
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { planToConsoleOutput } from '../dataset_detail_view/utils';
 
-export function DatasetManagementSplitView() {
+function deepSortKeys(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(deepSortKeys);
+  } else if (obj !== null && typeof obj === 'object') {
+    const sortedObj: { [key: string]: any } = {};
+    Object.keys(obj)
+      .sort()
+      .forEach((key) => {
+        sortedObj[key] = deepSortKeys(obj[key]);
+      });
+    return sortedObj;
+  }
+  return obj;
+}
+
+function cleanDoc(doc: any): any {
+  return doc._source;
+}
+
+export function DatasetManagementParseView() {
   const {
     path: { id },
   } = useInventoryParams('/data_stream/{id}/*');
@@ -40,6 +61,17 @@ export function DatasetManagementSplitView() {
       start: { unifiedSearch, dataViews },
     },
   } = useKibana();
+
+  const [code, setCode] = React.useState<string>(`{
+    "grok": {
+      "field": "message",
+      "patterns": ["\\\\[%{LOGLEVEL:loglevel}\\\\]"],
+      "ignore_failure": true
+    }
+  }`);
+
+  const [plan, setPlan] = React.useState<unknown>(undefined);
+  const [docI, setDocI] = React.useState<number>(0);
 
   const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
 
@@ -60,27 +92,6 @@ export function DatasetManagementSplitView() {
   const targets = useAsync(() => {
     return http.get('/api/reroute_targets');
   }, [http]);
-
-  const [result, setResult] = React.useState<any>();
-  const [code, setCode] = React.useState<string>(`
-{
-  "reroute": {
-    "if" : "ctx['cloud.region']?.contains('us-east-1')",
-    "dataset": "us_east_synth"
-  }
-}
-`);
-
-  async function testReroute() {
-    const apiResult = await http.post('/api/test_reroute', {
-      body: JSON.stringify({
-        datastream: id,
-        code,
-        filter: persistedKqlFilter,
-      }),
-    });
-    setResult(apiResult);
-  }
 
   const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
   const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
@@ -133,7 +144,7 @@ export function DatasetManagementSplitView() {
         </EuiButton>
       </EuiFlexGroup>
       {i18n.translate('xpack.inventory.datasetManagementSplitView.thisIsTheUILabel', {
-        defaultMessage: 'This is the UI to split up a data stream into different datasets.',
+        defaultMessage: 'This is the UI to parse the data in a data stream',
       })}
       <unifiedSearch.ui.SearchBar
         appName="inventory"
@@ -188,56 +199,130 @@ export function DatasetManagementSplitView() {
           </h3>
         </EuiTitle>
         <EuiFlexGroup direction="column">
-          <EuiText>
-            {i18n.translate(
-              'xpack.inventory.datasetManagementSplitView.specifyWhereToRerouteTextLabel',
-              { defaultMessage: 'Specify where to reroute on what condition. You can also use' }
-            )}
-            {'{{service.name}}'}{' '}
-            {i18n.translate(
-              'xpack.inventory.datasetManagementSplitView.asSyntaxToRereouteTextLabel',
-              {
-                defaultMessage:
-                  'as syntax to rereoute to a dataset based on a field in the doc (in this case service.name).',
-              }
-            )}
-          </EuiText>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <CodeEditor languageId="json" value={code} onChange={setCode} height={300} />
-            </EuiFlexItem>
-            <div>
-              {targets.loading ? (
-                <EuiLoadingSpinner />
-              ) : (
-                <>
-                  {i18n.translate(
-                    'xpack.inventory.datasetManagementSplitView.div.existingDatasetsToRerouteLabel',
-                    {
-                      defaultMessage:
-                        'Existing datasets to reroute to (can also create new datasets):',
-                    }
-                  )}
-                  <ul>
-                    {targets.value.map((target: any) => (
-                      <li key={target}>{target}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          </EuiFlexGroup>
+          <CodeEditor languageId="json" value={code} onChange={setCode} height={300} />
           <EuiButton
-            data-test-subj="inventoryDatasetManagementSplitViewTestButton"
-            onClick={testReroute}
+            data-test-subj="inventoryDatasetManagementParseViewCheckButton"
+            fill
+            onClick={async () => {
+              const result = await http.post('/api/apply_change/plan', {
+                body: JSON.stringify({
+                  datastream: id,
+                  change: JSON.parse(code),
+                  filter: persistedKqlFilter,
+                }),
+              });
+              setPlan({
+                ...result,
+                diff: result.simulatedRun.docs.map((after, i) =>
+                  after.doc
+                    ? calculateDiff({
+                        diffMode: 'lines',
+                        comparisonValue: deepSortKeys(cleanDoc(after.doc)),
+                        baseValue: deepSortKeys(cleanDoc(result.docs[i])),
+                      })
+                    : after
+                ),
+              });
+            }}
           >
-            {i18n.translate('xpack.inventory.datasetManagementSplitView.testButtonLabel', {
-              defaultMessage: 'Test',
+            {i18n.translate('xpack.inventory.datasetManagementParseView.checkButtonLabel', {
+              defaultMessage: 'Check',
             })}
           </EuiButton>
         </EuiFlexGroup>
       </EuiPanel>
-      {result && <ResultPanel result={result} />}
+      {plan && (
+        <>
+          <EuiPanel>
+            <EuiText size="m">
+              <h1>
+                {i18n.translate('xpack.inventory.datasetManagementParseView.h1.testRunLabel', {
+                  defaultMessage: 'Test Run',
+                })}
+              </h1>
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton
+              data-test-subj="inventoryDatasetManagementParseViewPreviousButton"
+              onClick={() => setDocI((docI - 1) % plan.simulatedRun.docs.length)}
+            >
+              {i18n.translate('xpack.inventory.datasetManagementParseView.previousButtonLabel', {
+                defaultMessage: 'Previous',
+              })}
+            </EuiButton>
+            {docI + 1} / {plan.simulatedRun.docs.length}
+            <EuiButton
+              data-test-subj="inventoryDatasetManagementParseViewNextButton"
+              onClick={() => setDocI((docI + 1) % plan.simulatedRun.docs.length)}
+            >
+              {i18n.translate('xpack.inventory.datasetManagementParseView.nextButtonLabel', {
+                defaultMessage: 'Next',
+              })}
+            </EuiButton>
+            <EuiSpacer />
+            <div style={{ overflowY: 'scroll', height: 500 }}>
+              {plan.diff[docI].error ? (
+                <EuiCallOut color="danger">
+                  <pre>{JSON.stringify(plan.simulatedRun.docs[docI], null, 2)}</pre>
+                  <pre>{JSON.stringify(plan.docs[docI], null, 2)}</pre>
+                </EuiCallOut>
+              ) : plan.diff[docI].some((d) => d.added || d.removed) ? (
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  {plan.diff[docI].map((part, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        backgroundColor: part.added
+                          ? 'lightgreen'
+                          : part.removed
+                          ? 'lightcoral'
+                          : 'white',
+                      }}
+                    >
+                      <pre>{part.value}</pre>
+                    </span>
+                  ))}
+                </EuiFlexGroup>
+              ) : (
+                <EuiCallOut>
+                  {i18n.translate(
+                    'xpack.inventory.datasetManagementParseView.noChangeCallOutLabel',
+                    { defaultMessage: 'No change' }
+                  )}
+                </EuiCallOut>
+              )}
+            </div>
+          </EuiPanel>
+          <EuiPanel>
+            <EuiText size="m">
+              <h3>
+                {i18n.translate('xpack.inventory.datasetManagementParseView.h1.planLabel', {
+                  defaultMessage: 'Plan',
+                })}
+              </h3>
+            </EuiText>
+            <EuiAccordion buttonContent="Execution Plan" id={'xxxx2'}>
+              <CodeEditor languageId="json" value={planToConsoleOutput(plan.plan)} height={300} />
+            </EuiAccordion>
+            <EuiButton
+              data-test-subj="inventoryResultPanelExecuteChangeButton"
+              onClick={async () => {
+                // execute change sending the plan to api/apply_plan
+                const apiResult = await http.post('/api/apply_plan', {
+                  body: JSON.stringify({
+                    plan: plan.plan,
+                  }),
+                });
+                alert(apiResult);
+              }}
+            >
+              {i18n.translate('xpack.inventory.resultPanel.executeChangeButtonLabel', {
+                defaultMessage: 'Execute change',
+              })}
+            </EuiButton>
+          </EuiPanel>
+        </>
+      )}
     </>
   );
 }

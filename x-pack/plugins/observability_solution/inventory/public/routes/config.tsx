@@ -21,6 +21,7 @@ import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadc
 import { DatasetManagementSplitView } from '../components/dataset_management_split_view';
 import { DefinitionsView } from '../components/definitions_view';
 import { EntityDetailView } from '../components/entity_detail_view';
+import { DatasetManagementParseView } from '../components/dataset_management_parse_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -105,6 +106,9 @@ const inventoryRoutes = {
               },
               '/data_stream/{id}/management/split': {
                 element: <DatasetManagementSplitView />,
+              },
+              '/data_stream/{id}/management/parse': {
+                element: <DatasetManagementParseView />,
               },
               '/data_stream/{id}': {
                 element: <RedirectTo path="/data_stream/{id}/overview" />,

@@ -18,14 +18,17 @@ import {
   EuiAccordion,
   EuiListGroup,
   EuiButton,
+  EuiFieldText,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
+import { planToConsoleOutput } from '../dataset_detail_view/utils';
 
 export function DatasetManagementView() {
   const {
     path: { id },
-  } = useInventoryParams('/datastream/{id}/*');
+  } = useInventoryParams('/data_stream/{id}/*');
 
   const {
     core: { http },
@@ -33,87 +36,11 @@ export function DatasetManagementView() {
 
   const path = `/internal/dataset_quality/data_streams/${id}/details`;
 
-  /*
-  Sample:
-  {
-    "docsCount": 25740,
-    "degradedDocsCount": 4290,
-    "services": {
-        "service.name": [
-            "synth-service-1",
-            "synth-service-2",
-            "synth-service-0"
-        ]
-    },
-    "hosts": {
-        "host.name": [
-            "synth-host"
-        ],
-        "kubernetes.pod.uid": [],
-        "container.id": [],
-        "cloud.instance.id": [
-            "8157600000000217",
-            "8157600000000224",
-            "8157600000000231",
-            "8157600000000238",
-            "8157600000000245",
-            "8157600000000252",
-            "8157600000000259",
-            "8157600000000266",
-            "8157600000000273",
-            "8157600000000280",
-            "8157600000000287",
-            "8157600000000294",
-            "8157600000000301",
-            "8157600000000308",
-            "8157600000000315",
-            "8157600000000322",
-            "8157600000000329",
-            "8157600000000336",
-            "8157600000000343",
-            "8157600000000350",
-            "8157600000000357",
-            "8157600000000364",
-            "8157600000000371",
-            "8157600000000378",
-            "8157600000000385",
-            "8157600000000392",
-            "8157600000000399",
-            "8157600000000406",
-            "8157600000000413",
-            "8157600000000420",
-            "8157600000000427",
-            "8157600000000434",
-            "8157600000000441",
-            "8157600000000628",
-            "8157600000000634",
-            "8157600000000640",
-            "8157600000000646",
-            "8157600000000652",
-            "8157600000000658",
-            "8157600000000664",
-            "8157600000000670",
-            "8157600000000676",
-            "8157600000000682",
-            "8157600000000688",
-            "8157600000000694",
-            "8157600000000700",
-            "8157600000000706",
-            "8157600000000712",
-            "8157600000000718",
-            "8157600000000724",
-            "8157600000000730"
-        ],
-        "aws.s3.bucket.name": [],
-        "aws.rds.db_instance.arn": [],
-        "aws.sqs.queue.name": []
-    },
-    "sizeBytes": 3786686,
-    "lastActivity": 1726210893792,
-    "userPrivileges": {
-        "canMonitor": true
-    }
-}*/
+  const retentionInfo = useAsync(() => {
+    return http.get(`/api/datastream_retention_info/${id}`);
+  }, [http, id]);
+  console.log(retentionInfo);
+
   const details = useAsync(() => {
     return http.get(path, {
       query: {
@@ -130,6 +57,7 @@ export function DatasetManagementView() {
   ) : (
     <>
       <StorageDetails details={details.value} />
+      <RetentionDetails details={retentionInfo.value} />
       <EuiFlexGroup>
         <EuiButton
           data-test-subj="inventoryDatasetManagementViewSplitUpButton"
@@ -137,6 +65,14 @@ export function DatasetManagementView() {
         >
           {i18n.translate('xpack.inventory.datasetManagementView.splitUpButtonLabel', {
             defaultMessage: 'Split up or reroute',
+          })}
+        </EuiButton>
+        <EuiButton
+          data-test-subj="inventoryDatasetManagementViewSplitUpButton"
+          href={`/app/observability/entities/data_stream/${id}/management/parse`}
+        >
+          {i18n.translate('xpack.inventory.datasetManagementView.splitUpButtonLabel', {
+            defaultMessage: 'Parse',
           })}
         </EuiButton>
       </EuiFlexGroup>
@@ -162,6 +98,169 @@ export function DatasetManagementView() {
   );
 }
 
+function RetentionDetails(props: { details: any }) {
+  const {
+    core: { http },
+  } = useKibana();
+
+  const [retention, setRetention] = React.useState(
+    props.details.datastreamInfo.lifecycle?.data_retention || ''
+  );
+
+  const executionPlan = [
+    ...(props.details.datastreamInfo.prefer_ilm
+      ? props.details.template.name === 'logs'
+        ? [
+            {
+              title: 'Create new index template',
+              method: 'PUT',
+              path: `/_index_template/${props.details.datastreamInfo.name}@template`,
+              body: {
+                ...props.details.template.index_template,
+                priority: props.details.template.index_template.priority + 100,
+                template: {
+                  ...props.details.template.index_template.template,
+                  settings: {
+                    ...props.details.template.index_template.template?.settings,
+                    lifecycle: {
+                      ...props.details.template.index_template.template?.settings?.lifecycle,
+                      prefer_ilm: false,
+                    },
+                  },
+                },
+                index_patterns: [props.details.datastreamInfo.name],
+              },
+            },
+            {
+              title: 'Roll over data stream',
+              method: 'POST',
+              path: `/_data_stream/${props.details.datastreamInfo.name}/_rollover`,
+            },
+          ]
+        : [
+            {
+              title: 'Change template to local retention',
+              method: 'PUT',
+              path: `/_index_template/${props.details.template.name}`,
+              body: {
+                ...props.details.template.index_template,
+                template: {
+                  ...props.details.template.index_template.template,
+                  settings: {
+                    ...props.details.template.index_template.template?.settings,
+                    lifecycle: {
+                      ...props.details.template.index_template.template?.settings?.lifecycle,
+                      prefer_ilm: false,
+                    },
+                  },
+                },
+              },
+            },
+            {
+              title: 'Roll over data stream',
+              method: 'POST',
+              path: `/_data_stream/${props.details.datastreamInfo.name}/_rollover`,
+            },
+          ]
+      : []),
+    {
+      title: 'Set local retention',
+      method: 'PUT',
+      path: `/_data_stream/${props.details.datastreamInfo.name}/_lifecycle`,
+      body: {
+        data_retention: retention,
+      },
+    },
+  ];
+  return (
+    <EuiPanel hasBorder>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h3>
+                {i18n.translate('xpack.inventory.details.h5.storageDetailsLabel', {
+                  defaultMessage: 'Retention details',
+                })}
+              </h3>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <>
+          {props.details.datastreamInfo.prefer_ilm && props.details.datastreamInfo.ilm_policy && (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.inventory.retentionDetails.thisDataStreamIsTextLabel', {
+                  defaultMessage: 'This data stream is managed by an ilm policy',
+                })}
+              </EuiText>
+              <EuiListGroup
+                flush={true}
+                bordered={false}
+                listItems={[
+                  {
+                    label: `Edit "${props.details.datastreamInfo.ilm_policy}" in stack management`,
+                    href: `/app/management/data/index_lifecycle_management/policies/edit/${props.details.datastreamInfo.ilm_policy}`,
+                    iconType: 'indexSettings',
+                  },
+                ]}
+              />
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.inventory.details.h5.storageDetailsLabel', {
+                    defaultMessage: 'Switch to retention managed on data stream level',
+                  })}
+                </h5>
+              </EuiText>
+            </>
+          )}
+          <EuiFlexGroup>
+            <EuiFieldText
+              data-test-subj="abc"
+              value={retention}
+              placeholder="Enter retention (e.g. 7d)"
+              onChange={(e) => setRetention(e.target.value)}
+            />
+            <EuiButton
+              onClick={async () => {
+                // execute change sending the plan to api/apply_plan
+                const apiResult = await http.post('/api/apply_plan', {
+                  body: JSON.stringify({
+                    plan: executionPlan,
+                  }),
+                });
+                alert(apiResult);
+              }}
+              data-test-subj="inventoryRetentionDetailsManageOnDataStreamLevelButton"
+            >
+              {i18n.translate('xpack.inventory.retentionDetails.manageOnDataStreamButtonLabel', {
+                defaultMessage: 'Set retention on data stream level',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
+          <EuiAccordion buttonContent="Execution Plan" id={'xxxx2'}>
+            <CodeEditor languageId="json" value={planToConsoleOutput(executionPlan)} height={300} />
+          </EuiAccordion>
+          {props.details.template.name !== 'logs' && props.details.datastreamInfo.prefer_ilm && (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.inventory.resultPanel.affectedDatastreamsTextLabel', {
+                  defaultMessage: 'Affected datastreams:',
+                })}
+              </EuiText>
+              <ul>
+                {props.details.affectedDatastreams.map((datastream: any) => (
+                  <li key={datastream}>{datastream}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
 function StorageDetails(props: { details: any }) {
   return (
     <EuiPanel hasBorder>
@@ -169,11 +268,11 @@ function StorageDetails(props: { details: any }) {
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText>
-              <h5>
+              <h3>
                 {i18n.translate('xpack.inventory.details.h5.storageDetailsLabel', {
                   defaultMessage: 'Storage details',
                 })}
-              </h5>
+              </h3>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
