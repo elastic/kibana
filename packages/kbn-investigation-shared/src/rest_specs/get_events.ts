@@ -16,7 +16,7 @@ const getEventsParamsSchema = z
       .object({
         rangeFrom: z.string(),
         rangeTo: z.string(),
-        source: z.string(),
+        filter: z.string(),
       })
       .partial(),
   })

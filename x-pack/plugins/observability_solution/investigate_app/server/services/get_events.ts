@@ -47,7 +47,7 @@ export async function getAnnotationEvents(
 ): Promise<GetEventsResponse> {
   const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
   const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
-  const sourceJson = params?.source ? JSON.parse(params?.source) : {};
+  const filterJSON = params?.filter ? JSON.parse(params.filter) : {};
 
   const body = {
     size: 100,
@@ -55,8 +55,8 @@ export async function getAnnotationEvents(
       bool: {
         filter: [
           ...rangeQuery(startInMs, endInMs),
-          ...Object.keys(sourceJson).map((sourceKey) => ({
-            term: { [sourceKey]: sourceJson[sourceKey] },
+          ...Object.keys(filterJSON).map((filterKey) => ({
+            term: { [filterKey]: filterJSON[filterKey] },
           })),
         ],
       },
@@ -78,6 +78,7 @@ export async function getAnnotationEvents(
       const _source = hit._source as any;
       const hostName = _source.host?.name;
       const serviceName = _source.service?.name;
+      const serviceVersion = _source.service?.version;
       const sloId = _source.slo?.id;
       const sloInstanceId = _source.slo?.instanceId;
 
@@ -86,14 +87,13 @@ export async function getAnnotationEvents(
         title: _source.annotation.title,
         description: _source.message,
         timestamp: new Date(_source['@timestamp']).getTime(),
-        type: 'annotation' as const,
-        details: {
-          type: _source.type,
-          end: _source['event.end'],
-        },
+        eventType: 'annotation' as const,
+        annotationType: _source.annotation.type,
+        annotationEnd: _source.event.end,
         source: {
           ...(hostName ? { 'host.name': hostName } : undefined),
           ...(serviceName ? { 'service.name': serviceName } : undefined),
+          ...(serviceVersion ? { 'service.version': serviceVersion } : undefined),
           ...(sloId ? { 'slo.id': sloId } : undefined),
           ...(sloInstanceId ? { 'slo.instanceId': sloInstanceId } : undefined),
         },
@@ -114,7 +114,7 @@ export async function getAlertEvents(
 ): Promise<GetEventsResponse> {
   const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
   const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
-  const sourceJson = params?.source ? JSON.parse(params?.source) : {};
+  const filterJSON = params?.filter ? JSON.parse(params.filter) : {};
 
   const body = {
     size: 100,
@@ -123,8 +123,8 @@ export async function getAlertEvents(
       bool: {
         filter: [
           ...rangeQuery(startInMs, endInMs, ALERT_START),
-          ...Object.keys(sourceJson).map((sourceKey) => ({
-            term: { [sourceKey]: sourceJson[sourceKey] },
+          ...Object.keys(filterJSON).map((filterKey) => ({
+            term: { [filterKey]: filterJSON[filterKey] },
           })),
         ],
       },
@@ -141,10 +141,8 @@ export async function getAlertEvents(
       title: `${_source[ALERT_RULE_CATEGORY]} breached`,
       description: _source[ALERT_REASON],
       timestamp: new Date(_source['@timestamp']).getTime(),
-      type: 'alert' as const,
-      details: {
-        status: _source[ALERT_STATUS],
-      },
+      eventType: 'alert',
+      alertStatus: _source[ALERT_STATUS],
     };
   });
 

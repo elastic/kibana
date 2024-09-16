@@ -18,8 +18,9 @@ const eventTypeSchema = z.union([
 ]);
 
 const annotationEventSchema = z.object({
-  type: z.union([z.string(), z.undefined()]),
-  end: z.union([z.string(), z.undefined()]),
+  eventType: z.literal('annotation'),
+  annotationType: z.union([z.string(), z.undefined()]),
+  annotationEnd: z.union([z.string(), z.undefined()]),
 });
 
 const alertStatusSchema = z.union([
@@ -30,8 +31,11 @@ const alertStatusSchema = z.union([
 ]);
 
 const alertEventSchema = z.object({
-  status: alertStatusSchema,
+  eventType: z.literal('alert'),
+  alertStatus: alertStatusSchema,
 });
+
+const sourceSchema = z.record(z.string(), z.any());
 
 const eventSchema = z.intersection(
   z.object({
@@ -39,14 +43,10 @@ const eventSchema = z.intersection(
     title: z.string(),
     description: z.string(),
     timestamp: z.number(),
-    type: eventTypeSchema,
+    eventType: eventTypeSchema,
+    source: z.union([sourceSchema, z.undefined()]),
   }),
-  z
-    .object({
-      details: z.union([annotationEventSchema, alertEventSchema]),
-      source: z.record(z.string(), z.any()),
-    })
-    .partial()
+  z.discriminatedUnion('eventType', [annotationEventSchema, alertEventSchema])
 );
 
 export { eventSchema };
