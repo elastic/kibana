@@ -10,7 +10,7 @@ import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import type { Capabilities } from '@kbn/core/public';
-import { CASES_FEATURE_ID, CASES_PATH, LANDING_PATH, SERVER_APP_ID } from '../../common/constants';
+import { CASES_FEATURE_ID, CASES_PATH, ONBOARDING_PATH, SERVER_APP_ID } from '../../common/constants';
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
 
@@ -33,7 +33,7 @@ AppRoutes.displayName = 'AppRoutes';
 
 export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
   if (capabilities[SERVER_APP_ID].show === true) {
-    return <Redirect to={LANDING_PATH} />;
+    return <Redirect to={ONBOARDING_PATH} />;
   }
   if (capabilities[CASES_FEATURE_ID].read_cases === true) {
     return <Redirect to={CASES_PATH} />;
