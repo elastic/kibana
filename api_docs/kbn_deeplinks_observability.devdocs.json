@@ -843,7 +843,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
+          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -924,7 +924,7 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"profiling:functions\""
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
