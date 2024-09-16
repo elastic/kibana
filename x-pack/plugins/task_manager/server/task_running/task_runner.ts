@@ -41,6 +41,7 @@ import {
   TaskManagerStat,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   CancelFunction,
   CancellableTask,
@@ -713,7 +714,7 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
-    const debugLogger = this.logger.get(`metrics-debugger`);
+    const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
 
