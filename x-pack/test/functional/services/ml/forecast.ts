@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningForecastProvider({ getService }: FtrProviderContext) {
+export function MachineLearningForecastProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const headerPage = getPageObject('header');
 
   return {
     async assertForecastButtonExists() {
@@ -102,6 +103,7 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
     },
 
     async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
+      await headerPage.waitUntilLoadingHasFinished();
       const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
       expect(isEnabled).to.eql(
         expectedValue,
