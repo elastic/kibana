@@ -13,6 +13,7 @@ import {
   deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
+  getAllInvestigationStatsParamsSchema,
   getAllInvestigationTagsParamsSchema,
   getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
@@ -42,6 +43,7 @@ import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -156,6 +158,20 @@ const getAllInvestigationTagsRoute = createInvestigateAppServerRoute({
     const repository = investigationRepositoryFactory({ soClient, logger });
 
     return await getAllInvestigationTags(repository);
+  },
+});
+
+const getAllInvestigationStatsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/_stats 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getAllInvestigationStatsParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await getAllInvestigationStats(repository);
   },
 });
 
@@ -344,6 +360,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...updateInvestigationItemRoute,
     ...getInvestigationItemsRoute,
     ...getEventsRoute,
+    ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
   };
 }
