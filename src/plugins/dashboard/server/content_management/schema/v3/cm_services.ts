@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
@@ -165,19 +166,23 @@ const searchSourceSchema = schema.object(
       schema.arrayOf(
         schema.object(
           {
-            meta: schema.object({
-              alias: schema.maybe(schema.nullable(schema.string())),
-              disabled: schema.maybe(schema.boolean()),
-              negate: schema.maybe(schema.boolean()),
-              controlledBy: schema.maybe(schema.string()),
-              group: schema.maybe(schema.string()),
-              index: schema.maybe(schema.string()),
-              isMultiIndex: schema.maybe(schema.boolean()),
-              type: schema.maybe(schema.string()),
-              key: schema.maybe(schema.string()),
-              params: schema.maybe(schema.any()),
-              value: schema.maybe(schema.string()),
-            }),
+            meta: schema.object(
+              {
+                alias: schema.maybe(schema.nullable(schema.string())),
+                disabled: schema.maybe(schema.boolean()),
+                negate: schema.maybe(schema.boolean()),
+                controlledBy: schema.maybe(schema.string()),
+                group: schema.maybe(schema.string()),
+                index: schema.maybe(schema.string()),
+                isMultiIndex: schema.maybe(schema.boolean()),
+                type: schema.maybe(schema.string()),
+                key: schema.maybe(schema.string()),
+                params: schema.maybe(schema.any()),
+                value: schema.maybe(schema.string()),
+                field: schema.maybe(schema.string()),
+              },
+              { unknowns: 'allow' }
+            ),
             query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             $state: schema.maybe(
               schema.object({
