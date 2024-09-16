@@ -82,6 +82,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
     await page.waitForSelector(`text=Alerts are now disabled for the monitor "Test Monitor".`);
+    await page.hover('text=Test Monitor');
+    await page.click('[aria-label="Open actions menu"]');
     await page.click('text=Enable status alert');
   });
 
@@ -109,11 +111,14 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
       numberOfChecks: 1,
       downThreshold: 1,
       locationsThreshold: 1,
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -173,11 +178,14 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
       numberOfChecks: 1,
       downThreshold: 1,
       locationsThreshold: 1,
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
