@@ -18,9 +18,11 @@ export async function createInvestigation(
     throw new Error(`Investigation [id=${params.id}] already exists`);
   }
 
+  const now = Date.now();
   const investigation: Investigation = {
     ...params,
-    createdAt: Date.now(),
+    updatedAt: now,
+    createdAt: now,
     createdBy: user.username,
     status: 'triage',
     notes: [],

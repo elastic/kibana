@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Index } from '@kbn/index-management';
+import React, { useMemo, useState } from 'react';
+import type { Index } from '@kbn/index-management-shared-types';
 
 import {
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface QuickStatsProps {
   index: Index;
@@ -28,6 +29,9 @@ export interface QuickStatsProps {
 }
 
 export const SetupAISearchButton: React.FC = () => {
+  const {
+    services: { docLinks },
+  } = useKibana();
   return (
     <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
       <EuiFlexGroup gutterSize="s" direction="column" alignItems="center">
@@ -35,19 +39,19 @@ export const SetupAISearchButton: React.FC = () => {
           <EuiText>
             <h6>
               {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_description', {
-                defaultMessage: 'Use Elastic to build powerful AI Search',
+                defaultMessage: 'Build AI-powered search experiences with Elastic',
               })}
             </h6>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search.html"
+            href={docLinks.links.enterpriseSearch.semanticSearch}
             target="_blank"
             data-test-subj="setupAISearchButton"
           >
             {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
-              defaultMessage: 'Setup now',
+              defaultMessage: 'Set up now',
             })}
           </EuiButton>
         </EuiFlexItem>
@@ -57,9 +61,9 @@ export const SetupAISearchButton: React.FC = () => {
 };
 
 export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
-  const mappingStats = countVectorBasedTypesFromMappings(mappings);
+  const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
 
@@ -97,7 +101,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
                   defaultMessage: 'Index Size',
                 }),
-                description: index.size ?? 0,
+                description: index.size ?? '0b',
               },
             ]}
             first
