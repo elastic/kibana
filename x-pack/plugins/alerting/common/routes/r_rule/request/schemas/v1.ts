@@ -22,7 +22,7 @@ export const rRuleRequestSchema = schema.object({
     schema.number({
       validate: (interval: number) => {
         if (!Number.isInteger(interval)) {
-          return `rRule interval must be an integer greater than 0`;
+          return 'rRule interval must be an integer greater than 0';
         }
       },
       min: 1,
@@ -33,7 +33,7 @@ export const rRuleRequestSchema = schema.object({
     schema.number({
       validate: (count: number) => {
         if (!Number.isInteger(count)) {
-          return `rRule count must be an integer greater than 0`;
+          return 'rRule count must be an integer greater than 0';
         }
       },
       min: 1,

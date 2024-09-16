@@ -59,16 +59,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const nameInput = await testSubjects.find('createMaintenanceWindowFormNameInput');
 
-      nameInput.click();
-      nameInput.clearValue();
-      nameInput.type('Test Maintenance Window updated');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type('Test Maintenance Window updated');
 
       // Open the repeat dropdown select
-      (await testSubjects.find('recurringScheduleRepeatSelect')).click();
+      await (await testSubjects.find('recurringScheduleRepeatSelect')).click();
       // Select daily
-      (await testSubjects.find('recurringScheduleOptionDaily')).click();
+      await (await testSubjects.find('recurringScheduleOptionDaily')).click();
 
-      (await testSubjects.find('create-submit')).click();
+      await (await testSubjects.find('create-submit')).click();
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();

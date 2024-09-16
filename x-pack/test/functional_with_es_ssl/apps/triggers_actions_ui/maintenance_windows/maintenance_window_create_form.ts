@@ -43,20 +43,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const nameInput = await testSubjects.find('createMaintenanceWindowFormNameInput');
 
-      nameInput.click();
-      nameInput.type('Test Maintenance Window');
+      await nameInput.click();
+      await nameInput.type('Test Maintenance Window');
 
       // Turn on repeat
-      (await testSubjects.find('createMaintenanceWindowRepeatSwitch')).click();
+      await (await testSubjects.find('createMaintenanceWindowRepeatSwitch')).click();
 
       await retry.try(async () => {
         await testSubjects.existOrFail('recurringScheduleRepeatSelect');
       });
 
       // Open the repeat dropdown select
-      (await testSubjects.find('recurringScheduleRepeatSelect')).click();
+      await (await testSubjects.find('recurringScheduleRepeatSelect')).click();
       // Select custom
-      (await testSubjects.find('recurringScheduleOptionCustom')).click();
+      await (await testSubjects.find('recurringScheduleOptionCustom')).click();
 
       await retry.try(async () => {
         await testSubjects.existOrFail('customRecurringScheduleFrequencySelect');
@@ -65,15 +65,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Change interval to 2
       const intervalInput = await testSubjects.find('customRecurringScheduleIntervalInput');
 
-      intervalInput.click();
-      intervalInput.type('2');
+      await intervalInput.click();
+      await intervalInput.type('2');
 
       // Open "every" frequency dropdown
-      (await testSubjects.find('customRecurringScheduleFrequencySelect')).click();
+      await (await testSubjects.find('customRecurringScheduleFrequencySelect')).click();
       // Select daily
-      (await testSubjects.find('customFrequencyDaily')).click();
+      await (await testSubjects.find('customFrequencyDaily')).click();
       // Click on "End -> after {X}"
-      (await testSubjects.find('recurrenceEndOptionAfterX')).click();
+      await (await testSubjects.find('recurrenceEndOptionAfterX')).click();
 
       await retry.try(async () => {
         await testSubjects.existOrFail('count-field');
@@ -81,11 +81,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const afterXOccurenceInput = await testSubjects.find('recurringScheduleAfterXOccurenceInput');
 
-      afterXOccurenceInput.click();
-      afterXOccurenceInput.clearValue();
-      afterXOccurenceInput.type('5');
+      await afterXOccurenceInput.click();
+      await afterXOccurenceInput.clearValue();
+      await afterXOccurenceInput.type('5');
 
-      (await testSubjects.find('create-submit')).click();
+      await (await testSubjects.find('create-submit')).click();
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
