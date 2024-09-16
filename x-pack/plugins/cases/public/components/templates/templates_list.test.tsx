@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within, cleanup } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -30,12 +30,18 @@ describe('TemplatesList', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    cleanup();
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders correctly', () => {
     appMockRender.render(<TemplatesList {...props} />);
 
     expect(screen.getByTestId('templates-list')).toBeInTheDocument();
   });
 
+  // double act error
   it('renders all templates', async () => {
     appMockRender.render(
       <TemplatesList {...{ ...props, templates: templatesConfigurationMock }} />
