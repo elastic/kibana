@@ -294,21 +294,16 @@ export class TaskRunner<
       state: { previousStartedAt },
     } = this.taskInstance;
 
-    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const { queryDelaySettings, flappingSettings } =
+      await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${rule.name}'`;
-    const queryDelay = await withAlertingSpan('alerting:get-query-delay-settings', () =>
-      rulesSettingsClient.queryDelay().get()
-    );
-    const flappingSettings = await withAlertingSpan('alerting:get-flapping-settings', () =>
-      rulesSettingsClient.flapping().get()
-    );
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
       namespace: this.context.spaceIdToNamespace(spaceId),
-      queryDelaySec: queryDelay.delay,
+      queryDelaySec: queryDelaySettings.delay,
       ruleId,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
