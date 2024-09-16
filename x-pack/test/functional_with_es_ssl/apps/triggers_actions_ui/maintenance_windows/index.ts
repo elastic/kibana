@@ -10,5 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Maintenance Windows', function () {
     loadTestFile(require.resolve('./maintenance_windows_table'));
+    loadTestFile(require.resolve('./maintenance_window_create_form'));
+    loadTestFile(require.resolve('./maintenance_window_update_form'));
   });
 };
