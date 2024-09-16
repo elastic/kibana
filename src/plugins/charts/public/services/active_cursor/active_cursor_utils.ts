@@ -27,7 +27,7 @@ const parseDatatable = (dataTables: Datatable[]) => {
     return {
       isDateHistogram:
         Boolean(dataTables.length) &&
-        dataTables.every((t) => t.columns.some((c) => Boolean(c.meta.type === 'date'))),
+        dataTables.every((t) => t.columns.some((c) => c.meta.type === 'date')),
       accessors: [],
     };
   }
