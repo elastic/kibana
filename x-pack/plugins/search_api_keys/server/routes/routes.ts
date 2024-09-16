@@ -15,11 +15,11 @@ import { createAPIKey } from '../lib/create_key';
 import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
 
 export function registerRoutes(router: IRouter, logger: Logger) {
-  router.get(
+  router.post(
     {
-      path: APIRoutes.API_KEYS,
+      path: APIRoutes.API_KEY_VALIDITY,
       validate: {
-        params: schema.object({
+        body: schema.object({
           id: schema.string(),
         }),
       },
@@ -31,17 +31,18 @@ export function registerRoutes(router: IRouter, logger: Logger) {
       try {
         const core = await context.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const apiKey = await getAPIKeyById(request.params.id, client, logger);
+        const apiKey = await getAPIKeyById(request.body.id, client, logger);
+        logger.info('API KEY' + JSON.stringify(apiKey));
 
-        if (!apiKey || !apiKey.invalidated) {
+        if (!apiKey) {
           return response.customError({
-            body: { message: 'API key is expired or invalid.' },
-            statusCode: 401,
+            body: { message: 'API key is not found.' },
+            statusCode: 404,
           });
         }
 
         return response.ok({
-          body: apiKey,
+          body: { isValid: !apiKey.invalidated },
           headers: { 'content-type': 'application/json' },
         });
       } catch (e) {

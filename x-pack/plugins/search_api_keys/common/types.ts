@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { Id, long, Name } from '@elastic/elasticsearch/lib/api/types';
-
 export enum APIRoutes {
   API_KEYS = '/internal/search_api_keys',
+  API_KEY_VALIDITY = '/internal/search_api_keys/validity',
 }
 
-export interface APIKeyCreationResponse {
-  api_key: string;
-  encoded: string;
+export interface APIKey {
+  id: string;
   name: string;
   expiration?: number;
+  invalidated?: boolean;
 }
 
-export interface GetApiKeyResponse {
-  creation?: long;
-  expiration?: long;
-  id: Id;
-  invalidated?: boolean;
-  name: Name;
+export interface APIKeyCreationResponse extends Pick<APIKey, 'id' | 'name' | 'expiration'> {
+  api_key: string;
+  encoded: string;
 }
+
+export type GetApiKeyResponse = APIKey;
