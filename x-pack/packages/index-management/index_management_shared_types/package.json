@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/index-management",
+  "name": "@kbn/index-management-shared-types",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"

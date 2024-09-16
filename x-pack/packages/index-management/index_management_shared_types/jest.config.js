@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/index-management'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/index-management/index_management_shared_types'],
 };
