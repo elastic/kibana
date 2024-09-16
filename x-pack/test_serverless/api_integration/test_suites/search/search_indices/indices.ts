@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('viewer', function () {
         before(async () => {
           supertestViewerWithCookieCredentials =
-            await roleScopedSupertest.getSupertestWithRoleScope('viwer', {
+            await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
               useCookieHeader: true,
               withInternalHeaders: true,
             });
