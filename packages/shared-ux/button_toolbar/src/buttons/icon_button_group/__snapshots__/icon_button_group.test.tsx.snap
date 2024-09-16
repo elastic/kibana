@@ -12,29 +12,33 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
   <div
     class="euiButtonGroup__buttons emotion-euiButtonGroup__buttons-m"
   >
-    <button
-      aria-label="Text"
-      aria-pressed="false"
-      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly emotion-euiButtonDisplay-m-defaultMinWidth-euiButtonGroupButton-iconOnly-m-uncompressed-base-text-EuiButtonGroup"
-      data-test-subj="generated-id0"
-      title="Text"
-      type="button"
+    <span
+      class="euiToolTipAnchor euiButtonGroup__tooltipWrapper emotion-euiToolTipAnchor-inlineBlock-tooltipWrapper-m"
     >
-      <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content"
+      <button
+        aria-label="Text"
+        aria-pressed="false"
+        class="euiButtonGroupButton euiButtonGroupButton-isIconOnly emotion-euiButtonDisplay-m-defaultMinWidth-euiButtonGroupButton-iconOnly-hasToolTip-uncompressed-base-text-EuiButtonGroup"
+        data-test-subj="generated-id0"
+        title=""
+        type="button"
       >
         <span
-          color="inherit"
-          data-euiicon-type="visText"
-        />
-        <span
-          class="eui-textTruncate emotion-euiButtonGroupButton__iconOnly"
-          data-text="Text"
+          class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content"
         >
-          Text
+          <span
+            color="inherit"
+            data-euiicon-type="visText"
+          />
+          <span
+            class="eui-textTruncate emotion-euiButtonGroupButton__iconOnly"
+            data-text="Text"
+          >
+            Text
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+    </span>
   </div>
 </fieldset>
 `;
