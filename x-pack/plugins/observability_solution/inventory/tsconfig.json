@@ -35,7 +35,6 @@
     "@kbn/server-route-repository-client",
     "@kbn/react-kibana-context-render",
     "@kbn/es-types",
-    "@kbn/entities-schema",
-    "@kbn/apm-data-access-plugin",
+    "@kbn/entities-schema"
   ]
 }
