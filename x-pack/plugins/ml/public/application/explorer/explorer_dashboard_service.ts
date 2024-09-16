@@ -25,7 +25,7 @@ import type { ExplorerJob } from './explorer_utils';
 
 type ExplorerActionType = (typeof EXPLORER_ACTION)[keyof typeof EXPLORER_ACTION];
 
-interface ExplorerActionPayloads {
+export interface ExplorerActionPayloads {
   [EXPLORER_ACTION.SET_EXPLORER_DATA]: DeepPartial<ExplorerState>;
   [EXPLORER_ACTION.JOB_SELECTION_CHANGE]: {
     loading: boolean;

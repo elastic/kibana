@@ -7,7 +7,7 @@
 
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from '../../explorer_constants';
-import type { ExplorerActions } from '../../explorer_dashboard_service';
+import type { ExplorerActionPayloads, ExplorerActions } from '../../explorer_dashboard_service';
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
 
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
@@ -44,7 +44,10 @@ export const explorerReducer = (
       break;
 
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
-      nextState = jobSelectionChange(state, payload);
+      nextState = jobSelectionChange(
+        state,
+        payload as ExplorerActionPayloads[typeof EXPLORER_ACTION.JOB_SELECTION_CHANGE]
+      );
       break;
 
     case EXPLORER_ACTION.SET_CHARTS_DATA_LOADING:
