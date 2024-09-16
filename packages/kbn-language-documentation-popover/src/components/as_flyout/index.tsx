@@ -13,7 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
@@ -79,12 +79,13 @@ function DocumentationFlyout({
           aria-labelledby="esqlInlineDocumentationFlyout"
           type="push"
           size={DEFAULT_WIDTH}
+          paddingSize="m"
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h3>ES|QL quick reference</h3>
             </EuiTitle>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <DocumentationNavigation
               searchText={searchText}
               setSearchText={setSearchText}
