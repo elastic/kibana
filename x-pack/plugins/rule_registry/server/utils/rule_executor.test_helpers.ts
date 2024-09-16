@@ -22,13 +22,7 @@ import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { maintenanceWindowsServiceMock } from '@kbn/alerting-plugin/server/task_runner/maintenance_windows/maintenance_windows_service.mock';
 
-const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
-maintenanceWindowsService?.loadMaintenanceWindows.mockReturnValue({
-  maintenanceWindows: [],
-  maintenanceWindowsWithoutScopedQueryIds: ['test-id-1', 'test-id-2'],
-});
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
   State extends RuleTypeState = never,
@@ -91,7 +85,6 @@ export const createDefaultAlertExecutorOptions = <
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     share: {} as SharePluginStart,
-
     shouldStopExecution: () => false,
     shouldWriteAlerts: () => shouldWriteAlerts,
     uiSettingsClient: uiSettingsServiceMock.createClient(),

@@ -387,6 +387,9 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
     describe('legacy', function () {
       this.tags('skipFIPS');
       it('handles multi-alert status', async () => {
+        // wait so cache expires
+        await setTimeoutAsync(10000);
+
         // pattern of when the alert should fire
         const pattern = {
           alertA: [true, true, true, true],

@@ -436,7 +436,6 @@ describe('Ad Hoc Task Runner', () => {
     expect(call.services.alertsClient?.report).toBeTruthy();
     expect(call.services.alertsClient?.setAlertData).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
-    expect(call.services.maintenanceWindowsService).toBeUndefined();
     expect(call.params).toEqual(mockedAdHocRunSO.attributes.rule.params);
     expect(call.state).toEqual({});
     expect(call.startedAt).toStrictEqual(new Date(schedule1.runAt));

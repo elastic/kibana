@@ -132,12 +132,15 @@ export const finishMaintenanceWindow = async ({
   id: string;
   supertest: SuperTestAgent;
 }) => {
-  return supertest
+  await supertest
     .post(
       `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window/${id}/_finish`
     )
     .set('kbn-xsrf', 'foo')
     .expect(200);
+
+  // wait so cache expires
+  await setTimeoutAsync(10000);
 };
 
 export const getRuleEvents = async ({
