@@ -193,10 +193,10 @@
     display: flex;
     flex-wrap: nowrap;
     border: $euiBorderThin;
-  
+
     background-color: $euiColorEmptyShade;
     height: $euiSizeXL;
-  
+
     pointer-events: all; // Re-enable pointer-events for hover actions
   }
 
