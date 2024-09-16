@@ -367,7 +367,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.DISCOVER],
+            featureIds: ['discover'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
@@ -378,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
           return hit.fields?.['kibana.alert.rule.consumer'];
         });
 
-        expect(consumers.every((consumer) => consumer === AlertConsumers.DISCOVER));
+        expect(consumers.every((consumer) => consumer === 'discover'));
       });
 
       it('should return alerts from .es-query rule type with consumer discover as superuser', async () => {
@@ -392,7 +392,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.DISCOVER],
+            featureIds: ['discover'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
@@ -403,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
           return hit.fields?.['kibana.alert.rule.consumer'];
         });
 
-        expect(consumers.every((consumer) => consumer === AlertConsumers.DISCOVER));
+        expect(consumers.every((consumer) => consumer === 'discover'));
       });
 
       it('should not return alerts from .es-query rule type with consumer discover without access to stack rules', async () => {
@@ -417,7 +417,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.DISCOVER],
+            featureIds: ['discover'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
