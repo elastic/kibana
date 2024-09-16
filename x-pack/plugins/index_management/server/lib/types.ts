@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './rules_settings_client';
-export * from './flapping/rules_settings_flapping_client';
-export * from './query_delay/rules_settings_query_delay_client';
+export interface MeteringStats {
+  name: string;
+  num_docs: number;
+  size_in_bytes: number;
+}
