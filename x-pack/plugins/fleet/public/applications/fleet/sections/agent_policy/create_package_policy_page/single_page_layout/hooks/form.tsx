@@ -350,7 +350,7 @@ export function useOnSubmit({
           notifications.toasts.addError(e, {
             title: agentlessPolicy?.supports_agentless
               ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create agentless integration',
+                  defaultMessage: 'Unable to create integration',
                 })
               : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
                   defaultMessage: 'Unable to create agent policy',
