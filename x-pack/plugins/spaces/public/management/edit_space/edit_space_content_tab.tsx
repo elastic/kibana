@@ -13,12 +13,14 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { handleApiError } from './handle_api_error';
 import { useEditSpaceServices } from './provider';
@@ -115,16 +117,31 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
   }
 
   return (
-    <EuiBasicTable
-      data-test-subj="editSpaceContentTab"
-      tableCaption={i18n.translate('xpack.spaces.management.editSpaceContent.listTableCaption', {
-        defaultMessage: 'List of saved object content within the space',
-      })}
-      items={items}
-      rowHeader="type"
-      columns={columns}
-      rowProps={getRowProps}
-      cellProps={getCellProps}
-    />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.spaces.management.editSpaceContent.heading"
+            defaultMessage="All Kibana objects that are associated with this space."
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiBasicTable
+          data-test-subj="editSpaceContentTab"
+          tableCaption={i18n.translate(
+            'xpack.spaces.management.editSpaceContent.listTableCaption',
+            {
+              defaultMessage: 'List of saved object content within the space',
+            }
+          )}
+          items={items}
+          rowHeader="type"
+          columns={columns}
+          rowProps={getRowProps}
+          cellProps={getCellProps}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

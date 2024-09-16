@@ -191,38 +191,71 @@ export const EditSpace: FC<PageProps> = ({
 
   return (
     <div data-test-subj="spaces-view-page">
-      <EuiFlexGroup data-test-subj="space-view-page-details-header" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <HeaderAvatar />
+      <EuiFlexGroup
+        data-test-subj="space-view-page-details-header"
+        alignItems="flexStart"
+        direction="column"
+      >
+        <EuiFlexItem grow={true} css={{ flexBasis: '100%', width: '100%' }}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <HeaderAvatar />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={true} al>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={true}>
+                      <EuiTitle size="l">
+                        <h1 data-test-subj="spaces-view-page-title">{space.name}</h1>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <React.Fragment>
+                        {userActiveSpace?.id !== id ? (
+                          <EuiButton
+                            iconType="push"
+                            href={addSpaceIdToPath(
+                              serverBasePath,
+                              id,
+                              `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${id}`
+                            )}
+                            data-test-subj="spaces-view-page-switcher-button"
+                          >
+                            <FormattedMessage
+                              id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
+                              defaultMessage="Switch to this space"
+                            />
+                          </EuiButton>
+                        ) : null}
+                      </React.Fragment>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div>
+                    {shouldShowSolutionBadge ? (
+                      <SpaceSolutionBadge
+                        solution={solution}
+                        data-test-subj={`space-solution-badge-${solution}`}
+                      />
+                    ) : null}
+                    {userActiveSpace?.id === id ? (
+                      <EuiBadge color="primary">
+                        <FormattedMessage
+                          id="xpack.spaces.management.spaceDetails.space.badge.isCurrent"
+                          description="Text for a badge shown in the Space details page when the particular Space currently active."
+                          defaultMessage="Current"
+                        />
+                      </EuiBadge>
+                    ) : null}
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiTitle size="l">
-            <h1 data-test-subj="spaces-view-page-title">
-              {space.name}
-              {shouldShowSolutionBadge ? (
-                <>
-                  {' '}
-                  <SpaceSolutionBadge
-                    solution={solution}
-                    data-test-subj={`space-solution-badge-${solution}`}
-                  />
-                </>
-              ) : null}
-              {userActiveSpace?.id === id ? (
-                <>
-                  {' '}
-                  <EuiBadge color="primary">
-                    <FormattedMessage
-                      id="xpack.spaces.management.spaceDetails.space.badge.isCurrent"
-                      description="Text for a badge shown in the Space details page when the particular Space currently active."
-                      defaultMessage="Current"
-                    />
-                  </EuiBadge>
-                </>
-              ) : null}
-            </h1>
-          </EuiTitle>
-
+        <EuiFlexItem>
           <EuiText size="s">
             <p>
               {space.description ?? (
@@ -234,26 +267,7 @@ export const EditSpace: FC<PageProps> = ({
             </p>
           </EuiText>
         </EuiFlexItem>
-        {userActiveSpace?.id !== id ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="merge"
-              href={addSpaceIdToPath(
-                serverBasePath,
-                id,
-                `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${id}`
-              )}
-              data-test-subj="spaces-view-page-switcher-button"
-            >
-              <FormattedMessage
-                id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
-                defaultMessage="Switch to this space"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
-
       <EuiSpacer />
 
       <EuiFlexGroup direction="column">

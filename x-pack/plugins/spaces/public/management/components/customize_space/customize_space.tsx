@@ -71,7 +71,7 @@ export class CustomizeSpace extends Component<Props, State> {
           description={i18n.translate(
             'xpack.spaces.management.manageSpacePage.describeSpaceDescription',
             {
-              defaultMessage: "Give your space a name that's memorable.",
+              defaultMessage: 'Give your space a meaningful name and description.',
             }
           )}
           fullWidth

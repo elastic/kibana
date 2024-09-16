@@ -452,7 +452,7 @@ export class SpacesGridPage extends Component<Props, State> {
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.deleteActionDisabledDescription',
                   {
-                    defaultMessage: `{spaceName} is reserved`,
+                    defaultMessage: `You can't delete the {spaceName} space`,
                     values: { spaceName: rowRecord.name },
                   }
                 )

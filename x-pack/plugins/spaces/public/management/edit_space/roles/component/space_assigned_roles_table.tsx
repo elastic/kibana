@@ -36,13 +36,14 @@ import type { Space } from '../../../../../common';
 import { sortRolesForListing } from '../../../lib';
 
 interface ISpaceAssignedRolesTableProps {
-  isReadOnly: boolean;
+  isReadOnly?: boolean;
   currentSpace: Space;
   assignedRoles: Map<Role['name'], Role>;
   onClickAssignNewRole: () => Promise<void>;
-  onClickBulkRemove: (selectedRoles: Role[]) => void;
   onClickRowEditAction: (role: Role) => void;
   onClickRowRemoveAction: (role: Role) => void;
+  supportsBulkAction?: boolean;
+  onClickBulkRemove?: (selectedRoles: Role[]) => void;
 }
 
 const isRoleReserved = (role: Role) => {
@@ -157,7 +158,7 @@ const getTableColumns = ({
             isRoleReserved(role)
               ? i18n.translate(
                   'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
-                  { defaultMessage: `Can't perform actions on a reserved role` }
+                  { defaultMessage: `You can’t edit the access of reserved roles to this space.` }
                 )
               : i18n.translate(
                   'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
@@ -232,13 +233,14 @@ const getCellProps = (item: Role, column: EuiTableFieldDataColumnType<Role>) => 
 };
 
 export const SpaceAssignedRolesTable = ({
-  isReadOnly,
   assignedRoles,
   currentSpace,
   onClickAssignNewRole,
   onClickBulkRemove,
   onClickRowEditAction,
   onClickRowRemoveAction,
+  isReadOnly = false,
+  supportsBulkAction = false,
 }: ISpaceAssignedRolesTableProps) => {
   const tableColumns = useMemo(
     () =>
@@ -277,11 +279,12 @@ export const SpaceAssignedRolesTable = ({
   const searchElementDefinition = useMemo<EuiSearchBarProps>(() => {
     return {
       box: {
+        fullWidth: false,
         incremental: true,
         'data-test-subj': 'spaceAssignedRolesSearchBox',
         placeholder: i18n.translate(
           'xpack.spaces.management.spaceDetails.roles.searchField.placeholder',
-          { defaultMessage: 'Search' }
+          { defaultMessage: 'Filter assigned roles...' }
         ),
       },
       onChange: onSearchQueryChange,
@@ -291,7 +294,7 @@ export const SpaceAssignedRolesTable = ({
             <EuiFlexItem grow={false} color="primary">
               <EuiButton iconType="plusInCircle" onClick={onClickAssignNewRole}>
                 {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
-                  defaultMessage: 'Assign role',
+                  defaultMessage: 'Assign new roles',
                 })}
               </EuiButton>
             </EuiFlexItem>
@@ -302,6 +305,10 @@ export const SpaceAssignedRolesTable = ({
   }, [isReadOnly, onClickAssignNewRole, onSearchQueryChange]);
 
   const tableHeader = useMemo<EuiInMemoryTableProps<Role>['childrenBetween']>(() => {
+    if (!supportsBulkAction) {
+      return null;
+    }
+
     const pageSize = pagination.size;
     const pageIndex = pagination.index;
 
@@ -379,7 +386,7 @@ export const SpaceAssignedRolesTable = ({
                                   </EuiTextColor>
                                 ),
                                 onClick: async () => {
-                                  onClickBulkRemove(selectedRoles);
+                                  onClickBulkRemove?.(selectedRoles);
                                   setBulkActionContextOpen(false);
                                 },
                               },
@@ -427,13 +434,14 @@ export const SpaceAssignedRolesTable = ({
       </EuiFlexGroup>
     );
   }, [
-    isReadOnly,
-    isBulkActionContextOpen,
-    onClickBulkRemove,
-    pagination.index,
     pagination.size,
+    pagination.index,
     rolesInView,
     selectedRoles,
+    isReadOnly,
+    supportsBulkAction,
+    isBulkActionContextOpen,
+    onClickBulkRemove,
   ]);
 
   const onTableChange = ({ page }: CriteriaWithPagination<Role>) => {
@@ -444,30 +452,36 @@ export const SpaceAssignedRolesTable = ({
     setSelectedRoles(selection);
   };
 
-  const selection: EuiTableSelectionType<Role> = {
-    selected: selectedRoles,
-    selectable: (role) => isEditableRole(role),
-    selectableMessage: (_selectable, role) => {
-      if (isRoleReserved(role)) {
-        return i18n.translate(
-          'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isReserved',
-          { defaultMessage: `You can't select a role that is reserved` }
-        );
-      }
-      if (isRoleAssignedToAll(role)) {
-        return i18n.translate(
-          'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isRoleAssignedToAll',
-          { defaultMessage: `You can't select a role that is assigned to all spaces` }
-        );
-      }
+  const selection: EuiTableSelectionType<Role> | undefined = useMemo(() => {
+    if (!supportsBulkAction) {
+      return void 0;
+    }
 
-      return i18n.translate(
-        'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.selectRole',
-        { defaultMessage: `Select {roleName}`, values: { roleName: role.name } }
-      );
-    },
-    onSelectionChange,
-  };
+    return {
+      selected: selectedRoles,
+      selectable: (role) => isEditableRole(role),
+      selectableMessage: (_selectable, role) => {
+        if (isRoleReserved(role)) {
+          return i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isReserved',
+            { defaultMessage: `You can't select a role that is reserved` }
+          );
+        }
+        if (isRoleAssignedToAll(role)) {
+          return i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isRoleAssignedToAll',
+            { defaultMessage: `You can't select a role that is assigned to all spaces` }
+          );
+        }
+
+        return i18n.translate(
+          'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.selectRole',
+          { defaultMessage: `Select {roleName}`, values: { roleName: role.name } }
+        );
+      },
+      onSelectionChange,
+    };
+  }, [selectedRoles, supportsBulkAction]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">

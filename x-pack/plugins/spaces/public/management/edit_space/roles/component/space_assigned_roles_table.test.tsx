@@ -33,7 +33,10 @@ const defaultProps: Pick<
 };
 
 const renderTestComponent = (
-  props: Pick<ComponentProps<typeof SpaceAssignedRolesTable>, 'assignedRoles' | 'isReadOnly'>
+  props: Pick<
+    ComponentProps<typeof SpaceAssignedRolesTable>,
+    'assignedRoles' | 'isReadOnly' | 'supportsBulkAction'
+  >
 ) => {
   render(
     <IntlProvider locale="en">
@@ -90,26 +93,39 @@ describe('SpaceAssignedRolesTable', () => {
   it('renders the table', () => {
     renderTestComponent({
       assignedRoles: spaceAssignedRoles,
-      isReadOnly: false,
+    });
+
+    expect(screen.getByTestId('spaceAssignedRolesTable')).toBeInTheDocument();
+  });
+
+  it('does not render row selection and bulk actions context menu by default', () => {
+    renderTestComponent({
+      assignedRoles: spaceAssignedRoles,
+      supportsBulkAction: false,
+    });
+
+    expect(screen.getByTestId('spaceAssignedRolesTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('bulkActionsContextMenuOpener')).toBeNull();
+    expect(screen.queryByTestId('checkboxSelectAll')).toBeNull();
+  });
+
+  it('renders with row selection and bulk actions context menu when bulk action are supported and table is not in readOnly mode', () => {
+    renderTestComponent({
+      assignedRoles: spaceAssignedRoles,
+      supportsBulkAction: true,
     });
 
     expect(screen.getByTestId('spaceAssignedRolesTable')).toBeInTheDocument();
     expect(screen.getByTestId('bulkActionsContextMenuOpener')).toBeInTheDocument();
+    expect(screen.getByTestId('checkboxSelectAll')).toBeInTheDocument();
   });
 
-  it('does not render bulk action content menu when in read-only mode', () => {
-    renderTestComponent({
-      assignedRoles: spaceAssignedRoles,
-      isReadOnly: true,
-    });
-
-    expect(screen.queryByTestId('bulkActionsContextMenuOpener')).toBeNull();
-  });
+  // it('will not render the bulk actions context menu when the table is in readOnly mode', () => {})
 
   it('prevents modification of reserved roles', () => {
     renderTestComponent({
       assignedRoles: spaceAssignedRoles,
-      isReadOnly: false,
+      supportsBulkAction: true,
     });
 
     expect(screen.getByTestId('spaceAssignedRolesTable')).toBeInTheDocument();

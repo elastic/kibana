@@ -96,7 +96,7 @@ export const getTabs = ({
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
-        defaultMessage: 'Assigned roles',
+        defaultMessage: 'Permissions',
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">

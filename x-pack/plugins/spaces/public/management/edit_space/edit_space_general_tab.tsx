@@ -58,6 +58,21 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     openConfirm: overlays.openConfirm,
     navigateToUrl,
     history,
+    titleText: i18n.translate('xpack.spaces.management.spaceDetails.unsavedChangesPromptTitle', {
+      defaultMessage: 'Leave without saving?',
+    }),
+    messageText: i18n.translate(
+      'xpack.spaces.management.spaceDetails.unsavedChangesPromptMessage',
+      {
+        defaultMessage: "Unsaved changes won't be applied to the space and will be lost.",
+      }
+    ),
+    cancelButtonText: i18n.translate('xpack.spaces.management.spaceDetails.keepEditingButton', {
+      defaultMessage: 'Save before leaving',
+    }),
+    confirmButtonText: i18n.translate('xpack.spaces.management.spaceDetails.leavePageButton', {
+      defaultMessage: 'Leave',
+    }),
   });
 
   const onChangeSpaceSettings = useCallback(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useEffect } from 'react';
 
@@ -178,17 +178,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
           <EuiText>
             <FormattedMessage
               id="xpack.spaces.management.spaceDetails.roles.heading"
-              defaultMessage="Assign roles to this space so that users with those roles are able to access it. You can create and edit them in {linkToRolesPage}."
-              values={{
-                linkToRolesPage: (
-                  <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
-                    {i18n.translate(
-                      'xpack.spaces.management.spaceDetails.roles.rolesPageAnchorText',
-                      { defaultMessage: 'Roles' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Assign roles to this space. Users with these roles can access and use the space according to the privileges that you set."
             />
           </EuiText>
         </EuiFlexItem>

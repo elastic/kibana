@@ -245,9 +245,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
           if (spaces.includes(space.id!)) {
             if (spaces.length > 1) {
-              // space belongs to a collection of other spaces that share the same privileges,
-              // so we have to assign the new privilege to apply only to the specific space
-              // hence we remove the space from the shared privilege
+              // account for instance where current space belongs to a collection of other spaces that share the same privileges that are grouped together,
+              // since we intend to apply the new privilege exclusively to the current space
+              // we remove the space from the shared privilege.
               spaces.splice(i, 1);
             } else {
               Object.assign(selectedRole.value!.kibana[i], newPrivileges);
@@ -390,7 +390,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             color="primary"
             idSelected={roleSpacePrivilege}
             onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
-            buttonSize="compressed"
             isFullWidth
           />
         </EuiFormRow>
@@ -421,8 +420,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     role={roleCustomizationAnchor.value!}
                     privilegeIndex={roleCustomizationAnchor.privilegeIndex}
                     onChange={(featureId, selectedPrivileges) => {
-                      // apply selected changes only to customization anchor, this way we delay reconciling the intending privileges
-                      // of the selected roles till we decide to commit the changes chosen
+                      // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                      // to all of the selected roles till we decide to commit the changes chosen
                       setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
                         let privilege;
 
@@ -434,7 +433,17 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                       });
                     }}
                     onChangeAll={(_privilege) => {
-                      // dummy function we wouldn't be using this
+                      // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                      // to all of the selected roles till we decide to commit the changes chosen
+                      setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
+                        let privilege;
+
+                        if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                          privilege.base = _privilege;
+                        }
+
+                        return { value, privilegeIndex };
+                      });
                     }}
                     kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
                     privilegeCalculator={
@@ -476,10 +485,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign.privileges.custom', {
-              defaultMessage: 'Assign role to "{spaceName}"',
-              values: { spaceName: space.name },
-            })}
+            {defaultSelected.length
+              ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
+                  defaultMessage: 'Edit role privileges',
+                })
+              : i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
+                  {
+                    defaultMessage: 'Assign roles to space',
+                  }
+                )}
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -487,7 +502,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           <p>
             <FormattedMessage
               id="xpack.spaces.management.spaceDetails.privilegeForm.heading"
-              defaultMessage="Roles will be granted access to the current space according to their default privileges. Use the &lsquo;Customize&rsquo; option to override default privileges."
+              defaultMessage="Define the privileges a given role should have in this space."
             />
           </p>
         </EuiText>
