@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type {
   DiscoverAppState,
@@ -30,7 +30,7 @@ export interface WithAllSelection {
   allSelection: AllDatasetSelection;
 }
 export interface WithControlPanelGroupAPI {
-  controlGroupAPI: ControlGroupAPI;
+  controlGroupAPI: ControlGroupRendererApi;
 }
 
 export interface WithControlPanels {
@@ -198,7 +198,7 @@ export type LogsExplorerControllerEvent =
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
-      controlGroupAPI: ControlGroupAPI | undefined;
+      controlGroupAPI: ControlGroupRendererApi | undefined;
     }
   | {
       type: 'UPDATE_CONTROL_PANELS';
@@ -222,5 +222,5 @@ export type LogsExplorerControllerEvent =
     }
   | DoneInvokeEvent<DataSourceSelection>
   | DoneInvokeEvent<ControlPanels>
-  | DoneInvokeEvent<ControlGroupAPI>
+  | DoneInvokeEvent<ControlGroupRendererApi>
   | DoneInvokeEvent<Error>;

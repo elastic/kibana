@@ -29,8 +29,8 @@ export async function getEntityLatestServices({
   serviceName,
 }: {
   entitiesESClient: EntitiesESClient;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
   environment: string;
   kuery?: string;
   size: number;

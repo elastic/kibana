@@ -32,7 +32,10 @@ export function useCreateInvestigation() {
     ['createInvestigation'],
     ({ investigation }) => {
       const body = JSON.stringify(investigation);
-      return http.post<CreateInvestigationResponse>(`/api/observability/investigations`, { body });
+      return http.post<CreateInvestigationResponse>(`/api/observability/investigations`, {
+        body,
+        version: '2023-10-31',
+      });
     },
     {
       onError: (error, { investigation }, context) => {

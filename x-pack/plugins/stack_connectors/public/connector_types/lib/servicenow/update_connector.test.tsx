@@ -243,7 +243,7 @@ describe('UpdateConnector renders', () => {
       await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
       await userEvent.type(usernameInput, 'user', { delay: 100 });
       await userEvent.type(passwordInput, 'pass', { delay: 100 });
-      userEvent.click(getByTestId('snUpdateInstallationSubmit'));
+      await userEvent.click(getByTestId('snUpdateInstallationSubmit'));
     });
 
     // Wait for click event to be processed

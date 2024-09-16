@@ -4472,7 +4472,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, params: TabifyDocsOptions | undefined) => Record<string, any>"
+          " | undefined, params: (TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined) => Record<string, any>"
         ],
         "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
         "deprecated": false,
@@ -4522,14 +4522,14 @@
           {
             "parentPluginId": "data",
             "id": "def-public.flattenHit.$3",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [
               "Parameters how to flatten the hit"
             ],
             "signature": [
-              "TabifyDocsOptions | undefined"
+              "(TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined"
             ],
             "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
             "deprecated": false,
@@ -9614,7 +9614,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; setField: <K extends keyof ",
+          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9638,7 +9638,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+          "; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9792,7 +9792,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23162,7 +23162,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, params: TabifyDocsOptions | undefined) => Record<string, any>"
+          " | undefined, params: (TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined) => Record<string, any>"
         ],
         "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
         "deprecated": false,
@@ -23212,14 +23212,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.flattenHit.$3",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [
               "Parameters how to flatten the hit"
             ],
             "signature": [
-              "TabifyDocsOptions | undefined"
+              "(TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined"
             ],
             "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
             "deprecated": false,
