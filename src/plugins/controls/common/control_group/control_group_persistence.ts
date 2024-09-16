@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepEqual from 'fast-deep-equal';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { v4 } from 'uuid';
 import { pick, omit, xor } from 'lodash';
 
 import {
@@ -23,7 +23,6 @@ import {
 } from './control_group_panel_diff_system';
 import { ControlGroupInput } from '..';
 import {
-  ControlsPanels,
   PersistableControlGroupInput,
   persistableControlGroupInputKeys,
   RawControlGroupAttributes,
@@ -101,32 +100,6 @@ const getPanelsAreEqual = (
     if (!panelIsEqual) return false;
   }
   return true;
-};
-
-export const controlGroupInputToRawControlGroupAttributes = (
-  controlGroupInput: Omit<ControlGroupInput, 'id'>
-): RawControlGroupAttributes => {
-  return {
-    controlStyle: controlGroupInput.controlStyle,
-    chainingSystem: controlGroupInput.chainingSystem,
-    showApplySelections: controlGroupInput.showApplySelections,
-    panelsJSON: JSON.stringify(controlGroupInput.panels),
-    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
-  };
-};
-
-export const generateNewControlIds = (controlGroupInput?: PersistableControlGroupInput) => {
-  if (!controlGroupInput?.panels) return;
-
-  const newPanelsMap: ControlsPanels = {};
-  for (const panel of Object.values(controlGroupInput.panels)) {
-    const newId = v4();
-    newPanelsMap[newId] = {
-      ...panel,
-      explicitInput: { ...panel.explicitInput, id: newId },
-    };
-  }
-  return { ...controlGroupInput, panels: newPanelsMap };
 };
 
 export const rawControlGroupAttributesToControlGroupInput = (

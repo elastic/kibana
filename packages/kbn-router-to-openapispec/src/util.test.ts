@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RouteMethod } from '@kbn/core-http-server';
@@ -13,6 +14,7 @@ import {
   getXsrfHeaderForMethod,
   mergeResponseContent,
   prepareRoutes,
+  getPathParameters,
 } from './util';
 import { assignToPaths, extractTags } from './util';
 
@@ -227,5 +229,25 @@ describe('getXsrfHeaderForMethod', () => {
     },
   ])('$method', ({ method, options, expected }) => {
     expect(getXsrfHeaderForMethod(method as RouteMethod, options)).toEqual(expected);
+  });
+});
+
+describe('getPathParameters', () => {
+  test.each([
+    ['', {}],
+    ['/', {}],
+    ['{}', {}],
+    ['{{}', {}],
+    ['{badinput', {}],
+    ['{ok}', { ok: { optional: false } }],
+    ['{ok?}', { ok: { optional: true } }],
+    ['{ok??}', {}],
+    ['/api/{path}/is/{cool}', { path: { optional: false }, cool: { optional: false } }],
+    [
+      '/{required}/and/{optional?}',
+      { required: { optional: false }, optional: { optional: true } },
+    ],
+  ])('%s', (input, output) => {
+    expect(getPathParameters(input)).toEqual(output);
   });
 });

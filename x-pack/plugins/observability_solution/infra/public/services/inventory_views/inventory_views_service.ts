@@ -5,21 +5,33 @@
  * 2.0.
  */
 
-import { InventoryViewsClient } from './inventory_views_client';
-import {
+import type {
   InventoryViewsServiceStartDeps,
   InventoryViewsServiceSetup,
   InventoryViewsServiceStart,
+  IInventoryViewsClient,
 } from './types';
 
 export class InventoryViewsService {
-  public setup(): InventoryViewsServiceSetup {}
+  private client?: IInventoryViewsClient;
+
+  public setup(): InventoryViewsServiceSetup {
+    return {};
+  }
 
   public start({ http }: InventoryViewsServiceStartDeps): InventoryViewsServiceStart {
-    const client = new InventoryViewsClient(http);
-
     return {
-      client,
+      getClient: () => this.getClient({ http }),
     };
+  }
+
+  private async getClient({ http }: InventoryViewsServiceStartDeps) {
+    if (!this.client) {
+      const { InventoryViewsClient } = await import('./inventory_views_client');
+      const client = new InventoryViewsClient(http);
+      this.client = client;
+    }
+
+    return this.client;
   }
 }
