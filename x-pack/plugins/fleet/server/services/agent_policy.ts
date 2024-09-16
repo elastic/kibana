@@ -1205,7 +1205,9 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
+    await soClient.delete(savedObjectType, id, {
+      force: true, // need to delete through multiple space
+    });
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
