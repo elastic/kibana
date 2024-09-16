@@ -147,7 +147,7 @@ export async function installKibanaAssets(options: {
   await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
   let installedAssets: SavedObjectsImportSuccess[] = [];
-
+  debugger;
   if (
     assetsToInstall.length > MAX_ASSETS_TO_INSTALL_IN_PARALLEL &&
     !hasReferences(assetsToInstall)
@@ -271,6 +271,7 @@ export async function installKibanaAssetsAndReferences({
   if (installedPkg) {
     await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
   }
+
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
   if (!installAsAdditionalSpace) {
     // save new kibana refs before installing the assets

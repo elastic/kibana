@@ -1,0 +1,48 @@
+{
+  "rule_id": "test-new-terms-rule-001",
+  "name": "new-terms-rule-001_1",
+  "version": 1,
+  "type": "new_terms",
+  "risk_score": 50,
+  "language": "kuery",
+  "description": "Identifies the creation of new processes that have not been observed in the environment before, which could indicate potential malicious activity.",
+  "query": "test query",
+  "history_window_start": "now-15m",
+  "new_terms_fields": [
+    "process.executable"
+  ],
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.process-*"
+  ],
+  "severity": "medium",
+  "author": [
+    "Elastic"
+  ],
+  "false_positives": [
+    "Legitimate software installations or updates may introduce new processes."
+  ],
+  "tags": [
+    "Domain: Endpoint",
+    "OS: Windows",
+    "Use Case: Threat Detection",
+    "Tactic: Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1204",
+          "name": "User Execution",
+          "reference": "https://attack.mitre.org/techniques/T1204/"
+        }
+      ]
+    }
+  ]
+}
