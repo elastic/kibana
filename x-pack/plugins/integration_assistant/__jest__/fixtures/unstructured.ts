@@ -23,8 +23,3 @@ export const unstructuredLogResponse = {
     '####<%{MONTH} %{MONTHDAY}, %{YEAR} %{TIME} (?:AM|PM) %{WORD:timezone}> <%{WORD:log_level}> <%{WORD:component}> <%{DATA:hostname}> <%{DATA:server_name}> <%{DATA:thread_info}> <%{DATA:user}> <%{DATA:empty_field}> <%{DATA:empty_field2}> <%{NUMBER:timestamp}> <%{DATA:message_id}> <%{GREEDYDATA:message}>',
   ],
 };
-
-export const testPipelineValidResult: { pipelineResults: object[]; errors: object[] } = {
-  pipelineResults: [{ key: 'value', anotherKey: 'anotherValue' }],
-  errors: [],
-};
