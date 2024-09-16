@@ -35,6 +35,6 @@ describe('Testing unstructured error handling node', () => {
   it('handleUnstructuredError()', async () => {
     const response = await handleUnstructuredError({ state, model, client });
     expect(response.grokPatterns).toStrictEqual(unstructuredLogResponse.grok_patterns);
-    expect(response.lastExecutedChain).toBe('unstructured_error');
+    expect(response.lastExecutedChain).toBe('unstructuredError');
   });
 });

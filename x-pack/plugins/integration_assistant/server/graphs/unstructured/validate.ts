@@ -25,7 +25,7 @@ export async function handleUnstructuredValidate({
   };
 
   if (errors.length > 0) {
-    return { errors, lastExecutedChain: 'unstructured_validate' };
+    return { errors, lastExecutedChain: 'unstructuredValidate' };
   }
 
   const jsonSamples: string[] = pipelineResults.map((entry) => JSON.stringify(entry));
@@ -36,6 +36,6 @@ export async function handleUnstructuredValidate({
     jsonSamples,
     additionalProcessors,
     errors: [],
-    lastExecutedChain: 'unstructured_validate',
+    lastExecutedChain: 'unstructuredValidate',
   };
 }

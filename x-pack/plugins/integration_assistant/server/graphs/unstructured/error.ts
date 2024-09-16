@@ -27,6 +27,6 @@ export async function handleUnstructuredError({
 
   return {
     grokPatterns: pattern.grok_patterns,
-    lastExecutedChain: 'unstructured_error',
+    lastExecutedChain: 'unstructuredError',
   };
 }

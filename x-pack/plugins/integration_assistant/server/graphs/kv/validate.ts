@@ -41,7 +41,7 @@ export async function handleKVValidate({
   )) as { pipelineResults: KVResult[]; errors: object[] };
 
   if (errors.length > 0) {
-    return { errors, lastExecutedChain: 'kv_validate' };
+    return { errors, lastExecutedChain: 'kvValidate' };
   }
 
   // Converts JSON Object into a string and parses it as a array of JSON strings
@@ -56,7 +56,7 @@ export async function handleKVValidate({
     jsonSamples,
     additionalProcessors,
     errors: [],
-    lastExecutedChain: 'kv_validate',
+    lastExecutedChain: 'kvValidate',
   };
 }
 

@@ -48,7 +48,7 @@ describe('Testing unstructured validation without errors', () => {
       },
     ]);
     expect(response.errors).toStrictEqual([]);
-    expect(response.lastExecutedChain).toBe('unstructured_validate');
+    expect(response.lastExecutedChain).toBe('unstructuredValidate');
   });
 });
 
@@ -66,6 +66,6 @@ describe('Testing unstructured validation errors', () => {
   it('handleUnstructuredValidate() errors', async () => {
     const response = await handleUnstructuredValidate({ state, model, client });
     expect(response.errors).toStrictEqual(['some error']);
-    expect(response.lastExecutedChain).toBe('unstructured_validate');
+    expect(response.lastExecutedChain).toBe('unstructuredValidate');
   });
 });
