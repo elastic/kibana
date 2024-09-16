@@ -20,6 +20,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -52,10 +54,10 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
 
 const defaultEndpoints = [
   {
-    model_id: 'elser_model_2',
+    inference_id: 'elser_model_2',
   },
   {
-    model_id: 'e5',
+    inference_id: 'e5',
   },
 ];
 
@@ -87,17 +89,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   value,
 }) => {
   const {
-    core: { application },
+    core: { application, http },
     docLinks,
     plugins: { ml },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const getMlTrainedModelPageUrl = useCallback(async () => {
-    return await ml?.locator?.getUrl({
-      page: 'trained_models',
-    });
-  }, [ml]);
+  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
@@ -131,16 +129,21 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
 
   const options: EuiSelectableOption[] = useMemo(() => {
+    const filteredEndpoints = endpoints?.filter(
+      (endpoint) =>
+        endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
+    );
+
     const missingDefaultEndpoints = defaultEndpoints.filter(
-      (endpoint) => !(endpoints || []).find((e) => e.model_id === endpoint.model_id)
+      (endpoint) => !(filteredEndpoints || []).find((e) => e.inference_id === endpoint.inference_id)
     );
     const newOptions: EuiSelectableOption[] = [
-      ...(endpoints || []),
+      ...(filteredEndpoints || []),
       ...missingDefaultEndpoints,
     ].map((endpoint) => ({
-      label: endpoint.model_id,
-      'data-test-subj': `custom-inference_${endpoint.model_id}`,
-      checked: value === endpoint.model_id ? 'on' : undefined,
+      label: endpoint.inference_id,
+      'data-test-subj': `custom-inference_${endpoint.inference_id}`,
+      checked: value === endpoint.inference_id ? 'on' : undefined,
     }));
     if (value && !newOptions.find((option) => option.label === value)) {
       // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update
@@ -238,34 +241,12 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     >
       <EuiContextMenuPanel>
         <EuiContextMenuItem
-          key="addInferenceEndpoint"
-          icon="plusInCircle"
-          size="s"
-          data-test-subj="addInferenceEndpointButton"
-          onClick={() => {
-            setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-            setInferenceEndpointError(undefined);
-            setIsInferencePopoverVisible(!isInferencePopoverVisible);
-          }}
-        >
-          {i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.addInferenceEndpointButton',
-            {
-              defaultMessage: 'Add Inference Endpoint',
-            }
-          )}
-        </EuiContextMenuItem>
-        <EuiHorizontalRule margin="none" />
-        <EuiContextMenuItem
           key="manageInferenceEndpointButton"
           icon="gear"
           size="s"
           data-test-subj="manageInferenceEndpointButton"
           onClick={async () => {
-            const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
-            if (typeof mlTrainedPageUrl === 'string') {
-              application.navigateToUrl(mlTrainedPageUrl);
-            }
+            application.navigateToUrl(inferenceEndpointsPageLink);
           }}
         >
           {i18n.translate(
@@ -323,6 +304,21 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           )}
         </EuiSelectable>
       </EuiPanel>
+      <EuiHorizontalRule margin="none" />
+      <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="s">
+        <EuiLink
+          href={docLinks.links.enterpriseSearch.inferenceApiCreate}
+          target="_blank"
+          data-test-subj="learn-how-to-create-inference-endpoints"
+        >
+          {i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.learnHowToCreateInferenceEndpoints',
+            {
+              defaultMessage: 'Learn how to create inference endpoints',
+            }
+          )}
+        </EuiLink>
+      </EuiContextMenuItem>
     </EuiPopover>
   );
   return (

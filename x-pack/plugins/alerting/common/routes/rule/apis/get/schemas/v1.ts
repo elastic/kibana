@@ -8,5 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const getRuleRequestParamsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
 });

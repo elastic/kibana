@@ -25,11 +25,9 @@ import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { MetricsExplorerPage } from './metrics_explorer';
-import { SnapshotPage } from './inventory_view';
-import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
@@ -39,24 +37,32 @@ import { HeaderActionMenuContext } from '../../containers/header_action_menu_pro
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
-import { HostsPage } from './hosts';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { SearchSessionProvider } from '../../hooks/use_search_session';
+import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
 
+const MetricsExplorerPage = dynamic(() =>
+  import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
+);
+const SnapshotPage = dynamic(() =>
+  import('./inventory_view').then((mod) => ({ default: mod.SnapshotPage }))
+);
+const NodeDetail = dynamic(() =>
+  import('./metric_detail').then((mod) => ({ default: mod.NodeDetail }))
+);
+const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.HostsPage })));
+
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
-  const { application, share } = useKibana<{ share: SharePublicStart }>().services;
+  const { application } = useKibana<{ share: SharePublicStart }>().services;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
 
   const uiCapabilities = application?.capabilities;
-  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -89,25 +95,27 @@ export const InfrastructurePage = () => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <Route path="/inventory" component={AnomalyDetectionFlyout} />
-                        <Route
-                          path="/hosts"
-                          render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
-                        />
-                        <Route
-                          path="/detail/host"
-                          render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
-                        />
+                        <Routes>
+                          <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
+                          <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
+                          <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
+                        </Routes>
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
-                        <EuiHeaderLink
-                          href={onboardingLocator?.useUrl({ category: 'infra' })}
-                          color="primary"
-                          iconType="indexOpen"
-                        >
-                          {ADD_DATA_LABEL}
-                        </EuiHeaderLink>
+                        <Routes>
+                          <HeaderLinkAddDataRoute
+                            path="/hosts"
+                            onboardingFlow={OnboardingFlow.Hosts}
+                            exact
+                          />
+                          <HeaderLinkAddDataRoute
+                            path="/detail/host/:node"
+                            onboardingFlow={OnboardingFlow.Hosts}
+                            exact
+                          />
+                          <HeaderLinkAddDataRoute path="/" onboardingFlow={OnboardingFlow.Infra} />
+                        </Routes>
                       </EuiHeaderLinks>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -120,7 +128,7 @@ export const InfrastructurePage = () => {
                   <Route path="/explorer" component={MetricsExplorerPage} />
                 )}
                 <Route path="/detail/:type/:node" component={NodeDetail} />
-                {isHostsViewEnabled && <Route path="/hosts" component={HostsPage} />}
+                {isHostsViewEnabled ? <Route path="/hosts" component={HostsPage} /> : null}
                 <Route path="/settings" component={MetricsSettingsPage} />
 
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
@@ -142,5 +150,48 @@ export const InfrastructurePage = () => {
         </AlertPrefillProvider>
       </ReactQueryProvider>
     </EuiErrorBoundary>
+  );
+};
+
+const HeaderLinkAnomalyFlyoutRoute = ({ path }: { path: string }) => {
+  const isInventory = path !== '/inventory';
+  return (
+    <Route
+      path={path}
+      render={() => (
+        <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
+      )}
+    />
+  );
+};
+
+const HeaderLinkAddDataRoute = ({
+  path,
+  onboardingFlow,
+  exact,
+}: {
+  path: string;
+  onboardingFlow: OnboardingFlow;
+  exact?: boolean;
+}) => {
+  const { share } = useKibana<{ share: SharePublicStart }>().services;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+
+  return (
+    <Route
+      path={path}
+      exact={exact}
+      render={() => (
+        <EuiHeaderLink
+          href={onboardingLocator?.getRedirectUrl({ category: onboardingFlow })}
+          color="primary"
+          iconType="indexOpen"
+        >
+          {ADD_DATA_LABEL}
+        </EuiHeaderLink>
+      )}
+    />
   );
 };

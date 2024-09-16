@@ -43,14 +43,13 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt, allPrompts }) => {
     const [quickPromptsContainerRef, { width }] = useMeasure();
 
-    const { knowledgeBase, promptContexts, setSelectedSettingsTab } = useAssistantContext();
+    const { promptContexts, setSelectedSettingsTab } = useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
-      // If KB is enabled, include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
-      if (knowledgeBase.isEnabledKnowledgeBase) {
-        registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
-      }
+      // include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
+      registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
+
       return allPrompts.filter((prompt) => {
         // only quick prompts
         if (prompt.promptType !== PromptTypeEnum.quick) {
@@ -65,7 +64,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           });
         }
       });
-    }, [allPrompts, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
+    }, [allPrompts, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
@@ -131,6 +130,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
               >
                 <EuiBadge
                   color={badge.color}
+                  data-test-subj={`quickPrompt-${badge.name}`}
                   onClick={() => onClickAddQuickPrompt(badge)}
                   onClickAriaLabel={badge.name}
                 >

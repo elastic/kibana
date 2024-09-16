@@ -28,8 +28,8 @@ export const ServerLogParamsFields: React.FunctionComponent<
   return (
     <EuiFormRow
       fullWidth
-      error={errors.message}
-      isInvalid={!!errors.message?.length && message !== undefined}
+      error={errors.message as string[]}
+      isInvalid={Number(errors.message.length) > 0 && message !== undefined}
       label={i18n.translate(
         'xpack.stackConnectors.components.systemLogExample.logMessageFieldLabel',
         {
@@ -39,7 +39,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
     >
       <EuiTextArea
         fullWidth
-        isInvalid={!!errors.message?.length && message !== undefined}
+        isInvalid={Number(errors.message.length) > 0 && message !== undefined}
         name={'message'}
         value={message || ''}
         data-test-subj={'messageTextArea'}

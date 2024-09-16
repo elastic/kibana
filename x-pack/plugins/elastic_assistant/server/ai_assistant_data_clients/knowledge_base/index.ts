@@ -14,21 +14,30 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
+  DocumentEntryType,
+  IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { StructuredTool } from '@langchain/core/tools';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import { GetElser } from '../../types';
+import { AssistantToolParams, GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { EsKnowledgeBaseEntrySchema } from './types';
+import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
-import { getKBVectorSearchQuery, isModelAlreadyExistsError } from './helpers';
+import {
+  getKBVectorSearchQuery,
+  getStructuredToolForIndexEntry,
+  isModelAlreadyExistsError,
+} from './helpers';
+import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
@@ -36,6 +45,7 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   getIsKBSetupInProgress: () => boolean;
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
+  v2KnowledgeBaseEnabled: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -45,6 +55,27 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public get isSetupInProgress() {
     return this.options.getIsKBSetupInProgress();
   }
+
+  public get isV2KnowledgeBaseEnabled() {
+    return this.options.v2KnowledgeBaseEnabled;
+  }
+
+  /**
+   * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
+   *
+   */
+  public isSetupAvailable = async () => {
+    // ML plugin requires request to retrieve capabilities, which are in turn scoped to the user from the request,
+    // so we just test the API for a 404 instead to determine if ML is 'available'
+    // TODO: expand to include memory check, see https://github.com/elastic/ml-team/issues/1208#issuecomment-2115770318
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await esClient.ml.getMemoryStats({ human: true });
+    } catch (error) {
+      return false;
+    }
+    return true;
+  };
 
   /**
    * Downloads and installs ELSER model if not already installed
@@ -104,10 +135,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
-      if (!isModelAlreadyExistsError(error)) {
-        this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
-      }
-      this.options.logger.debug(`Error deploying ELSER model '${elserId}', model already deployed`);
+      this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
+      throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
     }
   };
 
@@ -214,7 +243,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`Knowledge Base docs already loaded!`);
       }
     } catch (e) {
+      this.options.setIsKBSetupInProgress(false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
+      throw new Error(`Error setting up Knowledge Base: ${e.message}`);
     }
     this.options.setIsKBSetupInProgress(false);
   };
@@ -237,18 +268,30 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-    // @ts-ignore
     const { errors, docs_created: docsCreated } = await writer.bulk({
-      documentsToCreate: documents.map((doc) =>
-        transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          metadata: {
-            kbResource: doc.metadata.kbResource ?? 'unknown',
-            required: doc.metadata.required ?? false,
-            source: doc.metadata.source ?? 'unknown',
-          },
+      documentsToCreate: documents.map((doc) => {
+        // v1 schema has metadata nested in a `metadata` object, and kbResource vs kb_resource
+        const body = this.options.v2KnowledgeBaseEnabled
+          ? {
+              kb_resource: doc.metadata.kbResource ?? 'unknown',
+              required: doc.metadata.required ?? false,
+              source: doc.metadata.source ?? 'unknown',
+            }
+          : {
+              metadata: {
+                kbResource: doc.metadata.kbResource ?? 'unknown',
+                required: doc.metadata.required ?? false,
+                source: doc.metadata.source ?? 'unknown',
+              },
+            };
+        // @ts-ignore Transform only explicitly supports v2 schema, but technically still supports v1
+        return transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
+          type: DocumentEntryType.value,
+          name: 'unknown',
           text: doc.pageContent,
-        })
-      ),
+          ...body,
+        });
+      }),
       authenticatedUser,
     });
     const created =
@@ -268,7 +311,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Performs similarity search to retrieve LangChain Documents from the knowledge base
    */
-  public getKnowledgeBaseDocuments = async ({
+  public getKnowledgeBaseDocumentEntries = async ({
     filter,
     kbResource,
     query,
@@ -296,22 +339,30 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       query,
       required,
       user,
+      v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
     try {
-      const result = await esClient.search<EsKnowledgeBaseEntrySchema>({
+      const result = await esClient.search<EsDocumentEntry>({
         index: this.indexTemplateAndPattern.alias,
         size: 10,
         query: vectorSearchQuery,
       });
 
-      const results = result.hits.hits.map(
-        (hit) =>
-          new Document({
-            pageContent: hit?._source?.text ?? '',
-            metadata: hit?._source?.metadata ?? {},
-          })
-      );
+      const results = result.hits.hits.map((hit) => {
+        const metadata = this.options.v2KnowledgeBaseEnabled
+          ? {
+              source: hit?._source?.source,
+              required: hit?._source?.required,
+              kbResource: hit?._source?.kb_resource,
+            }
+          : // @ts-ignore v1 schema has metadata nested in a `metadata` object and kbResource vs kb_resource
+            hit?._source?.metadata ?? {};
+        return new Document({
+          pageContent: hit?._source?.text ?? '',
+          metadata,
+        });
+      });
 
       this.options.logger.debug(
         () =>
@@ -347,7 +398,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
@@ -361,5 +411,59 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
     });
+  };
+
+  /**
+   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base
+   */
+  public getAssistantTools = async ({
+    assistantToolParams,
+    esClient,
+  }: {
+    assistantToolParams: AssistantToolParams;
+    esClient: ElasticsearchClient;
+  }): Promise<StructuredTool[]> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    try {
+      const elserId = await this.options.getElserId();
+      const userFilter = getKBUserFilter(user);
+      const results = await this.findDocuments<EsIndexEntry>({
+        // Note: This is a magic number to set some upward bound as to not blow the context with too
+        // many registered tools. As discussed in review, this will initially be mitigated by caps on
+        // the IndexEntries field lengths, context trimming at the graph layer (before compilation),
+        // and eventually some sort of tool discovery sub-graph or generic retriever to scale tool usage.
+        perPage: 23,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
+      });
+      this.options.logger.debug(
+        `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`
+      );
+
+      if (results) {
+        const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
+        return entries.map((indexEntry) => {
+          return getStructuredToolForIndexEntry({
+            indexEntry,
+            esClient,
+            logger: this.options.logger,
+            elserId,
+          });
+        });
+      }
+    } catch (e) {
+      this.options.logger.error(`kbDataClient.getAssistantTools() - Failed to fetch IndexEntries`);
+      return [];
+    }
+
+    return [];
   };
 }

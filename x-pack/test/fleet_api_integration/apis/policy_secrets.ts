@@ -18,7 +18,6 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
-import { setupFleetAndAgents } from './agents/services';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
 
@@ -53,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
     const es: Client = getService('es');
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertest');
+    const fleetAndAgents = getService('fleetAndAgents');
 
     const createAgentPolicy = async () => {
       const { body: agentPolicyResponse } = await supertest
@@ -169,13 +169,13 @@ export default function (providerContext: FtrProviderContext) {
 
       // Reset the global settings object to disable secrets between tests.
       // Each test can re-run setup as part of its setup if it needs to enable secrets
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     };
 
@@ -377,9 +377,9 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );

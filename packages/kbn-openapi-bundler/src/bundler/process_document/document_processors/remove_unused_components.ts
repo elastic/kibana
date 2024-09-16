@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { hasProp } from '../../../utils/has_prop';
+import { parseRef } from '../../../utils/parse_ref';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
-import { ResolvedRef } from '../../ref_resolver/resolved_ref';
-import { PlainObjectNode } from '../types/node';
+import { DocumentNode, PlainObjectNode, RefNode } from '../types/node';
 import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
@@ -22,24 +22,61 @@ import { DocumentNodeProcessor } from './types/document_node_processor';
 export class RemoveUnusedComponentsProcessor implements DocumentNodeProcessor {
   private refs = new Set();
 
-  onRefNodeLeave(node: unknown, resolvedRef: ResolvedRef): void {
-    // If the reference has been inlined by one of the previous processors skip it
-    if (!hasProp(node, '$ref')) {
+  onRefNodeLeave(node: RefNode): void {
+    // Ref pointer might be modified by previous processors
+    // resolvedRef.pointer always has the original value
+    // while node.$ref might have updated
+    const currentRefPointer = parseRef(node.$ref).pointer;
+
+    this.refs.add(currentRefPointer);
+  }
+
+  // `security` entries implicitly refer security schemas
+  onNodeLeave(node: DocumentNode): void {
+    if (!hasSecurityRequirements(node)) {
       return;
     }
 
-    this.refs.add(resolvedRef.pointer);
+    for (const securityRequirementObj of node.security) {
+      if (!isPlainObjectType(securityRequirementObj)) {
+        continue;
+      }
+
+      for (const securityRequirementName of Object.keys(securityRequirementObj)) {
+        this.refs.add(`/components/securitySchemes/${securityRequirementName}`);
+      }
+    }
   }
 
   removeUnusedComponents(components: PlainObjectNode): void {
-    if (!isPlainObjectType(components.schemas)) {
-      return;
-    }
+    for (const collectionName of COMPONENTS_TO_CLEAN) {
+      const objectsCollection = components?.[collectionName];
 
-    for (const schema of Object.keys(components.schemas)) {
-      if (!this.refs.has(`/components/schemas/${schema}`)) {
-        delete components.schemas[schema];
+      if (!isPlainObjectType(objectsCollection)) {
+        continue;
+      }
+
+      for (const schema of Object.keys(objectsCollection)) {
+        if (!this.refs.has(`/components/${collectionName}/${schema}`)) {
+          delete objectsCollection[schema];
+        }
       }
     }
   }
 }
+
+function hasSecurityRequirements(node: DocumentNode): node is { security: unknown[] } {
+  return 'security' in node && Array.isArray(node.security);
+}
+
+const COMPONENTS_TO_CLEAN = [
+  'schemas',
+  'responses',
+  'parameters',
+  'examples',
+  'requestBodies',
+  'headers',
+  'securitySchemes',
+  'links',
+  'callbacks',
+];

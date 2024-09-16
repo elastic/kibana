@@ -13,6 +13,8 @@ export const SERVER_LOG_ACTION_BTN = '[data-test-subj=".server-log-siem-ActionTy
 
 export const XMATTERS_ACTION_BTN = '[data-test-subj=".xmatters-siem-ActionTypeSelectOption"]';
 
+export const CASES_SYSTEM_ACTION_BTN = '[data-test-subj=".cases-siem-ActionTypeSelectOption"]';
+
 /**
  * all rule actions buttons, elements which data-test-subj attribute ends with  '-siem-ActionTypeSelectOption'
  */

@@ -9,14 +9,14 @@ import { useMemo } from 'react';
 import { groupBy } from 'lodash';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
   timelineDataToEnrichment,
-} from '../../../../common/components/event_details/cti_details/helpers';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+} from '../../shared/utils/threat_intelligence';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 export interface UseThreatIntelligenceParams {
@@ -76,7 +76,7 @@ export const useFetchThreatIntelligence = ({
   );
 
   // api call to retrieve all documents that match the eventFields
-  const { result: response, loading } = useInvestigationTimeEnrichment(eventFields);
+  const { result: response, loading } = useInvestigationTimeEnrichment({ eventFields });
 
   // combine existing enrichment and enrichment from the api response
   // also removes the investigation-time enrichments if the exact indicator already exists

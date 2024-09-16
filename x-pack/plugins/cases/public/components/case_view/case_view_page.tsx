@@ -13,7 +13,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
@@ -49,8 +48,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     const activeTabId = getActiveTabId(urlParams?.tabId);
 
-    const timelineUi = useTimelineContext()?.ui;
-
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseData,
     });
@@ -76,7 +73,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
-      (newTitle) =>
+      (newTitle: string) =>
         onUpdateField({
           key: 'title',
           value: newTitle,
@@ -126,7 +123,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
         </EuiFlexGroup>
-        {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );
   }

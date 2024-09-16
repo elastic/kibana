@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type ESQLAst = ESQLAstCommand[];
@@ -12,21 +13,37 @@ export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
 
+/**
+ * Represents an *expression* in the AST.
+ */
 export type ESQLSingleAstItem =
-  | ESQLFunction
+  | ESQLFunction // "function call expression"
   | ESQLCommandOption
-  | ESQLSource
-  | ESQLColumn
+  | ESQLSource // "source identifier expression"
+  | ESQLColumn // "field identifier expression"
   | ESQLTimeInterval
-  | ESQLList
-  | ESQLLiteral
+  | ESQLList // "list expression"
+  | ESQLLiteral // "literal expression"
   | ESQLCommandMode
-  | ESQLInlineCast
+  | ESQLInlineCast // "inline cast expression"
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
 
+/**
+ * An array of AST nodes represents different things in different contexts.
+ * For example, in command top level arguments it is treated as an "assignment expression".
+ */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
+
+export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+
+/**
+ * *Proper* are nodes which are objects with `type` property, once we get rid
+ * of the nodes which are plain arrays, all nodes will be *proper* and we can
+ * remove this type.
+ */
+export type ESQLProperNode = ESQLSingleAstItem | ESQLAstCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -56,14 +73,89 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
   args: ESQLAstItem[];
 }
 
+/**
+ * Right now rename expressions ("clauses") are parsed as options in the
+ * RENAME command.
+ */
+export interface ESQLAstRenameExpression extends ESQLCommandOption {
+  name: 'as';
+}
+
 export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
 }
 
-export interface ESQLFunction extends ESQLAstBaseItem {
+/**
+ * We coalesce all function calls and expressions into a single "function"
+ * node type. This subtype is used to distinguish between different types
+ * of function calls and expressions.
+ *
+ * - `variadic-call` is a function call with any number of arguments: fn(a, b, c, ...)
+ * - `unary-expression` is a unary expression: -a, +a, NOT a, ...
+ * - `binary-expression` is a binary expression: a + b, a - b, a * b, ...
+ */
+export type FunctionSubtype =
+  | 'variadic-call' // fn(a, b, c, ...)
+  | 'unary-expression' // -a, +a, NOT a, ...
+  | 'postfix-unary-expression' // a IS NULL, a IS NOT NULL, ...
+  | 'binary-expression'; // a + b, a - b, a * b, ...
+
+export interface ESQLFunction<
+  Subtype extends FunctionSubtype = FunctionSubtype,
+  Name extends string = string
+> extends ESQLAstBaseItem<Name> {
   type: 'function';
+
+  /**
+   * Default is 'variadic-call'.
+   */
+  subtype?: Subtype;
+
   args: ESQLAstItem[];
 }
+
+const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
+  typeof node === 'object' &&
+  node !== null &&
+  Object.hasOwn(node, 'name') &&
+  Object.hasOwn(node, 'text');
+
+export const isESQLFunction = (node: unknown): node is ESQLFunction =>
+  isESQLAstBaseItem(node) &&
+  Object.hasOwn(node, 'type') &&
+  (node as ESQLFunction).type === 'function';
+
+export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'> {
+  subtype: 'variadic-call';
+  args: ESQLAstItem[];
+}
+
+export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+  subtype: 'unary-expression';
+  args: [ESQLAstItem];
+}
+
+export interface ESQLPostfixUnaryExpression extends ESQLFunction<'postfix-unary-expression'> {
+  subtype: 'postfix-unary-expression';
+  args: [ESQLAstItem];
+}
+
+export interface ESQLBinaryExpression
+  extends ESQLFunction<'binary-expression', BinaryExpressionOperator> {
+  subtype: 'binary-expression';
+  args: [ESQLAstItem, ESQLAstItem];
+}
+
+export type BinaryExpressionOperator =
+  | BinaryExpressionArithmeticOperator
+  | BinaryExpressionAssignmentOperator
+  | BinaryExpressionComparisonOperator
+  | BinaryExpressionRegexOperator;
+
+export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
+export type BinaryExpressionAssignmentOperator = '=';
+export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
+export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
@@ -95,10 +187,45 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
+
+  /**
+   * Represents the cluster part of the source identifier. Empty string if not
+   * present.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  cluster?: string;
+
+  /**
+   * Represents the index part of the source identifier. Unescaped and unquoted.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  index?: string;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
+   * This property contains the parsed unquoted parts of the identifier.
+   * For example: `['part1', 'part2', 'part`3️⃣']`.
+   */
+  parts: string[];
+
+  /**
+   * @deprecated
+   *
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part3️⃣`
+   *
+   * Each part can be quoted or not quoted independently. A single `quoted`
+   * property is not enough to represent the identifier. Use `parts` instead.
+   */
   quoted: boolean;
 }
 
@@ -107,19 +234,30 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
+export type ESQLNumericLiteralType = 'decimal' | 'integer';
+
 export type ESQLLiteral =
-  | ESQLNumberLiteral
+  | ESQLDecimalLiteral
+  | ESQLIntegerLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
   | ESQLParamLiteral<string>;
 
+// Exporting here to prevent TypeScript error TS4058
+// Return type of exported function has or is using name 'ESQLNumericLiteral' from external module
 // @internal
-export interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'number';
+  literalType: T;
   value: number;
 }
+// We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
+// @internal
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+
+// @internal
+export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
@@ -166,6 +304,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
+  isESQLAstBaseItem(node) &&
+  (node as ESQLNamedParamLiteral).literalType === 'param' &&
+  (node as ESQLNamedParamLiteral).paramType === 'named';
 /**
  * *Positional* parameter is a question mark followed by a number "?1".
  *

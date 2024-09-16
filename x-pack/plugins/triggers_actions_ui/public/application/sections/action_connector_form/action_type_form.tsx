@@ -43,7 +43,7 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter';

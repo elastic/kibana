@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -15,11 +16,8 @@ import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import { ActionConnector, RuleAction } from '../../common/types';
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import {
-  useLoadConnectors,
-  useLoadConnectorTypes,
-  useLoadRuleTypeAadTemplateField,
-} from '../../common/hooks';
+import { useLoadConnectors, useLoadConnectorTypes } from '../../common/hooks';
+import { useLoadRuleTypeAadTemplateField } from '../../common/hooks/use_load_rule_type_aad_template_fields';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 

@@ -12,8 +12,7 @@ import { defaultHeaders } from '../components/timeline/body/column_headers/defau
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
-import type { TimelineTypeLiteral } from '../../../common/api/timeline';
-import { TimelineType } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -33,7 +32,7 @@ export interface UseCreateTimelineParams {
   /**
    * Type of the timeline (default, template)
    */
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   /**
    * Callback to be called when the timeline is created
    */
@@ -64,7 +63,15 @@ export const useCreateTimeline = ({
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
   const createTimeline = useCallback(
-    ({ id, show, timeRange: timeRangeParam }) => {
+    ({
+      id,
+      show,
+      timeRange: timeRangeParam,
+    }: {
+      id: string;
+      show: boolean;
+      timeRange?: TimeRange;
+    }) => {
       const timerange = timeRangeParam ?? globalTimeRange;
 
       if (id === TimelineId.active && timelineFullScreen) {
@@ -88,7 +95,7 @@ export const useCreateTimeline = ({
           timelineType,
           updated: undefined,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         })
@@ -132,11 +139,11 @@ export const useCreateTimeline = ({
   return useCallback(
     async (options?: { timeRange?: TimeRange }) => {
       await resetDiscoverAppState();
-      createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
+      createTimeline({ id: timelineId, show: true, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
     },
-    [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
+    [createTimeline, timelineId, onClick, resetDiscoverAppState]
   );
 };

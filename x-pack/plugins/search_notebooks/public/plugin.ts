@@ -18,6 +18,7 @@ import {
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { createUsageTracker } from './utils/usage_tracker';
+import { removeNotebookParameter, setNotebookParameter } from './utils/notebook_query_param';
 
 export class SearchNotebooksPlugin
   implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
@@ -66,7 +67,7 @@ export class SearchNotebooksPlugin
           core,
           this.queryClient!,
           this.usageTracker,
-          this.clearNotebookList.bind(this),
+          this.clearNotebooksState.bind(this),
           this.getNotebookList.bind(this)
         )
       );
@@ -75,12 +76,16 @@ export class SearchNotebooksPlugin
       setNotebookList: (value: NotebookListValue) => {
         this.setNotebookList(value);
       },
+      setSelectedNotebook: (value: string) => {
+        setNotebookParameter(value);
+      },
     };
   }
   public stop() {}
 
-  private clearNotebookList() {
+  private clearNotebooksState() {
     this.setNotebookList(null);
+    removeNotebookParameter();
   }
 
   private setNotebookList(value: NotebookListValue) {

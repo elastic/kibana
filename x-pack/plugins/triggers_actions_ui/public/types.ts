@@ -13,7 +13,6 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
@@ -57,8 +56,10 @@ import {
   SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type {
+  RuleRegistrySearchRequestPagination,
+  EcsFieldsResponse,
+} from '@kbn/rule-registry-plugin/common';
 import {
   QueryDslQueryContainer,
   SortCombinations,
@@ -71,8 +72,10 @@ import {
   UserConfiguredActionConnector,
   ActionConnector,
   ActionTypeRegistryContract,
+  EsQuerySnapshot,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -487,19 +490,20 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
-  pagination: RuleRegistrySearchRequestPagination;
+  pageIndex: number;
+  pageSize: number;
   sort: SortCombinations[];
   isLoading: boolean;
   alerts: Alerts;
   oldAlertsData: FetchAlertData['oldAlertsData'];
   ecsAlertsData: FetchAlertData['ecsAlertsData'];
-  getInspectQuery: GetInspectQuery;
-  refetch: () => void;
+  querySnapshot?: EsQuerySnapshot;
+  refetchAlerts: () => void;
   alertsCount: number;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   renderCellPopover?: ReturnType<GetRenderCellPopover>;
-  fieldFormats: FieldFormatsRegistry;
+  fieldFormats: FieldFormatsStart;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;

@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer, EuiHighlight, useEuiTheme } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { FavoriteButton } from '@kbn/content-management-favorites-public';
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { css } from '@emotion/react';
 
 import type { Tag } from '../types';
 import { useServices } from '../services';
@@ -25,6 +28,7 @@ interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
   onClickTag: (tag: Tag, isCtrlKey: boolean) => void;
+  isFavoritesEnabled?: boolean;
 }
 
 /**
@@ -41,7 +45,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   getDetailViewLink,
   getOnClickTitle,
   onClickTag,
+  isFavoritesEnabled,
 }: Props<T>) {
+  const { euiTheme } = useEuiTheme();
   const {
     references,
     attributes: { title, description },
@@ -90,9 +96,19 @@ export function ItemDetails<T extends UserContentCommonSchema>({
             {title}
           </EuiHighlight>
         </EuiLink>
+        {isFavoritesEnabled && (
+          <FavoriteButton
+            id={item.id}
+            css={css`
+              margin-top: -${euiTheme.size.xs}; // trying to nicer align the star with the title
+              margin-left: ${euiTheme.size.xxs};
+            `}
+          />
+        )}
       </RedirectAppLinks>
     );
   }, [
+    euiTheme,
     getDetailViewLink,
     getOnClickTitle,
     id,
@@ -101,6 +117,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     redirectAppLinksCoreStart,
     searchTerm,
     title,
+    isFavoritesEnabled,
   ]);
 
   const hasTags = itemHasTags(references);

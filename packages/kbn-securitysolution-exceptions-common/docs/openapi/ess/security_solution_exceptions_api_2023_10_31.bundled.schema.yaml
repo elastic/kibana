@@ -75,7 +75,7 @@ paths:
           description: Internal server error response
       summary: Creates rule exception list items
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists:
     delete:
       operationId: DeleteExceptionList
@@ -139,9 +139,9 @@ paths:
           description: Internal server error response
       summary: Deletes an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     get:
-      operationId: GetExceptionList
+      operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
           in: query
@@ -202,7 +202,7 @@ paths:
           description: Internal server error response
       summary: Retrieves an exception list using its `id` or `list_id` field
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     post:
       operationId: CreateExceptionList
       requestBody:
@@ -279,7 +279,7 @@ paths:
           description: Internal server error response
       summary: Creates an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     put:
       operationId: UpdateExceptionList
       requestBody:
@@ -359,7 +359,7 @@ paths:
           description: Internal server error response
       summary: Updates an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/_duplicate:
     post:
       operationId: DuplicateExceptionList
@@ -428,7 +428,7 @@ paths:
           description: Internal server error response
       summary: Duplicates an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/_export:
     post:
       description: Exports an exception list and its associated items to an .ndjson file
@@ -508,7 +508,7 @@ paths:
           description: Internal server error response
       summary: Exports an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/_find:
     get:
       operationId: FindExceptionLists
@@ -628,7 +628,7 @@ paths:
           description: Internal server error response
       summary: Finds exception lists
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/_import:
     post:
       description: Imports an exception list and associated items
@@ -744,7 +744,7 @@ paths:
           description: Internal server error response
       summary: Imports an exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/items:
     delete:
       operationId: DeleteExceptionListItem
@@ -808,9 +808,9 @@ paths:
           description: Internal server error response
       summary: Deletes an exception list item
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     get:
-      operationId: GetExceptionListItem
+      operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
           in: query
@@ -871,7 +871,7 @@ paths:
           description: Internal server error response
       summary: Gets an exception list item
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     post:
       operationId: CreateExceptionListItem
       requestBody:
@@ -958,7 +958,7 @@ paths:
           description: Internal server error response
       summary: Creates an exception list item
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
     put:
       operationId: UpdateExceptionListItem
       requestBody:
@@ -1049,7 +1049,7 @@ paths:
           description: Internal server error response
       summary: Updates an exception list item
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/items/_find:
     get:
       operationId: FindExceptionListItems
@@ -1185,10 +1185,10 @@ paths:
           description: Internal server error response
       summary: Finds exception list items
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exception_lists/summary:
     get:
-      operationId: GetExceptionListSummary
+      operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
           in: query
@@ -1268,7 +1268,7 @@ paths:
           description: Internal server error response
       summary: Retrieves an exception list summary
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
   /api/exceptions/shared:
     post:
       operationId: CreateSharedExceptionList
@@ -1327,7 +1327,7 @@ paths:
           description: Internal server error response
       summary: Creates a shared exception list
       tags:
-        - Exceptions API
+        - Security Solution Exceptions API
 components:
   schemas:
     CreateExceptionListItemComment:
@@ -1852,4 +1852,9 @@ components:
       type: http
 security:
   - BasicAuth: []
-tags: !<tag:yaml.org,2002:js/undefined> ''
+tags:
+  - description: >-
+      Exceptions API allows you to manage detection rule exceptions to prevent a
+      rule from generating an alert from incoming events even when the rule's
+      other criteria are met.
+    name: Security Solution Exceptions API

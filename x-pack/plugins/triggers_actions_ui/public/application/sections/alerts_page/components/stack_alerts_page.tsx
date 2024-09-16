@@ -201,7 +201,7 @@ const PageContent = () => {
               featureIds={featureIds}
               query={esQuery}
               showAlertStatusWithFlapping
-              pageSize={20}
+              initialPageSize={20}
             />
           </Suspense>
         </EuiFlexGroup>

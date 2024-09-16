@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApiVersion } from '@kbn/core-http-common';
@@ -32,7 +33,10 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description' | 'deprecated'>;
+  options?: Omit<
+    RouteConfigOptions<Method>,
+    'access' | 'description' | 'deprecated' | 'discontinued'
+  >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /**
@@ -90,6 +94,14 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default false
    */
   deprecated?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @default undefined
+   */
+  discontinued?: string;
 };
 
 /**
@@ -274,10 +286,14 @@ export type VersionedResponseBodyValidation =
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }

@@ -274,6 +274,7 @@ describe('setRecoveredAlertsContext', () => {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
         recoveryReason: 'the monitor has been deleted',
+        'kibana.alert.reason': 'the monitor has been deleted',
         recoveryStatus: 'has been deleted',
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
@@ -350,6 +351,7 @@ describe('setRecoveredAlertsContext', () => {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
         recoveryReason: 'this location has been removed from the monitor',
+        'kibana.alert.reason': 'this location has been removed from the monitor',
         recoveryStatus: 'has recovered',
         stateId: '123456',
         status: 'recovered',
@@ -420,6 +422,8 @@ describe('setRecoveredAlertsContext', () => {
         monitorName: 'test-monitor',
         status: 'up',
         recoveryReason:
+          'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
+        'kibana.alert.reason':
           'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
         recoveryStatus: 'is now up',
         locationId: location,

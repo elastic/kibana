@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./has_import_permission'));
     loadTestFile(require.resolve('./index_exists'));
     loadTestFile(require.resolve('./preview_index_time_range'));
+    loadTestFile(require.resolve('./preview_tika_contents'));
   });
 }

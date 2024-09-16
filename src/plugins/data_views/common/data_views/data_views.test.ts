@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set } from '@kbn/safer-lodash-set';
@@ -544,7 +545,24 @@ describe('IndexPatterns', () => {
   test('find', async () => {
     const search = 'kibana*';
     const size = 10;
-    await indexPatterns.find('kibana*', size);
+    const result = await indexPatterns.find('kibana*', size);
+
+    expect(result[0]).toBeInstanceOf(DataView);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+  });
+
+  test('findLazy', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    const result = await indexPatterns.findLazy('kibana*', size);
+
+    expect(result[0]).toBeInstanceOf(DataViewLazy);
 
     expect(savedObjectsClient.find).lastCalledWith({
       fields: ['title'],

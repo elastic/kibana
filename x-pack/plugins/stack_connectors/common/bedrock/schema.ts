@@ -25,13 +25,63 @@ export const RunActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  raw: schema.maybe(schema.boolean()),
+});
+
+export const BedrockMessageSchema = schema.object(
+  {
+    role: schema.string(),
+    content: schema.maybe(schema.string()),
+    rawContent: schema.maybe(schema.arrayOf(schema.any())),
+  },
+  {
+    validate: (value) => {
+      if (value.content === undefined && value.rawContent === undefined) {
+        return 'Must specify either content or rawContent';
+      } else if (value.content !== undefined && value.rawContent !== undefined) {
+        return 'content and rawContent can not be used at the same time';
+      }
+    },
+  }
+);
+
+export const BedrockToolChoiceSchema = schema.object({
+  type: schema.oneOf([schema.literal('auto'), schema.literal('any'), schema.literal('tool')]),
+  name: schema.maybe(schema.string()),
 });
 
 export const InvokeAIActionParamsSchema = schema.object({
+  messages: schema.arrayOf(BedrockMessageSchema),
+  model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  system: schema.maybe(schema.string()),
+  maxTokens: schema.maybe(schema.number()),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
+  anthropicVersion: schema.maybe(schema.string()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        description: schema.string(),
+        input_schema: schema.object({}, { unknowns: 'allow' }),
+      })
+    )
+  ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
+});
+
+export const InvokeAIActionResponseSchema = schema.object({
+  message: schema.string(),
+});
+
+export const InvokeAIRawActionParamsSchema = schema.object({
   messages: schema.arrayOf(
     schema.object({
       role: schema.string(),
-      content: schema.string(),
+      content: schema.any(),
     })
   ),
   model: schema.maybe(schema.string()),
@@ -41,12 +91,21 @@ export const InvokeAIActionParamsSchema = schema.object({
   maxTokens: schema.maybe(schema.number()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  anthropicVersion: schema.maybe(schema.string()),
   timeout: schema.maybe(schema.number()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        description: schema.string(),
+        input_schema: schema.object({}, { unknowns: 'allow' }),
+      })
+    )
+  ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
 });
 
-export const InvokeAIActionResponseSchema = schema.object({
-  message: schema.string(),
-});
+export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'allow' });
 
 export const RunApiLatestResponseSchema = schema.object(
   {

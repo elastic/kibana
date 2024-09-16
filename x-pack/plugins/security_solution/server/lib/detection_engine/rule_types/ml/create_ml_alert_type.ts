@@ -72,7 +72,6 @@ export const createMlAlertType = (
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
-        isFeatureDisabled: !experimentalFeatures.alertSuppressionForMachineLearningRuleEnabled,
         licensing,
       });
 

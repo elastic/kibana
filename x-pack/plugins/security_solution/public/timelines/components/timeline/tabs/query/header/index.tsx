@@ -16,8 +16,11 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
-import type { TimelineStatusLiteralWithNull } from '../../../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
+import {
+  type TimelineStatus,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
+} from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
@@ -33,7 +36,7 @@ interface Props {
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   showEventsCountBadge: boolean;
-  status: TimelineStatusLiteralWithNull;
+  status: TimelineStatus | null;
   timelineId: string;
   totalCount: number;
 }
@@ -87,7 +90,8 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
     (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
   );
 
-  const shouldShowQueryBuilder = isDataProviderVisible || timelineType === TimelineType.template;
+  const shouldShowQueryBuilder =
+    isDataProviderVisible || timelineType === TimelineTypeEnum.template;
 
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
@@ -126,7 +130,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
               )}
-              {status === TimelineStatus.immutable && (
+              {status === TimelineStatusEnum.immutable && (
                 <EuiFlexItem>
                   <EuiCallOut
                     data-test-subj="timelineImmutableCallOut"

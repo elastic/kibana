@@ -20,6 +20,7 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './constants';
+import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -50,8 +51,9 @@ export const getKnowledgeBaseStatusRoute = (
       },
       async (context, request: KibanaRequest<ReadKnowledgeBaseRequestParams>, response) => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = ctx.elasticAssistant.logger;
         const telemetry = assistantContext.telemetry;
 
         try {
@@ -60,7 +62,12 @@ export const getKnowledgeBaseStatusRoute = (
           const elserId = await getElser();
           const kbResource = getKbResource(request);
 
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+          // FF Check for V2 KB
+          const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
+
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient(
+            v2KnowledgeBaseEnabled
+          );
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
@@ -79,17 +86,24 @@ export const getKnowledgeBaseStatusRoute = (
           const indexExists = await esStore.indexExists();
           const pipelineExists = await esStore.pipelineExists();
           const modelExists = await esStore.isModelInstalled(elserId);
+          const setupAvailable = await kbDataClient.isSetupAvailable();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
             index_exists: indexExists,
             is_setup_in_progress: kbDataClient.isSetupInProgress,
+            is_setup_available: setupAvailable,
             pipeline_exists: pipelineExists,
           };
 
-          if (kbResource === ESQL_RESOURCE) {
+          if (indexExists && kbResource === ESQL_RESOURCE) {
             const esqlExists =
-              indexExists && (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
+              (
+                await kbDataClient.getKnowledgeBaseDocumentEntries({
+                  query: ESQL_DOCS_LOADED_QUERY,
+                  required: true,
+                })
+              ).length > 0;
             return response.ok({ body: { ...body, esql_exists: esqlExists } });
           }
 

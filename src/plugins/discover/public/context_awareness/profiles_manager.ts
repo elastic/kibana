@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -38,7 +39,13 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
+/**
+ * Options for the `getProfiles` method
+ */
 export interface GetProfilesOptions {
+  /**
+   * The data table record to use for the document profile
+   */
   record?: DataTableRecord;
 }
 
@@ -60,6 +67,10 @@ export class ProfilesManager {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
   }
 
+  /**
+   * Resolves the root context profile
+   * @param params The root profile provider parameters
+   */
   public async resolveRootProfile(params: RootProfileProviderParams) {
     const serializedParams = serializeRootProfileParams(params);
 
@@ -87,7 +98,13 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
   }
 
-  public async resolveDataSourceProfile(params: DataSourceProfileProviderParams) {
+  /**
+   * Resolves the data source context profile
+   * @param params The data source profile provider parameters
+   */
+  public async resolveDataSourceProfile(
+    params: Omit<DataSourceProfileProviderParams, 'rootContext'>
+  ) {
     const serializedParams = serializeDataSourceProfileParams(params);
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
@@ -101,7 +118,10 @@ export class ProfilesManager {
     let context = this.dataSourceProfileService.defaultContext;
 
     try {
-      context = await this.dataSourceProfileService.resolve(params);
+      context = await this.dataSourceProfileService.resolve({
+        ...params,
+        rootContext: this.rootContext$.getValue(),
+      });
     } catch (e) {
       logResolutionError(ContextType.DataSource, serializedParams, e);
     }
@@ -114,7 +134,14 @@ export class ProfilesManager {
     this.prevDataSourceProfileParams = serializedParams;
   }
 
-  public resolveDocumentProfile(params: DocumentProfileProviderParams) {
+  /**
+   * Resolves the document context profile for a given data table record
+   * @param params The document profile provider parameters
+   * @returns The data table record with a resolved document context
+   */
+  public resolveDocumentProfile(
+    params: Omit<DocumentProfileProviderParams, 'rootContext' | 'dataSourceContext'>
+  ) {
     let context: ContextWithProfileId<DocumentContext> | undefined;
 
     return new Proxy(params.record, {
@@ -126,7 +153,11 @@ export class ProfilesManager {
 
         if (!context) {
           try {
-            context = this.documentProfileService.resolve(params);
+            context = this.documentProfileService.resolve({
+              ...params,
+              rootContext: this.rootContext$.getValue(),
+              dataSourceContext: this.dataSourceContext$.getValue(),
+            });
           } catch (e) {
             logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
             context = this.documentProfileService.defaultContext;
@@ -138,6 +169,11 @@ export class ProfilesManager {
     });
   }
 
+  /**
+   * Retrieves an array of the resolved profiles
+   * @param options Options for getting the profiles
+   * @returns The resolved profiles
+   */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
       this.rootProfileService.getProfile(this.rootContext$.getValue()),
@@ -148,6 +184,11 @@ export class ProfilesManager {
     ];
   }
 
+  /**
+   * Retrieves an observable of the resolved profiles that emits when the profiles change
+   * @param options Options for getting the profiles
+   * @returns The resolved profiles as an observable
+   */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
@@ -164,7 +205,7 @@ const serializeRootProfileParams = (
 };
 
 const serializeDataSourceProfileParams = (
-  params: DataSourceProfileProviderParams
+  params: Omit<DataSourceProfileProviderParams, 'rootContext'>
 ): SerializedDataSourceProfileParams => {
   return {
     dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)

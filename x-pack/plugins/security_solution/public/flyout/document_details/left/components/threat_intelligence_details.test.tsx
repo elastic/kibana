@@ -16,6 +16,7 @@ import {
 } from './test_ids';
 import { ThreatIntelligenceDetails } from './threat_intelligence_details';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
+import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -37,7 +38,6 @@ const defaultContextValue = {
   getFieldsData: () => 'id',
 } as unknown as DocumentDetailsContext;
 
-// Renders System Under Test
 const renderThreatIntelligenceDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
@@ -59,12 +59,9 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const wrapper = renderThreatIntelligenceDetails(defaultContextValue);
+    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
 
-    expect(
-      wrapper.getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)
-    ).toBeInTheDocument();
-
+    expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)).toBeInTheDocument();
     expect(useThreatIntelligenceDetails).toHaveBeenCalled();
   });
 
@@ -79,10 +76,32 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const wrapper = renderThreatIntelligenceDetails(defaultContextValue);
+    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
 
-    expect(wrapper.getByTestId(THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
-
+    expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
     expect(useThreatIntelligenceDetails).toHaveBeenCalled();
+  });
+
+  it('should render enrichments section', () => {
+    const enrichments = [
+      buildEventEnrichmentMock(),
+      buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+    ];
+
+    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+      isLoading: true,
+      enrichments,
+      isEventDataLoading: false,
+      isEnrichmentsLoading: false,
+      range: { from: '', to: '' },
+      setRange: () => {},
+      eventFields: {
+        test: 'test',
+      },
+    });
+
+    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
+
+    expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)).toBeInTheDocument();
   });
 });

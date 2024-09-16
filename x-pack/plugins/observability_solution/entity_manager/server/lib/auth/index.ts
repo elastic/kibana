@@ -15,7 +15,11 @@ import {
   saveEntityDiscoveryAPIKey,
   deleteEntityDiscoveryAPIKey,
 } from './api_key/saved_object';
-import { canEnableEntityDiscovery, canRunEntityDiscovery } from './privileges';
+import {
+  canEnableEntityDiscovery,
+  canManageEntityDefinition,
+  canDisableEntityDiscovery,
+} from './privileges';
 
 export {
   readEntityDiscoveryAPIKey,
@@ -24,6 +28,7 @@ export {
   checkIfAPIKeysAreEnabled,
   checkIfEntityDiscoveryAPIKeyIsValid,
   canEnableEntityDiscovery,
-  canRunEntityDiscovery,
+  canManageEntityDefinition,
+  canDisableEntityDiscovery,
   generateEntityDiscoveryAPIKey,
 };

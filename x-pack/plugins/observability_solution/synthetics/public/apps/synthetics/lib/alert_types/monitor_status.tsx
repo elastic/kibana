@@ -16,7 +16,8 @@ import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
-import type { AlertTypeInitializer } from '.';
+import type { AlertTypeInitializer } from './types';
+
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 
@@ -33,7 +34,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return `${docLinks.links.observability.syntheticsAlerting}`;
   },
   ruleParamsExpression: (paramProps: RuleTypeParamsExpressionProps<StatusRuleParams>) => (
-    <MonitorStatusAlert core={core} plugins={plugins} params={paramProps} />
+    <MonitorStatusAlert coreStart={core} plugins={plugins} params={paramProps} />
   ),
   validate: (_ruleParams: StatusRuleParams) => {
     return { errors: {} };

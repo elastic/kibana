@@ -64,15 +64,15 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceName?.buckets?.[0].key}
+                    title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0].key}
+                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {bucket.resourceSubType?.buckets?.[0].key}
+                  {bucket.resourceSubType?.buckets?.[0]?.key}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -93,8 +93,8 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {firstNonNullValue(bucket.benchmarkName?.buckets?.[0].key)}{' '}
-                  {firstNonNullValue(bucket.benchmarkVersion?.buckets?.[0].key)}
+                  {firstNonNullValue(bucket.benchmarkName?.buckets?.[0]?.key)}{' '}
+                  {firstNonNullValue(bucket.benchmarkVersion?.buckets?.[0]?.key)}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -185,7 +185,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={FINDINGS_GROUPING_COUNTER}
@@ -208,7 +208,7 @@ const ComplianceBarComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
       size="l"
       overrideCss={css`
         width: 104px;
-        margin-left: ${euiTheme.size.s}};
+        margin-left: ${euiTheme.size.s};
       `}
       totalFailed={totalFailed}
       totalPassed={totalPassed}

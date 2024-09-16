@@ -92,8 +92,19 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([

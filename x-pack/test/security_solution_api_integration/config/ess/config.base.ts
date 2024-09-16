@@ -18,6 +18,7 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases',
   '.email',
   '.index',
   '.pagerduty',
@@ -81,10 +82,8 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
-            'alertSuppressionForEsqlRuleEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'alertSuppressionForMachineLearningRuleEnabled',
             'manualRuleRunEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',

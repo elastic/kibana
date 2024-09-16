@@ -21,7 +21,9 @@ import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
   id?: string;
+  organization_id?: string;
   cname?: string;
+  csp?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -40,6 +42,7 @@ export interface CloudConfigType {
     project_id: string;
     project_name?: string;
     project_type?: string;
+    orchestrator_target?: string;
   };
 }
 
@@ -80,6 +83,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
+      csp,
     } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
@@ -89,8 +93,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
+      csp,
       baseUrl,
       ...this.getCloudUrls(),
       elasticsearchUrl: decodedId?.elasticsearchUrl,
@@ -108,6 +114,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        orchestratorTarget: this.config.serverless?.orchestrator_target,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

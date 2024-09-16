@@ -9,8 +9,6 @@ paths:
       operationId: DeleteList
       x-codegen-enabled: true
       summary: Deletes a list
-      tags:
-        - List API
       parameters:
         - name: id
           in: query

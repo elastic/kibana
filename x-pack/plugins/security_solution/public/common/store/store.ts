@@ -21,7 +21,7 @@ import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
@@ -55,11 +55,6 @@ import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory
 import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
-import {
-  reducer as dataViewPickerReducer,
-  initialState as dataViewPickerState,
-} from '../../sourcerer/experimental/redux/reducer';
-import { listenerMiddleware } from '../../sourcerer/experimental/redux/listeners';
 import { initialNotesState } from '../../notes/store/notes.slice';
 
 let store: Store<State, Action> | null = null;
@@ -122,7 +117,7 @@ export const createStoreFactory = async (
           id: TimelineId.active,
           timelineById: {},
           show: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           columns: [],
           dataViewId: null,
           indexNames: [],
@@ -176,7 +171,6 @@ export const createStoreFactory = async (
     dataTableInitialState,
     groupsInitialState,
     analyzerInitialState,
-    dataViewPickerState,
     initialNotesState
   );
 
@@ -184,14 +178,12 @@ export const createStoreFactory = async (
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    dataViewPicker: dataViewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [
     ...(subPlugins.management.store.middleware ?? []),
     ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
-    listenerMiddleware.middleware,
   ]);
 };
 

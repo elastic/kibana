@@ -9,9 +9,9 @@ import React from 'react';
 import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { EuiSpacer } from '@elastic/eui';
@@ -21,17 +21,23 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 const settingsKeys = [
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 ];
 
 export function UISettings() {
-  const { docLinks, settings, notifications } = useKibana().services;
+  const {
+    docLinks,
+    settings,
+    notifications,
+    application: { capabilities },
+  } = useKibana().services;
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);
 
+  const canEditAdvancedSettings = capabilities.advancedSettings?.save;
   async function handleSave() {
     try {
       await saveAll();
@@ -71,7 +77,7 @@ export function UISettings() {
           >
             <FieldRow
               field={field}
-              isSavingEnabled={true}
+              isSavingEnabled={!!canEditAdvancedSettings}
               onFieldChange={handleFieldChange}
               unsavedChange={unsavedChanges[settingKey]}
             />
@@ -84,11 +90,11 @@ export function UISettings() {
           onDiscardChanges={cleanUnsavedChanges}
           onSave={handleSave}
           saveLabel={i18n.translate(
-            'xpack.observabilityAiAssistantManagement.apmSettings.saveButton',
+            'xpack.observabilityAiAssistantManagement.settings.saveButton',
             { defaultMessage: 'Save changes' }
           )}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
-          appTestSubj="apm"
+          appTestSubj="observabilityAiAssistantManagement"
           areChangesInvalid={hasInvalidChanges}
         />
       )}

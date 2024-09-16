@@ -109,7 +109,6 @@ describe('Sourcerer integration tests', () => {
 
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
-      activePatterns: ['myFakebeat-*'],
     });
     jest.clearAllMocks();
   });

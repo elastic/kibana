@@ -9,9 +9,8 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
-import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
@@ -20,9 +19,7 @@ jest.mock('../use_send_message');
 jest.mock('../use_conversation');
 jest.mock('../../..');
 
-const setEditingSystemPromptId = jest.fn();
 const setSelectedPromptContexts = jest.fn();
-const setUserPrompt = jest.fn();
 const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
 const clearConversation = jest.fn();
@@ -30,7 +27,6 @@ const setCurrentConversation = jest.fn();
 
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
-  allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
   currentConversation: { ...emptyWelcomeConvo, id: 'an-id' },
   http: {
     basePath: {
@@ -40,11 +36,9 @@ export const testProps: UseChatSendProps = {
     anonymousPaths: {},
     externalUrl: {},
   } as unknown as HttpSetup,
-  editingSystemPromptId: defaultSystemPrompt.id,
-  setEditingSystemPromptId,
   setSelectedPromptContexts,
-  setUserPrompt,
   setCurrentConversation,
+  refetchCurrentUserConversations: jest.fn(),
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };
 const reportAssistantMessageSent = jest.fn();
@@ -63,47 +57,27 @@ describe('use chat send', () => {
       assistantTelemetry: {
         reportAssistantMessageSent,
       },
-      knowledgeBase: { isEnabledKnowledgeBase: false, isEnabledRAGAlerts: false },
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {
     (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
-    const { result } = renderHook(() => useChatSend(testProps), {
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleOnChatCleared();
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleOnChatCleared();
+    });
     expect(clearConversation).toHaveBeenCalled();
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    expect(result.current.userPrompt).toEqual('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
     await waitFor(() => {
       expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);
       expect(setCurrentConversation).toHaveBeenCalled();
     });
-    expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
-  it('handlePromptChange updates prompt successfully', () => {
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handlePromptChange('new prompt');
-    expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
-  });
-  it('handleSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
-    const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handleSendMessage(promptText);
 
-    await waitFor(() => {
-      expect(sendMessage).toHaveBeenCalled();
-      const appendMessageSend = sendMessage.mock.calls[0][0].message;
-      expect(appendMessageSend).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n${promptText}`
-      );
-    });
-  });
-  it('handleSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
+  it('handleChatSend sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(
       () =>
@@ -113,7 +87,7 @@ describe('use chat send', () => {
       }
     );
 
-    result.current.handleSendMessage(promptText);
+    result.current.handleChatSend(promptText);
 
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
@@ -122,7 +96,7 @@ describe('use chat send', () => {
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result } = renderHook(
+    const { result, waitForNextUpdate } = renderHook(
       () =>
         useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
@@ -130,7 +104,10 @@ describe('use chat send', () => {
       }
     );
 
-    result.current.handleRegenerateResponse();
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleRegenerateResponse();
+    });
     expect(removeLastMessage).toHaveBeenCalledWith('welcome-id');
 
     await waitFor(() => {
@@ -141,29 +118,30 @@ describe('use chat send', () => {
   });
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps), {
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleSendMessage(promptText);
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleChatSend(promptText);
+    });
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
         conversationId: testProps.currentConversation?.title,
         role: 'user',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
       });
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
         conversationId: testProps.currentConversation?.title,
         role: 'assistant',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
       });
     });
   });

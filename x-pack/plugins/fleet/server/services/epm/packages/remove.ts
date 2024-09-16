@@ -65,11 +65,15 @@ export async function removeInstallation(options: {
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);
 
-  const { total, items } = await packagePolicyService.list(savedObjectsClient, {
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
+  const { total, items } = await packagePolicyService.list(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -91,7 +95,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, esClient);
+  await deleteAssets(installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -129,7 +133,7 @@ export async function removeInstallation(options: {
  * generally better to delete assets directly if the package is known to be
  * installed in 8.x or later.
  */
-async function deleteKibanaAssets({
+export async function deleteKibanaAssets({
   installedObjects,
   packageInfo,
   spaceId = DEFAULT_SPACE_ID,
@@ -203,7 +207,7 @@ async function bulkDeleteSavedObjects(
   }
 }
 
-function deleteESAssets(
+export function deleteESAssets(
   installedObjects: EsAssetReference[],
   esClient: ElasticsearchClient
 ): Array<Promise<unknown>> {
@@ -226,25 +230,9 @@ function deleteESAssets(
     }
   });
 }
+type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[], EsAssetReference[]];
 
-async function deleteAssets(
-  {
-    installed_es: installedEs,
-    installed_kibana: installedKibana,
-    installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
-    additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
-    name,
-    version,
-  }: Installation,
-  savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const logger = appContextService.getLogger();
-  // must unset default_pipelines settings in indices first, or pipelines associated with an index cannot not be deleted
-  // must delete index templates first, or component templates which reference them cannot be deleted
-  // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
-  // separate the assets into Index Templates and other assets.
-  type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[], EsAssetReference[]];
+export const splitESAssets = (installedEs: EsAssetReference[]) => {
   const [indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets] =
     installedEs.reduce<Tuple>(
       (
@@ -273,6 +261,30 @@ async function deleteAssets(
       },
       [[], [], [], []]
     );
+  return { indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets };
+};
+
+/**
+ * deletePrerequisiteAssets removes the ES assets that need to be deleted first and in a certain order.
+ * All the other assets can be deleted after these (see deleteAssets)
+ */
+export async function deletePrerequisiteAssets(
+  {
+    indexAssets,
+    transformAssets,
+    indexTemplatesAndPipelines,
+  }: {
+    indexAssets: EsAssetReference[];
+    transformAssets: EsAssetReference[];
+    indexTemplatesAndPipelines: EsAssetReference[];
+  },
+  esClient: ElasticsearchClient
+) {
+  const logger = appContextService.getLogger();
+  // must unset default_pipelines settings in indices first, or pipelines associated with an index cannot not be deleted
+  // must delete index templates first, or component templates which reference them cannot be deleted
+  // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
+  // separate the assets into Index Templates and other assets.
 
   try {
     // must first unset any default pipeline associated with any existing indices
@@ -281,15 +293,48 @@ async function deleteAssets(
       indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
     );
 
-    // in case transform's destination index contains any pipline,
+    // in case transform's destination index contains any pipeline,
     // we should delete the transforms first
     await Promise.all(deleteESAssets(transformAssets, esClient));
 
     // then delete index templates and pipelines
     await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
+  } catch (err) {
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(err);
+    }
+  }
+}
 
+async function deleteAssets(
+  {
+    installed_es: installedEs,
+    installed_kibana: installedKibana,
+    installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
+    additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
+    name,
+    version,
+  }: Installation,
+  esClient: ElasticsearchClient
+) {
+  const logger = appContextService.getLogger();
+  const { indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets } =
+    splitESAssets(installedEs);
+
+  // delete assets that need to be deleted first
+  await deletePrerequisiteAssets(
+    {
+      indexAssets,
+      transformAssets,
+      indexTemplatesAndPipelines,
+    },
+    esClient
+  );
+
+  // delete the other asset types
+  try {
     const packageInfo = await Registry.fetchInfo(name, version);
-    // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets({ installedObjects: installedKibana, spaceId, packageInfo }),
@@ -332,11 +377,9 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 }
 
 export async function deleteKibanaSavedObjectsAssets({
-  savedObjectsClient,
   installedPkg,
   spaceId,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
   installedPkg: SavedObject<Installation>;
   spaceId?: string;
 }) {
@@ -375,4 +418,48 @@ export async function deleteKibanaSavedObjectsAssets({
       logger.error(err);
     }
   }
+}
+
+export function deleteILMPolicies(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter(
+      (asset) =>
+        asset.type === ElasticsearchAssetType.dataStreamIlmPolicy ||
+        asset.type === ElasticsearchAssetType.ilmPolicy
+    )
+    .map((asset) => asset.id);
+  return deleteIlms(esClient, idsToDelete);
+}
+
+export function deleteMLModels(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.mlModel)
+    .map((asset) => asset.id);
+  return deleteMlModel(esClient, idsToDelete);
+}
+
+export function cleanupComponentTemplate(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.mlModel)
+    .map((asset) => asset.id);
+  return deleteComponentTemplate(esClient, idsToDelete[0]);
+}
+
+export function cleanupTransforms(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+    .map((asset) => asset.id);
+  return deleteTransforms(esClient, idsToDelete);
 }

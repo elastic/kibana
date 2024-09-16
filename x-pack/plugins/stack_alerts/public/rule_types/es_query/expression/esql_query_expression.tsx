@@ -194,21 +194,20 @@ export const EsqlQueryExpression: React.FC<
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
-          expandCodeEditor={() => true}
-          isCodeEditorExpanded={true}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideMinimizeButton={true}
           hideRunQueryText={true}
           isLoading={isLoading}
+          hasOutline
         />
       </EuiFormRow>
       <EuiSpacer />
       <EuiFormRow
         id="timeField"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-        error={errors.timeField}
+        error={errors.timeField as string[]}
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
@@ -218,6 +217,7 @@ export const EsqlQueryExpression: React.FC<
       >
         <EuiSelect
           options={timeFieldOptions}
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
           fullWidth
           name="timeField"
@@ -233,8 +233,9 @@ export const EsqlQueryExpression: React.FC<
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.timeWindowSize.length > 0}
-            error={errors.timeWindowSize}
+            error={errors.timeWindowSize as string[]}
             label={
               <FormattedMessage
                 id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
@@ -245,6 +246,7 @@ export const EsqlQueryExpression: React.FC<
             <EuiFieldNumber
               name="timeWindowSize"
               data-test-subj="timeWindowSizeNumber"
+              // @ts-expect-error upgrade typescript v5.1.6
               isInvalid={errors.timeWindowSize.length > 0}
               min={0}
               value={timeWindowSize || ''}

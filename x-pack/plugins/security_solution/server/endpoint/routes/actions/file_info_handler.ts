@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ensureUserHasAuthzToFilesForAction } from './utils';
 import { stringify } from '../../utils/stringify';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
@@ -83,9 +84,10 @@ export const registerActionFileInfoRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations', 'canGetRunningProcesses'] },
         endpointContext.logFactory.get('actionFileInfo'),
-        getActionFileInfoRouteHandler(endpointContext)
+        getActionFileInfoRouteHandler(endpointContext),
+        ensureUserHasAuthzToFilesForAction
       )
     );
 };

@@ -284,6 +284,7 @@
     "title",
     "version"
   ],
+  "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
     "artifactIds",
     "policyId",
@@ -435,6 +436,11 @@
     "updated_by",
     "version"
   ],
+  "favorites": [
+    "favoriteIds",
+    "type",
+    "userId"
+  ],
   "file": [
     "FileKind",
     "Meta",
@@ -458,6 +464,36 @@
     "token",
     "valid_until"
   ],
+  "fleet-agent-policies": [
+    "advanced_settings",
+    "agent_features",
+    "agent_features.enabled",
+    "agent_features.name",
+    "data_output_id",
+    "description",
+    "download_source_id",
+    "fleet_server_host_id",
+    "global_data_tags",
+    "inactivity_timeout",
+    "is_default",
+    "is_default_fleet_server",
+    "is_managed",
+    "is_preconfigured",
+    "is_protected",
+    "keep_monitoring_alive",
+    "monitoring_enabled",
+    "monitoring_output_id",
+    "name",
+    "namespace",
+    "overrides",
+    "revision",
+    "schema_version",
+    "status",
+    "supports_agentless",
+    "unenroll_timeout",
+    "updated_at",
+    "updated_by"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
@@ -467,6 +503,32 @@
     "proxy_id"
   ],
   "fleet-message-signing-keys": [],
+  "fleet-package-policies": [
+    "created_at",
+    "created_by",
+    "description",
+    "elasticsearch",
+    "enabled",
+    "inputs",
+    "is_managed",
+    "name",
+    "namespace",
+    "output_id",
+    "overrides",
+    "package",
+    "package.name",
+    "package.requires_root",
+    "package.title",
+    "package.version",
+    "policy_id",
+    "policy_ids",
+    "revision",
+    "secret_references",
+    "secret_references.id",
+    "updated_at",
+    "updated_by",
+    "vars"
+  ],
   "fleet-preconfiguration-deletion-record": [
     "id"
   ],
@@ -486,6 +548,7 @@
   ],
   "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
+    "namespaces",
     "policy_id",
     "token_plain"
   ],
@@ -628,6 +691,7 @@
     "is_managed",
     "name",
     "namespace",
+    "output_id",
     "overrides",
     "package",
     "package.name",
@@ -648,7 +712,9 @@
     "has_seen_add_data_notice",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
-    "secret_storage_requirements_met"
+    "secret_storage_requirements_met",
+    "use_space_awareness_migration_started_at",
+    "use_space_awareness_migration_status"
   ],
   "inventory-view": [],
   "kql-telemetry": [],
@@ -1005,6 +1071,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",

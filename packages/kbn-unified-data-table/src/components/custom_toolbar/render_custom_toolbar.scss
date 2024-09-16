@@ -1,58 +1,68 @@
 .unifiedDataTableToolbar {
   padding: $euiSizeS $euiSizeS $euiSizeXS;
-}
 
-.unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
-  block-size: $euiSizeXL;
-  border: $euiBorderThin;
-  border-radius: $euiBorderRadiusSmall;
+  .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
+    block-size: $euiSizeXL;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadiusSmall;
 
-  // making the icons larger than the default size
-  & svg {
-    inline-size: $euiSize;
-    block-size: $euiSize;
+    // making the icons larger than the default size
+    & svg {
+      inline-size: $euiSize;
+      block-size: $euiSize;
+    }
+
+    // cancel default background changes
+    &:active, &:focus {
+      background: transparent;
+    }
+
+    // add toolbar control animation
+    transition: transform $euiAnimSpeedNormal ease-in-out;
+    &:hover {
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0);
+    }
   }
 
-  // cancel default background changes
-  &:active, &:focus {
-    background: transparent;
+  .unifiedDataTableToolbarControlGroup {
+    box-shadow: inset 0 0 0 $euiBorderWidthThin $euiBorderColor;
+    border-radius: $euiBorderRadiusSmall;
+    display: inline-flex;
+    align-items: stretch;
+    flex-direction: row;
+
+    & .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
+      border-radius: 0;
+      border: none;
+    }
+
+    & .unifiedDataTableToolbarControlButton + .unifiedDataTableToolbarControlButton {
+      border-inline-start: $euiBorderThin;
+      border-radius: 0;
+    }
   }
 
-  // add toolbar control animation
-  transition: transform $euiAnimSpeedNormal ease-in-out;
-  &:hover {
-    transform: translateY(-1px);
-  }
-  &:active {
-    transform: translateY(0);
-  }
-}
+  .unifiedDataTableToolbarControlIconButton .euiButtonIcon {
+    inline-size: $euiSizeXL;
+    block-size: $euiSizeXL;
 
-.unifiedDataTableToolbarControlGroup {
-  box-shadow: inset 0 0 0 $euiBorderWidthThin $euiBorderColor;
-  border-radius: $euiBorderRadiusSmall;
-  display: inline-flex;
-  align-items: stretch;
-  flex-direction: row;
-}
-
-.unifiedDataTableToolbarControlIconButton .euiButtonIcon {
-  inline-size: $euiSizeXL;
-  block-size: $euiSizeXL;
-
-  // cancel default behaviour
-  &:hover, &:active, &:focus {
-    background: transparent;
-    animation: none !important;
-    transform: none !important;
+    // cancel default behaviour
+    &:hover, &:active, &:focus {
+      background: transparent;
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
-  .unifiedDataTableToolbarControlIconButton + & {
+  .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton {
     border-inline-start: $euiBorderThin;
     border-radius: 0;
   }
-}
 
-.unifiedDataTableToolbarBottom {
-  position: relative; // for placing a loading indicator correctly
+  .unifiedDataTableToolbarBottom {
+    position: relative; // for placing a loading indicator correctly
+  }
 }

@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header']);
+  const { settings, common, graph, header } = getPageObjects([
+    'settings',
+    'common',
+    'graph',
+    'header',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -21,13 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/graph/secrepo');
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.navigateToApp('settings');
+      await common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
-      await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
+      await settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');
-      await PageObjects.common.navigateToApp('graph');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.graph.createWorkspace();
+      await common.navigateToApp('graph');
+      await header.waitUntilLoadingHasFinished();
+      await graph.createWorkspace();
     });
 
     after(async () => {
@@ -80,16 +85,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     async function buildGraph() {
       // select fields url.parts, url, params and src
-      await PageObjects.graph.addFields(['url.parts', 'url', 'params', 'src']);
-      await PageObjects.graph.query('admin');
-      await PageObjects.common.sleep(8000);
+      await graph.addFields(['url.parts', 'url', 'params', 'src']);
+      await graph.query('admin');
+      await common.sleep(8000);
     }
 
     it('should show correct node labels', async function () {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.graph.selectIndexPattern('secrepo');
+      await header.waitUntilLoadingHasFinished();
+      await graph.selectIndexPattern('secrepo');
       await buildGraph();
-      const { nodes } = await PageObjects.graph.getGraphObjects();
+      const { nodes } = await graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
       const unexpectedCircleTexts = circlesText.filter((t) => !expectedNodes.includes(t));
@@ -103,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const expectedConnectionCount = Object.values(expectedConnections)
         .map((connections) => Object.values(connections).length)
         .reduce((acc, n) => acc + n, 0);
-      const { edges } = await PageObjects.graph.getGraphObjects();
+      const { edges } = await graph.getGraphObjects();
       expect(edges.length).to.be(expectedConnectionCount);
       edges.forEach((edge) => {
         const from = edge.sourceNode.label!;
@@ -113,14 +118,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should save Graph workspace', async function () {
-      const graphExists = await PageObjects.graph.saveGraph(graphName);
+      const graphExists = await graph.saveGraph(graphName);
       expect(graphExists).to.eql(true);
     });
 
     // open the same graph workspace again and make sure the results are the same
     it('should open Graph workspace', async function () {
-      await PageObjects.graph.openGraph(graphName);
-      const { nodes } = await PageObjects.graph.getGraphObjects();
+      await graph.openGraph(graphName);
+      const { nodes } = await graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
       circlesText.forEach((circleText) => {
@@ -130,9 +135,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create new Graph workspace', async function () {
-      await PageObjects.graph.newGraph();
-      await PageObjects.graph.selectIndexPattern('secrepo');
-      const { nodes, edges } = await PageObjects.graph.getGraphObjects();
+      await graph.newGraph();
+      await graph.selectIndexPattern('secrepo');
+      const { nodes, edges } = await graph.getGraphObjects();
       expect(nodes).to.be.empty();
       expect(edges).to.be.empty();
     });
@@ -140,31 +145,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show venn when clicking a line', async function () {
       await buildGraph();
 
-      await PageObjects.graph.isolateEdge('test', '/test/wp-admin/');
+      await graph.isolateEdge('test', '/test/wp-admin/');
 
-      await PageObjects.graph.stopLayout();
-      await PageObjects.common.sleep(1000);
+      await graph.stopLayout();
+      await common.sleep(1000);
       await browser.execute(() => {
         const event = document.createEvent('SVGEvents');
         event.initEvent('click', true, true);
         return document.getElementsByClassName('gphEdge--clickable')[0].dispatchEvent(event);
       });
-      await PageObjects.common.sleep(1000);
-      await PageObjects.graph.startLayout();
+      await common.sleep(1000);
+      await graph.startLayout();
 
-      const vennTerm1 = await PageObjects.graph.getVennTerm1();
+      const vennTerm1 = await graph.getVennTerm1();
       log.debug('vennTerm1 = ' + vennTerm1);
 
-      const vennTerm2 = await PageObjects.graph.getVennTerm2();
+      const vennTerm2 = await graph.getVennTerm2();
       log.debug('vennTerm2 = ' + vennTerm2);
 
-      const smallVennTerm1 = await PageObjects.graph.getSmallVennTerm1();
+      const smallVennTerm1 = await graph.getSmallVennTerm1();
       log.debug('smallVennTerm1 = ' + smallVennTerm1);
 
-      const smallVennTerm12 = await PageObjects.graph.getSmallVennTerm12();
+      const smallVennTerm12 = await graph.getSmallVennTerm12();
       log.debug('smallVennTerm12 = ' + smallVennTerm12);
 
-      const smallVennTerm2 = await PageObjects.graph.getSmallVennTerm2();
+      const smallVennTerm2 = await graph.getSmallVennTerm2();
       log.debug('smallVennTerm2 = ' + smallVennTerm2);
 
       expect(vennTerm1).to.be('/test/wp-admin/');
@@ -175,10 +180,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should delete graph', async function () {
-      await PageObjects.graph.goToListingPage();
-      expect(await PageObjects.graph.getWorkspaceCount()).to.equal(1);
-      await PageObjects.graph.deleteGraph(graphName);
-      expect(await PageObjects.graph.getWorkspaceCount()).to.equal(0);
+      await graph.goToListingPage();
+      expect(await graph.getWorkspaceCount()).to.equal(1);
+      await graph.deleteGraph(graphName);
+      expect(await graph.getWorkspaceCount()).to.equal(0);
     });
   });
 }

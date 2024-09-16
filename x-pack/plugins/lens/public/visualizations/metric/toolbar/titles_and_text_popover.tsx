@@ -32,9 +32,9 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
       title={i18n.translate('xpack.lens.metric.toolbarTitlesText.label', {
         defaultMessage: 'Titles and text',
       })}
-      type="labels"
+      type="titlesAndText"
       groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTitlesTextButton"
+      buttonDataTestSubj="lnsTextOptionsButton"
     >
       {!state.breakdownByAccessor && (
         <SubtitleOption
@@ -133,7 +133,7 @@ function ValueFontSizeOption({
   value,
   onChange,
 }: {
-  value: typeof valueFontModes[number]['id'];
+  value: (typeof valueFontModes)[number]['id'];
   onChange: (mode: ValueFontMode) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.valueFontSize', {

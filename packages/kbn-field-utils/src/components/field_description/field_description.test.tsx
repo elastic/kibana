@@ -1,17 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
+
+const mockSetLocalStorage = jest.fn();
+const mockLocalStorageKey = SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY;
+let mockTestInitialLocalStorageValue: boolean | undefined;
+
+jest.mock('react-use/lib/useLocalStorage', () => {
+  return jest.fn((key: string, initialValue: number) => {
+    if (key !== mockLocalStorageKey) {
+      throw new Error(`Unexpected key: ${key}`);
+    }
+    return [mockTestInitialLocalStorageValue ?? initialValue, mockSetLocalStorage];
+  });
+});
 
 describe('FieldDescription', () => {
+  afterEach(() => {
+    mockSetLocalStorage.mockReset();
+    mockTestInitialLocalStorageValue = undefined;
+  });
+
   it('should render correctly when no custom description', async () => {
     render(<FieldDescription field={{ name: 'bytes', type: 'number' }} />);
     const desc = screen.queryByTestId('fieldDescription-bytes');
@@ -35,8 +55,23 @@ describe('FieldDescription', () => {
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
+    expect(mockSetLocalStorage).toHaveBeenCalledWith(false);
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
+  });
+
+  it('should render correctly with a long custom description and do not truncate it by default as per local storage', async () => {
+    mockTestInitialLocalStorageValue = false;
+    const customDescription = 'test this long desc '.repeat(8).trim();
+    render(<FieldDescription field={{ name: 'bytes', type: 'number', customDescription }} />);
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
+      `${customDescription}View less`
+    );
+    expect(mockSetLocalStorage).not.toHaveBeenCalled();
+    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
+    expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
   });
 
   it('should render a long custom description without truncation', async () => {

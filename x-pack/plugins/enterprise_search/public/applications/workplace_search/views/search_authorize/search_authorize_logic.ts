@@ -52,6 +52,7 @@ export const SearchAuthorizeLogic = kea<
     cachedPreAuth: [
       {} as OAuthPreAuthorization,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, serverProps) => transformServerPreAuth(serverProps),
       },
     ],

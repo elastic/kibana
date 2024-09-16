@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_exception_list_items', () => {
+  describe('@ess @serverless @serverlessQA update_exception_list_items', () => {
     describe('update exception list items', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);

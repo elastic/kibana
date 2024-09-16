@@ -1,7 +1,7 @@
 post:
   summary: Bulk get agent policies
   tags:
-    - Agent policies
+    - Elastic Agent policies
   requestBody:
     content:
       application/json:
@@ -38,4 +38,5 @@ post:
       $ref: ../components/responses/error.yaml
   operationId: bulk-get-agent-policies
   security: []
-  parameters: []
+  parameters:
+    - $ref: ../components/parameters/format.yaml

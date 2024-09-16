@@ -55,18 +55,20 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
-  const isToInvalid: boolean = to !== undefined && errors.to !== undefined && errors.to.length > 0;
+  const isToInvalid: boolean =
+    to !== undefined && errors.to !== undefined && Number(errors.to.length) > 0;
   const isSubjectInvalid: boolean =
-    subject !== undefined && errors.subject !== undefined && errors.subject.length > 0;
-  const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
+    subject !== undefined && errors.subject !== undefined && Number(errors.subject.length) > 0;
+  const isCCInvalid: boolean =
+    errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
-    errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
+    errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
 
   return (
     <>
       <EuiFormRow
         fullWidth
-        error={errors.to}
+        error={errors.to as string}
         isInvalid={isToInvalid}
         label={i18n.translate('xpack.stackConnectors.components.email.recipientTextFieldLabel', {
           defaultMessage: 'To',
@@ -128,7 +130,7 @@ export const EmailParamsFields = ({
       {addCC || (cc && cc?.length > 0) ? (
         <EuiFormRow
           fullWidth
-          error={errors.cc}
+          error={errors.cc as string}
           isInvalid={isCCInvalid}
           isDisabled={isDisabled}
           label={i18n.translate(
@@ -172,7 +174,7 @@ export const EmailParamsFields = ({
       {addBCC || (bcc && bcc?.length > 0) ? (
         <EuiFormRow
           fullWidth
-          error={errors.bcc}
+          error={errors.bcc as string}
           isInvalid={isBCCInvalid}
           label={i18n.translate(
             'xpack.stackConnectors.components.email.recipientBccTextFieldLabel',
@@ -216,7 +218,7 @@ export const EmailParamsFields = ({
       {showEmailSubjectAndMessage && (
         <EuiFormRow
           fullWidth
-          error={errors.subject}
+          error={errors.subject as string}
           isInvalid={isSubjectInvalid}
           label={i18n.translate('xpack.stackConnectors.components.email.subjectTextFieldLabel', {
             defaultMessage: 'Subject',

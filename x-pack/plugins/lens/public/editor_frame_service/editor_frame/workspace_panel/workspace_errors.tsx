@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPagination,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type { UserMessage } from '../../../types';
 
 interface Props {
@@ -41,7 +48,19 @@ export function WorkspaceErrors(props: Props) {
       }
       body={
         <div data-test-subj="workspace-error-message">
-          {typeof activeError === 'string' ? activeError : activeError.longMessage}
+          {typeof activeError === 'string' ? (
+            activeError
+          ) : (
+            <div>
+              {activeError.shortMessage}
+              {activeError.longMessage ? (
+                <>
+                  <EuiSpacer />
+                  <EuiText size="s"> {activeError.longMessage as React.ReactNode}</EuiText>
+                </>
+              ) : null}
+            </div>
+          )}
         </div>
       }
       title={<h2>{props.title}</h2>}

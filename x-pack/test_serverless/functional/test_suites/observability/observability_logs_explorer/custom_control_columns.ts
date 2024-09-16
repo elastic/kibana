@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await navigateToLogsExplorer();
     });
 
@@ -44,11 +44,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.clean();
     });
 
-    describe('should render custom control columns properly', async () => {
+    describe('should render custom control columns properly', () => {
       it('should render control column with proper header', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           // First control column has no title, so empty string, leading control column has title
-          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', 'actions']);
+          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', '', '', '']);
         });
       });
 
@@ -60,27 +60,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should render the malformed icon in the leading control column if malformed doc exists', async () => {
+      it('should render the degraded icon in the leading control column if degraded doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 1);
-          const malformedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
-          expect(malformedButton).to.not.be.empty();
+          const cellElement = await dataGrid.getCellElement(1, 2);
+          const degradedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
+          expect(degradedButton).to.not.be.empty();
         });
       });
 
-      it('should render the disabled malformed icon in the leading control column when malformed doc does not exists', async () => {
+      it('should render the disabled degraded icon in the leading control column when degraded doc does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 1);
-          const malformedDisableButton = await cellElement.findByTestSubject(
+          const cellElement = await dataGrid.getCellElement(0, 2);
+          const degradedDisableButton = await cellElement.findByTestSubject(
             'docTableDegradedDocDoesNotExist'
           );
-          expect(malformedDisableButton).to.not.be.empty();
+          expect(degradedDisableButton).to.not.be.empty();
         });
       });
 
       it('should render the stacktrace icon in the leading control column when stacktrace exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(4, 1);
+          const cellElement = await dataGrid.getCellElement(4, 3);
           const stacktraceButton = await cellElement.findByTestSubject('docTableStacktraceExist');
           expect(stacktraceButton).to.not.be.empty();
         });
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the stacktrace icon disabled in the leading control column when stacktrace does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 1);
+          const cellElement = await dataGrid.getCellElement(1, 3);
           const stacktraceButton = await cellElement.findByTestSubject(
             'docTableStacktraceDoesNotExist'
           );
@@ -116,10 +116,7 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         })
     );
 
-  const malformedDocs = timerange(
-    moment(to).subtract(2, 'second'),
-    moment(to).subtract(1, 'second')
-  )
+  const degradedDocs = timerange(moment(to).subtract(2, 'second'), moment(to).subtract(1, 'second'))
     .interval('1m')
     .rate(1)
     .generator((timestamp) =>
@@ -128,7 +125,7 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         .map(() => {
           return log
             .create()
-            .message('A malformed doc')
+            .message('A degraded doc')
             .logLevel(MORE_THAN_1024_CHARS)
             .timestamp(timestamp)
             .defaults({ 'service.name': 'synth-service' });
@@ -186,5 +183,5 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         })
     );
 
-  return [logs, malformedDocs, logsWithErrorMessage, logsWithErrorException, logsWithErrorInLog];
+  return [logs, degradedDocs, logsWithErrorMessage, logsWithErrorException, logsWithErrorInLog];
 }

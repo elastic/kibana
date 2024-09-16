@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema, Type } from '@kbn/config-schema';
@@ -45,8 +46,34 @@ describe('generateOpenApiDocument', () => {
 
     it('generates the expected OpenAPI document', () => {
       const [routers, versionedRouters] = createTestRouters({
-        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
-        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        routers: {
+          testRouter: {
+            routes: [
+              { method: 'get' },
+              { method: 'post' },
+              { method: 'post', path: '/no-xsrf/{id}/{path*}', options: { xsrfRequired: false } },
+              {
+                method: 'delete',
+                validationSchemas: {
+                  request: {},
+                  response: { [200]: { description: 'good response' } },
+                },
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              { method: 'get' },
+              {
+                method: 'post',
+                path: '/no-xsrf/{id}/{path*}',
+                options: { access: 'public', options: { xsrfRequired: false } },
+              },
+            ],
+          },
+        },
       });
       expect(
         generateOpenApiDocument(

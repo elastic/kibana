@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApiVersion } from '@kbn/core-http-common';
@@ -241,12 +242,12 @@ describe('Versioned route', () => {
       ] = route.handlers;
 
       const res200 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![200].body;
+        .response![200].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res200))).toBe(true);
 
       const res404 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![404].body;
+        .response![404].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res404))).toBe(true);
 
@@ -299,6 +300,33 @@ describe('Versioned route', () => {
       expect(validateParamsFn).toHaveBeenCalledTimes(1);
       expect(validateQueryFn).toHaveBeenCalledTimes(1);
       expect(validateOutputFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles "undefined" response schemas', async () => {
+      let handler: RequestHandler;
+
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: { response: { 500: { description: 'jest description', body: undefined } } },
+        },
+        async (ctx, req, res) => res.custom({ statusCode: 500 })
+      );
+
+      await expect(
+        handler!(
+          {} as any,
+          createRequest({
+            version: '1',
+            body: { foo: 1 },
+            params: { foo: 1 },
+            query: { foo: 1 },
+          }),
+          responseFactory
+        )
+      ).resolves.not.toThrow();
     });
 
     it('runs custom response validations', async () => {

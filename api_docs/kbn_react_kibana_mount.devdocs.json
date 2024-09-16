@@ -91,9 +91,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement>"
@@ -152,7 +152,7 @@
         "label": "useIfMounted",
         "description": [],
         "signature": [
-          "() => (func: any) => void"
+          "() => (func?: (() => void) | undefined) => void"
         ],
         "path": "packages/react/kibana_mount/utils.ts",
         "deprecated": false,
@@ -185,9 +185,9 @@
               "(mountPoint: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement> | undefined) => void"
@@ -206,9 +206,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement> | undefined"
@@ -252,25 +252,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           "; analytics?: Pick<",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.ThemeServiceStart",
+            "section": "def-public.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           "; }"

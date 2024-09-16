@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../constants';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 
 // this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
 

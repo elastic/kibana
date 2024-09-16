@@ -54,13 +54,16 @@ export function useGetReplacementCustomIntegrationsQuery() {
 }
 
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
-  return useQuery<GetCategoriesResponse, RequestError>(['categories', query], () =>
-    sendRequestForRq<GetCategoriesResponse>({
-      path: epmRouteService.getCategoriesPath(),
-      method: 'get',
-      query,
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<GetCategoriesResponse, RequestError>(
+    ['categories', query],
+    () =>
+      sendRequestForRq<GetCategoriesResponse>({
+        path: epmRouteService.getCategoriesPath(),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      }),
+    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
   );
 }
 
@@ -96,6 +99,8 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
+    retry: (_, error) => !isRegistryConnectionError(error),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -123,6 +128,7 @@ export const useGetPackageInfoByKeyQuery = (
     ignoreUnverified?: boolean;
     prerelease?: boolean;
     full?: boolean;
+    withMetadata?: boolean;
   },
   // Additional options for the useQuery hook
   queryOptions: {
@@ -150,7 +156,12 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount }
+    {
+      enabled: queryOptions.enabled,
+      refetchOnMount: queryOptions.refetchOnMount,
+      retry: (_, error) => !isRegistryConnectionError(error),
+      refetchOnWindowFocus: false,
+    }
   );
 
   const confirm = async () => {
@@ -358,4 +369,8 @@ export function useGetInputsTemplatesQuery(
         version: API_VERSIONS.public.v1,
       })
   );
+}
+
+function isRegistryConnectionError(error: RequestError) {
+  return error.statusCode === 502;
 }

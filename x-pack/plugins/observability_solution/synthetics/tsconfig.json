@@ -40,7 +40,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/securitysolution-io-ts-utils",
-    "@kbn/ui-theme",
     "@kbn/es-query",
     "@kbn/stack-connectors-plugin",
     "@kbn/rule-data-utils",
@@ -90,7 +89,17 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/ui-actions-browser",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/dashboard-plugin",
+    "@kbn/slo-plugin",
+    "@kbn/ebt-tools"
   ],
   "exclude": ["target/**/*"]
 }

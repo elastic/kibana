@@ -46,9 +46,9 @@ const props: Props = {
       isNewConversationDefault: true,
     },
   ],
-  conversation: undefined,
   isSettingsModalVisible: false,
   isClearable: true,
+  onSystemPromptSelectionChange: jest.fn(),
   selectedPrompt: { id: 'default-system-prompt', content: '', name: '', promptType: 'system' },
   setIsSettingsModalVisible: jest.fn(),
 };
@@ -74,10 +74,6 @@ const mockUseAssistantContext = {
     },
   ],
   setAllSystemPrompts: jest.fn(),
-  knowledgeBase: {
-    isEnabledRAGAlerts: false,
-    isEnabledKnowledgeBase: false,
-  },
 };
 jest.mock('../../../../assistant_context', () => {
   const original = jest.requireActual('../../../../assistant_context');
@@ -103,14 +99,14 @@ describe('SelectSystemPrompt', () => {
     expect(getByTestId('clearSystemPrompt')).toBeInTheDocument();
   });
 
-  it('clears the selected system prompt when the clear button is clicked', () => {
+  it('clears the selected system prompt when the clear button is clicked', async () => {
     const clearSelectedSystemPrompt = jest.fn();
 
     const { getByTestId } = render(
       <SelectSystemPrompt {...props} clearSelectedSystemPrompt={clearSelectedSystemPrompt} />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(clearSelectedSystemPrompt).toHaveBeenCalledTimes(1);
   });

@@ -46,7 +46,7 @@ describe('withTokenBudget', () => {
     it('accepts using a custom content accessor when using complex types', () => {
       const items = [{ message: 'Some content', role: 'user' }]; // Worth 10 tokens total, message worth 2 tokens
       expect(withTokenBudget(items, 2)).toEqual([]);
-      const contentAccessor = (item: typeof items[0]) => item.message;
+      const contentAccessor = (item: (typeof items)[0]) => item.message;
       expect(withTokenBudget(items, 2, { contentAccessor })).toEqual(items);
     });
   });

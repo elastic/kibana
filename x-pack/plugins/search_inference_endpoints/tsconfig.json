@@ -4,9 +4,9 @@
     "outDir": "target/types",
   },
   "include": [
-    "__mocks__/**/*", 
-    "common/**/*", 
-    "public/**/*", 
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
     "server/**/*"
   ],
   "kbn_references": [
@@ -16,7 +16,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/inference_integration_flyout",
     "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/shared-ux-router",
@@ -30,7 +29,8 @@
     "@kbn/doc-links",
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/ml-error-utils"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/features-plugin"
   ],
   "exclude": [
     "target/**/*",

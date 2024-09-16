@@ -194,7 +194,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   }, [getUrlForApp, policy?.policy_id]);
 
   const handleConfigUpload = useCallback(
-    (newConfig) => {
+    (newConfig: any) => {
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;

@@ -193,7 +193,7 @@ interface FieldBasic {
 }
 
 type FieldParams = {
-  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'] | unknown;
+  [K in ParameterName]: (typeof PARAMETERS_DEFINITION)[K]['fieldConfig']['defaultValue'] | unknown;
 };
 
 export type Field = FieldBasic & Partial<FieldParams>;

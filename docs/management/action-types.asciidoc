@@ -16,6 +16,10 @@ a| <<cases-action-type,Cases>>
 
 | Add alerts to cases.
 
+a| <<crowdstrike-action-type,CrowdStrike>>
+
+| Send a request to CrowdStrike.
+
 a| <<d3security-action-type,D3 Security>>
 
 | Send a request to D3 Security.
@@ -87,6 +91,10 @@ a| <<slack-action-type,Slack>>
 a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
+
+a| <<thehive-action-type,TheHive>>
+
+| Create cases and alerts in TheHive.
 
 a| <<tines-action-type,Tines>>
 

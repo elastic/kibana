@@ -6,11 +6,11 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { KillProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { KillProcessRequestBody } from '../../../../../common/endpoint/types';
 
 export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[]; processName?: string[] }>

@@ -26,9 +26,17 @@ export const getConnectorRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        params: getConnectorParamsSchemaV1,
+        request: {
+          params: getConnectorParamsSchemaV1,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

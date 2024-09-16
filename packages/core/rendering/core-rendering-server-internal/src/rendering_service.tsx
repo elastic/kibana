@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -42,6 +43,7 @@ import {
   getBrowserLoggingConfig,
 } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
@@ -121,7 +123,7 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
       renderOptions;
@@ -221,6 +223,7 @@ export class RenderingService {
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
+    const apmConfig = getApmConfig(request.url.pathname);
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -249,6 +252,7 @@ export class RenderingService {
         logging: loggingConfig,
         env,
         clusterInfo,
+        apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
@@ -268,7 +272,6 @@ export class RenderingService {
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
-        vars: vars ?? {},
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
             const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);

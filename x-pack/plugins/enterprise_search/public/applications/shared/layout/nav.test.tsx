@@ -112,6 +112,12 @@ const baseNavItems = [
         name: 'Vector Search',
       },
       {
+        href: '/app/enterprise_search/semantic_search',
+        id: 'semanticSearch',
+        items: undefined,
+        name: 'Semantic Search',
+      },
+      {
         href: '/app/enterprise_search/ai_search',
         id: 'aiSearch',
         items: undefined,

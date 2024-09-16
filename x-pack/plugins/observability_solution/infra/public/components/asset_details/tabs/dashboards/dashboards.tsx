@@ -29,7 +29,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   ASSET_DETAILS_LOCATOR_ID,
-} from '@kbn/observability-shared-plugin/public';
+} from '@kbn/observability-shared-plugin/common';
 import { useLocation } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import { isEqual } from 'lodash';
@@ -124,11 +124,9 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
-    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
-    telemetry,
     urlState?.dashboardId,
   ]);
 
@@ -165,7 +163,7 @@ export function Dashboards() {
   ]);
 
   const getLocatorParams = useCallback(
-    (params, isFlyoutView) => {
+    (params: any, isFlyoutView: any) => {
       const searchParams = new URLSearchParams(location.search);
       const tableProperties = searchParams.get('tableProperties');
       const flyoutParams =

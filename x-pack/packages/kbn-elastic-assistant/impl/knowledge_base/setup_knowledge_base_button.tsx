@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
-const ESQL_RESOURCE = 'esql';
+export const ESQL_RESOURCE = 'esql';
 
 /**
  * Self-contained component that renders a button to set up the knowledge base.
@@ -40,19 +40,28 @@ export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
     return null;
   }
 
+  const toolTipContent = !kbStatus?.is_setup_available
+    ? i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButtonToolTip', {
+        defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
+      })
+    : undefined;
+
   return (
-    <EuiButton
-      color="primary"
-      data-test-subj="setup-knowledge-base-button"
-      fill
-      isLoading={isSetupInProgress}
-      iconType="importAction"
-      onClick={onInstallKnowledgeBase}
-    >
-      {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
-        defaultMessage: 'Setup Knowledge Base',
-      })}
-    </EuiButton>
+    <EuiToolTip position={'bottom'} content={toolTipContent}>
+      <EuiButton
+        color="primary"
+        data-test-subj="setup-knowledge-base-button"
+        fill
+        disabled={!kbStatus?.is_setup_available}
+        isLoading={isSetupInProgress}
+        iconType="importAction"
+        onClick={onInstallKnowledgeBase}
+      >
+        {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
+          defaultMessage: 'Setup Knowledge Base',
+        })}
+      </EuiButton>
+    </EuiToolTip>
   );
 });
 

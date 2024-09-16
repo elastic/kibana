@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // https://github.com/elastic/kibana/issues/183247
-    describe('@serverless @skipInServerlessMKI Asset Criticality Privileges API', () => {
+    describe('@skipInServerless @skipInServerlessMKI Asset Criticality Privileges API', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const assetCriticalityRoutesNoAuth =
         assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);

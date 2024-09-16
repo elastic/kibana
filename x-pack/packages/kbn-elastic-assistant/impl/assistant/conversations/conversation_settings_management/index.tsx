@@ -121,7 +121,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const setAssistantStreamingEnabled = useCallback(
-    (value) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any) => {
       setHasPendingChanges(true);
       setUpdatedAssistantStreamingEnabled(value);
     },
@@ -259,11 +260,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        conversations: conversationSettings,
         onDeleteActionClicked,
         onEditActionClicked,
       }),
-    [conversationSettings, getColumns, onDeleteActionClicked, onEditActionClicked]
+    [getColumns, onDeleteActionClicked, onEditActionClicked]
   );
 
   const confirmationTitle = useMemo(
@@ -324,7 +324,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-            onSelectedConversationChange={onSelectedConversationChange}
           />
         </Flyout>
       )}

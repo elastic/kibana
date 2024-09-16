@@ -24,6 +24,11 @@ export function healthRoute(
     {
       path: '/api/alerts/_health',
       validate: false,
+      options: {
+        summary: 'Get the alerting framework health',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

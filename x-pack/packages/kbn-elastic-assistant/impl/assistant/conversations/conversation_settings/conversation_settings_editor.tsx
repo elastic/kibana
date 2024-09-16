@@ -17,7 +17,7 @@ import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import { ConnectorSelector } from '../../../connectorland/connector_selector';
+import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -36,7 +36,6 @@ export interface ConversationSettingsEditorProps {
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
-  onSelectedConversationChange: (conversation?: Conversation) => void;
 }
 
 /**
@@ -45,14 +44,13 @@ export interface ConversationSettingsEditorProps {
 export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProps> = React.memo(
   ({
     allSystemPrompts,
-    selectedConversation,
     conversationSettings,
+    conversationsSettingsBulkActions,
     http,
     isDisabled = false,
+    selectedConversation,
     setConversationSettings,
-    conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
-    onSelectedConversationChange,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
@@ -137,7 +135,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       [selectedConversation]
     );
     const handleOnConnectorSelectionChange = useCallback(
-      (connector) => {
+      (connector: AIConnector) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {
@@ -273,15 +271,11 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           <SelectSystemPrompt
             allPrompts={allSystemPrompts}
             compressed
-            conversation={selectedConversation}
             isDisabled={isDisabled}
+            isSettingsModalVisible={true}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
-            isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
-            onSelectedConversationChange={onSelectedConversationChange}
-            setConversationSettings={setConversationSettings}
-            setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           />
         </EuiFormRow>
 

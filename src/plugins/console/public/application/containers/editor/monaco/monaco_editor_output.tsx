@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
@@ -14,6 +15,7 @@ import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import { getStatusCodeDecorations } from './utils';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
@@ -33,10 +35,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       setupResizeChecker(divRef.current!, editor);
+      lineDecorations.current = editor.createDecorationsCollection();
     },
     [setupResizeChecker]
   );
@@ -46,6 +50,8 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   }, [destroyResizeChecker]);
 
   useEffect(() => {
+    // Clean up any existing line decorations
+    lineDecorations.current?.clear();
     if (data) {
       const isMultipleRequest = data.length > 1;
       setMode(
@@ -73,6 +79,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           })
           .join('\n')
       );
+      if (isMultipleRequest) {
+        // If there are multiple responses, add decorations for their status codes
+        const decorations = getStatusCodeDecorations(data);
+        lineDecorations.current?.set(decorations);
+      }
     } else {
       setValue('');
     }
@@ -99,6 +110,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         fullWidth={true}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        enableFindAction={true}
         options={{
           readOnly: true,
           fontSize: readOnlySettings.fontSize,

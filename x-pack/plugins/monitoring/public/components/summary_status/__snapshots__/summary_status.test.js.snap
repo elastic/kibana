@@ -18,14 +18,11 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Status
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
@@ -50,20 +47,12 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          />
+          <p />
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           127.0.0.1:9300
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-           127.0.0.1:9300
         </p>
       </div>
     </div>
@@ -78,22 +67,14 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Documents
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-          Documents 24.8k
         </p>
       </div>
     </div>
@@ -123,22 +104,14 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Free Disk Space
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-          Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
@@ -153,22 +126,14 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Documents
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-          Documents 24.8k
         </p>
       </div>
     </div>
@@ -194,14 +159,11 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Status
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
@@ -226,22 +188,14 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Free Disk Space
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-          Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
@@ -256,22 +210,14 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiStat__description emotion-euiText-s"
         >
-          <p
-            aria-hidden="true"
-          >
+          <p>
             Documents
           </p>
         </div>
         <p
-          aria-hidden="true"
           class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
-        </p>
-        <p
-          class="emotion-euiScreenReaderOnly"
-        >
-          Documents 24.8k
         </p>
       </div>
     </div>

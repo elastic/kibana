@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -11,10 +12,12 @@ import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import { KNOWN_HTTP_METHODS } from './http_methods';
 import { isRefNode } from '../process_document';
+import { MergeOptions } from './merge_options';
 
 export function mergeOperations(
   sourcePathItem: OpenAPIV3.PathItemObject,
-  mergedPathItem: OpenAPIV3.PathItemObject
+  mergedPathItem: OpenAPIV3.PathItemObject,
+  options: MergeOptions
 ) {
   for (const httpMethod of KNOWN_HTTP_METHODS) {
     const sourceOperation = sourcePathItem[httpMethod];
@@ -24,12 +27,25 @@ export function mergeOperations(
       continue;
     }
 
-    if (!mergedOperation || deepEqual(sourceOperation, mergedOperation)) {
-      mergedPathItem[httpMethod] = sourceOperation;
+    // Adding tags before merging helps to reuse already existing functionality
+    // without changes. It imitates a case when such tags already existed in source operations.
+    const extendedTags = [
+      ...(options.addTags?.map((t) => t.name) ?? []),
+      ...(sourceOperation.tags ?? []),
+    ];
+    const normalizedSourceOperation = {
+      ...sourceOperation,
+      ...(options.skipServers ? { servers: undefined } : { servers: sourceOperation.servers }),
+      ...(options.skipSecurity ? { security: undefined } : { security: sourceOperation.security }),
+      ...(extendedTags.length > 0 ? { tags: extendedTags } : {}),
+    };
+
+    if (!mergedOperation || deepEqual(normalizedSourceOperation, mergedOperation)) {
+      mergedPathItem[httpMethod] = normalizedSourceOperation;
       continue;
     }
 
-    mergeOperation(sourceOperation, mergedOperation);
+    mergeOperation(normalizedSourceOperation, mergedOperation);
   }
 }
 

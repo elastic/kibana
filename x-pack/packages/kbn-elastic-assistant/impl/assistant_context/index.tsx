@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
@@ -21,7 +20,12 @@ import type {
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
-import type { Conversation } from './types';
+import {
+  AssistantAvailability,
+  AssistantTelemetry,
+  Conversation,
+  GetAssistantMessages,
+} from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
@@ -34,7 +38,6 @@ import {
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { SettingsTabs } from '../assistant/settings/types';
@@ -63,17 +66,7 @@ export interface AssistantProviderProps {
   basePromptContexts?: PromptContextTemplate[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
-  getComments: (commentArgs: {
-    abortStream: () => void;
-    currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
-    isFetchingResponse: boolean;
-    refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
-    regenerateMessage: (conversationId: string) => void;
-    showAnonymizedValues: boolean;
-    setIsStreaming: (isStreaming: boolean) => void;
-    currentUserAvatar?: UserAvatar;
-  }) => EuiCommentProps[];
+  getComments: GetAssistantMessages;
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
@@ -103,17 +96,7 @@ export interface UseAssistantContext {
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   baseConversations: Record<string, Conversation>;
-  getComments: (commentArgs: {
-    abortStream: () => void;
-    currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
-    isFetchingResponse: boolean;
-    refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
-    regenerateMessage: () => void;
-    showAnonymizedValues: boolean;
-    currentUserAvatar?: UserAvatar;
-    setIsStreaming: (isStreaming: boolean) => void;
-  }) => EuiCommentProps[];
+  getComments: GetAssistantMessages;
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
@@ -139,6 +122,7 @@ export interface UseAssistantContext {
   basePromptContexts: PromptContextTemplate[];
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
+  codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -239,6 +223,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
+  /**
+   * Setting code block ref that can be used to store callback from parent components
+   */
+  const codeBlockRef = useRef(() => {});
+
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
@@ -286,6 +275,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
       currentAppId,
+      codeBlockRef,
     }),
     [
       actionTypeRegistry,
@@ -318,6 +308,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationId,
       baseConversations,
       currentAppId,
+      codeBlockRef,
     ]
   );
 

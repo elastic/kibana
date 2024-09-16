@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  InfraTimerangeInput,
-  MetricsAPIRequest,
-  SnapshotRequest,
-} from '../../../../common/http_api';
+import type { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api';
 import moment from 'moment';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
+import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 
 jest.mock('./apply_metadata_to_last_path', () => ({
   applyMetadataToLastPath: (series: any) => [{ label: series.id }],

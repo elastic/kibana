@@ -11,11 +11,11 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { AlertsFilter } from '@kbn/alerting-types';
-import { AlertsSearchBar } from '../../alerts_search_bar';
+import type { AlertsFilter } from '@kbn/alerting-types';
 import { useRuleFormState } from '../hooks';
 import { RuleAction } from '../../common';
 import { RuleFormPlugins } from '../types';
+import { AlertsSearchBar, AlertsSearchBarProps } from '../../alerts_search_bar';
 
 const DEFAULT_QUERY = { kql: '', filters: [] };
 
@@ -66,7 +66,7 @@ export const RuleActionsAlertsFilter = ({
     [query, onChange]
   );
 
-  const onQueryChange = useCallback(
+  const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
     ({ query: newQuery }) => updateQuery({ kql: newQuery }),
     [updateQuery]
   );

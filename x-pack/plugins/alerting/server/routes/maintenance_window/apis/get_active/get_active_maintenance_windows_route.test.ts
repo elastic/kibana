@@ -62,6 +62,7 @@ describe('getActiveMaintenanceWindowsRoute', () => {
 
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
+      // @ts-expect-error upgrade typescript v5.1.6
       body: mockMaintenanceWindows.map((data) => rewriteMaintenanceWindowRes(data)),
     });
   });

@@ -35,6 +35,7 @@ export const GetInstalledPackagesRequestSchema = {
         schema.literal('profiling'),
       ])
     ),
+    showOnlyActiveDataStreams: schema.maybe(schema.boolean()),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
     perPage: schema.number({ defaultValue: 15 }),
@@ -86,6 +87,7 @@ export const GetInfoRequestSchema = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -103,6 +105,7 @@ export const GetInfoRequestSchemaDeprecated = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 

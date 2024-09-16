@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import {
@@ -19,6 +20,11 @@ import {
 import { css } from '@emotion/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
+const SHOULD_TRUNCATE_FIELD_DESCRIPTION_BY_DEFAULT = true;
+export const SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY =
+  'fieldDescription:truncateByDefault';
 
 const MAX_VISIBLE_LENGTH = 110;
 
@@ -81,10 +87,24 @@ const EcsFieldDescriptionFallback: React.FC<
 export const FieldDescriptionContent: React.FC<
   FieldDescriptionContentProps & { ecsFieldDescription?: string }
 > = ({ field, color, truncate = true, ecsFieldDescription, Wrapper }) => {
+  const [shouldTruncateByDefault, setShouldTruncateByDefault] = useLocalStorage<boolean>(
+    SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY,
+    SHOULD_TRUNCATE_FIELD_DESCRIPTION_BY_DEFAULT
+  );
   const { euiTheme } = useEuiTheme();
   const customDescription = (field?.customDescription || ecsFieldDescription || '').trim();
   const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
-  const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
+  const [isTruncated, setIsTruncated] = useState<boolean>(
+    (shouldTruncateByDefault ?? SHOULD_TRUNCATE_FIELD_DESCRIPTION_BY_DEFAULT) && isTooLong
+  );
+
+  const truncateFieldDescription = useCallback(
+    (nextValue: boolean) => {
+      setIsTruncated(nextValue);
+      setShouldTruncateByDefault(nextValue);
+    },
+    [setIsTruncated, setShouldTruncateByDefault]
+  );
 
   if (!customDescription) {
     return null;
@@ -100,7 +120,7 @@ export const FieldDescriptionContent: React.FC<
               defaultMessage: 'View full field description',
             })}
             className="eui-textBreakWord eui-textLeft"
-            onClick={() => setIsTruncated(false)}
+            onClick={() => truncateFieldDescription(false)}
             css={css`
               padding: 0;
               margin: 0;
@@ -130,7 +150,7 @@ export const FieldDescriptionContent: React.FC<
               size="xs"
               flush="both"
               data-test-subj={`toggleFieldDescription-${field.name}`}
-              onClick={() => setIsTruncated(true)}
+              onClick={() => truncateFieldDescription(true)}
             >
               {i18n.translate('fieldUtils.fieldDescription.viewLessButton', {
                 defaultMessage: 'View less',

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
 import {
   initializePathScript,
   cleanScript,
 } from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function mapDestinationToPainless(field: string) {
   return `
@@ -26,7 +26,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, def) => {
-    const destination = def.destination || def.source;
+    const destination = def.destination;
     const optionalFieldPath = destination.replaceAll('.', '?.');
     const next = `
       if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
@@ -45,6 +45,39 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
       value: `{{entity.identity.${key.field}}}`,
     },
   }));
+}
+
+function getCustomIngestPipelines(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
+      },
+    },
+  ];
 }
 
 export function generateHistoryProcessors(definition: EntityDefinition) {
@@ -163,5 +196,6 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
+    ...getCustomIngestPipelines(definition),
   ];
 }

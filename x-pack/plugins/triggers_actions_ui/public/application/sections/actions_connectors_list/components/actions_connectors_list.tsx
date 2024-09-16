@@ -23,12 +23,11 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
-import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
+import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -49,17 +48,9 @@ import {
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from '../../../../common/connectors_selection';
-import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
-import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
-
-interface EditConnectorProps {
-  initialConnector?: ActionConnector;
-  tab?: EditConnectorTabs;
-  isFix?: boolean;
-}
 
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
@@ -77,16 +68,30 @@ const ConnectorIconTipWithSpacing: React.FC = () => {
   );
 };
 
-const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList = ({
+  setAddFlyoutVisibility,
+  editItem,
+  isLoadingActions,
+  actions,
+  loadActions,
+  setActions,
+}: {
+  setAddFlyoutVisibility: (state: boolean) => void;
+  editItem: (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => void;
+  isLoadingActions: boolean;
+  actions: ActionConnector[];
+  loadActions: () => Promise<void>;
+  setActions: (state: ActionConnector[]) => void;
+}) => {
   const {
     http,
     notifications: { toasts },
     application: { capabilities },
-    actionTypeRegistry,
     setBreadcrumbs,
     chrome,
     docLinks,
   } = useKibana().services;
+
   const { connectorId } = useParams<{ connectorId?: string }>();
   const history = useHistory();
   const location = useLocation();
@@ -94,18 +99,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-  const [actions, setActions] = useState<ActionConnector[]>([]);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
-  const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
-  useEffect(() => {
-    loadActions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
 
   // Set breadcrumb and page title
@@ -172,7 +169,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
 
       window.history.replaceState(null, '', linkToConnectors);
     }
-  }, [actions, connectorId, history, isLoadingActions, location]);
+  }, [actions, connectorId, editItem, history, isLoadingActions, location]);
 
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
@@ -186,29 +183,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     const itemIds = items.map((item: any) => item.id);
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
-  }
-
-  async function loadActions() {
-    setIsLoadingActions(true);
-    try {
-      const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
-          {
-            defaultMessage: 'Unable to load connectors',
-          }
-        ),
-      });
-    } finally {
-      setIsLoadingActions(false);
-    }
-  }
-
-  function editItem(actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) {
-    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
   const actionsTableColumns = [
@@ -434,50 +408,34 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             options: actionTypesList,
           },
         ],
-        toolsLeft: (selectedItems.length === 0 || !canDelete
-          ? []
-          : [
-              <EuiButton
-                key="delete"
-                iconType="trash"
-                color="danger"
-                data-test-subj="bulkDelete"
-                onClick={() => onDelete(selectedItems)}
-                title={
-                  canDelete
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                        { defaultMessage: 'Unable to delete connectors' }
-                      )
-                }
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                  defaultMessage="Delete {count}"
-                  values={{
-                    count: selectedItems.length,
-                  }}
-                />
-              </EuiButton>,
-            ]
-        ).concat(
-          canSave
-            ? [
+        toolsLeft:
+          selectedItems.length === 0 || !canDelete
+            ? []
+            : [
                 <EuiButton
-                  data-test-subj="createActionButton"
-                  key="create-action"
-                  fill
-                  onClick={() => setAddFlyoutVisibility(true)}
+                  key="delete"
+                  iconType="trash"
+                  color="danger"
+                  data-test-subj="bulkDelete"
+                  onClick={() => onDelete(selectedItems)}
+                  title={
+                    canDelete
+                      ? undefined
+                      : i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
+                          { defaultMessage: 'Unable to delete connectors' }
+                        )
+                  }
                 >
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                    defaultMessage="Create connector"
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
+                    defaultMessage="Delete {count}"
+                    values={{
+                      count: selectedItems.length,
+                    }}
                   />
                 </EuiButton>,
-              ]
-            : []
-        ),
+              ],
       }}
     />
   );
@@ -546,33 +504,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             />
           )}
         {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
-        {addFlyoutVisible ? (
-          <CreateConnectorFlyout
-            onClose={() => {
-              setAddFlyoutVisibility(false);
-            }}
-            onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
-            onConnectorCreated={loadActions}
-            actionTypeRegistry={actionTypeRegistry}
-          />
-        ) : null}
-        {editConnectorProps.initialConnector ? (
-          <EditConnectorFlyout
-            key={`${editConnectorProps.initialConnector.id}${
-              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
-            }`}
-            connector={editConnectorProps.initialConnector}
-            tab={editConnectorProps.tab}
-            onClose={() => {
-              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
-            }}
-            onConnectorUpdated={(connector) => {
-              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
-              loadActions();
-            }}
-            actionTypeRegistry={actionTypeRegistry}
-          />
-        ) : null}
       </EuiPageTemplate.Section>
     </>
   );

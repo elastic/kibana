@@ -47,9 +47,9 @@ export class RequestHandler {
     private context: ReportingRequestHandlerContext,
     private path: string,
     private req: KibanaRequest<
-      TypeOf<typeof validation['params']>,
-      TypeOf<typeof validation['query']>,
-      TypeOf<typeof validation['body']>
+      TypeOf<(typeof validation)['params']>,
+      TypeOf<(typeof validation)['query']>,
+      TypeOf<(typeof validation)['body']>
     >,
     private res: KibanaResponseFactory,
     private logger: Logger

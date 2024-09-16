@@ -21,14 +21,12 @@ import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
   RowRenderer,
-  ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
@@ -61,9 +59,6 @@ type CommonDataTableProps = {
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
-  onEventClosed: (args: ToggleDetailPanel) => void;
-  expandedDetail: ExpandedDetailTimeline;
-  showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
@@ -102,9 +97,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     refetch,
     dataLoadingState,
     totalCount,
-    onEventClosed,
-    showExpandedDetails,
-    expandedDetail,
     onChangePage,
     updatedAt,
     isTextBasedQuery = false,
@@ -194,7 +186,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const onColumnResize = useCallback(
-      ({ columnId, width }: { columnId: string; width: number }) => {
+      ({ columnId, width }: { columnId: string; width?: number }) => {
         dispatch(
           timelineActions.updateColumnWidth({
             columnId,
@@ -206,14 +198,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const onResizeDataGrid = useCallback(
+    const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
       (colSettings) => {
-        onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
+        onColumnResize({
+          columnId: colSettings.columnId,
+          ...(colSettings.width ? { width: Math.round(colSettings.width) } : {}),
+        });
       },
       [onColumnResize]
     );
 
-    const onChangeItemsPerPage = useCallback(
+    const onChangeItemsPerPage = useCallback<
+      NonNullable<UnifiedDataTableProps['onUpdateRowsPerPage']>
+    >(
       (itemsChangedPerPage) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })

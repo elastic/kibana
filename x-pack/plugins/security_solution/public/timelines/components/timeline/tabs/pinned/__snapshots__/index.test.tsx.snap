@@ -111,7 +111,9 @@ Can be one or multiple IPv4 or IPv6 addresses.",
           "long",
         ],
         "example": "123",
-        "format": "bytes",
+        "format": Object {
+          "id": "bytes",
+        },
         "id": "destination.bytes",
         "initialWidth": 180,
         "type": "number",
@@ -156,8 +158,8 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
+  dispatch={Object {}}
   eventIdToNoteIds={Object {}}
-  expandedDetail={Object {}}
   itemsPerPage={5}
   itemsPerPageOptions={
     Array [
@@ -166,7 +168,6 @@ In other use cases the message field can be used to concatenate different values
       20,
     ]
   }
-  onEventClosed={[MockFunction]}
   pinnedEventIds={Object {}}
   renderCellValue={[Function]}
   rowRenderers={
@@ -1153,7 +1154,6 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
-  showExpandedDetails={false}
   sort={
     Array [
       Object {

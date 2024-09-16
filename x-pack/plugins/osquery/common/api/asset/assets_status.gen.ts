@@ -14,10 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type AssetsRequestQuery = z.infer<typeof AssetsRequestQuery>;
 export const AssetsRequestQuery = z.object({});
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

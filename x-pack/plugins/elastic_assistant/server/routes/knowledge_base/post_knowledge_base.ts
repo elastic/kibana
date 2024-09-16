@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
@@ -19,6 +17,7 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { getKbResource } from './get_kb_resource';
+import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
@@ -59,17 +58,21 @@ export const postKnowledgeBaseRoute = (
         response
       ): Promise<IKibanaResponse<CreateKnowledgeBaseResponse>> => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = ctx.elasticAssistant.logger;
         const telemetry = assistantContext.telemetry;
         const elserId = await getElser();
-        const core = await context.core;
+        const core = ctx.core;
         const esClient = core.elasticsearch.client.asInternalUser;
         const soClient = core.savedObjects.getClient();
 
+        // FF Check for V2 KB
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
+
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled);
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
@@ -88,13 +91,10 @@ export const postKnowledgeBaseRoute = (
           await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
 
           return response.ok({ body: { success: true } });
-        } catch (err) {
-          logger.log(err);
-          const error = transformError(err);
-
+        } catch (error) {
           return resp.error({
             body: error.message,
-            statusCode: error.statusCode,
+            statusCode: 500,
           });
         }
       }

@@ -166,13 +166,63 @@
     "misc": [
       {
         "parentPluginId": "integrationAssistant",
+        "id": "def-common.ANALYZE_LOGS_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYZE_LOGS_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.AnalyzeLogsRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyzeLogsRequestBody",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; packageName: string; dataStreamName: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.AnalyzeLogsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyzeLogsResponse",
+        "description": [],
+        "signature": [
+          "{ results: { samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; parsedSamples: string[]; }; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
         "id": "def-common.BuildIntegrationRequestBody",
         "type": "Type",
         "tags": [],
         "label": "BuildIntegrationRequestBody",
         "description": [],
         "signature": [
-          "{ integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -180,7 +230,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -188,7 +238,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }"
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }; }"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.ts",
         "deprecated": false,
@@ -215,7 +265,7 @@
         "label": "CategorizationRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "{ connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -223,7 +273,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -254,7 +304,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -297,7 +347,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -337,7 +387,7 @@
           "\nThe dataStream object."
         ],
         "signature": [
-          "{ name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -345,7 +395,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -353,7 +403,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }"
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -397,7 +447,15 @@
         "label": "EcsMappingRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+          "{ connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
         "deprecated": false,
@@ -420,7 +478,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -464,7 +522,7 @@
           "\nThe input type for the dataStream to pull logs from."
         ],
         "signature": [
-          "\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\""
+          "\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\""
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -481,7 +539,7 @@
           "\nThe integration object."
         ],
         "signature": [
-          "{ name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -489,7 +547,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -497,7 +555,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }"
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -564,7 +622,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -614,7 +672,7 @@
         "label": "RelatedRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "{ connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -622,7 +680,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -653,7 +711,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -667,9 +725,88 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.SamplesFormat",
+        "type": "Type",
+        "tags": [],
+        "label": "SamplesFormat",
+        "description": [
+          "\nFormat of the provided log samples."
+        ],
+        "signature": [
+          "{ name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.AnalyzeLogsRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "AnalyzeLogsRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; logSamples: Zod.ZodArray<Zod.ZodString, \"many\">; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; dataStreamName: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; dataStreamName: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.AnalyzeLogsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "AnalyzeLogsResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ results: Zod.ZodObject<{ samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; parsedSamples: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; parsedSamples: string[]; }, { samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; parsedSamples: string[]; }>; additionalProcessors: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { results: { samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; parsedSamples: string[]; }; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { results: { samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; parsedSamples: string[]; }; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "integrationAssistant",
         "id": "def-common.BuildIntegrationRequestBody",
@@ -678,7 +815,7 @@
         "label": "BuildIntegrationRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ integration: Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          "Zod.ZodObject<{ integration: Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -718,7 +855,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -734,7 +871,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -742,7 +879,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -750,7 +887,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -758,7 +895,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -766,7 +903,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -774,7 +911,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -782,7 +919,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -790,7 +927,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -798,7 +935,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -806,7 +943,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -814,7 +951,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -822,7 +959,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }; }, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -830,7 +967,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -838,7 +975,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }>"
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }; }>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.ts",
         "deprecated": false,
@@ -853,7 +990,7 @@
         "label": "CategorizationRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -893,7 +1030,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -909,7 +1046,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -917,7 +1054,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "[] | undefined; }>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -925,7 +1062,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -933,7 +1070,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -941,7 +1078,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1004,7 +1141,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1020,7 +1157,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1036,7 +1173,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1052,7 +1189,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1068,7 +1205,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1084,7 +1221,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1147,7 +1284,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1163,7 +1300,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1179,7 +1316,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1195,7 +1332,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1233,7 +1370,7 @@
         "label": "DataStream",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1273,7 +1410,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1289,7 +1426,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1297,7 +1434,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1305,7 +1442,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1313,7 +1450,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1321,7 +1458,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1329,7 +1466,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>"
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -1359,7 +1496,39 @@
         "label": "EcsMappingRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; mapping: Zod.ZodOptional<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; mapping: Zod.ZodOptional<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>>; additionalProcessors: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; additionalProcessors?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
         "deprecated": false,
@@ -1414,7 +1583,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1430,7 +1599,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1446,7 +1615,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1462,7 +1631,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1478,7 +1647,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1494,7 +1663,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1548,7 +1717,7 @@
         "label": "InputType",
         "description": [],
         "signature": [
-          "Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>"
+          "Zod.ZodEnum<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -1563,7 +1732,7 @@
         "label": "Integration",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1603,7 +1772,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1619,7 +1788,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1627,7 +1796,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1635,7 +1804,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1643,7 +1812,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1651,7 +1820,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1659,7 +1828,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1667,7 +1836,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1675,7 +1844,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1683,7 +1852,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1691,7 +1860,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }>"
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; }[]; logo?: string | undefined; }>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
@@ -1746,7 +1915,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1762,7 +1931,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1785,7 +1954,7 @@
         "label": "RelatedRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; samplesFormat: Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1825,7 +1994,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1841,7 +2010,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1849,7 +2018,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "[] | undefined; }>; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1857,7 +2026,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1865,7 +2034,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1873,7 +2042,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1936,7 +2105,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1952,7 +2121,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1968,7 +2137,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -1984,7 +2153,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -2000,7 +2169,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -2016,7 +2185,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "integrationAssistant",
             "scope": "common",
@@ -2027,6 +2196,21 @@
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }>"
         ],
         "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.SamplesFormat",
+        "type": "Object",
+        "tags": [],
+        "label": "SamplesFormat",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\"; multiline?: boolean | undefined; json_path?: string[] | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

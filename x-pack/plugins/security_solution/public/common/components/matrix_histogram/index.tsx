@@ -57,7 +57,9 @@ const visualizationResponseHasData = (response: VisualizationResponse[]): boolea
   }
   return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
     response[0].aggregations ?? {}
-  ).some(({ buckets }) => buckets.length > 0);
+  ).some(
+    ({ buckets }) => (Array.isArray(buckets) ? buckets.length : Object.keys(buckets).length) > 0
+  );
 };
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({

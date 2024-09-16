@@ -98,6 +98,10 @@ export interface CloudSetup {
    */
   cloudId?: string;
   /**
+   * The Elastic Cloud Organization that owns this deployment/project.
+   */
+  organizationId?: string;
+  /**
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
   deploymentId?: string;
@@ -107,6 +111,12 @@ export interface CloudSetup {
    * @example `cloud.elastic.co`
    */
   cname?: string;
+  /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
   /**
    * This is the URL of the Cloud interface.
    */
@@ -208,5 +218,10 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: string;
+    /**
+     * The serverless orchestrator target. The potential values are `canary` or `non-canary`
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    orchestratorTarget?: string;
   };
 }

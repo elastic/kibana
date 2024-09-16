@@ -86,7 +86,7 @@ export class CasePlugin
       this.persistableStateAttachmentTypeRegistry
     );
 
-    registerCaseFileKinds(this.caseConfig.files, plugins.files);
+    registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;

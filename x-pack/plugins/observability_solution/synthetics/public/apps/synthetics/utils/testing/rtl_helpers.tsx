@@ -34,10 +34,7 @@ import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { stringifyUrlParams } from '../url_params';
 import { ClientPluginsStart } from '../../../../plugin';
-import {
-  SyntheticsRefreshContextProvider,
-  SyntheticsStartupPluginsContextProvider,
-} from '../../contexts';
+import { SyntheticsRefreshContextProvider } from '../../contexts';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 type DeepPartial<T> = {
@@ -182,21 +179,14 @@ export function MockKibanaProvider<ExtraCore>({
 }: MockKibanaProviderProps<ExtraCore>) {
   const coreOptions = merge({}, mockCore(), core);
 
-  kibanaService.core = coreOptions as any;
+  kibanaService.coreStart = coreOptions as any;
 
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
       <SyntheticsRefreshContextProvider>
-        <SyntheticsStartupPluginsContextProvider
-          data={(coreOptions as any).data}
-          observability={(coreOptions as any).observability}
-          observabilityShared={(coreOptions as any).observabilityShared}
-          exploratoryView={(coreOptions as any).exploratoryView}
-        >
-          <EuiThemeProvider darkMode={false}>
-            <I18nProvider>{children}</I18nProvider>
-          </EuiThemeProvider>
-        </SyntheticsStartupPluginsContextProvider>
+        <EuiThemeProvider darkMode={false}>
+          <I18nProvider>{children}</I18nProvider>
+        </EuiThemeProvider>
       </SyntheticsRefreshContextProvider>
     </KibanaContextProvider>
   );

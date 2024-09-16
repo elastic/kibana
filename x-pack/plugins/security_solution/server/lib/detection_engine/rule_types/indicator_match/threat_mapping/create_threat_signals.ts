@@ -37,6 +37,7 @@ import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
+import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 
 export const createThreatSignals = async ({
   alertId,
@@ -106,9 +107,13 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const dataTiersFilters = await getDataTierFilter({
+    uiSettingsClient: services.uiSettingsClient,
+  });
+
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
-  const allEventFilters = [...filters, eventMappingFilter];
-  const allThreatFilters = [...threatFilters, indicatorMappingFilter];
+  const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
+  const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
 
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
@@ -135,10 +140,11 @@ export const createThreatSignals = async ({
     if (newPitId) threatPitId = newPitId;
   };
 
+  const dataViews = await services.getDataViews();
   const threatIndexFields = await getFieldsForWildcard({
     index: threatIndex,
     language: threatLanguage ?? 'kuery',
-    dataViews: services.dataViews,
+    dataViews,
     ruleExecutionLogger,
   });
 

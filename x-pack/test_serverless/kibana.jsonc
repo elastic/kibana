@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-serverless",
+  "owner": [],
+  "devOnly": true
+}

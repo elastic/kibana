@@ -5,51 +5,15 @@
  * 2.0.
  */
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  KibanaDiscoveryService,
-  DISCOVERY_INTERVAL,
-  ACTIVE_NODES_LOOK_BACK,
-} from './kibana_discovery_service';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
-import {
-  SavedObjectsBulkDeleteResponse,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core/server';
+import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
-import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import { createFindResponse, createFindSO } from './mock_kibana_discovery_service';
+import { DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION, DEFAULT_DISCOVERY_INTERVAL_MS } from '../config';
 
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
-
-const createNodeRecord = (id: string = '1', lastSeen: string = now): BackgroundTaskNode => ({
-  id,
-  last_seen: lastSeen,
-});
-
-const createFindSO = (
-  id: string = currentNode,
-  lastSeen: string = now
-): SavedObjectsFindResult<BackgroundTaskNode> => ({
-  attributes: createNodeRecord(id, lastSeen),
-  id: `${BACKGROUND_TASK_NODE_SO_NAME}:${id}`,
-  namespaces: ['default'],
-  references: [],
-  score: 1,
-  type: BACKGROUND_TASK_NODE_SO_NAME,
-  updated_at: new Date().toDateString(),
-  version: '1',
-});
-
-const createFindResponse = (
-  soList: Array<SavedObjectsFindResult<BackgroundTaskNode>>
-): SavedObjectsFindResponse<BackgroundTaskNode, unknown> => ({
-  total: 1,
-  per_page: 10000,
-  page: 1,
-  saved_objects: soList,
-});
 
 describe('KibanaDiscoveryService', () => {
   const savedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -76,6 +40,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -101,6 +69,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
       await kibanaDiscoveryService.start();
@@ -117,13 +89,21 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
 
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
 
       jest.runOnlyPendingTimers();
 
@@ -137,6 +117,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -146,7 +130,11 @@ describe('KibanaDiscoveryService', () => {
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
     });
 
     it('reschedules when upsert fails after start', async () => {
@@ -158,6 +146,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -166,7 +158,11 @@ describe('KibanaDiscoveryService', () => {
       expect(logger.info).toHaveBeenCalledWith('Kibana Discovery Service has been started');
       expect(kibanaDiscoveryService.isStarted()).toBe(true);
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
 
       savedObjectsRepository.update.mockRejectedValueOnce(new Error('foo'));
 
@@ -174,7 +170,11 @@ describe('KibanaDiscoveryService', () => {
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
       expect(setTimeout).toHaveBeenCalledTimes(2);
-      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), DISCOVERY_INTERVAL);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        2,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
@@ -191,12 +191,16 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
 
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
 
       expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${ACTIVE_NODES_LOOK_BACK}`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION}`,
         page: 1,
         perPage: 10000,
         type: BACKGROUND_TASK_NODE_SO_NAME,
@@ -213,6 +217,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
 
       await kibanaDiscoveryService.deleteCurrentNode();
@@ -225,20 +233,6 @@ describe('KibanaDiscoveryService', () => {
       expect(logger.info).toHaveBeenCalledWith(
         'Removed this node from the Kibana Discovery Service'
       );
-    });
-
-    it('logs an error when failed', async () => {
-      savedObjectsRepository.delete.mockRejectedValue(new Error('bar'));
-
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-
-      await kibanaDiscoveryService.deleteCurrentNode();
-
-      expect(logger.error).toHaveBeenCalledWith('Deleting current node has failed. error: bar');
     });
   });
 });

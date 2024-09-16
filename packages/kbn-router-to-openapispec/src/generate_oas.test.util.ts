@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ZodType } from '@kbn/zod';
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
@@ -62,6 +64,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
     summary: 'versioned route',
     access: 'public',
     deprecated: true,
+    discontinued: 'route discontinued version or date',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },
@@ -77,12 +80,19 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
               schema.object({
                 foo: schema.string(),
                 deprecatedFoo: schema.maybe(
-                  schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+                  schema.string({
+                    meta: {
+                      description: 'deprecated foo',
+                      deprecated: true,
+                      'x-discontinued': 'route discontinued version or date',
+                    },
+                  })
                 ),
               }),
           },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-1',
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
@@ -101,6 +111,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-2',
               body: () => schema.stream({ meta: { description: 'stream response' } }),
               bodyContentType: 'application/octet-stream',
             },

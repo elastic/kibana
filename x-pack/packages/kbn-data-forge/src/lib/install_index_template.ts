@@ -16,24 +16,24 @@ export async function installIndexTemplate(
   client: Client,
   logger: ToolingLog
 ): Promise<void> {
-  const namespace = config.indexing.dataset;
-  const templates = indexTemplates[namespace];
-  const templateNames = templates.map((templateDef) => templateDef.namespace).join(',');
+  const { dataset } = config.indexing;
+  const templates = indexTemplates[dataset];
+  const templateNames = templates.map((templateDef) => templateDef.name).join(',');
   logger.info(`Installing index templates (${templateNames})`);
   for (const indexTemplateDef of templates) {
     const componentNames = indexTemplateDef.components.map(({ name }) => name);
-    logger.info(`Installing components for ${indexTemplateDef.namespace} (${componentNames})`);
+    logger.info(`Installing components for ${indexTemplateDef.name} (${componentNames})`);
     for (const component of indexTemplateDef.components) {
       await client.cluster.putComponentTemplate({ name: component.name, ...component.template });
     }
-    logger.info(`Installing index template (${indexTemplateDef.namespace})`);
+    logger.info(`Installing index template (${indexTemplateDef.name})`);
     // Clone the template and add the base component name
     const template = { ...indexTemplateDef.template };
     if (isArray(template.composed_of)) {
-      template.composed_of.push('kbn-data-forge_base');
+      template.composed_of.push('kbn-data-forge@mappings');
     }
     await client.indices.putIndexTemplate({
-      name: indexTemplateDef.namespace,
+      name: indexTemplateDef.name,
       body: template,
     });
   }

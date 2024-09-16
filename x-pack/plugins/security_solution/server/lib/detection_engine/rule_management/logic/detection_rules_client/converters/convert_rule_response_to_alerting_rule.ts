@@ -6,6 +6,10 @@
  */
 
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleResponse,
   TypeSpecificCreateProps,
@@ -22,7 +26,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToCamelCase } from '../../../../../../utils/object_case_converters';
 import type { RuleParams, TypeSpecificRuleParams } from '../../../../rule_schema';
 import { transformToActionFrequency } from '../../../normalization/rule_actions';
-import { addEcsToRequiredFields } from '../../../utils/utils';
+import { separateActionsAndSystemAction } from '../../../utils/utils';
 
 /**
  * These are the fields that are added to the rule response that are not part of the rule params
@@ -37,10 +41,17 @@ type RuntimeFields =
   | 'execution_summary';
 
 export const convertRuleResponseToAlertingRule = (
-  rule: Omit<RuleResponse, RuntimeFields>
+  rule: Omit<RuleResponse, RuntimeFields>,
+  actionsClient: ActionsClient
 ): UpdateRuleData<RuleParams> => {
-  const alertActions = rule.actions.map((action) => transformRuleToAlertAction(action));
-  const actions = transformToActionFrequency(alertActions, rule.throttle);
+  const [ruleSystemActions, ruleActions] = separateActionsAndSystemAction(
+    actionsClient,
+    rule.actions
+  );
+  const systemActions = ruleSystemActions?.map((action) => transformRuleToAlertAction(action));
+
+  const alertActions = ruleActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const actions = transformToActionFrequency(alertActions as RuleActionCamel[], rule.throttle);
 
   // Because of Omit<RuleResponse, RuntimeFields> Typescript doesn't recognize
   // that rule is assignable to TypeSpecificCreateProps despite omitted fields
@@ -87,6 +98,7 @@ export const convertRuleResponseToAlertingRule = (
     },
     schedule: { interval: rule.interval },
     actions,
+    ...(systemActions && { systemActions }),
   };
 };
 

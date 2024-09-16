@@ -9,7 +9,7 @@ import { ComboBoxOption } from './types';
 
 export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
 
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 export const RUNTIME_FIELD_OPTIONS: Array<ComboBoxOption<RuntimeType>> = [
   {

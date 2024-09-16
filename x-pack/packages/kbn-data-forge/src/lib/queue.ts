@@ -17,6 +17,18 @@ import { INDEX_PREFIX } from '../constants';
 type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
 let queue: CargoQueue;
 
+function calculateIndexName(config: Config, doc: Doc) {
+  if (doc.data_stream?.dataset) {
+    const { dataset } = doc.data_stream;
+    const type = doc.data_stream.type ?? 'logs';
+    const namespace = doc.data_stream.namespace ?? 'default';
+    return `${type}-${dataset}-${namespace}`;
+  } else {
+    const namespace = `${config.indexing.dataset}.${doc.namespace}`;
+    return `${INDEX_PREFIX}-${namespace}-${moment(doc['@timestamp']).format('YYYY-MM-01')}`;
+  }
+}
+
 export const createQueue = (config: Config, client: Client, logger: ToolingLog): CargoQueue => {
   if (queue != null) return queue;
   queue = cargoQueue<Doc, Error>(
@@ -24,10 +36,7 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
       const body: object[] = [];
       const startTs = Date.now();
       docs.forEach((doc) => {
-        const namespace = `${config.indexing.dataset}.${doc.namespace}`;
-        const indexName = `${INDEX_PREFIX}-${namespace}-${moment(doc['@timestamp']).format(
-          'YYYY-MM-01'
-        )}`;
+        const indexName = calculateIndexName(config, doc);
         indices.add(indexName);
         body.push({ create: { _index: indexName } });
         body.push(omit(doc, 'namespace'));

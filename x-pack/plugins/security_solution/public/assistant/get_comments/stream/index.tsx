@@ -17,12 +17,10 @@ import { MessageText } from './message_text';
 interface Props {
   abortStream: () => void;
   content?: string;
-  isEnabledLangChain: boolean;
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
   index: number;
-  actionTypeId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: () => void;
@@ -33,10 +31,8 @@ interface Props {
 export const StreamComment = ({
   abortStream,
   content,
-  actionTypeId,
   index,
   isControlsEnabled = false,
-  isEnabledLangChain,
   isError = false,
   isFetching = false,
   reader,
@@ -48,9 +44,7 @@ export const StreamComment = ({
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
     content,
-    actionTypeId,
     reader,
-    isEnabledLangChain,
     isError,
   });
   useEffect(() => {
@@ -108,7 +102,14 @@ export const StreamComment = ({
 
   return (
     <MessagePanel
-      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
+      body={
+        <MessageText
+          data-test-subj={isError ? 'errorComment' : undefined}
+          content={message}
+          index={index}
+          loading={isAnythingLoading}
+        />
+      }
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

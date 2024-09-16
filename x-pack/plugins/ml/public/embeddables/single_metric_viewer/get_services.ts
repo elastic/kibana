@@ -25,7 +25,7 @@ export const getMlServices = async (
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { timeSeriesExplorerServiceFactory },
-    { mlApiServicesProvider },
+    { mlApiProvider },
     { mlJobServiceFactory },
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
@@ -48,20 +48,20 @@ export const getMlServices = async (
 
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
-  const mlApiServices = mlApiServicesProvider(httpService);
+  const mlApi = mlApiProvider(httpService);
   const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
+  const mlJobService = mlJobServiceFactory(mlApi);
+  const mlResultsService = mlResultsServiceProvider(mlApi);
+  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApi);
   const mlTimeSeriesExplorerService = timeSeriesExplorerServiceFactory(
     coreStart.uiSettings,
-    mlApiServices,
+    mlApi,
     mlResultsService
   );
-  const mlCapabilities = new MlCapabilitiesService(mlApiServices);
+  const mlCapabilities = new MlCapabilitiesService(mlApi);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     pluginsStart.data.query.timefilter.timefilter,
-    mlApiServices,
+    mlApi,
     mlResultsService
   );
   // Note on the following services:
@@ -74,11 +74,11 @@ export const getMlServices = async (
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApi, mlIndexUtils, mlJobService);
   return {
     anomalyDetectorService,
     anomalyExplorerService,
-    mlApiServices,
+    mlApi,
     mlCapabilities,
     mlFieldFormatService,
     mlJobService,

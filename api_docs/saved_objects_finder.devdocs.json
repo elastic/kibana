@@ -22,9 +22,9 @@
           ", uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
+            "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           ", savedObjectsTagging?: ",
@@ -80,9 +80,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -420,7 +420,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+                "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
               },
               {
                 "plugin": "graph",
@@ -549,9 +549,9 @@
         "signature": [
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.SOWithMetadata",
+            "section": "def-server.SOWithMetadata",
             "text": "SOWithMetadata"
           },
           "<T>"
