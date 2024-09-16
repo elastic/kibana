@@ -8,7 +8,7 @@
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
 import type { UnstructuredLogState } from '../../types';
-import { handleUnstructured } from './unstuctured';
+import { handleUnstructured } from './unstructured';
 import type { UnstructuredGraphParams, UnstructuredBaseNodeParams } from './types';
 import { handleUnstructuredError } from './error';
 import { handleUnstructuredValidate } from './validate';
