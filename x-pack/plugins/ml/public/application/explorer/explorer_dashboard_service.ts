@@ -23,7 +23,7 @@ import type { MlFieldFormatService } from '../services/field_format_service';
 import type { MlJobService } from '../services/job_service';
 import type { ExplorerJob } from './explorer_utils';
 
-type ExplorerActionType = (typeof EXPLORER_ACTION)[keyof typeof EXPLORER_ACTION];
+type ExplorerAction = (typeof EXPLORER_ACTION)[keyof typeof EXPLORER_ACTION];
 
 export interface ExplorerActionPayloads {
   [EXPLORER_ACTION.SET_EXPLORER_DATA]: DeepPartial<ExplorerState>;
@@ -35,7 +35,7 @@ export interface ExplorerActionPayloads {
 }
 
 export type ExplorerActions = {
-  [K in ExplorerActionType]: K extends keyof ExplorerActionPayloads
+  [K in ExplorerAction]: K extends keyof ExplorerActionPayloads
     ? {
         type: K;
         payload: ExplorerActionPayloads[K];
@@ -43,16 +43,16 @@ export type ExplorerActions = {
     : {
         type: K;
       };
-}[ExplorerActionType];
+}[ExplorerAction];
 
-type ExplorerAction = ExplorerActions | Observable<ExplorerActions | null>;
+type ExplorerActionMaybeObservable = ExplorerActions | Observable<ExplorerActions | null>;
 
-export const explorerAction$ = new Subject<ExplorerAction>();
+export const explorerAction$ = new Subject<ExplorerActionMaybeObservable>();
 
 const explorerFilteredAction$ = explorerAction$.pipe(
   // consider observables as side-effects
-  flatMap((action: ExplorerAction) =>
-    isObservable(action) ? action : (from([action]) as Observable<ExplorerAction>)
+  flatMap((action: ExplorerActionMaybeObservable) =>
+    isObservable(action) ? action : (from([action]) as Observable<ExplorerActionMaybeObservable>)
   ),
   distinctUntilChanged(isEqual)
 );
