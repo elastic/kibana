@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -16,6 +16,16 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
 
 const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -75,10 +85,14 @@ const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
   euiTheme,
+  numberOfPassedFindings,
+  numberOfFailedFindings,
 }: {
   passedFindings: number;
   failedFindings: number;
   euiTheme: EuiThemeComputed<{}>;
+  numberOfPassedFindings?: number;
+  numberOfFailedFindings?: number;
 }) => {
   return (
     <EuiFlexItem>
@@ -119,9 +133,52 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
 
   const { euiTheme } = useEuiTheme();
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+  const hostNameFilterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
+  const riskScoreState = useRiskScore({
+    riskEntity: RiskScoreEntity.host,
+    filterQuery: hostNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+  });
+  const { data: hostRisk } = riskScoreState;
+  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist = !!hostRiskData?.host.risk;
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const isPreviewMode = false;
+  const goToEntityInsightTab = useCallback(() => {
+    openLeftPanel({
+      id: HostDetailsPanelKey,
+      params: {
+        name: hostName,
+        isRiskScoreExist,
+        hasMisconfigurationFindings,
+        path: { tab: 'csp_insights' },
+      },
+    });
+  }, [hasMisconfigurationFindings, hostName, isRiskScoreExist, openLeftPanel]);
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToEntityInsightTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
+                defaultMessage="Show all misconfiguration findings"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToEntityInsightTab]
+  );
   return (
     <ExpandablePanel
       header={{
+        iconType: hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -135,6 +192,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
             />
           </EuiText>
         ),
+        link: hasMisconfigurationFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
