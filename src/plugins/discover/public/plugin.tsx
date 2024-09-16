@@ -150,14 +150,14 @@ export class DiscoverPlugin
     this.stopUrlTracking = stopUrlTracker;
 
     const ebtContext$: ProfilesManagerEbtContext = new BehaviorSubject({
-      dscContextProfiles: [] as string[],
+      dscProfiles: [] as string[],
     });
 
     core.analytics.registerContextProvider({
       name: 'dsc_context_profiles',
       context$: ebtContext$,
       schema: {
-        dscContextProfiles: {
+        dscProfiles: {
           type: 'array',
           items: {
             type: 'keyword',
