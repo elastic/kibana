@@ -218,11 +218,6 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
-export const flappingSchema = schema.object({
-  lookBackWindow: schema.number(),
-  statusChangeThreshold: schema.number(),
-});
-
 export const rawRuleSchema = schema.object({
   name: schema.string(),
   enabled: schema.boolean(),
