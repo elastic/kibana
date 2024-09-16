@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-export interface EntityTypeDefinition {
-  type: string;
-  label: string;
-  icon: string;
-  count: number;
-}
-
-export interface EntityDefinition {
-  type: string;
-  field: string;
-  filter?: string;
-  index: string[];
+export interface LatestEntity {
+  agent: {
+    name: string[];
+  };
+  data_stream: {
+    type: string[];
+  };
+  cloud: {
+    availability_zone: string[];
+  };
+  entity: {
+    firstSeenTimestamp: string;
+    lastSeenTimestamp: string;
+    type: string;
+    displayName: string;
+    id: string;
+    identityFields: string[];
+  };
 }
