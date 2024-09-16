@@ -95,7 +95,7 @@
     "**/sharp": "0.32.6",
     "**/typescript": "5.1.6",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
-    "@xstate5/react/**/xstate": "^5.18.0",
+    "@xstate5/react/**/xstate": "^5.18.1",
     "globby/fast-glob": "^3.2.11"
   },
   "dependencies": {
@@ -1025,7 +1025,7 @@
     "@turf/helpers": "6.0.1",
     "@turf/length": "^6.0.2",
     "@xstate/react": "^3.2.2",
-    "@xstate5/react": "npm:@xstate/react@^4.1.1",
+    "@xstate5/react": "npm:@xstate/react@^4.1.2",
     "adm-zip": "^0.5.9",
     "ai": "^2.2.33",
     "ajv": "^8.12.0",
@@ -1261,7 +1261,7 @@
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.5.0",
     "xstate": "^4.38.2",
-    "xstate5": "npm:xstate@^5.18.0",
+    "xstate5": "npm:xstate@^5.18.1",
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
