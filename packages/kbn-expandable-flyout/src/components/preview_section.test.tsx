@@ -16,18 +16,24 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { TestProvider } from '../test/provider';
-import { State } from '../state';
+import { State } from '../store/state';
 
 describe('PreviewSection', () => {
-  const context = {
-    right: {},
-    left: {},
-    preview: [
-      {
-        id: 'key',
+  const context: State = {
+    panels: {
+      byId: {
+        flyout: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
+        },
       },
-    ],
-  } as unknown as State;
+    },
+  };
 
   const component = <div>{'component'}</div>;
   const left = 500;

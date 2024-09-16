@@ -27,13 +27,22 @@ import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
+import { ConnectionDetails } from '../connection_details/connection_details';
+import { QuickStats } from '../quick_stats/quick_stats';
+import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { console: consolePlugin, docLinks, application } = useKibana().services;
-  const { data: index, refetch, isSuccess, isInitialLoading } = useIndex(indexName);
+
+  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const {
+    data: mappings,
+    isError: isMappingsError,
+    isInitialLoading: isMappingsInitialLoading,
+  } = useIndexMapping(indexName);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -87,7 +96,7 @@ export const SearchIndexDetailsPage = () => {
       />
     </EuiPopover>
   );
-  if (isInitialLoading) {
+  if (isInitialLoading || isMappingsInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -103,9 +112,10 @@ export const SearchIndexDetailsPage = () => {
       restrictWidth={false}
       data-test-subj="searchIndicesDetailsPage"
       grow={false}
-      bottomBorder={false}
+      panelled
+      bottomBorder
     >
-      {!isSuccess || !index ? (
+      {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
           indexName={indexName}
           navigateToIndexListPage={navigateToIndexListPage}
@@ -156,8 +166,20 @@ export const SearchIndexDetailsPage = () => {
               navigateToIndexListPage={navigateToIndexListPage}
             />
           )}
+          <EuiPageTemplate.Section grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ConnectionDetails />
+              </EuiFlexItem>
+              <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+            </EuiFlexGroup>
 
-          <div data-test-subj="searchIndexDetailsContent" />
+            <EuiSpacer size="l" />
+
+            <EuiFlexGroup>
+              <QuickStats index={index} mappings={mappings} />
+            </EuiFlexGroup>
+          </EuiPageTemplate.Section>
         </>
       )}
       {embeddableConsole}
