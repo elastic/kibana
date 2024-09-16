@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useWizIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
@@ -174,6 +175,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 const EmptySecurityFindingsPrompt = () => {
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const wizIntegrationLink = useWizIntegrationRoute();
 
   return (
     <EuiFlexGroup>
@@ -279,8 +281,8 @@ const EmptySecurityFindingsPrompt = () => {
                 <EuiButton
                   color="primary"
                   fill
-                  href={cspmIntegrationLink}
-                  isDisabled={!cspmIntegrationLink}
+                  href={wizIntegrationLink}
+                  isDisabled={!wizIntegrationLink}
                   data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
                 >
                   <FormattedMessage
