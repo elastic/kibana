@@ -402,7 +402,7 @@ x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/packages/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/plugins/observability_solution/entity_manager @elastic/obs-entities
+x-pack/plugins/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
@@ -508,8 +508,8 @@ src/plugins/image_embeddable @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
-x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
+x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/plugins/inference @elastic/appex-ai-infra
@@ -1506,7 +1506,6 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 
 /x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
 /x-pack/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
-/x-pack/test/threat_intelligence_cypress @elastic/security-threat-hunting-investigations
 
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations

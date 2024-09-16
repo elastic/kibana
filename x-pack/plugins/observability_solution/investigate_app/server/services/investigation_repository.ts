@@ -7,7 +7,6 @@
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { investigationSchema } from '@kbn/investigation-shared';
-import { isLeft } from 'fp-ts/lib/Either';
 import { Investigation, StoredInvestigation } from '../models/investigation';
 import { Paginated, Pagination } from '../models/pagination';
 import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
@@ -27,20 +26,20 @@ export function investigationRepositoryFactory({
   logger: Logger;
 }): InvestigationRepository {
   function toInvestigation(stored: StoredInvestigation): Investigation | undefined {
-    const result = investigationSchema.decode({
+    const result = investigationSchema.safeParse({
       ...stored,
     });
 
-    if (isLeft(result)) {
+    if (!result.success) {
       logger.error(`Invalid stored Investigation with id [${stored.id}]`);
       return undefined;
     }
 
-    return result.right;
+    return result.data;
   }
 
   function toStoredInvestigation(investigation: Investigation): StoredInvestigation {
-    return investigationSchema.encode(investigation);
+    return investigationSchema.parse(investigation);
   }
 
   return {
