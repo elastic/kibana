@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { splitSizeAndUnits } from './data_stream_serialization';
+import { splitSizeAndUnits } from './data_stream_utils';
 
-describe('Data stream serialization', () => {
+describe('Data stream utils', () => {
   test('can split size and units from lifecycle string', () => {
     expect(splitSizeAndUnits('1h')).toEqual({ size: '1', unit: 'h' });
     expect(splitSizeAndUnits('20micron')).toEqual({ size: '20', unit: 'micron' });
