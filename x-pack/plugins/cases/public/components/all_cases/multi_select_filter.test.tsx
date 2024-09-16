@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 describe('multi select filter', () => {
+  // https://github.com/elastic/kibana/issues/183663
   it('should render the amount of options available', async () => {
     const onChange = jest.fn();
     const props = {
@@ -25,10 +26,14 @@ describe('multi select filter', () => {
       onChange,
       isLoading: false,
     };
-
+    const t0 = performance.now();
     render(<MultiSelectFilter {...props} />);
+    const t1 = performance.now();
+    console.log(`Call to render took ${t1 - t0} milliseconds.`);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    const t2 = performance.now();
+    console.log(`Call to click took ${t2 - t1} milliseconds.`);
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('4 options')).toBeInTheDocument();
