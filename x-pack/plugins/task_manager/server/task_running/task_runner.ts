@@ -294,6 +294,10 @@ export class TaskManagerRunner implements TaskRunner {
    * running a task, the task should be deleted instead of ran.
    */
   public get isAdHocTaskAndOutOfAttempts() {
+    if (this.instance.task.status === 'running') {
+      // This function gets called with tasks marked as running when using MGET, so attempts is already incremented
+      return !this.instance.task.schedule && this.instance.task.attempts > this.getMaxAttempts();
+    }
     return !this.instance.task.schedule && this.instance.task.attempts >= this.getMaxAttempts();
   }
 

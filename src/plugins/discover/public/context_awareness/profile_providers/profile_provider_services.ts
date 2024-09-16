@@ -10,16 +10,30 @@
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
+/**
+ * Dependencies required by profile provider implementations
+ */
 export interface ProfileProviderDeps {
   logsDataAccessPlugin?: LogsDataAccessPluginStart;
 }
 
+/**
+ * Services provided to profile provider implementations
+ */
 export interface ProfileProviderServices {
+  /**
+   * A service containing methods used for logs profiles
+   */
   logsContextService: LogsContextService;
 }
 
+/**
+ * Creates the profile provider services
+ * @param _deps Profile provider dependencies
+ * @returns Profile provider services
+ */
 export const createProfileProviderServices = async (
-  _deps: ProfileProviderDeps
+  _deps: ProfileProviderDeps = {}
 ): Promise<ProfileProviderServices> => {
   return {
     logsContextService: await createLogsContextService({
