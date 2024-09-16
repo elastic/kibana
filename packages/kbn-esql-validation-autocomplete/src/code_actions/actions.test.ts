@@ -11,11 +11,12 @@ import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { CodeActionOptions } from './types';
-import { ESQLRealField } from '../validation/types';
-import { FieldType } from '../definitions/types';
+import type { CodeActionOptions } from './types';
+import type { ESQLRealField } from '../validation/types';
+import type { FieldType } from '../definitions/types';
+import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
 
-function getCallbackMocks() {
+function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
     getFieldsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
       if (/enrich/.test(query)) {
@@ -69,7 +70,7 @@ function getCallbackMocks() {
       find: jest.fn(async () => ({
         fields: {},
       })),
-    })),
+    })) as unknown as Promise<PartialFieldsMetadataClient>,
   };
 }
 
@@ -400,6 +401,7 @@ describe('quick fixes logic', () => {
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
             getFieldsFor: undefined,
+            getFieldsMetadata: undefined,
           });
           const actions = await getActions(
             statement,
@@ -408,7 +410,11 @@ describe('quick fixes logic', () => {
             {
               relaxOnMissingCallbacks: true,
             },
-            { ...callbackMocks, getFieldsFor: undefined }
+            {
+              ...callbackMocks,
+              getFieldsFor: undefined,
+              getFieldsMetadata: undefined,
+            }
           );
           const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
           expect(edits).toEqual(['`any#Char$Field`']);

@@ -17,45 +17,20 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
   return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
-// ECS Metadata is very static, so info only needs to be fetched once
-export class EcsMetadataCache {
-  private static instance: EcsMetadataCache;
-  private cacheEcsMetadata: Record<string, { type: string; source: string }> | undefined;
-
-  private constructor() {}
-
-  public static getInstance(): EcsMetadataCache {
-    if (!EcsMetadataCache.instance) {
-      EcsMetadataCache.instance = new EcsMetadataCache();
-    }
-    return EcsMetadataCache.instance;
-  }
-
-  public getMetadata(): Record<string, { type: string; source: string }> | undefined {
-    return this.cacheEcsMetadata;
-  }
-
-  public setMetadata(metadata: Record<string, { type: string; source: string }>) {
-    this.cacheEcsMetadata = metadata;
-  }
-}
-
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
 
   const getEcsMetadata = async () => {
-    const cache = EcsMetadataCache.getInstance();
-    if (!cache.getMetadata() && resourceRetriever?.getFieldsMetadata) {
-      // Fetch full list of ECS field
-      const client = await resourceRetriever?.getFieldsMetadata();
-      if (client?.find) {
-        const metadata = await client.find({
-          attributes: ['type'],
-        });
-        cache.setMetadata(metadata?.fields);
-      }
+    if (!resourceRetriever?.getFieldsMetadata) {
+      return undefined;
     }
-    return cache.getMetadata();
+    const client = await resourceRetriever?.getFieldsMetadata;
+    if (client.find) {
+      // Fetch full list of ECS field
+      // This list should be cached already by fieldsMetadataClient
+      const results = await client.find({ attributes: ['type'] });
+      return results?.fields;
+    }
   };
 
   const getFields = async () => {

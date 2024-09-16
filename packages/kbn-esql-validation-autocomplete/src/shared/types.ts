@@ -12,6 +12,22 @@ import type { ESQLRealField } from '../validation/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
+/**
+ *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
+/** @internal **/
+export interface PartialFieldsMetadataClient {
+  find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
+    fields: Record<
+      string,
+      {
+        type: string;
+        source: string;
+        description?: string;
+      }
+    >;
+  }>;
+}
+
 /** @public **/
 export interface ESQLCallbacks {
   getSources?: CallbackFn<
@@ -30,18 +46,7 @@ export interface ESQLCallbacks {
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
-  getFieldsMetadata?: () => Promise<{
-    find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
-      fields: Record<
-        string,
-        {
-          type: string;
-          source: string;
-          description?: string;
-        }
-      >;
-    }>;
-  }>;
+  getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

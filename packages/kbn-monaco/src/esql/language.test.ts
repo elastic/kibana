@@ -7,25 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsMetadataCache } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { PartialFieldsMetadataClient } from '@kbn/esql-validation-autocomplete/src/shared/types';
 import { monaco } from '../monaco_imports';
 import { ESQLLang } from './language';
 
 describe('ESQLLang', () => {
   describe('getSuggestionProvider', () => {
     describe('resolveCompletionItem', () => {
-      EcsMetadataCache.getInstance().setMetadata({
-        'test.field': {
-          type: 'keyword',
-          source: 'ecs',
-        },
-      });
-
       it('should resolve completion item with field metadata', async () => {
-        const mockGetFieldsMetadata = jest.fn().mockResolvedValue({
+        const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: jest.fn().mockResolvedValue({
             fields: {
               'test.field': {
+                type: 'keyword',
                 description: 'Test field description',
               },
             },
@@ -73,7 +67,7 @@ describe('ESQLLang', () => {
       });
 
       it('should return original item if field metadata is not available', async () => {
-        const mockGetFieldsMetadata = jest.fn().mockResolvedValue({
+        const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: jest.fn().mockResolvedValue({
             fields: {},
           }),
@@ -98,7 +92,7 @@ describe('ESQLLang', () => {
         const mockFind = jest.fn().mockResolvedValue({
           fields: {},
         });
-        const mockGetFieldsMetadata = jest.fn().mockResolvedValue({
+        const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: mockFind,
         });
 
@@ -117,21 +111,21 @@ describe('ESQLLang', () => {
           notFieldItem,
           {} as any
         );
-        expect(mockFind).not.toHaveBeenCalled();
+        expect(mockFind).toBeCalledTimes(1);
         expect(notFieldResolvedItem).toEqual(notFieldItem);
 
+        mockFind.mockClear();
         const notECSFieldItem: monaco.languages.CompletionItem = {
           label: 'not.ecs.field',
           kind: 4,
           insertText: 'not.ecs.field',
           range: new monaco.Range(0, 0, 0, 0),
         };
-
         const notECSFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
           notECSFieldItem,
           {} as any
         );
-        expect(mockFind).not.toHaveBeenCalled();
+        expect(mockFind).toBeCalledTimes(1);
         expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
       });
     });

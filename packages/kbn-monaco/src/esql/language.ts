@@ -8,7 +8,6 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
-import { EcsMetadataCache } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';
@@ -113,19 +112,20 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!callbacks?.getFieldsMetadata) return item;
-        const fieldsMetadataClient = await callbacks?.getFieldsMetadata();
-        const fullEcsMetadataList = EcsMetadataCache.getInstance().getMetadata();
+        const fieldsMetadataClient = await callbacks?.getFieldsMetadata;
 
+        const fullEcsMetadataList = await fieldsMetadataClient?.find({
+          attributes: ['type'],
+        });
         if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
           return item;
 
         const strippedFieldName = removeKeywordSuffix(item.label);
-
         if (
           // If item is not a ECS field, no need to fetch metadata
           item.kind === 4 &&
           // If not ECS, no need to fetch description
-          Object.hasOwn(fullEcsMetadataList, strippedFieldName)
+          Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
         ) {
           const ecsMetadata = await fieldsMetadataClient.find({
             fieldNames: [strippedFieldName],

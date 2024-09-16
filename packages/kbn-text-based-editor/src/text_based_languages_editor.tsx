@@ -375,9 +375,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         };
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
-      getFieldsMetadata: async () => {
-        return await fieldsMetadata?.getClient();
-      },
+      getFieldsMetadata: fieldsMetadata?.getClient(),
     };
     return callbacks;
   }, [
