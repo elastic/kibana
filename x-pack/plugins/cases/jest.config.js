@@ -12,7 +12,4 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cases',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/plugins/cases/{common,public,server}/**/*.{ts,tsx}'],
-  // testEnvironment: '<rootDir>/custom_jest_environment.js',
-  // "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
-  // setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
 };
