@@ -104,9 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // TODO: possibly could be solved by https://github.com/elastic/kibana/issues/192711
     describe('when creating a conversation with the write user', function () {
-      this.tags(['skipMKI']);
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
@@ -152,10 +150,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(404);
       });
-      // by using cookie auth we can set a username to compare the user.name against
-      // otherwise this will change in the MKI environment to a string of numbers.
-      // if not we should not test for an exact user.name match
       it('returns the conversation', function () {
+        // delete user from response to avoid comparing it as it will be different in MKI
+        delete createResponse.body.user;
         expect(createResponse.body).to.eql({
           '@timestamp': createResponse.body['@timestamp'],
           conversation: {
@@ -168,9 +165,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages: conversationCreate.messages,
           namespace: 'default',
           public: conversationCreate.public,
-          user: {
-            name: 'elastic_admin',
-          },
         });
       });
 
@@ -221,6 +215,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
+        // delete user from response to avoid comparing it as it will be different in MKI
+        delete response.body.user;
         expect(response.body).to.eql(createResponse.body);
       });
 
@@ -232,7 +228,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             internalReqHeader,
           })
           .expect(200);
-
+        // delete user from response to avoid comparing it as it will be different in MKI
+        delete response.body.conversations[0].user;
         expect(response.body.conversations[0]).to.eql(createResponse.body);
       });
 
