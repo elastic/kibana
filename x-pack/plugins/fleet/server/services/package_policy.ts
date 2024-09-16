@@ -1035,9 +1035,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
     const bumpPromises = [];
     for (const policyId of associatedPolicyIds) {
+      // If the agent policy is no longer associated with the endpoint package policy, remove the protection
+      const removeProtection =
+        newPolicy.package?.name === 'endpoint' &&
+        oldPackagePolicy.policy_ids.includes(policyId) &&
+        !newPolicy.policy_ids.includes(policyId);
+
       bumpPromises.push(
         agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
+          removeProtection,
         })
       );
     }
@@ -1207,10 +1214,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ...packagePolicyUpdates.flatMap((p) => p.policy_ids),
       ...oldPackagePolicies.flatMap((p) => p.policy_ids),
     ]);
-    logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
+
+    const [endpointPackagePolicyUpdatesIds, endpointOldPackagePoliciesIds] = [
+      packagePolicyUpdates,
+      oldPackagePolicies,
+    ].map((packagePolicies) =>
+      packagePolicies
+        .filter((p) => p.package?.name === 'endpoint')
+        .map((p) => p.policy_ids)
+        .flat()
+    );
+
     const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
+      // If the agent policy is no longer associated with the endpoint package policy, remove the protection
+      const removeProtection =
+        endpointOldPackagePoliciesIds.includes(agentPolicyId) &&
+        !endpointPackagePolicyUpdatesIds.includes(agentPolicyId);
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
+        removeProtection,
       });
     });
 
