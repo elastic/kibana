@@ -89,6 +89,7 @@ function LegacyEmbeddable({ type, config, timeRange: { from, to }, savedObjectId
         from,
         to,
       },
+      overrides: { axisX: { hide: true } },
     };
 
     if (savedObjectId) {
@@ -188,7 +189,7 @@ export function registerEmbeddableItem({
           grow={true}
           className={css`
             > div {
-              height: 196px;
+              height: 128px;
             }
           `}
         >
