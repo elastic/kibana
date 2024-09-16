@@ -46,8 +46,6 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-
-import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -130,7 +128,10 @@ export const EditPackagePolicyForm = memo<{
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
   });
-  const hasAgentlessAgentPolicy = packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
+
+  const hasAgentlessAgentPolicy = existingAgentPolicies.some(
+    (policy) => policy.id === policyId && policy.supports_agentless === true
+  );
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);

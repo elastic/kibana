@@ -115,7 +115,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Serverless - Agentless CIS_AWS edit flow', () => {
+    // TODO: Migrate test after Serverless default agentless policy is deleted.
+    describe.skip('Serverless - Agentless CIS_AWS edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newDirectAccessKeyId = `newDirectAccessKey`;
 
