@@ -25,6 +25,7 @@ export interface DocLinksMeta {
 export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
+  readonly apiReference: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
