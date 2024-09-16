@@ -116,15 +116,16 @@ export const PackagePolicyBaseSchema = {
     })
   ),
   namespace: schema.maybe(PackagePolicyNamespaceSchema),
-  policy_id: schema.nullable(
-    schema.maybe(
+  policy_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
       schema.string({
         meta: {
           description: 'Agent policy ID where that package policy will be added',
           deprecated: true,
         },
-      })
-    )
+      }),
+    ])
   ),
   policy_ids: schema.maybe(
     schema.arrayOf(
@@ -143,7 +144,8 @@ export const PackagePolicyBaseSchema = {
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
   overrides: schema.maybe(
-    schema.nullable(
+    schema.oneOf([
+      schema.literal(null),
       schema.object(
         {
           inputs: schema.maybe(
@@ -167,8 +169,8 @@ export const PackagePolicyBaseSchema = {
               'Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.',
           },
         }
-      )
-    )
+      ),
+    ])
   ),
 };
 
@@ -297,7 +299,7 @@ export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolic
 
 export const SimplifiedCreatePackagePolicyRequestBodySchema =
   SimplifiedPackagePolicyBaseSchema.extends({
-    policy_id: schema.nullable(schema.maybe(schema.string())),
+    policy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
     policy_ids: schema.maybe(schema.arrayOf(schema.string())),
     force: schema.maybe(schema.boolean()),
     package: PackagePolicyPackageSchema,
