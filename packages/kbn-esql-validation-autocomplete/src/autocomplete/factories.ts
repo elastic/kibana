@@ -30,7 +30,7 @@ const allFunctions = aggregationFunctionDefinitions
   .concat(scalarFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
 export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
   return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
@@ -439,13 +439,13 @@ export function getCompatibleLiterals(
 }
 
 export const TIME_SYSTEM_DESCRIPTIONS = {
-  '?t_start': i18n.translate(
+  '?_tstart': i18n.translate(
     'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
     {
       defaultMessage: 'The start time from the date picker',
     }
   ),
-  '?t_end': i18n.translate(
+  '?_tend': i18n.translate(
     'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
     {
       defaultMessage: 'The end time from the date picker',
