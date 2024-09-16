@@ -8,25 +8,18 @@
  */
 
 import { z } from '@kbn/zod';
+import { statusSchema } from '../schema';
 
-const itemSchema = z.object({
-  title: z.string(),
-  type: z.string(),
-  params: z.record(z.string(), z.any()),
+const getAllInvestigationStatsParamsSchema = z.object({
+  query: z.object({}),
 });
 
-const investigationItemSchema = z.intersection(
-  z.object({
-    id: z.string(),
-    createdAt: z.number(),
-    createdBy: z.string(),
-    updatedAt: z.number(),
-  }),
-  itemSchema
-);
+const getAllInvestigationStatsResponseSchema = z.object({
+  count: z.record(statusSchema, z.number()),
+  total: z.number(),
+});
 
-type Item = z.infer<typeof itemSchema>;
-type InvestigationItem = z.infer<typeof investigationItemSchema>;
+type GetAllInvestigationStatsResponse = z.output<typeof getAllInvestigationStatsResponseSchema>;
 
-export type { Item, InvestigationItem };
-export { investigationItemSchema, itemSchema };
+export { getAllInvestigationStatsParamsSchema, getAllInvestigationStatsResponseSchema };
+export type { GetAllInvestigationStatsResponse };

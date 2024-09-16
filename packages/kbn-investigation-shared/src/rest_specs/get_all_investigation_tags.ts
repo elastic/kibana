@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './investigation';
-export * from './investigation_item';
-export * from './investigation_note';
-export * from './origin';
+import { z } from '@kbn/zod';
 
-export type * from './investigation';
+const getAllInvestigationTagsParamsSchema = z.object({
+  query: z.object({}),
+});
+
+const getAllInvestigationTagsResponseSchema = z.string().array();
+
+type GetAllInvestigationTagsResponse = z.output<typeof getAllInvestigationTagsResponseSchema>;
+
+export { getAllInvestigationTagsParamsSchema, getAllInvestigationTagsResponseSchema };
+export type { GetAllInvestigationTagsResponse };

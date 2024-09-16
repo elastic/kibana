@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { State } from './state';
+import { State } from './store/state';
 
 export default {
   component: ExpandableFlyout,
@@ -103,13 +103,15 @@ const registeredPanels = [
 
 export const Right: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
         },
-        left: undefined,
-        preview: undefined,
       },
     },
   };
@@ -126,15 +128,17 @@ export const Right: Story<void> = () => {
 
 export const Left: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
     },
   };
@@ -151,19 +155,21 @@ export const Left: Story<void> = () => {
 
 export const Preview: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
-        },
-        left: {
-          id: 'left',
-        },
-        preview: [
-          {
-            id: 'preview1',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
           },
-        ],
+          left: {
+            id: 'left',
+          },
+          preview: [
+            {
+              id: 'preview1',
+            },
+          ],
+        },
       },
     },
   };
@@ -180,22 +186,24 @@ export const Preview: Story<void> = () => {
 
 export const MultiplePreviews: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
-        },
-        left: {
-          id: 'left',
-        },
-        preview: [
-          {
-            id: 'preview1',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
           },
-          {
-            id: 'preview2',
+          left: {
+            id: 'left',
           },
-        ],
+          preview: [
+            {
+              id: 'preview1',
+            },
+            {
+              id: 'preview2',
+            },
+          ],
+        },
       },
     },
   };
@@ -212,13 +220,15 @@ export const MultiplePreviews: Story<void> = () => {
 
 export const CollapsedPushVsOverlay: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
         },
-        left: undefined,
-        preview: undefined,
       },
     },
   };
@@ -232,15 +242,17 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
 
 export const ExpandedPushVsOverlay: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
     },
   };
@@ -254,15 +266,17 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
 
 export const DisableTypeSelection: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
     },
   };

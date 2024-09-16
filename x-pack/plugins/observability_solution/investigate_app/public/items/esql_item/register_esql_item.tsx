@@ -132,7 +132,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
         <lens.EmbeddableComponent
           {...previewInput.value}
           style={{ height: 128 }}
-          overrides={{ axisX: { hide: true } }}
+          overrides={{
+            axisX: { hide: true },
+            axisLeft: { style: { axisTitle: { visible: false } } },
+            settings: { showLegend: false },
+          }}
         />
       );
     } else {
@@ -147,7 +151,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
       <lens.EmbeddableComponent
         {...input}
         style={{ height: 128 }}
-        overrides={{ axisX: { hide: true } }}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </EuiFlexItem>
   );
