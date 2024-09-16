@@ -8,7 +8,6 @@
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { DASHBOARD_MARGIN_SIZE } from '@kbn/dashboard-plugin/public/dashboard_constants';
 import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';

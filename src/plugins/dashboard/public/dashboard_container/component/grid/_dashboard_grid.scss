@@ -33,6 +33,10 @@
  */
 .dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
+  
+  .embPanel__hoverActionsLeft {
+    visibility: hidden;
+  }
 }
 
 /**
