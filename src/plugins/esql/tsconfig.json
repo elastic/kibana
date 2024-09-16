@@ -15,7 +15,7 @@
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/esql-utils",
