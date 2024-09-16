@@ -37,7 +37,8 @@ const dataArchive = Path.join(__dirname, '..', 'archives', '1m_dummy_so.zip');
 
 jest.setTimeout(24 * 3600 * 100);
 
-describe('multiple migrator instances running in parallel', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('multiple migrator instances running in parallel', () => {
   it.skip('enable and focus this test (it.skip => fit), and run it, in order to create a baseline archive', async () => {
     // generate DOCUMENTS_PER_TYPE documents of each type
     const documents: SavedObjectsBulkCreateObject[] = ['server', 'basic', 'deprecated', 'complex']
