@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { isEmpty, mapValues, pick } from 'lodash';
+import { isEmpty, has } from 'lodash';
 import { Observable, from, map, merge, of, switchMap } from 'rxjs';
 import { ToolSchema, generateFakeToolCallId, isChatCompletionMessageEvent } from '../../../common';
 import {
@@ -86,7 +86,21 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           'OPERATORS',
         ].map((keyword) => keyword.toUpperCase());
 
-        const requestedDocumentation = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
+        const requestedDocumentation = keywords.reduce<Record<string, string>>(
+          (documentation, keyword) => {
+            if (has(esqlDocs, keyword)) {
+              documentation[keyword] = esqlDocs[keyword].data;
+            } else {
+              documentation[keyword] = `
+              ## ${keyword}
+
+              There is no ${keyword} function or command in ES|QL. Do NOT try to use it.
+              `;
+            }
+            return documentation;
+          },
+          {}
+        );
 
         const fakeRequestDocsToolCall = {
           function: {

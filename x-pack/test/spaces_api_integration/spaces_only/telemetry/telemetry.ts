@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitoring: 0,
         apm: 0,
         enterpriseSearch: 0,
+        searchInferenceEndpoints: 0,
         siem: 0,
         securitySolutionCases: 0,
         securitySolutionAssistant: 0,
