@@ -228,6 +228,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
+        'xpack.cloud.csp (string?)',
         'xpack.cloud.deployment_url (string?)',
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
