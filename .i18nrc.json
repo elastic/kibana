@@ -116,6 +116,7 @@
     "searchTypes": "packages/kbn-search-types",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
+    "sse": [ "packages/kbn-sse-utils" ],
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
     "esql": "src/plugins/esql",

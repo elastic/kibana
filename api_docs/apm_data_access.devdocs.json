@@ -2244,7 +2244,9 @@
             "section": "def-common.ApmDataSourceWithSummary",
             "text": "ApmDataSourceWithSummary"
           },
-          "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; }"
+          "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; getHostServices: ({ start, end, size, filters, documentSources }: ",
+          "HostServicesRequest",
+          ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
         ],
         "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
         "deprecated": false,
@@ -2445,7 +2447,9 @@
               "section": "def-common.ApmDataSourceWithSummary",
               "text": "ApmDataSourceWithSummary"
             },
-            "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; }"
+            "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; getHostServices: ({ start, end, size, filters, documentSources }: ",
+            "HostServicesRequest",
+            ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
           ],
           "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
