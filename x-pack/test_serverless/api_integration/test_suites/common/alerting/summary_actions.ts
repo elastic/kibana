@@ -49,8 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // Failing: See https://github.com/elastic/kibana/issues/193061
-  describe.skip('Summary actions', function () {
+  describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
