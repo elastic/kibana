@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(options).to.have.length(6);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         await testSubjects.click('typeFilter-number');
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '6 available fields.'
+            '4 available fields. 2 empty fields.'
           );
         });
       });
@@ -448,14 +448,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
