@@ -8,8 +8,6 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
-import { getUngroupedReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
-import { AlertStatusMetaData } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/queries/query_monitor_status_alert';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper, SYNTHETICS_ALERT_ACTION_INDEX } from './synthetics_rule_helper';
 import { waitForDocumentInIndex } from '../helpers/alerting_wait_for_helpers';
@@ -27,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('SyntheticsCustomStatusRule', () => {
     before(async () => {
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, 'synthetics-*']);
+      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
       await ruleHelper.createIndexAction();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
@@ -37,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, 'synthetics-*']);
+      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
     });
 
     describe('NumberOfChecks', () => {
@@ -153,24 +151,28 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('NumberOfChecksUngrouped', () => {
       let ruleId = '';
-      const params = {
-        condition: {
-          locationsThreshold: 1,
-          window: {
-            numberOfChecks: 5,
-          },
-          groupBy: 'none',
-          downThreshold: 5,
-        },
-      };
       let monitor: any;
       let docs: any[] = [];
+
       it('creates a monitor', async () => {
-        monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
+        monitor = await ruleHelper.addMonitor(
+          `Monitor check based at ${moment().format('LLL')} ungrouped`
+        );
         expect(monitor).to.have.property('id');
       });
 
       it('should trigger down for ungrouped', async () => {
+        const params = {
+          condition: {
+            locationsThreshold: 1,
+            window: {
+              numberOfChecks: 5,
+            },
+            groupBy: 'none',
+            downThreshold: 5,
+          },
+          monitorIds: [monitor.id],
+        };
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'Status based on number of checks',
@@ -207,6 +209,11 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
           docCountTarget: 1,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
         expect(downResponse.hits.hits[0]._source).property(
           'reason',
@@ -221,32 +228,33 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('NumberOfLocations', () => {
+    describe('Location threshold > 1', () => {
       let ruleId = '';
-      const params: StatusRuleParams = {
-        condition: {
-          locationsThreshold: 2,
-          window: {
-            numberOfChecks: 1,
-          },
-          groupBy: 'locationId',
-          downThreshold: 1,
-        },
-      };
+      let monitor: any;
+
+      it('creates a monitor', async () => {
+        monitor = await ruleHelper.addMonitor('Monitor location based at ' + moment().format('LT'));
+        expect(monitor).to.have.property('id');
+      });
+
       it('creates a custom rule with location threshold', async () => {
+        const params: StatusRuleParams = {
+          condition: {
+            locationsThreshold: 2,
+            window: {
+              numberOfChecks: 1,
+            },
+            groupBy: 'none',
+            downThreshold: 1,
+          },
+          monitorIds: [monitor.id],
+        };
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'When down from 2 locations',
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);
-      });
-
-      let monitor: any;
-
-      it('creates a monitor', async () => {
-        monitor = await ruleHelper.addMonitor('Monitor location based at ' + moment().format('LT'));
-        expect(monitor).to.have.property('id');
       });
 
       it('should not trigger down alert based on location threshold with one location down', async () => {
@@ -285,35 +293,6 @@ export default function ({ getService }: FtrProviderContext) {
           }
         }
       });
-
-      const statusConfigs = [
-        {
-          checks: {
-            down: 1,
-            downWithinXChecks: 1,
-          },
-          ping: {
-            observer: {
-              geo: {
-                name: 'Dev Service',
-              },
-            },
-          },
-        },
-        {
-          checks: {
-            down: 1,
-            downWithinXChecks: 1,
-          },
-          ping: {
-            observer: {
-              geo: {
-                name: 'Dev Service 2',
-              },
-            },
-          },
-        },
-      ] as AlertStatusMetaData[];
 
       it('should trigger down alert based on location threshold with two locations down', async () => {
         // 1st down check from dev 2
@@ -362,6 +341,11 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
         expect(downResponse.hits.hits[0]._source).property(
           'reason',
@@ -413,6 +397,11 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
           docCountTarget: 2,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
         expect(recoveryResponse.hits.hits[1]._source).property(
           'reason',
@@ -448,12 +437,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
-        const reasonMessage = getUngroupedReasonMessage({
-          statusConfigs,
-          monitorName: monitor.name,
-          params,
-        });
-        expect(alert['kibana.alert.reason']).to.eql(reasonMessage);
+        expect(alert['kibana.alert.reason']).to.eql(
+          `Monitor "${monitor.name}" is down 1 time from Dev Service | 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
+        );
         const downResponse = await waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
@@ -464,6 +450,7 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
           docCountTarget: 3,
+          filters: [{ term: { 'monitor.id': monitor.id } }],
         });
         expect(downResponse.hits.hits[2]._source).property(
           'reason',
@@ -483,17 +470,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Multi location grouped', () => {
       let ruleId = '';
-      const params: StatusRuleParams = {
-        condition: {
-          window: {
-            numberOfChecks: 1,
-          },
-          groupBy: 'locationId',
-          locationsThreshold: 1,
-          downThreshold: 1,
-        },
-      };
-
       let monitor: any;
 
       it('creates a monitor', async () => {
@@ -501,7 +477,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitor).to.have.property('id');
       });
 
-      it('creates a custom rule with 1 location threshold ungrouped', async () => {
+      it('creates a custom rule with 1 location threshold grouped by location', async () => {
+        const params: StatusRuleParams = {
+          condition: {
+            window: {
+              numberOfChecks: 1,
+            },
+            groupBy: 'locationId',
+            locationsThreshold: 1,
+            downThreshold: 1,
+          },
+          monitorIds: [monitor.id],
+        };
+
         const rule = await ruleHelper.createCustomStatusRule({
           params,
         });
@@ -546,7 +534,12 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 5,
+          docCountTarget: 2,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
         const lastTwoHits = downResponse.hits.hits.slice(-2).map((hit) => hit._source);
 
