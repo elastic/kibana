@@ -56,6 +56,11 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       [services]
     );
 
+    const filters = useMemo(
+      () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+      [querySubscriberResult.filters, additionalFilters]
+    );
+
     if (!hasQuerySubscriberData(querySubscriberResult)) {
       return null;
     }
@@ -64,7 +69,7 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       <FieldStats
         services={statsServices}
         query={querySubscriberResult.query}
-        filters={(querySubscriberResult.filters || []).concat(additionalFilters || [])}
+        filters={filters}
         fromDate={querySubscriberResult.fromDate}
         toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}

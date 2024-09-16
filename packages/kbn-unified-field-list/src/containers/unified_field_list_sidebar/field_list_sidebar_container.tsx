@@ -152,11 +152,16 @@ const UnifiedFieldListSidebarContainer = memo(
       const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
       const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
 
+      const filters = useMemo(
+        () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+        [querySubscriberResult.filters, additionalFilters]
+      );
+
       const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
         disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
         dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
         query: querySubscriberResult.query,
-        filters: (querySubscriberResult.filters || []).concat(additionalFilters || []),
+        filters,
         fromDate: querySubscriberResult.fromDate,
         toDate: querySubscriberResult.toDate,
         services,
