@@ -97,13 +97,13 @@ const useSelectedTab = (
   const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
     openLeftPanel({
       id: UserDetailsPanelKey,
-      path: {
-        tab: tabId,
-      },
       params: {
         user,
         isRiskScoreExist,
         hasMisconfigurationFindings,
+        path: {
+          tab: tabId,
+        },
       },
     });
   };

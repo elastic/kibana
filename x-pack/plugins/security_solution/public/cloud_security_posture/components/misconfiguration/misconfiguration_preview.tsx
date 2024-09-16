@@ -141,10 +141,6 @@ export const MisconfigurationsPreview = ({
 
   const { euiTheme } = useEuiTheme();
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
-  // const hostNameFilterQuery = useMemo(
-  //   () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-  //   [hostName]
-  // );
 
   const buildFilterQuery = useMemo(
     () => (fieldName === 'host.name' ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
@@ -177,11 +173,11 @@ export const MisconfigurationsPreview = ({
               path: { tab: 'csp_insights' },
             }
           : {
-              user: { name, email: ['ALPHA'] },
+              user: { name },
               isRiskScoreExist,
               hasMisconfigurationFindings,
+              path: { tab: 'csp_insights' },
             },
-      path: { tab: 'csp_insights' },
     });
   }, [fieldName, hasMisconfigurationFindings, isRiskScoreExist, name, openLeftPanel]);
   const link = useMemo(
