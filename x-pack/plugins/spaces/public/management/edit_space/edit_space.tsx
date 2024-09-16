@@ -257,19 +257,11 @@ export const EditSpace: FC<PageProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <p>
-              {space.description ?? (
-                <FormattedMessage
-                  id="xpack.spaces.management.spaceDetails.space.description"
-                  defaultMessage="Organize your saved objects and show related features for creating new content."
-                />
-              )}
-            </p>
+            <p>{space.description}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiTabs>
