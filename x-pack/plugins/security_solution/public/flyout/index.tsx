@@ -16,7 +16,6 @@ import {
   DocumentDetailsRightPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
-  DocumentDetailsRuleOverviewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -29,9 +28,8 @@ import { PreviewPanel } from './document_details/preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
-import type { RuleOverviewPanelProps } from './document_details/rule_overview';
-import { RuleOverviewPanel } from './document_details/rule_overview';
-import { RuleOverviewPanelProvider } from './document_details/rule_overview/context';
+import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
+import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
@@ -80,11 +78,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: DocumentDetailsRuleOverviewPanelKey,
+    key: RulePanelKey,
+    component: (props) => <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: RulePreviewPanelKey,
     component: (props) => (
-      <RuleOverviewPanelProvider {...(props as RuleOverviewPanelProps).params}>
-        <RuleOverviewPanel />
-      </RuleOverviewPanelProvider>
+      <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
   {
