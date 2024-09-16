@@ -211,7 +211,9 @@ export class ProfilesManager {
     // if (this.ebtContext$) {
     //   console.log('dscProfiles', dscProfiles);
     // }
-    // EBT context was enabled only for Discover pages and not for Dashboard panels, Log Explorer, Security Solution, etc.
+
+    // ebtContext$ was enabled only for Discover pages.
+    // Dashboard panels, Log Explorer, Security Solution pages are excluded from this tracking.
     this.ebtContext$?.next({
       dscProfiles,
     });
