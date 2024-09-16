@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -32,19 +32,17 @@ export function DegradedFields() {
   });
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
 
-  const { totalItemCount, toggleCurrentQualityIssues } = useDegradedFields();
-
-  const [checked, setChecked] = useState(false);
+  const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
+    useDegradedFields();
 
   const onChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setChecked(e.target.checked);
     toggleCurrentQualityIssues();
   };
 
   const latestBackingIndexToggle = (
     <EuiSwitch
       label={overviewDegradedFieldToggleSwitch}
-      checked={checked}
+      checked={showCurrentQualityIssues}
       onChange={onChange}
       aria-describedby={toggleTextSwitchId}
       compressed

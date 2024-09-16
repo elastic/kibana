@@ -50,13 +50,6 @@ export async function getDataStreamMapping({
       }
     : undefined;
 
-  console.table({
-    field,
-    fieldCount,
-    fieldPresent,
-    fieldMapping,
-  });
-
   return {
     fieldCount,
     fieldPresent,

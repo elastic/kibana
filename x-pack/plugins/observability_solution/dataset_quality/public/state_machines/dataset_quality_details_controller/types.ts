@@ -46,7 +46,7 @@ export interface WithDefaultControllerState {
   isIndexNotFoundError?: boolean;
   integration?: Integration;
   expandedDegradedField?: string;
-  currentQualityIssues?: boolean;
+  showCurrentQualityIssues: boolean;
 }
 
 export interface WithDataStreamDetails {
@@ -88,7 +88,7 @@ export interface WithDegradeFieldAnalysis {
 
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
-  'degradedFields' | 'timeRange' | 'isIndexNotFoundError'
+  'degradedFields' | 'timeRange' | 'isIndexNotFoundError' | 'showCurrentQualityIssues'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -96,7 +96,7 @@ export type DatasetQualityDetailsControllerTypeState =
       value:
         | 'initializing'
         | 'initializing.nonAggregatableDataset.fetching'
-        | 'initializing.dataStreamDegradedFields.fetching'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching'
         | 'initializing.dataStreamSettings.fetchingDataStreamSettings'
         | 'initializing.dataStreamDetails.fetching';
       context: WithDefaultControllerState;
@@ -118,7 +118,7 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState & WithBreakdownInEcsCheck;
     }
   | {
-      value: 'initializing.dataStreamDegradedFields.done';
+      value: 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.done';
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
@@ -144,16 +144,16 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.dataStreamSettings.initializingIntegrations'
-        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.fetching'
-        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.fetching'
-        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.unauthorized';
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.fetching'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.fetching'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.unauthorized';
       context: WithDefaultControllerState & WithDataStreamSettings;
     }
   | {
       value:
-        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
-        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.done';
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.done'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.done';
       context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
     };
 

@@ -51,7 +51,7 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamSettings.initializingIntegrations')
+    state.matches('initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields')
       ? state.context.dataStreamSettings
       : undefined
   );
@@ -59,14 +59,14 @@ export const useDatasetQualityDetailsState = () => {
   const integrationDetails = {
     integration: useSelector(service, (state) =>
       state.matches(
-        'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
+        'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.done'
       )
         ? state.context.integration
         : undefined
     ),
     dashboard: useSelector(service, (state) =>
       state.matches(
-        'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.done'
+        'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.done'
       )
         ? state.context.integrationDashboards
         : undefined
@@ -77,7 +77,7 @@ export const useDatasetQualityDetailsState = () => {
     service,
     (state) =>
       !state.matches(
-        'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.unauthorized'
+        'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.unauthorized'
       )
   );
 
@@ -107,13 +107,13 @@ export const useDatasetQualityDetailsState = () => {
       'initializing.dataStreamSettings.fetchingDataStreamSettings'
     ),
     integrationDetailsLoadings: state.matches(
-      'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.fetching'
+      'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.fetching'
     ),
     integrationDetailsLoaded: state.matches(
-      'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
+      'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.done'
     ),
     integrationDashboardsLoading: state.matches(
-      'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.fetching'
+      'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.fetching'
     ),
   }));
 

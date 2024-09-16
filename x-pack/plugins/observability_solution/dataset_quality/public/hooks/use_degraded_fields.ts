@@ -29,7 +29,7 @@ export function useDegradedFields() {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { degradedFields, expandedDegradedField, currentQualityIssues } = useSelector(
+  const { degradedFields, expandedDegradedField, showCurrentQualityIssues } = useSelector(
     service,
     (state) => state.context
   );
@@ -75,7 +75,9 @@ export function useDegradedFields() {
   }, [expandedDegradedField, renderedItems]);
 
   const isDegradedFieldsLoading = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamDegradedFields.fetching')
+    state.matches(
+      'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching'
+    )
   );
 
   const closeDegradedFieldFlyout = useCallback(
@@ -175,7 +177,7 @@ export function useDegradedFields() {
     degradedFieldAnalysis,
     degradedFieldAnalysisResult,
     toggleCurrentQualityIssues,
-    currentQualityIssues,
+    showCurrentQualityIssues,
     expandedRenderedItem,
   };
 }

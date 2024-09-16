@@ -51,7 +51,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
       initial: 'initializing',
       states: {
         initializing: {
-          // TODO: Change it to ready
           type: 'parallel',
           states: {
             nonAggregatableDataset: {
@@ -142,50 +141,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 done: {},
               },
             },
-            dataStreamDegradedFields: {
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: 'loadDegradedFields',
-                    onDone: {
-                      target: 'done',
-                      actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
-                    },
-                    onError: [
-                      {
-                        target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
-                      },
-                      {
-                        target: 'done',
-                      },
-                    ],
-                  },
-                },
-                done: {
-                  on: {
-                    UPDATE_TIME_RANGE: {
-                      target: 'fetching',
-                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
-                    },
-                    UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
-                      target: 'done',
-                      actions: ['storeDegradedFieldTableOptions'],
-                    },
-                    OPEN_DEGRADED_FIELD_FLYOUT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
-                      actions: ['storeExpandedDegradedField'],
-                    },
-                    TOGGLE_CURRENT_QUALITY_ISSUES: {
-                      target: 'fetching',
-                      actions: ['toggleCurrentQualityIssues'],
-                    },
-                  },
-                },
-              },
-            },
             dataStreamSettings: {
               initial: 'fetchingDataStreamSettings',
               states: {
@@ -193,7 +148,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   invoke: {
                     src: 'loadDataStreamSettings',
                     onDone: {
-                      target: 'initializingIntegrations',
+                      target: 'loadingIntegrationsAndDegradedFields',
                       actions: ['storeDataStreamSettings'],
                     },
                     onError: [
@@ -208,9 +163,53 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     ],
                   },
                 },
-                initializingIntegrations: {
+                loadingIntegrationsAndDegradedFields: {
                   type: 'parallel',
                   states: {
+                    dataStreamDegradedFields: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadDegradedFields',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
+                            },
+                            onError: [
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'done',
+                              },
+                            ],
+                          },
+                        },
+                        done: {
+                          on: {
+                            UPDATE_TIME_RANGE: {
+                              target: 'fetching',
+                              actions: ['resetDegradedFieldPageAndRowsPerPage'],
+                            },
+                            UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                              target: 'done',
+                              actions: ['storeDegradedFieldTableOptions'],
+                            },
+                            OPEN_DEGRADED_FIELD_FLYOUT: {
+                              target:
+                                '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                              actions: ['storeExpandedDegradedField'],
+                            },
+                            TOGGLE_CURRENT_QUALITY_ISSUES: {
+                              target: 'fetching',
+                              actions: ['toggleCurrentQualityIssues'],
+                            },
+                          },
+                        },
+                      },
+                    },
                     integrationDetails: {
                       initial: 'fetching',
                       states: {
@@ -281,18 +280,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       cond: 'hasNoDegradedFieldsSelected',
                     },
                   ],
-                  on: {
-                    // TODO: Delete this on handler after talking with Felix
-                    DEGRADED_FIELDS_LOADED: [
-                      {
-                        target: 'open',
-                        cond: 'shouldOpenFlyout',
-                      },
-                      {
-                        target: 'closed',
-                      },
-                    ],
-                  },
                 },
                 open: {
                   type: 'parallel',
@@ -455,7 +442,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         }),
         toggleCurrentQualityIssues: assign((context) => {
           return {
-            currentQualityIssues: !context.currentQualityIssues,
+            showCurrentQualityIssues: !context.showCurrentQualityIssues,
           };
         }),
         raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
@@ -613,7 +600,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
 
         return dataStreamDetailsClient.getDataStreamDegradedFields({
           dataStream:
-            context.currentQualityIssues &&
+            context.showCurrentQualityIssues &&
             'dataStreamSettings' in context &&
             context.dataStreamSettings
               ? context.dataStreamSettings.lastBackingIndexName

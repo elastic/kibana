@@ -39,17 +39,6 @@ export async function analyzeDegradedField({
     getDataStreamSettings({ datasetQualityESClient, dataStream, lastBackingIndex }),
   ]);
 
-  console.table({
-    fieldMapping,
-    fieldPresent,
-    ignoreDynamicBeyondLimit,
-    fieldCount,
-    totalFieldLimit,
-    isFieldLimitIssue: Boolean(
-      !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit
-    ),
-  });
-
   return {
     isFieldLimitIssue: Boolean(
       !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit

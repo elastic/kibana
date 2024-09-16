@@ -79,21 +79,17 @@ export async function getDegradedFields({
     aggs,
   });
 
-  const result =
-    response.aggregations?.degradedFields.buckets.map((bucket) => ({
-      name: bucket.key as string,
-      count: bucket.doc_count,
-      lastOccurrence: bucket.lastOccurrence.value,
-      timeSeries: bucket.timeSeries.buckets.map((timeSeriesBucket) => ({
-        x: timeSeriesBucket.key,
-        y: timeSeriesBucket.doc_count,
-      })),
-      indexFieldWasLastPresentIn: bucket.index.buckets[0].key as string,
-    })) ?? [];
-
-  console.table(result);
-
   return {
-    degradedFields: result,
+    degradedFields:
+      response.aggregations?.degradedFields.buckets.map((bucket) => ({
+        name: bucket.key as string,
+        count: bucket.doc_count,
+        lastOccurrence: bucket.lastOccurrence.value,
+        timeSeries: bucket.timeSeries.buckets.map((timeSeriesBucket) => ({
+          x: timeSeriesBucket.key,
+          y: timeSeriesBucket.doc_count,
+        })),
+        indexFieldWasLastPresentIn: bucket.index.buckets[0].key as string,
+      })) ?? [],
   };
 }
