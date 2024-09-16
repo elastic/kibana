@@ -295,8 +295,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       () => [
         {
           id: TIMELINE_EVENT_DETAIL_ROW_ID,
-          // The header cell should be visually hidden, but available to screen readers
           width: 0,
+          // The header cell should be visually hidden, but available to screen readers
           headerCellRender: () => <></>,
           headerCellProps: { className: 'euiScreenReaderOnly' },
 

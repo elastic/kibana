@@ -62,12 +62,8 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
     useEffect(() => {
       setCellProps?.({
         className: ctx.expanded?.id === event._id ? 'unifiedDataTable__cell--expanded' : '',
-        style: { width: '100%', height: eventDetailRowRef.current?.getBoundingClientRect().height },
+        style: { width: '100%' },
       });
-
-      if (rowIndex === 7) {
-        console.log({ size: eventDetailRowRef.current?.getBoundingClientRect().height });
-      }
     }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
 
     if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;

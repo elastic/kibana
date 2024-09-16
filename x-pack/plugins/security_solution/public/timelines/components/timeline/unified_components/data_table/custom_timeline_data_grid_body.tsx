@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { CellMeasurer, List, AutoSizer, CellMeasurerCache } from 'react-virtualized';
 import type { RowRenderer } from '../../../../../../common/types';
@@ -58,42 +58,45 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 
     return (
       <AutoSizer>
-        {({ width, height }) => (
-          <List
-            width={width}
-            height={height}
-            rowHeight={cache.rowHeight}
-            deferredMeasurementCache={cache}
-            rowCount={visibleRows.length}
-            overscanRowCount={2}
-            rowRenderer={({ index, key, style, parent }) => (
-              <CellMeasurer
-                cache={cache}
-                columnIndex={0}
-                key={key}
-                parent={parent}
-                rowIndex={index}
-              >
-                {({ measure, registerChild }) => {
-                  return (
-                    <div ref={registerChild} style={style}>
-                      <CustomDataGridSingleRow
-                        rowData={visibleRows[index]}
-                        rowIndex={index}
-                        visibleColumns={visibleColumns}
-                        Cell={Cell}
-                        enabledRowRenderers={enabledRowRenderers}
-                        refetch={refetch}
-                        measure={measure}
-                        registerChild={() => {}}
-                      />
-                    </div>
-                  );
-                }}
-              </CellMeasurer>
-            )}
-          />
-        )}
+        {({ width, height }) => {
+          console.log({ width, height });
+          return (
+            <List
+              width={width}
+              height={height}
+              rowHeight={cache.rowHeight}
+              deferredMeasurementCache={cache}
+              rowCount={visibleRows.length}
+              overscanRowCount={10}
+              rowRenderer={({ index, key, style, parent }) => (
+                <CellMeasurer
+                  cache={cache}
+                  columnIndex={0}
+                  key={key}
+                  parent={parent}
+                  rowIndex={index}
+                >
+                  {({ measure, registerChild }) => {
+                    return (
+                      <div ref={registerChild} key={key} style={style}>
+                        <CustomDataGridSingleRow
+                          rowData={visibleRows[index]}
+                          rowIndex={index}
+                          visibleColumns={visibleColumns}
+                          Cell={Cell}
+                          enabledRowRenderers={enabledRowRenderers}
+                          refetch={refetch}
+                          measure={measure}
+                          registerChild={registerChild}
+                        />
+                      </div>
+                    );
+                  }}
+                </CellMeasurer>
+              )}
+            />
+          );
+        }}
       </AutoSizer>
     );
   }
@@ -199,10 +202,15 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   });
 
   useEffect(() => {
+    if (cache.has(rowIndex, visibleColumns.length - 1)) {
+      cache.clear(rowIndex, visibleColumns.length - 1);
+    }
+    console.log('measuring');
     measure();
-  }, [measure]);
+  }, [Cell, measure, rowIndex, visibleColumns.length]);
 
   const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
+  console.log({ cssRowHeight });
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -218,6 +226,8 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     [canShowRowRenderer]
   );
   const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
+
+  const [rowHeight, setRowHeight] = useState<number>(0);
 
   return (
     <CustomGridRow
@@ -246,6 +256,9 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
+          style={{
+            width: '100%',
+          }}
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
           visibleRowIndex={rowIndex}
         />

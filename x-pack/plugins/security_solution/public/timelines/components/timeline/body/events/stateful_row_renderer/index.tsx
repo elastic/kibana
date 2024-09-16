@@ -83,7 +83,7 @@ export const StatefulRowRenderer = ({
                 <EuiFlexItem grow={true}>
                   {rowRenderer.renderRow({
                     data: event.ecs,
-                    isDraggable: true,
+                    isDraggable: false,
                     scopeId: timelineId,
                   })}
                 </EuiFlexItem>
