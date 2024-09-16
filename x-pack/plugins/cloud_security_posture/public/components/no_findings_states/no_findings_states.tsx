@@ -188,7 +188,7 @@ const EmptySecurityFindingsPrompt = () => {
         <EuiEmptyPrompt
           style={{ padding: 24 }}
           data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-          icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="" role="presentation" />}
+          icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />}
           title={
             <h2>
               <FormattedMessage
@@ -259,7 +259,7 @@ const EmptySecurityFindingsPrompt = () => {
         <EuiEmptyPrompt
           style={{ padding: 24 }}
           data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
-          icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="" role="presentation" />}
+          icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
           title={
             <h2>
               <FormattedMessage

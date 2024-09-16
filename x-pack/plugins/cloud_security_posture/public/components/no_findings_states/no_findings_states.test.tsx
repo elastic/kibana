@@ -28,9 +28,11 @@ describe('NoFindingsStates', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/detect security misconfigurations in your cloud infrastructure!/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Elastic’s Cloud Security Posture Management/i)).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Already using a cloud security product?/i)).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -46,7 +48,15 @@ describe('NoFindingsStates', () => {
         '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/kspm'
       );
     });
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /wiz integration/i })).toHaveAttribute(
+        'href',
+        '/app/integrations/detail/wiz/overview'
+      );
+    });
   });
+
   it('shows install agent prompt with install agent link when status is not-deployed', async () => {
     server.use(statusHandlers.notDeployedHandler);
     server.use(benchmarksHandlers.cspmInstalledHandler);
@@ -64,6 +74,7 @@ describe('NoFindingsStates', () => {
       );
     });
   });
+
   it('shows install agent prompt with install agent link when status is not-deployed and postureType is KSPM', async () => {
     server.use(statusHandlers.notDeployedHandler);
     server.use(benchmarksHandlers.kspmInstalledHandler);
@@ -84,6 +95,7 @@ describe('NoFindingsStates', () => {
       );
     });
   });
+
   it('shows indexing message when status is indexing', async () => {
     server.use(statusHandlers.indexingHandler);
 
@@ -100,6 +112,7 @@ describe('NoFindingsStates', () => {
       )
     ).toBeInTheDocument();
   });
+
   it('shows timeout message when status is index-timeout', async () => {
     server.use(statusHandlers.indexTimeoutHandler);
 
@@ -116,6 +129,7 @@ describe('NoFindingsStates', () => {
       screen.getByText(/collecting findings is taking longer than expected/i)
     ).toBeInTheDocument();
   });
+
   it('shows unprivileged message when status is unprivileged', async () => {
     server.use(statusHandlers.unprivilegedHandler);
 
@@ -137,6 +151,7 @@ describe('NoFindingsStates', () => {
       ).toBeInTheDocument();
     });
   });
+
   it('renders empty container when the status does not match a no finding status', async () => {
     server.use(statusHandlers.indexedHandler);
 
