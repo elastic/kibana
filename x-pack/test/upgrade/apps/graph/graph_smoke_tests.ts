@@ -10,7 +10,7 @@ import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'graph']);
+  const { common, header, home, graph } = getPageObjects(['common', 'header', 'home', 'graph']);
   const log = getService('log');
 
   describe('upgrade graph smoke tests', function describeIndexTests() {
@@ -37,15 +37,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       graphTests.forEach(({ name, numNodes }) => {
         describe('space: ' + space, () => {
           before(async () => {
-            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
               basePath,
             });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.launchSampleGraph(name);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await header.waitUntilLoadingHasFinished();
+            await home.launchSampleGraph(name);
+            await header.waitUntilLoadingHasFinished();
           });
           it('renders graph for ' + name, async () => {
-            const elements = await PageObjects.graph.getAllGraphNodes();
+            const elements = await graph.getAllGraphNodes();
             expect(elements).to.be.equal(numNodes);
           });
         });

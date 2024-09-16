@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -43,9 +44,9 @@ describe('Options list popover', () => {
     );
   };
 
-  const clickShowOnlySelections = (popover: RenderResult) => {
+  const clickShowOnlySelections = async (popover: RenderResult) => {
     const showOnlySelectedButton = popover.getByTestId('optionsList-control-show-only-selected');
-    userEvent.click(showOnlySelectedButton);
+    await userEvent.click(showOnlySelectedButton);
   };
 
   test('no available options', async () => {
@@ -70,20 +71,20 @@ describe('Options list popover', () => {
     const popover = mountComponent(mocks);
 
     const existsOption = popover.getByTestId('optionsList-control-selection-exists');
-    userEvent.click(existsOption);
+    await userEvent.click(existsOption);
     expect(mocks.api.makeSelection).toBeCalledWith('exists-option', false);
 
     let woofOption = popover.getByTestId('optionsList-control-selection-woof');
-    userEvent.click(woofOption);
+    await userEvent.click(woofOption);
     expect(mocks.api.makeSelection).toBeCalledWith('woof', false);
 
     // simulate `makeSelection`
     mocks.setSelectedOptions(['woof']);
     await waitOneTick();
 
-    clickShowOnlySelections(popover);
+    await clickShowOnlySelections(popover);
     woofOption = popover.getByTestId('optionsList-control-selection-woof');
-    userEvent.click(woofOption);
+    await userEvent.click(woofOption);
     expect(mocks.api.makeSelection).toBeCalledWith('woof', true);
   });
 
@@ -100,7 +101,7 @@ describe('Options list popover', () => {
       mocks.setSelectedOptions(selections);
       await waitOneTick();
 
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
@@ -119,7 +120,7 @@ describe('Options list popover', () => {
       mocks.setSelectedOptions([]);
       const popover = mountComponent(mocks);
 
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const noSelectionsDiv = within(availableOptionsDiv).getByTestId(
         'optionsList-control-selectionsEmptyMessage'
@@ -142,7 +143,7 @@ describe('Options list popover', () => {
       expect(searchBox).not.toBeDisabled();
       expect(sortButton).not.toBeDisabled();
 
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       searchBox = popover.getByTestId('optionsList-control-search-input');
       sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       expect(searchBox).toBeDisabled();
@@ -235,7 +236,7 @@ describe('Options list popover', () => {
 
       mocks.setExistsSelected(true);
       await waitOneTick();
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
 
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
