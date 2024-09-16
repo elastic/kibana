@@ -9,17 +9,13 @@ import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Get Knowledge Base Status Route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  // eslint-disable-next-line prefer-const
-  let { clients, context } = requestContextMock.createTools();
 
-  clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+  let { context } = requestContextMock.createTools();
 
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
   const mockUser = {
     username: 'my_username',
     authentication_realm: {
@@ -41,7 +37,7 @@ describe('Get Knowledge Base Status Route', () => {
       isSetupAvailable: jest.fn().mockResolvedValue(true),
     });
 
-    getKnowledgeBaseStatusRoute(server.router, mockGetElser);
+    getKnowledgeBaseStatusRoute(server.router);
   });
 
   describe('Status codes', () => {
@@ -51,17 +47,6 @@ describe('Get Knowledge Base Status Route', () => {
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 500 if error is thrown in checking kb status', async () => {
-      context.core.elasticsearch.client.asInternalUser.indices.exists.mockRejectedValue(
-        new Error('Test error')
-      );
-      const response = await server.inject(
-        getGetKnowledgeBaseStatusRequest('esql'),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(500);
     });
   });
 });

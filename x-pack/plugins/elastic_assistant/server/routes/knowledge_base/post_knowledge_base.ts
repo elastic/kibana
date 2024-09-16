@@ -14,9 +14,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { getKbResource } from './get_kb_resource';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
@@ -26,12 +24,8 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
- * @param getElser
  */
-export const postKnowledgeBaseRoute = (
-  router: ElasticAssistantPluginRouter,
-  getElser: GetElser
-) => {
+export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
@@ -60,11 +54,7 @@ export const postKnowledgeBaseRoute = (
         const resp = buildResponse(response);
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
-        const logger = ctx.elasticAssistant.logger;
-        const telemetry = assistantContext.telemetry;
-        const elserId = await getElser();
         const core = ctx.core;
-        const esClient = core.elasticsearch.client.asInternalUser;
         const soClient = core.savedObjects.getClient();
 
         // FF Check for V2 KB
@@ -77,18 +67,7 @@ export const postKnowledgeBaseRoute = (
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
-          const esStore = new ElasticsearchStore(
-            esClient,
-            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
-            logger,
-            telemetry,
-            elserId,
-            getKbResource(request),
-            knowledgeBaseDataClient
-          );
-
-          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
+          await knowledgeBaseDataClient.setupKnowledgeBase({ soClient });
 
           return response.ok({ body: { success: true } });
         } catch (error) {

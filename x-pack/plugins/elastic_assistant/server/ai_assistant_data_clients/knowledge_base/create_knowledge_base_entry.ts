@@ -9,8 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
+  DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  Metadata,
 } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema } from './types';
@@ -21,7 +23,7 @@ export interface CreateKnowledgeBaseEntryParams {
   logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
-  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
   global?: boolean;
   isV2?: boolean;
 }
@@ -42,14 +44,14 @@ export const createKnowledgeBaseEntry = async ({
         createdAt,
         spaceId,
         user,
-        entry: knowledgeBaseEntry,
+        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
         global,
       })
     : transformToLegacyCreateSchema({
         createdAt,
         spaceId,
         user,
-        entry: knowledgeBaseEntry,
+        entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
         global,
       });
   try {
@@ -133,14 +135,29 @@ export const transformToCreateSchema = ({
   };
 };
 
+export type LegacyKnowledgeBaseEntryCreateProps = Omit<
+  DocumentEntryCreateFields,
+  'kbResource' | 'source'
+> & {
+  metadata: Metadata;
+};
+
+interface TransformToLegacyCreateSchemaProps {
+  createdAt: string;
+  spaceId: string;
+  user: AuthenticatedUser;
+  entry: LegacyKnowledgeBaseEntryCreateProps;
+  global?: boolean;
+}
+
 export const transformToLegacyCreateSchema = ({
   createdAt,
   spaceId,
   user,
   entry,
   global = false,
-}: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
-  const base = {
+}: TransformToLegacyCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
+  return {
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user.profile_uid ?? 'unknown',
@@ -155,22 +172,7 @@ export const transformToLegacyCreateSchema = ({
             name: user.username,
           },
         ],
+    ...entry,
+    vector: undefined,
   };
-
-  if (entry.type === 'index') {
-    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
-    return {
-      ...base,
-      ...restEntry,
-      query_description: queryDescription,
-      input_schema:
-        entry.inputSchema?.map((schema) => ({
-          field_name: schema.fieldName,
-          field_type: schema.fieldType,
-          description: schema.description,
-        })) ?? undefined,
-      output_fields: outputFields ?? undefined,
-    };
-  }
-  return { ...base, ...entry, vector: undefined };
 };

@@ -219,8 +219,6 @@ export const postEvaluateRoute = (
                 ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
                 : undefined;
 
-              const modelExists = await esStore.isModelInstalled();
-
               // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
               const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
@@ -255,7 +253,7 @@ export const postEvaluateRoute = (
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
                 logger,
-                modelExists,
+                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,

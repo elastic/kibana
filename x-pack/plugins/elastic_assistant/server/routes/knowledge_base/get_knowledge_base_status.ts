@@ -17,21 +17,16 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { KibanaRequest } from '@kbn/core/server';
 import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './constants';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { ESQL_RESOURCE } from './constants';
 import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
  *
  * @param router IRouter for registering routes
- * @param getElser Function to get the default Elser ID
  */
-export const getKnowledgeBaseStatusRoute = (
-  router: ElasticAssistantPluginRouter,
-  getElser: GetElser
-) => {
+export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
       access: 'internal',
@@ -54,12 +49,9 @@ export const getKnowledgeBaseStatusRoute = (
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
         const logger = ctx.elasticAssistant.logger;
-        const telemetry = assistantContext.telemetry;
 
         try {
           // Use asInternalUser
-          const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          const elserId = await getElser();
           const kbResource = getKbResource(request);
 
           // FF Check for V2 KB
@@ -72,20 +64,9 @@ export const getKnowledgeBaseStatusRoute = (
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          // Use old status checks by overriding esStore to use kbDataClient
-          const esStore = new ElasticsearchStore(
-            esClient,
-            kbDataClient.indexTemplateAndPattern.alias,
-            logger,
-            telemetry,
-            elserId,
-            kbResource,
-            kbDataClient
-          );
-
-          const indexExists = await esStore.indexExists();
-          const pipelineExists = await esStore.pipelineExists();
-          const modelExists = await esStore.isModelInstalled(elserId);
+          const indexExists = true; // Installed at startup, always true
+          const pipelineExists = true; // Installed at startup, always true
+          const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
 
           const body: ReadKnowledgeBaseResponse = {
@@ -97,14 +78,7 @@ export const getKnowledgeBaseStatusRoute = (
           };
 
           if (indexExists && kbResource === ESQL_RESOURCE) {
-            const esqlExists =
-              (
-                await kbDataClient.getKnowledgeBaseDocumentEntries({
-                  query: ESQL_DOCS_LOADED_QUERY,
-                  // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
-                  required: true,
-                })
-              ).length > 0;
+            const esqlExists = await kbDataClient.isESQLDocsLoaded();
             return response.ok({ body: { ...body, esql_exists: esqlExists } });
           }
 

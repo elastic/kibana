@@ -25,10 +25,14 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { AssistantToolParams, GetElser } from '../../types';
-import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
+import {
+  createKnowledgeBaseEntry,
+  LegacyKnowledgeBaseEntryCreateProps,
+  transformToCreateSchema,
+  transformToLegacyCreateSchema,
+} from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
@@ -182,16 +186,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * See ml-team issue for providing 'dry run' flag to perform these checks: https://github.com/elastic/ml-team/issues/1208
    *
    * @param options
-   * @param options.esStore ElasticsearchStore for loading ES|QL docs via LangChain loaders
    * @param options.soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
    *
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
-    esStore,
     soClient,
   }: {
-    esStore: ElasticsearchStore;
     soClient: SavedObjectsClientContract;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
@@ -235,10 +236,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      const kbDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
+      const kbDocsLoaded = await this.isESQLDocsLoaded();
       if (!kbDocsLoaded) {
         this.options.logger.debug(`Loading KB docs...`);
-        await loadESQL(esStore, this.options.logger);
+        await loadESQL(this, this.options.logger);
       } else {
         this.options.logger.debug(`Knowledge Base docs already loaded!`);
       }
@@ -274,33 +275,40 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
-        // v1 schema has metadata nested in a `metadata` object, and kbResource vs kb_resource
-        const body = this.options.v2KnowledgeBaseEnabled
-          ? {
-              kb_resource: doc.metadata.kbResource ?? 'unknown',
+        // v1 schema has metadata nested in a `metadata` object
+        if (this.options.v2KnowledgeBaseEnabled) {
+          return transformToCreateSchema({
+            createdAt: changedAt,
+            spaceId: this.spaceId,
+            user: authenticatedUser,
+            entry: {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              text: doc.pageContent,
+              kbResource: doc.metadata.kbResource ?? 'unknown',
               required: doc.metadata.required ?? false,
               source: doc.metadata.source ?? 'unknown',
-            }
-          : {
+            },
+            global,
+          });
+        } else {
+          return transformToLegacyCreateSchema({
+            createdAt: changedAt,
+            spaceId: this.spaceId,
+            user: authenticatedUser,
+            entry: {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              text: doc.pageContent,
               metadata: {
                 kbResource: doc.metadata.kbResource ?? 'unknown',
                 required: doc.metadata.required ?? false,
                 source: doc.metadata.source ?? 'unknown',
               },
-            };
-        // @ts-ignore Transform only explicitly supports v2 schema, but technically still supports v1
-        return transformToCreateSchema({
-          createdAt: changedAt,
-          spaceId: this.spaceId,
-          user: authenticatedUser,
-          entry: {
-            type: DocumentEntryType.value,
-            name: 'unknown',
-            text: doc.pageContent,
-            ...body,
-          } as unknown as KnowledgeBaseEntryCreateProps,
-          global,
-        });
+            },
+            global,
+          });
+        }
       }),
       authenticatedUser,
     });
@@ -316,6 +324,18 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
+  };
+
+  /**
+   * Returns if ES|QL KB docs have been loaded
+   */
+  public isESQLDocsLoaded = async (): Promise<boolean> => {
+    const esqlDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: ESQL_DOCS_LOADED_QUERY,
+      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
+      required: true,
+    });
+    return esqlDocs.length > 0;
   };
 
   /**
@@ -402,7 +422,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     knowledgeBaseEntry,
     global = false,
   }: {
-    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
