@@ -29,6 +29,7 @@ export const startRuntimeServices = async ({
   username,
   password,
   apiKey,
+  spaceId,
   ...otherOptions
 }: StartRuntimeServicesOptions) => {
   const stackServices = await createRuntimeServices({
@@ -39,6 +40,7 @@ export const startRuntimeServices = async ({
     password,
     apiKey,
     log,
+    spaceId,
     asSuperuser: otherOptions?.asSuperuser,
   });
 

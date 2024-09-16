@@ -43,6 +43,7 @@ const getVersionsFile = (() => {
     prevMinors: Version[];
     prevMajors: Version[];
     current: Version;
+    versions: Version[];
   };
   const versionsFileName = 'versions.json';
   try {
