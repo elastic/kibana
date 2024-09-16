@@ -101,6 +101,13 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
   }
+
+  async clickPanelActionByTitle(testSubject: string, title = '') {
+    this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.clickPanelAction(testSubject, wrapper);
+  }
+
   async hasContextMenuMoreItem() {
     this.log.debug('hasContextMenuMoreItem');
     return await this.testSubjects.exists('embeddablePanelMore-mainMenu', { timeout: 500 });
@@ -118,12 +125,6 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug('openContextMenuMorePanel');
     await this.openContextMenu(wrapper);
     await this.clickContextMenuMoreItem();
-  }
-
-  async clickPanelActionByTitle(testSubject: string, title = '') {
-    this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
-    const wrapper = await this.getPanelWrapper(title);
-    await this.clickPanelAction(testSubject, wrapper);
   }
 
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
