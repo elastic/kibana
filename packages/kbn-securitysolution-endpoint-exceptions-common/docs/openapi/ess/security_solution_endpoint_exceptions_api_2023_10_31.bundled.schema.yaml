@@ -52,6 +52,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Create an endpoint exception list
+      tags:
+        - Security Solution Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
       description: >-
@@ -111,6 +113,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Delete an endpoint exception list item
+      tags:
+        - Security Solution Endpoint Exceptions API
     get:
       description: >-
         Get the details of an endpoint exception list item using the `id` or
@@ -171,6 +175,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Get an endpoint exception list item
+      tags:
+        - Security Solution Endpoint Exceptions API
     post:
       description: >-
         Create an endpoint exception list item, and associate it with the
@@ -250,6 +256,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Create an endpoint exception list item
+      tags:
+        - Security Solution Endpoint Exceptions API
     put:
       description: >-
         Update an endpoint exception list item using the `id` or `item_id`
@@ -334,6 +342,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Update an endpoint exception list item
+      tags:
+        - Security Solution Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
       description: Get a list of all endpoint exception list items.
@@ -439,6 +449,8 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
       summary: Get endpoint exception list items
+      tags:
+        - Security Solution Endpoint Exceptions API
 components:
   schemas:
     EndpointList:
@@ -867,3 +879,9 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: >-
+      Endpoint Exceptions API allows you to manage detection rule endpoint
+      exceptions to prevent a rule from generating an alert from incoming events
+      even when the rule's other criteria are met.
+    name: Security Solution Endpoint Exceptions API
