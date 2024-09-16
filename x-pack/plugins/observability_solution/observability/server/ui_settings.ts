@@ -650,7 +650,7 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
         defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen. 
-        When configured, indices allocated in the selected tiers will be ignored from search requests.`,
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM`,
       }
     ),
     value: [],
