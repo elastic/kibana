@@ -164,24 +164,30 @@ export const streamGraph = async ({
       };
 
       const processSimpleChatModelEvent = () => {
-        // console.log(`[TEST][ActionsClientSimpleChatModel] currentOutput: ${currentOutput}`);
+        // console.log(`[TEST] currentOutput: ${currentOutput}`);
+        // console.log(`[TEST] finalMessage: ${finalMessage}`);
         if (event.event === 'on_llm_stream') {
           const chunk = event.data?.chunk;
 
-          const msg = isOssLlm ? chunk.message.content : chunk.content;
+          let msg = isOssLlm ? chunk.message.content : chunk.content;
           if (finalOutputIndex === -1) {
             currentOutput += msg;
             // Remove whitespace to simplify parsing
             const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
             if (noWhitespaceOutput.includes(finalOutputStartToken)) {
               const nonStrippedToken = '"action_input": "';
-              finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+              finalOutputIndex = currentOutput.lastIndexOf(nonStrippedToken);
               const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
               extraOutput = currentOutput.substring(contentStartIndex);
               push({ payload: extraOutput, type: 'content' });
               finalMessage += extraOutput;
             }
           } else if (!streamingFinished && !didEnd) {
+            if (msg.startsWith('"') && finalMessage.endsWith('\\')) {
+              // console.log(`[TEST] finalMessage: ${finalMessage}, msg: ${msg}`);
+              finalMessage = finalMessage.slice(0, -1);
+              msg = `\\${msg}`;
+            }
             const finalOutputEndIndex = msg.search(finalOutputStopRegex);
             if (finalOutputEndIndex !== -1) {
               extraOutput = msg.substring(0, finalOutputEndIndex);
