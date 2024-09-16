@@ -20,13 +20,33 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          'monitoring.run.last_run.metrics.gap_range.from': { type: 'date' },
-          'monitoring.run.last_run.metrics.gap_range.to': { type: 'date' },
-          'monitoring.run.last_run.metrics.gap_range': { type: 'object' },
+          monitoring: {
+            properties: {
+              run: {
+                properties: {
+                  last_run: {
+                    properties: {
+                      metrics: {
+                        properties: {
+                          gap_range: {
+                            properties: {
+                              from: { type: 'date' },
+                              to: { type: 'date' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     ],
     schemas: {
+      forwardCompatibility: rawRuleSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV2,
     },
   },
