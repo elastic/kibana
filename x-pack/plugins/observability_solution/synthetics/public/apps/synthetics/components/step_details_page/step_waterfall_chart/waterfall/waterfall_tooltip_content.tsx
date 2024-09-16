@@ -13,6 +13,7 @@ import { useWaterfallContext } from './context/waterfall_context';
 interface Props {
   text: string;
   url: string;
+  index: string;
 }
 
 const StyledText = euiStyled(EuiText)`
@@ -23,22 +24,23 @@ const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
   background-color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
-export const WaterfallTooltipContent: React.FC<Props> = ({ text, url }) => {
-  const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
+export const WaterfallTooltipContent: React.FC<Props> = ({ text, url, index }) => {
+  const { data, renderTooltipItem, sidebarItems, metadata } = useWaterfallContext();
+  const metadataEntry = metadata?.[index - 1];
+  const tooltipItems = metadataEntry?.networkItemTooltipProps;
+  const showTooltip = metadataEntry?.showTooltip;
 
-  const tooltipMetrics = data.filter(
-    (datum) =>
-      datum.x === sidebarItems?.find((sidebarItem) => sidebarItem.url === url)?.index &&
-      datum.config.tooltipProps &&
-      datum.config.showTooltip
-  );
+  if (!tooltipItems || !showTooltip) {
+    return null;
+  }
+
   return (
     <div style={{ maxWidth: 500, height: '100%' }}>
       <StyledText size="xs">{text}</StyledText>
       <StyledHorizontalRule margin="none" />
       <EuiFlexGroup direction="column" gutterSize="none">
-        {tooltipMetrics.map((item, idx) => (
-          <EuiFlexItem key={idx}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
+        {tooltipItems.map((item, idx) => (
+          <EuiFlexItem key={idx}>{renderTooltipItem(item)}</EuiFlexItem>
         ))}
       </EuiFlexGroup>
     </div>

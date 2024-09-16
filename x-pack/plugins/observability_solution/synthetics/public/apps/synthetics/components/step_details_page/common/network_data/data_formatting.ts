@@ -167,10 +167,10 @@ export const getSeriesAndDomain = (
   const queryMatcher = getQueryMatcher(query);
   const filterMatcher = getFilterMatcher(activeFilters);
   items.forEach((item, index) => {
+    let showTooltip = true;
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     const offsetValue = getValueForOffset(item);
     let currentOffset = offsetValue - zeroOffset;
-    metadata.push(formatMetadata({ item, index, requestStart: currentOffset, dateFormatter }));
     const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     if (isHighlighted) {
       totalHighlightedRequests++;
@@ -190,13 +190,25 @@ export const getSeriesAndDomain = (
     }
 
     let timingValueFound = false;
+    const networkItemTooltipProps = [];
 
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      if (value && value >= 0) {
+      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
+
+      if (value !== null && value !== undefined && value >= 0) {
         timingValueFound = true;
-        const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
+
+        const tooltipProps = {
+          value: getFriendlyTooltipValue({
+            value: y - currentOffset,
+            timing,
+            mimeType: item.mimeType,
+          }),
+          colour,
+        };
+        networkItemTooltipProps.push(tooltipProps);
 
         series.push({
           x: index,
@@ -206,15 +218,6 @@ export const getSeriesAndDomain = (
             id: index,
             colour,
             isHighlighted,
-            showTooltip: true,
-            tooltipProps: {
-              value: getFriendlyTooltipValue({
-                value: y - currentOffset,
-                timing,
-                mimeType: item.mimeType,
-              }),
-              colour,
-            },
           },
         });
         currentOffset = y;
@@ -225,8 +228,19 @@ export const getSeriesAndDomain = (
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
     if (!timingValueFound) {
+      showTooltip = false;
       const total = item.timings.total;
       const hasTotal = total !== -1;
+      if (hasTotal) {
+        networkItemTooltipProps.push({
+          value: getFriendlyTooltipValue({
+            value: total,
+            timing: Timings.Receive,
+            mimeType: item.mimeType,
+          }),
+          colour: mimeTypeColour,
+        });
+      }
       series.push({
         x: index,
         y0: hasTotal ? currentOffset : 0,
@@ -234,20 +248,20 @@ export const getSeriesAndDomain = (
         config: {
           isHighlighted,
           colour: hasTotal ? mimeTypeColour : '',
-          showTooltip: hasTotal,
-          tooltipProps: hasTotal
-            ? {
-                value: getFriendlyTooltipValue({
-                  value: total,
-                  timing: Timings.Receive,
-                  mimeType: item.mimeType,
-                }),
-                colour: mimeTypeColour,
-              }
-            : undefined,
         },
       });
     }
+
+    metadata.push(
+      formatMetadata({
+        item,
+        index,
+        showTooltip,
+        requestStart: currentOffset,
+        dateFormatter,
+        networkItemTooltipProps,
+      })
+    );
   });
 
   const yValues = series.map((serie) => serie.y);
@@ -282,11 +296,15 @@ const formatMetadata = ({
   index,
   requestStart,
   dateFormatter,
+  showTooltip,
+  networkItemTooltipProps,
 }: {
   item: NetworkEvent;
   index: number;
   requestStart: number;
   dateFormatter: DateFormatter;
+  showTooltip: boolean;
+  networkItemTooltipProps?: Array<Record<string, string | number>>;
 }) => {
   const {
     certificates,
@@ -304,6 +322,8 @@ const formatMetadata = ({
   return {
     x: index,
     url,
+    networkItemTooltipProps,
+    showTooltip,
     requestHeaders: formatHeaders(requestHeaders),
     responseHeaders: formatHeaders(responseHeaders),
     certificates: certificates
