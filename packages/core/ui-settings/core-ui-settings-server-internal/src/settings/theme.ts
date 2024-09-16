@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -50,9 +51,9 @@ export const getThemeSettings = (
       description: i18n.translate('core.ui_settings.params.darkModeText', {
         defaultMessage:
           `The UI theme that the Kibana UI should use. ` +
-          `Set to 'enabled' or 'disabled' to enable or disable the dark theme. ` +
-          `Set to 'system' to have the Kibana UI theme follow the system theme. ` +
-          `A page refresh is required for the setting to be applied.`,
+          `Set to 'Enabled' to enable the dark theme, or 'Disabled' to disable it. ` +
+          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme. ` +
+          `A page reload is required for the setting to be applied.`,
       }),
       type: 'select',
       options: ['enabled', 'disabled', 'system'],

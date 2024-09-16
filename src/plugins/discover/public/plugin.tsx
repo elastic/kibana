@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -52,14 +53,13 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import {
-  DataSourceProfileService,
-  DocumentProfileService,
-  ProfilesManager,
-  RootProfileService,
-} from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
+import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
+import { RootProfileService } from './context_awareness/profiles/root_profile';
+import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
+import { DocumentProfileService } from './context_awareness/profiles/document_profile';
+import { ProfilesManager } from './context_awareness/profiles_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -270,6 +270,7 @@ export class DiscoverPlugin
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
+    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
