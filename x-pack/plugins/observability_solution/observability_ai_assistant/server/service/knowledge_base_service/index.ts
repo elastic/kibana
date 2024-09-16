@@ -54,6 +54,7 @@ function isModelMissingOrUnavailableError(error: Error) {
   );
 }
 function isCreateModelValidationError(error: Error) {
+  console.log('isCreateModelValidationError', error);
   return (
     error instanceof errors.ResponseError &&
     error.statusCode === 400 &&
@@ -123,13 +124,15 @@ export class KnowledgeBaseService {
 
     const installModelIfDoesNotExist = async () => {
       const modelInstalledAndReady = await isModelInstalledAndReady();
+      console.log('modelInstalledAndReady', modelInstalledAndReady);
       if (!modelInstalledAndReady) {
         await installModel();
       }
     };
 
     const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
+      this.dependencies.logger.info(`Installing ${elserModelId} model`);
+      console.log('installModel', elserModelId)
       try {
         await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
           {
@@ -143,17 +146,18 @@ export class KnowledgeBaseService {
         );
       } catch (error) {
         if (isCreateModelValidationError(error)) {
+          console.log('isCreateModelValidationError', error);
           throw badRequest(error);
         } else {
           throw error;
         }
       }
-      this.dependencies.logger.info('Finished installing ELSER model');
+      this.dependencies.logger.info(`Finished installing ${elserModelId} model`);
     };
 
     const pollForModelInstallCompleted = async () => {
       await pRetry(async () => {
-        this.dependencies.logger.info('Polling installation of ELSER model');
+        this.dependencies.logger.info(`Polling installation of ${elserModelId} model`);
         const modelInstalledAndReady = await isModelInstalledAndReady();
         if (!modelInstalledAndReady) {
           throwKnowledgeBaseNotReady({
@@ -171,7 +175,7 @@ export class KnowledgeBaseService {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
-      this.dependencies.logger.debug('Error starting model deployment');
+      this.dependencies.logger.debug(`Error starting ${elserModelId} model deployment`);
       this.dependencies.logger.debug(error);
       if (!isModelMissingOrUnavailableError(error)) {
         throw error;
@@ -193,13 +197,13 @@ export class KnowledgeBaseService {
         return Promise.resolve();
       }
 
-      this.dependencies.logger.debug('Model is not allocated yet');
+      this.dependencies.logger.debug(`${elserModelId} model is not allocated yet`);
       this.dependencies.logger.debug(() => JSON.stringify(response));
 
       throw gatewayTimeout();
     }, retryOptions);
 
-    this.dependencies.logger.info('Model is ready');
+    this.dependencies.logger.info(`${elserModelId} model is ready`);
     this.ensureTaskScheduled();
   };
 

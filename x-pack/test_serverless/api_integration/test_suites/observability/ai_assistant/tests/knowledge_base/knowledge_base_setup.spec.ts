@@ -20,7 +20,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192757
+    // TODO: https://github.com/elastic/kibana/issues/192886
+    // fails to delete all the .ml indices
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
