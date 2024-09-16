@@ -142,9 +142,12 @@ export const getInstalledListHandler: FleetRequestHandler<
   TypeOf<typeof GetInstalledPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
+    const savedObjectsClient = fleetContext.internalSoClient;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const res = await getInstalledPackages({
       savedObjectsClient,
+      esClient,
       ...request.query,
     });
 
