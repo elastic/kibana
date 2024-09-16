@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CrowdstrikeHostActionsParams } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { buildCrowdstrikeRoutePath, TEST_AGENT_ID, TEST_SESSION_ID } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
@@ -113,7 +112,7 @@ const rtrAdminCommandWrongCloudFileExampleError = async () => {
 // @ts-expect-error - example of invalid command error
 const rtrAdminCommandInvalidCommandError: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
-  CrowdstrikeHostActionsParams
+  {}
 > = async () => {
   return {
     meta: {
@@ -141,10 +140,7 @@ const rtrAdminCommandInvalidCommandError: ExternalEdrServerEmulatorRouteHandlerM
   };
 };
 
-const rtrAdminCommandHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
-  {},
-  CrowdstrikeHostActionsParams
-> = async () => {
+const rtrAdminCommandHandler: ExternalEdrServerEmulatorRouteHandlerMethod<{}, {}> = async () => {
   return {
     meta: {
       query_time: 0.945570286,
@@ -175,7 +171,7 @@ const rtrAdminCommandHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
 // @ts-expect-error - example of private script error
 const rtrAdminCommandCustomScriptNotFoundError: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
-  CrowdstrikeHostActionsParams
+  {}
 > = async () => {
   return {
     meta: {
@@ -208,7 +204,7 @@ const rtrAdminCommandCustomScriptNotFoundError: ExternalEdrServerEmulatorRouteHa
 // @ts-expect-error - example of error while executing put on a file that already exists on host
 const rtrCommandPutFileAlreadyExistError: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
-  CrowdstrikeHostActionsParams
+  {}
 > = async () => {
   return {
     meta: {
@@ -239,7 +235,7 @@ const rtrCommandPutFileAlreadyExistError: ExternalEdrServerEmulatorRouteHandlerM
 // @ts-expect-error - example of success response while executing put on a file
 const rtrAdminCommandPutSuccessResponse: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
-  CrowdstrikeHostActionsParams
+  {}
 > = async () => {
   return {
     meta: {

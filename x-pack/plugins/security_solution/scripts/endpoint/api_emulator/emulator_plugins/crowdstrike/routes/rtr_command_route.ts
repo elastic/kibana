@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CrowdstrikeHostActionsParams } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import {
   buildCrowdstrikeRoutePath,
   TEST_AGENT_ID,
@@ -119,10 +118,7 @@ const rtrCommandInvalidSessionError = async () => {
   };
 };
 
-const rtrCommandHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
-  {},
-  CrowdstrikeHostActionsParams
-> = async () => {
+const rtrCommandHandler: ExternalEdrServerEmulatorRouteHandlerMethod<{}, {}> = async () => {
   return {
     meta: {
       query_time: 0.274908106,

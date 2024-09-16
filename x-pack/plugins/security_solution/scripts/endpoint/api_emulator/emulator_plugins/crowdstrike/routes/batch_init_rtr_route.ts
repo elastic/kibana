@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CrowdstrikeHostActionsParams } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { buildCrowdstrikeRoutePath, TEST_AGENT_ID, TEST_BATCH_ID, TEST_SESSION_ID } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
@@ -72,7 +71,7 @@ const initSessionMissingIdsError = async () => {
 
 const batchInitSessionSuccessHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
-  CrowdstrikeHostActionsParams
+  {}
 > = async () => {
   return {
     meta: {
