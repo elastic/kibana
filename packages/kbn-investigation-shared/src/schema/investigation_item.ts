@@ -7,25 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const itemSchema = t.type({
-  title: t.string,
-  type: t.string,
-  params: t.record(t.string, t.any),
+const itemSchema = z.object({
+  title: z.string(),
+  type: z.string(),
+  params: z.record(z.string(), z.any()),
 });
 
-const investigationItemSchema = t.intersection([
-  t.type({
-    id: t.string,
-    createdAt: t.number,
-    createdBy: t.string,
+const investigationItemSchema = z.intersection(
+  z.object({
+    id: z.string(),
+    createdAt: z.number(),
+    createdBy: z.string(),
   }),
-  itemSchema,
-]);
+  itemSchema
+);
 
-type Item = t.TypeOf<typeof itemSchema>;
-type InvestigationItem = t.TypeOf<typeof investigationItemSchema>;
+type Item = z.infer<typeof itemSchema>;
+type InvestigationItem = z.infer<typeof investigationItemSchema>;
 
 export type { Item, InvestigationItem };
 export { investigationItemSchema, itemSchema };
