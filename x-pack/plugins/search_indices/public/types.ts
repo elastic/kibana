@@ -11,7 +11,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
