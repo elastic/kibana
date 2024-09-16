@@ -176,6 +176,8 @@
       "@kbn/cloud-security-posture/*": ["x-pack/packages/kbn-cloud-security-posture/*"],
       "@kbn/cloud-security-posture-common": ["x-pack/packages/kbn-cloud-security-posture-common"],
       "@kbn/cloud-security-posture-common/*": ["x-pack/packages/kbn-cloud-security-posture-common/*"],
+      "@kbn/cloud-security-posture-graph": ["x-pack/packages/kbn-cloud-security-posture/graph"],
+      "@kbn/cloud-security-posture-graph/*": ["x-pack/packages/kbn-cloud-security-posture/graph/*"],
       "@kbn/cloud-security-posture-plugin": ["x-pack/plugins/cloud_security_posture"],
       "@kbn/cloud-security-posture-plugin/*": ["x-pack/plugins/cloud_security_posture/*"],
       "@kbn/code-editor": ["packages/shared-ux/code_editor/impl"],
