@@ -23,6 +23,7 @@ import * as i18n from '../../translations';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import { FormProps } from '../schema';
+import { parseSchedule } from '../../helpers/parse_schedule';
 
 const UseField = getUseField({ component: Field });
 
@@ -44,9 +45,13 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
     ],
   });
 
+  const parsedSchedule = useMemo(() => {
+    return parseSchedule(recurringSchedule);
+  }, [recurringSchedule]);
+
   const frequencyOptions = useMemo(
-    () => CREATE_FORM_CUSTOM_FREQUENCY(recurringSchedule?.interval),
-    [recurringSchedule?.interval]
+    () => CREATE_FORM_CUSTOM_FREQUENCY(parsedSchedule?.interval),
+    [parsedSchedule?.interval]
   );
 
   const bymonthOptions = useMemo(() => {
@@ -69,7 +74,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
 
   return (
     <>
-      {recurringSchedule?.frequency !== Frequency.DAILY ? (
+      {parsedSchedule?.frequency !== Frequency.DAILY ? (
         <>
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -81,6 +86,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
                   'data-test-subj': 'interval-field',
                   id: 'interval',
                   euiFieldProps: {
+                    'data-test-subj': 'customRecurringScheduleIntervalInput',
                     min: 1,
                     prepend: (
                       <EuiFormLabel htmlFor={'interval'}>
@@ -97,6 +103,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
                 componentProps={{
                   'data-test-subj': 'custom-frequency-field',
                   euiFieldProps: {
+                    'data-test-subj': 'customRecurringScheduleFrequencySelect',
                     options: frequencyOptions,
                   },
                 }}
@@ -106,8 +113,8 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
           <EuiSpacer size="s" />
         </>
       ) : null}
-      {Number(recurringSchedule?.customFrequency) === Frequency.WEEKLY ||
-      recurringSchedule?.frequency === Frequency.DAILY ? (
+      {Number(parsedSchedule?.customFrequency) === Frequency.WEEKLY ||
+      parsedSchedule?.frequency === Frequency.DAILY ? (
         <UseField
           path="recurringSchedule.byweekday"
           config={{
@@ -131,6 +138,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
           componentProps={{
             'data-test-subj': 'byweekday-field',
             euiFieldProps: {
+              'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
               legend: 'Repeat on weekday',
               options: WEEKDAY_OPTIONS,
             },
@@ -138,7 +146,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
         />
       ) : null}
 
-      {Number(recurringSchedule?.customFrequency) === Frequency.MONTHLY ? (
+      {Number(parsedSchedule?.customFrequency) === Frequency.MONTHLY ? (
         <UseField
           path="recurringSchedule.bymonth"
           componentProps={{
