@@ -11,6 +11,7 @@ import {
   cleanScript,
 } from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateLatestIndexName } from '../helpers/generate_component_id';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function mapDestinationToPainless(field: string) {
   return `
@@ -61,6 +62,39 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
       ];
     })
     .flat();
+}
+
+function getCustomIngestPipelines(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@custom`,
+      },
+    },
+  ];
 }
 
 export function generateLatestProcessors(definition: EntityDefinition) {
@@ -160,30 +194,6 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: `${generateLatestIndexName(definition)}`,
       },
     },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@platform`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-latest@platform`,
-      },
-    },
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}@custom`,
-      },
-    },
-
-    {
-      pipeline: {
-        ignore_missing_pipeline: true,
-        name: `${definition.id}-latest@custom`,
-      },
-    },
+    ...getCustomIngestPipelines(definition),
   ];
 }

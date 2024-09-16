@@ -61,7 +61,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               return pathNameSerialized.startsWith(prepend('/app/entities'));
             },
           },
-
           {
             link: 'observability-overview:alerts',
           },

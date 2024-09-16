@@ -54,6 +54,8 @@ export type AppId =
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
+export type InventoryLinkId = 'datastreams';
+
 export type ObservabilityOverviewLinkId =
   | 'alerts'
   | 'cases'

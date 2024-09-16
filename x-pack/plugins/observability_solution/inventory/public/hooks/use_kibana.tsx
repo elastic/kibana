@@ -7,6 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { useMemo } from 'react';
 import type { InventoryStartDependencies } from '../types';
 import type { InventoryServices } from '../services/types';
 
@@ -19,13 +20,15 @@ export interface InventoryKibanaContext {
 const useTypedKibana = (): InventoryKibanaContext => {
   const context = useKibana<CoreStart & Omit<InventoryKibanaContext, 'core'>>();
 
-  const { dependencies, services, ...core } = context.services;
+  return useMemo(() => {
+    const { dependencies, services, ...core } = context.services;
 
-  return {
-    core,
-    dependencies,
-    services,
-  };
+    return {
+      core,
+      dependencies,
+      services,
+    };
+  }, [context.services]);
 };
 
 export { useTypedKibana as useKibana };

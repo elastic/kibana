@@ -1792,15 +1792,9 @@ test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-/x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
-/x-pack/plugins/ml/common/openapi             @elastic/platform-docs
-/packages/core/saved-objects/docs/openapi     @elastic/platform-docs
-/plugins/data_views/docs/openapi              @elastic/platform-docs
 oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
 oas_docs/kibana.info.yaml                     @elastic/platform-docs
-oas_docs/makefile                             @elastic/platform-docs
-oas_docs/overlays                             @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
