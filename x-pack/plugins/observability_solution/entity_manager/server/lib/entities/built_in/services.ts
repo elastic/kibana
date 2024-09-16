@@ -20,7 +20,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '1.0.2',
+    version: '1.0.3',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
@@ -46,7 +46,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
     metadata: [
       { source: '_index', destination: 'sourceIndex' },
-      { source: 'agent.name', limit: 100 },
+      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
       'data_stream.type',
       'service.environment',
       'service.name',
@@ -121,7 +121,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
+            filter: 'data_stream.type: logs',
           },
         ],
       },
