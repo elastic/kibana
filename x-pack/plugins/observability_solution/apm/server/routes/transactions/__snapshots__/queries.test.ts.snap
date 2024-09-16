@@ -40,6 +40,9 @@ Object {
     "terminate_after": 1,
     "track_total_hits": false,
   },
+  "fields": Array [
+    "*",
+  ],
 }
 `;
 
@@ -311,6 +314,11 @@ Object {
     ],
   },
   "body": Object {
+    "fields": Array [
+      "transaction.id",
+      "trace.id",
+      "@timestamp",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
