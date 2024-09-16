@@ -51,6 +51,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     elasticStackGetStarted: isServerless
       ? `${SERVERLESS_DOCS}`
       : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
+    apiReference: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -218,6 +219,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchApplicationsSearch: `${ELASTICSEARCH_DOCS}search-application-client.html`,
       searchLabs: `${SEARCH_LABS_URL}`,
       searchLabsRepo: `${SEARCH_LABS_REPO}`,
+      semanticSearch: `${ELASTICSEARCH_DOCS}semantic-search.html`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       semanticTextField: `${ELASTICSEARCH_DOCS}semantic-text.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
@@ -563,6 +565,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
+      logsAnomalyDetectionConfigs: `${MACHINE_LEARNING_DOCS}ootb-ml-jobs-logs-ui.html`,
+      metricsAnomalyDetectionConfigs: `${MACHINE_LEARNING_DOCS}ootb-ml-jobs-metrics-ui.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
       nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,

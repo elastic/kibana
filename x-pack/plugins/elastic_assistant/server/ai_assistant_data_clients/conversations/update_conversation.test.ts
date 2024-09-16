@@ -134,10 +134,6 @@ describe('transformToUpdateScheme', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('it returns a transformed conversation with converted string datetime to ISO from the client', async () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
     const existingConversation = getConversationResponseMock();
@@ -194,6 +190,45 @@ describe('transformToUpdateScheme', () => {
           is_error: undefined,
           reader: undefined,
           role: 'user',
+        },
+      ],
+    };
+    expect(transformed).toEqual(expected);
+  });
+  test('it does not pass api_config if apiConfig is not updated', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
+    const updateAt = new Date().toISOString();
+    const transformed = transformToUpdateScheme(updateAt, {
+      id: conversation.id,
+      messages: [
+        {
+          content: 'Message 3',
+          role: 'user',
+          timestamp: '2011-10-05T14:48:00.000Z',
+          traceData: {
+            traceId: 'something',
+            transactionId: 'something',
+          },
+        },
+      ],
+    });
+    const expected: UpdateConversationSchema = {
+      id: conversation.id,
+      updated_at: updateAt,
+      messages: [
+        {
+          '@timestamp': '2011-10-05T14:48:00.000Z',
+          content: 'Message 3',
+          is_error: undefined,
+          reader: undefined,
+          role: 'user',
+          trace_data: {
+            trace_id: 'something',
+            transaction_id: 'something',
+          },
         },
       ],
     };
