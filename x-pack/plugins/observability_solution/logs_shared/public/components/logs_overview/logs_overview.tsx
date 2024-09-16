@@ -9,6 +9,7 @@ import { OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID } from '@kbn/management-
 import type {
   LogsOverviewProps as FullLogsOverviewProps,
   LogsOverviewDependencies,
+  LogsOverviewErrorContentProps,
 } from '@kbn/observability-logs-overview';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
@@ -32,7 +33,20 @@ const LazyLogsOverviewLoadingContent = dynamic(() =>
 
 export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies'>;
 
-export const createLogsOverview = (dependencies: LogsOverviewDependencies) => {
+export interface SelfContainedLogsOverviewHelpers {
+  useIsEnabled: () => boolean;
+  ErrorContent: React.ComponentType<LogsOverviewErrorContentProps>;
+  LoadingContent: React.ComponentType;
+}
+
+export type SelfContainedLogsOverviewComponent = React.ComponentType<LogsOverviewProps>;
+
+export type SelfContainedLogsOverview = SelfContainedLogsOverviewComponent &
+  SelfContainedLogsOverviewHelpers;
+
+export const createLogsOverview = (
+  dependencies: LogsOverviewDependencies
+): SelfContainedLogsOverview => {
   const SelfContainedLogsOverview = (props: LogsOverviewProps) => {
     return <LazyLogsOverview dependencies={dependencies} {...props} />;
   };
@@ -54,5 +68,3 @@ export const createLogsOverview = (dependencies: LogsOverviewDependencies) => {
 };
 
 const defaultIsEnabled = false;
-
-export type SelfContainedLogsOverview = ReturnType<typeof createLogsOverview>;
