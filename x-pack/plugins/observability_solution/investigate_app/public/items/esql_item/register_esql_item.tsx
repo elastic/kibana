@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
@@ -123,6 +122,7 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     [dataView, lens, dateHistogramResults]
   );
 
+  // in the case of a lnsDatatable, we want to render the preview of the histogram and not the datable (input) itself
   if (input.attributes.visualizationType === 'lnsDatatable') {
     let innerElement: React.ReactElement;
     if (previewInput.error) {
@@ -131,6 +131,7 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
       innerElement = (
         <lens.EmbeddableComponent
           {...previewInput.value}
+          style={{ height: 128 }}
           overrides={{
             axisX: { hide: true },
             axisLeft: { style: { axisTitle: { visible: false } } },
@@ -141,20 +142,8 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     } else {
       innerElement = <EuiLoadingSpinner size="s" />;
     }
-    return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem
-          grow={false}
-          className={css`
-            > div {
-              height: 128px;
-            }
-          `}
-        >
-          {innerElement}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+
+    return <EuiFlexItem grow={true}>{innerElement}</EuiFlexItem>;
   }
 
   return (
