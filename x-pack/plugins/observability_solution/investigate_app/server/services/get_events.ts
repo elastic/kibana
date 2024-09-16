@@ -13,6 +13,7 @@ import {
   GetEventsResponse,
   getEventsResponseSchema,
 } from '@kbn/investigation-shared';
+import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { ScopedAnnotationsClient, unwrapEsResponse } from '@kbn/observability-plugin/server';
 import {
   ALERT_REASON,
@@ -21,6 +22,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { AlertsClient } from './get_alerts_client';
 
 export function rangeQuery(
   start: number,
@@ -74,31 +76,33 @@ export async function getAnnotationEvents(
       )
     );
 
-    const events = response.hits.hits.map((hit) => {
-      const _source = hit._source as any;
-      const hostName = _source.host?.name;
-      const serviceName = _source.service?.name;
-      const serviceVersion = _source.service?.version;
-      const sloId = _source.slo?.id;
-      const sloInstanceId = _source.slo?.instanceId;
+    // we will return only "point_in_time" annotations
+    const events = response.hits.hits
+      .filter((hit) => !(hit._source as Annotation).event?.end)
+      .map((hit) => {
+        const _source = hit._source as Annotation;
+        const hostName = _source.host?.name;
+        const serviceName = _source.service?.name;
+        const serviceVersion = _source.service?.version;
+        const sloId = _source.slo?.id;
+        const sloInstanceId = _source.slo?.instanceId;
 
-      return {
-        id: hit._id as string,
-        title: _source.annotation.title,
-        description: _source.message,
-        timestamp: new Date(_source['@timestamp']).getTime(),
-        eventType: 'annotation' as const,
-        annotationType: _source.annotation.type,
-        annotationEnd: _source.event.end,
-        source: {
-          ...(hostName ? { 'host.name': hostName } : undefined),
-          ...(serviceName ? { 'service.name': serviceName } : undefined),
-          ...(serviceVersion ? { 'service.version': serviceVersion } : undefined),
-          ...(sloId ? { 'slo.id': sloId } : undefined),
-          ...(sloInstanceId ? { 'slo.instanceId': sloInstanceId } : undefined),
-        },
-      };
-    });
+        return {
+          id: hit._id,
+          title: _source.annotation.title,
+          description: _source.message,
+          timestamp: new Date(_source['@timestamp']).getTime(),
+          eventType: 'annotation',
+          annotationType: _source.annotation.type,
+          source: {
+            ...(hostName ? { 'host.name': hostName } : undefined),
+            ...(serviceName ? { 'service.name': serviceName } : undefined),
+            ...(serviceVersion ? { 'service.version': serviceVersion } : undefined),
+            ...(sloId ? { 'slo.id': sloId } : undefined),
+            ...(sloInstanceId ? { 'slo.instanceId': sloInstanceId } : undefined),
+          },
+        };
+      });
 
     return getEventsResponseSchema.parse(events);
   } catch (error) {
@@ -110,7 +114,7 @@ export async function getAnnotationEvents(
 
 export async function getAlertEvents(
   params: GetEventsParams,
-  alertsClient: any
+  alertsClient: AlertsClient
 ): Promise<GetEventsResponse> {
   const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
   const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
@@ -133,8 +137,8 @@ export async function getAlertEvents(
 
   const response = await alertsClient.search(body);
 
-  const events = response.hits.hits.map((hit: any) => {
-    const _source = hit._source as any;
+  const events = response.hits.hits.map((hit) => {
+    const _source = hit._source;
 
     return {
       id: _source[ALERT_UUID],

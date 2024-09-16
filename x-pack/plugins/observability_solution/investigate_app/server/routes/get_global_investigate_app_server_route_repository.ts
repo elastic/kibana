@@ -40,7 +40,7 @@ import { updateInvestigationNote } from '../services/update_investigation_note';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigation } from '../services/update_investigation';
 import { getAlertEvents, getAnnotationEvents } from '../services/get_events';
-import { getAlertsClient } from '../services/get_alerts_client';
+import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -297,7 +297,7 @@ const getEventsRoute = createInvestigateAppServerRoute({
     const esClient: ElasticsearchClient = (await context.core).elasticsearch.client.asCurrentUser;
     const annotationsClient: ScopedAnnotationsClient | undefined =
       await plugins.observability.setup.getScopedAnnotationsClient(context, request);
-    const alertsClient = await getAlertsClient({ plugins, request });
+    const alertsClient: AlertsClient = await getAlertsClient({ plugins, request });
     const events: GetEventsResponse = [];
 
     if (annotationsClient) {

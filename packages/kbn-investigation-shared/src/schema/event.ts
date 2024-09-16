@@ -20,7 +20,6 @@ const eventTypeSchema = z.union([
 const annotationEventSchema = z.object({
   eventType: z.literal('annotation'),
   annotationType: z.union([z.string(), z.undefined()]),
-  annotationEnd: z.union([z.string(), z.undefined()]),
 });
 
 const alertStatusSchema = z.union([
