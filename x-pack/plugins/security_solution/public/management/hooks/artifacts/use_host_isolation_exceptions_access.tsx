@@ -12,25 +12,32 @@ import type { ExceptionsListApiClient } from '../../services/exceptions_list/exc
 export const useHostIsolationExceptionsAccess = (
   canAccessHostIsolationExceptions: boolean,
   canReadHostIsolationExceptions: boolean,
-  apiClient: () => ExceptionsListApiClient
-) => {
+  getApiClient: () => ExceptionsListApiClient
+): {
+  hasAccessToHostIsolationExceptions: boolean;
+  isHostIsolationExceptionsAccessLoading: boolean;
+} => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     (async () => {
-      // canAccessHostIsolationExceptions is a paid feature, so the tab should always be displayed.
-      // canReadHostIsolationExceptions, however, is not a paid feature, which allows users to view and delete exceptions in case of a downgrade.
+      // Host isolation exceptions is a paid feature and therefore:
+      // canAccessHostIsolationExceptions signifies if the user has required license to access the feature.
+      // canReadHostIsolationExceptions, however, is a privilege that allows the user to read and delete the data even if the license is not sufficient (downgrade scenario).
       // In such cases, the tab should be visible only if there is existing data.
       if (canAccessHostIsolationExceptions) {
         setHasAccess(true);
       } else if (canReadHostIsolationExceptions) {
-        const result = await checkArtifactHasData(apiClient());
+        const result = await checkArtifactHasData(getApiClient());
         setHasAccess(result);
       } else {
         setHasAccess(false);
       }
     })();
-  }, [canAccessHostIsolationExceptions, canReadHostIsolationExceptions, apiClient]);
+  }, [canAccessHostIsolationExceptions, canReadHostIsolationExceptions, getApiClient]);
 
-  return hasAccess;
+  return {
+    hasAccessToHostIsolationExceptions: !!hasAccess,
+    isHostIsolationExceptionsAccessLoading: hasAccess === null,
+  };
 };

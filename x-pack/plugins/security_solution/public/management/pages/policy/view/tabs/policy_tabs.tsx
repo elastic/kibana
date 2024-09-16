@@ -124,7 +124,7 @@ export const PolicyTabs = React.memo(() => {
     canWriteHostIsolationExceptions,
     canReadBlocklist,
     canWriteBlocklist,
-    loading: privilegesLoading,
+    loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
@@ -139,24 +139,23 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
-  const hasAccessToHostIsolationExceptions = useHostIsolationExceptionsAccess(
-    canAccessHostIsolationExceptions,
-    canReadHostIsolationExceptions,
-    getHostIsolationExceptionsApiClientInstance
-  );
-
-  const hostIsolationExceptionsAccessLoading = hasAccessToHostIsolationExceptions === null;
+  const { hasAccessToHostIsolationExceptions, isHostIsolationExceptionsAccessLoading } =
+    useHostIsolationExceptionsAccess(
+      canAccessHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      getHostIsolationExceptionsApiClientInstance
+    );
 
   // move the user out of this route if they can't access it
   useEffect(() => {
-    if (hostIsolationExceptionsAccessLoading) {
+    if (isHostIsolationExceptionsAccessLoading || isPrivilegesLoading) {
       return;
     }
 
     const redirectHostIsolationException =
       isInHostIsolationExceptionsTab &&
       (!canReadHostIsolationExceptions ||
-        (!hostIsolationExceptionsAccessLoading && !hasAccessToHostIsolationExceptions));
+        (!isHostIsolationExceptionsAccessLoading && !hasAccessToHostIsolationExceptions));
 
     if (
       (isInTrustedAppsTab && !canReadTrustedApplications) ||
@@ -179,12 +178,13 @@ export const PolicyTabs = React.memo(() => {
     canReadTrustedApplications,
     hasAccessToHostIsolationExceptions,
     history,
-    hostIsolationExceptionsAccessLoading,
+    isHostIsolationExceptionsAccessLoading,
     isInBlocklistsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInProtectionUpdatesTab,
     isInTrustedAppsTab,
+    isPrivilegesLoading,
     policyId,
     toasts,
   ]);
@@ -507,7 +507,7 @@ export const PolicyTabs = React.memo(() => {
   }, [changeTab, unsavedChangesModal.nextTab]);
 
   // show loader for privileges validation
-  if (privilegesLoading || hostIsolationExceptionsAccessLoading) {
+  if (isPrivilegesLoading || isHostIsolationExceptionsAccessLoading) {
     return <ManagementPageLoader data-test-subj="privilegesLoading" />;
   }
 
