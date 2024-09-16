@@ -37,6 +37,10 @@ export function withSpaceSolutionDisabledFeatures(
   spaceDisabledFeatures: string[] = [],
   spaceSolution: SolutionView = 'classic'
 ): string[] {
+  if (spaceSolution === 'classic') {
+    return spaceDisabledFeatures;
+  }
+
   let disabledFeatureKeysFromSolution: string[] = [];
 
   if (spaceSolution === 'es') {
@@ -56,5 +60,5 @@ export function withSpaceSolutionDisabledFeatures(
     ]);
   }
 
-  return Array.from(new Set([...spaceDisabledFeatures, ...disabledFeatureKeysFromSolution]));
+  return Array.from(new Set([...disabledFeatureKeysFromSolution]));
 }

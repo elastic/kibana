@@ -12,9 +12,20 @@ const features = [
   { id: 'feature1', category: { id: 'observability' } },
   { id: 'feature2', category: { id: 'enterpriseSearch' } },
   { id: 'feature3', category: { id: 'securitySolution' } },
+  { id: 'feature4', category: { id: 'should_not_be_returned' } }, // not a solution, it should never appeared in the disabled features
 ] as KibanaFeature[];
 
 describe('#withSpaceSolutionDisabledFeatures', () => {
+  describe('when the space solution is not set (undefined)', () => {
+    test('it does not remove any features', () => {
+      const spaceDisabledFeatures: string[] = ['foo'];
+
+      const result = withSpaceSolutionDisabledFeatures(features, spaceDisabledFeatures);
+
+      expect(result).toEqual(['foo']);
+    });
+  });
+
   describe('when the space solution is "classic"', () => {
     test('it does not remove any features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
@@ -42,7 +53,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
       );
 
       // merges the spaceDisabledFeatures with the disabledFeatureKeysFromSolution
-      expect(result).toEqual(['foo', 'feature1', 'feature3']);
+      expect(result).toEqual(['feature1', 'feature3']); // "foo" from the spaceDisabledFeatures should not be removed
     });
   });
 
@@ -72,7 +83,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['baz', 'feature1', 'feature2']);
+      expect(result).toEqual(['feature1', 'feature2']); // "baz" from the spaceDisabledFeatures should not be removed
     });
   });
 });
