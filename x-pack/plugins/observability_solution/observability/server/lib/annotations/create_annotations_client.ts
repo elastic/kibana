@@ -264,7 +264,7 @@ export function createAnnotationsClient(params: {
                   },
                 },
               },
-              ...(filterJSON
+              ...(Object.keys(filterJSON).length !== 0
                 ? termsFilter
                 : [
                     {
