@@ -37,7 +37,7 @@ export const getStatusCodeDecorations = (data: RequestResult[]) => {
         startLineNumber: lastResponseEndLine + 1,
         startColumn: 1,
         endLineNumber: lastResponseEndLine + 1,
-        endColumn: 100,
+        endColumn: 1, // It doesn't matter what endColumn we set as the decoration will be applied to the whole line
       };
       const classNameSuffix = getStatusCodeClassNameSuffix(response.statusCode);
       decorations.push({
