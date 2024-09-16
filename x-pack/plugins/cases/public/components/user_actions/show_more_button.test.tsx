@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShowMoreButton } from './show_more_button';
 import type { AppMockRenderer } from '../../common/mock';
@@ -20,6 +20,11 @@ describe('ShowMoreButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+    cleanup();
   });
 
   it('renders correctly', () => {
@@ -38,10 +43,12 @@ describe('ShowMoreButton', () => {
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
+  // double act error
   it('calls onShowMoreClick on button click', async () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
-    await userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
+    const el = screen.getByTestId('cases-show-more-user-actions');
+    await userEvent.click(el);
     expect(showMoreClickMock).toHaveBeenCalled();
   });
 });

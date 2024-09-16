@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
-import { waitFor } from '@testing-library/react';
+import { waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
@@ -27,8 +27,10 @@ describe('FilterPopover ', () => {
 
   afterEach(async () => {
     await appMockRender.clearQueryCache();
+    cleanup();
   });
 
+  // double act error
   it('renders button label correctly', async () => {
     appMockRender.render(
       <FilterPopover

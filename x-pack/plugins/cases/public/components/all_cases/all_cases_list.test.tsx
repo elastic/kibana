@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
-import { render, waitFor, screen, within } from '@testing-library/react';
+import { render, waitFor, screen, within, cleanup } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -176,8 +176,10 @@ describe('AllCasesListGeneric', () => {
     window.localStorage.clear();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     moment.tz.setDefault('Browser');
+    cleanup();
+    await appMockRenderer.clearQueryCache();
   });
 
   it('should render AllCasesList', async () => {
@@ -949,6 +951,7 @@ describe('AllCasesListGeneric', () => {
         expect(screen.queryAllByTestId('case-table-column-assignee').length).toBe(0);
       });
 
+      // double act error
       it('should show the assignees column on platinum license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
 
