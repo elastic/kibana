@@ -28,11 +28,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ControlStyle, ParentIgnoreSettings } from '../../..';
+import { ControlStyle } from '../../..';
 
 import { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupApi, ControlGroupEditorState } from '../types';
+import { ParentIgnoreSettings } from '../../../../common';
 
 const CONTROL_LAYOUT_OPTIONS = [
   {

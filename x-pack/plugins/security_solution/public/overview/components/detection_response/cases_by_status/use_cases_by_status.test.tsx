@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -63,12 +64,12 @@ describe('useCasesByStatus', () => {
     jest.clearAllMocks();
   });
   test('init', () => {
-    const { result } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
-      () => useCasesByStatus({}),
-      {
-        wrapper: TestProviders,
-      }
-    );
+    const { result } = renderHook<
+      PropsWithChildren<UseCasesByStatusProps>,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus({}), {
+      wrapper: TestProviders,
+    });
     expect(result.current).toEqual({
       closed: 0,
       inProgress: 0,
@@ -81,7 +82,7 @@ describe('useCasesByStatus', () => {
 
   test('fetch data', async () => {
     const { result, waitForNextUpdate } = renderHook<
-      UseCasesByStatusProps,
+      PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
@@ -98,19 +99,19 @@ describe('useCasesByStatus', () => {
   });
 
   test('it should call setQuery when fetching', async () => {
-    const { waitForNextUpdate } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
-      () => useCasesByStatus({ skip: false }),
-      {
-        wrapper: TestProviders,
-      }
-    );
+    const { waitForNextUpdate } = renderHook<
+      PropsWithChildren<UseCasesByStatusProps>,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus({ skip: false }), {
+      wrapper: TestProviders,
+    });
     await waitForNextUpdate();
     expect(mockSetQuery).toHaveBeenCalled();
   });
 
   test('it should call deleteQuery when unmounting', async () => {
     const { waitForNextUpdate, unmount } = renderHook<
-      UseCasesByStatusProps,
+      PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
@@ -127,7 +128,7 @@ describe('useCasesByStatus', () => {
     const localProps = { skip: false };
 
     const { rerender, waitForNextUpdate } = renderHook<
-      UseCasesByStatusProps,
+      PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus(localProps), {
       wrapper: TestProviders,

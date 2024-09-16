@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -39,13 +39,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async function () {
@@ -211,8 +211,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can copy columns for selected rows as text', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
       });
