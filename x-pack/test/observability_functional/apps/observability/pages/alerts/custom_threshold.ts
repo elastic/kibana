@@ -100,12 +100,20 @@ export default ({ getService }: FtrProviderContext) => {
       const input1 = await find.byCssSelector('[data-test-subj="aggregationField"] input');
       await input1.type('metricset.rtt');
       await testSubjects.click('o11yClosablePopoverTitleButton');
+      await retry.waitFor('first aggregation to happen', async () => {
+        const aggregationNameA = await testSubjects.find('aggregationNameA');
+        return (await aggregationNameA.getVisibleText()) === 'AVERAGE\nmetricset.rtt';
+      });
 
       // set second aggregation
       await testSubjects.click('thresholdRuleCustomEquationEditorAddAggregationFieldButton');
       await testSubjects.click('aggregationNameB');
       await testSubjects.setValue('o11ySearchField', 'service.name : "opbeans-node"');
       await testSubjects.click('o11yClosablePopoverTitleButton');
+      await retry.waitFor('first aggregation to happen', async () => {
+        const aggregationNameB = await testSubjects.find('aggregationNameB');
+        return (await aggregationNameB.getVisibleText()) === 'COUNT\nservice.name : "opbeans-node"';
+      });
     });
 
     it('can set custom equation', async () => {

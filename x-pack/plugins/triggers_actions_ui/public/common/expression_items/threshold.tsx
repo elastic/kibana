@@ -124,7 +124,7 @@ export const ThresholdExpression = ({
           onClose={() => setAlertThresholdPopoverOpen(false)}
           dataTestSubj="thresholdPopoverTitle"
         >
-          {comparators[comparator].text}
+          <>{comparators[comparator].text}</>
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

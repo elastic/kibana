@@ -21,7 +21,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   const clickCreateRuleButton = async () => {
     await testSubjects.existOrFail('createRuleButton');
     const createRuleButton = await testSubjects.find('createRuleButton');
-    return createRuleButton.click();
+    return await createRuleButton.click();
   };
 
   const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusDropdown');
