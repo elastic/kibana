@@ -53,10 +53,12 @@ export class DashboardPanelActionsService extends FtrService {
     if (!wrapper) wrapper = await this.getPanelWrapper();
     const yOffset = (await wrapper.getPosition()).y;
     if (yOffset > DASHBOARD_TOP_OFFSET) {
-      await wrapper.scrollIntoView({ block: 'start' });
-      await this.browser.execute(`window.scrollBy(0, ${DASHBOARD_TOP_OFFSET});`);
+      await this.browser.execute(`
+        const scrollY = window.scrollY;
+        window.scrollBy(0, scrollY - ${yOffset});
+      `);
     }
-    await wrapper.moveMouseTo({ xOffset: DASHBOARD_MARGIN_SIZE, yOffset: DASHBOARD_MARGIN_SIZE });
+    await wrapper.moveMouseTo();
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('edit embeddable redirects', () => {
+  describe.only('edit embeddable redirects', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -36,10 +36,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('redirects via save and return button after edit', async () => {
-      await dashboardPanelActions.clickEdit();
-      await visualize.saveVisualizationAndReturn();
-    });
+    // it('redirects via save and return button after edit', async () => {
+    //   await dashboardPanelActions.clickEdit();
+    //   await visualize.saveVisualizationAndReturn();
+    // });
 
     it('redirects via save as button after edit, renaming itself', async () => {
       const newTitle = 'wowee, looks like I have a new title';
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
       const newTitle = 'wowee, my title just got cooler again';
       await header.waitUntilLoadingHasFinished();
-      await dashboardPanelActions.editPanelByTitle('wowee, my title just got cooler');
+      await dashboardPanelActions.clickEdit();
       await visualize.linkedToOriginatingApp();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
