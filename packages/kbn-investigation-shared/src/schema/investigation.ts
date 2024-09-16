@@ -25,6 +25,7 @@ const investigationSchema = z.object({
   title: z.string(),
   createdAt: z.number(),
   createdBy: z.string(),
+  updatedAt: z.number(),
   params: z.object({
     timeRange: z.object({ from: z.number(), to: z.number() }),
   }),
