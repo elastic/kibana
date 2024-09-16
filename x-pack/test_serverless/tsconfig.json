@@ -97,5 +97,8 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/test-suites-src",
     "@kbn/console-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-saved-objects-import-export-server-internal",
   ]
 }

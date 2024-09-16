@@ -15,7 +15,7 @@ import {
   getMarkdownTable,
   getTabCountsMarkdownComment,
   getSummaryTableMarkdownComment,
-} from '../../../markdown/helpers';
+} from '../../utils/markdown';
 import * as i18n from '../../../translations';
 import type {
   CustomFieldMetadata,

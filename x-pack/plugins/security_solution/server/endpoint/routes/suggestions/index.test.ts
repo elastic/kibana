@@ -18,7 +18,7 @@ import type {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import type { Observable } from 'rxjs';
 import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';

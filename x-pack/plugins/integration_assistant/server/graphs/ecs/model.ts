@@ -4,17 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EcsMappingState } from '../../types';
 import { prefixSamples } from '../../util/samples';
+import { mergeAndChunkSamples } from './chunk';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
-import { mergeAndChunkSamples } from './chunk';
-import type { EcsMappingState } from '../../types';
 import type { EcsBaseNodeParams } from './types';
 
 export function modelSubOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
   return {
-    lastExecutedChain: 'ModelSubOutput',
-    finalMapping: state.currentMapping,
+    lastExecutedChain: 'modelSubOutput',
+    chunkMapping: state.currentMapping,
+  };
+}
+
+export function modelMergedInputFromSubGraph({
+  state,
+}: EcsBaseNodeParams): Partial<EcsMappingState> {
+  return {
+    lastExecutedChain: 'modelMergedInputFromSubGraph',
+    useFinalMapping: true,
+    finalMapping: state.chunkMapping,
   };
 }
 

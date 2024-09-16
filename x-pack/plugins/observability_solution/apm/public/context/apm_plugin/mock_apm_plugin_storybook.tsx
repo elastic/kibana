@@ -120,13 +120,53 @@ const mockCore = {
     get: (key: string) => uiSettings[key],
     get$: (key: string) => of(mockCore.uiSettings.get(key)),
   },
+  unifiedSearch: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve(false),
+      getQuerySuggestions: () => [],
+      getValueSuggestions: () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([]);
+          }, 300);
+        }),
+    },
+  },
+  data: {
+    query: {
+      queryString: { getQuery: jest.fn(), setQuery: jest.fn(), clearQuery: jest.fn() },
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          setRefreshInterval: jest.fn(),
+        },
+      },
+    },
+  },
+  dataViews: {
+    create: jest.fn(),
+  },
+};
+
+const mockUnifiedSearchBar = {
+  ui: {
+    SearchBar: () => <div />,
+  },
 };
 
 const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
   },
 } as unknown as ApmPluginContextValue;
 

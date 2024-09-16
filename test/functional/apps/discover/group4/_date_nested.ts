@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
@@ -21,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/date_nested.json'
       );
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function unloadMakelogs() {
@@ -31,9 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show an error message', async function () {
-      await PageObjects.discover.selectIndexPattern('date-nested');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.showsErrorCallout();
+      await discover.selectIndexPattern('date-nested');
+      await discover.waitUntilSearchingHasFinished();
+      await discover.showsErrorCallout();
     });
   });
 }

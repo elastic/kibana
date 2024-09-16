@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { JsonTab } from '../../../document_details/right/tabs/json_tab';
 import { TableTab } from '../../../document_details/right/tabs/table_tab';
 import { FLYOUT_BODY_TEST_ID, JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
-import { FlyoutBody } from '../../../shared/components/flyout_body';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
 export interface AssetDocumentPanelProps extends FlyoutPanelProps {

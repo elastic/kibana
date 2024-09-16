@@ -51,7 +51,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   }, []);
 
   const openLogEntryFlyout = useCallback(
-    (logEntryId) => {
+    (logEntryId: string | null | undefined) => {
       const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
         http,
         data,

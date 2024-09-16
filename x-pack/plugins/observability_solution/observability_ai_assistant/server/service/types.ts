@@ -32,11 +32,11 @@ export type ChatFunction = (
   params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
 ) => Observable<ChatEvent>;
 
-export type ChatFunctionWithoutConnector = (
+export type AutoAbortedChatFunction = (
   name: string,
   params: Omit<
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
-    'connectorId' | 'simulateFunctionCalling' | 'signal'
+    'simulateFunctionCalling' | 'signal'
   >
 ) => Observable<ChatEvent>;
 
@@ -54,6 +54,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     messages: Message[];
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
+    connectorId: string;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;

@@ -6,24 +6,46 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_DEFAULT_METADATA_LIMIT } from '../../../../common/constants_entities';
+import { calculateOffset } from '../helpers/calculate_offset';
 
 export function generateHistoryMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
     return {};
   }
-  return definition.metadata.reduce(
-    (aggs, metadata) => ({
-      ...aggs,
-      [`entity.metadata.${metadata.destination ?? metadata.source}`]: {
+  return definition.metadata.reduce((aggs, metadata) => {
+    let agg;
+    if (metadata.aggregation.type === 'terms') {
+      agg = {
         terms: {
           field: metadata.source,
-          size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
+          size: metadata.aggregation.limit,
         },
-      },
-    }),
-    {}
-  );
+      };
+    } else if (metadata.aggregation.type === 'top_value') {
+      agg = {
+        filter: {
+          exists: {
+            field: metadata.source,
+          },
+        },
+        aggs: {
+          top_value: {
+            top_metrics: {
+              metrics: {
+                field: metadata.source,
+              },
+              sort: metadata.aggregation.sort,
+            },
+          },
+        },
+      };
+    }
+
+    return {
+      ...aggs,
+      [`entity.metadata.${metadata.destination}`]: agg,
+    };
+  }, {});
 }
 
 export function generateLatestMetadataAggregations(definition: EntityDefinition) {
@@ -31,27 +53,64 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
     return {};
   }
 
-  return definition.metadata.reduce(
-    (aggs, metadata) => ({
-      ...aggs,
-      [`entity.metadata.${metadata.destination}`]: {
+  const offsetInSeconds = `${calculateOffset(definition)}s`;
+
+  return definition.metadata.reduce((aggs, metadata) => {
+    let agg;
+    if (metadata.aggregation.type === 'terms') {
+      agg = {
         filter: {
           range: {
             '@timestamp': {
-              gte: `now-${definition.history.interval}`,
+              gte: `now-${offsetInSeconds}`,
             },
           },
         },
         aggs: {
           data: {
             terms: {
-              field: metadata.destination ?? metadata.source,
-              size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
+              field: metadata.destination,
+              size: metadata.aggregation.limit,
             },
           },
         },
-      },
-    }),
-    {}
-  );
+      };
+    } else if (metadata.aggregation.type === 'top_value') {
+      agg = {
+        filter: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${metadata.aggregation.lookbackPeriod ?? offsetInSeconds}`,
+                  },
+                },
+              },
+              {
+                exists: {
+                  field: metadata.destination,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          top_value: {
+            top_metrics: {
+              metrics: {
+                field: metadata.destination,
+              },
+              sort: metadata.aggregation.sort,
+            },
+          },
+        },
+      };
+    }
+
+    return {
+      ...aggs,
+      [`entity.metadata.${metadata.destination}`]: agg,
+    };
+  }, {});
 }

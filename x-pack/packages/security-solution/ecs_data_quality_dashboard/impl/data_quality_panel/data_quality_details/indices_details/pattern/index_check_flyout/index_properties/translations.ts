@@ -110,13 +110,6 @@ export const CUSTOM_DETECTION_ENGINE_RULES_WORK = i18n.translate(
   }
 );
 
-export const DOCS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.docsLabel',
-  {
-    defaultMessage: 'Docs',
-  }
-);
-
 export const ECS_COMPLIANT_FIELDS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.ecsCompliantFieldsLabel',
   {
@@ -330,13 +323,6 @@ export const CUSTOM_EMPTY_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.customEmptyTitle',
   {
     defaultMessage: 'All field mappings defined by ECS',
-  }
-);
-
-export const INCOMPATIBLE_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleFieldsTab',
-  {
-    defaultMessage: 'Incompatible fields',
   }
 );
 

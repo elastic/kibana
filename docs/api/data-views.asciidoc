@@ -8,5 +8,3 @@ For the latest details, refer to {api-kibana}/group/endpoint-data-views[data vie
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-WARNING: Use the data views APIs for managing data views instead of lower-level <<saved-objects-api, saved objects API>>.
-

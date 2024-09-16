@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiCode } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from '../../../../data_quality_summary/summary_actions/check_status/errors_popover/translations';
+import * as i18n from '../../../../translations';
 
 interface Props {
   title: string;

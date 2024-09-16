@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const esqlItemSchema = t.type({
-  title: t.string,
-  type: t.literal('esql'),
-  params: t.type({
-    esql: t.string,
-    suggestion: t.any,
-  }),
+const itemSchema = z.object({
+  title: z.string(),
+  type: z.string(),
+  params: z.record(z.string(), z.any()),
 });
 
-const investigationItemsSchema = esqlItemSchema; // replace with union with various item types
+const investigationItemSchema = z.intersection(
+  z.object({
+    id: z.string(),
+    createdAt: z.number(),
+    createdBy: z.string(),
+  }),
+  itemSchema
+);
 
-const investigationItemSchema = t.intersection([
-  t.type({ id: t.string, createdAt: t.number, createdBy: t.string }),
-  investigationItemsSchema,
-]);
+type Item = z.infer<typeof itemSchema>;
+type InvestigationItem = z.infer<typeof investigationItemSchema>;
 
-export { investigationItemSchema, investigationItemsSchema, esqlItemSchema };
+export type { Item, InvestigationItem };
+export { investigationItemSchema, itemSchema };

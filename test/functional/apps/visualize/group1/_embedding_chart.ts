@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const embedding = getService('embedding');
   const retry = getService('retry');
-  const PageObjects = getPageObjects([
+  const { visualize, visEditor, visChart, header, timePicker } = getPageObjects([
     'visualize',
     'visEditor',
     'visChart',
@@ -26,27 +27,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('embedding', () => {
     describe('a data table', () => {
       before(async function () {
-        await PageObjects.visualize.initTests();
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Date Histogram');
-        await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Histogram');
-        await PageObjects.visEditor.selectField('bytes');
-        await PageObjects.visEditor.setInterval('2000', { type: 'numeric', aggNth: 3 });
-        await PageObjects.visEditor.clickGo();
+        await visualize.initTests();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch();
+        await timePicker.setDefaultAbsoluteRange();
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Date Histogram');
+        await visEditor.selectField('@timestamp');
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Histogram');
+        await visEditor.selectField('bytes');
+        await visEditor.setInterval('2000', { type: 'numeric', aggNth: 3 });
+        await visEditor.clickGo();
       });
 
       it('should allow opening table vis in embedded mode', async () => {
         await embedding.openInEmbeddedMode();
         await renderable.waitForRender();
 
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['2015-09-20 00:00', '0B', '5'],
           ['2015-09-20 00:00', '1.953KB', '5'],
@@ -67,10 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           operation: 'is between',
           value: { from: '2015-09-21', to: '2015-09-23' },
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
 
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['2015-09-21 00:00', '0B', '7'],
           ['2015-09-21 00:00', '1.953KB', '9'],
@@ -87,11 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
         await retry.try(async () => {
-          await PageObjects.visChart.filterOnTableCell(0, 6);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await visChart.filterOnTableCell(0, 6);
+          await header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
 
-          const data = await PageObjects.visChart.getTableVisContent();
+          const data = await visChart.getTableVisContent();
           expect(data).to.be.eql([
             ['03:00', '0B', '1'],
             ['03:00', '1.953KB', '1'],

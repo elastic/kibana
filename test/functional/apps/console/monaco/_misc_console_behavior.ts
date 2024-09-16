@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -91,7 +93,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.monaco.getCurrentLineNumber()).to.be(4);
       });
 
-      describe('open documentation', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/190321
+      describe.skip('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {

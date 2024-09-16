@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { EnableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
@@ -38,6 +39,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
   API_VERSIONS,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -101,6 +103,15 @@ export const useEntityAnalyticsRoutes = () => {
     const disableRiskEngine = () =>
       http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
         version: '1',
+        method: 'POST',
+      });
+
+    /**
+     * Enable risk score engine
+     */
+    const scheduleNowRiskEngine = () =>
+      http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
+        version: API_VERSIONS.public.v1,
         method: 'POST',
       });
 
@@ -235,6 +246,7 @@ export const useEntityAnalyticsRoutes = () => {
       initRiskEngine,
       enableRiskEngine,
       disableRiskEngine,
+      scheduleNowRiskEngine,
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
