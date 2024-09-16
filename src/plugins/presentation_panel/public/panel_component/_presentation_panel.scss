@@ -140,11 +140,11 @@
 // EDITING MODE
 
 .embPanel--editing {
-  transition: all $euiAnimSpeedSlow $euiAnimSlightResistance;
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
   outline: 1px dashed $euiColorMediumShade;
 
   .embPanel--dragHandle {
-    transition: background-color $euiAnimSpeedSlow $euiAnimSlightResistance;
+    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     .embPanel--dragHandle:hover {
       background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
