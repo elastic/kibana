@@ -1,7 +1,0 @@
-$ curl -X POST api/security/session/_invalidate
-{
-  "match" : "query",
-  "query": {
-    "provider" : { "type": "saml" }
-  }
-}

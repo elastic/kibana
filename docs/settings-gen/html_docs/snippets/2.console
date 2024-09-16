@@ -1,5 +1,0 @@
-POST /_security/user/temporarykibanasuperuser
-{
-  "password" : "l0ng-r4nd0m-p@ssw0rd",
-  "roles" : [ "superuser", "grant_kibana_system_indices" ]
-}

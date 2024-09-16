@@ -1,1 +1,0 @@
-$ curl -X DELETE api/index_patterns/index_pattern/<my-pattern>/runtime_field/<runtime-field-name>

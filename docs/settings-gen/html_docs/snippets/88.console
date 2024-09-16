@@ -1,8 +1,0 @@
-GET /.kibana/_search
-{
-  "query": {
-    "exists": {
-      "field": "alert.isSnoozedUntil"
-    }
-  }
-}

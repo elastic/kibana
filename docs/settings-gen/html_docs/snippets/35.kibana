@@ -1,4 +1,0 @@
-$ curl -X POST api/security/session/_invalidate
-{
-  "match" : "all"
-}

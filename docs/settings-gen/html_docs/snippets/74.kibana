@@ -1,1 +1,0 @@
-$ curl -X GET api/osquery/saved-queries?page=1&perPage=10&sortField=updatedAt&sortOrder=asc

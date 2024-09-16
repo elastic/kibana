@@ -1,1 +1,0 @@
-$ curl -X DELETE api/logstash/pipeline/hello-world
