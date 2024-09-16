@@ -511,7 +511,7 @@ export async function getMWTelemetry({
   logger,
 }: MWOpts): Promise<GetMWTelemetryResults> {
   try {
-    const MWFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
+    const mwFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
@@ -520,20 +520,20 @@ export async function getMWTelemetry({
     let countMWTotal = 0;
     let countMWWithRepeatToggleON = 0;
     let countMWWithFilterAlertToggleON = 0;
-    for await (const response of MWFinder.find()) {
-      for (const MWSavedObject of response.saved_objects) {
+    for await (const response of mwFinder.find()) {
+      for (const mwSavedObject of response.saved_objects) {
         countMWTotal = countMWTotal + 1;
         // scopedQuery property will be null if "Filter alerts" toggle will be off
-        if (MWSavedObject.attributes.scopedQuery) {
+        if (mwSavedObject.attributes.scopedQuery) {
           countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
         }
         // interval property will be not in place if "Repeat" toggle will be off
-        if ('interval' in MWSavedObject.attributes.rRule) {
+        if (Object.hasOwn(mwSavedObject.attributes.rRule, 'interval')) {
           countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
         }
       }
     }
-    await MWFinder.close();
+    await mwFinder.close();
 
     return {
       hasErrors: false,

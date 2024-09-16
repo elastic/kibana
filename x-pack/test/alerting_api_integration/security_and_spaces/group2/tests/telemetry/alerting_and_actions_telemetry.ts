@@ -120,7 +120,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           category_ids: ['management'],
           scoped_query: scopedQuery,
         });
-      // console.log('response', response.body);
+
       expect(response.status).to.equal(200);
 
       objectRemover.add(spaceId, response.body.id, 'rules/maintenance_window', 'alerting', true);
@@ -254,9 +254,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
-        // MW with toggles off
+        // MW with both toggles off
         await createMaintenanceWindow({ spaceId: space.id });
-        // MW with toggles on
+        // MW with 'Repeat' toggle on and 'Filter alerts' toggle on
         await createMaintenanceWindow({
           spaceId: space.id,
           interval: 1,
