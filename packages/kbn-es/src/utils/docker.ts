@@ -173,7 +173,7 @@ const SHARED_SERVERLESS_PARAMS = [
 
 // only allow certain ES args to be overwrote by options
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
+  ['ES_JAVA_OPTS', '-Xms2g -Xmx2g'],
 
   ['ES_LOG_STYLE', 'file'],
 
