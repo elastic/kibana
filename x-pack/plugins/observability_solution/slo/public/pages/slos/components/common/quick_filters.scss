@@ -1,26 +1,60 @@
 .controlsWrapper {
   min-height: $euiSize * 4;
 }
+
 .controlsFrame__draggable {
-  height: $euiButtonHeight;
+  height: $euiButtonHeight !important;
 }
 
-.optionsList--filterBtn {
-  height: $euiButtonHeight;
+.optionsList--filterBtn, .euiFilterButton {
+  height: $euiButtonHeight !important;
+}
+
+.euiFilterGroup {
+  height: $euiButtonHeight !important;
+  border-radius: $euiFormControlBorderRadius !important;
 }
 
 .controlPanel {
-  height: $euiButtonHeight;
+  height: $euiButtonHeight !important;
+
+  .euiDualRange, .euiRange {
+    height: $euiButtonHeight !important;
+  }
 
   &--labelWrapper {
-    height: 100%;
+    height: 100% !important;
   }
 
   .controlPanel--label {
-    height: 100%;
+    height: 100% !important;
   }
 }
 
 .dshDashboardViewport-controls {
   padding-bottom: $euiSizeXS;
+}
+
+.euiFlexGroup {
+  height: $euiButtonHeight;
+}
+
+.euiFormControlLayout, .euiFormControlLayout--group, .controlFrame__formControlLayout, .optionsListControl {
+  height: $euiButtonHeight !important;
+}
+
+.optionsListControl {
+  height: $euiButtonHeight !important;
+}
+
+.--group {
+  height: $euiButtonHeight !important;
+}
+
+.controlFrame__formControlLayout {
+  height: $euiButtonHeight !important;
+}
+
+&.-compresed {
+  height: $euiButtonHeight !important;
 }

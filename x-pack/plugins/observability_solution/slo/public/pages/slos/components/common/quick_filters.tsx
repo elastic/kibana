@@ -55,7 +55,6 @@ export function QuickFilters({
   return (
     <Container>
       <ControlGroupRenderer
-        className="observability-slo"
         onApiAvailable={setControlGroupAPI}
         getCreationOptions={async (initialState, builder) => {
           builder.addOptionsListControl(

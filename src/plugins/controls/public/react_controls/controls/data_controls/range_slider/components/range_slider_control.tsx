@@ -33,7 +33,6 @@ interface Props {
   value: RangeValue | undefined;
   uuid: string;
   controlPanelClassName?: string;
-  className?: string;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -47,7 +46,6 @@ export const RangeSliderControl: FC<Props> = ({
   value,
   uuid,
   controlPanelClassName,
-  className,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -196,7 +194,7 @@ export const RangeSliderControl: FC<Props> = ({
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
-        compressed={className === 'observability-slo' ? false : true}
+        compressed
         inputPopoverProps={{
           className: controlPanelClassName,
           panelMinWidth: MIN_POPOVER_WIDTH,

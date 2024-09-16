@@ -76,7 +76,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections,
         ignoreParentSettings,
       } = initialRuntimeState;
-      const isObservabilitySLO = await services.core.application.capabilities.apm;
+
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const defaultDataViewId = await services.dataViews.getDefaultId();
       const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
@@ -298,7 +298,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               controlsManager={controlsManager}
               hasUnappliedSelections={hasUnappliedSelections}
               labelPosition={labelPosition}
-              className={isObservabilitySLO ? 'observability-slo' : undefined}
             />
           );
         },

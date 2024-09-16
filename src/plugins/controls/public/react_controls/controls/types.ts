@@ -96,5 +96,4 @@ export interface ControlPanelProps<
 > {
   uuid: string;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
-  className?: string;
 }

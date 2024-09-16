@@ -391,6 +391,7 @@ export const getOptionsListControlFactory = (
               hideExists$,
               hideSort$
             );
+
           return (
             <OptionsListControlContext.Provider
               value={{
@@ -399,12 +400,7 @@ export const getOptionsListControlFactory = (
                 displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
               }}
             >
-              <OptionsListControl
-                controlPanelClassName={controlPanelClassName}
-                className={
-                  services.core.application.capabilities.apm ? 'observability-slo' : undefined
-                }
-              />
+              <OptionsListControl controlPanelClassName={controlPanelClassName} />
             </OptionsListControlContext.Provider>
           );
         },

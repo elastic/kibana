@@ -46,7 +46,6 @@ interface Props {
   };
   hasUnappliedSelections: boolean;
   labelPosition: ControlStyle;
-  className?: string;
 }
 
 export function ControlGroup({
@@ -55,7 +54,6 @@ export function ControlGroup({
   controlsManager,
   labelPosition,
   hasUnappliedSelections,
-  className,
 }: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [autoApplySelections, controlsInOrder] = useBatchedPublishingSubjects(
@@ -156,7 +154,6 @@ export function ControlGroup({
                       controlsManager.setControlApi(id, controlApi);
                     }}
                     isControlGroupInitialized={isInitialized}
-                    className={className}
                   />
                 ))}
               </EuiFlexGroup>
