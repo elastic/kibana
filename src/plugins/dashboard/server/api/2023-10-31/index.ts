@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+export { dashboardAttributesSchema } from '../../content_management/schema/v3';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ControlWidth, ControlInputTransform } from './types';
+export type { ControlInputTransform } from './types';
 
 // Control Group exports
 export {
@@ -19,6 +19,8 @@ export {
   type PersistableControlGroupInput,
   type SerializableControlGroupInput,
   type ControlGroupChainingSystem,
+  type ControlStyle,
+  type ControlWidth,
   persistableControlGroupInputKeys,
 } from './control_group/types';
 export {
@@ -31,9 +33,13 @@ export {
 } from './control_group/control_group_persistence';
 
 export {
+  DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_CONTROL_STYLE,
+  CONTROL_WIDTH_OPTIONS,
+  CONTROL_STYLE_OPTIONS,
+  CONTROL_CHAINING_OPTIONS,
 } from './control_group/control_group_constants';
 
 // Control Type exports

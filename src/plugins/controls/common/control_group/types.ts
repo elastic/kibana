@@ -8,18 +8,25 @@
 
 import { EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/common/types';
 import { SerializableRecord } from '@kbn/utility-types';
-import { ControlInput, ControlStyle, ControlWidth } from '../types';
+import { ControlInput } from '../types';
+import {
+  CONTROL_CHAINING_OPTIONS,
+  CONTROL_STYLE_OPTIONS,
+  CONTROL_WIDTH_OPTIONS,
+} from './control_group_constants';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
 
+export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
+export type ControlStyle = (typeof CONTROL_STYLE_OPTIONS)[keyof typeof CONTROL_STYLE_OPTIONS];
+export type ControlGroupChainingSystem =
+  (typeof CONTROL_CHAINING_OPTIONS)[keyof typeof CONTROL_CHAINING_OPTIONS];
 export interface ControlPanelState<TEmbeddableInput extends ControlInput = ControlInput>
   extends PanelState<TEmbeddableInput> {
   order: number;
   width: ControlWidth;
   grow: boolean;
 }
-
-export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
 
 export interface ControlsPanels {
   [panelId: string]: ControlPanelState;

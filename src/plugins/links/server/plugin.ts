@@ -8,10 +8,12 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
+import { extractReferences, injectReferences } from '../common/persistable_state';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -24,6 +26,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core: CoreSetup,
     plugins: {
       contentManagement: ContentManagementServerSetup;
+      embeddable: EmbeddableSetup;
     }
   ) {
     plugins.contentManagement.register({
@@ -34,6 +37,44 @@ export class LinksServerPlugin implements Plugin<object, object> {
       }),
       version: {
         latest: LATEST_VERSION,
+      },
+    });
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: CONTENT_ID,
+      migrations: () => ({}),
+      inject: (state, references) => {
+        if (!('attributes' in state) || state.attributes === undefined) {
+          return state;
+        }
+
+        const { attributes: attributesWithInjectedIds } = injectReferences({
+          attributes: state.attributes as LinksAttributes,
+          references,
+        });
+
+        return {
+          ...state,
+          attributes: attributesWithInjectedIds,
+        };
+      },
+      extract: (state) => {
+        if (!('attributes' in state) || state.attributes === undefined) {
+          return { state, references: [] };
+        }
+
+        const { attributes, references } = extractReferences({
+          attributes: state.attributes as LinksAttributes,
+          references: [],
+        });
+
+        return {
+          state: {
+            ...state,
+            attributes,
+          },
+          references,
+        };
       },
     });
 

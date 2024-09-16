@@ -15,8 +15,10 @@ import type {
 
 import { serviceDefinition as v1 } from './v1';
 import { serviceDefinition as v2 } from './v2';
+import { serviceDefinition as v3 } from './v3';
 
 export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
   1: v1,
   2: v2,
+  3: v3,
 };

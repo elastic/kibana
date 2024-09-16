@@ -6,14 +6,23 @@
  * Side Public License, v 1.
  */
 
-export { LATEST_VERSION, CONTENT_ID } from './constants';
+export {
+  LATEST_CLIENT_VERSION,
+  LATEST_VERSION,
+  CONTENT_ID,
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from './constants';
 
 export type { DashboardContentType } from './types';
 
 export type {
-  GridData,
+  ControlGroupAttributes,
   DashboardItem,
   DashboardCrudTypes,
   DashboardAttributes,
+  DashboardSavedObjectAttributes,
+  GridData,
   SavedDashboardPanel,
 } from './latest';

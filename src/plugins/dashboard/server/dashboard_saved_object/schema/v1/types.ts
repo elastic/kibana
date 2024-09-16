@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+import { TypeOf } from '@kbn/config-schema';
+import { dashboardAttributesSchema } from './v1';
+
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;

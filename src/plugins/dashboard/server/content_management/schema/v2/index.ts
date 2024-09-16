@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  serviceDefinition,
-  dashboardSavedObjectSchema,
-  dashboardAttributesSchema,
-} from './cm_services';
+export { serviceDefinition } from './cm_services';

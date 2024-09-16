@@ -52,6 +52,7 @@ export type DefaultControlApi = PublishesDataLoading &
 export interface DefaultControlState {
   grow?: boolean;
   width?: ControlWidth;
+  dataViewId?: string;
 }
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<

@@ -57,7 +57,7 @@ import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
 import {
@@ -914,15 +914,19 @@ export class DashboardContainer
   public getSerializedStateForControlGroup = () => {
     return {
       rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
+        ? this.controlGroupInput
+        : {
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
+            panels: {},
+            ignoreParentSettings: {
+              ignoreFilters: false,
+              ignoreQuery: false,
+              ignoreTimerange: false,
+              ignoreValidations: false,
+            },
+          },
       references: getReferencesForControls(this.savedObjectReferences),
     };
   };

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+export type { DashboardAttributes } from './types';
+export { dashboardAttributesSchema } from './v2';

@@ -18,6 +18,7 @@ export type {
 export type { DashboardAttributes, SavedDashboardPanel } from './content_management';
 
 export {
+  type InjectExtractDeps,
   injectReferences,
   extractReferences,
 } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';

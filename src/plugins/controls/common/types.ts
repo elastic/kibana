@@ -8,9 +8,7 @@
 
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
-
-export type ControlWidth = 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
+import { ControlStyle } from './control_group/types';
 
 export type TimeSlice = [number, number];
 
@@ -39,3 +37,5 @@ export type ControlInputTransform = (
   newState: Partial<ControlInput>,
   controlType: string
 ) => Partial<ControlInput>;
+
+export type { ControlStyle, ControlWidth } from './control_group/types';

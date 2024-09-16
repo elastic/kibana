@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+import { contentManagementApiVersions } from './constants';
+
+export type ContentManagementApiVersionsType =
+  (typeof contentManagementApiVersions)[keyof typeof contentManagementApiVersions];

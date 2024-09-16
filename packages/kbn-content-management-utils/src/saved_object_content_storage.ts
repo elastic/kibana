@@ -40,26 +40,41 @@ const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   return savedObjects.client;
 };
 
-type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
+export type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-function savedObjectToItem<Attributes extends object, Item extends SOWithMetadata>(
-  savedObject: SavedObject<Attributes>,
-  allowedSavedObjectAttributes: string[],
-  partial: false
-): Item;
+export type ItemAttrsToSavedObjectAttrs<
+  ContentAttributes extends object,
+  SOAttributes extends object
+> = (attributes: ContentAttributes) => SOAttributes;
 
-function savedObjectToItem<Attributes extends object, PartialItem extends SOWithMetadata>(
-  savedObject: PartialSavedObject<Attributes>,
-  allowedSavedObjectAttributes: string[],
-  partial: true
-): PartialItem;
+const itemAttrsToSavedObjectAttrsDefault: ItemAttrsToSavedObjectAttrs<object, object> = (
+  attributes: object
+) => attributes;
+export interface SavedObjectToItem<SOAttributes extends object> {
+  <Item extends SOWithMetadata>(
+    savedObject: SavedObject<SOAttributes>,
+    allowedSavedObjectAttributes: string[],
+    partial: false
+  ): Item;
 
-function savedObjectToItem<Attributes extends object>(
-  savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>,
+  <PartialItem extends SOWithMetadata>(
+    savedObject: PartialSavedObject<SOAttributes>,
+    allowedSavedObjectAttributes: string[],
+    partial: true
+  ): PartialItem;
+
+  (
+    savedObject: SavedObject<SOAttributes> | PartialSavedObject<SOAttributes>,
+    allowedSavedObjectAttributes: string[]
+  ): SOWithMetadata | SOWithMetadataPartial;
+}
+
+const savedObjectToItemDefault: SavedObjectToItem<object> = (
+  savedObject: SavedObject<object> | PartialSavedObject<object>,
   allowedSavedObjectAttributes: string[]
-): SOWithMetadata | SOWithMetadataPartial {
+): SOWithMetadata | SOWithMetadataPartial => {
   const {
     id,
     type,
@@ -89,7 +104,7 @@ function savedObjectToItem<Attributes extends object>(
     namespaces,
     version,
   };
-}
+};
 
 export interface SearchArgsToSOFindOptionsOptionsDefault {
   fields?: string[];
@@ -141,6 +156,11 @@ export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
+  itemAttrsToSavedObjectAttrs?: ItemAttrsToSavedObjectAttrs<
+    Types['ContentAttributes'],
+    Types['Attributes']
+  >;
+  savedObjectToItem?: SavedObjectToItem<Types['Attributes']>;
   /**
    * MSearch is a feature that allows searching across multiple content types
    * (for example, could be used in a general content finder or the like)
@@ -168,6 +188,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     createArgsToSoCreateOptions,
     updateArgsToSoUpdateOptions,
     searchArgsToSOFindOptions,
+    itemAttrsToSavedObjectAttrs,
+    savedObjectToItem,
     enableMSearch,
     allowedSavedObjectAttributes,
     mSearchAdditionalSearchFields,
@@ -178,6 +200,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.savedObjectType = savedObjectType;
     this.cmServicesDefinition = cmServicesDefinition;
+    this.itemAttrsToSavedObjectAttrs =
+      itemAttrsToSavedObjectAttrs || itemAttrsToSavedObjectAttrsDefault;
+    this.savedObjectToItem = savedObjectToItem || savedObjectToItemDefault;
     this.createArgsToSoCreateOptions =
       createArgsToSoCreateOptions || createArgsToSoCreateOptionsDefault;
     this.updateArgsToSoUpdateOptions =
@@ -192,7 +217,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
         toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): Types['Item'] => {
           const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
 
-          const contentItem = savedObjectToItem(
+          const contentItem = this.savedObjectToItem(
             savedObject as SavedObjectsFindResult<Types['Attributes']>,
             this.allowedSavedObjectAttributes,
             false
@@ -235,6 +260,11 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
   private allowedSavedObjectAttributes: string[];
+  private itemAttrsToSavedObjectAttrs: ItemAttrsToSavedObjectAttrs<
+    Types['ContentAttributes'],
+    Types['Attributes']
+  >;
+  private savedObjectToItem: SavedObjectToItem<Types['Attributes']>;
 
   mSearch?: {
     savedObjectType: string;
@@ -255,7 +285,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
     const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+      item: this.savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
       meta: {
         aliasPurpose,
         aliasTargetId,
@@ -320,16 +350,17 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
 
     const createOptions = this.createArgsToSoCreateOptions(optionsToLatest);
+    const soAttributes = this.itemAttrsToSavedObjectAttrs(dataToLatest);
 
     // Save data in DB
     const savedObject = await soClient.create<Types['Attributes']>(
       this.savedObjectType,
-      dataToLatest,
+      soAttributes,
       createOptions
     );
 
     const result = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+      item: this.savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
     };
 
     const validationError = transforms.create.out.result.validate(result);
@@ -385,17 +416,18 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
 
     const updateOptions = this.updateArgsToSoUpdateOptions(optionsToLatest);
+    const soAttributes = this.itemAttrsToSavedObjectAttrs(dataToLatest);
 
     // Save data in DB
     const partialSavedObject = await soClient.update<Types['Attributes']>(
       this.savedObjectType,
       id,
-      dataToLatest,
+      soAttributes,
       updateOptions
     );
 
     const result = {
-      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
+      item: this.savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
     };
 
     const validationError = transforms.update.out.result.validate(result);
@@ -461,7 +493,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
     const response = {
       hits: soResponse.saved_objects.map((so) =>
-        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
+        this.savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
       ),
       pagination: {
         total: soResponse.total,

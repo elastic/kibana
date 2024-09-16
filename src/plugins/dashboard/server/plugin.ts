@@ -29,6 +29,7 @@ import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { registerAPIRoutes, v2023_10_31 } from './api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -65,6 +66,7 @@ export class DashboardPlugin
     plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
+        deps: { embeddablePersistableStateService: plugins.embeddable },
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.logger.get('storage'),
       }),
@@ -109,6 +111,21 @@ export class DashboardPlugin
     );
 
     core.uiSettings.register(getUISettings());
+
+    registerAPIRoutes({
+      http: core.http,
+      contentManagement: plugins.contentManagement,
+      appName: 'dashboards',
+      contentId: CONTENT_ID,
+      logger: this.logger,
+      getSchemas: () => {
+        return {
+          '2023-10-31': {
+            schema: v2023_10_31,
+          },
+        };
+      },
+    });
 
     return {};
   }

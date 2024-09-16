@@ -5,36 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
+
 import {
   createResultSchema,
   objectTypeToGetResultSchema,
   savedObjectSchema,
 } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import {
-  controlGroupInputSchema as controlGroupInputSchemaV1,
-  dashboardAttributesSchema as dashboardAttributesSchemaV1,
-  serviceDefinition as serviceDefinitionV1,
-} from '../v1';
-
-export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
-  {
-    controlGroupInput: schema.maybe(
-      controlGroupInputSchemaV1.extends(
-        {
-          showApplySelections: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+import type { DashboardCrudTypes } from '../../../../common/content_management/v2';
+import { serviceDefinition as serviceDefinitionV1 } from '../v1';
+import { dashboardAttributesOut as attributesTov3 } from '../v3';
+import { dashboardAttributesSchema } from '../../../dashboard_saved_object/schema/v2';
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
-// Content management service definition.
+/**
+ * Content management service definition v2.
+ * Dashboard attributes in content management version v2 are tightly coupled with the v2 model version saved object schema.
+ */
 export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
@@ -48,6 +36,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1?.create?.in,
       data: {
         schema: dashboardAttributesSchema,
+        up: (data: DashboardCrudTypes['CreateIn']['data']) => attributesTov3(data),
       },
     },
     out: {
@@ -61,6 +50,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
+        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data),
       },
     },
   },

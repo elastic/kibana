@@ -13,6 +13,8 @@ import type { Logger } from '@kbn/logging';
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
 import type { DashboardCrudTypes } from '../../common/content_management';
+import { InjectExtractDeps } from '../../common';
+import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './schema/latest';
 
 const searchArgsToSOFindOptions = (
   args: DashboardCrudTypes['SearchIn']
@@ -35,28 +37,34 @@ export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
   constructor({
     logger,
     throwOnResultValidationError,
+    deps,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    deps: InjectExtractDeps;
   }) {
+    const allowedSavedObjectAttributes = [
+      'kibanaSavedObjectMeta',
+      'controlGroupInput',
+      'refreshInterval',
+      'description',
+      'timeRestore',
+      'options',
+      'panels',
+      'timeFrom',
+      'version',
+      'timeTo',
+      'title',
+    ];
     super({
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
       searchArgsToSOFindOptions,
       enableMSearch: true,
-      allowedSavedObjectAttributes: [
-        'kibanaSavedObjectMeta',
-        'controlGroupInput',
-        'refreshInterval',
-        'description',
-        'timeRestore',
-        'optionsJSON',
-        'panelsJSON',
-        'timeFrom',
-        'version',
-        'timeTo',
-        'title',
-      ],
+      allowedSavedObjectAttributes,
+      itemAttrsToSavedObjectAttrs,
+      // TODO fix this type error by differentiating between SavedObject Attributes and Item Attributes
+      savedObjectToItem,
       logger,
       throwOnResultValidationError,
     });

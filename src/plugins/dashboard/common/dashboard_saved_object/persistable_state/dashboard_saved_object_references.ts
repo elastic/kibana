@@ -23,17 +23,14 @@ export interface InjectExtractDeps {
 function parseDashboardAttributesWithType(
   attributes: DashboardAttributes
 ): ParsedDashboardAttributesWithType {
-  let parsedPanels = [] as SavedDashboardPanel[];
-  if (typeof attributes.panelsJSON === 'string') {
-    const parsedJSON = JSON.parse(attributes.panelsJSON);
-    if (Array.isArray(parsedJSON)) {
-      parsedPanels = parsedJSON as SavedDashboardPanel[];
-    }
+  let panels = [] as SavedDashboardPanel[];
+  if (Array.isArray(attributes.panels)) {
+    panels = attributes.panels as SavedDashboardPanel[];
   }
 
   return {
     type: 'dashboard',
-    panels: convertSavedPanelsToPanelMap(parsedPanels),
+    panels: convertSavedPanelsToPanelMap(panels),
   } as ParsedDashboardAttributesWithType;
 }
 
@@ -52,8 +49,8 @@ export function injectReferences(
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(injectedPanels),
-  } as DashboardAttributes;
+    panels: injectedPanels,
+  };
 
   return newAttributes;
 }
@@ -82,8 +79,8 @@ export function extractReferences(
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(extractedPanels),
-  } as DashboardAttributes;
+    panels: extractedPanels,
+  };
 
   return {
     references: [...references, ...extractedReferences],

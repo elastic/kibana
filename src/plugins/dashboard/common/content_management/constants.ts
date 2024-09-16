@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const LATEST_VERSION = 2;
+export const LATEST_VERSION = 3;
+export const LATEST_CLIENT_VERSION = 2;
 
 export const CONTENT_ID = 'dashboard';
+
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;

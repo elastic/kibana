@@ -12,6 +12,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { pick, omit, xor } from 'lodash';
 
 import {
+  DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
@@ -41,7 +42,7 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   defaultControlWidth: DEFAULT_CONTROL_WIDTH,
   defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
-  chainingSystem: 'HIERARCHICAL',
+  chainingSystem: DEFAULT_CONTROL_CHAINING,
   showApplySelections: false,
   ignoreParentSettings: {
     ignoreFilters: false,

@@ -14,51 +14,7 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-
-export const controlGroupInputSchema = schema
-  .object({
-    panelsJSON: schema.maybe(schema.string()),
-    controlStyle: schema.maybe(schema.string()),
-    chainingSystem: schema.maybe(schema.string()),
-    ignoreParentSettingsJSON: schema.maybe(schema.string()),
-  })
-  .extends({}, { unknowns: 'ignore' });
-
-export const dashboardAttributesSchema = schema.object(
-  {
-    // General
-    title: schema.string(),
-    description: schema.string({ defaultValue: '' }),
-
-    // Search
-    kibanaSavedObjectMeta: schema.object({
-      searchSourceJSON: schema.maybe(schema.string()),
-    }),
-
-    // Time
-    timeRestore: schema.maybe(schema.boolean()),
-    timeFrom: schema.maybe(schema.string()),
-    timeTo: schema.maybe(schema.string()),
-    refreshInterval: schema.maybe(
-      schema.object({
-        pause: schema.boolean(),
-        value: schema.number(),
-        display: schema.maybe(schema.string()),
-        section: schema.maybe(schema.number()),
-      })
-    ),
-
-    // Dashboard Content
-    controlGroupInput: schema.maybe(controlGroupInputSchema),
-    panelsJSON: schema.string({ defaultValue: '[]' }),
-    optionsJSON: schema.string({ defaultValue: '{}' }),
-
-    // Legacy
-    hits: schema.maybe(schema.number()),
-    version: schema.maybe(schema.number()),
-  },
-  { unknowns: 'forbid' }
-);
+import { dashboardAttributesSchema } from '../../../dashboard_saved_object/schema/v1';
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
@@ -82,8 +38,10 @@ const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-// Content management service definition.
-// We need it for BWC support between different versions of the content
+/**
+ * Content management service definition v1.
+ * Dashboard attributes in content management version v1 are tightly coupled with the v1 model version saved object schema.
+ */
 export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {

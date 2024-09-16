@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+// Latest model version for dashboard saved objects is v2
+export {
+  dashboardAttributesSchema as dashboardSavedObjectSchema,
+  type DashboardAttributes as DashboardSavedObjectAttributes,
+} from './v2';

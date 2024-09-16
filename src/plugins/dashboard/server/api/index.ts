@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 3
-export * from './v3';
+export { dashboardAttributesSchema as v2023_10_31 } from './2023-10-31';
+export { registerAPIRoutes } from './register_routes';

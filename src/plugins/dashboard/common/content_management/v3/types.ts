@@ -11,30 +11,20 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import type { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import type { DashboardAttributes } from '../../../server/content_management/schema/v3';
+import type { DashboardSavedObjectAttributes } from '../../../server/dashboard_saved_object';
 import type { DashboardContentType } from '../types';
-import type { DashboardAttributes as DashboardAttributesV1 } from '../v1';
-
-type ControlGroupAttributesV2 = Pick<
-  RawControlGroupAttributes,
-  | 'panelsJSON'
-  | 'chainingSystem'
-  | 'controlStyle'
-  | 'ignoreParentSettingsJSON'
-  | 'showApplySelections'
->;
-
-export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
-  controlGroupInput?: ControlGroupAttributesV2;
-};
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,
-  DashboardAttributes,
+  DashboardSavedObjectAttributes,
   Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
   Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
   {
     /** Flag to indicate to only search the text on the "title" field */
     onlyTitle?: boolean;
-  }
+  },
+  DashboardAttributes
 >;
+
+export type DashboardItem = DashboardCrudTypes['Item'];

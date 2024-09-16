@@ -198,14 +198,14 @@ export const getControlGroupEmbeddableFactory = (services: {
           });
         },
         serializeState: () => {
-          const { panelsJSON, references } = controlsManager.serializeControls();
+          const { panels, references } = controlsManager.serializeControls();
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
               controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
               showApplySelections: !autoApplySelections$.getValue(),
-              ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
-              panelsJSON,
+              ignoreParentSettings: ignoreParentSettings$.getValue(),
+              panels,
             },
             references,
           };

@@ -36,7 +36,7 @@ import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
 export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
-  [panelId: string]: ControlState;
+  [panelId: string]: Omit<ControlState, 'id'>;
 }
 
 export type ControlGroupUnsavedChanges = Omit<
@@ -46,7 +46,7 @@ export type ControlGroupUnsavedChanges = Omit<
   filters: Filter[] | undefined;
 };
 
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
+export type ControlPanelState = DefaultControlState & { type: string; order: number; id: string };
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -94,8 +94,8 @@ export type ControlGroupEditorState = Pick<
 
 export interface ControlGroupSerializedState {
   chainingSystem: ControlGroupChainingSystem;
-  panelsJSON: string;
-  ignoreParentSettingsJSON: string;
+  panels: ControlPanelState[];
+  ignoreParentSettings: ParentIgnoreSettings;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlStyle;
