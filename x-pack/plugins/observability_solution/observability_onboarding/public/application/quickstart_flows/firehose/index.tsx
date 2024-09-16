@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiHorizontalRule,
   EuiLink,
@@ -177,19 +177,20 @@ export function FirehosePanel() {
                 </p>
               </EuiText>
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
 
-              <EuiButton
+              <EuiButtonEmpty
                 data-test-subj="observabilityOnboardingFirehosePanelDownloadCloudFormationTemplateButton"
                 href={FIREHOSE_CLOUDFORMATION_TEMPLATE_URL}
                 download={true}
                 iconType="download"
+                flush="left"
               >
                 {i18n.translate(
                   'xpack.observability_onboarding.firehosePanel.downloadCloudFormationTemplateButtonLabel',
                   { defaultMessage: 'Download CloudFormation Template' }
                 )}
-              </EuiButton>
+              </EuiButtonEmpty>
             </>
           )}
         </>
