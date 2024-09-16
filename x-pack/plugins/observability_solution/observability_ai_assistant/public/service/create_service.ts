@@ -95,5 +95,6 @@ export function createService({
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },
+    scope,
   };
 }

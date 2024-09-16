@@ -176,7 +176,6 @@ export function ConversationView() {
             knowledgeBase={knowledgeBase}
             showLinkToConversationsApp={false}
             onConversationUpdate={handleConversationUpdate}
-            scope={scope}
           />
 
           <div className={sidebarContainerClass}>

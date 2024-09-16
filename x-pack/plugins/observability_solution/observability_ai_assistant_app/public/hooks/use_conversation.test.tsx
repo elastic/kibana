@@ -55,6 +55,7 @@ const mockService: MockedService = {
     predefinedConversation$: new Observable(),
   },
   navigate: jest.fn().mockReturnValue(of()),
+  scope: 'all',
 };
 
 const mockChatService = createMockChatService();
@@ -107,7 +108,6 @@ describe('useConversation', () => {
             },
           ],
           initialConversationId: 'foo',
-          scope: 'all',
         },
         wrapper,
       });
@@ -125,7 +125,6 @@ describe('useConversation', () => {
           connectorId: 'my-connector',
         },
         wrapper,
-        scope: 'all',
       });
     });
 
@@ -165,7 +164,6 @@ describe('useConversation', () => {
               },
             },
           ],
-          scope: 'all',
         },
         wrapper,
       });
@@ -220,7 +218,6 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
-          scope: 'all',
         },
         wrapper,
       });
@@ -285,7 +282,6 @@ describe('useConversation', () => {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
-          scope: 'all',
         },
         wrapper,
       });
@@ -378,7 +374,6 @@ describe('useConversation', () => {
             },
           ],
           onConversationUpdate,
-          scope: 'all',
         },
         wrapper,
       });
@@ -458,7 +453,6 @@ describe('useConversation', () => {
             initialConversationId: 'foo',
           },
           wrapper,
-          scope: 'all',
         });
       });
 
@@ -497,7 +491,6 @@ describe('useConversation', () => {
               chatService: mockChatService,
               connectorId: 'my-connector',
               initialConversationId: 'my-conversation-id',
-              scope: 'all',
             },
             wrapper,
           });

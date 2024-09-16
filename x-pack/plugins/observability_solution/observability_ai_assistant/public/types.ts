@@ -83,7 +83,8 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler
+    onActionClick: ChatActionClickHandler,
+    scope?: AssistantScope
   ) => React.ReactNode;
 }
 
@@ -101,6 +102,7 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
+  scope: AssistantScope;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {

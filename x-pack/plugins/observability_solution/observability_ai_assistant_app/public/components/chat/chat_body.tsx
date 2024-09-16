@@ -110,7 +110,6 @@ export function ChatBody({
   showLinkToConversationsApp,
   onConversationUpdate,
   onToggleFlyoutPositionMode,
-  scope,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -122,7 +121,6 @@ export function ChatBody({
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
-  scope: AssistantScope;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -140,7 +138,6 @@ export function ChatBody({
     chatService,
     connectorId: connectors.selectedConnector,
     onConversationUpdate,
-    scope,
   });
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
