@@ -190,7 +190,7 @@ export const mlNavLinks: SolutionNavLink[] = [
   {
     id: ExternalPageName.mlESQLdataVisualizer,
     title: i18n.ESQL_DATA_VISUALIZER_TITLE,
-    landingIcon: IconDataViewLazy,
+    landingIcon: 'sqlApp',
     description: i18n.ESQL_DATA_VISUALIZER_DESC,
   },
   {
