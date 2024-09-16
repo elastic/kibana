@@ -46,8 +46,9 @@ export class SyntheticsRuleHelper {
       body: {
         mappings: {
           properties: {
-            reason: { type: 'text' },
-            locationNames: { type: 'text' },
+            'monitor.id': {
+              type: 'keyword',
+            },
           },
         },
       },
@@ -94,6 +95,7 @@ export class SyntheticsRuleHelper {
                 linkMessage: '{{context.linkMessage}}',
                 recoveryReason: '{{context.recoveryReason}}',
                 recoveryStatus: '{{context.recoveryStatus}}',
+                'monitor.id': '{{context.monitorId}}',
               },
             ],
           },
@@ -113,6 +115,7 @@ export class SyntheticsRuleHelper {
                 locationNames: '{{context.locationNames}}',
                 locationId: '{{context.locationId}}',
                 linkMessage: '{{context.linkMessage}}',
+                'monitor.id': '{{context.monitorId}}',
               },
             ],
           },

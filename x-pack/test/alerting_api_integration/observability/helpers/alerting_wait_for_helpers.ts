@@ -64,6 +64,7 @@ export async function waitForDocumentInIndex<T>({
   timeout = TIMEOUT,
   retries = RETRIES,
   retryDelay = RETRY_DELAY,
+  filters,
 }: {
   esClient: Client;
   indexName: string;
@@ -73,6 +74,7 @@ export async function waitForDocumentInIndex<T>({
   timeout?: number;
   retries?: number;
   retryDelay?: number;
+  filters?: QueryDslQueryContainer[];
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     testFn: async () => {
@@ -80,6 +82,15 @@ export async function waitForDocumentInIndex<T>({
         index: indexName,
         rest_total_hits_as_int: true,
         ignore_unavailable: true,
+        body: filters
+          ? {
+              query: {
+                bool: {
+                  filter: filters,
+                },
+              },
+            }
+          : undefined,
       });
       if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
         logger.debug(`Document count is ${response.hits.total}, should be ${docCountTarget}`);
