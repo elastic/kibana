@@ -12,8 +12,9 @@ import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getTableItemClosestToTimestamp } from './anomalies_table_utils';
 
 import mockAnomaliesTableData from '../__mocks__/mock_anomalies_table_data.json';
+import mockAnomaliesTableDataMultipleDetectors from '../__mocks__/mock_anomalies_table_data_multiple_detectors.json';
 
-describe('getTableItemClosestToTimestamp', () => {
+describe('getTableItemClosestToTimestamp without entities filter', () => {
   const anomalies: MlAnomaliesTableRecord[] = mockAnomaliesTableData.default.anomalies;
   anomalies.push(cloneDeep(anomalies[0]));
   anomalies[0].source.timestamp = 1000;
@@ -42,5 +43,44 @@ describe('getTableItemClosestToTimestamp', () => {
     const anomalyTime = 2000;
     const closestItem = getTableItemClosestToTimestamp([], anomalyTime);
     expect(closestItem).toBeUndefined();
+  });
+});
+
+// These tests test for the case when there's multiple anomalies with the same
+// timestamp but different entity values.
+describe('getTableItemClosestToTimestamp with entities filter', () => {
+  const anomalies: MlAnomaliesTableRecord[] =
+    mockAnomaliesTableDataMultipleDetectors.default.anomalies;
+
+  it("should return the closest item matching the filter for Men's Clothing", () => {
+    const anomalyTime = 1725862500000;
+    const entityFields = [{ fieldName: 'category.keyword', fieldValue: "Men's Clothing" }];
+
+    const closestItem = getTableItemClosestToTimestamp(anomalies, anomalyTime, entityFields);
+
+    expect(closestItem).toBeDefined();
+
+    // This is just to satisfy TypeScript.
+    if (!closestItem) throw new Error('closestItem is undefined');
+
+    expect(closestItem.source.timestamp).toBe(1725862500000);
+    expect(closestItem.entityName).toBe('category.keyword');
+    expect(closestItem.entityValue).toBe("Men's Clothing");
+  });
+
+  it("should return the closest item matching the filter for Women's Clothing", () => {
+    const anomalyTime = 1725862500000;
+    const entityFields = [{ fieldName: 'category.keyword', fieldValue: "Women's Clothing" }];
+
+    const closestItem = getTableItemClosestToTimestamp(anomalies, anomalyTime, entityFields);
+
+    expect(closestItem).toBeDefined();
+
+    // This is just to satisfy TypeScript.
+    if (!closestItem) throw new Error('closestItem is undefined');
+
+    expect(closestItem.source.timestamp).toBe(1725862500000);
+    expect(closestItem.entityName).toBe('category.keyword');
+    expect(closestItem.entityValue).toBe("Women's Clothing");
   });
 });

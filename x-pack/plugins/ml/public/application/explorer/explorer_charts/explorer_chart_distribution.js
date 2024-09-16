@@ -531,7 +531,11 @@ export class ExplorerChartDistribution extends React.Component {
     function showAnomalyPopover(marker, circle) {
       const anomalyTime = marker.date;
 
-      const tableItem = getTableItemClosestToTimestamp(that.props.tableData.anomalies, anomalyTime);
+      const tableItem = getTableItemClosestToTimestamp(
+        that.props.tableData.anomalies,
+        anomalyTime,
+        that.props.seriesConfig.entityFields
+      );
 
       if (tableItem) {
         // Overwrite the timestamp of the possibly aggregated table item with the
