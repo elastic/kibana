@@ -27,6 +27,8 @@ describe('useInitializeFromLocalStorage', () => {
     });
   });
 
+  // if this test fails, it's very likely because the data format of the values saved in local storage
+  // has changed and we might need to run a migration
   it('should retrieve push/overlay value from local storage', () => {
     (useExpandableFlyoutContext as jest.Mock).mockReturnValue({ urlKey });
     const mockUseDispatch = jest.fn();

@@ -9,7 +9,7 @@
 
 import { localStorageMock } from '../../__mocks__';
 import { EXPANDABLE_FLYOUT_LOCAL_STORAGE, PUSH_VS_OVERLAY_LOCAL_STORAGE } from '../constants';
-import { pushVsOverlayMiddleware } from './middlewares';
+import { savePushVsOverlayToLocalStorageMiddleware } from './middlewares';
 import { createAction, type MiddlewareAPI } from '@reduxjs/toolkit';
 import { changePushVsOverlayAction } from './actions';
 
@@ -30,7 +30,7 @@ describe('pushVsOverlayMiddleware', () => {
   });
 
   it('should ignore action without type', () => {
-    pushVsOverlayMiddleware({} as MiddlewareAPI)(jest.fn)(noTypeAction);
+    savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(noTypeAction);
 
     expect(
       localStorage.getItem(
@@ -40,7 +40,7 @@ describe('pushVsOverlayMiddleware', () => {
   });
 
   it('should ignore action of types other than changePushVsOverlayAction', () => {
-    pushVsOverlayMiddleware({} as MiddlewareAPI)(jest.fn)(randomAction);
+    savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(randomAction);
 
     expect(
       localStorage.getItem(
@@ -50,7 +50,7 @@ describe('pushVsOverlayMiddleware', () => {
   });
 
   it('should save value to local storage if action is of type changePushVsOverlayAction', () => {
-    pushVsOverlayMiddleware({} as MiddlewareAPI)(jest.fn)(
+    savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(
       changePushVsOverlayAction({ id: urlKey, type: 'push', savedToLocalStorage: true })
     );
 
@@ -62,7 +62,7 @@ describe('pushVsOverlayMiddleware', () => {
   });
 
   it('should not save value to local storage if savedToLocalStorage is false', () => {
-    pushVsOverlayMiddleware({} as MiddlewareAPI)(jest.fn)(
+    savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(
       changePushVsOverlayAction({ id: urlKey, type: 'push', savedToLocalStorage: false })
     );
 

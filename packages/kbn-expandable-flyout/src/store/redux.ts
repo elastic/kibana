@@ -13,7 +13,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import { initialState, State } from './state';
-import { pushVsOverlayMiddleware } from './middlewares';
+import { savePushVsOverlayToLocalStorageMiddleware } from './middlewares';
 
 export const store = configureStore({
   reducer: {
@@ -21,7 +21,7 @@ export const store = configureStore({
     ui: uiReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
-  middleware: [pushVsOverlayMiddleware],
+  middleware: [savePushVsOverlayToLocalStorageMiddleware],
 });
 
 export const Context = createContext<ReactReduxContextValue<State>>({
