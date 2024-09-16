@@ -42,18 +42,22 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createEsQueryRule } from './helpers/alerting_api_helper';
+import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
 import { ObjectRemover } from '../../../../shared/lib';
-import { RoleCredentials } from '../../../../shared/services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAdmin: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
-  const alertingApi = getService('alertingApi');
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
@@ -64,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     afterEach(async () => {
@@ -75,8 +80,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should generate an alert document for an active alert', async () => {
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -96,15 +103,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await alertingApi.helpers.waitForNumRuleRuns({
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
+      const alResp1 = await waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -197,8 +206,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update an alert document for an ongoing alert', async () => {
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -218,15 +229,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await alertingApi.helpers.waitForNumRuleRuns({
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
+      const alResp1 = await waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -236,15 +249,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       // wait for another run, get the updated alert document
       const testStart2 = new Date();
-      await alertingApi.helpers.waitForNumRuleRuns({
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart2,
       });
 
-      const alResp2 = await alertingApi.helpers.waitForAlertInIndex({
+      const alResp2 = await waitForAlertInIndex({
         esClient,
         filter: testStart2,
         indexName: ALERT_INDEX,

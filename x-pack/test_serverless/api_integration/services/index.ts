@@ -9,6 +9,7 @@ import { GenericFtrProviderContext } from '@kbn/test';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 
+import { AlertingApiProvider } from './alerting_api';
 import { SamlToolsProvider } from './saml_tools';
 import { SvlCasesServiceProvider } from './svl_cases';
 import { SloApiProvider } from './slo_api';
@@ -34,6 +35,7 @@ export const services = {
 
   // serverless FTR services
   ...svlSharedServices,
+  alertingApi: AlertingApiProvider,
   samlTools: SamlToolsProvider,
   svlCases: SvlCasesServiceProvider,
   sloApi: SloApiProvider,

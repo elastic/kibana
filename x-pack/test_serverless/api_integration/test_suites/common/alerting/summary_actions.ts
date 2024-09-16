@@ -29,15 +29,25 @@ import {
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
+import {
+  createIndex,
+  getDocumentsInIndex,
+  waitForAlertInIndex,
+  waitForDocumentInIndex,
+} from './helpers/alerting_wait_for_helpers';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const alertingApi = getService('alertingApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAdmin: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   // Failing: See https://github.com/elastic/kibana/issues/193061
   describe.skip('Summary actions', function () {
@@ -66,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     afterEach(async () => {
@@ -88,15 +99,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should schedule actions for summary of alerts per rule run', async () => {
       const testStart = new Date();
-      const createdConnector = await alertingApi.helpers.createIndexConnector({
+      const createdConnector = await createIndexConnector({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -144,27 +159,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      const resp = await alertingApi.helpers.waitForDocumentInIndex({
+      const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 15_000,
-        },
       });
       expect(resp.hits.hits.length).to.be(1);
 
-      const resp2 = await alertingApi.helpers.waitForAlertInIndex({
+      const resp2 = await waitForAlertInIndex({
         esClient,
         filter: testStart,
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 15_000,
-        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 
@@ -222,15 +229,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should filter alerts by kql', async () => {
       const testStart = new Date();
-      const createdConnector = await alertingApi.helpers.createIndexConnector({
+      const createdConnector = await createIndexConnector({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -278,27 +289,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      const resp = await alertingApi.helpers.waitForDocumentInIndex({
+      const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 15_000,
-        },
       });
       expect(resp.hits.hits.length).to.be(1);
 
-      const resp2 = await alertingApi.helpers.waitForAlertInIndex({
+      const resp2 = await waitForAlertInIndex({
         esClient,
         filter: testStart,
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 15_000,
-        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 
@@ -363,17 +366,21 @@ export default function ({ getService }: FtrProviderContext) {
       const start = `${hour}:${minutes}`;
       const end = `${hour}:${minutes}`;
 
-      await alertingApi.helpers.waiting.createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
+      await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      const createdConnector = await alertingApi.helpers.createIndexConnector({
+      const createdConnector = await createIndexConnector({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -427,7 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
 
       // Should not have executed any action
-      const resp = await alertingApi.helpers.waiting.getDocumentsInIndex({
+      const resp = await getDocumentsInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
@@ -437,15 +444,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should schedule actions for summary of alerts on a custom interval', async () => {
       const testStart = new Date();
-      const createdConnector = await alertingApi.helpers.createIndexConnector({
+      const createdConnector = await createIndexConnector({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
-      const createdRule = await alertingApi.helpers.createEsQueryRule({
+      const createdRule = await createEsQueryRule({
+        supertestWithoutAuth,
         roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -491,28 +502,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      const resp = await alertingApi.helpers.waitForDocumentInIndex({
+      const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         num: 2,
         sort: 'asc',
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 10_000,
-        },
       });
 
-      const resp2 = await alertingApi.helpers.waitForAlertInIndex({
+      const resp2 = await waitForAlertInIndex({
         esClient,
         filter: testStart,
         indexName: ALERT_INDEX,
         ruleId,
         num: 1,
-        retryOptions: {
-          retryCount: 20,
-          retryDelay: 15_000,
-        },
       });
       expect(resp2.hits.hits.length).to.be(1);
 

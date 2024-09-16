@@ -92,7 +92,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
       if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message} - Attempt #: ${attemptCounter}`);
+        log.debug(`--- onRetryBlock error: ${before.error.message}`);
       }
     }
 
@@ -104,13 +104,9 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
     if ('error' in attempt) {
       if (lastError && lastError.message === attempt.error.message) {
-        log.debug(
-          `--- ${methodName} failed again with the same message... - Attempt #: ${attemptCounter}`
-        );
+        log.debug(`--- ${methodName} failed again with the same message...`);
       } else {
-        log.debug(
-          `--- ${methodName} error: ${attempt.error.message} - Attempt #: ${attemptCounter}`
-        );
+        log.debug(`--- ${methodName} error: ${attempt.error.message}`);
       }
 
       lastError = attempt.error;
