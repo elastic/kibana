@@ -63,14 +63,6 @@ jobs:
         path: ./kibana-operations
         token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
-    - name: Triage analysis results
-      working-directory: ./kibana-operations/triage
-      env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
-      run: |
-        npm ci --omit=dev
-        node codeql-alert
-
     - name: CodeQL alert
       working-directory: ./kibana-operations/triage
       env:
