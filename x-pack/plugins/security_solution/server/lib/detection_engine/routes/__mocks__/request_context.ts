@@ -36,6 +36,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
+import { entityStoreDataClientMock } from '../../../entity_analytics/entity_store/entity_store_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { detectionRulesClientMock } from '../../rule_management/logic/detection_rules_client/__mocks__/detection_rules_client';
@@ -160,7 +161,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
-    getEntityStoreDataClient: jest.fn(() => client.entityStoreDataClient),
+    getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
   };
 };
 
