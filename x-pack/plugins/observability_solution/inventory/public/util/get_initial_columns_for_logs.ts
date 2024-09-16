@@ -6,7 +6,8 @@
  */
 
 import { isArray } from 'lodash';
-import { EsqlQueryResult } from '../hooks/use_esql_query_result';
+import { EntityTypeDefinition } from '../../common/entities';
+import { EsqlQueryResult } from './run_esql_query';
 
 type Column = EsqlQueryResult['columns'][number];
 
@@ -42,8 +43,10 @@ function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
 
 export function getInitialColumnsForLogs({
   datatable,
+  typeDefinitions,
 }: {
   datatable: EsqlQueryResult;
+  typeDefinitions: EntityTypeDefinition[];
 }): ColumnExtraction {
   const analyzedColumns = analyzeColumnValues(datatable);
 
@@ -71,21 +74,26 @@ export function getInitialColumnsForLogs({
     initialColumns.add(withoutUselessColumns[messageColumnIndex].column);
   }
 
-  for (const { column } of withoutUselessColumns) {
+  const allIdentityFields = new Set<string>([
+    ...typeDefinitions.flatMap(
+      (definition) => definition.discoveryDefinition?.identityFields.map(({ field }) => field) ?? []
+    ),
+  ]);
+
+  const columnsWithIdentityFields = analyzedColumns.filter((column) =>
+    allIdentityFields.has(column.name)
+  );
+  const columnsInOrderOfPreference = [
+    ...columnsWithIdentityFields,
+    ...withoutUselessColumns,
+    ...constantColumns,
+  ];
+
+  for (const { column } of columnsInOrderOfPreference) {
     if (initialColumns.size <= 8) {
       initialColumns.add(column);
     } else {
       break;
-    }
-  }
-
-  if (initialColumns.size <= 1) {
-    for (const { column } of constantColumns) {
-      if (initialColumns.size <= 8) {
-        initialColumns.add(column);
-      } else {
-        break;
-      }
     }
   }
 

@@ -20,7 +20,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '1.0.1',
+    version: '1.0.2',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
@@ -32,7 +32,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       'filebeat*',
       'metrics-apm.service_transaction.1m*',
       'metrics-apm.service_summary.1m*',
-    ],
+    ].flatMap((pattern) => [pattern, `*:${pattern}`]),
     history: {
       timestampField: '@timestamp',
       interval: '1m',
@@ -109,7 +109,8 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error"',
+            filter:
+              'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error" OR error.log.level: "ERROR"',
           },
         ],
       },

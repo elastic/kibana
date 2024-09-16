@@ -196,3 +196,5 @@ export const CLIENT_GEO_CITY_NAME = 'client.geo.city_name';
 export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
 
 export const CHILD_ID = 'child.id';
+
+export const LOG_LEVEL = 'log.level';

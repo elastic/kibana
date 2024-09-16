@@ -7,7 +7,11 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { builtInServicesFromLogsEntityDefinition } from './services';
+import { builtInDataStreamsEntityDefinition } from './datastreams';
 
 export { BUILT_IN_ID_PREFIX } from './constants';
 
-export const builtInDefinitions: EntityDefinition[] = [builtInServicesFromLogsEntityDefinition];
+export const builtInDefinitions: EntityDefinition[] = [
+  builtInServicesFromLogsEntityDefinition,
+  builtInDataStreamsEntityDefinition,
+];

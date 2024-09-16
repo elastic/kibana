@@ -133,7 +133,7 @@ export function DatasetManagementView() {
       <EuiFlexGroup>
         <EuiButton
           data-test-subj="inventoryDatasetManagementViewSplitUpButton"
-          href={`/app/observability/entities/datastream/${id}/management/split`}
+          href={`/app/observability/entities/data_stream/${id}/management/split`}
         >
           {i18n.translate('xpack.inventory.datasetManagementView.splitUpButtonLabel', {
             defaultMessage: 'Split up or reroute',

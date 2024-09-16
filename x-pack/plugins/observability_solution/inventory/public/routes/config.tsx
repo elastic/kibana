@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { createRouter, Outlet } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
@@ -19,6 +19,8 @@ import { AllInventoryView } from '../components/all_inventory_view';
 import { DatasetManagementView } from '../components/dataset_management_view';
 import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
 import { DatasetManagementSplitView } from '../components/dataset_management_split_view';
+import { DefinitionsView } from '../components/definitions_view';
+import { EntityDetailView } from '../components/entity_detail_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -42,6 +44,9 @@ const inventoryRoutes = {
       '/updates': {
         element: <></>,
       },
+      '/definitions': {
+        element: <DefinitionsView />,
+      },
       '/all': {
         element: (
           <InventoryRouterBreadcrumb
@@ -54,7 +59,7 @@ const inventoryRoutes = {
           </InventoryRouterBreadcrumb>
         ),
       },
-      '/datastream/analyze': {
+      '/data_stream/analyze': {
         element: <DatasetAnalysisView />,
         params: t.type({
           query: t.type({
@@ -62,22 +67,22 @@ const inventoryRoutes = {
           }),
         }),
       },
-      '/datastream': {
+      '/data_stream': {
         element: (
           <InventoryRouterBreadcrumb
             title={i18n.translate('xpack.inventory.datastreamsBreadcrumbTitle', {
-              defaultMessage: 'Datastreams',
+              defaultMessage: 'Data streams',
             })}
-            path="/datastream"
+            path="/data_stream"
           >
             <Outlet />
           </InventoryRouterBreadcrumb>
         ),
         children: {
-          '/datastream': {
+          '/data_stream': {
             element: <DatasetInventoryView />,
           },
-          '/datastream/{id}': {
+          '/data_stream/{id}': {
             params: t.type({
               path: t.type({
                 id: t.string,
@@ -89,36 +94,49 @@ const inventoryRoutes = {
               </DatasetDetailView>
             ),
             children: {
-              '/datastream/{id}/overview': {
+              '/data_stream/{id}/overview': {
                 element: <DatasetOverview />,
               },
-              '/datastream/{id}/metrics': {
+              '/data_stream/{id}/metrics': {
                 element: <DatasetMetricsView />,
               },
-              '/datastream/{id}/management': {
+              '/data_stream/{id}/management': {
                 element: <DatasetManagementView />,
               },
-              '/datastream/{id}/management/split': {
+              '/data_stream/{id}/management/split': {
                 element: <DatasetManagementSplitView />,
               },
-              '/datastream/{id}': {
-                element: <RedirectTo path="/datastream/{id}/overview" />,
+              '/data_stream/{id}': {
+                element: <RedirectTo path="/data_stream/{id}/overview" />,
               },
             },
           },
         },
       },
       '/{type}': {
-        element: <></>,
+        element: <Outlet />,
         params: t.type({
           path: t.type({ type: t.string }),
         }),
         children: {
           '/{type}/{id}': {
-            element: <></>,
             params: t.type({
               path: t.type({ id: t.string }),
             }),
+            element: <Outlet />,
+            children: {
+              '/{type}/{id}': {
+                element: (
+                  <RedirectTo path="/{type}/{id}/{tab}" params={{ path: { tab: 'overview' } }} />
+                ),
+              },
+              '/{type}/{id}/{tab}': {
+                element: <EntityDetailView />,
+                params: t.type({
+                  path: t.type({ tab: t.string }),
+                }),
+              },
+            },
           },
         },
       },
@@ -127,7 +145,7 @@ const inventoryRoutes = {
       },
     },
   },
-};
+} satisfies RouteMap;
 
 export type InventoryRoutes = typeof inventoryRoutes;
 

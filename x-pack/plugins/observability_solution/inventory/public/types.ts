@@ -14,6 +14,20 @@ import type {
   DataViewsPublicPluginSetup,
 } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  EntityManagerPublicPluginStart,
+  EntityManagerPublicPluginSetup,
+} from '@kbn/entityManager-plugin/public';
+import type {
+  UnifiedSearchPluginSetup,
+  UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public';
+import type {
+  DatasetQualityPluginStart,
+  DatasetQualityPluginSetup,
+} from '@kbn/dataset-quality-plugin/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -24,6 +38,11 @@ export interface InventorySetupDependencies {
   inference: InferencePublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
+  entityManager: EntityManagerPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPluginSetup;
+  datasetQuality: DatasetQualityPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface InventoryStartDependencies {
@@ -31,6 +50,11 @@ export interface InventoryStartDependencies {
   inference: InferencePublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  entityManager: EntityManagerPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  datasetQuality: DatasetQualityPluginStart;
+  share: SharePluginStart;
 }
 
 export interface InventoryPublicSetup {}

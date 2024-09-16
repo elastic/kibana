@@ -34,7 +34,7 @@ import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 export function DatasetManagementSplitView() {
   const {
     path: { id },
-  } = useInventoryParams('/datastream/{id}/*');
+  } = useInventoryParams('/data_stream/{id}/*');
 
   const {
     core: { http },
@@ -94,7 +94,7 @@ export function DatasetManagementSplitView() {
       <EuiFlexGroup>
         <EuiButton
           data-test-subj="inventoryDatasetManagementViewSplitUpButton"
-          href={`/app/observability/entities/datastream/${id}/management`}
+          href={`/app/observability/entities/data_stream/${id}/management`}
         >
           {i18n.translate(
             'xpack.inventory.datasetManagementSplitView.backToManagementViewButtonLabel',

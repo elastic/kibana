@@ -118,6 +118,7 @@
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
+    "xpack.entityManager": "plugins/observability_solution/entity_manager",
     "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",

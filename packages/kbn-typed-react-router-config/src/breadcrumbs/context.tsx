@@ -24,15 +24,21 @@ import {
   useRouter,
 } from '../..';
 
-export type Breadcrumb<TRouteMap extends RouteMap = RouteMap> = {
+export type Breadcrumb<
+  TRouteMap extends RouteMap = RouteMap,
+  TPath extends PathsOf<TRouteMap> = PathsOf<TRouteMap>
+> = {
   title: string;
-  path: PathsOf<TRouteMap>;
-} & TypeAsParams<TypeOf<TRouteMap, PathsOf<TRouteMap>, false>>;
+  path: TPath;
+} & TypeAsParams<TypeOf<TRouteMap, TPath, false>>;
 
 interface BreadcrumbApi<TRouteMap extends RouteMap = RouteMap> {
-  set(route: Route, breadcrumb: Array<Breadcrumb<TRouteMap>>): void;
+  set<TPath extends PathsOf<TRouteMap>>(
+    route: Route,
+    breadcrumb: Array<Breadcrumb<TRouteMap, TPath>>
+  ): void;
   unset(route: Route): void;
-  getBreadcrumbs(matches: RouteMatch[]): Array<Breadcrumb<TRouteMap>>;
+  getBreadcrumbs(matches: RouteMatch[]): Array<Breadcrumb<TRouteMap, PathsOf<TRouteMap>>>;
 }
 
 export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);

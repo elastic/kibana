@@ -28,6 +28,7 @@ import type {
 } from './types';
 import { InventoryServices } from './services/types';
 import { createCallInventoryAPI } from './api';
+import { createEntityFieldFormatterClass } from './components/entity_field_formatter';
 
 export class InventoryPlugin
   implements
@@ -104,6 +105,10 @@ export class InventoryPlugin
         };
       },
     });
+
+    pluginsSetup.fieldFormats.register([
+      createEntityFieldFormatterClass({ inventoryAPIClient, coreSetup }),
+    ]);
 
     return {};
   }

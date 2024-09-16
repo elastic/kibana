@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once } from 'lodash';
@@ -16,8 +17,8 @@ export interface RequestCache {
 }
 
 export interface RequestCacheOptions {
-  mode: 'always' | 'default';
-  type: 'inMemory';
+  mode: 'always' | 'default' | 'never';
+  type?: 'inMemory';
 }
 
 interface Storage {
@@ -58,7 +59,8 @@ export function createRequestCache(): RequestCache {
     fetch: async (request, options, cb) => {
       const method = request.method || 'GET';
 
-      const shouldCache = options.mode === 'always' || method.toLowerCase() === 'get';
+      const shouldCache =
+        options.mode !== 'never' && (options.mode === 'always' || method.toLowerCase() === 'get');
 
       if (!shouldCache) {
         return cb();

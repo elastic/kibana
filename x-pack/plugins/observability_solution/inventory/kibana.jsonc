@@ -12,7 +12,11 @@
       "entityManager",
       "inference",
       "dataViews",
-      "data"
+      "data",
+      "fieldFormats",
+      "unifiedSearch",
+      "datasetQuality",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact",

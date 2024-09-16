@@ -19,6 +19,7 @@ import {
   DatasetQualitySetupDeps,
   DatasetQualityStartDeps,
 } from './types';
+import { callDatasetQualityApi, createCallDatasetQualityApi } from '../common/rest';
 
 export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
@@ -28,6 +29,7 @@ export class DatasetQualityPlugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
+    createCallDatasetQualityApi(core);
     this.telemetry.setup({ analytics: core.analytics });
 
     return {};
@@ -73,6 +75,7 @@ export class DatasetQualityPlugin
       createDatasetQualityController,
       DatasetQualityDetails,
       createDatasetQualityDetailsController,
+      apiClient: callDatasetQualityApi,
     };
   }
 }

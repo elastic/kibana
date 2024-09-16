@@ -6,9 +6,30 @@
   "plugin": {
     "id": "entityManager",
     "configPath": ["xpack", "entityManager"],
-    "requiredPlugins": ["security", "encryptedSavedObjects", "licensing"],
     "browser": true,
     "server": true,
-    "requiredBundles": []
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "security",
+      "encryptedSavedObjects",
+      "lens",
+      "observabilityShared",
+      "embeddable",
+      "presentationUtil",
+      "usageCollection",
+      "licensing",
+      "transform"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
   }
 }

@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { memoize } from 'lodash';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import type { Observable } from 'rxjs';
 import type {
-  Entity,
   EntityDefinition,
   EntityTypeDefinition,
   VirtualEntityDefinition,
 } from '../../../common/entities';
 import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
+import { getDatasets } from '../../lib/datasets/get_datasets';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import {
   ExtractServiceDefinitionOutputCompleteEvent,
   extractServiceDefinitions,
 } from './extract_service_definitions';
-import { getDatasets } from '../../lib/datasets/get_datasets';
-import { DatasetEntity } from '../../../common/datasets';
+import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 
 const listServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions',
@@ -56,7 +54,7 @@ const listServiceDefinitionsRoute = createInventoryServerRoute({
         indexPatterns: params?.body?.indexPatterns,
       });
 
-      return fetchedDatasets.map((dataset) => dataset.entity.name);
+      return fetchedDatasets.map((dataset) => dataset.entity.id);
     }
 
     async function fetchEntityDefinitions() {
@@ -180,6 +178,38 @@ const listServiceDefinitionsRoute = createInventoryServerRoute({
   },
 });
 
+const dataStreamsForEntitiesRoute = createInventoryServerRoute({
+  endpoint: 'POST /internal/inventory/entities/data_streams_for_entity',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    body: t.type({
+      kql: t.string,
+      indexPatterns: t.array(t.string),
+    }),
+  }),
+  handler: async ({
+    params,
+    context,
+    logger,
+  }): Promise<{ dataStreams: Array<{ name: string }> }> => {
+    const esClient = createObservabilityEsClient({
+      client: (await context.core).elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: 'inventory',
+    });
+
+    return {
+      dataStreams: await getDataStreamsForFilter({
+        kql: params.body.kql,
+        esClient,
+        indexPatterns: params.body.indexPatterns,
+      }),
+    };
+  },
+});
+
 const extractServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions/extract',
   options: {
@@ -258,69 +288,19 @@ const listEntityTypesRoute = createInventoryServerRoute({
           return {
             label: def.name,
             icon: 'folderOpen',
-            name: def.type,
+            name: def.name,
+            discoveryDefinition: def,
             count: 0,
           };
         }),
-        {
-          label: i18n.translate('xpack.inventory.entityTypeLabels.datasets', {
-            defaultMessage: 'Datastreams',
-          }),
-          icon: 'pipeNoBreaks',
-          name: 'datastream',
-          count: 0,
-        },
       ],
-    };
-  },
-});
-
-const listEntitiesRoute = createInventoryServerRoute({
-  endpoint: 'GET /internal/inventory/entities',
-  params: t.type({
-    query: t.type({
-      type: t.string,
-    }),
-  }),
-  options: {
-    tags: ['access:inventory'],
-  },
-  handler: async ({
-    plugins,
-    request,
-    logger,
-    context,
-    params,
-  }): Promise<{ entities: Entity[] }> => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: 'inventory',
-    });
-
-    const {
-      query: { type },
-    } = params;
-
-    const [datasets] = await Promise.all([
-      type === 'all' || type === 'datastream'
-        ? getDatasets({
-            esClient,
-          })
-        : [],
-    ]);
-
-    const allEntities: Entity[] = [...datasets.map((dataset): DatasetEntity => dataset.entity)];
-
-    return {
-      entities: allEntities,
     };
   },
 });
 
 export const entitiesRoutes = {
   ...listEntityTypesRoute,
-  ...listEntitiesRoute,
   ...listServiceDefinitionsRoute,
   ...extractServiceDefinitionsRoute,
+  ...dataStreamsForEntitiesRoute,
 };

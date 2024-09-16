@@ -32,7 +32,7 @@ import { UncontrolledEsqlChart } from '../esql_chart/uncontrolled_esql_chart';
 export function DatasetMetricsView() {
   const {
     path: { id },
-  } = useInventoryParams('/datastream/{id}/metrics');
+  } = useInventoryParams('/data_stream/{id}/metrics');
 
   const {
     core: { notifications },
