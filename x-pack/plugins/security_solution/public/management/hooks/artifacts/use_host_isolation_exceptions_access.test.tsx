@@ -31,7 +31,7 @@ describe('useHostIsolationExceptionsAccess', () => {
   test('should set access to true if canAccessHostIsolationExceptions is true', async () => {
     const { result, waitFor } = setupHook(true, false);
 
-    await waitFor(() => expect(result.current).toBe(true));
+    await waitFor(() => expect(result.current.hasAccessToHostIsolationExceptions).toBe(true));
   });
 
   test('should check for artifact data if canReadHostIsolationExceptions is true and canAccessHostIsolationExceptions is false', async () => {
@@ -41,7 +41,7 @@ describe('useHostIsolationExceptionsAccess', () => {
 
     await waitFor(() => {
       expect(checkArtifactHasData).toHaveBeenCalledWith(mockApiClient());
-      expect(result.current).toBe(true);
+      expect(result.current.hasAccessToHostIsolationExceptions).toBe(true);
     });
   });
 
@@ -52,14 +52,14 @@ describe('useHostIsolationExceptionsAccess', () => {
 
     await waitFor(() => {
       expect(checkArtifactHasData).toHaveBeenCalledWith(mockApiClient());
-      expect(result.current).toBe(false);
+      expect(result.current.hasAccessToHostIsolationExceptions).toBe(false);
     });
   });
 
   test('should set access to false if neither canAccessHostIsolationExceptions nor canReadHostIsolationExceptions is true', async () => {
     const { result, waitFor } = setupHook(false, false);
     await waitFor(() => {
-      expect(result.current).toBe(false);
+      expect(result.current.hasAccessToHostIsolationExceptions).toBe(false);
     });
   });
 
@@ -68,7 +68,7 @@ describe('useHostIsolationExceptionsAccess', () => {
 
     await waitFor(() => {
       expect(checkArtifactHasData).not.toHaveBeenCalled();
-      expect(result.current).toBe(true);
+      expect(result.current.hasAccessToHostIsolationExceptions).toBe(true);
     });
   });
 });

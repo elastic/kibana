@@ -103,6 +103,10 @@ describe('Policy Details', () => {
       policyPackagePolicy.policy_id = policyPackagePolicy.policy_ids[0];
 
       const policyListApiHandlers = policyListApiPathHandlers();
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: true,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
 
       http.get.mockImplementation((...args) => {
         const [path] = args;
@@ -214,7 +218,6 @@ describe('Policy Details', () => {
     });
 
     it('should display the host isolation exceptions tab if user have access', async () => {
-      useHostIsolationExceptionsAccessMock.mockReturnValue(true);
       policyView = render();
       await asyncActions;
       policyView.update();
@@ -223,7 +226,10 @@ describe('Policy Details', () => {
     });
 
     it("shouldn't display when user doesn't have access", async () => {
-      useHostIsolationExceptionsAccessMock.mockReturnValue(false);
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: false,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
       policyView = render();
       await asyncActions;
       policyView.update();
@@ -246,6 +252,10 @@ describe('Policy Details', () => {
         licenseServiceMock.isEnterprise.mockReturnValue(false);
 
         useLicenseMock.mockReturnValue(licenseServiceMock);
+        useHostIsolationExceptionsAccessMock.mockReturnValue({
+          hasAccessToHostIsolationExceptions: false,
+          isHostIsolationExceptionsAccessLoading: false,
+        });
       });
 
       afterEach(() => {
