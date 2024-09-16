@@ -125,7 +125,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       } = formValues;
 
       const spaceClone = structuredClone(partialSpace as Partial<Space>);
-      const { id, name, disabledFeatures } = spaceClone;
+      const { id, name } = spaceClone;
 
       if (!id) {
         throw new Error(`Can not update space without id field!`);
@@ -135,6 +135,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       }
 
       setIsLoading(true);
+
+      let disabledFeatures: string[] | undefined;
+      if (spaceClone.solution === SOLUTION_VIEW_CLASSIC) {
+        disabledFeatures = spaceClone.disabledFeatures;
+      }
 
       try {
         await spacesManager.updateSpace({

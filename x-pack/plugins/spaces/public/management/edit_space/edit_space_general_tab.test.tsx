@@ -6,6 +6,7 @@
  */
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import {
@@ -191,7 +192,7 @@ describe('EditSpaceSettings', () => {
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
-      fireEvent.click(updateButton);
+      await userEvent.click(updateButton);
 
       expect(updateSpaceSpy).toHaveBeenCalledWith({
         ...spaceToUpdate,
@@ -230,10 +231,10 @@ describe('EditSpaceSettings', () => {
 
     await act(async () => {
       const deleteButton = screen.getByTestId('delete-space-button');
-      fireEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       const confirmButton = await screen.findByTestId('confirmModalConfirmButton'); // click delete confirm
-      fireEvent.click(confirmButton);
+      await userEvent.click(confirmButton);
 
       expect(deleteSpaceSpy).toHaveBeenCalledWith(spaceToDelete);
     });
@@ -272,7 +273,7 @@ describe('EditSpaceSettings', () => {
       fireEvent.change(nameInput, { target: { value: 'Updated Existing Space' } });
 
       const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
-      fireEvent.click(updateButton);
+      await userEvent.click(updateButton);
 
       expect(updateSpaceSpy).toHaveBeenCalledWith({
         ...spaceToUpdate,
@@ -311,21 +312,21 @@ describe('EditSpaceSettings', () => {
     // update the space solution view
     await act(async () => {
       const solutionViewPicker = screen.getByTestId('solutionViewSelect');
-      fireEvent.click(solutionViewPicker);
+      await userEvent.click(solutionViewPicker);
 
       const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
-      fireEvent.click(esSolutionOption);
+      await userEvent.click(esSolutionOption);
 
       expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = screen.getByTestId('save-space-button');
-      fireEvent.click(updateButton);
+      await userEvent.click(updateButton);
 
       expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
       const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-      fireEvent.click(confirmButton);
+      await userEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(updateSpaceSpy).toHaveBeenCalledWith({
@@ -378,7 +379,7 @@ describe('EditSpaceSettings', () => {
       const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
       expect(feature1Checkbox).toBeChecked();
 
-      fireEvent.click(feature1Checkbox);
+      await userEvent.click(feature1Checkbox);
       await waitFor(() => {
         expect(feature1Checkbox).not.toBeChecked();
       });
@@ -387,18 +388,98 @@ describe('EditSpaceSettings', () => {
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = screen.getByTestId('save-space-button');
-      fireEvent.click(updateButton);
+      await userEvent.click(updateButton);
 
       expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
       const confirmButton = screen.getByTestId('confirmModalConfirmButton');
-      fireEvent.click(confirmButton);
+      await userEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(updateSpaceSpy).toHaveBeenCalledWith({
           ...spaceToUpdate,
           imageUrl: '',
           disabledFeatures: ['feature-1'],
+        });
+      });
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('empties the disabled features list when the solution view non-classic', async () => {
+    const features = [
+      new KibanaFeature({
+        id: 'feature-1',
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+      }),
+    ];
+
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={features}
+          allowFeatureVisibility={true}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // customize the space visible features to disable feature-1
+    await act(async () => {
+      const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+      expect(feature1Checkbox).toBeChecked();
+
+      await userEvent.click(feature1Checkbox);
+      await waitFor(() => {
+        expect(feature1Checkbox).not.toBeChecked();
+      });
+
+      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    });
+
+    // change the selected solution view to es
+    await act(async () => {
+      const solutionViewPicker = screen.getByTestId('solutionViewSelect');
+      await userEvent.click(solutionViewPicker);
+
+      const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
+      await userEvent.click(esSolutionOption);
+    });
+
+    // perform the save
+    await act(async () => {
+      const updateButton = screen.getByTestId('save-space-button');
+      await userEvent.click(updateButton);
+
+      expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+
+      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+      await userEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(updateSpaceSpy).toHaveBeenCalledWith({
+          ...spaceToUpdate,
+          imageUrl: '',
+          solution: 'es',
+          disabledFeatures: [], // "feature-1" became deselected
         });
       });
     });
