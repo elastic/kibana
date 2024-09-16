@@ -1,0 +1,26 @@
+.controlsWrapper {
+  min-height: $euiSize * 4;
+}
+.controlsFrame__draggable {
+  height: $euiButtonHeight;
+}
+
+.optionsList--filterBtn {
+  height: $euiButtonHeight;
+}
+
+.controlPanel {
+  height: $euiButtonHeight;
+
+  &--labelWrapper {
+    height: 100%;
+  }
+
+  .controlPanel--label {
+    height: 100%;
+  }
+}
+
+.dshDashboardViewport-controls {
+  padding-bottom: $euiSizeXS;
+}
