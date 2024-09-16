@@ -53,6 +53,7 @@ export async function getAnnotationEvents(
 
   const body = {
     size: 100,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [

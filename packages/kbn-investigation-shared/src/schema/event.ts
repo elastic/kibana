@@ -19,7 +19,7 @@ const eventTypeSchema = z.union([
 
 const annotationEventSchema = z.object({
   eventType: z.literal('annotation'),
-  annotationType: z.union([z.string(), z.undefined()]),
+  annotationType: z.string().optional(),
 });
 
 const alertStatusSchema = z.union([
@@ -43,7 +43,7 @@ const eventSchema = z.intersection(
     description: z.string(),
     timestamp: z.number(),
     eventType: eventTypeSchema,
-    source: z.union([sourceSchema, z.undefined()]),
+    source: sourceSchema.optional(),
   }),
   z.discriminatedUnion('eventType', [annotationEventSchema, alertEventSchema])
 );
