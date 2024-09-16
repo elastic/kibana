@@ -10,7 +10,8 @@ import {
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
-describe('Functions page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192697
+describe.skip('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
