@@ -30,7 +30,6 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
     {
       code: dedent`
        import crypto from 'crypto';
-
        crypto.createHash('sha256');
       `,
     },
@@ -38,7 +37,6 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
     {
       code: dedent`
        import { createHash } from 'crypto';
-
        createHash('sha256');
       `,
     },
@@ -65,12 +63,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
     {
       code: dedent`
        import crypto from 'crypto';
-
        crypto.createHash('md5');
       `,
       errors: [
         {
-          line: 3,
+          line: 2,
           message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
@@ -79,12 +76,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
     {
       code: dedent`
        import { createHash } from 'crypto';
-
        createHash('md5');
       `,
       errors: [
         {
-          line: 3,
+          line: 2,
           message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
@@ -107,12 +103,36 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
     {
       code: dedent`
        import { hash } from 'crypto';
-
        hash('md5');
       `,
       errors: [
         {
-          line: 3,
+          line: 2,
+          message: `Usage of hash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
+        },
+      ],
+    },
+    {
+      code: dedent`
+       import _crypto from 'crypto';
+       _crypto.hash('md5');
+      `,
+      errors: [
+        {
+          line: 2,
+          message: `Usage of hash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
+        },
+      ],
+    },
+
+    {
+      code: dedent`
+       import { hash as _hash } from 'crypto';
+       _hash('md5');
+      `,
+      errors: [
+        {
+          line: 2,
           message: `Usage of hash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],

@@ -25,6 +25,7 @@ module.exports = {
   create(context) {
     let isCreateHashImported = false;
     let createHashName = 'createHash';
+    let cryptoLocalName = 'crypto';
     let usedFunctionName = '';
     const sourceCode = context.getSourceCode();
 
@@ -70,7 +71,9 @@ module.exports = {
               isHashOrCreateHash(specifier.imported.name)
             ) {
               isCreateHashImported = true;
-              createHashName = specifier.local.name;
+              createHashName = specifier.local.name; // Capture local name (renamed or not)
+            } else if (specifier.type === 'ImportDefaultSpecifier') {
+              cryptoLocalName = specifier.local.name;
             }
           });
         }
@@ -90,14 +93,45 @@ module.exports = {
         }
       },
       CallExpression(node) {
+        const callee = node.callee;
+
         if (
-          (node.callee.type === 'MemberExpression' &&
-            node.callee.object.name === 'crypto' &&
-            isHashOrCreateHash(node.callee.property.name)) ||
-          (isCreateHashImported && node.callee.name === createHashName)
+          callee.type === 'MemberExpression' &&
+          callee.object.name === cryptoLocalName &&
+          isHashOrCreateHash(callee.property.name)
         ) {
-          if (node.arguments.length > 0) {
-            const arg = node.arguments[0];
+          const arg = node.arguments[0];
+          if (arg) {
+            if (arg.type === 'Literal' && !isAllowedAlgorithm(arg.value)) {
+              context.report({
+                node,
+                messageId: 'noDisallowedHash',
+                data: {
+                  algorithm: arg.value,
+                  allowedAlgorithms: allowedAlgorithms.join(', '),
+                  functionName: usedFunctionName,
+                },
+              });
+            } else if (arg.type === 'Identifier') {
+              const identifierValue = getIdentifierValue(arg);
+              if (disallowedAlgorithmNodes.has(arg.name) && identifierValue) {
+                context.report({
+                  node,
+                  messageId: 'noDisallowedHash',
+                  data: {
+                    algorithm: identifierValue,
+                    allowedAlgorithms: allowedAlgorithms.join(', '),
+                    functionName: usedFunctionName,
+                  },
+                });
+              }
+            }
+          }
+        }
+
+        if (isCreateHashImported && callee.name === createHashName) {
+          const arg = node.arguments[0];
+          if (arg) {
             if (arg.type === 'Literal' && !isAllowedAlgorithm(arg.value)) {
               context.report({
                 node,
