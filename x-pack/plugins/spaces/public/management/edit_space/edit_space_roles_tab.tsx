@@ -93,6 +93,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
                 defaultSelected,
                 storeDispatch: dispatch,
                 spacesClientsInvocator: invokeClient,
+                getUrlForApp,
               }}
             />
           </EditSpaceProvider>,
@@ -106,15 +107,16 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
       );
     },
     [
-      dispatch,
-      features,
-      i18nStart,
-      invokeClient,
-      notifications.toasts,
       overlays,
-      space,
-      theme,
       services,
+      space,
+      features,
+      dispatch,
+      invokeClient,
+      getUrlForApp,
+      theme,
+      i18nStart,
+      notifications.toasts,
     ]
   );
 

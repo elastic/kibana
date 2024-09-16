@@ -87,7 +87,7 @@ const renderPrivilegeRolesForm = ({
           notifications,
           spacesManager,
           serverBasePath: '',
-          getUrlForApp: (_) => _,
+          getUrlForApp: jest.fn((_) => _),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           navigateToUrl: jest.fn(),
@@ -108,6 +108,7 @@ const renderPrivilegeRolesForm = ({
             onSaveCompleted,
             storeDispatch: dispatchMock,
             spacesClientsInvocator: spacesClientsInvocatorMock,
+            getUrlForApp: jest.fn((_) => _),
           }}
         />
       </EditSpaceProvider>

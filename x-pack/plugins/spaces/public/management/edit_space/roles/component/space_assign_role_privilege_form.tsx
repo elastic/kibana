@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -56,6 +57,7 @@ interface PrivilegesRolesFormProps {
   defaultSelected?: Role[];
   storeDispatch: EditSpaceStore['dispatch'];
   spacesClientsInvocator: EditSpaceServices['invokeClient'];
+  getUrlForApp: EditSpaceServices['getUrlForApp'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>
@@ -73,6 +75,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     defaultSelected = [],
     spacesClientsInvocator,
     storeDispatch,
+    getUrlForApp,
   } = props;
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
@@ -307,6 +310,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
             { defaultMessage: 'Select roles(s)' }
           )}
+          labelAppend={
+            <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+              {i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
+                { defaultMessage: 'Manage roles' }
+              )}
+            </EuiLink>
+          }
         >
           <EuiComboBox
             data-test-subj="space-assign-role-selection-combo-box"
