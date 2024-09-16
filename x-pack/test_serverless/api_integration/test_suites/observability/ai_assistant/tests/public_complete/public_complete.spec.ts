@@ -23,6 +23,7 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
+import { deleteAllConversations } from '../conversations/helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -47,8 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     },
   ];
-  // TODO: causes tests to fail checking for stored conversations
-  describe.skip('/api/observability_ai_assistant/chat/complete', () => {
+  describe('/api/observability_ai_assistant/chat/complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
     let roleAuthc: RoleCredentials;
@@ -153,6 +153,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await deleteAllConversations({
+        observabilityAIAssistantAPIClient,
+        internalReqHeader,
+        roleAuthc,
+        log,
+      });
       await deleteActionConnector({ supertest, connectorId, log, roleAuthc, internalReqHeader });
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);

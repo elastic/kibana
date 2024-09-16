@@ -54,7 +54,6 @@ function isModelMissingOrUnavailableError(error: Error) {
   );
 }
 function isCreateModelValidationError(error: Error) {
-  console.log('isCreateModelValidationError', error);
   return (
     error instanceof errors.ResponseError &&
     error.statusCode === 400 &&
@@ -124,7 +123,6 @@ export class KnowledgeBaseService {
 
     const installModelIfDoesNotExist = async () => {
       const modelInstalledAndReady = await isModelInstalledAndReady();
-      console.log('modelInstalledAndReady', modelInstalledAndReady);
       if (!modelInstalledAndReady) {
         await installModel();
       }
@@ -132,7 +130,6 @@ export class KnowledgeBaseService {
 
     const installModel = async () => {
       this.dependencies.logger.info(`Installing ${elserModelId} model`);
-      console.log('installModel', elserModelId)
       try {
         await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
           {
@@ -146,7 +143,6 @@ export class KnowledgeBaseService {
         );
       } catch (error) {
         if (isCreateModelValidationError(error)) {
-          console.log('isCreateModelValidationError', error);
           throw badRequest(error);
         } else {
           throw error;
