@@ -175,8 +175,6 @@
   height: 100%;
 
   .embPanel__hoverActionsWrapper {
-    transition: all $euiAnimSpeedSlow;
-    transition-delay: 1000ms;
     height: $euiSizeXL;
     position: absolute;
     top: 0;
@@ -190,8 +188,6 @@
   }
 
   .embPanel__hoverActions {
-    transition: all $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
-    transition-delay: 500ms;
     opacity: 0;
     padding: $euiSizeXS;
     display: flex;
@@ -219,12 +215,10 @@
   &:hover .embPanel__hoverActionsWrapper,
   &:focus-within .embPanel__hoverActionsWrapper,
   .embPanel__hoverActionsWrapper--openContextMenu {
-    transition: all $euiAnimSpeedFast;
     z-index: $euiZLevel9;
     top: -$euiSizeXL;
 
     .embPanel__hoverActions {
-      transition: all $euiAnimSpeedFast;
       opacity: 1;
     }
   }
