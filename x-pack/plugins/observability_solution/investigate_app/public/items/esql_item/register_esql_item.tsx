@@ -128,7 +128,16 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     if (previewInput.error) {
       innerElement = <ErrorMessage error={previewInput.error} />;
     } else if (previewInput.value) {
-      innerElement = <lens.EmbeddableComponent {...previewInput.value} />;
+      innerElement = (
+        <lens.EmbeddableComponent
+          {...previewInput.value}
+          overrides={{
+            axisX: { hide: true },
+            axisLeft: { style: { axisTitle: { visible: false } } },
+            settings: { showLegend: false },
+          }}
+        />
+      );
     } else {
       innerElement = <EuiLoadingSpinner size="s" />;
     }
@@ -153,7 +162,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
       <lens.EmbeddableComponent
         {...input}
         style={{ height: 128 }}
-        overrides={{ axisX: { hide: true } }}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </EuiFlexItem>
   );
