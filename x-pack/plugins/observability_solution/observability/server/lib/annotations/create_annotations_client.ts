@@ -202,7 +202,12 @@ export function createAnnotationsClient(params: {
       };
     }),
     find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
-      const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
+      const { start, end, sloId, sloInstanceId, serviceName, filter, size } = findParams ?? {};
+      const filterJSON = filter ? JSON.parse(filter) : {};
+
+      const termsFilter = Object.keys(filterJSON).map((filterKey) => ({
+        term: { [filterKey]: filterJSON[filterKey] },
+      }));
 
       const shouldClauses: QueryDslQueryContainer[] = [];
       if (sloId || sloInstanceId) {
@@ -246,7 +251,7 @@ export function createAnnotationsClient(params: {
 
       const result = await esClient.search({
         index: readIndex,
-        size: 10000,
+        size: size || 10000,
         ignore_unavailable: true,
         query: {
           bool: {
@@ -258,23 +263,26 @@ export function createAnnotationsClient(params: {
                     lte: end ?? 'now',
                   },
                 },
+                ...(filterJSON ? termsFilter : []),
               },
-              {
-                bool: {
-                  should: [
-                    ...(serviceName
-                      ? [
-                          {
-                            term: {
-                              'service.name': serviceName,
-                            },
-                          },
-                        ]
-                      : []),
-                    ...shouldClauses,
-                  ],
-                },
-              },
+              !filterJSON
+                ? {
+                    bool: {
+                      should: [
+                        ...(serviceName
+                          ? [
+                              {
+                                term: {
+                                  'service.name': serviceName,
+                                },
+                              },
+                            ]
+                          : []),
+                        ...shouldClauses,
+                      ],
+                    },
+                  }
+                : {},
             ],
           },
         },
