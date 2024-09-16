@@ -164,19 +164,9 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         incremental: true,
         placeholder: i18n.SEARCH_PLACEHOLDER,
       },
-      filters: [
-        {
-          type: 'field_value_selection',
-          field: 'namespace',
-          name: 'Spaces',
-          multiSelect: false,
-          options: entries.data.map(({ namespace }) => ({
-            value: namespace,
-          })),
-        },
-      ],
+      filters: [],
     }),
-    [entries.data, onDocumentClicked, onIndexClicked]
+    [onDocumentClicked, onIndexClicked]
   );
 
   const flyoutTitle = useMemo(() => {

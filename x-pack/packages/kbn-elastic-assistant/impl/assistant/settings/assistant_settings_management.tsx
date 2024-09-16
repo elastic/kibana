@@ -9,8 +9,6 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { useQuery } from '@tanstack/react-query';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -36,7 +34,6 @@ import {
 
 interface Props {
   selectedConversation: Conversation;
-  spacesApi: SpacesPluginStart;
 }
 
 /**
@@ -44,22 +41,13 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ selectedConversation: defaultSelectedConversation, spacesApi }) => {
+  ({ selectedConversation: defaultSelectedConversation }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
-
-    const { spacesDataPromise } = spacesApi?.ui.useSpaces();
-    const { data: currentSpaces } = useQuery({
-      queryKey: ['currentSpaces'],
-      queryFn: () => spacesDataPromise,
-      select: (data) => data,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    });
 
     const { data: connectors } = useLoadConnectors({
       http,
