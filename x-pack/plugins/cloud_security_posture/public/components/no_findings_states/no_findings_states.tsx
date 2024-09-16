@@ -31,7 +31,12 @@ import {
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
 } from '../test_subjects';
-import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
+import {
+  CloudPosturePage,
+  PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
+  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
+  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
+} from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
 import cloudsSVG from '../../assets/illustrations/clouds.svg';
 import vendorsSVG from '../../assets/illustrations/vendors.svg';
@@ -253,12 +258,12 @@ const EmptySecurityFindingsPrompt = () => {
       <EuiFlexItem>
         <EuiEmptyPrompt
           style={{ padding: 24 }}
-          data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+          data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
           icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="" role="presentation" />}
           title={
             <h2>
               <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+                id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
                 defaultMessage="Already using a {lineBreak} cloud security product?"
                 values={{ lineBreak: <br /> }}
               />
@@ -269,7 +274,7 @@ const EmptySecurityFindingsPrompt = () => {
           body={
             <p>
               <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+                id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
                 defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
                 values={{ lineBreak: <br /> }}
               />
@@ -283,10 +288,10 @@ const EmptySecurityFindingsPrompt = () => {
                   fill
                   href={wizIntegrationLink}
                   isDisabled={!wizIntegrationLink}
-                  data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
+                  data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
                 >
                   <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.3pPackageNotInstalledRenderer.addWizIntegrationButtonTitle"
+                    id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
                     defaultMessage="Wiz Integration"
                   />
                 </EuiButton>
