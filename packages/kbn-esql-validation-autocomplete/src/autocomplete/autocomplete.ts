@@ -30,11 +30,9 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
-  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
-  isMathFunction,
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
@@ -47,6 +45,7 @@ import {
   getColumnExists,
   findPreviousWord,
   noCaseCompare,
+  correctQuerySyntax,
   getColumnByName,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
@@ -98,11 +97,8 @@ import {
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
-  getCompatibleTypesToSuggestNext,
   removeQuoteForSuggestedSources,
-  getValidFunctionSignaturesForPreviousArgs,
-  strictlyGetParamAtPosition,
-  isLiteralDateItem,
+  getValidSignaturesAndTypesToSuggestNext,
 } from './helper';
 import {
   FunctionParameter,
@@ -156,76 +152,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
     finalSuggestions.push(commaCompleteItem);
   }
   return finalSuggestions;
-}
-
-/**
- * This function count the number of unclosed brackets in order to
- * locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param bracketType
- * @param text
- * @returns
- */
-function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
-  const stack = [];
-  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
-  for (let i = 0; i < text.length; i++) {
-    const substr = text.substring(i, i + bracketType.length);
-    if (substr === closingBrackets[bracketType] && stack.length) {
-      stack.pop();
-    } else if (substr === bracketType) {
-      stack.push(bracketType);
-    }
-  }
-  return stack.length;
-}
-
-/**
- * This function attempts to correct the syntax of a partial query to make it valid.
- *
- * This is important because a syntactically-invalid query will not generate a good AST.
- *
- * @param _query
- * @param context
- * @returns
- */
-function correctQuerySyntax(_query: string, context: EditorContext) {
-  let query = _query;
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
-  const unclosedQuotes = countBracketsUnclosed('"', query);
-  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
-    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
-    isComma(query.trimEnd()[query.trimEnd().length - 1])
-  ) {
-    query += EDITOR_MARKER;
-  }
-
-  // if there are unclosed brackets, close them
-  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
-    for (const [char, count] of [
-      ['"""', unclosedTripleQuotes],
-      ['"', unclosedQuotes],
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        query += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  return query;
 }
 
 export async function suggest(
@@ -332,7 +258,7 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(
+export function getFieldsByTypeRetriever(
   queryString: string,
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetFieldsByTypeFn; getFieldsMap: GetFieldsMapFn } {
@@ -1290,18 +1216,6 @@ async function getFunctionArgsSuggestions(
     fields: fieldsMap,
     variables: anyVariables,
   };
-
-  const enrichedArgs = node.args.map((nodeArg) => {
-    let dataType = extractTypeFromASTArg(nodeArg, references);
-
-    // For named system time parameters ?start and ?end, make sure it's compatiable
-    if (isLiteralDateItem(nodeArg)) {
-      dataType = 'date';
-    }
-
-    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
-  });
-
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
@@ -1309,33 +1223,15 @@ async function getFunctionArgsSuggestions(
     innerText
   );
 
-  // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
-  let argIndex = Math.max(node.args.length, 0);
-  if (!shouldGetNextArgument && argIndex) {
-    argIndex -= 1;
-  }
-
+  const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
+    getValidSignaturesAndTypesToSuggestNext(node, references, fnDefinition, fullText, offset);
   const arg: ESQLAstItem = enrichedArgs[argIndex];
-
-  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argIndex
-  );
-  // Retrieve unique of types that are compatiable for the current arg
-  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
-  const hasMoreMandatoryArgs = !validSignatures
-    // Types available to suggest next after this argument is completed
-    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
-    // when a param is null, it means param is optional
-    // If there's at least one param that is optional, then
-    // no need to suggest comma
-    .some((p) => p === null || p?.optional === true);
 
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
-  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const isCursorFollowedByComma = fullText
+    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+    : false;
   const canBeBooleanCondition =
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
     fnDefinition.name === 'case' ||
@@ -1345,9 +1241,10 @@ async function getFunctionArgsSuggestions(
   const shouldAddComma =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== 'builtin' &&
-    !alreadyHasComma &&
+    !isCursorFollowedByComma &&
     !canBeBooleanCondition;
-  const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
+  const shouldAdvanceCursor =
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext

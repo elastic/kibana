@@ -70,7 +70,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceId?.buckets?.[0]?.key}
+                    title={bucket.resourceId?.buckets?.[0]?.key as string}
                   >
                     <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
