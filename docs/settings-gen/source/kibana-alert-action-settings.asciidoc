@@ -14,25 +14,25 @@ Something
 Something else.
 
 `xpack.encryptedSavedObjects.encryptionKey`::
-A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
+A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
 +
-{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
+Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
 +
-If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}.
+If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
 +
-Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
+Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 +
 ====
 Options: +
-{nbsp} `yes` - a description +
-{nbsp} `no` - a different description +
-{nbsp} `maybe`- yet another description +
+{nbsp} `mercury` - too close to the sun +
+{nbsp} `venus` - still a little close +
+{nbsp} `earth` - just perfect +
 Default: `true` +
-Type: static +
+Type: `static` +
 ====
 
 `xpack.actions.allowedHosts` {ess-icon}::
-A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 +
 Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 +
@@ -74,7 +74,7 @@ Default: `false` +
 
 `xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
 +
-**Deprecated** Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead.
+**Deprecated:** Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead.
 +
 A boolean value indicating whether to bypass server certificate validation.
 +
@@ -82,13 +82,13 @@ Overrides the general `xpack.actions.rejectUnauthorized` configuration for reque
 
 
 [[action-config-custom-host-verification-mode]] `action-config-custom-host-verification-mode` {ess-icon}::
-Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
+Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 +
 ====
 Options: +
-{nbsp} `full` +
-{nbsp} `certificate` +
-{nbsp} `none` +
+{nbsp} `hello` - a description +
+{nbsp} `goodbye` - a different description +
+{nbsp} `have_a_nice_day` - yet another description +
 Default: `full` +
 ====
 
@@ -102,7 +102,7 @@ The contents of one or more PEM-encoded certificate files in multiline format. T
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist` {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
 +
-WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+WARNING: This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
 
 
 [float]
@@ -120,11 +120,11 @@ Some description.
 +
 ====
 Options: +
-{nbsp} `yes` +
-{nbsp} `no` +
-{nbsp} `maybe` +
+{nbsp} `hello` +
+{nbsp} `goodbye` +
+{nbsp} `have_a_nice_day` +
 Default: `true` +
-Type: static +
+Type: `static` +
 ====
 
 
@@ -143,11 +143,11 @@ Some description.
 +
 ====
 Options: +
-{nbsp} `yes - some decription` +
-{nbsp} `no` - another description +
-{nbsp} `maybe` - yet another description +
+{nbsp} `mercury` - too close to the sun +
+{nbsp} `venus` - still a little close +
+{nbsp} `earth` - just perfect +
 Default: `true` +
-Type: static +
+Type: `static` +
 ====
 
 
@@ -166,11 +166,11 @@ Some description.
 +
 ====
 Options: +
-{nbsp} `yes` - option description +
-{nbsp} `no` - another option description +
-{nbsp} `maybe` - yet another option description +
+{nbsp} `mercury` - too close to the sun +
+{nbsp} `venus` - still a little close +
+{nbsp} `earth` - just perfect +
 Default: `true` +
-Type: static +
+Type: `static` +
 ====
 
 

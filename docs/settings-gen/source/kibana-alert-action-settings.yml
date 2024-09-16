@@ -14,22 +14,25 @@ groups:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey 
         description:
-          - "A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties."
-          - "{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key."
-          - "If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}."
-          - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
+          - "A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties."
+          - "Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key."
+          - "If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana."
+          - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
         default: true
         type: static
         options:
-          - "`yes` - a description"
-          - "`no` - a different description"
-          - "`maybe`- yet another description"
+          - option: mercury
+            description: "too close to the sun"
+          - option: venus
+            description: "still a little close"
+          - option: earth
+            description: "just perfect"
         platforms:
           - self-managed
        
       - setting: xpack.actions.allowedHosts
         description:
-         - 'A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.'
+         - 'A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.'
          - 'Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.'
         default: '["*"]'
         platforms:
@@ -81,11 +84,14 @@ groups:
       - setting: action-config-custom-host-verification-mode
         id: action-config-custom-host-verification-mode
         description:
-         - "Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification."
+         - "Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification."
         options:
-          - "`full`"
-          - "`certificate`"
-          - "`none`"
+          - option: hello
+            description: "a description"
+          - option: goodbye
+            description: "a different description"
+          - option: have_a_nice_day
+            description: "yet another description"
         default: full
         platforms:
           - self-managed
@@ -106,7 +112,7 @@ groups:
         id: action-config-email-domain-allowlist
         description:
          - "A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed."
-        warning: "This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly."
+        warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly."
         platforms:
           - self-managed
           - cloud
@@ -125,9 +131,9 @@ groups:
         default: true
         type: static
         options:
-          - "`yes`"
-          - "`no`"
-          - "`maybe`"
+          - option: hello
+          - option: goodbye
+          - option: have_a_nice_day
         platforms:
           - self-manage
 
@@ -145,9 +151,12 @@ groups:
         default: true
         type: static
         options:
-          - "`yes` - some decription"
-          - "`no` - another description"
-          - "`maybe` - yet another description"
+          - option: mercury
+            description: "too close to the sun"
+          - option: venus
+            description: "still a little close"
+          - option: earth
+            description: "just perfect"
         platforms:
           - self-managed
 
@@ -165,8 +174,11 @@ groups:
         default: true
         type: static
         options:
-          - "`yes` - option description"
-          - "`no` - another option description"
-          - "`maybe` - yet another option description"
+          - option: mercury
+            description: "too close to the sun"
+          - option: venus
+            description: "still a little close"
+          - option: earth
+            description: "just perfect"
         platforms:
           - self-manage

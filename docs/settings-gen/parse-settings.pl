@@ -52,6 +52,24 @@ sub parsefile {
   $asciidocoutput .= "\n".'// '."Collection: ".$collection;
   $asciidocoutput .= "\n".'// '."Product: ".$product."\n\n";
 
+  # build the page preamble paragraphs
+  my $page_description = $yaml->[0]->{page_description};
+  my $page_description_string = "";
+  for my $paragraph (@$page_description) {
+    $page_description_string .= $paragraph."\n\n";
+  }
+  # remove the + sign after the last paragraph of the description
+  if ($page_description_string) {
+    $page_description_string =~ s/\+$//;
+    chomp ($page_description_string);
+  }
+  if ($page_description_string) {
+    $asciidocoutput .= $page_description_string;
+  }
+
+
+
+
   my $groups = $yaml->[0]{groups};
   for my $group (@$groups) {
 
@@ -78,16 +96,16 @@ sub parsefile {
       $asciidocoutput .= $group_description_string;
     }
 
-  
     my $settings = $group->{settings};
     for my $setting (@$settings) {
   
       # Grab the setting name, description, and other properties
       my $setting_name = $setting->{setting};
-      my $setting_id = $setting->{id};   
+      my $setting_id = $setting->{id};
       my $setting_description = $setting->{description};
       my $setting_note = $setting->{note};
       my $setting_warning = $setting->{warning};
+      my $setting_important = $setting->{important};
       my $setting_tip = $setting->{tip};
       my $setting_default = $setting->{default};
       my $setting_type = $setting->{type};
@@ -96,7 +114,20 @@ sub parsefile {
       my $setting_example = $setting->{example};
       my $setting_state = $setting->{state};
       my $setting_state_guidance = $setting->{state_guidance};
-  
+
+      # Get the setting options and option descriptions and build the string
+      my $options = $setting->{options};
+      my $setting_options_string = "";
+      for my $option (@$options) {
+        my $option_name = $option->{option};
+        # if ($option_name) {print "\nOPTION = ".$option_name;}
+        if ($option_name) {$setting_options_string .= '{nbsp} `'.$option_name.'`';}
+        my $option_description = $option->{description};
+        # if ($option_description) {print "\nDESCRIPTION = ".$option_description;}
+        if ($option_description) {$setting_options_string .= ' - '.$option_description;}
+        $setting_options_string .= ' +'."\n";
+      }
+
       # check if supported on Cloud (these settings are marked with a Cloud icon)
       my $supported_cloud = 0;
       for my $platform (@$setting_platforms) {
@@ -113,14 +144,6 @@ sub parsefile {
         $setting_description_string =~ s/\+$//;
         chomp ($setting_description_string);
       }
-  
-      # build the list of supported options
-      my $setting_options_string = "";
-      for my $option (@$setting_options) {
-        $setting_options_string .= '{nbsp} '.$option.' +'."\n";
-      }
-      # remove the ' +' after the last option in the list
-      # if ($setting_options_string) {$setting_options_string =~ s/ +$//;}
   
       # build the list of supported platforms
       my $setting_platforms_string = "";
@@ -141,7 +164,7 @@ sub parsefile {
       }
       $asciidocoutput .= '::'."\n";
       if ($setting_state) {
-        $asciidocoutput .= "+\n**".$setting_state."** ";
+        $asciidocoutput .= "+\n**".$setting_state.":** ";
         if ($setting_state_guidance) {
           $asciidocoutput .= $setting_state_guidance."\n+\n";
         }
@@ -155,6 +178,9 @@ sub parsefile {
       }
       if ($setting_warning) {
         $asciidocoutput .= "+\nWARNING: ".$setting_warning."\n";
+      }
+      if ($setting_important) {
+        $asciidocoutput .= "+\nIMPORTANT: ".$setting_important."\n";
       }
       if ($setting_tip) {
         $asciidocoutput .= "+\nTIP: ".$setting_tip."\n";
@@ -177,7 +203,7 @@ sub parsefile {
         #   $asciidocoutput .= "+\nPlatforms: ".$setting_platforms_string."\n";
         # }
         if ($setting_type) {
-          $asciidocoutput .= "Type: ".$setting_type.' +'."\n";
+          $asciidocoutput .= 'Type: `'.$setting_type.'` +'."\n";
         }
         $asciidocoutput .= "====\n";
       }
