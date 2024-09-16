@@ -18,6 +18,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { AllInventoryView } from '../components/all_inventory_view';
 import { DatasetManagementView } from '../components/dataset_management_view';
 import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
+import { DatasetManagementSplitView } from '../components/dataset_management_split_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -96,6 +97,9 @@ const inventoryRoutes = {
               },
               '/datastream/{id}/management': {
                 element: <DatasetManagementView />,
+              },
+              '/datastream/{id}/management/split': {
+                element: <DatasetManagementSplitView />,
               },
               '/datastream/{id}': {
                 element: <RedirectTo path="/datastream/{id}/overview" />,

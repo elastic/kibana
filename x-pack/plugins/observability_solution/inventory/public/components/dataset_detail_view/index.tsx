@@ -47,7 +47,7 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
       content: <></>,
     },
     manage: {
-      selected: routePath === '/datastream/{id}/management',
+      selected: routePath.startsWith('/datastream/{id}/management'),
       href: router.link('/datastream/{id}/management', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.manageTabLabel', {
         defaultMessage: 'Manage',
