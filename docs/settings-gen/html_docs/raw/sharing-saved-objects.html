@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Sharing saved objects | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Sharing saved objects | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="advanced.html" title="Advanced"/>
+<link rel="prev" href="upgrading-nodejs.html" title="Upgrading Node.js"/>
+<link rel="next" href="legacy-url-aliases.html" title="Legacy URL Aliases"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="upgrading-nodejs.html">« Upgrading Node.js</a>
+</span>
+<span class="next">
+<a href="legacy-url-aliases.html">Legacy URL Aliases »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="advanced.html">Advanced</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Sharing saved objects</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="sharing-saved-objects"></a>Sharing saved objects</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned
+8.0 release of Kibana. It also describes how developers can take advantage of this feature.</p>
+<p>From 8.7.0, as a step towards <em>zero downtime upgrades</em>, plugins are no longer allowed to update existing single space saved object types to become shareable.
+Note that new saved object types can still be defined as <code class="literal">'multiple'</code> or <code class="literal">'multiple-isolated'</code>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sharing-saved-objects-overview"></a>Overview</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p><a class="xref" href="saved-objects-service.html" title="Saved Objects service">Saved objects</a> (hereinafter "objects") are used to store all sorts of things in Kibana, from Dashboards to Index
+Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-overview.png" alt="Sharing Saved Objects overview">
+</div>
+</div>
+<p>Each plugin can register different object types to be used in Kibana. Historically, objects could be <em>isolated</em> (existing in a single
+<a class="xref" href="xpack-spaces.html" title="Spaces">space</a>) or <em>global</em> (existing in all spaces), there was no in-between. As of the 7.12 release, Kibana now supports two
+additional types of objects:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+<col class="col_4"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Where it exists</strong></span></p></td>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Object IDs</strong></span></p></td>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Registered as:</strong></span></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Global</p></td>
+<td align="left" valign="top"><p>All spaces</p></td>
+<td align="left" valign="top"><p>Globally unique</p></td>
+<td align="left" valign="top"><p><code class="literal">namespaceType: 'agnostic'</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Isolated</p></td>
+<td align="left" valign="top"><p>1 space</p></td>
+<td align="left" valign="top"><p>Unique in each space</p></td>
+<td align="left" valign="top"><p><code class="literal">namespaceType: 'single'</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>(NEW) Share-capable</p></td>
+<td align="left" valign="top"><p>1 space</p></td>
+<td align="left" valign="top"><p>Globally unique</p></td>
+<td align="left" valign="top"><p><code class="literal">namespaceType: 'multiple-isolated'</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>(NEW) Shareable</p></td>
+<td align="left" valign="top"><p>1 or more spaces</p></td>
+<td align="left" valign="top"><p>Globally unique</p></td>
+<td align="left" valign="top"><p><code class="literal">namespaceType: 'multiple'</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Ideally, most types of objects in Kibana will eventually be <em>shareable</em>; however, we have also introduced
+<a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-share-capable-vs-shareable" title="1. Why are there both "share-capable" and "shareable" object types?"><em>share-capable</em> objects</a> as a stepping stone for plugin developers to fully support
+this feature.</p>
+<p>Implementing a shareable saved object type is done in two phases:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Phase 1</strong></span>: Convert an existing isolated object type into a share-capable one. Keep reading!
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Phase 2</strong></span>: Switch an existing share-capable object type into a shareable one, <em>or</em> create a new shareable object type. Jump to the
+<a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-phase-2" title="Phase 2 developer flowchart">Phase 2 developer flowchart</a>!
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sharing-saved-objects-breaking-changes"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>To implement this feature, we had to make a key change to how objects are serialized into raw Elasticsearch documents. As a result,
+<a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-changing-object-ids" title="2. Why do object IDs need to be changed?">some existing object IDs need to be changed</a>, and this will cause some breaking changes to
+the way that consumers (plugin developers) interact with objects. We have implemented mitigations so that <span class="strong strong"><strong>these changes will not affect
+end-users <em>if</em> consumers implement the required steps below.</strong></span></p>
+<p>Existing, isolated object types will need to go through a special <em>conversion process</em> to become share-capable upon upgrading Kibana to
+version 8.0. Once objects are converted, they can easily be switched to become fully shareable in any future release. This conversion will
+change the IDs of any existing objects that are not in the Default space. Changing object IDs itself has several knock-on effects:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Nonstandard links to other objects can break - <em>mitigated by <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-1" title="Step 1">Step 1</a></em>
+</li>
+<li class="listitem">
+"Deep link" pages (URLs) to objects can break - <em>mitigated by <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-2" title="Step 2">Step 2</a> and <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-3" title="Step 3">Step 3</a></em>
+</li>
+<li class="listitem">
+Encrypted objects may not be able to be decrypted - <em>mitigated by <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-5" title="Step 5">Step 5</a></em>
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>To be perfectly clear: these effects will all be mitigated <em>if and only if</em> you follow the steps below!</strong></span></p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>External plugins can also convert their objects, but <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-external-plugins" title="7. What about external plugins?">they don&#8217;t have to do so before the
+8.0 release</a>.</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sharing-saved-objects-phase-1"></a>Phase 1 developer flowchart</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you&#8217;re still reading this page, you&#8217;re probably developing a Kibana plugin that registers an object type, and you want to know what steps
+you need to take to prepare for the 8.0 release and mitigate any breaking changes! Depending on how you are using saved objects, you may
+need to take up to 5 steps, which are detailed in separate sections below. Refer to this flowchart:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-phase-1-dev-flowchart.png" alt="Sharing Saved Objects phase 1 - developer flowchart">
+</div>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>There is a proof-of-concept (POC) pull request to demonstrate these changes. It first adds a simple test plugin that allows users to
+create and view notes. Then, it goes through the steps of the flowchart to convert the isolated "note" objects to become share-capable. As
+you read this guide, you can <a href="https://github.com/elastic/kibana/pull/107256" class="ulink" target="_top">follow along in the POC</a> to see exactly how to take these steps.</p>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-q1"></a>Question 1</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Do these objects contain links to other objects?</strong></span></p>
+</blockquote>
+</div>
+<p>If your objects store <em>any</em> links to other objects (with an object type/ID), you need to take specific steps to ensure that these links
+continue functioning after the 8.0 upgrade.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-1"></a>Step 1</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>⚠️ This step <span class="strong strong"><strong>must</strong></span> be completed no later than the 7.16 release. ⚠️</p>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Ensure all object links use the root-level <code class="literal">references</code> field</strong></span></p>
+</blockquote>
+</div>
+<p>If you answered "Yes" to <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-q1" title="Question 1">Question 1</a>, you need to make sure that your object links are <em>only</em> stored in the root-level
+<code class="literal">references</code> field. When a given object&#8217;s ID is changed, this field will be updated accordingly for other objects.</p>
+<p>The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to
+link to another object, and the bottom shows the correct way.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-1.png" alt="Sharing Saved Objects step 1">
+</div>
+</div>
+<p>If your objects <em>do not</em> use the root-level <code class="literal">references</code> field, you&#8217;ll need to <a class="xref" href="saved-objects-service.html#saved-objects-service-writing-migrations" title="Writing Migrations by defining model versions">add a migration</a>
+<em>before the 8.0 release</em> to fix that. Here&#8217;s a migration function for the example above:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">function migrateCaseToV716(
+  doc: SavedObjectUnsanitizedDoc&lt;{ connector: { type: string; id: string } }&gt;
+): SavedObjectSanitizedDoc&lt;unknown&gt; {
+  const {
+    connector: { type: connectorType, id: connectorId, ...otherConnectorAttrs },
+  } = doc.attributes;
+  const { references = [] } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      connector: otherConnectorAttrs,
+    },
+    references: [...references, { type: connectorType, id: connectorId, name: 'connector' }],
+  };
+}
+
+...
+
+// Use this migration function where the "case" object type is registered
+migrations: {
+  '7.16.0': migrateCaseToV716,
+},</pre>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Reminder, don&#8217;t forget to add unit tests and integration tests!</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-q2"></a>Question 2</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Are there any "deep links" to these objects?</strong></span></p>
+</blockquote>
+</div>
+<p>A deep link is a URL to a page that shows a specific object. End-users may bookmark these URLs or schedule reports with them, so it is
+critical to ensure that these URLs continue working. The image below shows an example of a deep link to a Canvas workpad object:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-q2.png" alt="Sharing Saved Objects deep link example">
+</div>
+</div>
+<p>Note that some URLs may contain <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-multiple-deep-link-objects" title="3. What if one page has deep links to multiple objects?">deep links to multiple objects</a>, for example, a
+Dashboard <em>and</em> a filter for an Index Pattern.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-2"></a>Step 2</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>⚠️ This step will preferably be completed in the 7.16 release; it <span class="strong strong"><strong>must</strong></span> be completed no later than the 8.0 release. ⚠️</p>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update your code to use the new SavedObjectsClient <code class="literal">resolve()</code> method instead of <code class="literal">get()</code></strong></span></p>
+</blockquote>
+</div>
+<p>If you answered "Yes" to <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-q2" title="Question 2">Question 2</a>, you need to make sure that when you use the SavedObjectsClient to fetch an object
+using its ID, you use a different API to do so. The existing <code class="literal">get()</code> function will only find an object using its current ID. To make sure
+your existing deep link URLs don&#8217;t break, you should use the new <code class="literal">resolve()</code> function; <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-legacy-url-alias" title="4. What is a "legacy URL alias"?">this
+attempts to find an object using its old ID <em>and</em> its current ID</a>.</p>
+<p>In a nutshell, if your deep link page had something like this before:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">const savedObject = savedObjectsClient.get(objType, objId);</pre>
+</div>
+<p>You&#8217;ll need to change it to this:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">const resolveResult = savedObjectsClient.resolve(objType, objId);
+const savedObject = resolveResult.saved_object;</pre>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>See an example of this in <a href="https://github.com/elastic/kibana/pull/107256#user-content-example-steps" class="ulink" target="_top">step 2 of the POC</a>!</p>
+</div>
+</div>
+<p>The
+<a href="https://github.com/elastic/kibana/blob/master/packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts" class="ulink" target="_top">SavedObjectsResolveResponse
+interface</a> has four fields, summarized below:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">saved_object</code> - The saved object that was found.
+</li>
+<li class="listitem">
+<code class="literal">outcome</code> - One of the following values: <code class="literal">'exactMatch' | 'aliasMatch' | 'conflict'</code>
+</li>
+<li class="listitem">
+<code class="literal">alias_target_id</code> - This is defined if the outcome is <code class="literal">'aliasMatch'</code> or <code class="literal">'conflict'</code>. It means that a legacy URL alias with this ID points
+to an object with a <em>different</em> ID.
+</li>
+<li class="listitem">
+<code class="literal">alias_purpose</code> - This is defined if the outcome is <code class="literal">'aliasMatch'</code> or <code class="literal">'conflict'</code>. It describes why the legacy URL alis was created.
+</li>
+</ul>
+</div>
+<p>The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
+custom HTTP route, or you may be fetching it on the client-side directly. Either way, the <code class="literal">outcome</code> and <code class="literal">alias_target_id</code> fields need to be
+passed to your client-side code, and you should update your UI accordingly in the next step.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You don&#8217;t need to use <code class="literal">resolve()</code> everywhere, <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-resolve-instead-of-get" title="6. Should I always use resolve instead of get?">you should only use it for deep
+links</a>!</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-3"></a>Step 3</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>⚠️ This step will preferably be completed in the 7.16 release; it <span class="strong strong"><strong>must</strong></span> be completed no later than the 8.0 release. ⚠️</p>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update your <em>client-side code</em> to correctly handle the three different <code class="literal">resolve()</code> outcomes</strong></span></p>
+</blockquote>
+</div>
+<p>The Spaces plugin API exposes React components and functions that you should use to render your UI in a consistent manner for end-users.
+Your UI will need to use the Core HTTP service and the Spaces plugin API to do this.</p>
+<p>Your page should change <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-faq-resolve-outcomes" title="5. Why are there three different resolve outcomes?">according to the outcome</a>:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-3.png" alt="Sharing Saved Objects resolve outcomes overview">
+</div>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>See an example of this in <a href="https://github.com/elastic/kibana/pull/107256#user-content-example-steps" class="ulink" target="_top">step 3 of the POC</a>!</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Update your plugin&#8217;s <code class="literal">kibana.json</code> to add a dependency on the Spaces plugin:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">...
+"optionalPlugins": ["spaces"]</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Update your plugin&#8217;s <code class="literal">tsconfig.json</code> to add a dependency to the Space&#8217;s plugin&#8217;s type definitions:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">...
+"references": [
+  ...
+  { "path": "../spaces/tsconfig.json" },
+]</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Update your Plugin class implementation to depend on the Spaces plugin API:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">interface PluginStartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export class MyPlugin implements Plugin&lt;{}, {}, {}, PluginStartDeps&gt; {
+  public setup(core: CoreSetup&lt;PluginStartDeps&gt;) {
+    core.application.register({
+      ...
+      async mount(appMountParams: AppMountParameters) {
+        const [, pluginStartDeps] = await core.getStartServices();
+        const { spaces: spacesApi } = pluginStartDeps;
+        ...
+        // pass `spacesApi` to your app when you render it
+      },
+    });
+    ...
+  }
+}</pre>
+</div>
+</li>
+<li class="listitem">
+<p>In your deep link page, add a check for the <code class="literal">'aliasMatch'</code> outcome:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">if (spacesApi &amp;&amp; resolveResult.outcome === 'aliasMatch') {
+  // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+  const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
+  const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
+  await spacesApi.ui.redirectLegacyUrl({
+    path: newPath,
+    aliasPurpose: resolveResult.alias_purpose, <a id="CO92-1"></a><i class="conum" data-value="1"></i>
+    objectNoun: OBJECT_NOUN <a id="CO92-2"></a><i class="conum" data-value="2"></i>
+  });
+  return;
+}</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO92-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">aliasPurpose</code> field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
+client whether a toast should be shown or not.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO92-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">objectNoun</code> field is optional. It just changes "object" in the toast to whatever you specify&#8201;&#8212;&#8201;you may want the toast to say
+"dashboard" or "data view" instead.</p>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li class="listitem">
+<p>And finally, in your deep link page, add a function that will create a callout in the case of a <code class="literal">'conflict'</code> outcome:</p>
+<div class="pre_wrapper lang-tsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-tsx">const getLegacyUrlConflictCallout = () =&gt; {
+  // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+  if (spacesApi &amp;&amp; resolveResult.outcome === 'conflict') {
+    // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+    // callout with a warning for the user, and provide a way for them to navigate to the other object.
+    const currentObjectId = savedObject.id;
+    const otherObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'conflict'
+    const otherObjectPath = `/this/page/${otherObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
+    return (
+      &lt;&gt;
+        {spacesApi.ui.components.getLegacyUrlConflict({
+          objectNoun: OBJECT_NOUN,
+          currentObjectId,
+          otherObjectId,
+          otherObjectPath,
+        })}
+        &lt;EuiSpacer /&gt;
+      &lt;/&gt;
+    );
+  }
+  return null;
+};
+...
+return (
+  &lt;EuiPage&gt;
+    &lt;EuiPageBody&gt;
+      &lt;EuiPageSection&gt;
+        {/* If we have a legacy URL conflict callout to display, show it at the top of the page */}
+        {getLegacyUrlConflictCallout()}
+        &lt;EuiPageHeader&gt;
+...
+);</pre>
+</div>
+</li>
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/pull/107099#issuecomment-891147792" class="ulink" target="_top">Generate staging data and test your page&#8217;s behavior with the
+different outcomes.</a>
+</li>
+</ol>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Reminder, don&#8217;t forget to add unit tests and functional tests!</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-4"></a>Step 4</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>⚠️ This step <span class="strong strong"><strong>must</strong></span> be completed in the 8.0 release (no earlier and no later). ⚠️</p>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update your <em>server-side code</em> to convert these objects to become "share-capable"</strong></span></p>
+</blockquote>
+</div>
+<p>After <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-3" title="Step 3">Step 3</a> is complete, you can add the code to convert your objects.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The previous steps can be backported to the 7.x branch, but this step&#8201;&#8212;&#8201;the conversion itself&#8201;&#8212;&#8201;can only take place in 8.0!
+You should use a separate pull request for this.</p>
+</div>
+</div>
+<p>When you register your object, you need to change the <code class="literal">namespaceType</code> and also add a <code class="literal">convertToMultiNamespaceTypeVersion</code> field. This
+special field will trigger the actual conversion that will take place during the Core migration upgrade process when a user installs the
+Kibana 8.0 release:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-4.png" alt="Sharing Saved Objects conversion code">
+</div>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>See an example of this in <a href="https://github.com/elastic/kibana/pull/107256#user-content-example-steps" class="ulink" target="_top">step 4 of the POC</a>!</p>
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Reminder, don&#8217;t forget to add integration tests!</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-q3"></a>Question 3</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Are these objects encrypted?</strong></span></p>
+</blockquote>
+</div>
+<p>Saved objects can optionally be <a class="xref" href="xpack-security-secure-saved-objects.html" title="Secure saved objects">encrypted</a> by using the Encrypted Saved Objects plugin. Very few
+object types are encrypted, so most plugin developers will not be affected.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-5"></a>Step 5</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>⚠️ This step <span class="strong strong"><strong>must</strong></span> be completed in the 8.0 release (no earlier and no later). ⚠️</p>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update your <em>server-side code</em> to add an Encrypted Saved Object (ESO) migration for these objects</strong></span></p>
+</blockquote>
+</div>
+<p>If you answered "Yes" to <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-q3" title="Question 3">Question 3</a>, you need to take additional steps to make sure that your objects can still be
+decrypted after the conversion process. Encrypted saved objects use some fields as part of "additionally authenticated data" (AAD) to defend
+against different types of cryptographic attacks. The object ID is part of this AAD, and so it follows that the after the object&#8217;s ID is
+changed, the object will not be able to be decrypted with the standard process.</p>
+<p>To mitigate this, you need to add a "no-op" ESO migration that will be applied immediately after the object is converted during the 8.0
+upgrade process. This will decrypt the object using its old ID and then re-encrypt it using its new ID:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-5.png" alt="Sharing Saved Objects ESO migration">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Reminder, don&#8217;t forget to add unit tests and integration tests!</p>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sharing-saved-objects-phase-2"></a>Phase 2 developer flowchart</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>This section covers switching a share-capable object type into a shareable one <em>or</em> creating a new shareable saved object type. Refer to
+this flowchart:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-phase-2-dev-flowchart.png" alt="Sharing Saved Objects phase 2 - developer flowchart">
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-6"></a>Step 6</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update your <em>server-side code</em> to mark these objects as "shareable"</strong></span></p>
+</blockquote>
+</div>
+<p>When you register your object, you need to set the proper <code class="literal">namespaceType</code>. If you have an existing object type that is "share-capable", you
+can simply change it:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-6.png" alt="Sharing Saved Objects registration (shareable)">
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-7"></a>Step 7</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Update saved object delete API usage to handle multiple spaces</strong></span></p>
+</blockquote>
+</div>
+<p>If an object is shared to multiple spaces, it cannot be deleted without using the
+<a href="https://github.com/elastic/kibana/blob/master/packages/core/saved-objects/core-saved-objects-api-server/src/apis/delete.ts" class="ulink" target="_top"><code class="literal">force</code>
+delete option</a>. You should always be aware when a saved object exists in multiple spaces, and you should warn users in that case.</p>
+<p>If your UI allows users to delete your objects, you can define a warning message like this:</p>
+<div class="pre_wrapper lang-tsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-tsx">const { namespaces, id } = savedObject;
+const warningMessage =
+  namespaces.length &gt; 1 || namespaces.includes('*') ? (
+    &lt;FormattedMessage
+      id="myPlugin.deleteObjectWarning"
+      defaultMessage="When you delete this object, you remove it from every space it is shared in. You can't undo this action."
+    /&gt;
+  ) : null;</pre>
+</div>
+<p>The <a class="xref" href="data-views.html" title="Create a data view">Data Views page</a> in <a class="xref" href="management.html" title="Stack Management">Stack Management</a> uses a
+<a href="https://github.com/elastic/kibana/blob/master/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx" class="ulink" target="_top">similar
+approach</a> to show a warning in its delete confirmation modal:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-step-7.png" alt="Sharing Saved Objects deletion warning">
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-step-8"></a>Step 8</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="quoteblock">
+<blockquote>
+<p><span class="strong strong"><strong>Allow users to view and change assigned spaces for your objects</strong></span></p>
+</blockquote>
+</div>
+<p>Users will need a way to view what spaces your objects are currently assigned to and share them to additional spaces. You can accomplish
+this in two ways, and many consumers will want to implement both:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>(Highly recommended) Add reusable components to your application, making it "space-aware". The space-related components are exported by
+the spaces plugin, and you can use them in your own application.</p>
+<p>First, make sure your page contents are wrapped in a
+<a href="https://github.com/elastic/kibana/blob/master/x-pack/plugins/spaces/public/spaces_context/types.ts" class="ulink" target="_top">spaces context provider</a>:</p>
+<div class="pre_wrapper lang-tsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-tsx">const ContextWrapper = useMemo(
+  () =&gt;
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+  [spacesApi]
+);
+
+...
+
+return (
+  &lt;ContextWrapper feature='my-feature-id'&gt;
+    &lt;!-- your page contents here --&gt;
+  &lt;/ContextWrapper&gt;
+);</pre>
+</div>
+<p>Second, display a <a href="https://github.com/elastic/kibana/blob/master/x-pack/plugins/spaces/public/space_list/types.ts" class="ulink" target="_top">list of spaces</a> for an
+object, and third, show a
+<a href="https://github.com/elastic/kibana/blob/master/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts" class="ulink" target="_top">flyout</a> for the user to
+edit the object&#8217;s assigned spaces. You may want to follow the example of the <a class="xref" href="data-views.html" title="Create a data view">Data Views page</a> and
+<a href="https://github.com/elastic/kibana/blob/master/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx" class="ulink" target="_top">combine
+these into a single component</a> so that the space list can be clicked to show the flyout:</p>
+<div class="pre_wrapper lang-tsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-tsx">const [showFlyout, setShowFlyout] = useState(false);
+const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [spacesApi]);
+
+const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
+  savedObjectTarget: {
+    type: myObject.type,
+    namespaces: myObject.namespaces,
+    id: myObject.id,
+    icon: 'beaker', <a id="CO93-1"></a><i class="conum" data-value="1"></i>
+    title: myObject.attributes.title, <a id="CO93-2"></a><i class="conum" data-value="2"></i>
+    noun: OBJECT_NOUN, <a id="CO93-3"></a><i class="conum" data-value="3"></i>
+  },
+  onUpdate: () =&gt; { /* callback when the object is updated */ },
+  onClose: () =&gt; setShowFlyout(false),
+};
+
+const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
+const clickProperties = canAssignSpaces
+  ? { cursorStyle: 'pointer', listOnClick: () =&gt; setShowFlyout(true) }
+  : { cursorStyle: 'not-allowed' };
+return (
+  &lt;&gt;
+    &lt;LazySpaceList
+      namespaces={spaceIds}
+      displayLimit={8}
+      behaviorContext="outside-space" <a id="CO93-4"></a><i class="conum" data-value="4"></i>
+      {...clickProperties}
+    /&gt;
+    {showFlyout &amp;&amp; &lt;LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} /&gt;}
+  &lt;/&gt;
+);</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO93-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">icon</code> field is optional. It specifies an <a href="https://elastic.github.io/eui/#/display/icons" class="ulink" target="_top">EUI icon</a> type that will be displayed in the
+flyout header.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO93-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">title</code> field is optional. It specifies a human-readable identifier for your object that will be displayed in the flyout header.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO93-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">noun</code> field is optional. It just changes "object" in the flyout to whatever you specify&#8201;&#8212;&#8201;you may want the flyout to say
+"dashboard" or "data view" instead.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO93-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">behaviorContext</code> field is optional. It controls how the space list is displayed. When using an <code class="literal">"outside-space"</code> behavior context,
+the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a
+<code class="literal">"within-space"</code> behavior context, the space list is rendered within the active space, so the active space is excluded from the list.</p>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li class="listitem">
+<p>Allow users to access your objects in the <a class="xref" href="managing-saved-objects.html" title="Manage saved objects">Saved Objects Management page</a> in <a class="xref" href="management.html" title="Stack Management">Stack Management</a>. You can do this by
+ensuring that your objects are marked as
+<a href="https://github.com/elastic/kibana/blob/master/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts" class="ulink" target="_top">importable and exportable</a> in your <a class="xref" href="saved-objects-service.html#saved-objects-type-registration" title="Registering a Saved Object type">saved object type registration</a>:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">name: 'my-object-type',
+management: {
+  isImportableAndExportable: true,
+},
+...</pre>
+</div>
+<p>If you do this, then your objects will be visible in the <a class="xref" href="managing-saved-objects.html" title="Manage saved objects">Saved Objects Management page</a>, where users can assign
+them to multiple spaces.</p>
+</li>
+</ol>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sharing-saved-objects-faq"></a>Frequently asked questions (FAQ)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-share-capable-vs-shareable"></a>1. Why are there both "share-capable" and "shareable" object types?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>We implemented the share-capable object type as an intermediate step for consumers who currently have isolated objects, but are not yet
+ready to support fully shareable objects. This is primarily because we want to make sure all object types are converted at the same time in
+the 8.0 release to minimize confusion and disruption for the end-user experience.</p>
+<p>We realize that the conversion process and all that it entails can be a not-insignificant amount of work for some Kibana teams to prepare
+for by the 8.0 release. As long as an object is made share-capable, that ensures that its ID will be globally unique, so it will be trivial
+to make that object shareable later on when the time is right.</p>
+<p>A developer can easily flip a switch to make a share-capable object into a shareable one, since these are both serialized the same way.
+However, we envision that each consumer will need to enact their own plan and make additional UI changes when making an object shareable.
+For example, some users may not have access to the Saved Objects Management page, but we still want those users to be able to see what
+space(s) their objects exist in and share them to other spaces. Each application should add the appropriate UI controls to handle this.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-changing-object-ids"></a>2. Why do object IDs need to be changed?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>This is because of how isolated objects are serialized to raw Elasticsearch documents. Each raw document ID today contains its space ID
+(<em>namespace</em>) as a prefix. When objects are copied or imported to other spaces, they keep the same object ID, they just have a different
+prefix when they are serialized to Elasticsearch. This has resulted in a situation where many Kibana installations have saved objects in
+different spaces with the same object ID:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-changing-object-ids-1.png" alt="Sharing Saved Objects object ID diagram (before conversion)">
+</div>
+</div>
+<p>Once an object is converted, we need to remove this prefix. Because of limitations with our migration process, we cannot actively check if
+this would result in a conflict. Therefore, we decided to pre-emptively regenerate the object ID for every object in a non-Default space to
+ensure that every object ID becomes globally unique:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-changing-object-ids-2.png" alt="Sharing Saved Objects object ID diagram (after conversion)">
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-multiple-deep-link-objects"></a>3. What if one page has deep links to multiple objects?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>As mentioned in <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-q2" title="Question 2">Question 2</a>, some URLs may contain multiple object IDs, effectively deep linking to multiple objects.
+These should be handled on a case-by-case basis at the plugin owner&#8217;s discretion. A good rule of thumb is:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The "primary" object on the page should always handle the three <code class="literal">resolve()</code> outcomes as described in <a class="xref" href="sharing-saved-objects.html#sharing-saved-objects-step-3" title="Step 3">Step 3</a>.
+</li>
+<li class="listitem">
+<p>Any "secondary" objects on the page may handle the outcomes differently. If the secondary object ID is not important (for example, it just
+functions as a page anchor), it may make more sense to ignore the different outcomes. If the secondary object <em>is</em> important but it is not
+directly represented in the UI, it may make more sense to throw a descriptive error when a <code class="literal">'conflict'</code> outcome is encountered.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Embeddables should use <code class="literal">spacesApi.ui.components.getEmbeddableLegacyUrlConflict</code> to render conflict errors:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-multiple-deep-link-objects-1.png" alt="Sharing Saved Objects embeddable legacy URL conflict">
+</div>
+</div>
+<p>Viewing details shows the user how to disable the alias and fix the problem using the
+<a class="xref" href="spaces-api-disable-legacy-url-aliases.html" title="Disable legacy URL aliases API">_disable_legacy_url_aliases API</a>:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-multiple-deep-link-objects-2.png" alt="Sharing Saved Objects embeddable legacy URL conflict (showing details)">
+</div>
+</div>
+</li>
+<li class="listitem">
+If the secondary object is resolved by an external service (such as the index pattern service), the service should simply make the full
+outcome available to consumers.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<p>Ideally, if a secondary object on a deep link page resolves to an <code class="literal">'aliasMatch'</code> outcome, the consumer should redirect the user to a URL
+with the new ID and display a toast message. The reason for this is that we don&#8217;t want users relying on legacy URL aliases more often than
+necessary. However, such handling of secondary objects is not considered critical for the 8.0 release.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-legacy-url-alias"></a>4. What is a "legacy URL alias"?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To
+preserve its old ID, we also create a special object called a <a class="xref" href="legacy-url-aliases.html" title="Legacy URL Aliases"><em>legacy URL alias</em></a> ("alias" for short); this alias
+retains the target object&#8217;s old ID (<em>sourceId</em>), and it contains a pointer to the target object&#8217;s new ID (<em>targetId</em>).</p>
+<p>Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be
+used as a stop-gap to help us through the 8.0 upgrade process, but we will nudge users away from relying on aliases so we can eventually
+deprecate and remove them.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-resolve-outcomes"></a>5. Why are there three different resolve outcomes?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>The <code class="literal">resolve()</code> function checks both if an object with the given ID exists, <em>and</em> if an object has an alias with the given ID.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+If only the former is true, the outcome is an <code class="literal">'exactMatch'</code>&#8201;&#8212;&#8201;we found the exact object we were looking for.
+</li>
+<li class="listitem">
+If only the latter is true, the outcome is an <code class="literal">'aliasMatch'</code>&#8201;&#8212;&#8201;we found an alias with this ID, that pointed us to an object with a
+different ID.
+</li>
+<li class="listitem">
+Finally, if <em>both conditions</em> are true, the outcome is a <code class="literal">'conflict'</code>&#8201;&#8212;&#8201;we found two objects using this ID. Instead of returning an
+error in this situation, in the interest of usability, we decided to return the <em>most correct match</em>, which is the exact match. By informing
+the consumer that this is a conflict, the consumer can render an appropriate UI to the end-user explaining that this might not be the object
+they are actually looking for.
+</li>
+</ol>
+</div>
+<p><span class="strong strong"><strong>Outcome 1</strong></span></p>
+<p>When you resolve an object with its current ID, the outcome is an <code class="literal">'exactMatch'</code>:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-resolve-outcomes-1.png" alt="Sharing Saved Objects resolve outcome 1 (exactMatch)">
+</div>
+</div>
+<p>This can happen in the Default space <em>and</em> in non-Default spaces.</p>
+<p><span class="strong strong"><strong>Outcome 2</strong></span></p>
+<p>When you resolve an object with its old ID (the ID of its alias), the outcome is an <code class="literal">'aliasMatch'</code>:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-resolve-outcomes-2.png" alt="Sharing Saved Objects resolve outcome 2 (aliasMatch)">
+</div>
+</div>
+<p>This outcome can only happen in non-Default spaces.</p>
+<p><span class="strong strong"><strong>Outcome 3</strong></span></p>
+<p>The third outcome is an edge case that is a combination of the others. If you resolve an object ID and two objects are found&#8201;&#8212;&#8201;one as an
+exact match, the other as an alias match&#8201;&#8212;&#8201;the outcome is a <code class="literal">'conflict'</code>:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/sharing-saved-objects-faq-resolve-outcomes-3.png" alt="Sharing Saved Objects resolve outcome 3 (conflict)">
+</div>
+</div>
+<p>We actually have controls in place to prevent this scenario from happening when you share, import, or copy
+objects. However, this scenario <em>could</em> still happen in a few different situations, if objects are created a certain way or if a user
+tampers with an object&#8217;s raw ES document. Since we can&#8217;t 100% rule out this scenario, we must handle it gracefully, but we do expect this
+will be a rare occurrence.</p>
+<p>It is important to note that when a <code class="literal">'conflict'</code> occurs, the object that is returned is the "most correct" match&#8201;&#8212;&#8201;the one with the ID that
+exactly matches.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-resolve-instead-of-get"></a>6. Should I always use resolve instead of get?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>Reading through this guide, you may think it is safer or better to use <code class="literal">resolve()</code> everywhere instead of <code class="literal">get()</code>. Actually, we made an
+explicit design decision to add a separate <code class="literal">resolve()</code> function because we want to limit the affects of and reliance upon legacy URL
+aliases. To that end, we collect anonymous usage data based on how many times <code class="literal">resolve()</code> is used and the different outcomes are
+encountered. That usage data is less useful is <code class="literal">resolve()</code> is used more often than necessary.</p>
+<p>Ultimately, <code class="literal">resolve()</code> should <em>only</em> be used for data flows that involve a user-controlled deep link to an object. There is no reason to
+change any other data flows to use <code class="literal">resolve()</code>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="sharing-saved-objects-faq-external-plugins"></a>7. What about external plugins?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>External plugins (those not shipped with Kibana) can use this guide to convert any isolated objects to become share-capable or fully
+shareable! If you are an external plugin developer, the steps are the same, but you don&#8217;t need to worry about getting anything done before a
+specific release. The only thing you need to know is that your plugin cannot convert your objects until the 8.0 release.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_8_how_will_users_be_impacted"></a>8. How will users be impacted?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/sharing-saved-objects.asciidoc">edit</a></div>
+</div></div></div>
+<p>Refer to <a class="xref" href="saved-object-ids.html" title="Saved Object IDs">Saved Object IDs</a> documentation for more details how users should expect to be impacted.</p>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="upgrading-nodejs.html">« Upgrading Node.js</a>
+</span>
+<span class="next">
+<a href="legacy-url-aliases.html">Legacy URL Aliases »</a>
+</span>
+</div>
+</body>
+</html>

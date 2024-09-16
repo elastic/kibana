@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delete space API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Delete space API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="spaces-api.html" title="Kibana spaces APIs"/>
+<link rel="prev" href="spaces-api-get-all.html" title="Get all Kibana spaces API"/>
+<link rel="next" href="spaces-api-copy-saved-objects.html" title="Copy saved objects to space API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="spaces-api-get-all.html">« Get all Kibana spaces API</a>
+</span>
+<span class="next">
+<a href="spaces-api-copy-saved-objects.html">Copy saved objects to space API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="spaces-api.html">Kibana spaces APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Delete space API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/delete.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="spaces-api-delete"></a>Delete space API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/delete.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Delete a Kibana space.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.</p>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-delete-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/delete.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/api/spaces/space/&lt;space_name&gt;</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-delete-errors-codes"></a>Response codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/delete.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">204</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">404</code>
+</span>
+</dt>
+<dd>
+Indicates that the request failed.
+</dd>
+</dl>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-api-get-all.html">« Get all Kibana spaces API</a>
+</span>
+<span class="next">
+<a href="spaces-api-copy-saved-objects.html">Copy saved objects to space API »</a>
+</span>
+</div>
+</body>
+</html>

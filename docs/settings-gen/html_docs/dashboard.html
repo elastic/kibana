@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Dashboard and visualizations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Dashboard and visualizations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="try-esql.html" title="Using ES|QL"/>
+<link rel="next" href="create-a-dashboard-of-panels-with-web-server-data.html" title="Create your first dashboard"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="try-esql.html">« Using ES|QL</a>
+</span>
+<span class="next">
+<a href="create-a-dashboard-of-panels-with-web-server-data.html">Create your first dashboard »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Dashboard and visualizations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="dashboard"></a>Dashboard and visualizations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p><span class="strong strong"><strong><em>Visualize your data with dashboards.</em></strong></span></p>
+<p>The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <a class="xref" href="data-views.html" title="Create a data view">data views</a> into a collection of panels
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that&#8217;s important to you.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_ecommerceRevenueDashboard_7.15.0.png" alt="Example dashboard"></span></p>
+<p>Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="aggregation-reference.html" title="Create panels with editors">Editors</a></p></td>
+<td align="left" valign="top"><p>Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="maps.html" title="Maps">Maps</a></p></td>
+<td align="left" valign="top"><p>Create beautiful displays of your geographical data.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="xpack-ml-anomalies.html" title="Anomaly detection">Anomaly swim lane</a></p></td>
+<td align="left" valign="top"><p>Display the results from machine learning anomaly detection jobs.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="xpack-ml-anomalies.html" title="Anomaly detection">Anomaly chart</a></p></td>
+<td align="left" valign="top"><p>Display an anomaly chart from the <span class="strong strong"><strong>Anomaly Explorer</strong></span>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="observability.html#logs-app" title="Logs">Log stream</a></p></td>
+<td align="left" valign="top"><p>Display a table of live streaming logs.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="add-controls.html" title="Filter dashboard data with controls">Tools</a></p></td>
+<td align="left" valign="top"><p>Add interactive filters with <span class="strong strong"><strong>Controls</strong></span> panels.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="dashboard.html#add-text" title="Add context to panels">Text</a></p></td>
+<td align="left" valign="top"><p>Add context to your panels with <span class="strong strong"><strong>Text</strong></span>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><a class="xref" href="dashboard.html#add-image" title="Add image panels">Image</a></p></td>
+<td align="left" valign="top"><p>Personalize your dashboard with a custom image.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h2><a id="create-dashboards"></a>Create dashboards</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Dashboards provide you with the space where you add panels of your data.</p>
+<div class="position-relative"><h3><a id="dashboard-minimum-requirements"></a>Minimum requirements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To create dashboards, you must meet the minimum requirements.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you need to set up Kibana, use <a href="https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&amp;elektra=docs" class="ulink" target="_top">our free trial</a>.
+</li>
+<li class="listitem">
+Make sure you have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/getting-started-index.html" class="ulink" target="_top">data indexed into Elasticsearch</a> and a <a class="xref" href="data-views.html" title="Create a data view">data view</a>.
+</li>
+<li class="listitem">
+When the read-only indicator appears, you have insufficient privileges
+to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
+refer to <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="open-the-dashboard"></a>Open the dashboard</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Begin with an empty dashboard, or open an existing dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Dashboard</strong></span>.
+</li>
+<li class="listitem">
+<p>On the <span class="strong strong"><strong>Dashboards</strong></span> page, choose one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>To start with an empty dashboard, click <span class="strong strong"><strong>Create dashboard</strong></span>.</p>
+<p>When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard.</p>
+</li>
+<li class="listitem">
+<p>To open an existing dashboard, click the dashboard <span class="strong strong"><strong>Title</strong></span> you want to open.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>When looking for a specific dashboard, you can filter them by tag or by creator, or search the list based on their name and description. Note that the creator information is only available for dashboards created on or after version 8.14.</p>
+</div>
+</div>
+<p>When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click <span class="strong strong"><strong>Edit</strong></span> in the toolbar.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="create-panels-with-lens"></a>Create and add panels</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>You create panels using the editors, which you can access from the dashboard toolbar or the <span class="strong strong"><strong>Visualize Library</strong></span>, or add panels that are saved in the <span class="strong strong"><strong>Visualize Library</strong></span>, or search results from <a class="xref" href="discover.html#save-your-search" title="Save your search for later use"><span class="strong strong"><strong>Discover</strong></span></a>.</p>
+<p>To create panels from the dashboard toolbar, use one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Create visualization</strong></span> &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Select type</strong></span> &mdash; Opens the menu for all of the editors and panel types.
+</li>
+</ul>
+</div>
+<p>To create panels from the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Visualize Library</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create visualization</strong></span>, then select an editor.
+</li>
+</ol>
+</div>
+<p>To add existing panels from the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the dashboard toolbar, click <span class="strong strong"><strong>Add from library</strong></span>.
+</li>
+<li class="listitem">
+<p>Click the panel you want to add to the dashboard, then click <span class="strong strong"><strong>X</strong></span>.</p>
+<p>When a panel contains a saved query, both queries are applied.</p>
+<p>When you add search results from <span class="strong strong"><strong>Discover</strong></span> to dashboards, the results are not aggregated.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="save-panels"></a>Save and add panels</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Consider where you want to save and add the panel in Kibana.</p>
+<div class="position-relative"><h4><a id="save-to-visualize-library"></a>Save to the Visualize Library</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To use the panel on other dashboards and <span class="strong strong"><strong>Canvas</strong></span> workpads, save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span>. When panels are saved in the <span class="strong strong"><strong>Visualize Library</strong></span>, <span class="image"><img src="dashboard/images/visualize-library-icon.png" alt="Visualize Library icon"></span> appears in the panel header.</p>
+<p>If you created the panel from the dashboard:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the editor, click <span class="strong strong"><strong>Save to library</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span> and add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>.
+</li>
+<li class="listitem">
+Make sure that <span class="strong strong"><strong>Add to Dashboard after saving</strong></span> is selected.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+</ol>
+</div>
+<p>If you created the panel from the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the editor, click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Save</strong></span> window, enter the <span class="strong strong"><strong>Title</strong></span>.
+</li>
+<li class="listitem">
+<p>Choose one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To save the panel to a dashboard and the <span class="strong strong"><strong>Visualize Library</strong></span>, select <span class="strong strong"><strong>Add to library</strong></span>, add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>, then click <span class="strong strong"><strong>Save and go to Dashboard</strong></span>.
+</li>
+<li class="listitem">
+To save the panel only to the <span class="strong strong"><strong>Visualize Library</strong></span>, select <span class="strong strong"><strong>None</strong></span>, add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>, then click <span class="strong strong"><strong>Save and add to library</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="save-to-the-dashboard"></a>Save to the dashboard</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Return to the dashboard and add the panel without specifying the save options or adding the panel to the <span class="strong strong"><strong>Visualize Library</strong></span>.</p>
+<p>If you created the panel from the dashboard:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the editor, click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+<li class="listitem">
+<p>Add an optional title to the panel.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the panel header, click <span class="strong strong"><strong>No Title</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Panel settings</strong></span> window, select <span class="strong strong"><strong>Show title</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span>, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<p>If you created the panel from the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Save</strong></span> window, enter the <span class="strong strong"><strong>Title</strong></span>.
+</li>
+<li class="listitem">
+<p>Choose one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you want to add the panel to an existing dashboard, select <span class="strong strong"><strong>Existing</strong></span>, select the dashboard from the dropdown, then click <span class="strong strong"><strong>Save and go to Dashboard</strong></span>.
+</li>
+<li class="listitem">
+If you want to add the panel to a new dashboard, select <span class="strong strong"><strong>New</strong></span>, then click <span class="strong strong"><strong>Save and go to Dashboard</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<p>To add unsaved dashboard panels to the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu, then select <span class="strong strong"><strong>More &gt; Save to library</strong></span>.
+</li>
+<li class="listitem">
+Enter the panel title, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="add-text"></a>Add context to panels</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To provide context to your dashboard panels, add <span class="strong strong"><strong>Text</strong></span> panels that display important information, instructions, images, and more. You create <span class="strong strong"><strong>Text</strong></span> panels using GitHub-flavored Markdown text.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the dashboard, click <span class="image"><img src="images/dashboard_createNewTextButton_7.15.0.png" alt="Create New Text button in dashboard toolbar"></span>.
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>Markdown</strong></span> field, enter the text, then click <span class="strong strong"><strong>Update</strong></span>.
+</li>
+</ol>
+</div>
+<p>For example, when you enter:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/markdown_example_1.png" alt="Markdown text with links">
+</div>
+</div>
+<p>The following instructions are displayed:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/markdown_example_2.png" alt="Panel with markdown link text">
+</div>
+</div>
+<p>Or when you enter:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/markdown_example_3.png" alt="Markdown text with image file">
+</div>
+</div>
+<p>The following image is displayed:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/markdown_example_4.png" alt="Panel with markdown image">
+</div>
+</div>
+<p>For detailed information about writing on GitHub, click <span class="strong strong"><strong>Help</strong></span>.</p>
+<div class="position-relative"><h3><a id="save-the-markdown-panel"></a>Save and add the panel</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span> and add it to the dashboard, or add it to the dashboard without saving.</p>
+<p>To save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Save to library</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span> and add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>.
+</li>
+<li class="listitem">
+Make sure that <span class="strong strong"><strong>Add to Dashboard after saving</strong></span> is selected.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+</ol>
+</div>
+<p>To save the panel to the dashboard:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+<li class="listitem">
+<p>Add an optional title to the panel.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the panel header, click <span class="strong strong"><strong>No Title</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Panel settings</strong></span> window, select <span class="strong strong"><strong>Show title</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span>, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="add-image"></a>Add image panels</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To personalize your dashboards, add your own logos and graphics with the <span class="strong strong"><strong>Image</strong></span> panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the dashboard, click <span class="image"><img src="images/dashboard_createNewImageButton_8.7.0.png" alt="Create New Image button in dashboard toolbar"></span>.
+</li>
+<li class="listitem">
+Use the editor to add an image.
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/dashboard_addImageEditor_8.7.0.png" alt="Add image editor">
+</div>
+</div>
+<p>To manage your uploaded image files, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Kibana &gt; Files</strong></span>.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>When you export a dashboard, the uploaded image files are not exported.
+When importing a dashboard with an image panel, and the image file is unavailable, the image panel displays a <code class="literal">not found</code> warning. Such panels have to be fixed manually by re-uploading the image using the panel&#8217;s image editor.</p>
+</div>
+</div>
+<div class="position-relative"><h2><a id="resizing-containers"></a>Arrange panels</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.</p>
+<p>In the toolbar, click <span class="strong strong"><strong>Edit</strong></span>, then use the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To move, click and hold the panel header, then drag to the new location.
+</li>
+<li class="listitem">
+To resize, click the resize control, then drag to the new dimensions.
+</li>
+<li class="listitem">
+To maximize to fullscreen, open the panel menu, then click <span class="strong strong"><strong>More &gt; Maximize panel</strong></span>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h2><a id="edit-panels"></a>Edit panels</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To make changes to the panel, use the panel menu options.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+<p>Open the panel menu, then use the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p><span class="strong strong"><strong>Edit visualization</strong></span> &mdash; Opens the editor so you can make changes to the panel.</p>
+<p>To make changes without changing the original version, open the panel menu, then click <span class="strong strong"><strong>More &gt; Unlink from library</strong></span>.</p>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Convert to Lens</strong></span> &mdash; Opens <span class="strong strong"><strong>TSVB</strong></span> and aggregation-based visualizations in <span class="strong strong"><strong>Lens</strong></span>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Panel settings</strong></span> &mdash; Opens the <span class="strong strong"><strong>Panel settings</strong></span> window to change the <span class="strong strong"><strong>title</strong></span>, <span class="strong strong"><strong>description</strong></span>, and <span class="strong strong"><strong>time range</strong></span>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>More &gt; Replace panel</strong></span> &mdash; Opens the <span class="strong strong"><strong>Visualize Library</strong></span> so you can select a new panel to replace the existing panel.
+</li>
+<li class="listitem">
+<p><span class="strong strong"><strong>More &gt; Delete from dashboard</strong></span> &mdash; Removes the panel from the dashboard.</p>
+<p>If you want to use the panel later, make sure that you save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span>.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="duplicate-panels"></a>Duplicate panels</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel,
+including renaming, editing, and cloning.</p>
+<div class="position-relative"><h3><a id="clone-panels"></a>Clone panels</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+<p>Open the panel menu, then select <span class="strong strong"><strong>Clone panel</strong></span>.</p>
+<p>When cloned panels are saved in the <span class="strong strong"><strong>Visualize Library</strong></span>, <span class="image"><img src="dashboard/images/visualize-library-icon.png" alt="Visualize Library icon"></span> appears in the header.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="copy-to-dashboard"></a>Copy panels</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Copy panels from one dashboard to another dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu, then select <span class="strong strong"><strong>More &gt; Copy to dashboard</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Copy to dashboard</strong></span> window, select the dashboard, then click <span class="strong strong"><strong>Copy and go to dashboard</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="add-dashboard-settings"></a>Add the dashboard settings</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Add the title, tags, design options, and more to the dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Settings</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Dashboard settings</strong></span> flyout, enter the <span class="strong strong"><strong>Title</strong></span> and an optional <span class="strong strong"><strong>Description</strong></span>.
+</li>
+<li class="listitem">
+Add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>.
+</li>
+<li class="listitem">
+<p>Specify the following settings:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Store time with dashboard</strong></span> &mdash; Saves the specified time filter.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Use margins between panels</strong></span> &mdash; Adds a margin of space between each panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Show panel titles</strong></span> &mdash; Displays the titles in the panel headers.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Sync color palettes across panels</strong></span> &mdash; Applies the same color palette to all panels on the dashboard.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Sync cursor across panels</strong></span> &mdash; When you hover your cursor over a <span class="strong strong"><strong>Lens</strong></span>, <span class="strong strong"><strong>TSVB</strong></span>, aggregation-based, or <span class="strong strong"><strong>Timelion</strong></span> XY or heatmap chart, the cursor on all other related dashboard charts automatically appears.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Sync tooltips across panels</strong></span> &mdash; When you hover your cursor over a <span class="strong strong"><strong>Lens</strong></span>, <span class="strong strong"><strong>TSVB</strong></span>, aggregation-based, or <span class="strong strong"><strong>Timelion</strong></span> XY chart, the tooltips on all other related dashboard charts automatically appears.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Apply</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="reset-the-dashboard"></a>Reset the dashboard</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To remove any dashboard changes you&#8217;ve made, reset the dashboard to the last saved changes.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Reset</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Reset dashboard</strong></span> window, click <span class="strong strong"><strong>Reset dashboard</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="save-dashboards"></a>Save dashboards</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>When you&#8217;ve finished making changes to the dashboard, save it.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+To exit <span class="strong strong"><strong>Edit</strong></span> mode, click <span class="strong strong"><strong>Switch to view mode</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="search-or-filter-your-data"></a>Search and filter your data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>Kibana supports several ways to search your data and apply Elasticsearch filters. You can combine the filters with any panel
+filter to display the data want to you see.</p>
+<p>For more information about Kibana and Elasticsearch filters, refer to <a class="xref" href="kibana-concepts-analysts.html" title="Kibana concepts">Kibana concepts</a>.</p>
+<p>To apply a panel-level time filter:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu, then select <span class="strong strong"><strong>More &gt; Panel settings</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Apply a custom time range</strong></span>.
+</li>
+<li class="listitem">
+Enter the time range you want to view, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+<p>To view and edit panel-level filters:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the panel, click <span class="image"><img src="images/dashboard_panelFiltersButton_8.7.0.png" alt="Panel filters button on panel header"></span>.
+</li>
+<li class="listitem">
+To edit, click <span class="strong strong"><strong>Edit filters</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="download-csv"></a>View the panel data and requests</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>View the data in visualizations and the requests that collect the data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu, then click <span class="strong strong"><strong>More &gt; Inspect</strong></span>.
+</li>
+<li class="listitem">
+<p>View and download the panel data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the <span class="strong strong"><strong>View</strong></span> dropdown, then click <span class="strong strong"><strong>Data</strong></span>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Download CSV</strong></span>, then select the format type from the dropdown:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Formatted CSV</strong></span> &mdash; Contains human-readable dates and numbers.
+</li>
+<li class="listitem">
+<p><span class="strong strong"><strong>Unformatted</strong></span> &mdash; Best used for computer use.</p>
+<p>When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer data view names.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>View the requests that collect the data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the <span class="strong strong"><strong>View</strong></span> dropdown, then click <span class="strong strong"><strong>Requests</strong></span>.
+</li>
+<li class="listitem">
+From the dropdown, select the requests you want to view.
+</li>
+<li class="listitem">
+To view the requests in <span class="strong strong"><strong>Console</strong></span>, click <span class="strong strong"><strong>Request</strong></span>, then click <span class="strong strong"><strong>Open in Console</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="share-the-dashboard"></a>Share dashboards</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To share the dashboard with a larger audience, click <span class="strong strong"><strong>Share</strong></span> in the toolbar. For detailed information about the sharing options, refer to <a class="xref" href="reporting-getting-started.html" title="Reporting and sharing">Reporting</a>.</p>
+<div class="position-relative"><h2><a id="import-dashboards"></a>Export dashboards</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/dashboard.asciidoc">edit</a></div>
+<p>To automate Kibana, you can export dashboards as NDJSON using the <a href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects" class="ulink" target="_top">Export saved objects API</a>. It is important to export dashboards with all necessary references.</p>
+</div>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="try-esql.html">« Using ES|QL</a>
+</span>
+<span class="next">
+<a href="create-a-dashboard-of-panels-with-web-server-data.html">Create your first dashboard »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+$ curl -X GET api/index_patterns/index_pattern/my-pattern

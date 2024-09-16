@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>HTTP service | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="HTTP service | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="elasticsearch-service.html" title="Elasticsearch service"/>
+<link rel="next" href="logging-service.html" title="Logging service"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="elasticsearch-service.html">« Elasticsearch service</a>
+</span>
+<span class="next">
+<a href="logging-service.html">Logging service »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>HTTP service</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/http-service.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="http-service"></a>HTTP service</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/http-service.asciidoc">edit</a></div>
+</div></div></div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The HTTP service is available both server and client side.</p>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_server_side_usage"></a>Server side usage</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/http-service.asciidoc">edit</a></div>
+</div></div></div>
+<p>The server-side HttpService allows server-side plugins to register endpoints with built-in support for request validation. These endpoints may be used by client-side code or be exposed as a public API for users. Most plugins integrate directly with this service.</p>
+<p>The service allows plugins to:
+* to extend the Kibana server with custom HTTP API.
+* to execute custom logic on an incoming request or server response.
+* implement custom authentication and authorization strategy.</p>
+<p>Refer to <a href="https://github.com/elastic/kibana//blob/8.9/packages/core/http/core-http-server/src/http_contract.ts" class="ulink" target="_top">HTTP service contract types</a>.</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+
+    const validate = {
+      params: schema.object({
+        id: schema.string(),
+      }),
+    };
+
+    router.get({
+      path: 'my_plugin/{id}',
+      validate
+    },
+    async (context, request, response) =&gt; {
+      const data = await findObject(request.params.id);
+      if (!data) return response.notFound();
+      return response.ok({
+        body: data,
+        headers: {
+          'content-type': 'application/json'
+        }
+      });
+    });
+  }
+}</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_client_side_usage"></a>Client side usage</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/http-service.asciidoc">edit</a></div>
+</div></div></div>
+<p>The HTTP service is also offered on the client side and provides an API to communicate with the Kibana server via HTTP interface.
+The client-side HttpService is a preconfigured wrapper around <code class="literal">window.fetch</code> that includes some default behavior and automatically handles common errors (such as session expiration). The service should only be used for access to backend endpoints registered by the same plugin. Feel free to use another HTTP client library to request 3rd party services.</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { CoreStart } from '@kbn/core/public';
+interface ResponseType {…};
+interface MyPluginData {…};
+async function fetchData&lt;ResponseType&gt;(core: CoreStart) {
+  return await core.http.get&lt;MyPluginData&gt;(
+    '/api/my_plugin/',
+    { query: … },
+  );
+}</pre>
+</div>
+<p>Refer to <a href="https://github.com/elastic/kibana//blob/8.9/packages/core/http/core-http-browser/src/types.ts" class="ulink" target="_top">the client-side APIs</a>.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="elasticsearch-service.html">« Elasticsearch service</a>
+</span>
+<span class="next">
+<a href="logging-service.html">Logging service »</a>
+</span>
+</div>
+</body>
+</html>

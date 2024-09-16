@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Display the most relevant documents per entity | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Display the most relevant documents per entity | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps-aggregations.html" title="Plot big data without plotting too much data"/>
+<link rel="prev" href="maps-grid-aggregation.html" title="Clusters"/>
+<link rel="next" href="point-to-point.html" title="Point to point"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps-grid-aggregation.html">« Clusters</a>
+</span>
+<span class="next">
+<a href="point-to-point.html">Point to point »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps-aggregations.html">Plot big data without plotting too much data</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Display the most relevant documents per entity</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-top-hits-aggregation"></a>Display the most relevant documents per entity</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>Use <span class="strong strong"><strong>Top hits per entity</strong></span> to display the most relevant documents per entity, for example, the most recent GPS tracks per flight route.
+To get this data, Elasticsearch first groups your data using a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-bucket-terms-aggregation.html" class="ulink" target="_top">terms aggregation</a>,
+then accumulates the most relevant documents based on sort order for each entry using a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-metrics-top-hits-aggregation.html" class="ulink" target="_top">top hits metric aggregation</a>.</p>
+<p>To enable top hits:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>, then select the <span class="strong strong"><strong>Top hits per entity</strong></span> layer.
+</li>
+<li class="listitem">
+Configure <span class="strong strong"><strong>Data view</strong></span> and <span class="strong strong"><strong>Geospatial field</strong></span>.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Entity</strong></span> to the field that identifies entities in your documents.
+This field will be used in the terms aggregation to group your documents into entity buckets.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Documents per entity</strong></span> to configure the maximum number of documents accumulated per entity.
+This setting is limited to the <code class="literal">index.max_inner_result_window</code> index setting, which defaults to 100.
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/top_hits.png" alt="top hits">
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-grid-aggregation.html">« Clusters</a>
+</span>
+<span class="next">
+<a href="point-to-point.html">Point to point »</a>
+</span>
+</div>
+</body>
+</html>

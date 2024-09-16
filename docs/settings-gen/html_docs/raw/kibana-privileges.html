@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kibana privileges | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana privileges | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-security.html" title="Security"/>
+<link rel="prev" href="kibana-role-management.html" title="Kibana role management"/>
+<link rel="next" href="api-keys.html" title="API Keys"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-role-management.html">« Kibana role management</a>
+</span>
+<span class="next">
+<a href="api-keys.html">API Keys »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-security.html">Security</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana privileges</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-privileges"></a>Kibana privileges</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana privileges grant users access to features within Kibana. Roles have privileges to determine whether users have write or read access.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_base_privileges"></a>Base privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>Assigning a base privilege grants access to all Kibana features, such as <span class="strong strong"><strong>Discover</strong></span>, <span class="strong strong"><strong>Dashboard</strong></span>, <span class="strong strong"><strong>Visualize Library</strong></span>, and <span class="strong strong"><strong>Canvas</strong></span>.</p>
+<div class="variablelist">
+<a id="kibana-privileges-all"></a>
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">all</code>
+</span>
+</dt>
+<dd>
+Grants full read-write access.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">read</code>
+</span>
+</dt>
+<dd>
+Grants read-only access.
+</dd>
+</dl>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_assigning_base_privileges"></a>Assigning base privileges</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>From the role management screen:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="security/images/assign-base-privilege.png" alt="Assign base privilege">
+</div>
+</div>
+<p>From the <a class="xref" href="role-management-api-put.html" title="Create or update role API">role management API</a>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {},
+      "spaces": ["marketing"]
+    }
+  ]
+}</pre>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="kibana-feature-privileges"></a>Feature privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>Assigning a feature privilege grants access to a specific feature.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">all</code>
+</span>
+</dt>
+<dd>
+Grants full read-write access.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">read</code>
+</span>
+</dt>
+<dd>
+Grants read-only access.
+</dd>
+</dl>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_sub_feature_privileges"></a>Sub-feature privileges</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>Some features allow for finer access control than the <code class="literal">all</code> and <code class="literal">read</code> privileges.
+This additional level of control is a <a href="https://www.elastic.co/subscriptions" class="ulink" target="_top">subscription feature</a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_assigning_feature_privileges"></a>Assigning feature privileges</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/authorization/kibana-privileges.asciidoc">edit</a></div>
+</div></div></div>
+<p>From the role management screen:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="security/images/assign-subfeature-privilege.png" alt="Assign feature privilege">
+</div>
+</div>
+<p>From the <a class="xref" href="role-management-api-put.html" title="Create or update role API">role management API</a>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "visualize": ["all"],
+        "dashboard": ["read", "url_create"]
+      },
+      "spaces": ["marketing"]
+    }
+  ]
+}</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-role-management.html">« Kibana role management</a>
+</span>
+<span class="next">
+<a href="api-keys.html">API Keys »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Logging settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Logging settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="i18n-settings-kb.html" title="i18n settings in Kibana"/>
+<link rel="next" href="logs-ui-settings-kb.html" title="Logs settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="i18n-settings-kb.html">« i18n settings in Kibana</a>
+</span>
+<span class="next">
+<a href="logs-ui-settings-kb.html">Logs settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Logging settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/logging-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="logging-settings"></a>Logging settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/logging-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>You do not need to configure any additional settings to use the logging features in Kibana. Logging is enabled by default and will log at <code class="literal">info</code> level using the <code class="literal">pattern</code> layout, which outputs logs to <code class="literal">stdout</code>.</p>
+<p>However, if you are planning to ingest your logs using Elasticsearch or another tool, we recommend using the <code class="literal">json</code> layout, which produces logs in ECS format. In general, <code class="literal">pattern</code> layout is recommended when raw logs will be read by a human, and <code class="literal">json</code> layout when logs will be read by a machine.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The logging configuration is validated against the predefined schema and if there are any issues with it, Kibana will fail to start with the detailed error message.</p>
+</div>
+</div>
+<p>Kibana relies on three high-level entities to set the logging service: appenders, loggers, and root. These can be configured in the <code class="literal">logging</code> namespace in <code class="literal">kibana.yml</code>.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Appenders define where log messages are displayed (stdout or console) and their layout (<code class="literal">pattern</code> or <code class="literal">json</code>). They also allow you to specify if you want the logs stored and, if so, where (file on the disk).
+</li>
+<li class="listitem">
+Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, <code class="literal">metrics.ops</code> or <code class="literal">elasticsearch.query</code>.
+</li>
+<li class="listitem">
+Root is a logger that applies to all the log entries in Kibana.
+</li>
+</ul>
+</div>
+<p>The following table serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the <a class="xref" href="logging-configuration.html" title="Configure logging">Configure Logging in Kibana</a> guide and complete <a class="xref" href="log-settings-examples.html" title="Examples">examples</a> for common configuration use cases.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;</code></p></td>
+<td align="left" valign="top"><p>Unique appender identifier.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].console:</code></p></td>
+<td align="left" valign="top"><p>Appender to use for logging records to <span class="strong strong"><strong>stdout</strong></span>. By default, uses the <code class="literal">[%date][%level][%logger] %message</code> <span class="strong strong"><strong>pattern</strong></span> layout. To use a <span class="strong strong"><strong>json</strong></span>, set the <a class="xref" href="log-settings-examples.html#log-in-json-ECS-example" title="Log in JSON format">layout type to <code class="literal">json</code></a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].file:</code></p></td>
+<td align="left" valign="top"><p>Allows you to specify a fileName to write log records to disk. To write <a class="xref" href="log-settings-examples.html#log-to-file-example" title="Log to a file">all log records to file</a>, add the file appender to <code class="literal">root.appenders</code>. If configured, you also need to specify <a class="xref" href="log-settings-examples.html#log-to-file-example" title="Log to a file"><code class="literal">logging.appenders.file.pathName</code></a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].rolling-file:</code></p></td>
+<td align="left" valign="top"><p>Similar to <a href="https://logging.apache.org/log4j/2.x/" class="ulink" target="_top">Log4j&#8217;s</a> <code class="literal">RollingFileAppender</code>, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: <a class="xref" href="logging-configuration.html#size-limit-triggering-policy"><code class="literal">size-limit</code></a> and <a class="xref" href="logging-configuration.html#time-interval-triggering-policy"><code class="literal">time-interval</code></a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.type</code></p></td>
+<td align="left" valign="top"><p>The appender type determines where the log messages are sent. Options are <code class="literal">console</code>, <code class="literal">file</code>, <code class="literal">rewrite</code>, <code class="literal">rolling-file</code>. Required.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.fileName</code></p></td>
+<td align="left" valign="top"><p>Determines the filepath where the log messages are written to for file and rolling-file appender types. Required for appenders that write to file.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.policy.type</code></p></td>
+<td align="left" valign="top"><p>Specify the triggering policy for when a rollover should occur for the <code class="literal">rolling-file</code> type appender.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.policy.interval</code></p></td>
+<td align="left" valign="top"><p>Specify the time interval for rotating a log file for a <code class="literal">time-interval</code> type <code class="literal">rolling-file</code> appender. <span class="strong strong"><strong>Default 24h</strong></span></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.policy.size</code></p></td>
+<td align="left" valign="top"><p>Specify the size limit at which the policy should trigger a rollover for a <code class="literal">size-limit</code> type <code class="literal">rolling-file</code> appender. <span class="strong strong"><strong>Default 100mb</strong></span>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.policy.interval</code></p></td>
+<td align="left" valign="top"><p>Specify the time interval at which the policy should trigger a rollover for a time-interval type <code class="literal">rolling-file</code> appender.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.policy.modulate</code></p></td>
+<td align="left" valign="top"><p>Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. Boolean. Default <code class="literal">true</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.strategy.type</code></p></td>
+<td align="left" valign="top"><p>Rolling file strategy type. Only <code class="literal">numeric</code> is currently supported.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.strategy.pattern</code></p></td>
+<td align="left" valign="top"><p>The suffix to append to the file path when rolling. Must include <code class="literal">%i</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.strategy.max</code></p></td>
+<td align="left" valign="top"><p>The maximum number of files to keep. Optional. Default is <code class="literal">7</code> and the maximum is <code class="literal">100</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.layout.type</code></p></td>
+<td align="left" valign="top"><p>Determines how the log messages are displayed. Options are <code class="literal">pattern</code>, which provides human-readable output, or <code class="literal">json</code>, which provides ECS-compliant output. Required.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.layout.highlight</code></p></td>
+<td align="left" valign="top"><p>Optional boolean to highlight log messages in color. Applies to <code class="literal">pattern</code> layout only. Default is <code class="literal">false</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.appenders[].&lt;appender-name&gt;.layout.pattern</code></p></td>
+<td align="left" valign="top"><p>Optional <a class="xref" href="logging-configuration.html#pattern-layout" title="Pattern layout">string pattern</a> for placeholders that will be replaced with data from the actual log message. Applicable to pattern type layout only.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.root.appenders[]</code></p></td>
+<td align="left" valign="top"><p>List of specific appenders to apply to <code class="literal">root</code>. Defaults to <code class="literal">console</code> with <code class="literal">pattern</code> layout.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.root.level</code></p></td>
+<td align="left" valign="top"><p>Specify default verbosity for all log messages to fall back to if not specifically configured at the individual logger level. Options are <code class="literal">all</code>, <code class="literal">fatal</code>, <code class="literal">error</code>, <code class="literal">warn</code>, <code class="literal">info</code>, <code class="literal">debug</code>, <code class="literal">trace</code>, <code class="literal">off</code>. The <code class="literal">all</code> and <code class="literal">off</code> levels can be used only in configuration and are just handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger. Default is <code class="literal">info</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.loggers[].&lt;logger&gt;.name:</code></p></td>
+<td align="left" valign="top"><p>Specific logger instance.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.loggers[].&lt;logger&gt;.level</code></p></td>
+<td align="left" valign="top"><p>Specify verbosity of log messages for &lt;logger&gt; context. Optional and inherits the verbosity of any ancestor logger, up to the <code class="literal">root</code> logger <code class="literal">level</code>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.loggers[].&lt;logger&gt;.appenders</code></p></td>
+<td align="left" valign="top"><p>Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the <code class="literal">root</code> logger if not specified.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="i18n-settings-kb.html">« i18n settings in Kibana</a>
+</span>
+<span class="next">
+<a href="logs-ui-settings-kb.html">Logs settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Build a map to compare metrics by country or region | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Build a map to compare metrics by country or region | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps.html" title="Maps"/>
+<link rel="prev" href="maps.html" title="Maps"/>
+<link rel="next" href="asset-tracking-tutorial.html" title="Track, visualize, and alert on assets in real time"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps.html">« Maps</a>
+</span>
+<span class="next">
+<a href="asset-tracking-tutorial.html">Track, visualize, and alert on assets in real time »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Build a map to compare metrics by country or region</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-getting-started"></a>Build a map to compare metrics by country or region</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you are new to <span class="strong strong"><strong>Maps</strong></span>, this tutorial is a good place to start.
+It guides you through the common steps for working with your location data.</p>
+<p>You will learn to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Create a map with multiple layers and data sources
+</li>
+<li class="listitem">
+Use symbols, colors, and labels to style data values
+</li>
+<li class="listitem">
+Embed a map in a dashboard
+</li>
+<li class="listitem">
+Search across panels in your dashboard
+</li>
+</ul>
+</div>
+<p>When you complete this tutorial, you’ll have a map that looks like this:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/sample_data_web_logs.png" alt="sample data web logs">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_prerequisites_2"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you don’t already have Kibana, set it up with <a href="https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&amp;elektra=docs" class="ulink" target="_top">our free trial</a>.
+</li>
+<li class="listitem">
+This tutorial requires the <a class="xref" href="get-started.html" title="Quick start">web logs sample data set</a>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll re-create in this tutorial.
+</li>
+<li class="listitem">
+You must have the correct privileges for creating a map.
+If you don&#8217;t have sufficient privileges to create or save maps,
+a read-only icon appears in the toolbar. For more information,
+refer to <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="maps-create"></a>Step 1. Create a map</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and then click <span class="strong strong"><strong>Dashboard</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create dashboard</strong></span>.
+</li>
+<li class="listitem">
+Set the time range to <span class="strong strong"><strong>Last 7 days</strong></span>.
+</li>
+<li class="listitem">
+Click the <span class="strong strong"><strong>Create new Maps</strong></span> icon <span class="image"><img src="maps/images/app_gis_icon.png" alt="app gis icon"></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="maps-add-choropleth-layer"></a>Step 2. Add a choropleth layer</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>The first layer you&#8217;ll add is a choropleth layer to shade world countries
+by web log traffic. Darker shades will symbolize countries with more web log traffic,
+and lighter shades will symbolize countries with less traffic.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>, and then click <span class="strong strong"><strong>Choropleth</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>EMS boundaries</strong></span> dropdown menu, select <span class="strong strong"><strong>World Countries</strong></span>.
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Statistics source</strong></span>, set:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Data view</strong></span> to <span class="strong strong"><strong>kibana_sample_data_logs</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Join field</strong></span> to <span class="strong strong"><strong>geo.dest</strong></span>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add and continue</strong></span>.
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Layer settings</strong></span>, set:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Name</strong></span> to <code class="literal">Total Requests by Destination</code>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Opacity</strong></span> to 50%
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Add a Tooltip field:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>ISO 3166-1 alpha-2 code</strong></span> is added by default.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>+ Add</strong></span> to open the field select.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>name</strong></span> and click <span class="strong strong"><strong>Add</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Layer style</strong></span>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Set <span class="strong strong"><strong>Fill color &gt; As number</strong></span> to the grey color ramp.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Border color</strong></span> to white.
+</li>
+<li class="listitem">
+Under <span class="strong strong"><strong>Label</strong></span>, change <span class="strong strong"><strong>By value</strong></span> to <span class="strong strong"><strong>Fixed</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Keep changes</strong></span>.</p>
+<p>Your map now looks like this:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_add_cloropeth_layer.png" alt="Map showing the Total Requests by Destination layer">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="maps-add-elasticsearch-layer"></a>Step 3. Add layers for the Elasticsearch data</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>To avoid overwhelming the user with too much data at once, you&#8217;ll add two layers
+for the Elasticsearch data. The first layer will display individual documents
+when users zoom in on the map. The second layer will
+display aggregated data when users zoom the map out.</p>
+<div class="position-relative"><h4><a id="_add_a_layer_for_individual_documents"></a>Add a layer for individual documents</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>This layer displays web log documents as points.
+The layer is only visible when users zoom in.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>, and then click <span class="strong strong"><strong>Documents</strong></span>.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Data view</strong></span> to <span class="strong strong"><strong>kibana_sample_data_logs</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add and continue</strong></span>.
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Layer settings</strong></span>, set:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Name</strong></span> to <code class="literal">Actual Requests</code>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Visibility</strong></span> to the range [9, 24]
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Opacity</strong></span> to 100%
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Add a tooltip field and select <span class="strong strong"><strong>agent</strong></span>, <span class="strong strong"><strong>bytes</strong></span>, <span class="strong strong"><strong>clientip</strong></span>, <span class="strong strong"><strong>host</strong></span>,
+<span class="strong strong"><strong>machine.os</strong></span>, <span class="strong strong"><strong>request</strong></span>, <span class="strong strong"><strong>response</strong></span>, and <span class="strong strong"><strong>timestamp</strong></span>.
+</li>
+<li class="listitem">
+In <span class="strong strong"><strong>Scaling</strong></span>, enable <span class="strong strong"><strong>Limit results to 10,000.</strong></span>
+</li>
+<li class="listitem">
+In <span class="strong strong"><strong>Layer style</strong></span>, set <span class="strong strong"><strong>Fill color</strong></span> to <span class="strong strong"><strong>#2200FF</strong></span>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Keep changes</strong></span>.</p>
+<p>Your map will look like this from zoom level 9 to 24:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_add_es_document_layer.png" alt="Map showing what zoom level looks like a level 9">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="_add_a_layer_for_aggregated_data"></a>Add a layer for aggregated data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>You&#8217;ll create a layer for <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations.html" class="ulink" target="_top">aggregated data</a> and make it visible only when the map
+is zoomed out. Darker colors will symbolize grids
+with more web log traffic, and lighter colors will symbolize grids with less
+traffic. Larger circles will symbolize grids with
+more total bytes transferred, and smaller circles will symbolize
+grids with less bytes transferred.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>, and select <span class="strong strong"><strong>Clusters</strong></span>.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Data view</strong></span> to <span class="strong strong"><strong>kibana_sample_data_logs</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add and continue</strong></span>.
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Layer settings</strong></span>, set:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Name</strong></span> to <code class="literal">Total Requests and Bytes</code>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Visibility</strong></span> to the range [0, 9]
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Opacity</strong></span> to 100%
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Metrics</strong></span>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Set <span class="strong strong"><strong>Aggregation</strong></span> to <span class="strong strong"><strong>Count</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add metric</strong></span>.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Aggregation</strong></span> to <span class="strong strong"><strong>Sum</strong></span> with <span class="strong strong"><strong>Field</strong></span> set to <span class="strong strong"><strong>bytes</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Layer style</strong></span>, change <span class="strong strong"><strong>Symbol size</strong></span>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Set <span class="strong strong"><strong>By value</strong></span> to <span class="strong strong"><strong>sum bytes</strong></span>.
+</li>
+<li class="listitem">
+Set the min size to 7 and the max size to 25 px.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Keep changes</strong></span> button.</p>
+<p>Your map will look like this between zoom levels 0 and 9:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/sample_data_web_logs.png" alt="Map showing what zoom level 3 looks like">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="maps-save"></a>Step 4. Save the map</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>Now that your map is complete, save it and return to the dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="maps-embedding"></a>Step 5. Explore your data from the dashboard</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<p>View your geospatial data alongside a heat map and pie chart, and then filter the data.
+When you apply a filter in one panel, it is applied to all panels on the dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add from library</strong></span> to open a list of panels that you can add to the dashboard.
+</li>
+<li class="listitem">
+<p>Add <span class="strong strong"><strong>[Logs] Unique Destination Heatmap</strong></span> and <span class="strong strong"><strong>[Logs] Bytes distribution</strong></span> to the dashboard.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_dashboard_with_map.png" alt="Map in a dashboard with 2 other panels">
+</div>
+</div>
+</li>
+<li class="listitem">
+To filter for documents with unusually high byte values, click and drag in the <span class="strong strong"><strong>Bytes distribution</strong></span> chart.
+</li>
+<li class="listitem">
+Remove the filter by clicking <span class="strong strong"><strong>x</strong></span> next to its name in the filter bar.
+</li>
+<li class="listitem">
+<p>Set a filter from the map:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open a tooltip by clicking anywhere in the United States vector.
+</li>
+<li class="listitem">
+<p>To show only documents where <span class="strong strong"><strong>geo.src</strong></span> is <span class="strong strong"><strong>US</strong></span>, click the filter icon <span class="image"><img src="maps/images/gs-filter-icon.png" alt="filter icon" width="24px"></span>in the row for <span class="strong strong"><strong>ISO 3066-1 alpha-2</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_tooltip_filter.png" alt="Tooltip on map" width="75%">
+</div>
+</div>
+<p>Your filtered map should look similar to this:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_map_filtered.png" alt="Map showing filtered data">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_whats_next_6"></a>What&#8217;s next?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-getting-started.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Check out <a class="xref" href="vector-layer.html" title="Vector layer">additional types of layers</a> that you can add to your map.
+</li>
+<li class="listitem">
+Learn more ways <a class="xref" href="maps-vector-style-properties.html" title="Vector style properties">customize your map</a>.
+</li>
+<li class="listitem">
+Learn more about <a class="xref" href="vector-tooltip.html" title="Vector tooltips">vector tooltips</a>.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps.html">« Maps</a>
+</span>
+<span class="next">
+<a href="asset-tracking-tutorial.html">Track, visualize, and alert on assets in real time »</a>
+</span>
+</div>
+</body>
+</html>

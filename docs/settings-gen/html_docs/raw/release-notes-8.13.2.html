@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.13.2 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.13.2 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.13.3.html" title="Kibana 8.13.3"/>
+<link rel="next" href="release-notes-8.13.1.html" title="Kibana 8.13.1"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.13.3.html">« Kibana 8.13.3</a>
+</span>
+<span class="next">
+<a href="release-notes-8.13.1.html">Kibana 8.13.1 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.13.2</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.13.2"></a>Kibana 8.13.2</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>The 8.13.2 release includes the following bug fixes.</p>
+<div class="position-relative"><h3><a id="fixes-v8.13.2"></a>Bug Fixes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Canvas
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes text settings to be honored in Canvas markdown elements (<a href="https://github.com/elastic/kibana/pull/179948" class="ulink" target="_top">#179948</a>).
+</li>
+<li class="listitem">
+Fixes custom styling for Canvas markdown Workpads (<a href="https://github.com/elastic/kibana/pull/180070" class="ulink" target="_top">#180070</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes keyboard navigation for search input on the document viewer flyout (<a href="https://github.com/elastic/kibana/pull/180022" class="ulink" target="_top">#180022</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.13.2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes having to wait ten minutes after agent upgrade if agent cleared watching state (<a href="https://github.com/elastic/kibana/pull/179917" class="ulink" target="_top">#179917</a>).
+Fixes using the latest available version in K8&#8217;s manifest instead of the latest compatible version (<a href="https://github.com/elastic/kibana/pull/179662" class="ulink" target="_top">#179662</a>).
+</li>
+<li class="listitem">
+Fixes a step in add agent instructions where a query to get all agents was unnecessary (<a href="https://github.com/elastic/kibana/pull/179603" class="ulink" target="_top">#179603</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes custom styling for TSVB markdown visualizations (<a href="https://github.com/elastic/kibana/pull/180053" class="ulink" target="_top">#180053</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly (<a href="https://github.com/elastic/kibana/pull/179761" class="ulink" target="_top">#179761</a>).
+</li>
+<li class="listitem">
+AIOps: Fixes text field candidate selection for log rate analysis (<a href="https://github.com/elastic/kibana/pull/179699" class="ulink" target="_top">#179699</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes the Response tab loading time to be faster (<a href="https://github.com/elastic/kibana/pull/180035" class="ulink" target="_top">#180035</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Maps
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes APM data view ID (<a href="https://github.com/elastic/kibana/pull/179257" class="ulink" target="_top">#179257</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Monitoring
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes a runtime error by adding a default value for source and target (<a href="https://github.com/elastic/kibana/pull/180043" class="ulink" target="_top">#180043</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Operations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes an issue with Kibana looking for a configuration file outside of the Kibana home directory, potentially preventing startup due to insufficient permissions (<a href="https://github.com/elastic/kibana/pull/179847" class="ulink" target="_top">#179847</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.13.3.html">« Kibana 8.13.3</a>
+</span>
+<span class="next">
+<a href="release-notes-8.13.1.html">Kibana 8.13.1 »</a>
+</span>
+</div>
+</body>
+</html>

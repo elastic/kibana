@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AIOps Labs | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="AIOps Labs | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-ml.html" title="Machine learning"/>
+<link rel="prev" href="xpack-ml-dfanalytics.html" title="Data frame analytics"/>
+<link rel="next" href="xpack-graph.html" title="Graph"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="xpack-ml-dfanalytics.html">« Data frame analytics</a>
+</span>
+<span class="next">
+<a href="xpack-graph.html">Graph »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-ml.html">Machine learning</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>AIOps Labs</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-ml-aiops"></a>AIOps Labs</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>AIOps Labs is a part of Machine Learning in Kibana which provides features that use
+advanced statistical methods to help you interpret your data and its behavior.</p>
+<div class="position-relative"><h3><a id="log-rate-analysis"></a>Log rate analysis</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+<p>Log rate analysis uses advanced statistical methods to identify reasons for increases or decreases in log rates and displays the statistically significant data in a tabular format.
+It makes it easy to find and investigate causes of unusual spikes or drops by using the analysis workflow view.
+Examine the histogram chart of the log rates for a given data view, and find the reason behind a particular change possibly in millions of log events across multiple fields and values.</p>
+<p>You can find log rate analysis embedded in multiple applications.
+In Kibana, you can find it under <span class="strong strong"><strong>Machine Learning</strong></span> &gt; <span class="strong strong"><strong>AIOps Labs</strong></span> where you can select the data view or saved search that you want to analyze.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-log-rate-analysis-before.png" alt="Log event histogram chart">
+</div>
+</div>
+<p>Select a spike or drop in the log event histogram chart to start the analysis.
+It identifies statistically significant field-value combinations that contribute to the spike or drop and displays them in a table.
+You can optionally choose to summarize the results into groups.
+The table also shows an indicator of the level of impact and a sparkline showing the shape of the impact in the chart.
+Hovering over a row displays the impact on the histogram chart in more detail.
+You can inspect a field in <span class="strong strong"><strong>Discover</strong></span>, further investigate in <span class="strong strong"><strong>Log pattern analysis</strong></span>, or copy the table row information as a query filter to the clipboard by selecting the corresponding option under the <span class="strong strong"><strong>Actions</strong></span> column.
+You can also pin a table row by clicking on it then move the cursor to the histogram chart.
+It displays a tooltip with exact count values for the pinned field which enables closer investigation.</p>
+<p>Brushes in the chart show the baseline time range and the deviation in the analyzed data.
+You can move the brushes to redefine both the baseline and the deviation and rerun the analysis with the modified values.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-log-rate-analysis.png" alt="Log rate spike explained">
+</div>
+</div>
+<div class="position-relative"><h3><a id="log-pattern-analysis"></a>Log pattern analysis</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+<p>Log pattern analysis helps you to find patterns in unstructured log messages and
+makes it easier to examine your data. It performs categorization analysis on a
+selected field of a data view, creates categories based on the data and
+displays them together with a chart that shows the distribution of each category
+and an example document that matches the category.</p>
+<p>You can find log pattern analysis under <span class="strong strong"><strong>Machine Learning</strong></span> &gt; <span class="strong strong"><strong>AIOps Labs</strong></span> where you
+can select the data view or saved search that you want to analyze, or in
+<span class="strong strong"><strong>Discover</strong></span> as an available action for any text field.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-log-pattern-analysis.png" alt="Log pattern analysis UI">
+</div>
+</div>
+<p>Select a field for categorization and optionally apply any filters that you
+want, then start the analysis. The analysis uses the same algorithms as a machine learning
+categorization job. The results of the analysis are shown in a table that makes
+it possible to open <span class="strong strong"><strong>Discover</strong></span> and show or filter out the given category
+there, which helps you to further examine your log messages.</p>
+<div class="position-relative"><h3><a id="change-point-detection"></a>Change point detection</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Change point detection uses the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-change-point-aggregation.html" class="ulink" target="_top">change point aggregation</a>
+to detect distribution changes, trend changes, and other statistically
+significant change points in a metric of your time series data.</p>
+<p>You can find change point detection under <span class="strong strong"><strong>Machine Learning</strong></span> &gt; <span class="strong strong"><strong>AIOps Labs</strong></span> where
+you can select the data view or saved search that you want to analyze.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-change-point-detection.png" alt="Change point detection UI">
+</div>
+</div>
+<p>Select a function and a metric field, then pick a date range to start detecting
+change points in the defined range. Optionally, you can split the data by a
+field. If the cardinality of the split field exceeds 10,000, then only the first
+10,000, sorted by document count, are analyzed. You can configure a maximum of 6
+combinations of a function applied to a metric field, partitioned by a split
+field to identify change points.</p>
+<p>When a change point is detected, a row displays basic information including the
+timestamp of the change point, a preview chart, the type of change point, its
+p-value, the name and value of the split field. You can further examine the
+selected change point in a detailed view. A chart visualizes the identified
+change point within the analyzed time window, making the interpretation easier.
+If the analysis is split by a field, a separate chart is shown for every
+partition that has a detected change point. The chart displays the type of
+change point, its value, and the timestamp of the bucket where the change point
+has been detected. The corresponding <code class="literal">p-value</code> indicates the magnitude of the
+change; lower values indicate more significant changes. You can use the change
+point type selector to filter the results by specific types of change points.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-change-point-detection-selected.png" alt="Selected change points">
+</div>
+</div>
+<p>You can attach change point charts to a dashboard or a case by using the context
+menu. If the split field is selected, you can either select specific charts
+(partitions) or set the maximum number of top change points to plot. It&#8217;s
+possible to preserve the applied time range or use the time bound from the page
+date picker. You can also add or edit change point charts directly from the
+<span class="strong strong"><strong>Dashboard</strong></span> app.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xpack-ml-dfanalytics.html">« Data frame analytics</a>
+</span>
+<span class="next">
+<a href="xpack-graph.html">Graph »</a>
+</span>
+</div>
+</body>
+</html>

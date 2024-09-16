@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Elasticsearch service | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Elasticsearch service | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="configuration-service.html" title="Configuration service"/>
+<link rel="next" href="http-service.html" title="HTTP service"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="configuration-service.html">« Configuration service</a>
+</span>
+<span class="next">
+<a href="http-service.html">HTTP service »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Elasticsearch service</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/elasticsearch-service.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="elasticsearch-service"></a>Elasticsearch service</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/elasticsearch-service.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">Elasticsearch service</code> provides <code class="literal">elasticsearch.client</code> program API to communicate with Elasticsearch server HTTP API.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Elasticsearch service is only available server side. You can use the <a href="https://github.com/elastic/kibana/blob/master/src/plugins/data/README.mdx" class="ulink" target="_top">Data plugin</a>.</p>
+</div>
+</div>
+<p><code class="literal">elasticsearch.client</code> interacts with Elasticsearch service on behalf of:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">kibana_system</code> user via <code class="literal">elasticsearch.client.asInternalUser.*</code> methods.
+</li>
+<li class="listitem">
+a current end-user via <code class="literal">elasticsearch.client.asCurrentUser.*</code> methods. In this case Elasticsearch client should be given the current user credentials.
+See <a class="xref" href="patterns.html#scoped-services" title="Scoped services">Scoped services</a> and <a class="xref" href="development-security.html" title="Security">Security</a>.
+</li>
+</ul>
+</div>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { CoreStart, Plugin } from '@kbn/core/public';
+
+export class MyPlugin implements Plugin {
+  public start(core: CoreStart) {
+    async function asyncTask() {
+      const result = await core.elasticsearch.client.asInternalUser.ping(…);
+    }
+    asyncTask();
+  }
+}</pre>
+</div>
+<p>For advanced use-cases, such as a search for specific objects, use the <a href="https://github.com/elastic/kibana/blob/master/x-pack/plugins/global_search/README.md" class="ulink" target="_top">Global search plugin</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="configuration-service.html">« Configuration service</a>
+</span>
+<span class="next">
+<a href="http-service.html">HTTP service »</a>
+</span>
+</div>
+</body>
+</html>

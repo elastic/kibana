@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delete Parameters API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Delete Parameters API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="synthetics-apis.html" title="Synthetics APIs"/>
+<link rel="prev" href="edit-parameter-by-id-api.html" title="Edit Parameter by ID API"/>
+<link rel="next" href="create-private-location-api.html" title="Create Private Location API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="edit-parameter-by-id-api.html">« Edit Parameter by ID API</a>
+</span>
+<span class="next">
+<a href="create-private-location-api.html">Create Private Location API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="synthetics-apis.html">Synthetics APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Delete Parameters API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="delete-parameters-api"></a>Delete Parameters API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Deletes one or more parameters from the Synthetics app.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_7"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/api/synthetics/params</code></p>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/synthetics/params</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_12"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Synthetics</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Synthetics</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="parameters-delete-request-body"></a>Request Body</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>The request body should contain an array of parameter IDs that you want to delete.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">ids</code>
+</span>
+</dt>
+<dd>
+(Required, array of strings) An array of parameter IDs to delete.
+</dd>
+</dl>
+</div>
+<p>Here is an example of a DELETE request to delete a list of parameters by ID:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">DELETE /api/synthetics/params
+{
+  "ids": [
+    "param1-id",
+    "param2-id"
+  ]
+}</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="parameters-delete-response-example"></a>Response Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/delete-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>The API response includes information about the deleted parameters, where each entry in the response array contains the following attributes:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">id</code> (string): The unique identifier of the deleted parameter.
+</li>
+<li class="listitem">
+<code class="literal">deleted</code> (boolean): Indicates whether the parameter was successfully deleted (<code class="literal">true</code> if deleted, <code class="literal">false</code> if not).
+</li>
+</ul>
+</div>
+<p>Here&#8217;s an example response for deleting multiple parameters:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">[
+  {
+    "id": "param1-id",
+    "deleted": true
+  },
+  {
+    "id": "param2-id",
+    "deleted": true
+  }
+]</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="edit-parameter-by-id-api.html">« Edit Parameter by ID API</a>
+</span>
+<span class="next">
+<a href="create-private-location-api.html">Create Private Location API »</a>
+</span>
+</div>
+</body>
+</html>

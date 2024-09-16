@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Capturing diagnostics | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Capturing diagnostics | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-troubleshooting.html" title="Troubleshooting"/>
+<link rel="prev" href="kibana-troubleshooting-trace-query.html" title="Trace Elasticsearch query to the origin in Kibana"/>
+<link rel="next" href="accessibility.html" title="Accessibility Statement for Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-troubleshooting-trace-query.html">« Trace Elasticsearch query to the origin in Kibana</a>
+</span>
+<span class="next">
+<a href="accessibility.html">Accessibility Statement for Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-troubleshooting.html">Troubleshooting</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Capturing diagnostics</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-diagnostic"></a>Capturing diagnostics</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Kibana <a href="https://github.com/elastic/support-diagnostics" class="ulink" target="_top">Support Diagnostic</a>
+tool captures a point-in-time snapshot of Kibana and its Task Manager health.
+It works on Kibana versions 7.11.0 and above.</p>
+<p>You can use the information captured by the tool to troubleshoot problems with Kibana instances.
+Check the
+<a href="https://www.elastic.co/blog/troubleshooting-kibana-health" class="ulink" target="_top">Troubleshooting
+Kibana Health blog</a> for examples.</p>
+<p>You can generate diagnostic information using this tool before you contact
+<a href="https://support.elastic.co" class="ulink" target="_top">Elastic Support</a> or
+<a href="https://discuss.elastic.co" class="ulink" target="_top">Elastic Discuss</a> to help get a timely answer.</p>
+<div class="position-relative"><h4><a id="kibana-diagnostic-tool-requirements"></a>Requirements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Java Runtime Environment or Java Development Kit v1.8 or higher.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="kibana-diagnostic-tool-access"></a>Access the tool</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+<p>The Support Diagnostic tool is included out-of-the-box as a sub-library in:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Elastic Cloud Enterprise - Find the tool under <span class="strong strong"><strong>Elastic Cloud Enterprise</strong></span> &gt; <span class="strong strong"><strong>Deployment</strong></span> &gt; <span class="strong strong"><strong>Operations</strong></span> &gt;
+<span class="strong strong"><strong>Prepare Bundle</strong></span> &gt; <span class="strong strong"><strong>Kibana</strong></span>.
+</li>
+<li class="listitem">
+Elastic Cloud on Kubernetes - Run the tool with <a href="https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-take-eck-dump.html" class="ulink" target="_top"><code class="literal">eck-diagnostics</code></a>.
+</li>
+</ul>
+</div>
+<p>You can also get the latest version of the tool by downloading the <code class="literal">diagnostics-X.X.X-dist.zip</code> file from
+<a href="https://github.com/elastic/support-diagnostics/releases/latest" class="ulink" target="_top">the
+<code class="literal">support-diagnostic</code> repo</a>.</p>
+<div class="position-relative"><h4><a id="kibana-diagnostic-capture"></a>Capture diagnostic information</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+<p>To run a Kibana diagnostic:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>In a terminal, verify that your network and user permissions are sufficient
+to connect by polling Kibana&#8217;s <a class="xref" href="task-manager-api-health.html" title="Task Manager health API">Task Manager health</a>.</p>
+<p>For example, with the parameters <code class="literal">host:localhost</code>, <code class="literal">port:5601</code>, and
+<code class="literal">username:elastic</code>, you&#8217;d use the following curl request. Adapt these parameters to your context.</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">curl -X GET -k -H 'kbn-xsrf: true' -u elastic -p https://localhost:5601/api/task_manager/_health</pre>
+</div>
+<p>If you receive an HTTP 200 <code class="literal">OK</code> response, you can proceed to the
+next step. If you receive a different response code, you must
+<a class="xref" href="kibana-diagnostic.html#kibana-diagnostic-non-200" title="Diagnose a non-200 response">diagnose the issue</a> before proceeding.</p>
+</li>
+<li class="listitem">
+<p>Using the same environment parameters, run the diagnostic tool script.</p>
+<p>For information about the parameters that you can pass to the tool, refer
+to the <a href="https://github.com/elastic/support-diagnostics#standard-options" class="ulink" target="_top">diagnostic
+parameter reference</a>.</p>
+<p>The following command options are recommended:</p>
+<p><span class="strong strong"><strong>Unix-based systems</strong></span></p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo ./diagnostics.sh --type kibana-local --host localhost --port 5601 -u elastic -p --bypassDiagVerify --ssl --noVerify</pre>
+</div>
+<p><span class="strong strong"><strong>Windows</strong></span></p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo .\diagnostics.bat --type kibana-local --host localhost --port 5601 -u elastic -p --bypassDiagVerify --ssl --noVerify</pre>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<h3>Script execution modes</h3>
+<p>You can execute the script in three <a href="https://github.com/elastic/support-diagnostics#diagnostic-types" class="ulink" target="_top">modes</a>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">kibana-local</code> (default, recommended): Polls the <a class="xref" href="api.html" title="REST API">Kibana API</a>,
+gathers operating system info, and captures cluster and garbage collection (GC) logs.
+</li>
+<li class="listitem">
+<code class="literal">kibana-remote</code>: Establishes an SSH session
+to the applicable target server to pull the same information as <code class="literal">kibana-local</code>.
+</li>
+<li class="listitem">
+<code class="literal">kibana-api</code>: Polls the <a class="xref" href="api.html" title="REST API">Kibana API</a>. All other data must be
+collected manually.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</li>
+<li class="listitem">
+When the script has completed, verify that no errors were logged to
+<code class="literal">diagnostic.log</code>. If the log file contains errors, refer to
+<a class="xref" href="kibana-diagnostic.html#kibana-diagnostic-log-errors" title="Diagnose errors in diagnostic.log">Diagnose errors in <code class="literal">diagnostic.log</code></a>.
+</li>
+<li class="listitem">
+If the script completed without errors, an archive with the
+format <code class="literal">&lt;diagnostic type&gt;-diagnostics-&lt;DateTimeStamp&gt;.zip</code> is created in
+the working directory or the output directory that you have specified. You can
+review or share the diagnostic archive as needed.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="kibana-diagnostic-non-200"></a>Diagnose a non-200 response</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+<p>When you poll your Task Manager health, if you receive any response other
+than <code class="literal">200 0K</code>, then the diagnostic tool might not work as intended. Check the possible resolutions based on the error code that you get:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+HTTP 401 <code class="literal">UNAUTHENTICATED</code>
+</span>
+</dt>
+<dd>
+Additional information in the error will usually indicate
+that your <code class="literal">username:password</code> pair is invalid, or that your Elasticsearch <code class="literal">.security</code>
+index is unavailable and you need to setup a temporary Elasticsearch
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/file-realm.html" class="ulink" target="_top">file-based realm</a> user with <code class="literal">role:superuser</code> to authenticate.
+</dd>
+<dt>
+<span class="term">
+HTTP 403 <code class="literal">UNAUTHORIZED</code>
+</span>
+</dt>
+<dd>
+Your <code class="literal">username</code> is recognized but has insufficient permissions to run the
+diagnostic. Either use a different username or increase the user&#8217;s privileges.
+</dd>
+<dt>
+<span class="term">
+HTTP 429 <code class="literal">TOO_MANY_REQUESTS</code> (for example, <code class="literal">circuit_breaking_exception</code>)
+</span>
+</dt>
+<dd>
+The authentication and authorization were successful, but the Elasticsearch cluster isn&#8217;t
+responding to requests. This issue is usually intermittent and can happen
+when the cluster is overwhelmed. In this case, resolve Elasticsearch&#8217;s health first before
+returning to Kibana.
+</dd>
+<dt>
+<span class="term">
+HTTP 504 <code class="literal">BAD_GATEWAY</code>
+</span>
+</dt>
+<dd>
+Your network has trouble reaching Kibana. You might be using
+a proxy or firewall. Consider running the diagnostic tool from a different
+location, confirming your port, or using an IP instead of a URL domain.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="kibana-diagnostic-log-errors"></a>Diagnose errors in <code class="literal">diagnostic.log</code></h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/troubleshooting/diagnostic.asciidoc">edit</a></div>
+<p>The following are common errors that you might encounter when running
+the diagnostic tool:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p><code class="literal">Error: Could not find or load main class com.elastic.support.diagnostics.DiagnosticApp</code></p>
+<p>This indicates that you accidentally downloaded the source code file
+instead of <code class="literal">diagnostics-X.X.X-dist.zip</code> from the releases page.</p>
+</li>
+<li class="listitem">
+<p>A <code class="literal">security_exception</code> that includes <code class="literal">is unauthorized for user</code>:</p>
+<p>The provided user has insufficient admin permissions to run the diagnostic
+tool. Use another user, or grant the user <code class="literal">role:superuser</code> privileges.</p>
+</li>
+<li class="listitem">
+<p><code class="literal">{kib} Server is not Ready yet</code></p>
+<p>This indicates issues with Kibana&#8217;s dependencies blocking full start-up.
+To investigate, check <a class="xref" href="access.html#not-ready" title="Troubleshoot Kibana UI error">Troubleshoot Kibana UI error</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-troubleshooting-trace-query.html">« Trace Elasticsearch query to the origin in Kibana</a>
+</span>
+<span class="next">
+<a href="accessibility.html">Accessibility Statement for Kibana »</a>
+</span>
+</div>
+</body>
+</html>

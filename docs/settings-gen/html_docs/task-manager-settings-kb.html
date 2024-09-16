@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Task Manager settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Task Manager settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="spaces-settings-kb.html" title="Spaces settings in Kibana"/>
+<link rel="next" href="telemetry-settings-kbn.html" title="Telemetry settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="spaces-settings-kb.html">« Spaces settings in Kibana</a>
+</span>
+<span class="next">
+<a href="telemetry-settings-kbn.html">Telemetry settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Task Manager settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="task-manager-settings-kb"></a>Task Manager settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Task Manager runs background tasks by polling for work on an interval.  You can configure its behavior to tune for performance and throughput.</p>
+<div class="position-relative"><h4><a id="task-manager-settings"></a>Task Manager settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.max_attempts</code>
+</span>
+</dt>
+<dd>
+The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.poll_interval</code>
+</span>
+</dt>
+<dd>
+How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.request_capacity</code>
+</span>
+</dt>
+<dd>
+How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.max_workers</code>
+</span>
+</dt>
+<dd>
+The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
+Starting in 8.0, it will not be possible to set the value greater than 100.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.enabled</code>
+</span>
+</dt>
+<dd>
+This flag will enable automatic warn and error logging if task manager self detects a performance issue, such as the time between when a task is scheduled to execute and when it actually executes. Defaults to false.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds</code>
+</span>
+</dt>
+<dd>
+The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.ephemeral_tasks.enabled</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">8.8.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 8.8.0.
+</span>
+</span>
+Enables a technical preview feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
+These action tasks will reduce the latency of the time it takes an action to run after it&#8217;s triggered, but are not persisted as SavedObjects.
+These non-persisted action tasks have a risk that they won&#8217;t be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.ephemeral_tasks.request_capacity</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">8.8.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 8.8.0.
+</span>
+</span>
+Sets the size of the ephemeral queue defined above. Defaults to 10.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.event_loop_delay.monitor</code>
+</span>
+</dt>
+<dd>
+Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the <code class="literal">warn_threshold</code> setting.  Defaults to true.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.event_loop_delay.warn_threshold</code>
+</span>
+</dt>
+<dd>
+Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="task-manager-health-settings"></a>Task Manager Health settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+<p>Settings that configure the <a class="xref" href="task-manager-health-monitoring.html" title="Task Manager health monitoring">Health monitoring</a> endpoint.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_task_execution_thresholds</code>
+</span>
+</dt>
+<dd>
+<p>
+Configures the threshold of failed task executions at which point the <code class="literal">warn</code> or
+<code class="literal">error</code> health status is set under each task type execution status
+(under <code class="literal">stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status</code>).
+</p>
+<p>This setting allows configuration of both the default level and a
+custom task type specific level. By default, this setting is configured to mark
+the health of every task type as <code class="literal">warning</code> when it exceeds 80% failed executions,
+and as <code class="literal">error</code> at 90%.</p>
+<p>Custom configurations allow you to reduce this threshold to catch failures sooner
+for task types that you might consider critical, such as alerting tasks.</p>
+<p>This value can be set to any number between 0 to 100, and a threshold is hit
+when the value <span class="strong strong"><strong>exceeds</strong></span> this number. This means that you can avoid setting the
+status to <code class="literal">error</code> by setting the threshold at 100, or hit <code class="literal">error</code> the moment
+any task fails by setting the threshold to 0 (as it will exceed 0 once a
+single failure occurs).</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-settings-kb.html">« Spaces settings in Kibana</a>
+</span>
+<span class="next">
+<a href="telemetry-settings-kbn.html">Telemetry settings in Kibana »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

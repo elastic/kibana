@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Get Private Locations API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Get Private Locations API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="synthetics-apis.html" title="Synthetics APIs"/>
+<link rel="prev" href="delete-private-location-api.html" title="Delete Private Location API"/>
+<link rel="next" href="uptime-apis.html" title="Uptime APIs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="delete-private-location-api.html">« Delete Private Location API</a>
+</span>
+<span class="next">
+<a href="uptime-apis.html">Uptime APIs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="synthetics-apis.html">Synthetics APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Get Private Locations API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="get-private-locations-api"></a>Get Private Locations API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Retrieves a list of private locations or a single private location by ID.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_10"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/api/synthetics/private_locations</code></p>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/synthetics/private_locations</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_15"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">read</code> privileges for the <span class="strong strong"><strong>Synthetics and Uptime</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-locations-list-response-example"></a>List Response Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The API returns a JSON array of private locations when accessing the list endpoint, with each private location having the following attributes:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">label</code> (string): A label for the private location.
+</li>
+<li class="listitem">
+<code class="literal">id</code> (string): The unique identifier of the private location.
+</li>
+<li class="listitem">
+<code class="literal">agentPolicyId</code> (string): The ID of the agent policy associated with the private location.
+</li>
+<li class="listitem">
+<code class="literal">isInvalid</code> (boolean): Indicates whether the location is invalid. If <code class="literal">true</code>, the location is invalid, which means the agent policy associated with the location is deleted.
+</li>
+<li class="listitem">
+<code class="literal">geo</code> (object): Geographic coordinates for the location, including <code class="literal">lat</code> and <code class="literal">lon</code>.
+</li>
+<li class="listitem">
+<code class="literal">namespace</code> (string): The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+</li>
+</ul>
+</div>
+<p>Here&#8217;s an example list response:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">[
+    {
+        "label": "Test private location",
+        "id": "fleet-server-policy",
+        "agentPolicyId": "fleet-server-policy",
+        "isInvalid": false,
+        "geo": {
+            "lat": 0,
+            "lon": 0
+        },
+        "namespace": "default"
+    },
+    {
+        "label": "Test private location 2",
+        "id": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+        "agentPolicyId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+        "isInvalid": false,
+        "geo": {
+            "lat": 0,
+            "lon": 0
+        },
+        "namespace": "test"
+    }
+]</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-location-by-id-response-example"></a>Get by ID/Label Response Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/get-private-locations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The API returns a JSON object of a single private location when accessing the endpoint with a specific <code class="literal">id</code>, with the same attributes as in the list response.</p>
+<p>Here&#8217;s an example request for a single location by ID:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">GET api/synthetics/private_locations/&lt;location_id&gt;</pre>
+</div>
+<p>or by label:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">GET api/synthetics/private_locations/&lt;Location label&gt;</pre>
+</div>
+<p>Here&#8217;s an example response object:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+    "label": "Test private location",
+    "id": "test-private-location-id",
+    "agentPolicyId": "test-private-location-id",
+    "isServiceManaged": false,
+    "isInvalid": false,
+    "geo": {
+        "lat": 0,
+        "lon": 0
+    },
+    "namespace": "default"
+}</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="delete-private-location-api.html">« Delete Private Location API</a>
+</span>
+<span class="next">
+<a href="uptime-apis.html">Uptime APIs »</a>
+</span>
+</div>
+</body>
+</html>

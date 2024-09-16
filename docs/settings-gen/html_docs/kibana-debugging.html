@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Debugging Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Debugging Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="development-getting-started.html" title="Getting started"/>
+<link rel="prev" href="sample-data.html" title="Installing sample data"/>
+<link rel="next" href="building-kibana.html" title="Building a Kibana distributable"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="sample-data.html">« Installing sample data</a>
+</span>
+<span class="next">
+<a href="building-kibana.html">Building a Kibana distributable »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development-getting-started.html">Getting started</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Debugging Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-debugging"></a>Debugging Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+</div></div></div>
+<p>For information about how to debug unit tests, refer to <a class="xref" href="development-tests.html#debugging-unit-tests" title="Debugging Unit Tests">Debugging Unit Tests</a>.</p>
+<div class="position-relative"><h4><a id="_server_code"></a>Server Code</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+<p><code class="literal">yarn debug</code> will start the server with Node&#8217;s inspect flag. Kibana&#8217;s development mode will start three processes on ports <code class="literal">9229</code>, <code class="literal">9230</code>, and <code class="literal">9231</code>. Chrome&#8217;s developer tools need to be configured to connect to all three connections. Add <code class="literal">localhost:&lt;port&gt;</code> for each Kibana process in Chrome&#8217;s developer tools connection tab.</p>
+<div class="position-relative"><h4><a id="_instrumenting_with_elastic_apm"></a>Instrumenting with Elastic APM</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+<p>Kibana ships with the
+<a href="https://github.com/elastic/apm-agent-nodejs" class="ulink" target="_top">Elastic APM Node.js Agent</a>
+built-in for debugging purposes.</p>
+<p>With an application as varied and complex as Kibana has become, it&#8217;s not practical or scalable to craft all possible performance measurements by hand ahead of time. As such, we need to rely on tooling to help us catch things we may otherwise have missed.</p>
+<p>For example, say you implement a brand new feature, plugin or service but don&#8217;t quite know how it will impact Kibana&#8217;s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/apm_example_trace.png" alt="apm example trace">
+</div>
+</div>
+<p>The net of metrics captured by APM are both a wide and deep because the entire application is instrumented at runtime and we simply take a sample of these metrics. This means that we don&#8217;t have to know what we need to measure ahead of time, we&#8217;ll instead just get (most) of the data we&#8217;re likely going to need by default.</p>
+<p>This type of data can help us identify unknown bottlenecks, spot when a performance regression may have been introduced, and inform how the performance of Kibana is changing between releases. Using APM allows us to be proactive in getting ahead of potential performance regressions before they are released.</p>
+<p>The default APM configuration is meant to be used by core Kibana developers
+only, but it can easily be re-configured to your needs. In its default
+configuration it’s disabled and will, once enabled, send APM data to a
+centrally managed Elasticsearch cluster accessible only to Elastic
+employees.</p>
+<p>To change the location where data is sent, use the
+<a href="https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#server-url" class="ulink" target="_top"><code class="literal">serverUrl</code></a>
+APM config option. To activate the APM agent, use the
+<a href="https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#active" class="ulink" target="_top"><code class="literal">active</code></a>
+APM config option.</p>
+<p>All config options can be set by
+creating an appropriate config file under <code class="literal">config/kibana.dev.yml</code>.</p>
+<p>Example <code class="literal">config/kibana.dev.yml</code> file:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">elastic:
+  apm:
+    active: true</pre>
+</div>
+<p>APM
+<a href="https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html" class="ulink" target="_top">Real
+User Monitoring agent</a> is not available in the Kibana distributables,
+however the agent can be enabled by setting <code class="literal">ELASTIC_APM_ACTIVE</code> to
+<code class="literal">true</code>. flags</p>
+<pre class="literallayout">ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent</pre>
+
+<p>Once the agent is active, it will trace all incoming HTTP requests to
+Kibana, monitor for errors, and collect process-level metrics. The
+collected data will be sent to the APM Server and is viewable in the APM
+UI in Kibana.</p>
+<div class="position-relative"><h4><a id="_running_kibana_with_the_apm_agent_locally"></a>Running Kibana with the APM Agent Locally</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+<p>The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the <a href="https://github.com/elastic/apm-integration-testing" class="ulink" target="_top">apm-integration-testing</a> repo. You’ll need <a href="https://www.docker.com/community-edition" class="ulink" target="_top">Docker</a>, <a href="https://docs.docker.com/compose/install/" class="ulink" target="_top">Docker Compose</a> and <a href="https://www.python.org/downloads" class="ulink" target="_top">Python (version 3 preferred)</a> to use the tool.</p>
+<div class="position-relative"><h5><a id="_quick_start_guide"></a>Quick start guide</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/debugging.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Clone the <a href="https://github.com/elastic/apm-integration-testing" class="ulink" target="_top">elastic/apm-integration-testing</a> repo.
+</li>
+<li class="listitem">
+<p>Change into the apm-integration-testing repo:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">cd apm-integration-testing</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Run Elasticsearch and the APM servers without running Kibana:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">./scripts/compose.py start master --no-kibana</pre>
+</div>
+</li>
+<li class="listitem">
+Clone the <a href="https://github.com/elastic/kibana" class="ulink" target="_top">elastic/kibana</a> repo.
+</li>
+<li class="listitem">
+<p>Change into the Kibana repo:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">cd ../kibana</pre>
+</div>
+</li>
+<li class="listitem">
+Change the elasticsearch credentials in your <code class="literal">kibana.yml</code> configuration file to match those needed by elasticsearch and the APM server (see the apm-integration-testing repo&#8217;s <a href="https://github.com/elastic/apm-integration-testing#logging-in" class="ulink" target="_top">README</a> for users provided to test different scenarios).
+</li>
+<li class="listitem">
+<p>Make sure that the APM agent is active and points to the local APM server by adding the following configuration settings to a config file under <code class="literal">config/kibana.dev.yml</code>:</p>
+<p>Example <code class="literal">config/kibana.dev.yml</code> file:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">elastic:
+  apm:
+    active: true
+    serverUrl: http://localhost:8200
+    secretToken: very_secret
+    centralConfig: true
+    breakdownMetrics: true
+    transactionSampleRate: 0.1</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Start Kibana with APM active using:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn start</pre>
+</div>
+</li>
+<li class="listitem">
+After Kibana starts up, navigate to the APM app, where you should see some transactions.
+</li>
+</ol>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/apm_ui_transactions.png" alt="apm ui transactions">
+</div>
+</div>
+<p>You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
+Once you&#8217;re finished, you can stop Kibana normally, then stop the Elasticsearch and APM servers in the apm-integration-testing clone with the following script:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">./scripts/compose.py stop</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="sample-data.html">« Installing sample data</a>
+</span>
+<span class="next">
+<a href="building-kibana.html">Building a Kibana distributable »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

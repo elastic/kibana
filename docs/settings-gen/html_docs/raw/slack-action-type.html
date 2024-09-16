@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Slack connector and action | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Slack connector and action | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="swimlane-action-type.html" title="Swimlane connector and action"/>
+<link rel="next" href="thehive-action-type.html" title="TheHive connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="swimlane-action-type.html">« Swimlane connector and action</a>
+</span>
+<span class="next">
+<a href="thehive-action-type.html">TheHive connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Slack connector and action</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="slack-action-type"></a>Slack connector and action</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Slack connector uses incoming webhooks or an API method to send Slack messages.</p>
+<div class="position-relative"><h4><a id="define-slack-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span> or as needed when you&#8217;re creating a rule.
+You can choose to use a webhook URL that&#8217;s specific to a single channel. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/slack-webhook-connector.png" alt="Slack connector">
+</div>
+</div>
+<p>Alternatively, you can create a connector that supports multiple channels.
+For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/slack-api-connector.png" alt="Slack API connector">
+</div>
+</div>
+<p>If you use the latter method, you must provide a valid list of Slack channel IDs.
+When you create a rule, each action can communicate with one of these channels.</p>
+<p>For Slack setup details, go to <a class="xref" href="slack-action-type.html#configuring-slack" title="Configure a Slack account">Configure a Slack account</a>.</p>
+<div class="position-relative"><h4><a id="slack-action-configuration"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<p>You can test connectors as you&#8217;re creating or editing the connector in Kibana.
+For the webhook type of connector, its message text cannot contain Markdown, images, or other advanced formatting:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/slack-webhook-params.png" alt="Slack webhook connector test">
+</div>
+</div>
+<p>For the web API type of connector, you must choose one of the channel IDs.
+You can then test either plain text or block kit messages:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/slack-api-connector-test.png" alt="Slack web API connector test">
+</div>
+</div>
+<p>After you add block kit messages you can click a link to preview them in the Slack block kit builder.</p>
+<div class="position-relative"><h4><a id="slack-connector-networking-configuration"></a>Connector networking configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">Action configuration settings</a> to customize connector networking configurations, such as proxies, certificates, or TLS settings.
+You can set configurations that apply to all your connectors or use <code class="literal">xpack.actions.customHostSettings</code> to set per-host configurations.</p>
+<div class="position-relative"><h4><a id="configuring-slack"></a>Configure a Slack account</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<p>Before you can create a Slack connector, you must configure your account and obtain the necessary URL or token.</p>
+<div class="position-relative"><h5><a id="configuring-slack-webhook"></a>Configure a Slack account for incoming webhooks</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Log in to <a href="http://slack.com" class="ulink" target="_top">slack.com</a> as a team administrator.
+</li>
+<li class="listitem">
+Create a Slack app, enable incoming webhooks, then create an incoming webhook. Refer to <a href="https://api.slack.com/messaging/webhooks" class="ulink" target="_top">https://api.slack.com/messaging/webhooks</a>.
+</li>
+<li class="listitem">
+Copy the generated webhook URL so you can paste it into your Slack connector form.
+</li>
+<li class="listitem">
+If you are using the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.allowedHosts</code></a> setting, make sure the hostname from the URL is added to the allowed hosts.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h5><a id="configuring-slack-web-api"></a>Configure a Slack account for Web API</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/slack.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Create a Slack app. Refer to <a href="https://api.slack.com/authentication/basics#creating" class="ulink" target="_top">https://api.slack.com/authentication/basics#creating</a>.
+</li>
+<li class="listitem">
+Add scope: <code class="literal">channels:read</code>, <code class="literal">groups:read</code>, <code class="literal">chat:write</code> and <code class="literal">chat:write.public</code>. Refer to <a href="https://api.slack.com/authentication/basics#scopes" class="ulink" target="_top">https://api.slack.com/authentication/basics#scopes</a>.
+</li>
+<li class="listitem">
+Install the app to a workspace. Refer to <a href="https://api.slack.com/authentication/basics#installing" class="ulink" target="_top">https://api.slack.com/authentication/basics#installing</a>.
+</li>
+<li class="listitem">
+Copy the <code class="literal">Bot User OAuth Token</code> so you can paste it into your Slack connector form.
+</li>
+<li class="listitem">
+If you need to send messages to a private channel, you need to write <code class="literal">/invite @App_name</code> in it.
+Putting "@" triggers Slack to start auto-suggesting, which is why it then becomes easy to find your app name in the list.
+</li>
+<li class="listitem">
+To find a channel ID (for example, <code class="literal">C123ABC456</code>), view the channel details.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="swimlane-action-type.html">« Swimlane connector and action</a>
+</span>
+<span class="next">
+<a href="thehive-action-type.html">TheHive connector and action »</a>
+</span>
+</div>
+</body>
+</html>

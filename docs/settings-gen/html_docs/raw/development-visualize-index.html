@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Developing Visualizations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Developing Visualizations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="add-data-tutorials.html" title="Add data tutorials"/>
+<link rel="next" href="reporting-integration.html" title="Reporting integration"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="add-data-tutorials.html">« Add data tutorials</a>
+</span>
+<span class="next">
+<a href="reporting-integration.html">Reporting integration »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Developing Visualizations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development-visualize-index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="development-visualize-index"></a>Developing Visualizations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development-visualize-index.asciidoc">edit</a></div>
+</div></div></div>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>These pages document internal APIs and are not guaranteed to be supported across future versions of Kibana.</p>
+</div>
+</div>
+<p>The internal APIs for creating custom visualizations are in a state of heavy churn as
+they are being migrated to the new Kibana platform, and large refactorings have been
+happening across minor releases in the <code class="literal">7.x</code> series. In particular, in <code class="literal">7.5</code> and later
+we have made significant changes to the legacy APIs as we work to gradually replace them.</p>
+<p>As a result, starting in <code class="literal">7.5</code> we have removed the documentation for the legacy APIs
+to prevent confusion. We expect to be able to create new documentation later in <code class="literal">7.x</code>
+when the visualizations plugin has been completed.</p>
+<p>We would recommend waiting until later in <code class="literal">7.x</code> to upgrade your plugins if possible.
+If you would like to keep up with progress on the visualizations plugin in the meantime,
+here are a few resources:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The <a class="xref" href="release-notes-8.0.0.html#breaking-changes-8.0.0" title="Breaking change">breaking changes</a> documentation, where we try to capture any changes to the APIs as they occur across minors.
+</li>
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/issues/44121" class="ulink" target="_top">Meta issue</a> which is tracking the move of the plugin to the new Kibana platform
+</li>
+<li class="listitem">
+Our <a href="https://www.elastic.co/blog/join-our-elastic-stack-workspace-on-slack" class="ulink" target="_top">Elastic Stack workspace on Slack</a>.
+</li>
+<li class="listitem">
+The <a href="https://github.com/elastic/kibana/blob/master/src/plugins/visualizations" class="ulink" target="_top">source code</a>, which will continue to be
+the most accurate source of information.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="add-data-tutorials.html">« Add data tutorials</a>
+</span>
+<span class="next">
+<a href="reporting-integration.html">Reporting integration »</a>
+</span>
+</div>
+</body>
+</html>

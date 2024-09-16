@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Torq connector and action | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Torq connector and action | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="tines-action-type.html" title="Tines connector"/>
+<link rel="next" href="webhook-action-type.html" title="Webhook connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="tines-action-type.html">« Tines connector</a>
+</span>
+<span class="next">
+<a href="webhook-action-type.html">Webhook connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Torq connector and action</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/torq.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="torq-action-type"></a>Torq connector and action</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/torq.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.</p>
+<div class="position-relative"><h4><a id="define-torq-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/torq.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>
+or as needed when you&#8217;re creating a rule. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/torq-configured-connector.png" alt="configured Torq connector">
+</div>
+</div>
+<div class="position-relative"><h5><a id="torq-connector-configuration"></a>Connector configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/torq.asciidoc">edit</a></div>
+<p>Torq connectors have the following configuration properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Name
+</span>
+</dt>
+<dd>
+The name of the connector. The name is used to identify a connector in the Stack Management UI connector listing, and in the connector list when configuring an action.
+</dd>
+<dt>
+<span class="term">
+Torq endpoint URL
+</span>
+</dt>
+<dd>
+Endpoint URL (webhook) of the Elastic Security integration you created in Torq.
+</dd>
+<dt>
+<span class="term">
+Torq authentication header secret
+</span>
+</dt>
+<dd>
+Secret of the webhook authentication header.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="torq-action-configuration"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/torq.asciidoc">edit</a></div>
+<p>You can test connectors as you&#8217;re creating or editing the connector in Kibana. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/torq-connector-test.png" alt="Torq connector test">
+</div>
+</div>
+<p>Torq actions have the following configuration properties.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Body
+</span>
+</dt>
+<dd>
+JSON payload to send to Torq.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="tines-action-type.html">« Tines connector</a>
+</span>
+<span class="next">
+<a href="webhook-action-type.html">Webhook connector and action »</a>
+</span>
+</div>
+</body>
+</html>

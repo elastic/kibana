@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vector tooltips | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Vector tooltips | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="vector-layer.html" title="Vector layer"/>
+<link rel="prev" href="maps-vector-style-properties.html" title="Vector style properties"/>
+<link rel="next" href="maps-aggregations.html" title="Plot big data without plotting too much data"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps-vector-style-properties.html">« Vector style properties</a>
+</span>
+<span class="next">
+<a href="maps-aggregations.html">Plot big data without plotting too much data »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="vector-layer.html">Vector layer</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Vector tooltips</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-tooltips.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="vector-tooltip"></a>Vector tooltips</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-tooltips.asciidoc">edit</a></div>
+</div></div></div>
+<p>Vector tooltips display attributes for the features at your mouse location.
+These tooltips give users an in-depth insight into what&#8217;s going on in the map.</p>
+<p>If more than one feature exists at a location, the tooltip displays the
+attributes for the top feature, and notes the number of features at that location.
+The following image has a tooltip with three features at the current location: a green circle from the <span class="strong strong"><strong>Total Sales Revenue</strong></span> layer, a blue New York State polygon from <span class="strong strong"><strong>United States</strong></span> layer, and a red United States Country polygon from the <span class="strong strong"><strong>World Countries</strong></span> layer.
+The tooltip displays attributes for the top feature, the green circle, from the <span class="strong strong"><strong>Total Sales Revenue</strong></span> layer.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/multifeature_tooltip.png" alt="multifeature tooltip">
+</div>
+</div>
+<div class="position-relative"><h4><a id="maps-vector-tooltip-formatting"></a>Format tooltips</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-tooltips.asciidoc">edit</a></div>
+<p>You can format the attributes in a tooltip by adding <a class="xref" href="managing-data-views.html#managing-fields" title="Format data fields">field formatters</a> to your
+data view. You can use field formatters to round numbers, provide units,
+and even display images in your tooltip.</p>
+<div class="position-relative"><h4><a id="maps-vector-tooltip-locking"></a>Lock a tooltip at the current location</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-tooltips.asciidoc">edit</a></div>
+<p>You can lock a tooltip in place by clicking a location on the map.
+With locked tooltips you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Page through features.
+</li>
+<li class="listitem">
+Create a <a class="xref" href="maps-create-filter-from-map.html#maps-phrase-filter" title="Phrase filters">phrase filter</a> from a feature attribute value.
+</li>
+<li class="listitem">
+Create a <a class="xref" href="maps-create-filter-from-map.html#maps-spatial-filters" title="Spatial filters">spatial filter</a> from a feature&#8217;s geometry.
+</li>
+</ul>
+</div>
+<p>This image shows a locked tooltip with features from three layers.
+The tooltip displays attributes
+for the second feature, the blue New York State polygon.  The tooltip includes
+controls for paging through the features and a dropdown menu for filtering
+the features by layer.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/locked_tooltip.png" alt="locked tooltip">
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-vector-style-properties.html">« Vector style properties</a>
+</span>
+<span class="next">
+<a href="maps-aggregations.html">Plot big data without plotting too much data »</a>
+</span>
+</div>
+</body>
+</html>

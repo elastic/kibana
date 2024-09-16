@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Connect to Elastic Maps Service | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Connect to Elastic Maps Service | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps.html" title="Maps"/>
+<link rel="prev" href="maps-settings.html" title="Configure map settings"/>
+<link rel="next" href="import-geospatial-data.html" title="Import geospatial data"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps-settings.html">« Configure map settings</a>
+</span>
+<span class="next">
+<a href="import-geospatial-data.html">Import geospatial data »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Connect to Elastic Maps Service</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-connect-to-ems"></a>Connect to Elastic Maps Service</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://www.elastic.co/elastic-maps-service" class="ulink" target="_top">Elastic Maps Service (EMS)</a> is a service that hosts
+tile layers and vector shapes of administrative boundaries.
+If you are using Kibana&#8217;s out-of-the-box settings, Maps is already configured to use EMS.</p>
+<p>If you are on a restricted or fully air-gapped environment, you may need to configure your firewall to enable access to EMS resources. Find below details on the domains and HTTP headers used by Elastic Maps Service. Alternatively, Elastic Maps Service can be <a class="xref" href="maps-connect-to-ems.html#disable-ems" title="Disable Elastic Maps Service">disabled</a> or <a class="xref" href="maps-connect-to-ems.html#elastic-maps-server" title="Host Elastic Maps Service locally">installed locally</a>.</p>
+<div class="position-relative"><h3><a id="_domains"></a>Domains</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>EMS requests are made to the following domains:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Tile Service: <code class="literal">tiles.maps.elastic.co</code>
+</li>
+<li class="listitem">
+File Service: <code class="literal">vector.maps.elastic.co</code>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_headers"></a>Headers</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>Find below examples of the request and response headers from Kibana and a minimal <code class="literal">curl</code> request example showing the response headers sent by each service.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>These headers may change without further notice at anytime and are shared for reference.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="_ems_tile_service"></a>EMS Tile Service</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>The EMS Tile Service provides basemaps in three different styles as the default background for Maps visualizations. The basemaps use <a href="https://www.openstreetmap.org/about" class="ulink" target="_top">OpenStreetMap</a> data following the <a href="https://openmaptiles.org/" class="ulink" target="_top">OpenMapTiles</a> schema and can be explored at <a href="https://maps.elastic.co" class="ulink" target="_top">maps.elastic.co</a>.</p>
+<p>Headers for the Tile Service JSON manifest describing the basemaps available.</p>
+<div class="tabs" data-tab-group="tiles-json-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the Tile Service for a JSON asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="tiles-json-tab-group-curl"
+            id="tiles-json-group-curl">
+      Curl Example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-json-tab-group-request"
+            id="tiles-json-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-json-tab-group-response"
+            id="tiles-json-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="tiles-json-tab-group-curl"
+       aria-labelledby="tiles-json-group-curl">
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">curl -I 'https://tiles.maps.elastic.co/v8.16/manifest?elastic_tile_service_tos=agree&amp;my_app_name=kibana&amp;my_app_version=8.16.0' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'</pre>
+</div>
+<p>Server response</p>
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">HTTP/2 200
+server: BaseHTTP/0.6 Python/3.11.4
+date: Mon, 20 Nov 2023 15:08:46 GMT
+content-type: application/json; charset=utf-8
+elastic-api-version: 2023-10-31
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+content-encoding: gzip
+vary: Accept-Encoding
+x-varnish: 844076 5416505
+accept-ranges: bytes
+varnish-age: 85285
+cache-control: private, max-age=86400
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+</div>
+</details>
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="tiles-json-tab-group-request"
+       aria-labelledby="tiles-json-group-request"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">Host: tiles.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://deployment-host/app/maps/map
+Origin: https://deployment-host
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache
+TE: trailers</pre>
+</div>
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="tiles-json-tab-group-response"
+       aria-labelledby="tiles-json-group-response"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">server: BaseHTTP/0.6 Python/3.11.4
+date: Mon, 20 Nov 2023 17:53:10 GMT
+content-type: application/json; charset=utf-8
+elastic-api-version: 2023-10-31
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+content-encoding: gzip
+vary: Accept-Encoding
+x-varnish: 8848609 1142291
+accept-ranges: bytes
+varnish-age: 65725
+cache-control: private, max-age=86400
+content-length: 341
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+  </div>
+</div>
+<p>Headers for a vector tile asset in <em>protobuffer</em> format from the Tile Service.</p>
+<div class="tabs" data-tab-group="tiles-pbf-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the Tile Service for a Vector Tile Asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="tiles-pbf-tab-group-curl"
+            id="tiles-pbf-group-curl">
+      Curl Example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-pbf-tab-group-request"
+            id="tiles-pbf-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-pbf-tab-group-response"
+            id="tiles-pbf-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="tiles-pbf-tab-group-curl"
+       aria-labelledby="tiles-pbf-group-curl">
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">$ curl -I 'https://tiles.maps.elastic.co/data/v3/1/1/0.pbf?elastic_tile_service_tos=agree&amp;my_app_name=kibana&amp;my_app_version=8.16.0' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'</pre>
+</div>
+<p>Server response</p>
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">HTTP/2 200
+content-encoding: gzip
+content-length: 144075
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+x-varnish: 3269455 5976667
+accept-ranges: bytes
+varnish-age: 9045
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+date: Mon, 20 Nov 2023 15:08:19 GMT
+age: 78827
+last-modified: Thu, 16 Sep 2021 17:14:41 GMT
+etag: W/"232cb-zYEfNgd8rzHusLotRFzgRDSDDGA"
+content-type: application/x-protobuf
+vary: Accept-Encoding
+cache-control: public,max-age=3600
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+</div>
+</details>
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="tiles-pbf-tab-group-request"
+       aria-labelledby="tiles-pbf-group-request"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">Host: tiles.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://deployment-host/app/maps/map
+Origin: https://deployment-host
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+TE: trailers</pre>
+</div>
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="tiles-pbf-tab-group-response"
+       aria-labelledby="tiles-pbf-group-response"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">content-encoding: gzip
+content-length: 101691
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+x-varnish: 4698676 3660338
+accept-ranges: bytes
+varnish-age: 9206
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+date: Mon, 20 Nov 2023 15:05:29 GMT
+age: 75788
+last-modified: Thu, 16 Sep 2021 17:14:41 GMT
+etag: W/"18d3b-ot9ckSsdpH7n+yJz4BXXQp6Zs08"
+content-type: application/x-protobuf
+vary: Accept-Encoding
+cache-control: public,max-age=3600
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+  </div>
+</div>
+<p>Headers for an sprite image asset from the Tile Service</p>
+<div class="tabs" data-tab-group="tiles-png-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the Tile Service for an Image Asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="tiles-png-tab-group-curl"
+            id="tiles-png-group-curl">
+      Curl Example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-png-tab-group-request"
+            id="tiles-png-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-png-tab-group-response"
+            id="tiles-png-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="tiles-png-tab-group-curl"
+       aria-labelledby="tiles-png-group-curl">
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">curl -I 'https://tiles.maps.elastic.co/styles/osm-bright-desaturated/sprite.png' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: image/avif,image/webp,*/*' \
+-H 'Accept-Encoding: gzip, deflate, br'</pre>
+</div>
+<p>Server response</p>
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">HTTP/2 200
+content-length: 17181
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+x-varnish: 8769943 4865354
+accept-ranges: bytes
+varnish-age: 250
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+date: Tue, 21 Nov 2023 14:44:36 GMT
+age: 592
+etag: W/"431d-/dqE/W5Q3FqkHikyDQtCuQqAdlY"
+content-type: image/png
+cache-control: public,max-age=3600
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+</div>
+</details>
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="tiles-png-tab-group-request"
+       aria-labelledby="tiles-png-group-request"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">Host: tiles.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: image/avif,image/webp,*/*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://deployment-host/app/maps/map
+Origin: https://deployment-host
+Connection: keep-alive
+Sec-Fetch-Dest: image
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache
+TE: trailers</pre>
+</div>
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="tiles-png-tab-group-response"
+       aria-labelledby="tiles-png-group-response"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">content-length: 17181
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+x-varnish: 3530683 3764574
+accept-ranges: bytes
+varnish-age: 833
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+date: Mon, 20 Nov 2023 14:44:29 GMT
+age: 77048
+etag: W/"431d-/dqE/W5Q3FqkHikyDQtCuQqAdlY"
+content-type: image/png
+cache-control: public,max-age=3600
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+  </div>
+</div>
+<div class="position-relative"><h4><a id="_ems_file_service"></a>EMS File Service</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>EMS File Service provides the administrative boundaries used for <a class="xref" href="maps-getting-started.html#maps-add-choropleth-layer" title="Step 2. Add a choropleth layer">choropleth mapping</a> as static assets in GeoJSON or TopoJSON formats and can be explored at <a href="https://maps.elastic.co" class="ulink" target="_top">maps.elastic.co</a>.</p>
+<p>Headers for the File Service JSON manifest that declares all the datasets available.</p>
+<div class="tabs" data-tab-group="file-json-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the File Service for a JSON Asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="file-json-tab-group-curl"
+            id="file-json-group-curl"
+            >
+      Curl example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-json-tab-group-request"
+            id="file-json-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-json-tab-group-response"
+            id="file-json-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="file-json-tab-group-curl"
+       aria-labelledby="file-json-group-curl">
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">curl -I 'https://vector.maps.elastic.co/v8.16/manifest?elastic_tile_service_tos=agree&amp;my_app_name=kibana&amp;my_app_version=8.16.0' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'</pre>
+</div>
+<p>Server response</p>
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">HTTP/2 200
+x-guploader-uploadid: ABPtcPp_BvMdBDO5jVlutETVHmvpOachwjilw4AkIKwMrOQJ4exR9Eln4g0LkW3V_LLSEpvjYLtUtFmO0Uwr61XXUhoP_A
+x-goog-generation: 1689593295246576
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 108029
+content-encoding: gzip
+x-goog-hash: crc32c=T5gVpw==
+x-goog-hash: md5=6F8KWV8VTdx8FsN2iFehow==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 108029
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 14:25:07 GMT
+expires: Tue, 21 Nov 2023 15:25:07 GMT
+cache-control: public, max-age=3600,no-transform
+age: 2170
+last-modified: Mon, 17 Jul 2023 11:28:15 GMT
+etag: "e85f0a595f154ddc7c16c3768857a1a3"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+</div>
+</details>
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="file-json-tab-group-request"
+       aria-labelledby="file-json-group-request"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">Host: vector.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://deployment-host/app/maps/map
+Origin: https://deployment-host
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache</pre>
+</div>
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="file-json-tab-group-response"
+       aria-labelledby="file-json-group-response"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">x-guploader-uploadid: ABPtcPoUFrCmjBeebnfRxSZp44ZHsZ-_iQg7794RU1Z7Lb2cNNxXsMRkIDa5s7VBEfyehvo-_9rcm1A3HfYW8geguUxKrw
+x-goog-generation: 1689593295246576
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 108029
+content-encoding: gzip
+x-goog-hash: crc32c=T5gVpw==
+x-goog-hash: md5=6F8KWV8VTdx8FsN2iFehow==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 108029
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 11:24:45 GMT
+expires: Tue, 21 Nov 2023 12:24:45 GMT
+cache-control: public, max-age=3600,no-transform
+age: 3101
+last-modified: Mon, 17 Jul 2023 11:28:15 GMT
+etag: "e85f0a595f154ddc7c16c3768857a1a3"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+X-Firefox-Spdy: h2</pre>
+</div>
+  </div>
+</div>
+<p>Headers for a sample Dataset from the File Service in TopoJSON format.</p>
+<div class="tabs" data-tab-group="file-data-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the File Service for Dataset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="file-data-tab-group-curl"
+            id="file-data-group-curl">
+      Curl example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-data-tab-group-request"
+            id="file-data-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="file-data-tab-group-response"
+            id="file-data-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="file-data-tab-group-curl"
+       aria-labelledby="file-data-group-curl">
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">curl -I 'https://vector.maps.elastic.co/files/world_countries_v7.topo.json?elastic_tile_service_tos=agree&amp;my_app_name=kibana&amp;my_app_version=8.16.0' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'</pre>
+</div>
+<p>Server response</p>
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">HTTP/2 200
+x-guploader-uploadid: ABPtcPpmMffchVgfHIr-SSC00WORo145oV-1q0asjqRvjLV_7cIgyfLRfofXV-BG7huMYABFypblcgdgXRBARhpo2c88ow
+x-goog-generation: 1689593325442971
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 587241
+content-encoding: gzip
+x-goog-hash: crc32c=OcROeg==
+x-goog-hash: md5=8KKIwD6wbKa3YYXTnnFcZw==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 587241
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 14:22:16 GMT
+expires: Tue, 21 Nov 2023 15:22:16 GMT
+cache-control: public, max-age=3600,no-transform
+age: 2202
+last-modified: Mon, 17 Jul 2023 11:28:45 GMT
+etag: "f0a288c03eb06ca6b76185d39e715c67"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</pre>
+</div>
+</div>
+</details>
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="file-data-tab-group-request"
+       aria-labelledby="file-data-group-request"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">Host: vector.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://deployment-host/app/maps/map
+Origin: https://deployment-host
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache</pre>
+</div>
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="file-data-tab-group-response"
+       aria-labelledby="file-data-group-response"
+       hidden="">
+<div class="pre_wrapper lang-regex">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-regex">x-guploader-uploadid: ABPtcPqIDSg5tyavvwwtJQa8a8iycoXOCkHBp_2YJbJJnQgb5XMD7nFwRUogg00Ou27VFIs95v7L99OMnvXR1bcb9RW-xQ
+x-goog-generation: 1689593325442971
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: gzip
+x-goog-stored-content-length: 587241
+content-encoding: gzip
+x-goog-hash: crc32c=OcROeg==
+x-goog-hash: md5=8KKIwD6wbKa3YYXTnnFcZw==
+x-goog-storage-class: MULTI_REGIONAL
+accept-ranges: bytes
+content-length: 587241
+access-control-allow-origin: *
+access-control-expose-headers: Authorization, Content-Length, Content-Type, Date, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, accept, elastic-api-version, kbn-name, kbn-version, origin
+server: UploadServer
+date: Tue, 21 Nov 2023 12:16:01 GMT
+expires: Tue, 21 Nov 2023 13:16:01 GMT
+cache-control: public, max-age=3600,no-transform
+age: 29
+last-modified: Mon, 17 Jul 2023 11:28:45 GMT
+etag: "f0a288c03eb06ca6b76185d39e715c67"
+content-type: application/json
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+X-Firefox-Spdy: h2</pre>
+</div>
+  </div>
+</div>
+<div class="position-relative"><h3><a id="disable-ems"></a>Disable Elastic Maps Service</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>You might experience EMS connection issues if your Kibana server or browser are on a private network or
+behind a firewall. If this happens, you can disable the EMS connection to avoid unnecessary EMS requests.</p>
+<p>To disable EMS, change your <a class="xref" href="settings.html" title="Configure Kibana">kibana.yml</a> file.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Set <code class="literal">map.includeElasticMapsService</code> to <code class="literal">false</code> to turn off the EMS connection.
+</li>
+<li class="listitem">
+Set <code class="literal">map.tilemap.url</code> to the URL of your tile server. This configures the default tile layer of Maps.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="elastic-maps-server"></a>Host Elastic Maps Service locally</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Find more details about installing Elastic components in an air-gapped environment in the <a href="https://www.elastic.co/guide/en/elastic-stack/master/air-gapped-install.html" class="ulink" target="_top">Elastic Stack documentation</a>.</p>
+</div>
+</div>
+<p>If you cannot connect to Elastic Maps Service from the Kibana server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.</p>
+<p>Elastic Maps Server is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your Elasticsearch cluster for license validation, you have the option to download and configure a more detailed basemaps database.</p>
+<p>You can use <code class="literal">docker pull</code> to download the Elastic Maps Server image from the Elastic Docker registry.</p>
+<p>Version 8.16.0 of Elastic Maps Server has not yet been released, so no Docker image is currently available for this version.</p>
+<div class="position-relative"><h4><a id="elastic-maps-server-configuration"></a>Configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>Elastic Maps Server reads properties from a configuration file in YAML format that is validated on startup. The location of this file is provided by the <code class="literal">EMS_PATH_CONF</code> container environment variable and defaults to <code class="literal">/usr/src/app/server/config/elastic-maps-server.yml</code>. This environment variable can be changed by making use of the <code class="literal">-e</code> docker flag of the start command.</p>
+<p><span class="strong strong"><strong>General settings</strong></span></p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><a id="ems-host"></a><code class="literal">host</code></p></td>
+<td align="left" valign="top"><p>Specifies the host of the backend server. To allow remote users to connect, set the value to the IP address or DNS name of the Elastic Maps Server container. <span class="strong strong"><strong>Default: <em>your-hostname</em></strong></span>. <a class="xref" href="settings.html#server-host">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">port</code></p></td>
+<td align="left" valign="top"><p>Specifies the port used by the backend server. Default: <span class="strong strong"><strong><code class="literal">8080</code></strong></span>. <a class="xref" href="settings.html#server-port">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">basePath</code></p></td>
+<td align="left" valign="top"><p>Specify a path at which to mount the server if you are running behind a proxy. This setting cannot end in a slash (<code class="literal">/</code>). <a class="xref" href="settings.html#server-basePath">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ui</code></p></td>
+<td align="left" valign="top"><p>Controls the display of the status page and the layer preview. <span class="strong strong"><strong>Default: <code class="literal">true</code></strong></span></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">logging.level</code></p></td>
+<td align="left" valign="top"><p>Verbosity of Elastic Maps Server logs. Valid values are <code class="literal">trace</code>, <code class="literal">debug</code>, <code class="literal">info</code>, <code class="literal">warn</code>, <code class="literal">error</code>, <code class="literal">fatal</code>, and <code class="literal">silent</code>. <span class="strong strong"><strong>Default: <code class="literal">info</code></strong></span></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">path.planet</code></p></td>
+<td align="left" valign="top"><p>Path of the basemaps database. <span class="strong strong"><strong>Default: <code class="literal">/usr/src/app/data/planet.mbtiles</code></strong></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="strong strong"><strong>Elasticsearch connection and security settings</strong></span></p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><code class="literal">elasticsearch.host</code></p></td>
+<td align="left" valign="top"><p>URL of the Elasticsearch instance to use for license validation.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">elasticsearch.username</code> and <code class="literal">elasticsearch.password</code></p></td>
+<td align="left" valign="top"><p>Credentials of a user with at least the <code class="literal">monitor</code> role.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">elasticsearch.ssl.certificateAuthorities</code></p></td>
+<td align="left" valign="top"><p>Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates that make up a trusted certificate chain for Elastic Maps Server. This chain is used by Elastic Maps Server to establish trust when connecting to your Elasticsearch cluster. <a class="xref" href="settings.html#elasticsearch-ssl-certificateAuthorities">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">elasticsearch.ssl.certificate</code> and <code class="literal">elasticsearch.ssl.key</code>, and <code class="literal">elasticsearch.ssl.keyPassphrase</code></p></td>
+<td align="left" valign="top"><p>Optional settings that provide the paths to the PEM-format SSL certificate and key files and the key password. These files are used to verify the identity of Elastic Maps Server to Elasticsearch and are required when <code class="literal">xpack.security.http.ssl.client_authentication</code> in Elasticsearch is set to <code class="literal">required</code>. <a class="xref" href="settings.html#elasticsearch-ssl-cert-key">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">elasticsearch.ssl.verificationMode</code></p></td>
+<td align="left" valign="top"><p>Controls the verification of the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection to Elasticsearch. Valid values are "<code class="literal">full</code>", "<code class="literal">certificate</code>", and "<code class="literal">none</code>". Using "<code class="literal">full</code>" performs hostname verification, using "<code class="literal">certificate</code>" skips hostname verification, and using "<code class="literal">none</code>" skips verification entirely. <span class="strong strong"><strong>Default: <code class="literal">full</code></strong></span>. <a class="xref" href="settings.html#elasticsearch-ssl-verificationMode">Equivalent Kibana setting</a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="strong strong"><strong>Server security settings</strong></span></p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ssl.enabled</code></p></td>
+<td align="left" valign="top"><p>Enables SSL/TLS for inbound connections to Elastic Maps Server. When set to <code class="literal">true</code>, a certificate and its corresponding private key must be provided. <span class="strong strong"><strong>Default: <code class="literal">false</code></strong></span>. <a class="xref" href="settings.html#server-ssl-enabled">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ssl.certificateAuthorities</code></p></td>
+<td align="left" valign="top"><p>Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates that make up a trusted certificate chain for Elastic Maps Server. This chain is used by the Elastic Maps Server to establish trust when receiving inbound SSL/TLS connections from end users. <a class="xref" href="settings.html#server-ssl-certificateAuthorities">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ssl.key</code>, <code class="literal">ssl.certificate</code>, and <code class="literal">ssl.keyPassphrase</code></p></td>
+<td align="left" valign="top"><p>Location of yor SSL key and certificate files and the password that decrypts the private key that is specified via <code class="literal">ssl.key</code>. This password is optional, as the key may not be encrypted. <a class="xref" href="settings.html#server-ssl-cert-key">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ssl.supportedProtocols</code></p></td>
+<td align="left" valign="top"><p>An array of supported protocols with versions.
+Valid protocols: <code class="literal">TLSv1</code>, <code class="literal">TLSv1.1</code>, <code class="literal">TLSv1.2</code>. <span class="strong strong"><strong>Default: <code class="literal">TLSv1.1</code>, <code class="literal">TLSv1.2</code></strong></span>. <a class="xref" href="settings.html#server-ssl-supportedProtocols">Equivalent Kibana setting</a>.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">ssl.cipherSuites</code></p></td>
+<td align="left" valign="top"><p>Details on the format, and the valid options, are available via the
+<a href="https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT" class="ulink" target="_top">OpenSSL cipher list format documentation</a>.
+<span class="strong strong"><strong>Default: <code class="literal">TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA</code></strong></span>. <a class="xref" href="settings.html#server-ssl-cipherSuites">Equivalent Kibana setting</a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h5><a id="elastic-maps-server-bind-mount-config"></a>Bind-mounted configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>One way to configure Elastic Maps Server is to provide <code class="literal">elastic-maps-server.yml</code> via bind-mounting. With <code class="literal">docker-compose</code>, the bind-mount can be specified like this:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">version: '2'
+services:
+  ems-server:
+    image: docker.elastic.co/elastic-maps-service/elastic-maps-server:8.16.0-amd64
+    volumes:
+      - ./elastic-maps-server.yml:/usr/src/app/server/config/elastic-maps-server.yml</pre>
+</div>
+<div class="position-relative"><h5><a id="elastic-maps-server-envvar-config"></a>Environment variable configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>All configuration settings can be overridden by environment variables that are named with all uppercase letters and by replacing YAML periods with underscores. For example <code class="literal">elasticsearch.ssl.certificate</code> could be overridden by the environment variable <code class="literal">ELASTICSEARCH_SSL_CERTIFICATE</code>. Boolean variables must use the <code class="literal">true</code> or <code class="literal">false</code> strings.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>All information that you include in environment variables is visible through the <code class="literal">ps</code> command, including sensitive information.</p>
+</div>
+</div>
+<p>These variables can be set with <code class="literal">docker-compose</code> like this:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">version: '2'
+services:
+  ems-server:
+    image: docker.elastic.co/elastic-maps-service/elastic-maps-server:8.16.0-amd64
+    environment:
+      ELASTICSEARCH_HOST: http://elasticsearch.example.org
+      ELASTICSEARCH_USERNAME: 'ems'
+      ELASTICSEARCH_PASSWORD: 'changeme'</pre>
+</div>
+<div class="position-relative"><h4><a id="elastic-maps-server-data"></a>Data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>Elastic Maps Server hosts vector layer boundaries and vector tile basemaps for the entire planet. Boundaries include world countries, global administrative regions, and specific country regions. Basemaps up to zoom level 8 are bundled in the Docker image. These basemaps are sufficient for maps and dashboards at the country level. To present maps with higher detail, follow the instructions of the front page to download and configure the appropriate basemaps database. The most detailed basemaps at zoom level 14 are good for street level maps, but require ~90GB of disk space.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/elastic-maps-server-basemaps.png" alt="Basemaps download options">
+</div>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The available basemaps and boundaries can be explored from the <code class="literal">/maps</code> endpoint in a web page that is your self-managed equivalent to <a href="https://maps.elastic.co" class="ulink" target="_top">https://maps.elastic.co</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="elastic-maps-server-kibana"></a>Kibana configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>With Elastic Maps Server running, add the <code class="literal">map.emsUrl</code> configuration key in your <a class="xref" href="settings.html" title="Configure Kibana">kibana.yml</a> file pointing to the root of the service. This setting will point Kibana to request EMS basemaps and boundaries from Elastic Maps Server. Typically this will be the URL to the <a class="xref" href="maps-connect-to-ems.html#ems-host">host and port</a> of Elastic Maps Server. For example, <code class="literal">map.emsUrl: https://my-ems-server:8080</code>.</p>
+<div class="position-relative"><h4><a id="elastic-maps-server-check"></a>Status check</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>Elastic Maps Server periodically runs a status check that is exposed in three different forms:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+At the root of Elastic Maps Server, a web page will render the status of the different services.
+</li>
+<li class="listitem">
+A JSON representation of Elastic Maps Server status is available at the <code class="literal">/status</code> endpoint.
+</li>
+<li class="listitem">
+The Docker <a href="https://docs.docker.com/engine/reference/builder/#healthcheck" class="ulink" target="_top"><code class="literal">HEALTHCHECK</code></a> instruction is run by default and will inform about the health of the service, running a process equivalent to the <code class="literal">/status</code> endpoint.
+</li>
+</ul>
+</div>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Elastic Maps Server won&#8217;t respond to any data request if the license validation is not fulfilled.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="elastic-maps-server-logging"></a>Logging</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/connect-to-ems.asciidoc">edit</a></div>
+<p>Logs are generated in <a href="https://www.elastic.co/guide/en/ecs/8.11" class="ulink" target="_top">ECS JSON format</a> and emitted to the standard output and to <code class="literal">/var/log/elastic-maps-server/elastic-maps-server.log</code>. The server won&#8217;t rotate the logs automatically but the <code class="literal">logrotate</code> tool is installed in the image. Mount <code class="literal">/dev/null</code> to the default log path if you want to disable the output to that file.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-settings.html">« Configure map settings</a>
+</span>
+<span class="next">
+<a href="import-geospatial-data.html">Import geospatial data »</a>
+</span>
+</div>
+</body>
+</html>

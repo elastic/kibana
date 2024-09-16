@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Get live query results API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Get live query results API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="osquery-manager-api.html" title="Osquery manager API"/>
+<link rel="prev" href="osquery-manager-live-queries-api-get-all.html" title="Get live queries API"/>
+<link rel="next" href="osquery-manager-live-queries-api-create.html" title="Create live query API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="osquery-manager-live-queries-api-get-all.html">« Get live queries API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-live-queries-api-create.html">Create live query API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="osquery-manager-api.html">Osquery manager API</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Get live query results API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="osquery-manager-live-queries-api-get-results"></a>Get live query results API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Retrieve a single live query result by ID.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-get-results-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/api/osquery/live_queries/&lt;id&gt;/results/&lt;query_action_id&gt;</code></p>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/osquery/live_queries/&lt;query_action_id&gt;</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-get-results-params"></a>Path parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">space_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The space identifier. When <code class="literal">space_id</code> is not provided in the URL, the default space is used.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The ID of the live query result you want to retrieve.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">query_action_id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The ID of the query action that generated the live query results.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-get-results-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">404</code>
+</span>
+</dt>
+<dd>
+The specified live query or &lt;query_action_id&gt; doesn&#8217;t exist.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-get-results-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/get-results.asciidoc">edit</a></div>
+</div></div></div>
+<p>Retrieve the live query results for <code class="literal">3c42c847-eb30-4452-80e0-728584042334</code> ID and <code class="literal">609c4c66-ba3d-43fa-afdd-53e244577aa0</code> query action ID:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X GET api/osquery/live_queries/3c42c847-eb30-4452-80e0-728584042334/results/609c4c66-ba3d-43fa-afdd-53e244577aa0</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/65.kibana"></div>
+<p>The API returns a live query action single query result:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+  "data": {
+    "total": 2,
+    "edges": [{...}, {...}],
+  }
+}</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="osquery-manager-live-queries-api-get-all.html">« Get live queries API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-live-queries-api-create.html">Create live query API »</a>
+</span>
+</div>
+</body>
+</html>

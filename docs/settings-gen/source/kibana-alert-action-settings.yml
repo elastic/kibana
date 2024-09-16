@@ -135,7 +135,7 @@ groups:
           - option: goodbye
           - option: have_a_nice_day
         platforms:
-          - self-manage
+          - self-managed
 
   - group: Preconfigured connector settings
     group_id: preconfigured-connector-settings
@@ -181,4 +181,5 @@ groups:
           - option: earth
             description: "just perfect"
         platforms:
-          - self-manage
+          - self-managed
+          - cloud

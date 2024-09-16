@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Examples | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Examples | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="logging-configuration.html" title="Configure logging"/>
+<link rel="prev" href="logging-configuration.html" title="Configure logging"/>
+<link rel="next" href="_cli_configuration.html" title="Cli configuration"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="logging-configuration.html">« Configure logging</a>
+</span>
+<span class="next">
+<a href="_cli_configuration.html">Cli configuration »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="logging-configuration.html">Configure logging</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Examples</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="log-settings-examples"></a>Examples</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div></div></div>
+<p>Here are some configuration examples for the most common logging use cases:</p>
+<div class="position-relative"><h4><a id="log-to-file-example"></a>Log to a file</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Log the default log format to a file instead of to stdout (the default).</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: pattern
+  root:
+    appenders: [file]</pre>
+</div>
+<div class="position-relative"><h4><a id="log-in-json-ECS-example"></a>Log in JSON format</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Log the default log format to JSON layout instead of pattern (the default).
+With <code class="literal">json</code> layout, log messages will be formatted as JSON strings in <a href="https://www.elastic.co/guide/en/ecs/current/ecs-reference.html" class="ulink" target="_top">ECS format</a> that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    json-layout:
+      type: console
+      layout:
+        type: json
+  root:
+    appenders: [json-layout]</pre>
+</div>
+<div class="position-relative"><h4><a id="log-with-meta-to-stdout"></a>Log with meta to stdout</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Include <code class="literal">%meta</code> in your pattern layout:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    console-meta:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date] [%level] [%logger] [%meta] %message"
+  root:
+    appenders: [console-meta]</pre>
+</div>
+<div class="position-relative"><h4><a id="log-elasticsearch-queries"></a>Log Elasticsearch queries</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [console_appender]
+    level: warn
+  loggers:
+    - name: elasticsearch.query
+      level: debug</pre>
+</div>
+<div class="position-relative"><h4><a id="change-overall-log-level"></a>Change overall log level</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  root:
+    level: debug</pre>
+</div>
+<div class="position-relative"><h4><a id="customize-specific-log-records"></a>Customize specific log records</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Here is a detailed configuration example that can be used to configure <em>loggers</em>, <em>appenders</em> and <em>layouts</em>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+    custom:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date][%level] %message"
+    json-file-appender:
+      type: file
+      fileName: /var/log/kibana-json.log
+      layout:
+        type: json
+
+  root:
+    appenders: [console, file]
+    level: error
+
+  loggers:
+    - name: plugins
+      appenders: [custom]
+      level: warn
+    - name: plugins.myPlugin
+      level: info
+    - name: server
+      level: fatal
+    - name: optimize
+      appenders: [console]
+    - name: telemetry
+      appenders: [json-file-appender]
+      level: all
+    - name: metrics.ops
+      appenders: [console]
+      level: debug</pre>
+</div>
+<p>Here is what we get with the config above:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Context name</th>
+<th align="left" valign="top">Appenders</th>
+<th align="left" valign="top">Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>root</p></td>
+<td align="left" valign="top"><p>console, file</p></td>
+<td align="left" valign="top"><p>error</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>plugins</p></td>
+<td align="left" valign="top"><p>custom</p></td>
+<td align="left" valign="top"><p>warn</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>plugins.myPlugin</p></td>
+<td align="left" valign="top"><p>custom</p></td>
+<td align="left" valign="top"><p>info</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>server</p></td>
+<td align="left" valign="top"><p>console, file</p></td>
+<td align="left" valign="top"><p>fatal</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>optimize</p></td>
+<td align="left" valign="top"><p>console</p></td>
+<td align="left" valign="top"><p>error</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>telemetry</p></td>
+<td align="left" valign="top"><p>json-file-appender</p></td>
+<td align="left" valign="top"><p>all</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>metrics.ops</p></td>
+<td align="left" valign="top"><p>console</p></td>
+<td align="left" valign="top"><p>debug</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="logging-configuration.html">« Configure logging</a>
+</span>
+<span class="next">
+<a href="_cli_configuration.html">Cli configuration »</a>
+</span>
+</div>
+</body>
+</html>

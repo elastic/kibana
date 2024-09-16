@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.14.3 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.14.3 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="enhancements-and-bug-fixes-v8.15.0.html" title="Enhancements and bug fixes"/>
+<link rel="next" href="release-notes-8.14.2.html" title="Kibana 8.14.2"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.15.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="release-notes-8.14.2.html">Kibana 8.14.2 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.14.3</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.14.3"></a>Kibana 8.14.3</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>The 8.14.3 release includes the following bug fixes and known issues.</p>
+<div class="position-relative"><h3><a id="known-issues-8.14.3"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details>
+<summary class="title">Creating or editing APM, Observability and Stack Monitoring rules fails</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+When you attempt to create or edit some rule types in <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Rules</strong></span>, the request will fail with errors similar to <code class="literal">Cannot read properties of undefined (reading 'eui')</code> or <code class="literal">e.theme.eui is undefined</code>.
+Refer to <a href="https://github.com/elastic/kibana/issues/186969" class="ulink" target="_top">#186969</a></p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+This known issue impacts only Observability, Stack Monitoring, and APM and User Experience rules.</p>
+<p><span class="strong strong"><strong>Workaround</strong></span><br>
+To work around this issue for Observability and APM and User Experience rules, create them from the Observability <span class="strong strong"><strong>Alerts</strong></span> page.
+Refer to <a class="xref" href="apm-alerts.html" title="Create an alert"><em>Create an alert</em></a> and <a href="https://www.elastic.co/guide/en/observability/master/create-alerts-rules.html" class="ulink" target="_top">Create and manage Observability rules</a>.</p>
+<p><span class="strong strong"><strong>Resolved</strong></span><br>
+This issue is resolved in 8.15.0.</p>
+</div>
+</details>
+<details>
+<summary class="title">Webhook - Case Management connector fails to send HTTP headers</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+If you configured the Webhook - Case Management connector to send key-value pairs as headers, that information is not sent unles you have also enabled the basic authentication option for the connector.
+Refer to <a href="https://github.com/elastic/kibana/issues/189394" class="ulink" target="_top">#189394</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+The impact of this issue will vary depending on the purpose of your headers.
+For example, if you added an <code class="literal">ApiKey</code> authorization header, you might receive a <code class="literal">401</code> authorization error since it&#8217;s no longer sent by the connector.</p>
+<p><span class="strong strong"><strong>Workaround</strong></span><br>
+To work around this issue, enable the <span class="strong strong"><strong>Require authentication for this webhook</strong></span> option, which is the <code class="literal">hasAuth</code> property in the API.
+You must then provide a username and password for authentication.</p>
+<p><span class="strong strong"><strong>Resolved</strong></span><br>
+This issue is resolved in 8.15.0.</p>
+</div>
+</details>
+<details id="known-185691">
+<summary class="title">When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In 8.14.3, if you are using the Observability AI Assistant with the OpenAI connector, function calling will result in an error.
+The error message will look similar to this:</p>
+<pre class="screen">Error: an error occurred while running the action - Status code: 400. Message: API Error: model_error - Missing required parameter: 'messages[4].function_call.arguments'.</pre>
+<p>A fix will be available in 8.15. Users on 8.14.3 can get around this error by turning on synthetic function calling in <em>AI Assistant Settings</em>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In Kibana, go to <span class="strong strong"><strong>Stack Management</strong></span> → <span class="strong strong"><strong>AI Assistant</strong></span> → <span class="strong strong"><strong>Observability</strong></span>
+</li>
+<li class="listitem">
+Toggle the <em>Simulate function calling</em> option to <span class="strong strong"><strong>On</strong></span>.
+</li>
+</ol>
+</div>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/185691" class="ulink" target="_top">#185691</a>.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="fixes-v8.14.3"></a>Bug Fixes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes controls getting overwritten on navigation (<a href="https://github.com/elastic/kibana/pull/187509" class="ulink" target="_top">#187509</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.14.3 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.15.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="release-notes-8.14.2.html">Kibana 8.14.2 »</a>
+</span>
+</div>
+</body>
+</html>

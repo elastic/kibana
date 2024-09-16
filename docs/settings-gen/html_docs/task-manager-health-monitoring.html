@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Task Manager health monitoring | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Task Manager health monitoring | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="task-manager-production-considerations.html" title="Task Manager"/>
+<link rel="prev" href="task-manager-production-considerations.html" title="Task Manager"/>
+<link rel="next" href="task-manager-troubleshooting.html" title="Task Manager troubleshooting"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="task-manager-production-considerations.html">« Task Manager</a>
+</span>
+<span class="next">
+<a href="task-manager-troubleshooting.html">Task Manager troubleshooting »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="production.html">Use Kibana in a production environment</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="task-manager-production-considerations.html">Task Manager</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Task Manager health monitoring</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/task-manager-health-monitoring.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="task-manager-health-monitoring"></a>Task Manager health monitoring</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/task-manager-health-monitoring.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>The Task Manager has an internal monitoring mechanism to keep track of a variety of metrics, which can be consumed with either the health monitoring API or the Kibana server log.</p>
+<p>The health monitoring API provides a reliable endpoint that can be monitored.
+Consuming this endpoint doesn&#8217;t cause additional load, but rather returns the latest health checks made by the system. This design enables consumption by external monitoring services at a regular cadence without additional load to the system.</p>
+<p>Each Kibana instance exposes its own endpoint at:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X GET api/task_manager/_health</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/10.kibana"></div>
+<p>Monitoring the <code class="literal">_health</code> endpoint of each Kibana instance in the cluster is the recommended method of ensuring confidence in mission critical services such as Alerting, Actions, and Reporting.</p>
+<div class="position-relative"><h4><a id="task-manager-configuring-health-monitoring"></a>Configuring the monitored health statistics</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/task-manager-health-monitoring.asciidoc">edit</a></div>
+<p>The health monitoring API monitors the performance of Task Manager out of the box.  However, certain performance considerations are deployment specific and you can configure them.</p>
+<p>A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of <code class="literal">warn</code> or <code class="literal">error</code> is set on the task type execution. To configure a health threshold, use the <a class="xref" href="task-manager-settings-kb.html#task-manager-health-settings" title="Task Manager Health settings"><code class="literal">xpack.task_manager.monitored_task_execution_thresholds</code></a> setting.  You can apply this this setting to all task types in the system, or to a custom task type.</p>
+<p>By default, this setting marks the health of every task type as <code class="literal">warning</code> when it exceeds 80% failed executions, and as <code class="literal">error</code> at 90%.
+Set this value to a number between 0 to 100. The threshold is hit when the value <span class="strong strong"><strong>exceeds</strong></span> this number.
+To avoid a status of <code class="literal">error</code>, set the threshold at 100.  To hit <code class="literal">error</code> the moment any task fails, set the threshold to 0.</p>
+<p>Create a custom configuration to set lower thresholds for task types you consider critical, such as alerting tasks that you want to detect sooner in an external monitoring service.</p>
+<div class="pre_wrapper lang-yml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yml">xpack.task_manager.monitored_task_execution_thresholds:
+  default: <a id="CO9-1"></a><i class="conum" data-value="1"></i>
+    error_threshold: 70
+    warn_threshold: 50
+  custom:
+    "alerting:.index-threshold": <a id="CO9-2"></a><i class="conum" data-value="2"></i>
+      error_threshold: 50
+      warn_threshold: 0</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO9-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A default configuration that sets the system-wide <code class="literal">warn</code> threshold at a 50% failure rate, and <code class="literal">error</code> at 70% failure rate.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO9-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A custom configuration for the <code class="literal">alerting:.index-threshold</code> task type that sets a system wide <code class="literal">warn</code> threshold at 0% (which sets a <code class="literal">warn</code> status the moment any task of that type fails), and <code class="literal">error</code> at a 50% failure rate.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h4><a id="task-manager-consuming-health-stats"></a>Consuming health stats</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/task-manager-health-monitoring.asciidoc">edit</a></div>
+<p>The health API is best consumed by via the <code class="literal">/api/task_manager/_health</code> endpoint.</p>
+<p>Additionally, there are two ways to consume these metrics:</p>
+<p><span class="strong strong"><strong>Debug logging</strong></span></p>
+<p>The metrics are logged in the Kibana <code class="literal">DEBUG</code> logger at a regular cadence.
+To enable Task Manager debug logging in your Kibana instance, add the following to your <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-yml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yml">logging:
+  loggers:
+      - context: plugins.taskManager
+        appenders: [console]
+        level: debug</pre>
+</div>
+<p>These stats are logged based on the number of milliseconds set in your <a class="xref" href="task-manager-settings-kb.html#task-manager-settings" title="Task Manager settings"><code class="literal">xpack.task_manager.poll_interval</code></a> setting, which could add substantial noise to your logs. Only enable this level of logging temporarily.</p>
+<p><span class="strong strong"><strong>Automatic logging</strong></span></p>
+<p>By default, the health API runs at a regular cadence, and each time it runs, it attempts to self evaluate its performance. If this self evaluation yields a potential problem,
+a message will log to the Kibana server log. In addition, the health API will look at how long tasks have waited to start (from when they were scheduled to start). If this number exceeds a configurable threshold (<a class="xref" href="task-manager-settings-kb.html#task-manager-settings" title="Task Manager settings"><code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds</code></a>), the same message as above will log to the Kibana server log.</p>
+<p>This message looks like:</p>
+<div class="pre_wrapper lang-log">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-log">Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`</pre>
+</div>
+<p>If this message appears, set <a class="xref" href="task-manager-settings-kb.html#task-manager-settings" title="Task Manager settings"><code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.enabled</code></a> to <code class="literal">true</code> in your <code class="literal">kibana.yml</code>. This will start logging the health metrics at either a <code class="literal">warn</code> or <code class="literal">error</code> log level, depending on the detected severity of the potential problem.</p>
+<div class="position-relative"><h4><a id="making-sense-of-task-manager-health-stats"></a>Making sense of Task Manager health stats</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/task-manager-health-monitoring.asciidoc">edit</a></div>
+<p>The health monitoring API exposes three sections: <code class="literal">configuration</code>, <code class="literal">workload</code> and <code class="literal">runtime</code>:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top">
+<p>Configuration</p>
+</td>
+<td align="left" valign="top"><p>This section summarizes the current configuration of Task Manager.  This includes dynamic configurations that change over time, such as <code class="literal">poll_interval</code> and <code class="literal">max_workers</code>, which can adjust in reaction to changing load on the system.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p>Workload</p>
+</td>
+<td align="left" valign="top"><p>This section summarizes the work load across the cluster, including the tasks in the system, their types, and current status.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p>Runtime</p>
+</td>
+<td align="left" valign="top"><p>This section tracks execution performance of Task Manager, tracking task <em>drift</em>, worker <em>load</em>, and execution stats broken down by type, including duration and execution results.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p>Capacity Estimation</p>
+</td>
+<td align="left" valign="top"><p>This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <a class="xref" href="task-manager-production-considerations.html#task-manager-scaling-guidance" title="Scaling guidance">Scaling guidance</a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each section has a <code class="literal">timestamp</code> and a <code class="literal">status</code> that indicates when the last update to this section took place and whether the health of this section was evaluated as <code class="literal">OK</code>, <code class="literal">Warning</code> or <code class="literal">Error</code>.</p>
+<p>The root <code class="literal">status</code> indicates the <code class="literal">status</code> of the system overall.</p>
+<p>The Runtime <code class="literal">status</code> indicates whether task executions have exceeded any of the <a class="xref" href="task-manager-health-monitoring.html#task-manager-configuring-health-monitoring" title="Configuring the monitored health statistics">configured health thresholds</a>. An <code class="literal">OK</code> status means none of the threshold have been exceeded. A <code class="literal">Warning</code> status means that at least one warning threshold has been exceeded. An <code class="literal">Error</code> status means that at least one error threshold has been exceeded.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Some tasks (such as <a class="xref" href="action-types.html" title="Connectors">connectors</a>) will incorrectly report their status as successful even if the task failed.
+The runtime and workload block will return data about success and failures and will not take this into consideration.</p>
+<p>To get a better sense of action failures, please refer to the <a class="xref" href="event-log-index.html" title="Event log index">Event log index</a> for more accurate context into failures and successes.</p>
+</div>
+</div>
+<p>The Capacity Estimation <code class="literal">status</code> indicates the sufficiency of the observed capacity. An <code class="literal">OK</code> status means capacity is sufficient. A <code class="literal">Warning</code> status means that capacity is sufficient for the scheduled recurring tasks, but non-recurring tasks often cause the cluster to exceed capacity. An <code class="literal">Error</code> status means that there is insufficient capacity across all types of tasks.</p>
+<p>By monitoring the <code class="literal">status</code> of the system overall, and the <code class="literal">status</code> of specific task types of interest, you can evaluate the health of the Kibana Task Management system.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="task-manager-production-considerations.html">« Task Manager</a>
+</span>
+<span class="next">
+<a href="task-manager-troubleshooting.html">Task Manager troubleshooting »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

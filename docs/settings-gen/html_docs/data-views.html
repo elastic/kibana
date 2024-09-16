@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Create a data view | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create a data view | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-concepts-analysts.html" title="Kibana concepts"/>
+<link rel="prev" href="kibana-concepts-analysts.html" title="Kibana concepts"/>
+<link rel="next" href="set-time-filter.html" title="Set the time range"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="kibana-concepts-analysts.html">« Kibana concepts</a>
+</span>
+<span class="next">
+<a href="set-time-filter.html">Set the time range »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-concepts-analysts.html">Kibana concepts</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create a data view</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="data-views"></a>Create a data view</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana requires a data view to access the Elasticsearch data that you want to explore.
+A data view can point to one or more indices, <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html" class="ulink" target="_top">data streams</a>, or <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/alias.html" class="ulink" target="_top">index aliases</a>.
+For example, a data view can point to your log data from yesterday,
+or all indices that contain your data.</p>
+<div class="position-relative"><h3><a id="data-views-read-only-access"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Access to <span class="strong strong"><strong>Data Views</strong></span> requires the <a class="xref" href="kibana-role-management.html" title="Kibana role management">Kibana privilege</a>
+<code class="literal">Data View Management</code>.
+</li>
+<li class="listitem">
+To create a data view, you must have the <a class="xref" href="kibana-role-management.html" title="Kibana role management">Elasticsearch privilege</a>
+<code class="literal">view_index_metadata</code>.
+</li>
+<li class="listitem">
+If a read-only indicator appears in Kibana, you have insufficient privileges
+to create or save data views. In addition, the buttons to create data views or
+save existing data views are not visible. For more information,
+refer to <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="settings-create-pattern"></a>Create a data view</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<p>If you collected data using one of the Kibana <a class="xref" href="connect-to-elasticsearch.html" title="Add data">ingest options</a>,
+uploaded a file, or added sample data,
+you get a data view for free, and can start exploring your data.
+If you loaded your own data, follow these steps to create a data view.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Open <span class="strong strong"><strong>Lens</strong></span> or <span class="strong strong"><strong>Discover</strong></span>, and then open the data view menu.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/discover-data-view.png" alt="How to set the data view in Discover" width="40%">
+</div>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create a data view</strong></span>.
+</li>
+<li class="listitem">
+Give your data view a name.
+</li>
+<li class="listitem">
+<p>Start typing in the <span class="strong strong"><strong>Index pattern</strong></span> field, and Kibana looks for the names of
+indices, data streams, and aliases that match your input. You can
+view all available sources or only the sources that the data view targets.</p>
+<p class="screenshot"><span class="image"><img src="management/index-patterns/images/create-data-view.png" alt="Create data view"></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To match multiple sources, use a wildcard (*). <code class="literal">filebeat-*</code> matches
+<code class="literal">filebeat-apache-a</code>, <code class="literal">filebeat-apache-b</code>, and so on.
+</li>
+<li class="listitem">
+To match multiple single sources, enter their names,
+separated by a comma.  Do not include a space after the comma.
+<code class="literal">filebeat-a,filebeat-b</code> matches two indices.
+</li>
+<li class="listitem">
+To exclude a source, use a minus sign (-), for example, <code class="literal">-test3</code>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Open the <span class="strong strong"><strong>Timestamp field</strong></span> dropdown,
+and then select the default field for filtering your data by time.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you don’t set a default time field, you can&#8217;t use
+global time filters on your dashboards. This is useful if
+you have multiple time fields and want to create dashboards that combine visualizations
+based on different timestamps.
+</li>
+<li class="listitem">
+If your index doesn’t have time-based data, choose <span class="strong strong"><strong>I don’t want to use the time filter</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Show advanced settings</strong></span> to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Display hidden and system indices.
+</li>
+<li class="listitem">
+Specify your own data view name. For example, enter your Elasticsearch index alias name.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p><a id="reload-fields"></a> Click <span class="strong strong"><strong>Save data view to Kibana</strong></span>.</p>
+<p>You can manage your data view from <span class="strong strong"><strong>Stack Management</strong></span>.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="_create_a_temporary_data_view"></a>Create a temporary data view</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<p>Want to explore your data or create a visualization without saving it as a data view?
+Select <span class="strong strong"><strong>Use without saving</strong></span> in the <span class="strong strong"><strong>Create data view</strong></span> form in <span class="strong strong"><strong>Discover</strong></span>
+or <span class="strong strong"><strong>Lens</strong></span>. With a temporary data view, you can add fields and create an Elasticsearch
+query alert, just like you would a regular data view.  Your work won&#8217;t be visible to others in your space.</p>
+<p>A temporary data view remains in your space until you change apps, or until you save it.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994c44c0cc/637eb0c95834861044c21a25/ad-hoc-data-view.gif" alt="how to create an ad-hoc data view">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Temporary data views are not available in <span class="strong strong"><strong>Stack Management.</strong></span></p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="rollup-data-view"></a>Use data views with rolled up data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<h3>Deprecated in 8.11.0.</h3>
+<p>Rollups are deprecated and will be removed in a future version. Use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/downsampling.html" class="ulink" target="_top">downsampling</a> instead.</p>
+</div>
+</div>
+<p>A data view can match one rollup index.  For a combination rollup
+data view with both raw and rolled up data, use the standard notation:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">rollup_logstash,kibana_sample_data_logs</pre>
+</div>
+<p>For an example, refer to <a class="xref" href="data-rollups.html#rollup-data-tutorial" title="Try it: Create and visualize rolled up data">Create and visualize rolled up data</a>.</p>
+<div class="position-relative"><h4><a id="management-cross-cluster-search"></a>Use data views with cross-cluster search</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<p>If your Elasticsearch clusters are configured for <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html" class="ulink" target="_top">cross-cluster search</a>,
+you can create a data view to search across the clusters of your choosing.
+Specify data streams, indices, and aliases in a remote cluster using the
+following syntax:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">&lt;remote_cluster_name&gt;:&lt;target&gt;</pre>
+</div>
+<p>To query Logstash indices across two Elasticsearch clusters
+that you set up for cross-cluster search, named <code class="literal">cluster_one</code> and <code class="literal">cluster_two</code>:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts"> cluster_one:logstash-*,cluster_two:logstash-*</pre>
+</div>
+<p>Use wildcards in your cluster names
+to match any number of clusters. To search Logstash indices across
+clusters named <code class="literal">cluster_foo</code>, <code class="literal">cluster_bar</code>, and so on:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">cluster_*:logstash-*</pre>
+</div>
+<p>To query across all Elasticsearch clusters that have been configured for cross-cluster search,
+use a standalone wildcard for your cluster name:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">*:logstash-*</pre>
+</div>
+<p>To match indices starting with <code class="literal">logstash-</code>, but exclude those starting with <code class="literal">logstash-old</code>, from
+all clusters having a name starting with <code class="literal">cluster_</code>:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">`cluster_*:logstash-*,cluster_*:-logstash-old*`</pre>
+</div>
+<p>Excluding a cluster avoids sending any network calls to that cluster.
+To exclude a cluster with the name <code class="literal">cluster_one</code>:</p>
+<div class="pre_wrapper lang-ts">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ts">`cluster_*:logstash-*,-cluster_one:*`</pre>
+</div>
+<p>Once you configure a data view to use the cross-cluster search syntax, all searches and
+aggregations using that data view in Kibana take advantage of cross-cluster search.</p>
+<p>For more information, refer to
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html#exclude-problematic-clusters" class="ulink" target="_top">Excluding
+clusters or indicies from cross-cluster search</a>.</p>
+<div class="position-relative"><h3><a id="delete-data-view"></a>Delete a data view</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<p>When you delete a data view, you cannot recover the associated field formatters, runtime fields, source filters,
+and field popularity data. Deleting a data view does not remove any indices or data documents from Elasticsearch.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Deleting a data view breaks all visualizations, saved searches, and other saved objects that reference the data view.</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Find the data view that you want to delete, and then
+click <span class="image"><img src="management/index-patterns/images/delete.png" alt="Delete icon"></span> in the <span class="strong strong"><strong>Actions</strong></span> column.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="data-view-field-cache"></a>data view field cache</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/data-views.asciidoc">edit</a></div>
+<p>The browser caches data view field lists for increased performance. This is particularly impactful
+for data views with a high field count that span a large number of indices and clusters. The field
+list is updated every couple of minutes in typical Kibana usage. Alternatively, use the refresh button on the data view
+management detail page to get an updated field list. A force reload of Kibana has the same effect.</p>
+<p>The field list may be impacted by changes in indices and user permissions.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-concepts-analysts.html">« Kibana concepts</a>
+</span>
+<span class="next">
+<a href="set-time-filter.html">Set the time range »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.0.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.0.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="enhancements-and-bug-fixes-v8.1.0.html" title="Enhancements and bug fixes"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.0.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.1.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.0.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.0.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.0.0"></a>Kibana 8.0.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the Kibana 8.0.0 changes, then use the <a href="https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html" class="ulink" target="_top">Upgrade Assistant</a> to complete the upgrade.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.0.0"></a>Breaking change</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.</p>
+<details id="breaking-123754">
+<summary class="title">Removes the <code class="literal">console.ssl</code> setting</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The <code class="literal">console.ssl</code> setting has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/123754" class="ulink" target="_top">#123754</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Before you upgrade to 8.0.0, remove <code class="literal">console.ssl</code> from kibana.yml.</p>
+</div>
+</details>
+<p>To review the breaking changes in previous versions, refer to the following:</p>
+<p><a class="xref" href="release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2" title="Breaking change">8.0.0-rc2</a> | <a class="xref" href="release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" title="Breaking changes">8.0.0-rc1</a> | <a class="xref" href="release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" title="Breaking changes">8.0.0-beta1</a> | <a class="xref" href="release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" title="Breaking changes">8.0.0-alpha2</a> |
+<a class="xref" href="release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" title="Breaking changes">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="deprecations-8.0.0"></a>Deprecation</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.0.0.</p>
+<details id="deprecation-123229">
+<summary class="title">Removes support for <code class="literal">monitoring.cluster_alerts.allowedSpaces</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The <code class="literal">monitoring.cluster_alerts.allowedSpaces</code> setting, which Kibana uses to create Stack Monitoring alerts, has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/123229" class="ulink" target="_top">#123229</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Before you upgrade to 8.0.0, remove <code class="literal">monitoring.cluster_alerts.allowedSpaces</code> from kibana.yml.</p>
+</div>
+</details>
+<p>To review the deprecations in previous versions, refer to the following:</p>
+<p><a class="xref" href="release-notes-8.0.0-rc1.html#deprecations-8.0.0-rc1" title="Deprecations">8.0.0-rc1</a> | <a class="xref" href="release-notes-8.0.0-alpha1.html#deprecations-8.0.0-alpha1" title="Deprecations">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="known-issue-8.0.0"></a>Known issue</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details id="known-issue-123550">
+<summary class="title">Importing and copying saved objects causes weak links to break</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Kibana supports weak links in some saved objects. For example, a dashboard may include a Markdown panel that contains a relative URL to
+another dashboard. Weak links are defined by free text, <em>not</em> the saved object&#8217;s relationships, and can break if <span class="strong strong"><strong>both</strong></span> of the following
+conditions are true:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+You are importing saved objects into multiple spaces, <em>OR</em> you are copying saved objects into another space
+</li>
+<li class="listitem">
+Before you upgraded to 8.0.0, the saved objects did not already exist in the destinations
+</li>
+</ul>
+</div>
+<p>In 8.0.0 and later, weak links break because <a class="xref" href="saved-object-ids.html#saved-object-ids-impact-when-using-import-and-copy" title="Importing and copying saved objects">saved object IDs can change during import or copy</a>.
+This applies to both the UI and the API.
+For more information, refer to <a href="https://github.com/elastic/kibana/issues/123550" class="ulink" target="_top">#123550</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Saved objects in 7.x that are migrated during upgrade are <span class="strong strong"><strong>not</strong></span> impacted.
+Only <em>new</em> saved objects that are imported or copied <em>multiple times</em> (causing object IDs to change) are impacted.
+If you are impacted, you can re-import or re-copy your saved objects after the fix is
+implemented to preserve the weak links.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.0.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>For information about the features introduced in 8.0.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.0</a>.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.0.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+</dl>
+</div>
+<p>To review the features in previous versions, refer to the following:</p>
+<p><a class="xref" href="release-notes-8.0.0-rc2.html#features-8.0.0-rc2" title="Features">8.0.0-rc2</a> | <a class="xref" href="release-notes-8.0.0-rc1.html#features-8.0.0-rc1" title="Features">8.0.0-rc1</a> | <a class="xref" href="release-notes-8.0.0-beta1.html#features-8.0.0-beta1" title="Features">8.0.0-beta1</a> | <a class="xref" href="release-notes-8.0.0-alpha2.html#features-8.0.0-alpha2" title="Features">8.0.0-alpha2</a></p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.1.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.0.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

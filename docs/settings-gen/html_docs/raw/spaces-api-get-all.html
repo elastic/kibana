@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Get all Kibana spaces API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Get all Kibana spaces API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="spaces-api.html" title="Kibana spaces APIs"/>
+<link rel="prev" href="spaces-api-get.html" title="Get a space API"/>
+<link rel="next" href="spaces-api-delete.html" title="Delete space API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="spaces-api-get.html">« Get a space API</a>
+</span>
+<span class="next">
+<a href="spaces-api-delete.html">Delete space API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="spaces-api.html">Kibana spaces APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Get all Kibana spaces API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="spaces-api-get-all"></a>Get all Kibana spaces API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Retrieve all Kibana spaces.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-all-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/api/spaces/space</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-all-query-params"></a>Query parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">purpose</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Valid options include <code class="literal">any</code>, <code class="literal">copySavedObjectsIntoSpace</code>, and <code class="literal">shareSavedObjectsIntoSpace</code>. This determines what
+authorization checks are applied to the API call. If <code class="literal">purpose</code> is not provided in the URL, the <code class="literal">any</code> purpose is used.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">include_authorized_purposes</code>
+</span>
+</dt>
+<dd>
+<p>
+(Optional, boolean) When enabled, the API will return any spaces that the user is authorized to access in any capacity, and each space
+will contain the purpose(s) for which the user is authorized. This can be useful to determine which spaces a user can read but not take a
+specific action in. If the Security plugin is not enabled, this will have no effect, as no authorization checks would take place.
+</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This option cannot be used in conjunction with <code class="literal">purpose</code>.</p>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-all-response-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-all-example"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="spaces-api-get-all-example-1"></a>Default options</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<p>Retrieve all spaces without specifying any options:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">$ curl -X GET api/spaces/space</pre>
+</div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">[
+  {
+    "id": "default",
+    "name": "Default",
+    "description" : "This is the Default Space",
+    "disabledFeatures": [],
+    "imageUrl": "",
+    "_reserved": true
+  },
+  {
+    "id": "marketing",
+    "name": "Marketing",
+    "description" : "This is the Marketing Space",
+    "color": "#aabbcc",
+    "disabledFeatures": ["apm"],
+    "initials": "MK",
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU"
+  },
+  {
+    "id": "sales",
+    "name": "Sales",
+    "initials": "MK",
+    "disabledFeatures": ["discover"],
+    "imageUrl": "",
+    "solution": "oblt"
+  }
+]</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="spaces-api-get-all-example-2"></a>Custom options</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_all.asciidoc">edit</a></div>
+</div></div></div>
+<p>The user has read-only access to the Sales space. Retrieve all spaces and specify options:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&amp;include_authorized_purposes=true</pre>
+</div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">[
+  {
+    "id": "default",
+    "name": "Default",
+    "description" : "This is the Default Space",
+    "disabledFeatures": [],
+    "imageUrl": "",
+    "_reserved": true,
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": true,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": true,
+    }
+  },
+  {
+    "id": "marketing",
+    "name": "Marketing",
+    "description" : "This is the Marketing Space",
+    "color": "#aabbcc",
+    "disabledFeatures": ["apm"],
+    "initials": "MK",
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU",
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": true,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": true,
+    }
+  },
+  {
+    "id": "sales",
+    "name": "Sales",
+    "initials": "MK",
+    "disabledFeatures": ["discover"],
+    "imageUrl": "",
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": false,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": false,
+    }
+  }
+]</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-api-get.html">« Get a space API</a>
+</span>
+<span class="next">
+<a href="spaces-api-delete.html">Delete space API »</a>
+</span>
+</div>
+</body>
+</html>

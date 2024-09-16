@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.13.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.13.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.13.1.html" title="Kibana 8.13.1"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.13.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.13.1.html">« Kibana 8.13.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.13.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.13.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.13.0"></a>Kibana 8.13.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For information about the Kibana 8.13.0 release, review the following information.</p>
+<div class="position-relative"><h3><a id="known-issues-8.13.0"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details id="known-179457">
+<summary class="title">In Canvas, an empty text element incorrectly triggers a toast notification</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to (<a href="https://github.com/elastic/kibana/pull/179457" class="ulink" target="_top">#179457</a>).</p>
+</div>
+</details>
+<details id="known-177938-8.13">
+<summary class="title">Index templates UI incorrectly sets the <code class="literal">allow_auto_create</code> field to <code class="literal">false</code> by default.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the <code class="literal">allow_auto_create</code> field is incorrectly set to <code class="literal">false</code> by default (the default value should be <code class="literal">undefined</code>). For more information, refer to (<a href="https://github.com/elastic/kibana/issues/177938" class="ulink" target="_top">#177938</a>).</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="breaking-changes-8.13.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.13.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-176879">
+<summary class="title">Removes conditional topics for Kafka outputs</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The Kafka output no longer supports conditional topics. For more information, refer to (<a href="https://github.com/elastic/kibana/pull/176879" class="ulink" target="_top">#176879</a>).</p>
+</div>
+</details>
+<details id="breaking-176443">
+<summary class="title">Most Fleet installed integrations are now read-only and labelled with a <span class="strong strong"><strong>Managed</strong></span> tag in the Kibana UI</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br></p>
+<p>Integration content installed by Fleet is no longer editable. This content is tagged with <span class="strong strong"><strong>Managed</strong></span> in the Kibana UI, and is Elastic managed. This content cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned. The clones can be customized.</p>
+<p>When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies.</p>
+<p>Managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.</p>
+<p>For more information, refer to (<a href="https://github.com/elastic/kibana/pull/172393" class="ulink" target="_top">#172393</a>).</p>
+</div>
+</details>
+<details id="breaking-174674">
+<summary class="title">Removes <code class="literal">is_nan</code>, <code class="literal">is_finite</code>, and <code class="literal">is_infinite</code> functions from ES|QL</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+These functions have been removed from ES|QL queries as they are not supported. Errors would be thrown when trying to use them. For more information, refer to (<a href="https://github.com/elastic/kibana/pull/174674" class="ulink" target="_top">#174674</a>).</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.13.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.13.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The Custom Threshold rule is now out of technical preview and generally available (<a href="https://github.com/elastic/kibana/pull/176514" class="ulink" target="_top">#176514</a>).
+</li>
+<li class="listitem">
+Adds threshold to the custom threshold alert document (<a href="https://github.com/elastic/kibana/pull/176043" class="ulink" target="_top">#176043</a>).
+</li>
+<li class="listitem">
+Adds the ability to post Block Kit messages to the Slack Web API action (<a href="https://github.com/elastic/kibana/pull/174303" class="ulink" target="_top">#174303</a>).
+</li>
+<li class="listitem">
+Adds criticality fields and risk score fields to alert schema (<a href="https://github.com/elastic/kibana/pull/174626" class="ulink" target="_top">#174626</a>).
+</li>
+<li class="listitem">
+Adds fields table to rule details page alert flyout (<a href="https://github.com/elastic/kibana/pull/172830" class="ulink" target="_top">#172830</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+APM
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Show Universal Profiling on Transaction view (<a href="https://github.com/elastic/kibana/pull/176302" class="ulink" target="_top">#176302</a>).
+</li>
+<li class="listitem">
+Adds a specific metrics dashboard for opentelemetry-node services (<a href="https://github.com/elastic/kibana/pull/174700" class="ulink" target="_top">#174700</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Dashboards
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the creating of ES|QL charts from the dashboard (<a href="https://github.com/elastic/kibana/pull/171973" class="ulink" target="_top">#171973</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.13.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+ES|QL
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds enhanced ES|QL query editing experience with client side validation (<a href="https://github.com/elastic/kibana/pull/170071" class="ulink" target="_top">#170071</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds reference to <code class="literal">ecs@mappings</code> for each index template (<a href="https://github.com/elastic/kibana/pull/174855" class="ulink" target="_top">#174855</a>).
+</li>
+<li class="listitem">
+Adds support for the <code class="literal">subobjects</code> setting on the object type mapping (<a href="https://github.com/elastic/kibana/pull/171826" class="ulink" target="_top">#171826</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Infrastructure
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds a new Services component to host details UI (<a href="https://github.com/elastic/kibana/pull/176539" class="ulink" target="_top">#176539</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Integrations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds tiles for Notion and Redis connectors (<a href="https://github.com/elastic/kibana/pull/177306" class="ulink" target="_top">#177306</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds workspace panel dimensions by chart type (<a href="https://github.com/elastic/kibana/pull/168651" class="ulink" target="_top">#168651</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the single metric viewer embeddable for dashboards (<a href="https://github.com/elastic/kibana/pull/175857" class="ulink" target="_top">#175857</a>).
+</li>
+<li class="listitem">
+Adds support for ES|QL in Data visualizer (<a href="https://github.com/elastic/kibana/pull/174188" class="ulink" target="_top">#174188</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds a method of excluding data tiers when getting a field list (<a href="https://github.com/elastic/kibana/pull/167946" class="ulink" target="_top">#167946</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Reporting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for <em>auto</em> value for CSV scrolling duration (<a href="https://github.com/elastic/kibana/pull/175005" class="ulink" target="_top">#175005</a>).
+</li>
+<li class="listitem">
+Adds CSV reporting with ES|QL in Discover (<a href="https://github.com/elastic/kibana/pull/174511" class="ulink" target="_top">#174511</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds actions column (<a href="https://github.com/elastic/kibana/pull/175872" class="ulink" target="_top">#175872</a>).
+</li>
+<li class="listitem">
+Adds resource column with tooltip (<a href="https://github.com/elastic/kibana/pull/175287" class="ulink" target="_top">#175287</a>).
+</li>
+<li class="listitem">
+Adds support for the Timeslice Metric visualization on the SLO detail page (<a href="https://github.com/elastic/kibana/pull/175281" class="ulink" target="_top">#175281</a>).
+</li>
+<li class="listitem">
+Refactor alert table registration and change default columns (<a href="https://github.com/elastic/kibana/pull/175119" class="ulink" target="_top">#175119</a>).
+</li>
+<li class="listitem">
+Adds customization for virtual columns and add the 1st virtual column (<a href="https://github.com/elastic/kibana/pull/173732" class="ulink" target="_top">#173732</a>).
+</li>
+<li class="listitem">
+Adds a new option, Visualize this query, to the generated ES|QL quires in the Elastic Assistant (<a href="https://github.com/elastic/kibana/pull/174677" class="ulink" target="_top">#174677</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.13.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.13</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.13.1.html">« Kibana 8.13.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.13.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create filters from a map | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create filters from a map | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps-search.html" title="Search geographic data"/>
+<link rel="prev" href="maps-search.html" title="Search geographic data"/>
+<link rel="next" href="maps-layer-based-filtering.html" title="Filter a single layer"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps-search.html">« Search geographic data</a>
+</span>
+<span class="next">
+<a href="maps-layer-based-filtering.html">Filter a single layer »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps-search.html">Search geographic data</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create filters from a map</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-create-filter-from-map"></a>Create filters from a map</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+</div></div></div>
+<p>Create filters from your map to focus in on just the data you want. <span class="strong strong"><strong>Maps</strong></span> provides three ways to create filters:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="maps-create-filter-from-map.html#maps-map-extent-filter" title="Filter dashboard by map bounds">Filter dashboard by map bounds</a>
+</li>
+<li class="listitem">
+<a class="xref" href="maps-create-filter-from-map.html#maps-spatial-filters" title="Spatial filters">Spatial filters</a>
+</li>
+<li class="listitem">
+<a class="xref" href="maps-create-filter-from-map.html#maps-phrase-filter" title="Phrase filters">Phrase filters</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="maps-map-extent-filter"></a>Filter dashboard by map bounds</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>To filter your dashboard by your map bounds as you pan and zoom your map:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and then click <span class="strong strong"><strong>Dashboard</strong></span>.
+</li>
+<li class="listitem">
+Select your dashboard from the list or click <span class="strong strong"><strong>Create dashboard</strong></span>.
+</li>
+<li class="listitem">
+If your dashboard does not have a map, add a map panel.
+</li>
+<li class="listitem">
+Click the gear icon <span class="image"><img src="maps/images/gear_icon.png" alt="gear icon"></span> to open the map panel menu.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>More</strong></span> to view all panel options.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Filter dashboard by map bounds</strong></span>.
+</li>
+<li class="listitem">
+Select the checkbox for your map panel.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="maps-spatial-filters"></a>Spatial filters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.</p>
+<p>Spatial filters have the following properties:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Geometry label</strong></span> enables you to provide a meaningful name for your spatial filter.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Spatial relation</strong></span> determines the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/query-dsl-geo-shape-query.html#geo-shape-spatial-relations" class="ulink" target="_top">spatial relation operator</a> to use at search time.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Action</strong></span> specifies whether to apply the filter to the current view or to a drilldown action.
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p><a href="https://www.elastic.co/guide/en/kibana/master/drilldowns.html" class="ulink" target="_top">Drilldowns</a> are available only if the map is a panel in a <a href="https://www.elastic.co/guide/en/kibana/master/dashboard.html" class="ulink" target="_top">dashboard</a>, and not within the Maps application.</p>
+</div>
+</div>
+<p>You can create spatial filters in two ways:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Click the tool icon <span class="image"><img src="maps/images/tools_icon.png" alt="tool icon"></span>, and then draw a shape, bounding box, or distance on the map to define the spatial filter.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Filter by geometry</strong></span> in a <a class="xref" href="vector-tooltip.html#maps-vector-tooltip-locking" title="Lock a tooltip at the current location">locked tooltip</a>, and then use the feature&#8217;s geometry for the spatial filter.
+</li>
+</ul>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/create_spatial_filter.png" alt="create spatial filter">
+</div>
+</div>
+<div class="position-relative"><h4><a id="maps-phrase-filter"></a>Phrase filters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>A phrase filter narrows search results to documents that contain the specified text.
+You can create a phrase filter by clicking the plus icon <span class="image"><img src="maps/images/gs_plus_icon.png" alt="gs plus icon"></span> in a <a class="xref" href="vector-tooltip.html#maps-vector-tooltip-locking" title="Lock a tooltip at the current location">locked tooltip</a>.
+If the map is a dashboard panel with drilldowns, you can apply a phrase filter to a drilldown by selecting the drilldown action.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-search.html">« Search geographic data</a>
+</span>
+<span class="next">
+<a href="maps-layer-based-filtering.html">Filter a single layer »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FIPS 140-2 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="FIPS 140-2 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-security.html" title="Security"/>
+<link rel="prev" href="role-mappings.html" title="Role mappings"/>
+<link rel="next" href="xpack-spaces.html" title="Spaces"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="role-mappings.html">« Role mappings</a>
+</span>
+<span class="next">
+<a href="xpack-spaces.html">Spaces »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-security.html">Security</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>FIPS 140-2</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-security-fips-140-2"></a>FIPS 140-2</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>The Federal Information Processing Standard (FIPS) Publication 140-2, (FIPS PUB 140-2),
+titled "Security Requirements for Cryptographic Modules" is a U.S. government computer security standard
+used to approve cryptographic modules.</p>
+<p>Kibana offers a FIPS 140-2 compliant mode and as such can run in a Node.js environment configured with a FIPS
+140-2 compliant OpenSSL3 provider.</p>
+<p>To run Kibana in FIPS mode, you must have the appropriate <a href="https://www.elastic.co/subscriptions" class="ulink" target="_top">subscription</a>.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Node bundled with Kibana is not configured for FIPS 140-2. You must configure a FIPS 140-2 compliant OpenSSL3
+provider. Consult the Node.js documentation to learn how to configure your environment.</p>
+</div>
+</div>
+<p>For Kibana, adherence to FIPS 140-2 is ensured by:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Using FIPS approved / NIST recommended cryptographic algorithms.
+</li>
+<li class="listitem">
+Delegating the implementation of these cryptographic algorithms to a NIST validated cryptographic module
+(available via Node.js configured with an OpenSSL3 provider).
+</li>
+<li class="listitem">
+Allowing the configuration of Kibana in a FIPS 140-2 compliant manner, as documented below.
+</li>
+</ul>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_configuring_kibana_for_fips_140_2"></a>Configuring Kibana for FIPS 140-2</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div></div></div>
+<p>Apart from setting <code class="literal">xpack.security.experimental.fipsMode.enabled</code> to <code class="literal">true</code> in your Kibana config, a number of security related
+settings need to be reviewed and configured in order to run Kibana successfully in a FIPS 140-2 compliant Node.js
+environment.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_kibana_keystore"></a>Kibana keystore</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div></div></div>
+<p>FIPS 140-2 (via NIST Special Publication 800-132) dictates that encryption keys should at least have an effective
+strength of 112 bits. As such, the Kibana keystore that stores the application’s secure settings needs to be
+password protected with a password that satisfies this requirement. This means that the password needs to be 14 bytes
+long which is equivalent to a 14 character ASCII encoded password, or a 7 character UTF-8 encoded password.</p>
+<p>For more information on how to set this password, refer to the <a class="xref" href="secure-settings.html#change-password" title="Change password">keystore documentation</a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_tls_keystore_and_keys"></a>TLS keystore and keys</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div></div></div>
+<p>Keystores can be used in a number of General TLS settings in order to conveniently store key and trust material.
+PKCS#12 keystores cannot be used in a FIPS 140-2 compliant Node.js environment. Avoid using these types of keystores.
+Your FIPS 140-2 provider may provide a compliant keystore implementation that can be used, or you can use PEM encoded
+files. To use PEM encoded key material, you can use the relevant <code class="literal">\*.key</code> and <code class="literal">*.certificate</code> configuration options,
+and for trust material you can use <code class="literal">*.certificate_authorities</code>.</p>
+<p>As an example, avoid PKCS#12 specific settings such as:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">server.ssl.keystore.path</code>
+</li>
+<li class="listitem">
+<code class="literal">server.ssl.truststore.path</code>
+</li>
+<li class="listitem">
+<code class="literal">elasticsearch.ssl.keystore.path</code>
+</li>
+<li class="listitem">
+<code class="literal">elasticsearch.ssl.truststore.path</code>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_limitations_2"></a>Limitations</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/fips-140-2.asciidoc">edit</a></div>
+</div></div></div>
+<p>Configuring Kibana to run in FIPS mode is still considered to be experimental. Not all features are guaranteed to
+function as expected.</p>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="role-mappings.html">« Role mappings</a>
+</span>
+<span class="next">
+<a href="xpack-spaces.html">Spaces »</a>
+</span>
+</div>
+</body>
+</html>

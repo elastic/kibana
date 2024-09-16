@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Enhancements and bug fixes | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Enhancements and bug fixes | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes-8.0.0-rc2.html" title="Kibana 8.0.0-rc2"/>
+<link rel="prev" href="release-notes-8.0.0-rc2.html" title="Kibana 8.0.0-rc2"/>
+<link rel="next" href="release-notes-8.0.0-rc1.html" title="Kibana 8.0.0-rc1"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.0.0-rc2.html">« Kibana 8.0.0-rc2</a>
+</span>
+<span class="next">
+<a href="release-notes-8.0.0-rc1.html">Kibana 8.0.0-rc1 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes-8.0.0-rc2.html">Kibana 8.0.0-rc2</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Enhancements and bug fixes</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="enhancements-and-bug-fixes-v8.0.0-rc2"></a>Enhancements and bug fixes</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For detailed information about the 8.0.0-rc2 release, review the enhancements and bug fixes.</p>
+<div class="position-relative"><h4><a id="enhancement-v8.0.0-rc2"></a>Enhancements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.0.0-rc2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+Adds session cleanup audit logging <a href="https://github.com/elastic/kibana/pull/122419" class="ulink" target="_top">#122419</a>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+Make a monitor&#8217;s steps details page work on mobile resolutions in Uptime <a href="https://github.com/elastic/kibana/pull/122171" class="ulink" target="_top">#122171</a>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="fixes-v8.0.0-rc2"></a>Bug fixes</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+Fixes PagerDuty timestamp validation <a href="https://github.com/elastic/kibana/pull/122321" class="ulink" target="_top">#122321</a>
+</dd>
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Creates Explicit Diffing System <a href="https://github.com/elastic/kibana/pull/121241" class="ulink" target="_top">#121241</a>
+</li>
+<li class="listitem">
+Fixes blank panel save and display issue <a href="https://github.com/elastic/kibana/pull/120815" class="ulink" target="_top">#120815</a>
+</li>
+<li class="listitem">
+Fixes full screen error when pressing back arrow on browser <a href="https://github.com/elastic/kibana/pull/118113" class="ulink" target="_top">#118113</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.0.0-rc2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Maps
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes Point to point and Tracks layers label properties not showing in the legend <a href="https://github.com/elastic/kibana/pull/122993" class="ulink" target="_top">#122993</a>
+</li>
+<li class="listitem">
+Fixes Color ramp UI for percent of a top term in join layer is broken <a href="https://github.com/elastic/kibana/pull/122718" class="ulink" target="_top">#122718</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Updates index pattern permission error in APM <a href="https://github.com/elastic/kibana/pull/122680" class="ulink" target="_top">#122680</a>
+</li>
+<li class="listitem">
+Honor time unit for Inventory Threshold in Metrics <a href="https://github.com/elastic/kibana/pull/122294" class="ulink" target="_top">#122294</a>
+</li>
+<li class="listitem">
+Adds locator to aid other plugins in linking properly to Uptime <a href="https://github.com/elastic/kibana/pull/123004" class="ulink" target="_top">#123004</a>
+</li>
+<li class="listitem">
+Fixes a bug in which headers would be incorrectly centered on desktop in Uptime <a href="https://github.com/elastic/kibana/pull/122643" class="ulink" target="_top">#122643</a>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.0.0-rc2.html">« Kibana 8.0.0-rc2</a>
+</span>
+<span class="next">
+<a href="release-notes-8.0.0-rc1.html">Kibana 8.0.0-rc1 »</a>
+</span>
+</div>
+</body>
+</html>

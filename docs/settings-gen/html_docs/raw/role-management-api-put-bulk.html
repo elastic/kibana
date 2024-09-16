@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bulk create or update roles API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Bulk create or update roles API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="role-management-api.html" title="Kibana role management APIs"/>
+<link rel="prev" href="role-management-api-delete.html" title="Delete role API"/>
+<link rel="next" href="session-management-api.html" title="User session management APIs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="role-management-api-delete.html">« Delete role API</a>
+</span>
+<span class="next">
+<a href="session-management-api.html">User session management APIs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="role-management-api.html">Kibana role management APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Bulk create or update roles API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="role-management-api-put-bulk"></a>Bulk create or update roles API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview, and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Create new Kibana roles, or update the attributes of an existing roles. Kibana roles are stored in the
+Elasticsearch native realm.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="role-management-api-put-bulk-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/security/roles</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="role-management-api-put-bulk-prereqs"></a>Prerequisite</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+<p>To use the bulk create or update roles API, you must have the <code class="literal">manage_security</code> cluster privilege.</p>
+</div>
+
+<div class="section child_attributes">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="role-management-api-bulk-response-body"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">roles</code>
+</span>
+</dt>
+<dd>
+(object) Object that specifies the roles to add as a role name to role map.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">&lt;role_name&gt;</code> (required)
+</span>
+</dt>
+<dd>
+(string) The role name.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">description</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Description for the role.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">metadata</code>
+</span>
+</dt>
+<dd>
+(Optional, object) In the <code class="literal">metadata</code> object, keys that begin with <code class="literal">_</code> are reserved for system usage.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">elasticsearch</code>
+</span>
+</dt>
+<dd>
+(Optional, object) Elasticsearch cluster and index privileges. Valid keys include
+<code class="literal">cluster</code>, <code class="literal">indices</code>, <code class="literal">remote_indices</code>, <code class="literal">remote_cluster</code>, and <code class="literal">run_as</code>. For more information, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/defining-roles.html" class="ulink" target="_top">Defining roles</a>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana</code>
+</span>
+</dt>
+<dd>
+<p>
+(list) Objects that specify the <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana privileges</a> for the role.
+</p>
+<details open>
+<summary class="title">Properties of <code class="literal">kibana</code></summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">base</code>
+</span>
+</dt>
+<dd>
+(Optional, list) A base privilege. When specified, the base must be <code class="literal">["all"]</code> or <code class="literal">["read"]</code>.
+When the <code class="literal">base</code> privilege is specified, you are unable to use the <code class="literal">feature</code> section.
+"all" grants read/write access to all Kibana features for the specified spaces.
+"read" grants read-only access to all Kibana features for the specified spaces.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">feature</code>
+</span>
+</dt>
+<dd>
+(object) Contains privileges for specific features.
+When the <code class="literal">feature</code> privileges are specified, you are unable to use the <code class="literal">base</code> section.
+To retrieve a list of available features, use the <a class="xref" href="features-api-get.html" title="Get features API">features API</a>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">spaces</code>
+</span>
+</dt>
+<dd>
+(list) The spaces to apply the privileges to.
+To grant access to all spaces, set to <code class="literal">["*"]</code>, or omit the value.
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="role-management-api-bulk-put-response-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_examples_4"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/role-management/put-bulk.asciidoc">edit</a></div>
+</div></div></div>
+<p>Grant access to various features in all spaces:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "my_kibana_role_1_description",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "visualize": ["all"],
+            "dashboard": ["all"],
+            "dev_tools": ["read"],
+            "advancedSettings": ["read"],
+            "indexPatterns": ["read"],
+            "graph": ["all"],
+            "apm": ["read"],
+            "maps": ["read"],
+            "canvas": ["read"],
+            "infrastructure": ["all"],
+            "logs": ["all"],
+            "uptime": ["all"]
+          },
+          "spaces": ["*"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "my_kibana_role_2_description",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "visualize": ["all"],
+            "dashboard": ["all"],
+            "dev_tools": ["read"],
+            "logs": ["all"],
+            "uptime": ["all"]
+          },
+          "spaces": ["*"]
+        }
+      ]
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/30.kibana"></div>
+<p>Grant dashboard-only access to only the Marketing space for <code class="literal">my_kibana_role_1</code> and dashboard-only access to only Sales space for <code class="literal">my_kibana_role_2</code>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants dashboard-only access to only the Marketing space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "dashboard": ["read"]
+          },
+          "spaces": ["marketing"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants dashboard-only access to only the Sales space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "dashboard": ["read"]
+          },
+          "spaces": ["sales"]
+        }
+      ]
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/31.kibana"></div>
+<p>Grant full access to all features in the Default space for <code class="literal">my_kibana_role_1</code> and <code class="literal">my_kibana_role_2</code>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants full access to all features in the Default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants full access to all features in the Default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/32.kibana"></div>
+<p>Grant different access to different spaces:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing, and sales spaces.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "dashboard": ["all"]
+          },
+          "spaces": ["default"]
+        },
+        {
+          "base": ["read"],
+          "spaces": ["marketing", "sales"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "dashboard": ["all"]
+          },
+          "spaces": ["default"]
+        },
+        {
+          "base": ["read"],
+          "spaces": ["marketing"]
+        }
+      ]
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/33.kibana"></div>
+<p>Grant access to Kibana and Elasticsearch:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants all cluster privileges and full access to index1 and index2. Grants full access to remote_index1 and remote_index2, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": ["all"],
+        "indices": [
+          {
+            "names": ["index1", "index2"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_indices": [
+          {
+            "clusters": ["remote_cluster1"],
+            "names": ["remote_index1", "remote_index2"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_cluster": [
+          {
+            "clusters": ["remote_cluster1"],
+            "privileges": ["monitor_enrich"]
+          }
+        ]
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants all cluster privileges and full access to index1. Grants full access to remote_index1, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": ["all"],
+        "indices": [
+          {
+            "names": ["index1"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_indices": [
+          {
+            "clusters": ["remote_cluster1"],
+            "names": ["remote_index1"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_cluster": [
+          {
+            "clusters": ["remote_cluster1"],
+            "privileges": ["monitor_enrich"]
+          }
+        ]
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/34.kibana"></div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="role-management-api-delete.html">« Delete role API</a>
+</span>
+<span class="next">
+<a href="session-management-api.html">User session management APIs »</a>
+</span>
+</div>
+</body>
+</html>

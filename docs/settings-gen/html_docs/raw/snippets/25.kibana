@@ -1,0 +1,32 @@
+$ curl -X PUT api/security/role/my_kibana_role
+{
+  "description": "my_kibana_role_description",
+  "metadata": {
+    "version": 1
+  },
+  "elasticsearch": {
+    "cluster": [ ],
+    "indices": [ ]
+  },
+  "kibana": [
+    {
+      "base": [ ],
+      "feature": {
+       "discover": [ "all" ],
+        "visualize": [ "all" ],
+        "dashboard": [ "all" ],
+        "dev_tools": [ "read" ],
+        "advancedSettings": [ "read" ],
+        "indexPatterns": [ "read" ],
+        "graph": [ "all" ],
+        "apm": [ "read" ],
+        "maps": [ "read" ],
+        "canvas": [ "read" ],
+        "infrastructure": [ "all" ],
+        "logs": [ "all" ],
+        "uptime": [ "all"  ]
+      },
+      "spaces": [ "*" ]
+    }
+  ]
+}

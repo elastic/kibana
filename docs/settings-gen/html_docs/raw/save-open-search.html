@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Save a search for reuse | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Save a search for reuse | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="discover.html" title="Discover"/>
+<link rel="prev" href="discover-search-for-relevance.html" title="Search for relevance"/>
+<link rel="next" href="show-field-statistics.html" title="View field statistics"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="discover-search-for-relevance.html">« Search for relevance</a>
+</span>
+<span class="next">
+<a href="show-field-statistics.html">View field statistics »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="discover.html">Discover</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Save a search for reuse</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="save-open-search"></a>Save a search for reuse</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+</div></div></div>
+<p>A saved search is a convenient way to reuse a search
+that you&#8217;ve created in <span class="strong strong"><strong>Discover</strong></span>.
+Saved searches are good for adding search results to a dashboard,
+and can also serve as a foundation for building visualizations.</p>
+<div class="position-relative"><h3 class="xpack"><a id="discover-read-only-access"></a>Read-only access</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+<p>If you don&#8217;t have sufficient privileges to save searches, the following indicator is
+displayed and the <span class="strong strong"><strong>Save</strong></span> button is not visible. For more information, refer to <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="discover/images/read-only-badge.png" alt="Example of Discover&#8217;s read only access indicator in Kibana&#8217;s header">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_save_a_search"></a>Save a search</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+<p>By default, a saved search stores the query text, filters, and
+current view of <span class="strong strong"><strong>Discover</strong></span>, including the columns and sort order in the document table, and the data view.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Once you&#8217;ve created a search worth saving, click <span class="strong strong"><strong>Save</strong></span> in the toolbar.
+</li>
+<li class="listitem">
+Enter a name for the search.
+</li>
+<li class="listitem">
+Optionally store <a class="xref" href="managing-tags.html" title="Tags">tags</a> and the time range with the search.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+<p>To reload your search results in <span class="strong strong"><strong>Discover</strong></span>, click <span class="strong strong"><strong>Open</strong></span> in the toolbar, and select the saved search.</p>
+<p>If the saved search is associated with a different data view than is currently
+selected, opening the saved search changes the selected data view. The query language
+used for the saved search is also automatically selected.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_duplicate_a_search"></a>Duplicate a search</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In <span class="strong strong"><strong>Discover</strong></span>, open the search that you want to duplicate.
+</li>
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+Give the search a new name.
+</li>
+<li class="listitem">
+Turn on <span class="strong strong"><strong>Save as new search</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_add_search_results_to_a_dashboard"></a>Add search results to a dashboard</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/save-search.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and then click <span class="strong strong"><strong>Dashboard</strong></span>.
+</li>
+<li class="listitem">
+Open or create the dashboard, then click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add from library</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Types</strong></span> dropdown, select <span class="strong strong"><strong>Saved search</strong></span>.
+</li>
+<li class="listitem">
+Select the saved search that you want to visualize, then click <span class="strong strong"><strong>X</strong></span> to close the list.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="discover-search-for-relevance.html">« Search for relevance</a>
+</span>
+<span class="next">
+<a href="show-field-statistics.html">View field statistics »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tutorial: Index GeoJSON data | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Tutorial: Index GeoJSON data | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="import-geospatial-data.html" title="Import geospatial data"/>
+<link rel="prev" href="maps-clean-your-data.html" title="Clean your data"/>
+<link rel="next" href="maps-troubleshooting.html" title="Troubleshoot Maps"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maps-clean-your-data.html">« Clean your data</a>
+</span>
+<span class="next">
+<a href="maps-troubleshooting.html">Troubleshoot Maps »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="import-geospatial-data.html">Import geospatial data</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Tutorial: Index GeoJSON data</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="indexing-geojson-data-tutorial"></a>Tutorial: Index GeoJSON data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+</div></div></div>
+<p>In this tutorial, you&#8217;ll build a customized map that shows the flight path between
+two airports, and the lightning hot spots on that route. You&#8217;ll learn to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Import GeoJSON files into Kibana
+</li>
+<li class="listitem">
+Index the files in Elasticsearch
+</li>
+<li class="listitem">
+Display the data in a multi-layer map
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_before_you_begin"></a>Before you begin</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+<p>This tutorial requires you to download the following GeoJSON sample data files.
+These files are good examples of the types
+of vector data that you can upload to Kibana and index in
+Elasticsearch for display in  Maps.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a href="https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson" class="ulink" target="_top">Logan International Airport</a>
+</li>
+<li class="listitem">
+<a href="https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson" class="ulink" target="_top">Bangor International Airport</a>
+</li>
+<li class="listitem">
+<a href="https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/lightning_detected.geojson" class="ulink" target="_top">Lightning detected</a>
+</li>
+<li class="listitem">
+<a href="https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/original_flight_path.geojson" class="ulink" target="_top">Original flight path</a>
+</li>
+<li class="listitem">
+<a href="https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/modified_flight_path.geojson" class="ulink" target="_top">Modified flight path</a>
+</li>
+</ul>
+</div>
+<p>The data represents two real airports, two fictitious flight routes, and
+fictitious lightning reports. You don&#8217;t need to use all of
+these files. Feel free to work with as many files as you&#8217;d like, or use valid GeoJSON
+files of your own.</p>
+<div class="position-relative"><h3 class="xpack"><a id="_create_and_set_up_a_map"></a>Create and set up a map</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a class="xref" href="maps-getting-started.html#maps-create" title="Step 1. Create a map">Create a new map</a>.
+</li>
+<li class="listitem">
+<p>Zoom in on the New England area in the northeast United States.</p>
+<p>You&#8217;re adding flight paths to this area, and this
+sets up the map for a good view of the data.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/fu_gs_new_england_map.png" alt="fu gs new england map">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="upload-and-index-geojson-file"></a>Upload and index GeoJSON files</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+<p>For each GeoJSON file you downloaded, complete the following steps:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+From the list of layer types, click <span class="strong strong"><strong>Upload file</strong></span>.
+</li>
+<li class="listitem">
+<p>Using the File Picker, upload the GeoJSON file.</p>
+<p>Depending on the geometry type of your features, this will
+auto-populate <span class="strong strong"><strong>Index type</strong></span> with either <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-point.html" class="ulink" target="_top">geo_point</a> or
+ <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-shape.html" class="ulink" target="_top">geo_shape</a> and <span class="strong strong"><strong>Index name</strong></span> with
+<code class="literal">&lt;file name&gt;</code>.</p>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Import file</strong></span>.</p>
+<p>You&#8217;ll see activity as the GeoJSON Upload utility creates a new index
+and data view for the data set. When the process is complete, you should
+receive messages that the creation of the new index and data view
+were successful.</p>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+In <span class="strong strong"><strong>Layer settings</strong></span>, adjust settings and <a class="xref" href="maps-vector-style-properties.html" title="Vector style properties">properties</a> as needed.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Keep changes</strong></span>.
+</li>
+<li class="listitem">
+<p>Once you&#8217;ve added all of the sample files,
+<a class="xref" href="maps-getting-started.html#maps-save" title="Step 4. Save the map">save your map</a>.</p>
+<p>At this point, you could consider the map complete,
+but there are a few additions and tweaks that you can make to tell a
+better story with your data.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/fu_gs_flight_paths.png" alt="fu gs flight paths">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_add_a_heatmap_aggregation_layer"></a>Add a heatmap aggregation layer</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+<p>Looking at the <code class="literal">Lightning detected</code> layer, it&#8217;s clear where lightning has
+struck. What&#8217;s less clear, is if there have been more lightning
+strikes in some areas than others, in other words, where the lightning
+hot spots are. An advantage of having indexed
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-point.html" class="ulink" target="_top">geo_point</a> data for the
+lightning strikes is that you can perform aggregations on the data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+<p>From the list of layer types, click <span class="strong strong"><strong>Heat map</strong></span>.</p>
+<p>Because you indexed <code class="literal">lightning_detected.geojson</code> using the index name and
+pattern <code class="literal">lightning_detected</code>, that data is available as a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-point.html" class="ulink" target="_top">geo_point</a>
+aggregation.</p>
+</li>
+<li class="listitem">
+Select <code class="literal">lightning_detected</code>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add layer</strong></span> to add the heat map layer
+"Lightning intensity".</p>
+<p>The remaining default settings are good, but there are a couple of
+settings that you might want to change.</p>
+</li>
+<li class="listitem">
+<p>Play around with the <span class="strong strong"><strong>Layer Style</strong></span> &gt;
+<span class="strong strong"><strong>Color range</strong></span> setting.</p>
+<p>Again the default looks good, but feel free to choose a
+different color range.</p>
+</li>
+<li class="listitem">
+<p>When you&#8217;re finished modifying settings, click <span class="strong strong"><strong>Keep changes</strong></span>.</p>
+<p>With your new lightning heat map layer, your map should look
+like this:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/fu_gs_lightning_intensity.png" alt="fu gs lightning intensity">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_organize_the_layers"></a>Organize the layers</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/indexing-geojson-data-tutorial.asciidoc">edit</a></div>
+<p>Consider ways you might improve the appearance of the final map.
+Small changes in how and when layers are shown can help tell a
+better story with your data. Here are a few final tweaks
+you might make:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Update layer names
+</li>
+<li class="listitem">
+Adjust styles for each layer
+</li>
+<li class="listitem">
+Adjust the layer order
+</li>
+<li class="listitem">
+Decide which layers to show at different zoom levels
+</li>
+</ul>
+</div>
+<p>When you&#8217;ve finished, again be sure to <a class="xref" href="maps-getting-started.html#maps-save" title="Step 4. Save the map">save your work </a>.</p>
+<p>Your final map might look like this:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/fu_gs_final_map.png" alt="fu gs final map">
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-clean-your-data.html">« Clean your data</a>
+</span>
+<span class="next">
+<a href="maps-troubleshooting.html">Troubleshoot Maps »</a>
+</span>
+</div>
+</body>
+</html>

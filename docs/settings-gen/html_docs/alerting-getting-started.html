@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Alerting | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Alerting | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="graph-troubleshooting.html" title="Graph troubleshooting and limitations"/>
+<link rel="next" href="alerting-setup.html" title="Alerting set up"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="graph-troubleshooting.html">« Graph troubleshooting and limitations</a>
+</span>
+<span class="next">
+<a href="alerting-setup.html">Alerting set up »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Alerting</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="alerting-getting-started"></a>Alerting</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p>Alerting enables you to define <em>rules</em>, which detect complex conditions within different Kibana apps and trigger actions when those conditions are met. Alerting is integrated with <a href="https://www.elastic.co/guide/en/observability/master/create-alerts.html" class="ulink" target="_top"><span class="strong strong"><strong>Observability</strong></span></a>, <a href="https://www.elastic.co/guide/en/security/master/prebuilt-rules.html" class="ulink" target="_top"><span class="strong strong"><strong>Security</strong></span></a>, <a class="xref" href="geo-alerting.html" title="Create a tracking containment rule"><span class="strong strong"><strong>Maps</strong></span></a> and <a href="https://www.elastic.co/guide/en/machine-learning/master/ml-configuring-alerts.html" class="ulink" target="_top"><span class="strong strong"><strong>Machine Learning</strong></span></a>. It can be centrally managed from <span class="strong strong"><strong>Stack Management</strong></span> and provides a set of built-in <a class="xref" href="action-types.html" title="Connectors">connectors</a> and <a class="xref" href="rule-types.html#stack-rules" title="Stack rules">rules</a> for you to use.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/alerting-overview.png" alt="Rules UI">
+</div>
+</div>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>To make sure you can access alerting and actions, see the <a class="xref" href="alerting-setup.html#alerting-prerequisites" title="Prerequisites">setup and prerequisites</a> section.</p>
+</div>
+</div>
+<p>Alerting works by running checks on a schedule to detect conditions defined by a rule. When a condition is met, the rule tracks it as an <em>alert</em> and responds by triggering one or more <em>actions</em>.
+Actions typically involve interaction with Kibana services or third party integrations. <em>Connectors</em> enable actions to talk to these services and integrations.
+This section describes all of these elements and how they operate together.</p>
+<div class="position-relative"><h2><a id="_rules"></a>Rules</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>A rule specifies a background task that runs on the Kibana server to check for specific conditions. Kibana provides two types of rules: stack rules that are built into Kibana and the rules that are registered by Kibana apps. For more information, refer to <a class="xref" href="rule-types.html" title="Rule types"><em>Rule types</em></a>.</p>
+<p>A rule consists of three main parts:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<em>Conditions</em>: what needs to be detected?
+</li>
+<li class="listitem">
+<em>Schedule</em>: when/how often should detection checks run?
+</li>
+<li class="listitem">
+<em>Actions</em>: what happens when a condition is detected?
+</li>
+</ul>
+</div>
+<p>For example, when monitoring a set of servers, a rule might:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Check for average CPU usage &gt; 0.9 on each server for the last two minutes (condition).
+</li>
+<li class="listitem">
+Check every minute (schedule).
+</li>
+<li class="listitem">
+Send a warning email message via SMTP with subject <code class="literal">CPU on {{server}} is high</code> (action).
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/what-is-a-rule.svg" alt="Three components of a rule">
+</div>
+</div>
+<p>The following sections describe each part of the rule in more detail.</p>
+<div class="position-relative"><h3><a id="alerting-concepts-conditions"></a>Conditions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>Under the hood, Kibana rules detect conditions by running a JavaScript function on the Kibana server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple Elasticsearch query to heavy computations involving data from multiple sources or external systems.</p>
+<p>These conditions are packaged and exposed as <em>rule types</em>. A rule type hides the underlying details of the condition, and exposes a set of parameters
+to control the details of the conditions to detect.</p>
+<p>For example, an <a class="xref" href="rule-type-index-threshold.html" title="Create an index threshold rule">index threshold rule type</a> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying Elasticsearch query are hidden.</p>
+<p>See <a class="xref" href="rule-types.html" title="Rule types"><em>Rule types</em></a> for the rules provided by Kibana and how they express their conditions.</p>
+<div class="position-relative"><h3><a id="alerting-concepts-scheduling"></a>Schedule</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>Rule schedules are defined as an interval between subsequent checks, and can range from a few seconds to months.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The intervals of rule checks in Kibana are approximate. Their timing is affected by factors such as the frequency at which tasks are claimed and the task load on the system. Refer to <a class="xref" href="alerting-production-considerations.html" title="Alerting production considerations">Alerting production considerations</a> for more information.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="alerting-concepts-actions"></a>Actions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>Actions run as background tasks on the Kibana server when rule conditions are met. Recovery actions likewise run when rule conditions are no longer met. They send notifications by connecting with services inside Kibana or integrating with third-party systems.</p>
+<p>When defining actions in a rule, you specify:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A connector
+</li>
+<li class="listitem">
+An action frequency
+</li>
+<li class="listitem">
+A mapping of rule values to properties exposed for that type of action
+</li>
+</ul>
+</div>
+<p>Rather than repeatedly entering connection information and credentials for each action, Kibana simplifies action setup using <a class="xref" href="action-types.html" title="Connectors">connectors</a>. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector.</p>
+<p>The <em>action frequency</em> defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the <em>action groups</em> that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, set the action frequency to a summary of alerts. You will receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.</p>
+<p>Some types of rules enable you to further refine the conditions under which actions run.
+For example, you can specify that actions run only when an alert occurs within a specific time frame or when it matches a KQL query.</p>
+<p>Each action definition is therefore a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected.</p>
+<p>In the server monitoring example, the <code class="literal">email</code> connector type is used, and <code class="literal">server</code> is mapped to the body of the email, using the template string <code class="literal">CPU on {{server}} is high</code>.</p>
+<p>When the rule detects the condition, it creates an alert containing the details of the condition.</p>
+<div class="position-relative"><h2><a id="alerting-concepts-alerts"></a>Alerts</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>When checking for a condition, a rule might identify multiple occurrences of the condition. Kibana tracks each of these alerts separately. Depending on the action frequency, an action occurs per alert or at the specified alert summary interval.</p>
+<p>Using the server monitoring example, each server with average CPU &gt; 0.9 is tracked as an alert. This means a separate email is sent for each server that exceeds the threshold whenever the alert status changes.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/alerts.svg" alt="Kibana tracks each detected condition as an alert and takes action on each alert">
+</div>
+</div>
+<div class="position-relative"><h2><a id="_putting_it_all_together"></a>Putting it all together</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p>A rule consists of conditions, actions, and a schedule. When conditions are met, alerts are created that render actions and invoke them. To make action setup and update easier, actions use connectors that centralize the information used to connect with Kibana services and third-party integrations. The following example ties these concepts together:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/rule-concepts-summary.svg" alt="Rules" width="connectors" height="alerts and actions work together to convert detection into action">
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Any time a rule&#8217;s conditions are met, an alert is created. This example checks for servers with average CPU &gt; 0.9. Three servers meet the condition, so three alerts are created.
+</li>
+<li class="listitem">
+Alerts create actions according to the action frequency, as long as they are not muted or throttled. When actions are created, its properties are filled with actual values. In this example, three actions are created when the threshold is met, and the template string {{server}} is replaced with the appropriate server name for each alert.
+</li>
+<li class="listitem">
+Kibana runs the actions, sending notifications by using a third party integration like an email service.
+</li>
+<li class="listitem">
+If the third party integration has connection parameters or credentials, Kibana fetches these from the appropriate connector.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="alerting-concepts-differences"></a>Differences from Watcher</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-getting-started.asciidoc">edit</a></div>
+<p><a class="xref" href="watcher-ui.html" title="Watcher">Watcher</a> and the Kibana alerting features are both used to detect
+conditions and can trigger actions in response, but they are completely
+independent alerting systems.</p>
+<p>This section will clarify some of the important differences in the function and
+intent of the two systems.</p>
+<p>Functionally, the alerting features differ in that:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Scheduled checks are run on Kibana instead of Elasticsearch
+</li>
+<li class="listitem">
+Kibana <a class="xref" href="alerting-getting-started.html#alerting-concepts-conditions" title="Conditions">rules hide the details of detecting conditions</a> through rule types, whereas watches provide low-level control over inputs, conditions, and transformations.
+</li>
+<li class="listitem">
+Kibana rules track and persist the state of each detected condition through alerts. This makes it possible to mute and throttle individual alerts, and detect changes in state such as resolution.
+</li>
+<li class="listitem">
+Actions are linked to alerts. Actions are fired for each occurrence of a detected condition, rather than for the entire rule.
+</li>
+</ul>
+</div>
+<p>At a higher level, the alerting features allow rich integrations across use cases like <a class="xref" href="observability.html#apm-app" title="APM"><span class="strong strong"><strong>APM</strong></span></a>, <a class="xref" href="observability.html#metrics-app" title="Metrics"><span class="strong strong"><strong>Metrics</strong></span></a>, <a class="xref" href="xpack-siem.html" title="Elastic Security overview"><span class="strong strong"><strong>Security</strong></span></a>, and <a class="xref" href="observability.html#uptime-app" title="Uptime"><span class="strong strong"><strong>Uptime</strong></span></a>.
+Prepackaged rule types simplify setup and hide the details of complex, domain-specific detections, while providing a consistent interface across Kibana.</p>
+</div>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="graph-troubleshooting.html">« Graph troubleshooting and limitations</a>
+</span>
+<span class="next">
+<a href="alerting-setup.html">Alerting set up »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create saved query API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create saved query API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="osquery-manager-api.html" title="Osquery manager API"/>
+<link rel="prev" href="osquery-manager-saved-queries-api-get-all.html" title="Get saved-queries API"/>
+<link rel="next" href="osquery-manager-saved-queries-api-update.html" title="Update saved query API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="osquery-manager-saved-queries-api-get-all.html">« Get saved-queries API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-saved-queries-api-update.html">Update saved query API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="osquery-manager-api.html">Osquery manager API</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create saved query API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="osquery-manager-saved-queries-api-create"></a>Create saved query API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Create saved queries.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-saved-queries-api-create-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/osquery/saved_queries</code></p>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/osquery/saved_queries</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-saved-queries-api-create-path-params"></a>Path parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">space_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The space identifier. When <code class="literal">space_id</code> is not provided in the URL, the default space is used.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-saved-queries-api-create-body-params"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The saved query name.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">description</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The saved query description.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">platform</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Restricts the query to a specified platform. The default is <em>all</em> platforms. To specify multiple platforms, use commas. For example, <em>linux,darwin</em>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">query</code>
+</span>
+</dt>
+<dd>
+(Required, string) The SQL query you want to run.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">version</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Uses the Osquery versions greater than or equal to the specified version string.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">interval</code>
+</span>
+</dt>
+<dd>
+(Optional, string) An interval, in seconds, on which to run the query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">ecs_mapping</code>
+</span>
+</dt>
+<dd>
+(Optional, object) Maps Osquery results columns or static values to ECS fields.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">timeout</code>
+</span>
+</dt>
+<dd>
+(Optional, number) A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is <code class="literal">60</code>. The maximum supported value is <code class="literal">900</code>.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-saved-queries-api-create-request-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-saved-queries-api-create-example"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/saved-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<p>Create a saved query:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/osquery/saved_queries \
+{
+  "id": "saved_query_id",
+  "description": "Saved query description",
+  "query": "select * from uptime;",
+  "interval": "60",
+  "timeout": 120,
+  "version": "2.8.0",
+  "platform": "linux,darwin",
+  "ecs_mapping": {
+    "host.uptime": {
+      "field": "total_seconds"
+    }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/75.kibana"></div>
+<p>The API returns the saved query object:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+    "data": {...}
+}</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="osquery-manager-saved-queries-api-get-all.html">« Get saved-queries API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-saved-queries-api-update.html">Update saved query API »</a>
+</span>
+</div>
+</body>
+</html>

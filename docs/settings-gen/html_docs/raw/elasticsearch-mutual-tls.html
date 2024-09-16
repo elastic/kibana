@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mutual TLS authentication between Kibana and Elasticsearch | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Mutual TLS authentication between Kibana and Elasticsearch | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="using-kibana-with-security.html" title="Configure security in Kibana"/>
+<link rel="prev" href="kibana-authentication.html" title="Authentication in Kibana"/>
+<link rel="next" href="xpack-security-audit-logging.html" title="Audit logs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-authentication.html">« Authentication in Kibana</a>
+</span>
+<span class="next">
+<a href="xpack-security-audit-logging.html">Audit logs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="using-kibana-with-security.html">Configure security in Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Mutual TLS authentication between Kibana and Elasticsearch</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/securing-communications/elasticsearch-mutual-tls.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="elasticsearch-mutual-tls"></a>Mutual TLS authentication between Kibana and Elasticsearch</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/securing-communications/elasticsearch-mutual-tls.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption
+for data-in-transit. While these terms are often used interchangeably, Kibana
+supports only TLS, which supersedes the old SSL protocols.</p>
+<p>TLS requires X.509 certificates to authenticate the communicating parties and
+perform encryption of data-in-transit. Each certificate contains a public key
+and has and an associated&#8201;&#8212;&#8201;but separate&#8201;&#8212;&#8201;private key; these keys are used
+for cryptographic operations. Kibana supports certificates and private keys in
+PEM or PKCS#12 format.</p>
+<p>In a standard TLS configuration, the server presents a signed certificate to
+authenticate itself to the client. In a mutual TLS configuration, the client
+also presents a signed certificate to authenticate itself to the server.</p>
+<p>Elasticsearch security features are enabled on your cluster by default, so each request
+that Kibana (the client) makes to Elasticsearch (the server) is authenticated. Most
+requests made by end users through Kibana to Elasticsearch are authenticated by using the
+credentials of the logged-in user.</p>
+<p>To <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-stack-security.html#stack-start-with-security" class="ulink" target="_top">enroll Kibana with an Elasticsearch cluster</a>, you pass a generated enrollment token. This token
+configures Kibana to authenticate with Elasticsearch using a
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/service-accounts.html#service-accounts-tokens" class="ulink" target="_top">service account token</a>.
+Kibana also supports mutual TLS authentication with Elasticsearch via a
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/pki-realm.html" class="ulink" target="_top">Public Key Infrastructure (PKI) realm</a>. With this setup,
+Elasticsearch needs to verify the signature on the Kibana client certificate, and it also
+needs to map the client certificate&#8217;s distinguished name (DN) to the appropriate
+<code class="literal">kibana_system</code> role.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Using a PKI realm is a <a href="https://www.elastic.co/subscriptions" class="ulink" target="_top">subscription feature</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="_configure_kibana_and_elasticsearch_to_use_mutual_tls_authentication"></a>Configure Kibana and Elasticsearch to use mutual TLS authentication</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/securing-communications/elasticsearch-mutual-tls.asciidoc">edit</a></div>
+<p>If you haven&#8217;t already, start Kibana and connect it to Elasticsearch using the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/configuring-stack-security.html#stack-start-with-security" class="ulink" target="_top">enrollment token</a>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Obtain a client certificate and private key for Kibana.</p>
+<p>Kibana uses the client certificate and corresponding private key when connecting to Elasticsearch.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This is not the same as the <a class="xref" href="configuring-tls.html#configuring-tls-browser-kib" title="Encrypt traffic between the browser and Kibana">server certificate</a> that Kibana will present to web browsers.</p>
+</div>
+</div>
+<p>You may choose to generate a client certificate and private key using the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/certutil.html" class="ulink" target="_top"><code class="literal">elasticsearch-certutil</code></a> tool. If you followed the Elasticsearch documentation for <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-basic-setup.html#generate-certificates" class="ulink" target="_top">generating the certificates authority</a>, then you already have a certificate authority (CA) to sign
+the Elasticsearch server certificate. You may choose to use the same CA to sign the Kibana
+client certificate. For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">bin/elasticsearch-certutil cert -ca elastic-stack-ca.p12 -name kibana-client -dns &lt;your_kibana_hostname&gt;</pre>
+</div>
+<p>This will generate a client certificate and private key in a PKCS#12 file named <code class="literal">kibana-client.p12</code>. In this example, the client certificate
+has a Common Name (CN) of <code class="literal">"kibana-client"</code> and a subject alternative name (SAN) of <code class="literal">"&lt;your_kibana_hostname&gt;"</code>. The SAN may be required if
+you have hostname verification enabled on Elasticsearch.</p>
+</li>
+<li class="listitem">
+<p>Obtain the certificate authority (CA) certificate chain for Kibana.</p>
+<p>Elasticsearch needs the appropriate CA certificate chain to properly establish trust when receiving connections from Kibana.</p>
+<p>If you followed the instructions to generate a client certificate, then you will have a PKCS#12 file for Kibana. You can extract the CA
+certificate chain from this file. For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">openssl pkcs12 -in kibana-client.p12 -cacerts -nokeys -out kibana-ca.crt</pre>
+</div>
+<p>This will produce a PEM-formatted file named <code class="literal">kibana-ca.crt</code> that contains the CA certificate from the PKCS#12 file.</p>
+</li>
+<li class="listitem">
+<p>Configure Elasticsearch with a PKI realm and a native realm.</p>
+<p>By default, Elasticsearch provides a native realm for authenticating with a username and password. However, to support both a PKI realm (for Kibana)
+and a native realm (for end users), you must configure each realm in <code class="literal">elasticsearch.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.security.authc.realms.pki.realm1.order: 1
+xpack.security.authc.realms.pki.realm1.certificate_authorities: "/path/to/kibana-ca.crt"
+xpack.security.authc.realms.native.realm2.order: 2</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Configure Elasticsearch to request client certificates.</p>
+<p>By default, Elasticsearch will not request a client certificate when establishing a TLS connection. To change this, you must set up optional client
+certificate authentication in <code class="literal">elasticsearch.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.security.http.ssl.client_authentication: "optional"</pre>
+</div>
+</li>
+<li class="listitem">
+Restart Elasticsearch.
+</li>
+<li class="listitem">
+<p>Use Kibana to create a role mapping in Elasticsearch for the client certificate.</p>
+<p>This role mapping will assign the <code class="literal">kibana_system</code> role to any user that matches the included mapping rule, which is set to equal the client
+certificate&#8217;s DN attribute:</p>
+<p class="screenshot"><span class="image"><img src="security/images/mutual-tls-role-mapping.png" alt="Role mapping for the Kibana client certificate"></span></p>
+<p>For more information, see <a class="xref" href="role-mappings.html" title="Role mappings">role mappings</a>.</p>
+</li>
+<li class="listitem">
+<p>Configure Kibana to use the client certificate and private key.</p>
+<p>You need to specify the information required to access your client certificate and corresponding private key.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>If your certificate and private key are contained in a PKCS#12 file:</p>
+<p>Specify your PKCS#12 file in <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">elasticsearch.ssl.keystore.path: "/path/to/kibana-client.p12"</pre>
+</div>
+<p>If your PKCS#12 file is encrypted, add the decryption password to your <a class="xref" href="secure-settings.html" title="Secure settings">Kibana keystore</a>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">bin/kibana-keystore add elasticsearch.ssl.keystore.password</pre>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If your PKCS#12 file isn&#8217;t protected with a password, depending on how it was generated, you may need to set
+<code class="literal">elasticsearch.ssl.keystore.password</code> to an empty string.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Otherwise, if your certificate and private key are in PEM format:</p>
+<p>Specify your certificate and private key in <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">elasticsearch.ssl.certificate: "/path/to/kibana-client.crt"
+elasticsearch.ssl.key: "/path/to/kibana-client.key"</pre>
+</div>
+<p>If your private key is encrypted, add the decryption password to your <a class="xref" href="secure-settings.html" title="Secure settings">Kibana keystore</a>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">bin/kibana-keystore add elasticsearch.ssl.keyPassphrase</pre>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Configure Kibana <em>not</em> to use a username and password for Elasticsearch.</p>
+<p>You must remove the <code class="literal">elasticsearch.username</code> and <code class="literal">elasticsearch.password</code> settings from <code class="literal">kibana.yml</code>. If these are present, Kibana will
+attempt to use them to authenticate to Elasticsearch via the native realm.</p>
+</li>
+<li class="listitem">
+Restart Kibana.
+</li>
+</ol>
+</div>
+<p>These steps enable Kibana to authenticate to Elasticsearch using a certificate. However, end users will only be able to authenticate to
+Kibana with a username and password. To allow end users to authenticate to Kibana using a client certificate, see <a class="xref" href="kibana-authentication.html#pki-authentication" title="Public key infrastructure (PKI) authentication">Kibana
+PKI authentication</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-authentication.html">« Authentication in Kibana</a>
+</span>
+<span class="next">
+<a href="xpack-security-audit-logging.html">Audit logs »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tines connector | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Tines connector | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="thehive-action-type.html" title="TheHive connector and action"/>
+<link rel="next" href="torq-action-type.html" title="Torq connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="thehive-action-type.html">« TheHive connector and action</a>
+</span>
+<span class="next">
+<a href="torq-action-type.html">Torq connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Tines connector</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="tines-action-type"></a>Tines connector</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Tines connector uses Tines&#8217;s <a href="https://www.tines.com/docs/actions/types/webhook" class="ulink" target="_top">Webhook actions</a> to send events via POST request.</p>
+<div class="position-relative"><h4><a id="define-tines-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>
+or as needed when you&#8217;re creating a rule. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/tines-connector.png" alt="Tines connector">
+</div>
+</div>
+<div class="position-relative"><h5><a id="tines-connector-configuration"></a>Connector configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>Tines connectors have the following configuration properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+URL
+</span>
+</dt>
+<dd>
+The Tines tenant URL. If you are using the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.allowedHosts</code></a> setting, make sure the hostname is added to the allowed hosts.
+</dd>
+<dt>
+<span class="term">
+Email
+</span>
+</dt>
+<dd>
+The email used to sign in to Tines.
+</dd>
+<dt>
+<span class="term">
+API Token
+</span>
+</dt>
+<dd>
+A Tines API token created by the user. For more information, refer to the <a href="https://www.tines.com/api/authentication#generate-api-token" class="ulink" target="_top">Tines documentation</a>.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="tines-action-parameters"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>You can test connectors as you&#8217;re creating or editing the connector in Kibana. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/tines-params-test.png" alt="Tines params test">
+</div>
+</div>
+<p>If you create a rule action that uses the Tines connector, you can likewise configure the POST request that is sent to the Tines webhook action when the rule conditions are met.</p>
+<div class="position-relative"><h5><a id="webhookUrlFallback-tines-configuration"></a>Webhook URL fallback</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>It is possible that requests to the Tines API to get the stories and webhooks for the selectors hit the 500 results limit. In this scenario, the webhook URL fallback text field will be displayed.
+You can still use the selectors if the story or webhook exists in the 500 options loaded. Otherwise, you can paste the webhook URL in the test input field; it can be copied from the Tines webhook configuration.</p>
+<p>When the webhook URL is defined, the connector will use it directly when an action runs, and the story and webhook selectors will be disabled and ignored. To re-enable the story and webhook selectors, remove the webhook URL value.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/tines-webhook-url-fallback.png" alt="Tines Webhook URL fallback">
+</div>
+</div>
+<div class="position-relative"><h4><a id="tines-story-library"></a>Tines story library</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library.
+They can be found by searching for "Elastic" in the <a href="https://www.tines.com/story-library?s=elastic" class="ulink" target="_top">Tines Story library</a>:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/tines_elastic_stories.png" alt="Tines Elastic stories">
+</div>
+</div>
+<p>They can be imported directly into your Tines tenant.</p>
+<div class="position-relative"><h4><a id="tines-format"></a>Format</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/tines.asciidoc">edit</a></div>
+<p>Tines connector will send the data in JSON format.</p>
+<p>The message contains fields such as <code class="literal">alertId</code>, <code class="literal">date</code>, <code class="literal">_index</code>, <code class="literal">kibanaBaseUrl</code>, along with the <code class="literal">rule</code> and <code class="literal">params</code> objects.</p>
+<p>The number of alerts (signals) can be found at <code class="literal">state.signals_count</code>.</p>
+<p>The alerts (signals) data is stored in the <code class="literal">context.alerts</code> array, following the <a href="https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html" class="ulink" target="_top">ECS</a> format.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="thehive-action-type.html">« TheHive connector and action</a>
+</span>
+<span class="next">
+<a href="torq-action-type.html">Torq connector and action »</a>
+</span>
+</div>
+</body>
+</html>

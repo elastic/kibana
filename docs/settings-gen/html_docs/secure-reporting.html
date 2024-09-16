@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Configure reporting in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Configure reporting in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="setup.html" title="Set up"/>
+<link rel="prev" href="xpack-security-secure-saved-objects.html" title="Secure saved objects"/>
+<link rel="next" href="logging-configuration.html" title="Configure logging"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="xpack-security-secure-saved-objects.html">« Secure saved objects</a>
+</span>
+<span class="next">
+<a href="logging-configuration.html">Configure logging »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Configure reporting in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="secure-reporting"></a>Configure reporting in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>For security, you grant users access to the reporting features and secure the reporting endpoints
+with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system
+to enable the Kibana server to have screenshotting capabilities.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#grant-user-access" title="Grant users access to reporting">Grant users access to reporting</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#reporting-roles-user-api" title="Grant access with the role API">Grant access with the role API</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#grant-user-access-basic" title="Grant users access with a Basic license">Grant users access with a Basic license</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#grant-user-access-external-provider" title="Grant access using an external provider">Grant access using an external provider</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#securing-reporting" title="Secure the reporting endpoints">Secure the reporting endpoints</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#install-reporting-packages" title="Install the dependencies for the headless browser">Install the dependencies for the headless browser</a>
+</li>
+<li class="listitem">
+<a class="xref" href="secure-reporting.html#set-reporting-server-host" title="Set the server.host for the headless browser">Set the <code class="literal">server.host</code> for the headless browser</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="grant-user-access"></a>Grant users access to reporting</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>When security is enabled, you grant users access to reporting features with <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana application privileges</a>, which allow you to create custom roles that control the spaces and applications where users generate reports.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Enable application privileges in Reporting. To enable, turn off the default user access control features in <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.reporting.roles.enabled: false</pre>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is <code class="literal">reporting_user</code>. This behavior is being deprecated and does not allow application-level access controls for reporting features, and does not allow API keys or authentication tokens to authorize report generation. Refer to <a class="xref" href="reporting-settings-kb.html#reporting-advanced-settings" title="Security settings">reporting security settings</a> for information and caveats about the deprecated access control features.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Create the reporting role.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Roles &gt; Create role</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Specify the role settings.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Role name</strong></span>. For example, <code class="literal">custom_reporting_user</code>.
+</li>
+<li class="listitem">
+<p>Specify the <span class="strong strong"><strong>Indices</strong></span> and <span class="strong strong"><strong>Privileges</strong></span>.</p>
+<p>Access to data is an index-level privilege. For each index that contains the data you want to include in reports, add a line, then give each index <code class="literal">read</code> and <code class="literal">view_index_metadata</code> privileges.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you use index aliases, you must also grant <code class="literal">read</code> and <code class="literal">view_index_metadata</code> privileges to underlying indices to generate CSV reports.</p>
+</div>
+</div>
+<p>For more information, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-privileges.html" class="ulink" target="_top">Security privileges</a>.</p>
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Add the Kibana privileges.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add Kibana privilege</strong></span>.
+</li>
+<li class="listitem">
+Select one or more <span class="strong strong"><strong>Spaces</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Customize</strong></span>, then click <span class="strong strong"><strong>Analytics</strong></span>.
+</li>
+<li class="listitem">
+<p>For each application, select <span class="strong strong"><strong>All</strong></span>, or to customize the privileges, select <span class="strong strong"><strong>Read</strong></span> and <span class="strong strong"><strong>Customize sub-feature privileges</strong></span>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you have a Basic license, sub-feature privileges are unavailable. For details, check out <a class="xref" href="secure-reporting.html#grant-user-access-basic" title="Grant users access with a Basic license">Grant users access with a Basic license</a>.</p>
+</div>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/reporting/images/kibana-privileges-with-reporting.png" alt="Kibana privileges with Reporting options, Gold or higher license">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If the <span class="strong strong"><strong>Reporting</strong></span> options for application features are unavailable, and the cluster license is higher than Basic, contact your administrator, or <a class="xref" href="reporting-settings-kb.html#reporting-advanced-settings" title="Security settings">check that <code class="literal">xpack.reporting.roles.enabled</code> is set to <code class="literal">false</code> in kibana.yml</a>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add Kibana privilege</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create role</strong></span>.
+</li>
+<li class="listitem">
+<p>Assign the reporting role to a user.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Users</strong></span>, then click the user you want to assign the reporting role to.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Roles</strong></span> dropdown, select <span class="strong strong"><strong>custom_reporting_user</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Update user</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<p>Granting the privilege to generate reports also grants the user the privilege to view their reports in <span class="strong strong"><strong>Stack Management &gt; Reporting</strong></span>. Users can only access their own reports.</p>
+<div class="position-relative"><h4><a id="reporting-roles-user-api"></a>Grant access with the role API</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>With <a class="xref" href="secure-reporting.html#grant-user-access" title="Grant users access to reporting">Kibana application privileges</a> enabled in Reporting, you can also use the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-put-role.html" class="ulink" target="_top">role API</a> to grant access to the reporting features, using <span class="strong strong"><strong>All</strong></span> privileges, or sub-feature privileges.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This <a href="https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html" class="ulink" target="_top">API request</a> needs to be executed against the <a href="https://www.elastic.co/guide/en/kibana/current/api.html" class="ulink" target="_top">Kibana API endpoint</a>.</p>
+</div>
+</div>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">PUT &lt;kibana host&gt;:&lt;port&gt;/api/security/role/custom_reporting_user
+{
+	"elasticsearch": {
+		"cluster": [],
+		"indices": [],
+		"run_as": []
+	},
+	"kibana": [{
+		"spaces": ["*"],
+		"base": [],
+		"feature": {
+			"dashboard": ["generate_report",  <a id="CO6-1"></a><i class="conum" data-value="1"></i>
+      "download_csv_report"], <a id="CO6-2"></a><i class="conum" data-value="2"></i>
+      "discover": ["generate_report"], <a id="CO6-3"></a><i class="conum" data-value="3"></i>
+			"canvas": ["generate_report"], <a id="CO6-4"></a><i class="conum" data-value="4"></i>
+			"visualize": ["generate_report"] <a id="CO6-5"></a><i class="conum" data-value="5"></i>
+		}
+	}]
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/8.console"></div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO6-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate PNG and PDF reports in <span class="strong strong"><strong>Dashboard</strong></span>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO6-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate CSV reports from saved search panels in <span class="strong strong"><strong>Dashboard</strong></span>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO6-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate CSV reports from saved searches in <span class="strong strong"><strong>Discover</strong></span>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO6-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate PDF reports in <span class="strong strong"><strong>Canvas</strong></span>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO6-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate PNG and PDF reports in <span class="strong strong"><strong>Visualize Library</strong></span>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h3><a id="grant-user-access-basic"></a>Grant users access with a Basic license</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>With a Basic license, you can grant users access with custom roles to reporting features with <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana application privileges</a>. However, with a Basic license, sub-feature privileges are unavailable. <a class="xref" href="secure-reporting.html#grant-user-access" title="Grant users access to reporting">Create a role</a>, then select <span class="strong strong"><strong>All</strong></span> privileges for the applications where users can create reports.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/reporting/images/kibana-privileges-with-reporting-basic.png" alt="Kibana privileges with Reporting options, Basic license">
+</div>
+</div>
+<p>With a Basic license, sub-feature application privileges are unavailable, but you can use the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-put-role.html" class="ulink" target="_top">role API</a> to grant access to CSV reporting features:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">PUT localhost:5601/api/security/role/custom_reporting_user
+{
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": [ "all" ], <a id="CO7-1"></a><i class="conum" data-value="1"></i>
+        "discover": [ "all" ], <a id="CO7-2"></a><i class="conum" data-value="2"></i>
+      },
+      "spaces": [ "*" ]
+    }
+  ],
+  "metadata": {} // optional
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/9.console"></div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO7-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate CSV reports from saved searches in <span class="strong strong"><strong>Discover</strong></span>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO7-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Grants access to generate CSV reports from saved search panels in <span class="strong strong"><strong>Dashboard</strong></span>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h4><a id="grant-user-access-external-provider"></a>Grant access using an external provider</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>If you are using an external identity provider, such as LDAP or Active Directory, you can assign roles to individual users or groups of users. Role mappings are configured in <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/mapping-roles.html" class="ulink" target="_top"><code class="literal">config/role_mapping.yml</code></a>.</p>
+<p>For example, assign the <code class="literal">kibana_admin</code> and <code class="literal">reporting_user</code> roles to the Bill Murray user:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">kibana_admin:
+  - "cn=Bill Murray,dc=example,dc=com"
+reporting_user:
+  - "cn=Bill Murray,dc=example,dc=com"</pre>
+</div>
+<div class="position-relative"><h3><a id="securing-reporting"></a>Secure the reporting endpoints</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>To automatically generate reports with Watcher, you must configure Watcher to trust the Kibana server certificate.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Enable Elastic Stack security features on your Elasticsearch cluster. For more information, see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-getting-started.html" class="ulink" target="_top">Getting started with security</a>.
+</li>
+<li class="listitem">
+Configure TLS/SSL encryption for the Kibana server. For more information, see <a class="xref" href="configuring-tls.html" title="Encrypt TLS communications in Kibana"><em>Encrypt TLS communications in Kibana</em></a>.
+</li>
+<li class="listitem">
+<p>Specify the Kibana server CA certificate chain in <code class="literal">elasticsearch.yml</code>:</p>
+<p>If you are using your own CA to sign the Kibana server certificate, then you need to specify the CA certificate chain in Elasticsearch to properly establish trust in TLS connections between Watcher and Kibana. If your CA certificate chain is contained in a PKCS #12 trust store, specify it like so:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"</pre>
+</div>
+<p>Otherwise, if your CA certificate chain is in PEM format, specify it like so:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]</pre>
+</div>
+<p>For more information, see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/notification-settings.html#ssl-notification-settings" class="ulink" target="_top">the Watcher HTTP TLS/SSL Settings</a>.</p>
+</li>
+<li class="listitem">
+<p>Add one or more users who have access to the reporting features.</p>
+<p>Once you&#8217;ve enabled SSL for Kibana, all requests to the reporting endpoints must include valid credentials.</p>
+</li>
+</ol>
+</div>
+<p>For more information on sharing reports, direct links, and more, refer to <a class="xref" href="reporting-getting-started.html" title="Reporting and sharing">Reporting and sharing</a>.</p>
+<div class="position-relative"><h3><a id="install-reporting-packages"></a>Install the dependencies for the headless browser</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>If using PNG/PDF reporting features, make sure the Kibana server operating system has the appropriate packages installed for the distribution.</p>
+<p>If you are using RHEL operating systems, install the following packages:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">xorg-x11-fonts-100dpi</code>
+</li>
+<li class="listitem">
+<code class="literal">xorg-x11-fonts-75dpi</code>
+</li>
+<li class="listitem">
+<code class="literal">xorg-x11-utils</code>
+</li>
+<li class="listitem">
+<code class="literal">xorg-x11-fonts-cyrillic</code>
+</li>
+<li class="listitem">
+<code class="literal">xorg-x11-fonts-Type1</code>
+</li>
+<li class="listitem">
+<code class="literal">xorg-x11-fonts-misc</code>
+</li>
+<li class="listitem">
+<code class="literal">vlgothic-fonts</code>
+</li>
+<li class="listitem">
+<code class="literal">fontconfig</code>
+</li>
+<li class="listitem">
+<code class="literal">freetype</code>
+</li>
+</ul>
+</div>
+<p>If you are using Ubuntu/Debian systems, install the following packages:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">fonts-liberation</code>
+</li>
+<li class="listitem">
+<code class="literal">libfontconfig1</code>
+</li>
+<li class="listitem">
+<code class="literal">libnss3</code>
+</li>
+</ul>
+</div>
+<p>The screenshotting plugin used for {reporting-features} has a built-in utility to check for common issues, such as missing dependencies. See
+<a class="xref" href="reporting-troubleshooting-pdf.html#reporting-diagnostics" title="Reporting diagnostics">Reporting diagnostics</a> for more information.</p>
+<div class="position-relative"><h3><a id="set-reporting-server-host"></a>Set the <code class="literal">server.host</code> for the headless browser</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-reporting.asciidoc">edit</a></div>
+<p>If using PNG/PDF reporting features in a production environment, it is preferred to use the setting of
+<code class="literal">server.host: 0.0.0.0</code> in the <code class="literal">kibana.yml</code> configuration file. This allows the headless browser used for
+PDF/PNG reporting to reach Kibana over a local interface, while also allowing the Kibana server to listen on
+outward-facing network interfaces, as it makes the Kibana server accessible from any network interface on the
+machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
+address.</p>
+<p>For the most reliable configuration of PDF/PNG reporting features, consider installing Kibana using <a class="xref" href="docker.html" title="Install Kibana with Docker">Docker</a>, or
+using <a class="xref" href="get-started.html#set-up-on-cloud" title="Set up on cloud">Elastic Cloud</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xpack-security-secure-saved-objects.html">« Secure saved objects</a>
+</span>
+<span class="next">
+<a href="logging-configuration.html">Configure logging »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

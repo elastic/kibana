@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ES|QL | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="ES|QL | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-concepts-analysts.html" title="Kibana concepts"/>
+<link rel="prev" href="set-time-filter.html" title="Set the time range"/>
+<link rel="next" href="kuery-query.html" title="Kibana Query Language"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="set-time-filter.html">« Set the time range</a>
+</span>
+<span class="next">
+<a href="kuery-query.html">Kibana Query Language »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-concepts-analysts.html">Kibana concepts</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>ES|QL</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/esql.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="esql"></a>ES|QL</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/esql.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Elasticsearch Query Language, ES|QL, makes it faster and easier to explore your data.</p>
+<p>ES|QL is a piped language which allows you to chain together multiple commands to query your data.
+Based on the query, Lens suggestions in Discover create a visualization of the query results.</p>
+<p>ES|QL comes with its own dedicated ES|QL Compute Engine for greater efficiency. With one query you can search, aggregate, calculate and perform data transformations without leaving <span class="strong strong"><strong>Discover</strong></span>. Write your query directly in <span class="strong strong"><strong>Discover</strong></span> or use the <span class="strong strong"><strong>Dev Tools</strong></span> with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-rest.html" class="ulink" target="_top">ES|QL API</a>.</p>
+<p>Here&#8217;s how to use ES|QL in the data view selector in <span class="strong strong"><strong>Discover</strong></span>:</p>
+<p class="screenshot"><span class="image"><img src="images/esql-data-view-menu.png" alt="An image of the Discover UI where users can access the ES|QL feature" width="30%"></span></p>
+<p>ES|QL also features in-app help, so you can get started faster and don&#8217;t have to leave the application to check syntax.</p>
+<p class="screenshot"><span class="image"><img src="images/esql-in-app-help.png" alt="An image of the Discover UI where users can browse the in-app help"></span></p>
+<p>You can also use ES|QL queries to create panels on your dashboards, create enrich policies, and create alerting rules.</p>
+<p>For more detailed information about ES|QL in Kibana, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-kibana.html" class="ulink" target="_top">Using ES|QL in Kibana</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>ES|QL is enabled by default in Kibana. It can be
+disabled using the <code class="literal">enableESQL</code> setting from the
+<a href="https://www.elastic.co/guide/en/kibana/master/advanced-options.html" class="ulink" target="_top">Advanced Settings</a>.</p>
+<p>This will hide the ES|QL user interface from various applications.
+However, users will be able to access existing ES|QL artifacts like saved searches and visualizations.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="esql-observability"></a>Observability</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/esql.asciidoc">edit</a></div>
+<p>ES|QL makes it much easier to analyze metrics, logs and traces from a single query. Find performance issues fast by defining fields on the fly, enriching data with lookups, and using simultaneous query processing. Combining ES|QL with machine learning and AiOps can improve detection accuracy and use aggregated value thresholds.</p>
+<div class="position-relative"><h4><a id="esql-security"></a>Security</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/esql.asciidoc">edit</a></div>
+<p>Use ES|QL to retrieve important information for investigation by using lookups. Enrich data and create new fields on the go to gain valuable insight for faster decision-making and actions. For example, perform a lookup on an IP address to identify its geographical location, its association with known malicious entities, or whether it belongs to a known cloud service provider all from one search bar. ES|QL ensures more accurate alerts by incorporating aggregated values in detection rules.</p>
+<div class="position-relative"><h4><a id="esql-whats-next"></a>What&#8217;s next?</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/concepts/esql.asciidoc">edit</a></div>
+<p>The main documentation for ES|QL lives in the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html" class="ulink" target="_top">Elasticsearch docs</a>.</p>
+<p>We also have a short tutorial in the <span class="strong strong"><strong>Discover</strong></span> docs: <a class="xref" href="try-esql.html" title="Using ES|QL">Using ES|QL</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="set-time-filter.html">« Set the time range</a>
+</span>
+<span class="next">
+<a href="kuery-query.html">Kibana Query Language »</a>
+</span>
+</div>
+</body>
+</html>

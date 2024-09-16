@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PagerDuty connector and action | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="PagerDuty connector and action | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="opsgenie-action-type.html" title="Opsgenie connector and action"/>
+<link rel="next" href="sentinelone-action-type.html" title="SentinelOne connector"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="opsgenie-action-type.html">« Opsgenie connector and action</a>
+</span>
+<span class="next">
+<a href="sentinelone-action-type.html">SentinelOne connector »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>PagerDuty connector and action</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="pagerduty-action-type"></a>PagerDuty connector and action</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The PagerDuty connector enables you to trigger, acknowledge, and resolve PagerDuty alerts.
+In particular, it uses the <a href="https://v2.developer.pagerduty.com/docs/events-api-v2" class="ulink" target="_top">v2 Events API</a>.</p>
+<p>To create this connector, you must have a valid PagerDuty integration key.
+For configuration tips, refer to <a class="xref" href="pagerduty-action-type.html#configuring-pagerduty" title="Configure PagerDuty">Configure PagerDuty</a></p>
+<div class="position-relative"><h4><a id="define-pagerduty-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>
+or as needed when you&#8217;re creating a rule. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/pagerduty-connector.png" alt="PagerDuty connector">
+</div>
+</div>
+<div class="position-relative"><h5><a id="pagerduty-connector-configuration"></a>Connector configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>PagerDuty connectors have the following configuration properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+API URL
+</span>
+</dt>
+<dd>
+An optional PagerDuty event URL.
+Defaults to <code class="literal">https://events.pagerduty.com/v2/enqueue</code>.
+If you are using the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.allowedHosts</code></a> setting, make sure the hostname is added to the allowed hosts.
+</dd>
+<dt>
+<span class="term">
+Integration key
+</span>
+</dt>
+<dd>
+A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
+</dd>
+<dt>
+<span class="term">
+Name
+</span>
+</dt>
+<dd>
+The name of the connector.
+The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="pagerduty-action-configuration"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>After you create a connector, use the <span class="strong strong"><strong>Test</strong></span> tab to test its actions:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="pagerduty-action-type.html#pagerduty-action-resolve" title="Resolve action">Acknowledge</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pagerduty-action-type.html#pagerduty-action-resolve" title="Resolve action">Resolve</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pagerduty-action-type.html#pagerduty-action-trigger" title="Trigger action">Trigger</a>
+</li>
+</ul>
+</div>
+<p>When you create a rule that uses a PagerDuty connector, you can use any of these types of actions.
+Rule recovery actions also support all types.</p>
+<div class="position-relative"><h5><a id="pagerduty-action-acknowledge"></a>Acknowledge action</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>When you test the acknowlege action, you must provide the de-duplication key for a PagerDuty alert:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/pagerduty-acknowledge-test.png" alt="PagerDuty params test">
+</div>
+</div>
+<div class="position-relative"><h5><a id="pagerduty-action-resolve"></a>Resolve action</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>Likewise when you test the resolve action, you must provide the de-duplication key:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/pagerduty-resolve-test.png" alt="PagerDuty params test">
+</div>
+</div>
+<div class="position-relative"><h5><a id="pagerduty-action-trigger"></a>Trigger action</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>When you test the trigger action, you must provide a summary for the PagerDuty alert:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/pagerduty-trigger-test.png" alt="PagerDuty params test">
+</div>
+</div>
+<p>This action has the following properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Class
+</span>
+</dt>
+<dd>
+An optional value indicating the class/type of the event, for example <code class="literal">ping failure</code> or <code class="literal">cpu load</code>.
+</dd>
+<dt>
+<span class="term">
+Component
+</span>
+</dt>
+<dd>
+An optional value indicating the component of the source machine that is responsible for the event, for example <code class="literal">mysql</code> or <code class="literal">eth0</code>.
+</dd>
+<dt>
+<span class="term">
+Custom details
+</span>
+</dt>
+<dd>
+An optional set of additional details to add to the event.
+</dd>
+<dt>
+<span class="term">
+DedupKey
+</span>
+</dt>
+<dd>
+<p>
+All actions sharing this key will be associated with the same PagerDuty alert.
+This value is used to correlate trigger and resolution.
+This value is optional, and if not set, defaults to <code class="literal">&lt;rule ID&gt;:&lt;alert ID&gt;</code>.
+The maximum length is 255 characters. See <a href="https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication" class="ulink" target="_top">alert deduplication</a> for details.
+</p>
+<p>By default, when you create rules that use the PagerDuty connector, the de-duplication key is used to create a new PagerDuty incident for each alert and reuse the incident when a recovered alert reactivates.</p>
+</dd>
+<dt>
+<span class="term">
+Event action
+</span>
+</dt>
+<dd>
+One of <code class="literal">Trigger</code> (default), <code class="literal">Resolve</code>, or <code class="literal">Acknowledge</code>.
+See <a href="https://v2.developer.pagerduty.com/docs/events-api-v2#event-action" class="ulink" target="_top">event action</a> for more details.
+</dd>
+<dt>
+<span class="term">
+Group
+</span>
+</dt>
+<dd>
+An optional value indicating the logical grouping of components of a service, for example <code class="literal">app-stack</code>.
+</dd>
+<dt>
+<span class="term">
+Links
+</span>
+</dt>
+<dd>
+An optional list of links to add to the event.
+You must provide a URL and plain text description for each link.
+</dd>
+<dt>
+<span class="term">
+Severity
+</span>
+</dt>
+<dd>
+The perceived severity of on the affected system.
+This can be one of <code class="literal">Critical</code>, <code class="literal">Error</code>, <code class="literal">Warning</code> or <code class="literal">Info</code>(default).
+</dd>
+<dt>
+<span class="term">
+Source
+</span>
+</dt>
+<dd>
+An optional value indicating the affected system, preferably a hostname or fully qualified domain name.
+Defaults to the Kibana saved object id of the action.
+</dd>
+<dt>
+<span class="term">
+Summary
+</span>
+</dt>
+<dd>
+An optional text summary of the event, defaults to <code class="literal">No summary provided</code>.
+The maximum length is 1024 characters.
+</dd>
+<dt>
+<span class="term">
+Timestamp
+</span>
+</dt>
+<dd>
+An optional <a href="https://v2.developer.pagerduty.com/v2/docs/types#datetime" class="ulink" target="_top">ISO-8601 format date-time</a>, indicating the time the event was detected or generated.
+</dd>
+</dl>
+</div>
+<p>For more details on these properties, see <a href="https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2" class="ulink" target="_top">PagerDuty v2 event parameters</a>.</p>
+<div class="position-relative"><h4><a id="pagerduty-connector-networking-configuration"></a>Connector networking configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">Action configuration settings</a> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use <code class="literal">xpack.actions.customHostSettings</code> to set per-host configurations.</p>
+<div class="position-relative"><h4><a id="configuring-pagerduty"></a>Configure PagerDuty</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/pagerduty.asciidoc">edit</a></div>
+<p>By integrating PagerDuty with rules, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Route your rules to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
+</li>
+<li class="listitem">
+Automatically generate incidents of different types and severity based on each rule&#8217;s context.
+</li>
+<li class="listitem">
+Tailor the incident data to match your needs by easily passing the rule context from Kibana to PagerDuty.
+</li>
+</ul>
+</div>
+<p><a id="pagerduty-in-pagerduty"></a>To set up PagerDuty:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the <span class="strong strong"><strong>Configuration</strong></span> menu, select <span class="strong strong"><strong>Services</strong></span>.
+</li>
+<li class="listitem">
+<p>Add an integration to a service:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you are adding your integration to an existing service,
+click the name of the service you want to add the integration to.
+Then, select the <span class="strong strong"><strong>Integrations</strong></span> tab and click the <span class="strong strong"><strong>New Integration</strong></span> button.
+</li>
+<li class="listitem">
+If you are creating a new service for your integration,
+go to
+<a href="https://support.pagerduty.com/docs/services-and-integrations#section-configuring-services-and-integrations" class="ulink" target="_top">Configuring Services and Integrations</a>
+and follow the steps outlined in the <span class="strong strong"><strong>Create a New Service</strong></span> section, selecting <span class="strong strong"><strong>Elastic Alerts</strong></span> as the <span class="strong strong"><strong>Integration Type</strong></span>.
+Continue with the connector creation in Kibana after you have finished these steps.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Enter an <span class="strong strong"><strong>Integration Name</strong></span> in the format Elastic-service-name (for example, Elastic-Alerting or Kibana-APM-Alerting)
+and select <span class="strong strong"><strong>Elastic Alerts</strong></span> from the <span class="strong strong"><strong>Integration Type</strong></span> menu.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add Integration</strong></span> to save your new integration.</p>
+<p>You will be redirected to the <span class="strong strong"><strong>Integrations</strong></span> tab for your service. An Integration Key is generated on this screen.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/pagerduty-integration.png" alt="PagerDuty Integrations tab">
+</div>
+</div>
+</li>
+<li class="listitem">
+Save this key for use when you configure the connector in Kibana.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="opsgenie-action-type.html">« Opsgenie connector and action</a>
+</span>
+<span class="next">
+<a href="sentinelone-action-type.html">SentinelOne connector »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.8.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.8.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.8.1.html" title="Kibana 8.8.1"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.8.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.8.1.html">« Kibana 8.8.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.8.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.8.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.8.0"></a>Kibana 8.8.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the following information about the Kibana 8.8.0 release.</p>
+<div class="position-relative"><h3><a id="known-issues-8.8.0"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details>
+<summary class="title">Kibana can run out of memory during an upgrade when there are many Fleet agent policies.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Due to a schema version update, during Fleet setup in 8.8.x, all agent policies are being queried and deployed.
+This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
+there is an increase in Kibana&#8217;s resident memory usage (RSS).</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Because the default batch size of <code class="literal">100</code> for schema version upgrade of Fleet agent policies is too high, this can
+cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each.</p>
+<p><span class="strong strong"><strong>Workaround</strong></span><br>
+Two workaround options are available:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
+</li>
+<li class="listitem">
+Set <code class="literal">xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize</code> to <code class="literal">2</code> in the <code class="literal">kibana.yml</code> and restart the Kibana instance(s).
+</li>
+</ul>
+</div>
+<p>In 8.9.0, we are addressing this by changing the default batch size to <code class="literal">2</code>.</p>
+</div>
+</details>
+<details>
+<summary class="title">Failed upgrades to 8.8.0 can cause bootlooping and data loss</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The 8.8.0 release splits the <code class="literal">.kibana</code> index into multiple saved object indices. If an upgrade to 8.8.0 partially succeeds, but not all the indices are created successfully, Kibana may be unable to successfully complete the upgrade on the next restart.</p>
+<p>This can result in a loss of saved objects during the upgrade. This can also leave Kibana in a bootlooping state where it&#8217;s unable to start due to <code class="literal">write_blocked</code> indices.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+The 8.8.1 release includes in <a href="https://github.com/elastic/kibana/pull/158940" class="ulink" target="_top">a fix</a> for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the <a href="https://github.com/elastic/kibana/issues/158733" class="ulink" target="_top">related issue</a>.</p>
+</div>
+</details>
+<details>
+<summary class="title">Memory leak in Fleet audit logging.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Fleet introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of Fleet audit logging that can result in poor Kibana performance, and in some cases Kibana instances being terminated by the OS kernel&#8217;s oom-killer. This memory leak can occur even when Kibana audit logging is not explicitly enabled (regardless of whether <code class="literal">xpack.security.audit.enabled</code> is set in the <code class="literal">kibana.yml</code> settings file).</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+The version 8.8.2 release includes in <a href="https://github.com/elastic/kibana/pull/159807" class="ulink" target="_top">a fix</a> for this problem. If you are using Fleet integrations
+and Kibana audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.</p>
+</div>
+</details>
+<details>
+<summary class="title">Monitors in Synthetics may stop running</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in <a href="https://github.com/elastic/kibana/pull/155203" class="ulink" target="_top">#155203</a> when a user with <a href="https://www.elastic.co/guide/en/observability/8.8/synthetics-role-setup.html" class="ulink" target="_top">sufficient privileges</a> visits this page for the first time after upgrading to 8.8.0.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+All monitors configured to run on Elastic&#8217;s global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.</p>
+</div>
+</details>
+<details>
+<summary class="title">Network throttling disabled for browser monitors in Synthetics</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Network throttling has been temporarily disabled for browser-based Synthetics monitors running on Elastic&#8217;s global managed testing infrastructure and private locations. This will be enabled again at some point in the future. We&#8217;re providing frequent updates on this issue in <a href="https://github.com/elastic/synthetics/blob/main/docs/throttling.md" class="ulink" target="_top">this document</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+With network throttling being disabled, your monitors may run more quickly (i.e. have a lower duration) than you observed previously and than when network throttling is enabled again in the future. No monitor configurations have been changed, but the network throttling settings are ignored at the moment.</p>
+</div>
+</details>
+<details>
+<summary class="title">Alert failures when migrating to 8.8.0 from 8.6 or earlier</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+If a cluster meets all of the following conditions, its Elastic Security and Observability rules will fail and no actions will be sent:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The Elastic Security and Observability rules were created in version 8.6 or earlier releases.
+</li>
+<li class="listitem">
+There must be an <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/index-templates.html" class="ulink" target="_top">index template</a> (for any index) that isn&#8217;t composed of component templates.
+</li>
+</ul>
+</div>
+<p>The following error messages in the Kibana log occur when Kibana starts or when the rules run:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">Error installing component template .alerts-ecs-mappings - Cannot read properties of undefined (reading 'includes')
+
+Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - Failure during installation. Cannot read properties of undefined (reading 'includes')</pre>
+</div>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.</p>
+</div>
+</details>
+<details>
+<summary class="title">Incorrect attachments are added to cases</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+When you attach machine learning visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the <span class="strong strong"><strong>Activity</strong></span> tab.
+For these attachments, a bug was introduced in 8.8.0:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+If you add two different attachments on a case, the view will be the same for both.
+</li>
+<li class="listitem">
+If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+</li>
+</ol>
+</div>
+<p>Alerts are not affected.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="breaking-changes-8.8.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.8.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-155470">
+<summary class="title">Removes legacy project monitor API</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The project monitor API for Synthetics in Elastic Observability has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/155470" class="ulink" target="_top">#155470</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+In 8.8.0 and later, an error appears when you use the project monitor API.</p>
+</div>
+</details>
+<details id="breaking-147985">
+<summary class="title">Changes the privileges for alerts and cases</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The privileges for attaching alerts to cases has changed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/147985" class="ulink" target="_top">#147985</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To attach alerts to cases, you must have <code class="literal">Read</code> access to an Observability or Security feature that has alerts and <code class="literal">All</code> access to the <span class="strong strong"><strong>Cases</strong></span> feature. For detailed information, check <a href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html" class="ulink" target="_top">Kibana privileges</a> and <a href="https://www.elastic.co/guide/en/kibana/current/setup-cases.html" class="ulink" target="_top">Configure access to cases</a>.</p>
+</div>
+</details>
+<p>To review the breaking changes in previous versions, refer to the following:</p>
+<p><a href="https://www.elastic.co/guide/en/kibana/8.7/release-notes-8.7.0.html#breaking-changes-8.7.0" class="ulink" target="_top">8.7.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.6/release-notes-8.6.0.html#breaking-changes-8.6.0" class="ulink" target="_top">8.6.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0" class="ulink" target="_top">8.5.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0" class="ulink" target="_top">8.4.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0" class="ulink" target="_top">8.3.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0" class="ulink" target="_top">8.2.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0" class="ulink" target="_top">8.1.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0" class="ulink" target="_top">8.0.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2" class="ulink" target="_top">8.0.0-rc2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" class="ulink" target="_top">8.0.0-rc1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" class="ulink" target="_top">8.0.0-beta1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" class="ulink" target="_top">8.0.0-alpha2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" class="ulink" target="_top">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="deprecations-8.8.0"></a>Deprecations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The following functionality is deprecated in 8.8.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.8.0.</p>
+<details id="deprecation-154275">
+<summary class="title">Deprecates ephemeral Task Manager settings</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The following Task Manager settings are deprecated:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">xpack.task_manager.ephemeral_tasks.enabled</code>
+</li>
+<li class="listitem">
+<code class="literal">xpack.task_manager.ephemeral_tasks.request_capacity</code>
+</li>
+<li class="listitem">
+<code class="literal">xpack.alerting.maxEphemeralActionsPerAlert</code>
+</li>
+</ul>
+</div>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/154275" class="ulink" target="_top">#154275</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To improve task execution resiliency, remove the deprecated settings from the <code class="literal">kibana.yml</code> file. For detailed information, check <a href="https://www.elastic.co/guide/en/kibana/current/task-manager-settings-kb.html" class="ulink" target="_top">Task Manager settings in Kibana</a>.</p>
+</div>
+</details>
+<details id="deprecation-154010">
+<summary class="title">Deprecates monitor schedules</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Synthetics and Uptime monitor schedules and zip URL fields are deprecated. For more information, refer to <a href="https://github.com/elastic/kibana/pull/154010" class="ulink" target="_top">#154010</a> and <a href="https://github.com/elastic/kibana/pull/154952" class="ulink" target="_top">#154952</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you create monitors in Uptime Monitor Management and the Synthetics app, unsupported schedules are automatically transfered to the nearest supported schedule. To use zip URLs, use project monitors.</p>
+</div>
+</details>
+<details id="deprecation-152236">
+<summary class="title">Deprecates Agent reassign API PUT endpoint</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The PUT endpoint for the agent reassign API is deprecated. For more information, refer to <a href="https://github.com/elastic/kibana/pull/152236" class="ulink" target="_top">#152236</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Use the POST endpoint for the agent reassign API.</p>
+</div>
+</details>
+<details id="deprecation-151564">
+<summary class="title">Deprecates <code class="literal">total</code> in <code class="literal">/agent_status</code> Fleet API</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The <code class="literal">total</code> field in <code class="literal">/agent_status</code> Fleet API responses is deprecated. For more information, refer to <a href="https://github.com/elastic/kibana/pull/151564" class="ulink" target="_top">#151564</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+The <code class="literal">/agent_status</code> Fleet API now returns the following statuses:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">all</code> &mdash; All active and inactive
+</li>
+<li class="listitem">
+<code class="literal">active</code> &mdash; All active
+</li>
+</ul>
+</div>
+</div>
+</details>
+<details id="deprecation-149506">
+<summary class="title">Deprecates Elastic Synthetics integration</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The Elastic Synthetics integration is deprecated. For more information, refer to <a href="https://github.com/elastic/kibana/pull/149506" class="ulink" target="_top">#149506</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To monitor endpoints, pages, and user journeys, go to <span class="strong strong"><strong>Observability</strong></span> &#8594; <span class="strong strong"><strong>Synthetics (beta)</strong></span>.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.8.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.8.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Maintenance Window Task Runner Integration + New AAD/Event Log Fields <a href="https://github.com/elastic/kibana/pull/154761" class="ulink" target="_top">#154761</a>
+</li>
+<li class="listitem">
+Adds support for users authenticated with API keys to manage alerting rules <a href="https://github.com/elastic/kibana/pull/154189" class="ulink" target="_top">#154189</a>
+</li>
+<li class="listitem">
+Adds the ability to control allowed attached file mime types and the maximum file size <a href="https://github.com/elastic/kibana/pull/154013" class="ulink" target="_top">#154013</a>
+</li>
+<li class="listitem">
+Adds query and timeframe params to RuleAction to filter alerts <a href="https://github.com/elastic/kibana/pull/152360" class="ulink" target="_top">#152360</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+APM
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds group-by feature in APM rules <a href="https://github.com/elastic/kibana/pull/155001" class="ulink" target="_top">#155001</a>
+</li>
+<li class="listitem">
+Adds queues as nodes to the service map <a href="https://github.com/elastic/kibana/pull/153784" class="ulink" target="_top">#153784</a>
+</li>
+<li class="listitem">
+Adds the ability to display the latest agent version in agent explorer <a href="https://github.com/elastic/kibana/pull/153643" class="ulink" target="_top">#153643</a>
+</li>
+<li class="listitem">
+Adds table tabs showing summary of metrics <a href="https://github.com/elastic/kibana/pull/153044" class="ulink" target="_top">#153044</a>
+</li>
+<li class="listitem">
+Adds warning to Edit Rule Flyout when publicUrl is not configured <a href="https://github.com/elastic/kibana/pull/149832" class="ulink" target="_top">#149832</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Cases
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for file attachments in Cases <a href="https://github.com/elastic/kibana/pull/154436" class="ulink" target="_top">#154436</a>
+</li>
+<li class="listitem">
+Adds the Cases column to the alerts table <a href="https://github.com/elastic/kibana/pull/150963" class="ulink" target="_top">#150963</a>
+</li>
+<li class="listitem">
+Adds filtering and sorting for the case activity <a href="https://github.com/elastic/kibana/pull/149396" class="ulink" target="_top">#149396</a>
+</li>
+<li class="listitem">
+Adds the ability to filter user activities with pagination <a href="https://github.com/elastic/kibana/pull/152702" class="ulink" target="_top">#152702</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+Pins the unified search bar and dashboard toolbar to the top of the dashboard page when scrolling <a href="https://github.com/elastic/kibana/pull/145628" class="ulink" target="_top">#145628</a>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+Adds log pattern analysis <a href="https://github.com/elastic/kibana/pull/153449" class="ulink" target="_top">#153449</a>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.8.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Enterprise Search
+</span>
+</dt>
+<dd>
+For the Elastic Enterprise Search 8.8.0 release information, refer to <a href="https://www.elastic.co/guide/en/enterprise-search/master/changelog.html" class="ulink" target="_top"><em>Elastic Enterprise Search Documentation Release notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds audit logging for core CRUD operations <a href="https://github.com/elastic/kibana/pull/152118" class="ulink" target="_top">#152118</a>
+</li>
+<li class="listitem">
+Adds modal to display versions changelog <a href="https://github.com/elastic/kibana/pull/152082" class="ulink" target="_top">#152082</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Infrastructure
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the logs tab to the Hosts View <a href="https://github.com/elastic/kibana/pull/152995" class="ulink" target="_top">#152995</a>
+</li>
+<li class="listitem">
+Adds Alerts tab into Hosts View <a href="https://github.com/elastic/kibana/pull/149579" class="ulink" target="_top">#149579</a>
+</li>
+<li class="listitem">
+Adds refactoring to the Time and Position log stream state <a href="https://github.com/elastic/kibana/pull/149052" class="ulink" target="_top">#149052</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds ELSER config to the Trained Models UI <a href="https://github.com/elastic/kibana/pull/155867" class="ulink" target="_top">#155867</a>
+</li>
+<li class="listitem">
+Adds support for custom URLs in jobs for Data Frame Analytics <a href="https://github.com/elastic/kibana/pull/154287" class="ulink" target="_top">#154287</a>
+</li>
+<li class="listitem">
+Adds support to filter fields from grouping in Explain Log Rate Spikes <a href="https://github.com/elastic/kibana/pull/153864" class="ulink" target="_top">#153864</a>
+</li>
+<li class="listitem">
+Adds log pattern analysis in Discover <a href="https://github.com/elastic/kibana/pull/153449" class="ulink" target="_top">#153449</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for global settings <a href="https://github.com/elastic/kibana/pull/148975" class="ulink" target="_top">#148975</a>
+</li>
+<li class="listitem">
+Adds Custom Branding settings to Global settings <a href="https://github.com/elastic/kibana/pull/150080" class="ulink" target="_top">#150080</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Maps
+</span>
+</dt>
+<dd>
+Adds map.emsUrl to docker env variables <a href="https://github.com/elastic/kibana/pull/153441" class="ulink" target="_top">#153441</a>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the ability to changes all SLO assets to managed, and indices to hidden <a href="https://github.com/elastic/kibana/pull/154953" class="ulink" target="_top">#154953</a>
+</li>
+<li class="listitem">
+Adds Exploratory View to a separate app <a href="https://github.com/elastic/kibana/pull/153852" class="ulink" target="_top">#153852</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+Adds text <a href="https://github.com/elastic/kibana/pull/151631" class="ulink" target="_top">#151631</a>
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds CloudFormation agent install method <a href="https://github.com/elastic/kibana/pull/155045" class="ulink" target="_top">#155045</a>
+</li>
+<li class="listitem">
+Adds Vul mgmt flyout details panel <a href="https://github.com/elastic/kibana/pull/154873" class="ulink" target="_top">#154873</a>
+</li>
+<li class="listitem">
+Adds Vulnerabilities Table <a href="https://github.com/elastic/kibana/pull/154388" class="ulink" target="_top">#154388</a>
+</li>
+<li class="listitem">
+Adds the ability to select a theme preference for Kibana in the User Profile <a href="https://github.com/elastic/kibana/pull/151507" class="ulink" target="_top">#151507</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Uptime
+</span>
+</dt>
+<dd>
+Adds UUID to RuleAction <a href="https://github.com/elastic/kibana/pull/148038" class="ulink" target="_top">#148038</a>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.8.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.8</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.8.1.html">« Kibana 8.8.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.8.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,6 @@
+$ curl -X POST api/index_patterns/index-pattern/my-pattern
+{
+  "index_pattern": {
+    "title": "some-other-pattern-*"
+  }
+}

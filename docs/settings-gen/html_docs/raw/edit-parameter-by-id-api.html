@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Edit Parameter by ID API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Edit Parameter by ID API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="synthetics-apis.html" title="Synthetics APIs"/>
+<link rel="prev" href="get-parameters-api.html" title="Get Parameters API"/>
+<link rel="next" href="delete-parameters-api.html" title="Delete Parameters API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="get-parameters-api.html">« Get Parameters API</a>
+</span>
+<span class="next">
+<a href="delete-parameters-api.html">Delete Parameters API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="synthetics-apis.html">Synthetics APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Edit Parameter by ID API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="edit-parameter-by-id-api"></a>Edit Parameter by ID API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Edits a parameter with the specified ID.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_6"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">PUT &lt;kibana host&gt;:&lt;port&gt;/api/synthetics/params</code></p>
+<p><code class="literal">PUT &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/synthetics/params</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_11"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Synthetics</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="parameter-edit-path-params"></a>Path Parameters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The unique identifier of the parameter to be edited.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="parameter-edit-request-body"></a>Request body</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>The request body should contain the following attributes:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">key</code>
+</span>
+</dt>
+<dd>
+(Required, string) The key of the parameter.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">value</code>
+</span>
+</dt>
+<dd>
+(Required, string) The updated value associated with the parameter.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">description</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The updated description of the parameter.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">tags</code>
+</span>
+</dt>
+<dd>
+(Optional, array of strings) An array of updated tags to categorize the parameter.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="parameter-edit-example"></a>Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/params/edit-param.asciidoc">edit</a></div>
+</div></div></div>
+<p>Here is an example of a PUT request to edit a parameter by its ID:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">PUT /api/synthetics/params/param_id1
+{
+  "key": "updated_param_key",
+  "value": "updated-param-value",
+  "description": "Updated Param to be used in browser monitor",
+  "tags": ["authentication", "security", "updated"]
+}</pre>
+</div>
+<p>The API returns the updated parameter as follows:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+  "id": "param_id1",
+  "key": "updated_param_key",
+  "value": "updated-param-value",
+  "description": "Updated Param to be used in browser monitor",
+  "tags": ["authentication", "security", "updated"]
+}</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="get-parameters-api.html">« Get Parameters API</a>
+</span>
+<span class="next">
+<a href="delete-parameters-api.html">Delete Parameters API »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create and manage rules | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create and manage rules | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="alerting-getting-started.html" title="Alerting"/>
+<link rel="prev" href="alerting-setup.html" title="Alerting set up"/>
+<link rel="next" href="view-alerts.html" title="View alerts"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="alerting-setup.html">« Alerting set up</a>
+</span>
+<span class="next">
+<a href="view-alerts.html">View alerts »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create and manage rules</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="create-and-manage-rules"></a>Create and manage rules</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+</div></div></div>
+<p>The <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Rules</strong></span> UI provides a cross-app view of alerting.
+Different Kibana apps like <a href="https://www.elastic.co/guide/en/observability/master/create-alerts.html" class="ulink" target="_top"><span class="strong strong"><strong>Observability</strong></span></a>,
+<a href="https://www.elastic.co/guide/en/security/master/prebuilt-rules.html" class="ulink" target="_top"><span class="strong strong"><strong>Security</strong></span></a>, <a class="xref" href="geo-alerting.html" title="Create a tracking containment rule"><span class="strong strong"><strong>Maps</strong></span></a> and
+<a class="xref" href="xpack-ml.html" title="Machine learning"><span class="strong strong"><strong>Machine Learning</strong></span></a> can offer their own rules. <span class="strong strong"><strong>Rules</strong></span> provides a
+central place to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="create-and-manage-rules.html#create-edit-rules" title="Create and edit rules">Create and edit</a> rules
+</li>
+<li class="listitem">
+<a class="xref" href="create-and-manage-rules.html#controlling-rules" title="Snooze and disable rules">Manage rules</a> including enabling/disabling, muting/unmuting, and deleting
+</li>
+<li class="listitem">
+Drill down to <a class="xref" href="create-and-manage-rules.html#rule-details" title="View rule details">rule details</a>
+</li>
+<li class="listitem">
+Configure settings that apply to all rules in the space
+</li>
+</ul>
+</div>
+<p class="screenshot"><span class="image"><img src="images/rules-ui.png" alt="Example rule listing in Rules"></span></p>
+<p>For more information on alerting concepts and the types of rules and connectors
+available, go to <a class="xref" href="alerting-getting-started.html" title="Alerting">Alerting</a>.</p>
+<div class="position-relative"><h3><a id="_required_permissions"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>Access to rules is granted based on your alerting features privileges. For
+more information, go to <a class="xref" href="alerting-setup.html#alerting-security" title="Security">Security</a>.</p>
+<div class="position-relative"><h3><a id="create-edit-rules"></a>Create and edit rules</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>Some rules must be created within the context of a Kibana app like
+<a class="xref" href="observability.html#metrics-app" title="Metrics">Metrics</a>, <a class="xref" href="observability.html#apm-app" title="APM"><span class="strong strong"><strong>APM</strong></span></a>, or <a class="xref" href="observability.html#uptime-app" title="Uptime">Uptime</a>, but others
+are generic. Generic rule types can be created in <span class="strong strong"><strong>Rules</strong></span> by clicking the
+<span class="strong strong"><strong>Create rule</strong></span> button. This will launch a flyout that guides you through selecting
+a rule type and configuring its conditions and actions.</p>
+<p>After a rule is created, you can open the action menu (…) and select <span class="strong strong"><strong>Edit rule</strong></span>
+to re-open the flyout and change the rule properties.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You can also manage rules as resources with the <a href="https://registry.terraform.io/providers/elastic/elasticstack/latest" class="ulink" target="_top">Elasticstack provider</a> for Terraform.
+For more details, refer to the <a href="https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule" class="ulink" target="_top">elasticstack_kibana_alerting_rule</a> resource.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="defining-rules-type-conditions"></a>Rule type and conditions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>Depending on the Kibana app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.</p>
+<p>Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern.
+For example, in an Elasticsearch query rule, you specify an index, a query, and a threshold, which uses a metric aggregation operation (<code class="literal">count</code>, <code class="literal">average</code>, <code class="literal">max</code>, <code class="literal">min</code>, or <code class="literal">sum</code>):</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/rule-types-es-query-conditions.png" alt="UI for defining rule conditions in an Elasticsearch query rule" width="500">
+</div>
+</div>
+<p>All rules must have a check interval, which defines how often to evaluate the rule conditions. Checks are queued; they run as close to the defined value as capacity allows.</p>
+<p>For details on what types of rules are available and how to configure them, refer to <a class="xref" href="rule-types.html" title="Rule types"><em>Rule types</em></a>.</p>
+<div class="position-relative"><h4><a id="defining-rules-actions-details"></a>Actions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>You can add one or more actions to your rule to generate notifications when its conditions are met and when they are no longer met.</p>
+<p>Each action uses a connector, which provides connection information for a Kibana service or third party integration, depending on where you want to send the notifications.</p>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Some connectors that perform actions within Kibana, such as the <a class="xref" href="cases-action-type.html" title="Cases connector and action">Cases connector</a>, require less configuration. For example, you do not need to set the action frequency or variables.</p>
+<p>After you select a connector, set the action frequency.
+You can choose to create a summary of alerts on each check interval or on a custom interval.
+Alternatively, you an choose to run actions for each alert (at each check interval, only when the alert status changes, or at a custom interval).</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you choose a custom action interval, it cannot be shorter than the rule&#8217;s check interval.</p>
+</div>
+</div>
+<p>For example, if you create an Elasticsearch query rule, you can send notifications that summarize the new, ongoing, and recovered alerts on a custom interval:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/es-query-rule-action-summary.png" alt="UI for defining alert summary action in an Elasticsearch query rule" width="500">
+</div>
+</div>
+<p>When you choose to run actions for each alert, you must specify an action group.
+Each rule type has a set of valid action groups, which affect when an action runs.
+For example, you can set <span class="strong strong"><strong>Run when</strong></span> to <code class="literal">Query matched</code> or <code class="literal">Recovered</code> for the Elasticsearch query rule:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/es-query-rule-recovery-action.png" alt="UI for defining a recovery action" width="500">
+</div>
+</div>
+<p>Connectors have unique behavior for each action group.
+For example, you can have actions that create an Opsgenie alert when rule conditions are met and recovery actions that close the Opsgenie alert. For more information about connectors, refer to <a class="xref" href="action-types.html" title="Connectors"><em>Connectors</em></a>.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<a id="alerting-concepts-suppressing-duplicate-notifications"></a>
+<p>If you are not using alert summaries, actions are generated per alert and a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage &gt; 0.9, and the action frequency is <code class="literal">On check intervals</code>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Minute 1: server X123 &gt; 0.9. <em>One email</em> is sent for server X123.
+</li>
+<li class="listitem">
+Minute 2: X123 and Y456 &gt; 0.9. <em>Two emails</em> are sent, one for X123 and one for Y456.
+</li>
+<li class="listitem">
+Minute 3: X123, Y456, Z789 &gt; 0.9. <em>Three emails</em> are sent, one for each of X123, Y456, Z789.
+</li>
+</ul>
+</div>
+<p>In this example, three emails are sent for server X123 in the span of 3 minutes for the same rule. Often, it&#8217;s desirable to suppress these re-notifications. If
+you set the action frequency to <code class="literal">On custom action intervals</code> with an interval of 5 minutes, you reduce noise by getting emails only every 5 minutes for
+servers that continue to exceed the threshold:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Minute 1: server X123 &gt; 0.9. <em>One email</em> will be sent for server X123.
+</li>
+<li class="listitem">
+Minute 2: X123 and Y456 &gt; 0.9. <em>One email</em> will be sent for Y456.
+</li>
+<li class="listitem">
+Minute 3: X123, Y456, Z789 &gt; 0.9. <em>One email</em> will be sent for Z789.
+</li>
+</ul>
+</div>
+<p>To get notified only once when a server exceeds the threshold, you can set the action frequency to <code class="literal">On status changes</code>. Alternatively, consider using alert summaries to reduce the volume of notifications.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="defining-rules-actions-variables"></a>Action variables</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>You can pass rule values to an action at the time a condition is detected.
+To view the list of variables available for your rule, click the "add rule variable" button:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/es-query-rule-action-variables.png" alt="Passing rule values to an action" width="500">
+</div>
+</div>
+<p>For more information about common action variables, refer to <a class="xref" href="rule-action-variables.html" title="Rule action variables"><em>Rule action variables</em></a>.</p>
+<div class="position-relative"><h3><a id="controlling-rules"></a>Snooze and disable rules</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>The rule listing enables you to quickly snooze, disable, enable, or delete individual rules.
+For example, you can change the state of a rule:</p>
+<p class="screenshot"><span class="image"><img src="images/individual-enable-disable.png" alt="Use the rule status dropdown to enable or disable an individual rule"></span></p>
+<p>If there are rules that are not currently needed, disable them to stop running checks and reduce the load on your cluster.</p>
+<p>When you snooze a rule, the rule checks continue to run on a schedule but alerts will not generate actions.
+You can snooze for a specified period of time, indefinitely, or schedule single or recurring downtimes:</p>
+<p class="screenshot"><span class="image"><img src="images/snooze-panel.png" alt="Snooze notifications for a rule"></span></p>
+<p>When a rule is in a snoozed state, you can cancel or change the duration of this state.</p>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> To temporarily suppress notifications for rules, you can also create a <a class="xref" href="maintenance-windows.html" title="Maintenance windows">maintenance window</a>.</p>
+<div class="position-relative"><h3><a id="rule-details"></a>View rule details</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>You can determine the health of a rule by looking at the <span class="strong strong"><strong>Last response</strong></span> in <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Rules</strong></span>.
+A rule can have one of the following responses:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">failed</code>
+</span>
+</dt>
+<dd>
+The rule ran with errors.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">succeeded</code>
+</span>
+</dt>
+<dd>
+The rule ran without errors.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">warning</code>
+</span>
+</dt>
+<dd>
+The rule ran with some non-critical errors.
+</dd>
+</dl>
+</div>
+<p>Click the rule name to access a rule details page:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/rule-details-alerts-active.png" alt="Rule details page with multiple alerts">
+</div>
+</div>
+<p>In this example, the rule detects when a site serves more than a threshold number of bytes in a 24 hour period. Four sites are above the threshold. These are called alerts - occurrences of the condition being detected - and the alert name, status, time of detection, and duration of the condition are shown in this view. Alerts come and go from the list depending on whether the rule conditions are met.
+For more information about alerts, go to <a class="xref" href="view-alerts.html" title="View alerts"><em>View alerts</em></a>.</p>
+<p>If there are rule actions that failed to run successfully, you can see the details on the <span class="strong strong"><strong>History</strong></span> tab.
+In the <span class="strong strong"><strong>Message</strong></span> column, click the warning or expand icon <span class="image"><img src="images/expand-icon-2.png" alt="double arrow icon to open a flyout with the document details"></span> or click the number in the <span class="strong strong"><strong>Errored actions</strong></span> column to open the <span class="strong strong"><strong>Errored Actions</strong></span> panel.
+In this example, the action failed because the <a class="xref" href="alert-action-settings-kb.html#action-config-email-domain-allowlist"><code class="literal">xpack.actions.email.domain_allowlist</code></a> setting was updated and the action&#8217;s email recipient is no longer included in the allowlist:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/rule-details-errored-actions.png" alt="Rule histor page with alerts that have errored actions">
+</div>
+</div>
+<div class="position-relative"><h3><a id="importing-and-exporting-rules"></a>Import and export rules</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/create-and-manage-rules.asciidoc">edit</a></div>
+<p>To import and export rules, use <a class="xref" href="managing-saved-objects.html" title="Manage saved objects">saved objects</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Some rule types cannot be exported through this interface:</p>
+<p><span class="strong strong"><strong>Security rules</strong></span> can be imported and exported using the <a href="https://www.elastic.co/guide/en/security/master/rules-ui-management.html#import-export-rules-ui" class="ulink" target="_top">Security UI</a>.</p>
+<p><span class="strong strong"><strong>Stack monitoring rules</strong></span> are <a class="xref" href="kibana-alerts.html" title="Kibana alerts">automatically created</a> for you and therefore cannot be managed in <span class="strong strong"><strong>Saved Objects</strong></span>.</p>
+</div>
+</div>
+<p>Rules are disabled on export. You are prompted to re-enable the rule on successful import.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/rules-imported-banner.png" alt="Rules import banner" width="500">
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="alerting-setup.html">« Alerting set up</a>
+</span>
+<span class="next">
+<a href="view-alerts.html">View alerts »</a>
+</span>
+</div>
+</body>
+</html>

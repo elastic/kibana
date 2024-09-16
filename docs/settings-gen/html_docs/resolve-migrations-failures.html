@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Resolve migration failures | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Resolve migration failures | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="upgrade.html" title="Upgrade Kibana"/>
+<link rel="prev" href="saved-object-migrations.html" title="Migrate saved objects"/>
+<link rel="next" href="upgrade-migrations-rolling-back.html" title="Roll back to a previous version of Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="saved-object-migrations.html">« Migrate saved objects</a>
+</span>
+<span class="next">
+<a href="upgrade-migrations-rolling-back.html">Roll back to a previous version of Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="upgrade.html">Upgrade Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Resolve migration failures</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="resolve-migrations-failures"></a>Resolve migration failures</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+</div></div></div>
+<p>Migrating Kibana primarily involves migrating saved object documents to be compatible
+with the new version.</p>
+<div class="position-relative"><h4><a id="_saved_object_migration_failures"></a>Saved object migration failures</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>If Kibana unexpectedly terminates while migrating a saved object index, Kibana automatically attempts to
+perform the migration again when the process restarts. Do not delete any saved objects indices to
+fix a failed migration. Unlike previous versions, Kibana 7.12.0 and later does not require deleting
+indices to release a failed migration lock.</p>
+<p>If upgrade migrations fail repeatedly, refer to
+<a class="xref" href="upgrade.html#preventing-migration-failures" title="Preparing for migration">preparing for migration</a>.
+When you address the root cause for the migration failure,
+Kibana automatically retries the migration.
+If you&#8217;re unable to resolve a failed migration, contact Support.</p>
+<div class="position-relative"><h4><a id="_corrupt_saved_objects"></a>Corrupt saved objects</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>To find and remedy problems caused by corrupt documents, we highly recommend testing your Kibana upgrade in a development cluster,
+especially when there are custom integrations that create saved objects in your environment.</p>
+<p>Saved objects that are corrupted through manual editing or integrations cause migration
+failures with a log message, such as <code class="literal">Unable to migrate the corrupt Saved Object document ...</code>.
+For a successful upgrade migration, you must fix or delete corrupt documents.</p>
+<p>For example, you receive the following error message:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">Unable to migrate the corrupt saved object document with _id: 'marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275'. To allow migrations to proceed, please delete this document from the [.kibana_7.12.0_001] index.</pre>
+</div>
+<p>To delete the documents that cause migrations to fail, take the following steps:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Create a role as follows:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">PUT _security/role/grant_kibana_system_indices
+{
+  "indices": [
+    {
+      "names": [
+        ".kibana*"
+      ],
+      "privileges": [
+        "all"
+      ],
+      "allow_restricted_indices": true
+    }
+  ]
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/1.console"></div>
+</li>
+<li class="listitem">
+<p>Create a user with the role above and <code class="literal">superuser</code> built-in role:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">POST /_security/user/temporarykibanasuperuser
+{
+  "password" : "l0ng-r4nd0m-p@ssw0rd",
+  "roles" : [ "superuser", "grant_kibana_system_indices" ]
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/2.console"></div>
+</li>
+<li class="listitem">
+<p>Remove the write block which the migration system has placed on the previous index:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">PUT .kibana_7.12.1_001/_settings
+{
+  "index": {
+    "blocks.write": false
+  }
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/3.console"></div>
+</li>
+<li class="listitem">
+<p>Delete the corrupt document:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/4.console"></div>
+</li>
+<li class="listitem">
+<p>Restart Kibana.</p>
+<p>The dashboard with the <code class="literal">e3c5fc71-ac71-4805-bcab-2bcc9cc93275</code> ID that belongs to the <code class="literal">marketing_space</code> space <span class="strong strong"><strong>is no longer available</strong></span>.</p>
+</li>
+</ol>
+</div>
+<p>You can configure Kibana to automatically discard all corrupt objects and transform errors that occur during a migration. When setting the configuration option <code class="literal">migrations.discardCorruptObjects</code>, Kibana will delete the conflicting objects and proceed with the migration.
+ For instance, for an upgrade to 8.4.0, you can define the following setting in kibana.yml:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">migrations.discardCorruptObjects: "8.4.0"</pre>
+</div>
+<p><span class="strong strong"><strong>WARNING:</strong></span> Enabling the flag above will cause the system to discard all corrupt objects, as well as those causing transform errors. Thus, it is HIGHLY recommended that you carefully review the list of conflicting objects in the logs.</p>
+<div class="position-relative"><h4><a id="unknown-saved-object-types"></a>Documents for unknown saved objects</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>Migrations will fail if saved objects belong to an unknown
+saved object type. Unknown saved objects are typically caused by performing manual modifications
+to the Elasticsearch index (no longer allowed in 8.x), or by disabling a plugin that had previously created a saved object.</p>
+<p>We recommend using the <a class="xref" href="upgrade-assistant.html" title="Upgrade Assistant">Upgrade Assistant</a>
+to discover and remedy any unknown saved object types. Kibana version 7.17.0 deployments containing unknown saved
+object types will also log the following warning message:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that future upgrades will succeed, either re-enable plugins or delete these documents from the ".kibana_7.17.0_001" index after the current upgrade completes.</pre>
+</div>
+<p>If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents were found which use unknown saved object types:
+- "firstDocId" (type "someType")
+- "secondtDocId" (type "someType")
+- "thirdDocId" (type "someOtherType")
+
+To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.</pre>
+</div>
+<p>To proceed with the migration, re-enable any plugins that previously created these saved objects. Alternatively, carefully review the list of unknown saved objects in the Kibana log entry. If the corresponding disabled plugins and their associated saved objects will no longer be used, they can be deleted by setting the configuration option <code class="literal">migrations.discardUnknownObjects</code> to the version you are upgrading to.
+For instance, for an upgrade to 8.4.0, you can define the following setting in kibana.yml:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">migrations.discardUnknownObjects: "8.4.0"</pre>
+</div>
+<div class="position-relative"><h4><a id="_incompatible_settings_or_mappings"></a>Incompatible settings or mappings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>Matching index templates that specify <code class="literal">settings.refresh_interval</code> or
+<code class="literal">mappings</code> are known to interfere with Kibana upgrades.
+This can happen when index templates are defined manually.</p>
+<p>To make sure the index templates won&#8217;t apply to new <code class="literal">.kibana*</code> indices, narrow down the data views of any user-defined index templates.</p>
+<div class="position-relative"><h4><a id="_incompatible_xpack_tasks_index_configuration_setting"></a>Incompatible <code class="literal">xpack.tasks.index</code> configuration setting</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>In Kibana 7.5.0 and earlier, when the task manager index is set to <code class="literal">.tasks</code>
+with the configuration setting <code class="literal">xpack.tasks.index: ".tasks"</code>,
+upgrade migrations fail. In Kibana 7.5.1 and later, the incompatible configuration
+setting prevents upgrade migrations from starting.</p>
+<div class="position-relative"><h4><a id="_repeated_time_out_requests_that_eventually_fail"></a>Repeated time-out requests that eventually fail</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>Migrations get stuck in a loop of retry attempts waiting for index yellow status that&#8217;s never reached.
+In the CLONE_TEMP_TO_TARGET or CREATE_REINDEX_TEMP steps, you might see a log entry similar to:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">"Action failed with [index_not_yellow_timeout] Timeout waiting for the status of the [.kibana_8.1.0_001] index to become "yellow". Retrying attempt 1 in 2 seconds."</pre>
+</div>
+<p>The process is waiting for a yellow index status. There are two known causes:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Cluster hits the low watermark for disk usage
+</li>
+<li class="listitem">
+Cluster has <a class="xref" href="resolve-migrations-failures.html#routing-allocation-disabled" title="Routing allocation disabled or restricted">routing allocation disabled</a>
+</li>
+</ul>
+</div>
+<p>Before retrying the migration, inspect the output of the <code class="literal">_cluster/allocation/explain?index=${targetIndex}</code> API to identify why the index isn&#8217;t yellow:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">GET _cluster/allocation/explain
+{
+  "index": ".kibana_8.1.0_001",
+  "shard": 0,
+  "primary": true,
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/5.console"></div>
+<p>If the cluster exceeded the low watermark for disk usage, the output should contain a message similar to this:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">"The node is above the low watermark cluster setting [cluster.routing.allocation.disk.watermark.low=85%], using more disk space than the maximum allowed [85.0%], actual free: [11.692661332965082%]"</pre>
+</div>
+<p>Refer to the Elasticsearch guide for how to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/disk-usage-exceeded.html" class="ulink" target="_top">fix common cluster issues</a>.</p>
+<p>If routing allocation is the issue, the <code class="literal">_cluster/allocation/explain</code> API will return an entry similar to this:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">"allocate_explanation" : "cannot allocate because allocation is not permitted to any of the nodes"</pre>
+</div>
+<div class="position-relative"><h4><a id="routing-allocation-disabled"></a>Routing allocation disabled or restricted</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>Upgrade migrations fail because routing allocation is disabled or restricted (<code class="literal">cluster.routing.allocation.enable: none/primaries/new_primaries</code>), which causes Kibana to log errors such as:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">Unable to complete saved object migrations for the [.kibana] index: [incompatible_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}</pre>
+</div>
+<p>To get around the issue, remove the transient and persisted routing allocation settings:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">PUT /_cluster/settings
+{
+  "transient": {
+    "cluster.routing.allocation.enable": null
+  },
+  "persistent": {
+    "cluster.routing.allocation.enable": null
+  }
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/6.console"></div>
+<div class="position-relative"><h4><a id="cluster-shard-limit-exceeded"></a>Elasticsearch cluster shard limit exceeded</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/resolving-migration-failures.asciidoc">edit</a></div>
+<p>When upgrading, Kibana creates new indices requiring a small number of new shards. If the amount of open Elasticsearch shards approaches or exceeds the Elasticsearch <code class="literal">cluster.max_shards_per_node</code> setting, Kibana is unable to complete the upgrade. Ensure that Kibana is able to add at least 10 more shards by removing indices to clear up resources, or by increasing the <code class="literal">cluster.max_shards_per_node</code> setting.</p>
+<p>For more information, refer to the documentation on <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/allocation-total-shards.html" class="ulink" target="_top">total shards per node</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="saved-object-migrations.html">« Migrate saved objects</a>
+</span>
+<span class="next">
+<a href="upgrade-migrations-rolling-back.html">Roll back to a previous version of Kibana »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

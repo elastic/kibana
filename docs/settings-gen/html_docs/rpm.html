@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Install Kibana with RPM | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Install Kibana with RPM | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="install.html" title="Install Kibana"/>
+<link rel="prev" href="deb.html" title="Install Kibana with Debian package"/>
+<link rel="next" href="docker.html" title="Install Kibana with Docker"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="deb.html">« Install Kibana with Debian package</a>
+</span>
+<span class="next">
+<a href="docker.html">Install Kibana with Docker »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="install.html">Install Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Install Kibana with RPM</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="rpm"></a>Install Kibana with RPM</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The RPM for Kibana can be <a class="xref" href="rpm.html#install-rpm" title="Download and install the RPM manually">downloaded from our website</a>
+or from our <a class="xref" href="rpm.html#rpm-repo" title="Installing from the RPM repository">RPM repository</a>. It can be used to install
+Kibana on any RPM-based system such as OpenSuSE, SLES, Red Hat,
+and Oracle Enterprise.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>RPM install is not supported on distributions with old versions of RPM,
+such as SLES 11. Refer to <a class="xref" href="targz.html" title="Install Kibana from archive on Linux or macOS">Install from archive on Linux or macOS</a> instead.</p>
+</div>
+</div>
+<p>This package contains both free and subscription features.
+<a class="xref" href="managing-licenses.html" title="License Management">Start a 30-day trial</a> to try out all of the features.</p>
+<p>The latest stable version of Kibana can be found on the
+<a href="/downloads/kibana" class="ulink" target="_top">Download Kibana</a> page. Other versions can
+be found on the <a href="/downloads/past-releases" class="ulink" target="_top">Past Releases page</a>.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>For a step-by-step example of setting up the Elastic Stack on your own premises, try out our tutorial: <a href="https://www.elastic.co/guide/en/elastic-stack/master/installing-stack-demo-self.html" class="ulink" target="_top">Installing a self-managed Elastic Stack</a>.</p>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-key"></a>Import the Elastic PGP key</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+<p>We sign all of our packages with the Elastic Signing Key (PGP key
+<a href="https://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0xD27D666CD88E42B4" class="ulink" target="_top">D88E42B4</a>,
+available from <a href="https://pgp.mit.edu" class="ulink" target="_top">https://pgp.mit.edu</a>) with fingerprint:</p>
+<pre class="literallayout">4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4</pre>
+
+<p>Download and install the public signing key:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-repo"></a>Installing from the RPM repository</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+<p>Version 8.16.0 of Kibana has not yet been released.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="install-rpm"></a>Download and install the RPM manually</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+<p>Version 8.16.0 of Kibana has not yet been released.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-enroll"></a>Start Elasticsearch and generate an enrollment token for Kibana</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>When you start Elasticsearch for the first time, the following security configuration
+occurs automatically:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Authentication and authorization are enabled, and a password is generated for the <code class="literal">elastic</code> built-in superuser.
+</li>
+<li class="listitem">
+Certificates and keys for TLS are generated for the transport and HTTP layer, and TLS is enabled and configured with these keys and certificates.
+</li>
+</ul>
+</div>
+<p>The password and certificate and keys are output to your terminal.</p>
+<p>You can then generate an enrollment token for Kibana with the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/create-enrollment-token.html" class="ulink" target="_top"><code class="literal">elasticsearch-create-enrollment-token</code></a> tool:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">bin/elasticsearch-create-enrollment-token -s kibana</pre>
+</div>
+<p>Start Kibana and enter the enrollment token to securely connect Kibana with Elasticsearch.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-running-systemd"></a>Run Kibana with <code class="literal">systemd</code></h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/systemd.asciidoc">edit</a></div>
+</div></div></div>
+<p>To configure Kibana to start automatically when the system starts,
+run the following commands:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable kibana.service</pre>
+</div>
+<p>Kibana can be started and stopped as follows:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo systemctl start kibana.service
+sudo systemctl stop kibana.service</pre>
+</div>
+<p>These commands provide no feedback as to whether Kibana was started
+successfully or not. Log information can be accessed via
+<code class="literal">journalctl -u kibana.service</code>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-configuring"></a>Configure Kibana via the config file</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana loads its configuration from the <code class="literal">/etc/kibana/kibana.yml</code>
+file by default.  The format of this config file is explained in
+<a href="https://www.elastic.co/guide/en/kibana/master/settings.html" class="ulink" target="_top">Configuring Kibana</a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="rpm-layout"></a>Directory layout of RPM</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/rpm.asciidoc">edit</a></div>
+</div></div></div>
+<p>The RPM places config files, logs, and the data directory in the appropriate
+locations for an RPM-based system:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+<col class="col_4"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Type</th>
+<th align="left" valign="top">Description</th>
+<th align="left" valign="top">Default Location</th>
+<th align="left" valign="top">Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>home</strong></span></p></td>
+<td align="left" valign="top"><p>Kibana home directory or <code class="literal">$KIBANA_HOME</code></p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>bin</strong></span></p></td>
+<td align="left" valign="top"><p>Binary scripts including <code class="literal">kibana</code> to start the Kibana server
+    and <code class="literal">kibana-plugin</code> to install plugins</p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana/bin</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>config</strong></span></p></td>
+<td align="left" valign="top"><p>Configuration files including <code class="literal">kibana.yml</code></p></td>
+<td align="left" valign="top"><p><code class="literal">/etc/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal"><a class="xref" href="settings.html" title="Configure Kibana">KBN_PATH_CONF</a></code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>data</strong></span></p></td>
+<td align="left" valign="top"><p>The location of the data files written to disk by Kibana and its plugins</p></td>
+<td align="left" valign="top"><p><code class="literal">/var/lib/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal">path.data</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>logs</strong></span></p></td>
+<td align="left" valign="top"><p>Logs files location</p></td>
+<td align="left" valign="top"><p><code class="literal">/var/log/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal"><a class="xref" href="logging-configuration.html" title="Configure logging">Logging configuration</a></code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>plugins</strong></span></p></td>
+<td align="left" valign="top"><p>Plugin files location. Each plugin will be contained in a subdirectory.</p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana/plugins</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="deb.html">« Install Kibana with Debian package</a>
+</span>
+<span class="next">
+<a href="docker.html">Install Kibana with Docker »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

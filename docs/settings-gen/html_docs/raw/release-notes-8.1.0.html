@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.1.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.1.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.1.1.html" title="Kibana 8.1.1"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.1.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.1.1.html">« Kibana 8.1.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.1.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.1.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.1.0"></a>Kibana 8.1.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the following information about the Kibana 8.1.0 release.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.1.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-121435">
+<summary class="title">Removes legacy CSV export type</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The <code class="literal">/api/reporting/generate/csv</code> endpoint has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/121435" class="ulink" target="_top">#121435</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+If you are using 7.13.0 and earlier, <a href="https://www.elastic.co/guide/en/kibana/8.1/automating-report-generation.html" class="ulink" target="_top">regenerate the POST URLs</a> that you use to automatically generate CSV reports.</p>
+</div>
+</details>
+<details id="breaking-121369">
+<summary class="title">Removes legacy PDF shim</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The POST URLs that you generated in Kibana 6.2.0 no longer work. For more information, refer to <a href="https://github.com/elastic/kibana/pull/121369" class="ulink" target="_top">#121369</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+<a href="https://www.elastic.co/guide/en/kibana/8.1/automating-report-generation.html" class="ulink" target="_top">Regenerate the POST URLs</a> that you use to automatatically generate PDF reports.</p>
+</div>
+</details>
+<p>To review the breaking changes in previous versions, refer to the following:</p>
+<p><a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0" class="ulink" target="_top">8.0.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2" class="ulink" target="_top">8.0.0-rc2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" class="ulink" target="_top">8.0.0-rc1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" class="ulink" target="_top">8.0.0-beta1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" class="ulink" target="_top">8.0.0-alpha2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" class="ulink" target="_top">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="features-8.1.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.1.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Canvas
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Heatmap <a href="https://github.com/elastic/kibana/pull/120239" class="ulink" target="_top">#120239</a>
+</li>
+<li class="listitem">
+Adds the <span class="strong strong"><strong>Filters</strong></span> panel for element settings <a href="https://github.com/elastic/kibana/pull/117270" class="ulink" target="_top">#117270</a> and <a href="https://github.com/elastic/kibana/pull/116592" class="ulink" target="_top">#116592</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds document explorer callout <a href="https://github.com/elastic/kibana/pull/123814" class="ulink" target="_top">#123814</a>
+</li>
+<li class="listitem">
+Adds ability to create data views from the sidebar <a href="https://github.com/elastic/kibana/pull/123391" class="ulink" target="_top">#123391</a>
+</li>
+<li class="listitem">
+Adds redirect if there are no data views <a href="https://github.com/elastic/kibana/pull/123366" class="ulink" target="_top">#123366</a>
+</li>
+<li class="listitem">
+Adds row height options <a href="https://github.com/elastic/kibana/pull/122087" class="ulink" target="_top">#122087</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.1.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the waffle visualization type to <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/119339" class="ulink" target="_top">#119339</a>
+</li>
+<li class="listitem">
+Adds the gauge visualization type to <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/118616" class="ulink" target="_top">#118616</a>
+</li>
+<li class="listitem">
+Adds multi terms support to <span class="strong strong"><strong>Top Values</strong></span> in <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/118600" class="ulink" target="_top">#118600</a>
+</li>
+<li class="listitem">
+Adds a new heatmap implementation with elastic-charts to <span class="strong strong"><strong>Visualize Library</strong></span> <a href="https://github.com/elastic/kibana/pull/118338" class="ulink" target="_top">#118338</a>
+</li>
+<li class="listitem">
+Adds the Mosaic or mekko visualization type to <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/117668" class="ulink" target="_top">#117668</a>
+</li>
+<li class="listitem">
+Adds the ability to configure the Metric visualization type color palette in <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/116170" class="ulink" target="_top">#116170</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Enable Field statistics table on by default <a href="https://github.com/elastic/kibana/pull/124046" class="ulink" target="_top">#124046</a>
+</li>
+<li class="listitem">
+Adds grouping to the side nav <a href="https://github.com/elastic/kibana/pull/123805" class="ulink" target="_top">#123805</a>
+</li>
+<li class="listitem">
+Integration part 1: Create anomalies layer in maps <a href="https://github.com/elastic/kibana/pull/122862" class="ulink" target="_top">#122862</a>
+</li>
+<li class="listitem">
+Replace navigation bar with a side nav <a href="https://github.com/elastic/kibana/pull/121652" class="ulink" target="_top">#121652</a>
+</li>
+<li class="listitem">
+Overview page redesign <a href="https://github.com/elastic/kibana/pull/120966" class="ulink" target="_top">#120966</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Support suggesting index templates v2 <a href="https://github.com/elastic/kibana/pull/124655" class="ulink" target="_top">#124655</a>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Console</strong></span> now supports autocompletion for index templates and component templates introduced in Elasticsearch 7.8.0.
+</li>
+<li class="listitem">
+Transforms: Support to set destination ingest pipeline <a href="https://github.com/elastic/kibana/pull/123911" class="ulink" target="_top">#123911</a>
+</li>
+<li class="listitem">
+Transforms: Adds reset action to transforms management <a href="https://github.com/elastic/kibana/pull/123735" class="ulink" target="_top">#123735</a>
+</li>
+<li class="listitem">
+Transforms: Support for terms agg in pivot configurations <a href="https://github.com/elastic/kibana/pull/123634" class="ulink" target="_top">#123634</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Tail-based sampling settings <a href="https://github.com/elastic/kibana/pull/124025" class="ulink" target="_top">#124025</a>
+</li>
+<li class="listitem">
+APM UI changes for serverless services / AWS lambda <a href="https://github.com/elastic/kibana/pull/122775" class="ulink" target="_top">#122775</a>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.1.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.1</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.1.1.html">« Kibana 8.1.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.1.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

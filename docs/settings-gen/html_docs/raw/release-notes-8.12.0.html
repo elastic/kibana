@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.12.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.12.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.12.1.html" title="Kibana 8.12.1"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.12.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.12.1.html">« Kibana 8.12.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.12.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.12.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.12.0"></a>Kibana 8.12.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For information about the Kibana 8.12.0 release, review the following information.</p>
+<div class="position-relative"><h3><a id="known-issues-8.12.0"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details id="known-177938-8.12">
+<summary class="title">Index templates UI incorrectly sets the <code class="literal">allow_auto_create</code> field to <code class="literal">false</code> by default.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the <code class="literal">allow_auto_create</code> field is incorrectly set to <code class="literal">false</code> by default (the default value should be <code class="literal">undefined</code>). For more information, refer to (<a href="https://github.com/elastic/kibana/issues/177938" class="ulink" target="_top">#177938</a>).</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="breaking-changes-8.12.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.12.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-172224">
+<summary class="title">New SLO architecture</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+We introduce a breaking change in the SLO features that will break any SLOs created before 8.12. These SLOs have to be manually reset through an API until we provide a UI for it. The data aggregated over time (rollup) is still available in the sli v2 index, but won&#8217;t be used for summary calculation when reset.</p>
+<p>The previous summary transforms summarizing every SLOs won&#8217;t be used anymore and can be stopped and deleted:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+slo-summary-occurrences-7d-rolling
+</li>
+<li class="listitem">
+slo-summary-occurrences-30d-rolling
+</li>
+<li class="listitem">
+slo-summary-occurrences-90d-rolling
+</li>
+<li class="listitem">
+slo-summary-occurrences-monthly-aligned
+</li>
+<li class="listitem">
+slo-summary-occurrences-weekly-aligned
+</li>
+<li class="listitem">
+slo-summary-timeslices-7d-rolling
+</li>
+<li class="listitem">
+slo-summary-timeslices-30d-rolling
+</li>
+<li class="listitem">
+slo-summary-timeslices-90d-rolling
+</li>
+<li class="listitem">
+slo-summary-timeslices-monthly-aligned
+</li>
+<li class="listitem">
+slo-summary-timeslices-weekly-aligned
+</li>
+</ul>
+</div>
+<p>Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new <code class="literal">slo-summary-{slo_id}-{slo_revision}</code> transforms. For more information, refer to (<a href="https://github.com/elastic/kibana/pull/172224" class="ulink" target="_top">#172224</a>).</p>
+</div>
+</details>
+<details id="breaking-170635">
+<summary class="title">A new sub-feature privilege to control user access to the cases settings</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. For more information, refer to (<a href="https://github.com/elastic/kibana/pull/170635" class="ulink" target="_top">#170635</a>).</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.12.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.12.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+APM
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds viewInApp URL to the custom threshold rule type (<a href="https://github.com/elastic/kibana/pull/171985" class="ulink" target="_top">#171985</a>).
+</li>
+<li class="listitem">
+Adds back the mobile crashes &amp; errors tab (<a href="https://github.com/elastic/kibana/pull/165892" class="ulink" target="_top">#165892</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Cases
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The case list filter bar is now customizable, filters are removable and custom fields can be used as filters (<a href="https://github.com/elastic/kibana/pull/172276" class="ulink" target="_top">#172276</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.12.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Elastic Search
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Display E5 multilingual callout (<a href="https://github.com/elastic/kibana/pull/171887" class="ulink" target="_top">#171887</a>).
+</li>
+<li class="listitem">
+Replace model selection dropdown with list (<a href="https://github.com/elastic/kibana/pull/171436" class="ulink" target="_top">#171436</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for preconfigured output secrets (Scrypt edition) (<a href="https://github.com/elastic/kibana/pull/172041" class="ulink" target="_top">#172041</a>).
+</li>
+<li class="listitem">
+Adds UI components to create and edit output secrets (<a href="https://github.com/elastic/kibana/pull/169429" class="ulink" target="_top">#169429</a>).
+</li>
+<li class="listitem">
+Adds support for remote ES output (<a href="https://github.com/elastic/kibana/pull/169252" class="ulink" target="_top">#169252</a>).
+</li>
+<li class="listitem">
+Adds the ability to specify secrets in outputs (<a href="https://github.com/elastic/kibana/pull/169221" class="ulink" target="_top">#169221</a>).
+</li>
+<li class="listitem">
+Adds an integrations configs tab to display input templates (<a href="https://github.com/elastic/kibana/pull/168827" class="ulink" target="_top">#168827</a>).
+</li>
+<li class="listitem">
+Adds a Kibana task to publish Agent metrics (<a href="https://github.com/elastic/kibana/pull/168435" class="ulink" target="_top">#168435</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the ability to edit charts made by ES|QL queries in Dashboard (<a href="https://github.com/elastic/kibana/pull/169911" class="ulink" target="_top">#169911</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds E5 model configurations (<a href="https://github.com/elastic/kibana/pull/172053" class="ulink" target="_top">#172053</a>).
+</li>
+<li class="listitem">
+Adds the ability to create a categorization anomaly detection job from pattern analysis (<a href="https://github.com/elastic/kibana/pull/170567" class="ulink" target="_top">#170567</a>).
+</li>
+<li class="listitem">
+Adds and displays alerts data in the Anomaly Explorer (<a href="https://github.com/elastic/kibana/pull/167998" class="ulink" target="_top">#167998</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds logic to update flyout highlights (<a href="https://github.com/elastic/kibana/pull/172193" class="ulink" target="_top">#172193</a>).
+</li>
+<li class="listitem">
+Adds logic to display highlights in the flyout (<a href="https://github.com/elastic/kibana/pull/170650" class="ulink" target="_top">#170650</a>).
+</li>
+<li class="listitem">
+Changes the Custom threshold title to Beta (<a href="https://github.com/elastic/kibana/pull/172360" class="ulink" target="_top">#172360</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Disables the connector parameters field (<a href="https://github.com/elastic/kibana/pull/173610" class="ulink" target="_top">#173610</a>).
+</li>
+<li class="listitem">
+Adds a risk engine missing privileges callout (<a href="https://github.com/elastic/kibana/pull/171250" class="ulink" target="_top">#171250</a>).
+</li>
+<li class="listitem">
+Asset criticality privileges API (<a href="https://github.com/elastic/kibana/pull/172441" class="ulink" target="_top">#172441</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Uptime
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Global params Public APIs (<a href="https://github.com/elastic/kibana/pull/169669" class="ulink" target="_top">#169669</a>).
+</li>
+<li class="listitem">
+Private location public API&#8217;s (<a href="https://github.com/elastic/kibana/pull/169376" class="ulink" target="_top">#169376</a>).
+</li>
+<li class="listitem">
+Settings public API (<a href="https://github.com/elastic/kibana/pull/163400" class="ulink" target="_top">#163400</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.12.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.12</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.12.1.html">« Kibana 8.12.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.12.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

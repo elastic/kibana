@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Compose functions with sub-expressions | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Compose functions with sub-expressions | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="canvas-expression-lifecycle.html" title="Canvas expression lifecycle"/>
+<link rel="prev" href="canvas-fetch-and-manipulate-data.html" title="Fetch and manipulate data"/>
+<link rel="next" href="canvas-handling-context-and-argument-types.html" title="Handling context and argument types"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-fetch-and-manipulate-data.html">« Fetch and manipulate data</a>
+</span>
+<span class="next">
+<a href="canvas-handling-context-and-argument-types.html">Handling context and argument types »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas.html">Canvas</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas-expression-lifecycle.html">Canvas expression lifecycle</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Compose functions with sub-expressions</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas-expressions-compose-functions-with-subexpressions"></a>Compose functions with sub-expressions</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div></div></div>
+<p>You may have noticed another syntax in examples from other sections, namely expressions inside of curly brackets. These are called sub-expressions, and they can be used to provide a calculated value to another expression, instead of just a static one.</p>
+<p>A simple example of this is when you upload your own images to a Canvas workpad. That upload becomes an asset, and that asset can be retrieved using the <code class="literal">asset</code> function. Usually you’ll just do this from the UI, adding an image element to the page and uploading your image from the control in the sidebar, or picking an existing asset from there as well. In both cases, the system will consume that asset via the <code class="literal">asset</code> function, and you’ll end up with an expression similar to this:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}</pre>
+</div>
+<p>Sub-expressions are executed before the function that uses them is executed. In this case, <code class="literal">asset</code> will be run first, it will produce a value, the base64-encoded value of the image and that value will be used as the value for the <code class="literal">dataurl</code> argument in the <a class="xref" href="canvas-function-reference.html#image_fn" title="image">image</a> function. After the asset function executes, you will get the following output:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">image dataurl="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0"</pre>
+</div>
+<p>Since all of the sub-expressions are now resolved into actual values, the <a class="xref" href="canvas-function-reference.html#image_fn" title="image">image</a> function can be executed to produce its JSON output, just as it’s explained previously. In the case of images, the ability to nest sub-expressions is particularly useful to show one of several images conditionally. For example, you could swap between two images based on some calculated value by mixing in the <a class="xref" href="canvas-function-reference.html#if_fn" title="if">if</a> function, like in this example expression:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">demodata
+| image dataurl={
+  if condition={getCell price | gte 100}
+    then={asset "asset-3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b"}
+    else={asset "asset-cbc11a1f-8f25-4163-94b4-2c3a060192e7"}
+}</pre>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The examples in this section can’t be copy and pasted directly, since the values used throughout will not exist in your workpad.</p>
+</div>
+</div>
+<p>Here, the expression to use for the value of the <code class="literal">condition</code> argument, <code class="literal">getCell price | gte 100</code>, runs first since it is nested deeper.</p>
+<p>The expression does the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Retrieves the value from the <span class="strong strong"><strong>price</strong></span> column in the first row of the <code class="literal">demodata</code> data table
+</li>
+<li class="listitem">
+Inputs the value to the <code class="literal">gte</code> function
+</li>
+<li class="listitem">
+Compares the value to <code class="literal">100</code>
+</li>
+<li class="listitem">
+Returns <code class="literal">true</code> if the value is 100 or greater, and <code class="literal">false</code> if the value is 100 or less
+</li>
+</ul>
+</div>
+<p>That boolean value becomes the value for the <code class="literal">condition</code> argument. The output from the <code class="literal">then</code> expression is used as the output when <code class="literal">condition</code> is <code class="literal">true</code>. The output from the <code class="literal">else</code> expression is used when <code class="literal">condition</code> is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.</p>
+<p>You might be wondering how the <a class="xref" href="canvas-function-reference.html#getCell_fn" title="getCell">getCell</a> function in the sub-expression accessed the data from the <a class="xref" href="canvas-function-reference.html#demodata_fn" title="demodata">demoData</a> function, even though <a class="xref" href="canvas-function-reference.html#demodata_fn" title="demodata">demoData</a> was not being directly inserted into <a class="xref" href="canvas-function-reference.html#getCell_fn" title="getCell">getCell</a>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same <em>context</em>, or output of the previous function that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s <code class="literal">getCell</code> function, which allows that expression to pull out a value and compare it to another value.</p>
+<p>The passing of the <em>context</em> is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the price against multiple conditions using the <a class="xref" href="canvas-function-reference.html#all_fn" title="all">all</a> function.</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">demodata
+| image dataurl={
+  if condition={getCell price | all {gte 100} {neq 105}}
+    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
+    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+}</pre>
+</div>
+<p>This time, <code class="literal">getCell price</code> is run, and the result is passed into the next function as the context.  Then, each sub-expression of the <a class="xref" href="canvas-function-reference.html#all_fn" title="all">all</a> function is run, with the context given to their parent, which in this case is the result of <code class="literal">getCell price</code>. If <code class="literal">all</code> of these sub-expressions evaluate to <code class="literal">true</code>, then the <code class="literal">if</code> condition argument will be true.</p>
+<p>Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <a class="xref" href="canvas-function-reference.html#essql_fn" title="essql">essql</a>.</p>
+<p>This whole section is really just scratching the surface, but hopefully after reading it, you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing <em>context</em> and sub-expressions together to turn any input into your desired output.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-fetch-and-manipulate-data.html">« Fetch and manipulate data</a>
+</span>
+<span class="next">
+<a href="canvas-handling-context-and-argument-types.html">Handling context and argument types »</a>
+</span>
+</div>
+</body>
+</html>

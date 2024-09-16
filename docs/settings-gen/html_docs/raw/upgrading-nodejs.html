@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Upgrading Node.js | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Upgrading Node.js | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="advanced.html" title="Advanced"/>
+<link rel="prev" href="development-basepath.html" title="Considerations for basepath"/>
+<link rel="next" href="sharing-saved-objects.html" title="Sharing saved objects"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="development-basepath.html">« Considerations for basepath</a>
+</span>
+<span class="next">
+<a href="sharing-saved-objects.html">Sharing saved objects »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="advanced.html">Advanced</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Upgrading Node.js</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="upgrading-nodejs"></a>Upgrading Node.js</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana requires a specific Node.js version to run.
+When running Kibana from source, you must have this version installed locally.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_step_1_generate_custom_node_js_builds"></a>Step 1: Generate custom Node.js builds</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Before making a PR to upgrade Node.js, we must first <a class="xref" href="upgrading-nodejs.html#start-new-nodejs-build" title="How to start a new build">generate the required custom Node.js builds</a> matching the desired Node.js version.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_step_2_create_pr_to_upgrade_node_js"></a>Step 2: Create PR to upgrade Node.js</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>The required version of Node.js is listed in several different files throughout the Kibana source code.
+These files must be updated when upgrading Node.js:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/blob/master/.node-version" class="ulink" target="_top"><code class="literal">.node-version</code></a>
+</li>
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/blob/master/.nvmrc" class="ulink" target="_top"><code class="literal">.nvmrc</code></a>
+</li>
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/blob/master/package.json" class="ulink" target="_top"><code class="literal">package.json</code></a> - The version is specified in the <code class="literal">engines.node</code> field (if possible, also upgrade <code class="literal">@types/node</code> to match the new version, both under <code class="literal">devDependencies</code> and <code class="literal">resolutions</code>).
+</li>
+<li class="listitem">
+<a href="https://github.com/elastic/kibana/blob/master/WORKSPACE.bazel" class="ulink" target="_top"><code class="literal">WORKSPACE.bazel</code></a> - The version is specified in the <code class="literal">node_version</code> property.
+Besides this property, the list of files under <code class="literal">node_repositories</code> must be updated along with their respective SHA256 hashes.
+These can be found in the <code class="literal">SHASUMS256.txt</code> file inside the public <code class="literal">kibana-custom-node-artifacts</code> GCP bucket.
+Example for Node.js v20.15.1: <a href="https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt" class="ulink" target="_top">kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt</a>
+</li>
+</ul>
+</div>
+<p>See PR <a href="https://github.com/elastic/kibana/pull/128123" class="ulink" target="_top">#128123</a> for an example of how the Node.js version has been upgraded previously.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_considerations_with_major_node_js_upgrades"></a>Considerations with major Node.js upgrades</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>When upgrading to a new major version of Node.js, the following extra steps must be performed:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Compare the new Node.js versions list of supported platforms with the <a href="https://www.elastic.co/support/matrix#matrix_os" class="ulink" target="_top">Kibana Support Matrix</a>.
+As an example, here&#8217;s the <a href="https://github.com/nodejs/node/blob/v18.x/BUILDING.md#platform-list" class="ulink" target="_top">Node.js 18 supported platform list</a>.
+You can change which Node.js major version to view, by changing the selected branch.
+If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform. This way support for it can be dropped before the currently used major version of Node.js <a href="https://github.com/nodejs/release#release-schedule" class="ulink" target="_top">reaches End-of-Life</a>.
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="custom-nodejs-builds"></a>Custom builds of Node.js</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Due to Node.js 16 coming to an <a href="https://nodejs.org/en/blog/announcements/nodejs16-eol" class="ulink" target="_top">early End-of-Life</a> and Node.js 18 no longer supporting the same platforms that Kibana supports (most notably CentOS7/RHEL7), we cannot bundle the official Node.js binaries with the Linux distributable of Kibana.
+To keep support for these older platforms, we&#8217;re bundling the Linux distributable of Kibana with a <a href="https://github.com/elastic/kibana-custom-nodejs-builds" class="ulink" target="_top">custom build of Node.js</a> with extended backwards compatibility.
+The only difference between the offical Node.js build and our custom build, is the version of <code class="literal">glibc</code> that it&#8217;s compiled against.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="start-new-nodejs-build"></a>How to start a new build</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>To generate a new custom Node.js build, <a href="https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new" class="ulink" target="_top">start a new build</a> on our dedicated Buildkite pipeline (requires Elastic employee permissions).
+Give it a clear name (e.g. <code class="literal">Node 20.15.1</code>) and remember so set the custom <code class="literal">OVERRIDE_TARGET_VERSION</code> environment variable to the desired Node.js version - e.g. <code class="literal">OVERRIDE_TARGET_VERSION=20.15.1</code>.
+You find the "Environment Variables" field by expanding "Options &gt;" in the "New Build" dialog.</p>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_backporting"></a>Backporting</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>The following rules are not set in stone.
+Use best judgement when backporting.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_node_js_patch_upgrades"></a>Node.js patch upgrades</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Typically, you want to backport Node.js <span class="strong strong"><strong>patch</strong></span> upgrades to all supported release branches that run the same <span class="strong strong"><strong>major</strong></span> Node.js version (which currently is all of them, but this might change in the future):</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If the current release is 8.1.x, the main PR should target <code class="literal">main</code> and be backported to <code class="literal">7.17</code> and <code class="literal">8.1</code> (GitHub tag example: <code class="literal">backport:all-open</code>).
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_node_js_minor_upgrades"></a>Node.js minor upgrades</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Typically, you want to backport Node.js <span class="strong strong"><strong>minor</strong></span> upgrades to the previous major Kibana release branch (if it runs the same <span class="strong strong"><strong>major</strong></span> Node.js version):</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If the current release is 8.1.x, the main PR should target <code class="literal">main</code> and be backported to <code class="literal">7.17</code>, while leaving the <code class="literal">8.1</code> branch as-is (GitHub tag example: <code class="literal">auto-backport</code> + <code class="literal">v7.17.13</code>).
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_node_js_major_upgrades"></a>Node.js major upgrades</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>Typically, you want to backport Node.js <span class="strong strong"><strong>major</strong></span> upgrades to the previous major Kibana release branch:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If the current release is 8.1.x, the main PR should target <code class="literal">main</code> and be backported to <code class="literal">7.17</code>, while leaving the <code class="literal">8.1</code> branch as-is (GitHub tag example: <code class="literal">auto-backport</code> + <code class="literal">v7.17.13</code>).
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_upgrading_installed_node_js_version"></a>Upgrading installed Node.js version</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/upgrading-nodejs.asciidoc">edit</a></div>
+</div></div></div>
+<p>The following instructions expect that <a href="https://github.com/nvm-sh/nvm" class="ulink" target="_top">nvm</a> is used to manage locally installed Node.js versions.</p>
+<p>Run the following to install the new Node.js version. Replace <code class="literal">&lt;version&gt;</code> with the desired Node.js version:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">nvm install &lt;version&gt;</pre>
+</div>
+<p>To get the same global npm modules installed with the new version of Node.js as is currently installed, use the <code class="literal">--reinstall-packages-from</code> command-line argument (optionally replace <code class="literal">16</code> with the desired source version):</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">nvm install &lt;version&gt; --reinstall-packages-from=16</pre>
+</div>
+<p>If needed, uninstall the old version of Node.js by running the following. Replace <code class="literal">&lt;old-version&gt;</code> with the full version number of the version that should be uninstalled:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">nvm uninstall &lt;old-version&gt;</pre>
+</div>
+<p>Optionally, tell nvm to always use the "highest" installed Node.js 16 version. Replace <code class="literal">16</code> if a different major version is desired:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">nvm alias default 16</pre>
+</div>
+<p>Alternatively, include the full version number at the end to specify a specific default version.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development-basepath.html">« Considerations for basepath</a>
+</span>
+<span class="next">
+<a href="sharing-saved-objects.html">Sharing saved objects »</a>
+</span>
+</div>
+</body>
+</html>

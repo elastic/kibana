@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aliases and unnamed arguments | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Aliases and unnamed arguments | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="canvas-expression-lifecycle.html" title="Canvas expression lifecycle"/>
+<link rel="prev" href="canvas-function-arguments.html" title="Function arguments"/>
+<link rel="next" href="canvas-change-your-expression-change-your-output.html" title="Change your expression, change your output"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-function-arguments.html">« Function arguments</a>
+</span>
+<span class="next">
+<a href="canvas-change-your-expression-change-your-output.html">Change your expression, change your output »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas.html">Canvas</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas-expression-lifecycle.html">Canvas expression lifecycle</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Aliases and unnamed arguments</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas-aliases-and-unnamed-arguments"></a>Aliases and unnamed arguments</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div></div></div>
+<p>Argument definitions have one canonical name, which is always provided in the underlying code. When argument definitions are used in an expression, they often include aliases that make them easier or faster to type.</p>
+<p>For example, the <a class="xref" href="canvas-function-reference.html#mapColumn_fn" title="mapColumn">mapColumn</a> function has 2 arguments:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">expression</code> - Produces a calculated value.
+</li>
+<li class="listitem">
+<code class="literal">name</code> - The name of column.
+</li>
+</ul>
+</div>
+<p>The <code class="literal">expression</code> argument includes some aliases, namely <code class="literal">exp</code>, <code class="literal">fn</code>, and <code class="literal">function</code>. That means that you can use any of those four options to provide that argument’s value.</p>
+<p>So <code class="literal">mapColumn name=newColumn fn={string example}</code> is equal to <code class="literal">mapColumn name=newColumn expression={string example}</code>.</p>
+<p>There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is an underscore, which indicates that the argument is an <em>unnamed</em> argument and can be provided without explicitly naming it in the expression. The <code class="literal">name</code> argument here uses the <em>unnamed</em> alias, which means that you can further simplify our example to <code class="literal">mapColumn newColumn fn={string example}</code>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>There can only be one <em>unnamed</em> argument for each function.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-function-arguments.html">« Function arguments</a>
+</span>
+<span class="next">
+<a href="canvas-change-your-expression-change-your-output.html">Change your expression, change your output »</a>
+</span>
+</div>
+</body>
+</html>

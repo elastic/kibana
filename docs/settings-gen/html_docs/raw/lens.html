@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create visualizations with Lens | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create visualizations with Lens | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="aggregation-reference.html" title="Create panels with editors"/>
+<link rel="prev" href="aggregation-reference.html" title="Create panels with editors"/>
+<link rel="next" href="tsvb.html" title="TSVB"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="aggregation-reference.html">« Create panels with editors</a>
+</span>
+<span class="next">
+<a href="tsvb.html">TSVB »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="dashboard.html">Dashboard and visualizations</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="aggregation-reference.html">Create panels with editors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create visualizations with Lens</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="lens"></a>Create visualizations with Lens</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>To create a visualization, drag the data fields you want to visualize to the workspace, then <span class="strong strong"><strong>Lens</strong></span> uses visualization best practices to apply the fields and create a visualization that best displays the data.</p>
+<p>With <span class="strong strong"><strong>Lens</strong></span>, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Create area, line, and bar charts with layers to display multiple indices and chart types.
+</li>
+<li class="listitem">
+Change the aggregation function to change the data in the visualization.
+</li>
+<li class="listitem">
+Create custom tables.
+</li>
+<li class="listitem">
+Perform math on aggregations using <span class="strong strong"><strong>Formula</strong></span>.
+</li>
+<li class="listitem">
+Use time shifts to compare the data in two time intervals, such as month over month.
+</li>
+<li class="listitem">
+Add annotations and reference lines.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="create-the-visualization-panel"></a>Create visualizations</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>If you&#8217;re unsure about the visualization type you want to use, or how you want to display the data, drag the fields you want to visualize onto the workspace, then let <span class="strong strong"><strong>Lens</strong></span> choose for you.</p>
+<p>If you already know the visualization type you want to use, and how you want to display the data, use the following process.</p>
+<p>Choose the visualization type.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Before you drag fields to the workspace, open the <span class="strong strong"><strong>Visualization type</strong></span> dropdown, then select the visualization you want to use.
+</li>
+<li class="listitem">
+To view more visualizations that <span class="strong strong"><strong>Lens</strong></span> automatically created for the fields, click <span class="strong strong"><strong>Suggestions</strong></span>. If one of the <span class="strong strong"><strong>Suggestions</strong></span> meets your visualization needs, click <span class="strong strong"><strong>Save and return</strong></span> to add it to the dashboard.
+</li>
+</ol>
+</div>
+<p>Choose the data you want to visualize.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Drag the fields directly to the layer pane. <span class="strong strong"><strong>Lens</strong></span> automatically selects the aggregation function.
+</li>
+<li class="listitem">
+If you want to learn more about the data a field contains, click the field.
+</li>
+<li class="listitem">
+To visualize more than one data view, click <span class="strong strong"><strong>Add layer</strong></span>, select the layer type, then select the data view.
+</li>
+</ol>
+</div>
+<p>Edit and delete.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu to clear Lens visualization layers"></span> on the panel, then <span class="strong strong"><strong>Edit visualization</strong></span>.
+</li>
+<li class="listitem">
+To change the aggregation <span class="strong strong"><strong>Quick function</strong></span> and, click the field in the flyout.
+</li>
+<li class="listitem">
+To delete a field, click <span class="image"><img src="dashboard/images/trash_can.png" alt="Actions menu icon to delete a field" width="5%"></span> next to the field.
+</li>
+<li class="listitem">
+To duplicate a layer, click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu to duplicate Lens visualization layers"></span> in the flyout, then select <span class="strong strong"><strong>Duplicate layer</strong></span>.
+</li>
+<li class="listitem">
+To clear the layer configuration, click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu to clear Lens visualization layers"></span> in the flyout, then select <span class="strong strong"><strong>Clear layer</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Apply and close</strong></span>.
+</li>
+</ol>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Use the <span class="strong strong"><strong>Edit visualization</strong></span> flyout to make edits without having to leave the dashboard, or click <span class="strong strong"><strong>Edit in Lens</strong></span> to make edits using the Lens application.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="change-the-fields"></a>Change the fields list</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Change the fields list to display a different data view, different time range, or add your own fields.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>To create a visualization with fields in a different data view, open the data view dropdown, then select the data view.</p>
+<p>For more information about data views, refer to <a class="xref" href="data-views.html" title="Create a data view">Create a data view</a>.</p>
+</li>
+<li class="listitem">
+If the fields list is empty, change the <a class="xref" href="set-time-filter.html" title="Set the time range">time filter</a>.
+</li>
+<li class="listitem">
+<p>To add fields, open the data view dropdown, then select <span class="strong strong"><strong>Add a field to this data view</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/lens_dataViewDropDown_8.4.0.png" alt="Dropdown menu located next to data view field with items for adding and managing fields"></span></p>
+<p>For more information about adding fields to data views and examples, refer to <a class="xref" href="managing-data-views.html#runtime-fields" title="Explore your data with runtime fields">Explore your data with runtime fields</a>.</p>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="create-custom-tables"></a>Create custom tables</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the <span class="strong strong"><strong>Visualization type</strong></span> dropdown, select <span class="strong strong"><strong>Table</strong></span>.
+</li>
+<li class="listitem">
+Drag the fields you want to visualize to the workspace.
+</li>
+<li class="listitem">
+<p>To sort or hide the columns, click the arrow next to the column heading, then select an option.</p>
+<p>All columns that belong to the same layer pane group are sorted in the table.</p>
+</li>
+<li class="listitem">
+<p>To change the display options, click a <span class="strong strong"><strong>Metrics</strong></span> field in the layer pane, then configure the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Name</strong></span> &mdash; Specifies the field display name.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Collapse by</strong></span> &mdash; Aggregates all metric values with the same value into a single number.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Value format</strong></span> &mdash; Specifies how the field value displays in the table.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Text alignment</strong></span> &mdash; Aligns the values in the cell to the <span class="strong strong"><strong>Left</strong></span>, <span class="strong strong"><strong>Center</strong></span>, or <span class="strong strong"><strong>Right</strong></span>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Hide column</strong></span> &mdash; Hides the column for the field.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Directly filter on click</strong></span> &mdash; Turns column values into clickable links that allow you to filter or drill down into the data.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Summary row</strong></span> &mdash; Adds a row that displays the summary value. When specified, allows you to enter a <span class="strong strong"><strong>Summary label</strong></span>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Color by value</strong></span> &mdash; Applies color to the cell or text values. To change the color, click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="drag-and-drop-keyboard-navigation"></a>Create visualizations with keyboard navigation</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>To use a keyboard instead of a mouse, use the <span class="strong strong"><strong>Lens</strong></span> fully accessible and continuously improved drag system.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Select the field in the fields list or layer pane. Most fields have an inner and outer select state. The inner state opens a panel with detailed information or options.
+The outer state allows you to drag the field. Tab through the fields until you get the outer state on the field.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/lens_drag_drop_2.png" alt="Lens drag and drop focus state">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Complete the following actions:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To select a field, press Space bar.
+</li>
+<li class="listitem">
+To select where you want to drop the field, use the Left and Right arrows.
+</li>
+<li class="listitem">
+To reorder the fields on the layer pane, use the Up and Down arrows.
+</li>
+<li class="listitem">
+<p>To duplicate an action, use the Left and Right arrows, then select the <span class="strong strong"><strong>Drop a field or click to add</strong></span> field you want to use.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/lens_drag_drop_3.gif" alt="Using drag and drop to reorder">
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+To confirm the action, press Space bar. To cancel, press Esc.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="lens-formulas"></a>Use formulas to perform math</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Formula</strong></span>, then enter the formula.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Filter ratio example
+</span>
+</dt>
+<dd>
+<p>
+To filter a document set, use <code class="literal">kql=''</code>, then compare to other documents within the same grouping:
+</p>
+<pre class="screen">count(kql='response.status_code &gt; 400') / count()</pre>
+</dd>
+<dt>
+<span class="term">
+Week over week example
+</span>
+</dt>
+<dd>
+<p>
+To get the value for each grouping from the previous week, use <code class="literal">shift='1w'</code>.
+</p>
+<pre class="screen">percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')</pre>
+<p>You are unable to combine different time shifts, such as <code class="literal">count(shift="1w") - count()</code> and <code class="literal">count(shift="1w") - count(shift="1m")</code>, with the <span class="strong strong"><strong>Top values</strong></span> function.</p>
+</dd>
+<dt>
+<span class="term">
+Percent of total example
+</span>
+</dt>
+<dd>
+<p>
+To convert each grouping into a percent of the total, formulas calculate <code class="literal">overall_sum</code> for all groupings:
+</p>
+<pre class="screen">sum(products.base_price) / overall_sum(sum(products.base_price))</pre>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>For detailed information on formulas, click <span class="image"><img src="dashboard/images/formula_reference.png" alt="Formula reference icon"></span>.</p>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</li>
+<li class="listitem">
+To accurately display the formula, select <span class="strong strong"><strong>Percent</strong></span> from the <span class="strong strong"><strong>Value format</strong></span> dropdown.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="compare-data-with-time-offsets"></a>Compare differences over time</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Compare your real-time data to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click the field you want to offset.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Advanced</strong></span>.
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>Time shift</strong></span> field, enter the time offset increment.
+</li>
+</ol>
+</div>
+<p>For a time shift example, refer to <a class="xref" href="create-a-dashboard-of-panels-with-ecommerce-data.html#compare-time-ranges" title="Compare time ranges">Compare time ranges</a>.</p>
+<div class="position-relative"><h4><a id="create-partition-charts-with-multiple-metrics"></a>Create partition charts with multiple metrics</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>To create partition charts, such as pie charts, configure one or more <span class="strong strong"><strong>Slice by</strong></span> dimensions to define the partitions, and a <span class="strong strong"><strong>Metric</strong></span> dimension to define the size.
+To create partition charts with multiple metrics, use the layer settings. Multiple metrics are unsupported for mosaic visualizations.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu for the partition visualization layer"></span>, then select <span class="strong strong"><strong>Layer settings</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Multiple metrics</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>X</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="improve-visualization-loading-time"></a>Improve visualization loading time</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy.
+Use low sampling percentages on large datasets.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the <span class="strong strong"><strong>Edit visualization</strong></span> flyout, click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu for the partition visualization layer"></span>, then select <span class="strong strong"><strong>Layer settings</strong></span>.
+</li>
+<li class="listitem">
+To select the <span class="strong strong"><strong>Sampling</strong></span> percentage, use the slider.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Apply and close</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="add-annotations"></a>Add annotations</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Annotations allow you to call out specific points in your visualizations that are important, such as significant changes in the data. You can add annotations for any data view, add text and icons, specify the line format and color, and more.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/lens_annotations_8.2.0.png" alt="Lens annotations">
+</div>
+</div>
+<p>Annotations support two placement types:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Static date</strong></span> &mdash; Displays annotations for specific times or time ranges.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Custom query</strong></span> &mdash; Displays annotations based on custom Elasticsearch queries. For detailed information about queries, check <a class="xref" href="kibana-concepts-analysts.html#semi-structured-search" title="Semi-structured search">Semi-structured search</a>.
+</li>
+</ul>
+</div>
+<p>Any annotation layer can be saved as an annotation group to the <span class="strong strong"><strong>Visualize Library</strong></span> in order to reuse it in other visualizations. Any changes made to the annotation group will be reflected in all visualizations to which it is added.</p>
+<p>Create a new annotation layer.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click <span class="strong strong"><strong>Add layer &gt; Annotations &gt; New annotation</strong></span>.
+</li>
+<li class="listitem">
+Select the data view for the annotation.
+</li>
+<li class="listitem">
+From the fields list, drag a field to the <span class="strong strong"><strong>Add an annotation</strong></span> field.
+</li>
+<li class="listitem">
+<p>To use global filters in the annotation, click <span class="image"><img src="dashboard/images/lens_layerActions_8.5.0.png" alt="Actions menu for the annotations layer"></span>, then select <span class="strong strong"><strong>Keep global filters</strong></span> from the dropdown.</p>
+<p>When you add the visualization to dashboards, <span class="image"><img src="dashboard/images/lens_visualizationModifierPopup_8.8.0.png" alt="Visualization modifier popup"></span> appears,
+which allows you to view settings changes to the visualization.</p>
+</li>
+</ol>
+</div>
+<p>Create static annotations.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Select <span class="strong strong"><strong>Static date</strong></span>.
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>Annotation date</strong></span> field, click <span class="image"><img src="images/lens_annotationDateIcon_8.6.0.png" alt="Annodation date icon in Lens"></span>, then select the date.
+</li>
+<li class="listitem">
+To display the annotation as a time range, select <span class="strong strong"><strong>Apply as range</strong></span>, then specify the <span class="strong strong"><strong>From</strong></span> and <span class="strong strong"><strong>To</strong></span> dates.
+</li>
+</ol>
+</div>
+<p>Create custom query annotations.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Select <span class="strong strong"><strong>Custom query</strong></span>.
+</li>
+<li class="listitem">
+<p>Enter the <span class="strong strong"><strong>Annotation query</strong></span> for the data you want to display.</p>
+<p>For detailed information about queries and examples, check <a class="xref" href="kibana-concepts-analysts.html#semi-structured-search" title="Semi-structured search">Semi-structured search</a>.</p>
+</li>
+<li class="listitem">
+Select the <span class="strong strong"><strong>Target date field</strong></span>.
+</li>
+</ol>
+</div>
+<p>Specify the annotation appearance.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Enter the annotation <span class="strong strong"><strong>Name</strong></span>.
+</li>
+<li class="listitem">
+Change the <span class="strong strong"><strong>Appearance</strong></span> options for how you want the annotation to display on the visualization.
+</li>
+<li class="listitem">
+If you created a custom query annotation, click <span class="strong strong"><strong>Add field</strong></span> to add a field to the annotation tooltip.
+</li>
+<li class="listitem">
+To close, click <span class="strong strong"><strong>X</strong></span>.
+</li>
+</ol>
+</div>
+<p>Save the annotation group to the library.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, on your annotation layer, click <span class="image"><img src="images/lens_saveAnnotationLayerButton_8.9.0.png" alt="Save button on annotations layer"></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span>, <span class="strong strong"><strong>Description</strong></span>, and add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save group</strong></span>.
+</li>
+</ol>
+</div>
+<p>Add a library annotation group to a visualization.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click <span class="strong strong"><strong>Add layer &gt; Annotations &gt; Load from library</strong></span>.
+</li>
+<li class="listitem">
+Select the annotation group you want to use.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="add-reference-lines"></a>Add reference lines</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>With reference lines, you can identify specific values in your visualizations with icons, colors, and other display options. You can add reference lines to any visualization type that displays axes.</p>
+<p>For example, to track the number of bytes in the 75th percentile, add a shaded <span class="strong strong"><strong>Percentile</strong></span> reference line to your time series visualization.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/lens_referenceLine_7.16.png" alt="Lens drag and drop focus state">
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click <span class="strong strong"><strong>Add layer &gt; Reference lines</strong></span>.
+</li>
+<li class="listitem">
+<p>Click the reference line value, then specify the reference line you want to use:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To add a static reference line, click <span class="strong strong"><strong>Static</strong></span>, then enter the reference line value you want to use.
+</li>
+<li class="listitem">
+To add a dynamic reference line, click <span class="strong strong"><strong>Quick functions</strong></span>, then click and configure the functions you want to use.
+</li>
+<li class="listitem">
+To calculate the reference line value with math, click <span class="strong strong"><strong>Formula</strong></span>, then enter the formula.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Specify the display options, such as <span class="strong strong"><strong>Display name</strong></span> and <span class="strong strong"><strong>Icon</strong></span>, then click <span class="strong strong"><strong>Close</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="filter-the-data"></a>Apply filters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>You can use the <a class="xref" href="kibana-concepts-analysts.html#semi-structured-search" title="Semi-structured search">query bar</a> to create queries that filter all the data in a visualization, or use the layer pane and legend filters to apply filters based on field values.</p>
+<div class="position-relative"><h5><a id="filter-with-the-function"></a>Apply multiple KQL filters</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>With the <span class="strong strong"><strong>Filters</strong></span> function, you can apply more than one KQL filter, and apply a KQL filter to a single layer so you can visualize filtered and unfiltered data at the same time.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+Click the <span class="strong strong"><strong>Filters</strong></span> function.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add a filter</strong></span>, then enter the KQL filter you want to apply.</p>
+<p>To try the <span class="strong strong"><strong>Filters</strong></span> function on your own, refer to <a class="xref" href="create-a-dashboard-of-panels-with-web-server-data.html#custom-ranges" title="Compare a subset of documents to all documents">Compare a subset of documents to all documents</a>.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h5><a id="filter-with-the-advanced-option"></a>Apply a single KQL filter</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>With the <span class="strong strong"><strong>Filter by</strong></span> advanced option, you can assign a color to each filter group in <span class="strong strong"><strong>Bar</strong></span> and <span class="strong strong"><strong>Line and area</strong></span> visualizations, and build complex tables. For example, to display failure rate and the overall data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add advanced options</strong></span>, then select <span class="strong strong"><strong>Filter by</strong></span>.
+</li>
+<li class="listitem">
+Enter the KQL filter you want to apply.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h5><a id="filter-with-legend-filters"></a>Apply legend filters</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Apply filters to visualizations directly from the values in the legend. <span class="strong strong"><strong>Bar</strong></span>, <span class="strong strong"><strong>Line and area</strong></span>, and <span class="strong strong"><strong>Proportion</strong></span> visualizations support legend filters.</p>
+<p>In the legend, click the field, then choose one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Filter for value</strong></span> &mdash; Applies a filter that displays only the field data in the visualization.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Filter out value</strong></span> &mdash; Applies a filter that removes the field data from the visualization.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="configure-the-visualization-components"></a>Configure the visualization components</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Each visualization type comes with a set of components that you access from the editor toolbar.</p>
+<p>The following component menus are available:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Visual options</strong></span> &mdash; Specifies how to display area, line, and bar chart options. For example, you can specify how to display the labels in bar charts.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Labels</strong></span> &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Legend</strong></span> &mdash; Specifies how to display the legend. You can choose to display the legend inside or outside the visualization, truncate the legend values when they&#8217;re too long, and <a class="xref" href="lens.html#customize-visualization-legend" title="Customize a visualization legend">select additional statistics to show</a>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Left axis</strong></span>, <span class="strong strong"><strong>Bottom axis</strong></span>, and <span class="strong strong"><strong>Right axis</strong></span> &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="customize-visualization-legend"></a>Customize a visualization legend</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>When creating or editing a visualization, you can customize the way the legend gets displayed, and the data it displays. To do that, look for the <span class="image"><img src="images/legend-icon.svg" alt="Legend icon"></span> icon.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/legend-popover.png" alt="Menu with options to customize the legend of a visualization" width="40%">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The options available can vary based on the type of chart you&#8217;re setting up. For example, showing additional statistics is only possible for time series charts.</p>
+</div>
+</div>
+<p><span class="strong strong"><strong>Change the legend&#8217;s display</strong></span></p>
+<p>With the <span class="strong strong"><strong>Visibility</strong></span>, <span class="strong strong"><strong>Position</strong></span>, and <span class="strong strong"><strong>Width</strong></span> options, you can adjust the way the legend appears in or next to the visualization.</p>
+<p><span class="strong strong"><strong>Truncate long labels</strong></span></p>
+<p>With the <span class="strong strong"><strong>Label truncation</strong></span> option, you can keep your legend minimal in case of long labels that span over multiple lines.</p>
+<p><span class="strong strong"><strong>Show additional statistics for time series charts</strong></span></p>
+<p>To make your legends as informative as possible, you can show some additional <span class="strong strong"><strong>Statistics</strong></span> for charts with a timestamp on one of the axes, and add a <span class="strong strong"><strong>Series header</strong></span>.</p>
+<p><span class="strong strong"><strong>Bar</strong></span>, <span class="strong strong"><strong>Line</strong></span> and <span class="strong strong"><strong>Area</strong></span> charts can show the following values:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Average</strong></span>: Average value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Median</strong></span>: Median value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Minimum</strong></span>: Minimum value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Maximum</strong></span>: Maximum value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Range</strong></span>: Difference between min and max values
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Last value</strong></span>: Last value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Last non-null value:</strong></span> Last non-null value
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>First value</strong></span>: First value considering all data points in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>First non-null value</strong></span>: First non-null value
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Difference</strong></span>: Difference between first and last values
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Difference %</strong></span>: % difference between first and last values
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Sum</strong></span>: Sum of al values plotted in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Count</strong></span>: number of data points plotted in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Distinct Count</strong></span>: number of data points with different values plotted in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Variance</strong></span>: Variance of all data points plotted in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Std Deviation</strong></span>: Standard deviation of all data points plotted in the chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Current or last value</strong></span>: The exact value of the current or last data point moused over
+</li>
+</ul>
+</div>
+<p>All statistics are computed based on the selected time range and the aggregated data points shown in the chart, rather than the original data coming from Elasticsearch.</p>
+<p>For example, if the metric plotted in the chart is <code class="literal">Median(system.memory)</code> and the time range is <span class="strong strong"><strong>last 24 hours</strong></span>, when you show the <span class="strong strong"><strong>Max</strong></span> statistic in the Legend, the value that shows corresponds to the <code class="literal">Max[Median(system.memory)]</code> for the last 24 hours.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/statistics-in-legends.png" alt="Additional statistics shown in the legend of a memory consumption bar chart">
+</div>
+</div>
+<div class="position-relative"><h4><a id="explore-lens-data-in-discover"></a>Explore the data in Discover</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>When your visualization includes one data view, you can open and explore the visualization data in <span class="strong strong"><strong>Discover</strong></span>.</p>
+<p>To get started, click <span class="strong strong"><strong>Explore data in Discover</strong></span> in the toolbar.</p>
+<p>For more information about exploring your data with <span class="strong strong"><strong>Discover</strong></span>, check out <a class="xref" href="discover.html" title="Discover">Discover</a>.</p>
+<div class="position-relative"><h4><a id="view-data-and-requests"></a>View the visualization data and requests</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>To view the data included in the visualization and the requests that collected the data, use the <span class="strong strong"><strong>Inspector</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Inspect</strong></span>.
+</li>
+<li class="listitem">
+<p>Open the <span class="strong strong"><strong>View</strong></span> dropdown, then click <span class="strong strong"><strong>Data</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the dropdown, select the table that contains the data you want to view.
+</li>
+<li class="listitem">
+To download the data, click <span class="strong strong"><strong>Download CSV</strong></span>, then select the format type.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Open the <span class="strong strong"><strong>View</strong></span> dropdown, then click <span class="strong strong"><strong>Requests</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the dropdown, select the requests you want to view.
+</li>
+<li class="listitem">
+To view the requests in <span class="strong strong"><strong>Console</strong></span>, click <span class="strong strong"><strong>Request</strong></span>, then click <span class="strong strong"><strong>Open in Console</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="save-the-lens-panel"></a>Save and add the panel</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>Save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span> and add it to the dashboard, or add it to the dashboard without saving.</p>
+<p>To save the panel to the <span class="strong strong"><strong>Visualize Library</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Save to library</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span> and add any applicable <a class="xref" href="managing-tags.html" title="Tags"><span class="strong strong"><strong>Tags</strong></span></a>.
+</li>
+<li class="listitem">
+Make sure that <span class="strong strong"><strong>Add to Dashboard after saving</strong></span> is selected.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+</ol>
+</div>
+<p>To save the panel to the dashboard:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+<li class="listitem">
+<p>Add an optional title to the panel.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the panel header, click <span class="strong strong"><strong>No Title</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Panel settings</strong></span> window, select <span class="strong strong"><strong>Show title</strong></span>.
+</li>
+<li class="listitem">
+Enter the <span class="strong strong"><strong>Title</strong></span>, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="lens-faq"></a>Frequently asked questions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/lens.asciidoc">edit</a></div>
+<p>For answers to common <span class="strong strong"><strong>Lens</strong></span> questions, review the following.</p>
+<details id="when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval">
+<summary class="title"><span class="strong strong"><strong>When should I normalize the data by unit or use a custom interval?</strong></span></summary>
+<div class="content">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Normalize by unit</strong></span> &mdash; Calculates the average for the interval. When you normalize the data by unit, the data appears less granular, but <span class="strong strong"><strong>Lens</strong></span> is able to calculate the data faster.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Customize time interval</strong></span> &mdash; Creates a bucket for each interval. When you customize the time interval, you can use a large time range, but <span class="strong strong"><strong>Lens</strong></span> calculates the data slower.
+</li>
+</ul>
+</div>
+<p>To normalize the interval:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add advanced options &gt; Normalize by unit</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Normalize by unit</strong></span> dropdown, select an option, then click <span class="strong strong"><strong>Close</strong></span>.
+</li>
+</ol>
+</div>
+<p>To create a custom interval:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Customize time interval</strong></span>.
+</li>
+<li class="listitem">
+Change the <span class="strong strong"><strong>Minimum interval</strong></span>, then click <span class="strong strong"><strong>Close</strong></span>.
+</li>
+</ol>
+</div>
+</div>
+</details>
+<details id="what-is-the-other-category">
+<summary class="title"><span class="strong strong"><strong>What data is categorized as Other?</strong></span></summary>
+<div class="content">
+<p>The <span class="strong strong"><strong>Other</strong></span> category contains all of the documents that do not match the specified criteria or filters.
+Use <span class="strong strong"><strong>Other</strong></span> when you want to compare a value, or multiple values, to a whole.</p>
+<p>By default, <span class="strong strong"><strong>Group other values as "Other"</strong></span> is enabled when you use the <span class="strong strong"><strong>Top values</strong></span> function.</p>
+<p>To disable <span class="strong strong"><strong>Group other values as "Other"</strong></span>, click a field in the layer pane, click <span class="strong strong"><strong>Advanced</strong></span>, then deselect <span class="strong strong"><strong>Group other values as "Other"</strong></span>.</p>
+</div>
+</details>
+<details id="how-can-i-include-documents-without-the-field-in-the-operation">
+<summary class="title"><span class="strong strong"><strong>How do I add documents without a field?</strong></span></summary>
+<div class="content">
+<p>By default, <span class="strong strong"><strong>Lens</strong></span> retrieves only the documents from the fields.
+For bucket aggregations, such as <span class="strong strong"><strong>Top values</strong></span>, you can add documents that do not contain the fields,
+which is helpful when you want to make a comparison to the whole documentation set.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the layer pane, click a field.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Advanced</strong></span>, then select <span class="strong strong"><strong>Include documents without this field</strong></span>.
+</li>
+</ol>
+</div>
+</div>
+</details>
+<details id="when-do-i-use-runtime-fields-vs-formula">
+<summary class="title"><span class="strong strong"><strong>When do I use runtime fields vs. formula?</strong></span></summary>
+<div class="content">
+<p>Use runtime fields to format, concatenate, and extract document-level fields. Runtime fields work across all of Kibana and are best used for smaller computations without compromising performance.</p>
+<p>Use formulas to compare multiple Elasticsearch aggregations that can be filtered or shifted in time. Formulas apply only to <span class="strong strong"><strong>Lens</strong></span> panels and are computationally intensive.</p>
+</div>
+</details>
+<details id="is-it-possible-to-have-more-than-one-Y-axis-scale">
+<summary class="title"><span class="strong strong"><strong>Can I add more than one y-axis scale?</strong></span></summary>
+<div class="content">
+<p>For each y-axis, you can select <span class="strong strong"><strong>Left</strong></span> and <span class="strong strong"><strong>Right</strong></span>, and configure a different scale.</p>
+</div>
+</details>
+<details id="why-is-my-value-with-the-right-color-using-value-based-coloring">
+<summary class="title"><span class="strong strong"><strong>Why is my value the incorrect color when I use value-based coloring?</strong></span></summary>
+<div class="content">
+<p>Here&#8217;s a short list of few different aspects to check:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
+</li>
+<li class="listitem">
+Make sure you have the correct value precision setup. Value formatters could round the numeric values up or down.
+</li>
+<li class="listitem">
+Make sure the correct color continuity option is selected. If the number is below the first color stop value, a continuity of type <code class="literal">Below</code> or <code class="literal">Above and below range</code> is required.
+</li>
+<li class="listitem">
+<p>The default values set by the Value type are based on the current data range displayed in the data table.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If a custom <code class="literal">Number</code> configuration is used, check that the color stop values are covering the current data range.
+</li>
+<li class="listitem">
+If a <code class="literal">Percent</code> configuration is used, and the data range changes, the colors displayed are affected.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</details>
+<details id="can-i-sort-by-multiple-columns">
+<summary class="title"><span class="strong strong"><strong>How do I sort by multiple columns?</strong></span></summary>
+<div class="content">
+<p>Multiple column sorting is unsupported, but is supported in <span class="strong strong"><strong>Discover</strong></span>. For information on how to sort multiple columns in <span class="strong strong"><strong>Discover</strong></span>,
+refer to <a class="xref" href="discover.html#explore-fields-in-your-data" title="Explore the fields in your data">Explore the fields in your data</a>.</p>
+</div>
+</details>
+<details id="why-my-field-is-missing-from-the-fields-list">
+<summary class="title"><span class="strong strong"><strong>Why is my field missing from the fields list?</strong></span></summary>
+<div class="content">
+<p>The following field types do not appear in the <span class="strong strong"><strong>Available fields</strong></span> list:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Full-text
+</li>
+<li class="listitem">
+geo_point
+</li>
+<li class="listitem">
+flattened
+</li>
+<li class="listitem">
+object
+</li>
+</ul>
+</div>
+<p>Verify if the field appears in the <span class="strong strong"><strong>Empty fields</strong></span> list. <span class="strong strong"><strong>Lens</strong></span> uses heuristics to determine if the fields contain values. For sparse data sets, the heuristics are less precise.</p>
+</div>
+</details>
+<details id="how-to-handle-gaps-in-time-series-visualizations">
+<summary class="title"><span class="strong strong"><strong>What do I do with gaps in time series visualizations?</strong></span></summary>
+<div class="content">
+<p>When you create <span class="strong strong"><strong>Area</strong></span> and <span class="strong strong"><strong>Line</strong></span> charts with sparse time series data, open <span class="strong strong"><strong>Visual options</strong></span> in the editor toolbar, then select a <span class="strong strong"><strong>Missing values</strong></span> option.</p>
+</div>
+</details>
+<details id="is-it-possible-to-change-the-scale-of-Y-axis">
+<summary class="title"><span class="strong strong"><strong>Can I statically define the y-axis scale?</strong></span></summary>
+<div class="content">
+<p>You can set the scale, or <em>bounds</em>, for area, bar, and line charts. You can configure the bounds for all functions, except <span class="strong strong"><strong>Percentile</strong></span>. Logarithmic scales are unsupported.</p>
+<p>To configure the bounds, use the menus in the editor toolbar. Bar and area charts required 0 in the scale between <span class="strong strong"><strong>Lower bound</strong></span> and <span class="strong strong"><strong>Upper bound</strong></span>.</p>
+</div>
+</details>
+<details id="is-it-possible-to-show-icons-in-datatable">
+<summary class="title"><span class="strong strong"><strong>Is it possible to display icons in data tables?</strong></span></summary>
+<div class="content">
+<p>You can display icons with <a class="xref" href="managing-data-views.html" title="Manage data views">field formatters</a> in data tables.</p>
+</div>
+</details>
+<details id="is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens">
+<summary class="title"><span class="strong strong"><strong>How do I inspect Elasticsearch queries in visualizations?</strong></span></summary>
+<div class="content">
+<p>You can inspect the requests sent by the visualization to Elasticsearch using the Inspector. It can be accessed within the editor or in the dashboard.</p>
+</div>
+</details>
+<details id="how-to-isolate-a-single-series-in-a-chart">
+<summary class="title"><span class="strong strong"><strong>How do I isolate a single series in a chart?</strong></span></summary>
+<div class="content">
+<p>For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically deselected.</p>
+</div>
+</details>
+<details id="is-it-possible-to-use-saved-serches-in-lens">
+<summary class="title"><span class="strong strong"><strong>How do I visualize saved searches?</strong></span></summary>
+<div class="content">
+<p>Visualizing saved searches in unsupported.</p>
+</div>
+</details>
+<details id="is-it-possible-to-decrease-or-increase-the-number-of-suggestions">
+<summary class="title"><span class="strong strong"><strong>How do I change the number of suggestions?</strong></span></summary>
+<div class="content">
+<p>Configuring the <span class="strong strong"><strong>Suggestions</strong></span> is unsupported.</p>
+</div>
+</details>
+<details id="is-it-possible-to-have-pagination-for-datatable">
+<summary class="title"><span class="strong strong"><strong>Is it possible to have pagination in a data table?</strong></span></summary>
+<div class="content">
+<p>Pagination in a data table is unsupported. To use pagination in data tables, create an <a class="xref" href="add-aggregation-based-visualization-panels.html#types-of-visualizations" title="Types of aggregation-based visualizations">aggregation-based data table</a>.</p>
+</div>
+</details>
+<details id="is-it-possible-to-select-color-for-specific-bar-or-point">
+<summary class="title"><span class="strong strong"><strong>How do I change the color for a single data point?</strong></span></summary>
+<div class="content">
+<p>Specifying the color for a single data point, such as a single bar or line, is unsupported.</p>
+</div>
+</details>
+<details id="dynamic-metric-coloring">
+<summary class="title"><span class="strong strong"><strong>How does dynamic coloring work for the metric visualization?</strong></span></summary>
+<div class="content">
+<p>In the color palette editor, if you select <span class="strong strong"><strong>Value type: Number</strong></span> the colors are applied based on the <span class="strong strong"><strong>Primary metric</strong></span> value.</p>
+<p>The <span class="strong strong"><strong>Primary metric</strong></span> refers to the large number displayed in each tile.</p>
+<p class="screenshot"><span class="image"><img src="images/lens_primaryMetric.png" alt="Illustration of where to find the primary metric in a metric visualization."></span></p>
+<p>If you select <span class="strong strong"><strong>Value type: Percent</strong></span>, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.</p>
+<p>The logic is as follows. If there is a Breakdown dimension for multiple visualization tiles:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+When there is a <span class="strong strong"><strong>Maximum dimension</strong></span>, the range is from zero to the value of your <span class="strong strong"><strong>Maximum dimension</strong></span>.
+</li>
+<li class="listitem">
+When there is no <span class="strong strong"><strong>Maximum dimension</strong></span>, the range is from the smallest primary metric values to the greatest primary metric values.
+</li>
+</ul>
+</div>
+<p>If there is no Breakdown dimension for a single visualization tile:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+When there is a <span class="strong strong"><strong>Maximum dimension</strong></span>, the range is from zero to the value of your <span class="strong strong"><strong>Maximum dimension</strong></span>.
+</li>
+<li class="listitem">
+When there is no <span class="strong strong"><strong>Maximum dimension</strong></span>, <span class="strong strong"><strong>Value type: Percent</strong></span> cannot be selected because there&#8217;s no way to determine a range.
+</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="aggregation-reference.html">« Create panels with editors</a>
+</span>
+<span class="next">
+<a href="tsvb.html">TSVB »</a>
+</span>
+</div>
+</body>
+</html>

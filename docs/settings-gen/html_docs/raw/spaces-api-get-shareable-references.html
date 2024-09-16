@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Get shareable references API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Get shareable references API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="spaces-api.html" title="Kibana spaces APIs"/>
+<link rel="prev" href="spaces-api-update-objects-spaces.html" title="Update saved objects spaces API"/>
+<link rel="next" href="role-management-api.html" title="Kibana role management APIs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="spaces-api-update-objects-spaces.html">« Update saved objects spaces API</a>
+</span>
+<span class="next">
+<a href="role-management-api.html">Kibana role management APIs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="spaces-api.html">Kibana spaces APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Get shareable references API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_shareable_references.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="spaces-api-get-shareable-references"></a>Get shareable references API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_shareable_references.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Get shareable references.</p>
+<p>Collects references and spaces context for saved objects.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-shareable-references-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_shareable_references.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/spaces/_get_shareable_references</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-shareable-references-request-body"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_shareable_references.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">objects</code>
+</span>
+</dt>
+<dd>
+<p>
+(Required, object array) The saved objects to collect outbound references for.
+</p>
+<details open>
+<summary class="title">Properties of <code class="literal">objects</code></summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">type</code>
+</span>
+</dt>
+<dd>
+(Required, string) The saved object type.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The saved object ID.
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section child_attributes">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-get-shareable-references-response-body"></a>Response body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/get_shareable_references.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">objects</code>
+</span>
+</dt>
+<dd>
+<p>
+(object array) The returned input object or one of its references, with additional context.
+</p>
+<details open>
+<summary class="title">Properties of <code class="literal">objects</code></summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">type</code>
+</span>
+</dt>
+<dd>
+(string) The saved object type.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(string) The saved object ID.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">originId</code>
+</span>
+</dt>
+<dd>
+(string) The origin ID of the referenced object (if it has one).
+</dd>
+<dt>
+<span class="term">
+<code class="literal">inboundReferences</code>
+</span>
+</dt>
+<dd>
+<p>
+(object array) References to this object.
+</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This does not contain <em>all inbound references everywhere</em>, it only contains inbound references to this object within the scope of this operation.</p>
+</div>
+</div>
+<details open>
+<summary class="title">Properties of <code class="literal">inboundReferences</code></summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">type</code>
+</span>
+</dt>
+<dd>
+(string) The type of the object that has the inbound reference.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(string) The ID of the object that has the inbound reference.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">name</code>
+</span>
+</dt>
+<dd>
+(string) The name of the inbound reference.
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">spaces</code>
+</span>
+</dt>
+<dd>
+(string array) The space(s) that the referenced saved object exists in.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">spacesWithMatchingAliases</code>
+</span>
+</dt>
+<dd>
+(string array) The space(s) that legacy URL aliases matching this type/id exist in. (if there are any)
+</dd>
+<dt>
+<span class="term">
+<code class="literal">spacesWithMatchingOrigins</code>
+</span>
+</dt>
+<dd>
+(string array) The space(s) that objects matching this origin exist in (including this one). (if there are any)
+</dd>
+<dt>
+<span class="term">
+<code class="literal">isMissing</code>
+</span>
+</dt>
+<dd>
+(boolean) Whether or not this object or reference is missing.
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+</dl>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-api-update-objects-spaces.html">« Update saved objects spaces API</a>
+</span>
+<span class="next">
+<a href="role-management-api.html">Kibana role management APIs »</a>
+</span>
+</div>
+</body>
+</html>

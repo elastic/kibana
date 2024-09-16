@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Security | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Security | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="saved-object-ids.html" title="Saved Object IDs"/>
+<link rel="next" href="xpack-security-authorization.html" title="Granting access to Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="saved-object-ids.html">« Saved Object IDs</a>
+</span>
+<span class="next">
+<a href="xpack-security-authorization.html">Granting access to Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Security</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-security"></a>Security</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Elastic Stack security features enable you to easily secure a cluster. With
+security, you can
+password-protect your data as well as implement more advanced security measures
+such as encrypting communications, role-based access control, IP filtering, and
+auditing. For more information, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/secure-cluster.html" class="ulink" target="_top">Secure a cluster</a> and
+<a class="xref" href="using-kibana-with-security.html" title="Configure security in Kibana">Configuring Security in Kibana</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>There are security limitations that affect Kibana. For more information, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-limitations.html" class="ulink" target="_top">Security</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="_required_permissions_6"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/index.asciidoc">edit</a></div>
+<p>The <code class="literal">manage_security</code> cluster privilege is required to access all Security features.</p>
+<div class="position-relative"><h3><a id="_users_2"></a>Users</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/index.asciidoc">edit</a></div>
+<p>To create and manage users, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Users</strong></span>.
+You can also change their passwords and roles. For more information about
+authentication and built-in users, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/setting-up-authentication.html" class="ulink" target="_top">Setting up user authentication</a>.</p>
+<div class="position-relative"><h3><a id="_roles_2"></a>Roles</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/index.asciidoc">edit</a></div>
+<p>To manage roles, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Roles</strong></span>, or use
+the <a class="xref" href="role-management-api.html" title="Kibana role management APIs"><em>Kibana role management APIs</em></a>. For more information on configuring roles for Kibana, see <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.</p>
+<p>For a more holistic overview of configuring roles for the entire stack,
+see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/authorization.html" class="ulink" target="_top">User authorization</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Managing roles that grant <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana privileges</a> using the Elasticsearch
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api.html#security-role-apis" class="ulink" target="_top">role management APIs</a> is not supported. Doing so will likely
+cause Kibana&#8217;s authorization to behave unexpectedly.</p>
+</div>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="saved-object-ids.html">« Saved Object IDs</a>
+</span>
+<span class="next">
+<a href="xpack-security-authorization.html">Granting access to Kibana »</a>
+</span>
+</div>
+</body>
+</html>

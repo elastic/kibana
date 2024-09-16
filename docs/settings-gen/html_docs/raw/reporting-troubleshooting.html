@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Troubleshooting reporting features | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Troubleshooting reporting features | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="reporting-getting-started.html" title="Reporting and sharing"/>
+<link rel="prev" href="automating-report-generation.html" title="Automatically generate reports"/>
+<link rel="next" href="reporting-troubleshooting-csv.html" title="Troubleshooting CSV reports"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="automating-report-generation.html">« Automatically generate reports</a>
+</span>
+<span class="next">
+<a href="reporting-troubleshooting-csv.html">Troubleshooting CSV reports »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="reporting-getting-started.html">Reporting and sharing</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Troubleshooting reporting features</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="reporting-troubleshooting"></a>Troubleshooting reporting features</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Kibana excels as a data visualization tool. The reporting features exist to export data as simple reports, however Kibana is not a data export tool.
+To export data at a large scale, there are better ways and better architectures for exporting data at scale from Elasticsearch.</p>
+<p>If you have trouble creating simple reports, there are some general solutions to common problems you might encounter while using reporting features.
+For tips related to specific types of reports, refer to <a class="xref" href="reporting-troubleshooting-csv.html" title="Troubleshooting CSV reports">CSV</a> and <a class="xref" href="reporting-troubleshooting-pdf.html" title="Troubleshooting PDF and PNG reports">PDF/PNG</a>.</p>
+<div class="position-relative"><h3><a id="reporting-troubleshooting-error-messages"></a>Error messages</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+<p>There are some common solutions for error messages that you might encounter in reporting features.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-version-conflict-exception"></a>Version conflict engine exceptions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+<p>If you are running multiple instances of Kibana in a cluster, the instances share the work of running report jobs to evenly distribute the workload.
+Each instance searches the reporting index for "pending" jobs that the user has requested.
+It is possible for multiple instances to find the same job in these searches.
+Only the instance that successfully updated the job status to "processing" will actually run the report job.
+The other instances that unsuccessfully tried to make the same update will log something similar to this:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">StatusCodeError: [version_conflict_engine_exception] [...]: version conflict, required seqNo [6124], primary term [1]. current document has seqNo [6125] and primary term [1], with { ... }
+  status: 409,
+  displayName: 'Conflict',
+  path: '/.reporting-...',
+  body: {
+    error: {
+      type: 'version_conflict_engine_exception',
+      reason: '[...]: version conflict, required seqNo [6124], primary term [1]. current document has seqNo [6125] and primary term [1]',
+    },
+  },
+  statusCode: 409
+}</pre>
+</div>
+<p>These messages alone don&#8217;t indicate a problem.
+They show normal events that happen in a healthy system.</p>
+<div class="position-relative"><h4><a id="_max_attempts_reached"></a>Max attempts reached</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+<p>There are two primary causes for a "Max attempts reached" error:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+You&#8217;re creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the <code class="literal">xpack.reporting.queue.timeout</code>
+</li>
+<li class="listitem">
+Kibana is hosted behind a reverse-proxy, and the <a class="xref" href="reporting-settings-kb.html#reporting-kibana-server-settings" title="Kibana server settings for headless browser connection">Kibana server settings</a> are not configured correctly
+</li>
+</ul>
+</div>
+<p>Create a Markdown visualization and then create a PDF report.
+If this succeeds, increase the <code class="literal">xpack.reporting.queue.timeout</code> setting.
+If the
+PDF report fails with "Max attempts reached," check your <a class="xref" href="reporting-settings-kb.html#reporting-kibana-server-settings" title="Kibana server settings for headless browser connection">Kibana server settings</a>.</p>
+<div class="position-relative"><h3><a id="reporting-troubleshooting-verbose-logs"></a>Verbose logging</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-troubleshooting.asciidoc">edit</a></div>
+<p>Kibana server logs have a lot of useful information for troubleshooting and understanding how things work.
+The full logs from reporting features are a good place to look when you encounter problems.
+In <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging.root.level: all</pre>
+</div>
+<p>For more information about logging, check out <a class="xref" href="settings.html#logging-root-level">Kibana configuration settings</a>.</p>
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="automating-report-generation.html">« Automatically generate reports</a>
+</span>
+<span class="next">
+<a href="reporting-troubleshooting-csv.html">Troubleshooting CSV reports »</a>
+</span>
+</div>
+</body>
+</html>

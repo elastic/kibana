@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Configuration service | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Configuration service | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="application-service.html" title="Application service"/>
+<link rel="next" href="elasticsearch-service.html" title="Elasticsearch service"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="application-service.html">« Application service</a>
+</span>
+<span class="next">
+<a href="elasticsearch-service.html">Elasticsearch service »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Configuration service</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/configuration-service.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="configuration-service"></a>Configuration service</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/configuration-service.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana provides <code class="literal">ConfigService</code> for plugin developers that want to support
+adjustable runtime behavior for their plugins.
+Plugins can only read their own configuration values, it is not possible to access the configuration values from Kibana Core or other plugins directly.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Configuration service is only available server side.</p>
+</div>
+</div>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">// in Legacy platform
+const basePath = config.get('server.basePath');
+// in Kibana Platform 'basePath' belongs to the http service
+const basePath = core.http.basePath.get(request);</pre>
+</div>
+<p>To have access to your plugin config, you <em>should</em>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Declare plugin-specific <code class="literal">configPath</code> (will fallback to plugin <code class="literal">id</code>
+if not specified) in your plugin definition.
+</li>
+<li class="listitem">
+Export schema validation for the config from plugin&#8217;s main file. Schema is
+mandatory. If a plugin reads from the config without schema declaration,
+<code class="literal">ConfigService</code> will throw an error.
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>my_plugin/server/index.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { schema, TypeOf } from '@kbn/config-schema';
+export const plugin = …
+export const config = {
+  schema: schema.object(…),
+};
+export type MyPluginConfigType = TypeOf&lt;typeof config.schema&gt;;</pre>
+</div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Read config value exposed via <code class="literal">PluginInitializerContext</code>:
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>my_plugin/server/plugin.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { PluginInitializerContext } from '@kbn/core/server';
+export class MyPlugin {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config$ = initializerContext.config.create&lt;MyPluginConfigType&gt;();
+    // or if config is optional:
+    this.config$ = initializerContext.config.createIfExists&lt;MyPluginConfigType&gt;();
+  }
+  ...
+}</pre>
+</div>
+<p>If your plugin also has a client-side part, you can also expose
+configuration properties to it using the configuration <code class="literal">exposeToBrowser</code>
+allow-list property.</p>
+<p><span class="strong strong"><strong>my_plugin/server/index.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Only on server' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf&lt;typeof configSchema&gt;;
+
+export const config: PluginConfigDescriptor&lt;ConfigType&gt; = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+};</pre>
+</div>
+<p>Configuration containing only the exposed properties will be then
+available on the client-side using the plugin&#8217;s <code class="literal">initializerContext</code>:</p>
+<p><span class="strong strong"><strong>my_plugin/public/index.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">interface ClientConfigType {
+  uiProp: string;
+}
+
+export class MyPlugin implements Plugin&lt;PluginSetup, PluginStart&gt; {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = this.initializerContext.config.get&lt;ClientConfigType&gt;();
+  }</pre>
+</div>
+<p>All plugins are considered enabled by default. If you want to disable
+your plugin, you could declare the <code class="literal">enabled</code> flag in the plugin
+config. This is a special Kibana Platform key. Kibana reads its
+value and won’t create a plugin instance if <code class="literal">enabled: false</code>.</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};</pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="handle-plugin-configuration-deprecations"></a>Handle plugin configuration deprecations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/configuration-service.asciidoc">edit</a></div>
+</div></div></div>
+<p>If your plugin has deprecated configuration keys, you can describe them using
+the <code class="literal">deprecations</code> config descriptor field.
+Deprecations are managed on a per-plugin basis, meaning you don’t need to specify
+the whole property path, but use the relative path from your plugin’s
+configuration root.</p>
+<p><span class="strong strong"><strong>my_plugin/server/index.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+
+const configSchema = schema.object({
+  newProperty: schema.string({ defaultValue: 'Some string' }),
+});
+
+type ConfigType = TypeOf&lt;typeof configSchema&gt;;
+
+export const config: PluginConfigDescriptor&lt;ConfigType&gt; = {
+  schema: configSchema,
+  deprecations: ({ rename, unused }) =&gt; [
+    rename('oldProperty', 'newProperty'),
+    unused('someUnusedProperty'),
+  ],
+};</pre>
+</div>
+<p>In some cases, accessing the whole configuration for deprecations is
+necessary. For these edge cases, <code class="literal">renameFromRoot</code> and <code class="literal">unusedFromRoot</code>
+are also accessible when declaring deprecations.</p>
+<p><span class="strong strong"><strong>my_plugin/server/index.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">export const config: PluginConfigDescriptor&lt;ConfigType&gt; = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot, unusedFromRoot }) =&gt; [
+    renameFromRoot('oldplugin.property', 'myplugin.property'),
+    unusedFromRoot('oldplugin.deprecated'),
+  ],
+};</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="validating-your-configuration-based-on-context-references"></a>Validating your configuration based on context references</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/configuration-service.asciidoc">edit</a></div>
+</div></div></div>
+<p>Some features require special configuration when running in different modes (dev/prod/dist, or even serverless). For purpose, core injects the following <em>references</em> in the validation&#8217;s context:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="center" valign="top">Context Reference</th>
+<th align="center" valign="top">Potential values</th>
+<th align="left" valign="top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center" valign="top"><p><code class="literal">dev</code></p></td>
+<td align="center" valign="top"><p><code class="literal">true</code>|<code class="literal">false</code></p></td>
+<td align="left" valign="top"><p>Is Kibana running in Dev mode?</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">prod</code></p></td>
+<td align="center" valign="top"><p><code class="literal">true</code>|<code class="literal">false</code></p></td>
+<td align="left" valign="top"><p>Is Kibana running in Production mode (running from binary)?</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">dist</code></p></td>
+<td align="center" valign="top"><p><code class="literal">true</code>|<code class="literal">false</code></p></td>
+<td align="left" valign="top"><p>Is Kibana running from a distributable build (not running from source)?</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">serverless</code></p></td>
+<td align="center" valign="top"><p><code class="literal">true</code>|<code class="literal">false</code></p></td>
+<td align="left" valign="top"><p>Is Kibana running in Serverless offering?</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">version</code></p></td>
+<td align="center" valign="top"><p><code class="literal">8.9.0</code></p></td>
+<td align="left" valign="top"><p>The current version of Kibana</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">buildNum</code></p></td>
+<td align="center" valign="top"><p><code class="literal">12345</code></p></td>
+<td align="left" valign="top"><p>The build number</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">branch</code></p></td>
+<td align="center" valign="top"><p><code class="literal">main</code></p></td>
+<td align="left" valign="top"><p>The current branch running</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">buildSha</code></p></td>
+<td align="center" valign="top"><p><code class="literal">12345</code></p></td>
+<td align="left" valign="top"><p>The build SHA (typically refers to the last commit&#8217;s SHA)</p></td>
+</tr>
+<tr>
+<td align="center" valign="top"><p><code class="literal">buildDate</code></p></td>
+<td align="center" valign="top"><p><code class="literal">2023-05-15T23:12:09+0000</code></p></td>
+<td align="left" valign="top"><p>The ISO 8601 date of the build</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To use any of the references listed above in a config validation schema, they can be accessed via <code class="literal">schema.contextRef('{CONTEXT_REFERENCE}')</code>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">export const config = {
+  schema: schema.object({
+    // Enabled by default in Dev mode
+    enabled: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+
+    // Setting only allowed in the Serverless offering
+    plansForWorldPeace: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.string({ defaultValue: 'Free hugs' }),
+      schema.never()
+    ),
+  }),
+};</pre>
+</div>
+<p>For Serverless vs. Traditional configuration, you are encouraged to use the <code class="literal">offeringBasedSchema</code> helper:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">import { schema, offeringBasedSchema } from '@kbn/config-schema'
+
+export const config = {
+  schema: schema.object({
+    // Enabled by default in Dev mode
+    enabled: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+
+    // Setting only allowed in the Serverless offering
+    plansForWorldPeace: offeringBasedSchema({
+      serverless: schema.string({ defaultValue: 'Free hugs' }),
+    }),
+  }),
+};</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="application-service.html">« Application service</a>
+</span>
+<span class="next">
+<a href="elasticsearch-service.html">Elasticsearch service »</a>
+</span>
+</div>
+</body>
+</html>

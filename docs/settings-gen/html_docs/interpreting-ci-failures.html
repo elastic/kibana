@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Interpreting CI Failures | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Interpreting CI Failures | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="contributing.html" title="Contributing"/>
+<link rel="prev" href="development-tests.html" title="Testing"/>
+<link rel="next" href="ci-metrics.html" title="CI Metrics"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="development-tests.html">« Testing</a>
+</span>
+<span class="next">
+<a href="ci-metrics.html">CI Metrics »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="contributing.html">Contributing</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Interpreting CI Failures</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/interpreting-ci-failures.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="interpreting-ci-failures"></a>Interpreting CI Failures</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/interpreting-ci-failures.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana CI uses a Buildkite feature called "Pipelines" to automate testing of the code in pull requests and on tracked branches. Pipelines are defined within the repository via the <code class="literal">Pipelines</code> at the <code class="literal">.buildkite/pipelines</code> folder.</p>
+<p>More information about Buildkite Pipelines can be found <a href="https://buildkite.com/docs/pipelines" class="ulink" target="_top">in the docs</a>.</p>
+<div class="position-relative"><h4><a id="_github_checks"></a>Github Checks</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/interpreting-ci-failures.asciidoc">edit</a></div>
+<p>When a test fails it will be reported to Github via Github Checks. We currently bucket tests into several categories which run in parallel to make CI faster. Groups like <code class="literal">ciGroup{X}</code> get a single check in Github, and other tests like linting, or type checks, get their own checks.</p>
+<p>Clicking the link next to the check in the conversation tab of a pull request will take you to the log output from that section of the tests. If that log output is truncated, or doesn&#8217;t clearly identify what happened, you can usually get more complete information by visiting Buildkite directly.</p>
+<div class="position-relative"><h4><a id="_viewing_job_executions_in_kibana"></a>Viewing Job Executions in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/interpreting-ci-failures.asciidoc">edit</a></div>
+<p>To view the results of a job execution in Buildkite, either click the link in the comment left by <code class="literal">@elasticmachine</code> or search for the <code class="literal">kibana-ci</code> check in the list at the bottom of the PR. This link will take you to the top-level page for the specific job execution that failed.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/job_view.png" alt="Buildkite pipeline view showing a few test failures">
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Git commit:</strong></span> the git commit that caused this build.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Test Results:</strong></span> A link to the test results screen, and shortcuts to the logs and jobs of the failed tests. Functional tests capture and store the log output from each specific test, and make it visible at these links.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Pipeline Steps:</strong></span>: A breakdown of the pipeline that was executed, along with individual log output for each step in the pipeline.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="_debugging_functional_ui_test_failures"></a>Debugging Functional UI Test Failures</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/interpreting-ci-failures.asciidoc">edit</a></div>
+<p>The logs in Pipeline Steps contain <code class="literal">Info</code> level logging. To debug Functional UI tests it&#8217;s usually helpful to see the debug logging. You can go to the test failure details by clicking on the <span class="strong strong"><strong>logs</strong></span> (1).</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/test_results.png" alt="Buildkite build screenshot">
+</div>
+</div>
+<p>Looking at the failure, we first look at the Error and stack trace. In the example below, this test failed to find an element within the timeout;
+ <code class="literal">Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])</code></p>
+<p>We know the test file from the stack trace was on line 50 of <code class="literal">test/accessibility/apps/spaces.ts</code> (this test and the stack trace context is kibana/x-pack/ so the file is <a href="https://github.com/elastic/kibana/blob/main/x-pack/test/accessibility/apps/group1/spaces.ts#L50" class="ulink" target="_top">https://github.com/elastic/kibana/blob/main/x-pack/test/accessibility/apps/group1/spaces.ts#L50</a>).
+The function to click on the element was called from a page object method in <code class="literal">test/functional/page_objects/space_selector_page.ts</code> <a href="https://github.com/elastic/kibana/blob/main/x-pack/test/functional/page_objects/space_selector_page.ts#L58" class="ulink" target="_top">https://github.com/elastic/kibana/blob/main/x-pack/test/functional/page_objects/space_selector_page.ts#L58</a></p>
+<pre class="literallayout">[00:03:36]             │ debg --- retry.try error: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
+[00:03:36]             │      Wait timed out after 10020ms
+[00:03:36]             │ info Taking screenshot "/dev/shm/workspace/parallel/24/kibana/x-pack/test/functional/screenshots/failure/Kibana spaces page meets a11y validations a11y test for click on create space page.png"
+[00:03:37]             │ info Current URL is: http://localhost:61241/app/home#/
+[00:03:37]             │ info Saving page source to: /dev/shm/workspace/parallel/24/kibana/x-pack/test/functional/failure_debug/html/Kibana spaces page meets a11y validations a11y test for click on create space page.html
+[00:03:37]             └- ✖ fail: Kibana spaces page meets a11y validations a11y test for click on create space page
+[00:03:37]             │      Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
+[00:03:37]             │ Wait timed out after 10020ms
+[00:03:37]             │     at /dev/shm/workspace/parallel/24/kibana/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+[00:03:37]             │     at runMicrotasks (&lt;anonymous&gt;)
+[00:03:37]             │     at processTicksAndRejections (internal/process/task_queues.js:93:5)
+[00:03:37]             │       at onFailure (/dev/shm/workspace/parallel/24/kibana/test/common/services/retry/retry_for_success.ts:17:9)
+[00:03:37]             │       at retryForSuccess (/dev/shm/workspace/parallel/24/kibana/test/common/services/retry/retry_for_success.ts:57:13)
+[00:03:37]             │       at Retry.try (/dev/shm/workspace/parallel/24/kibana/test/common/services/retry/retry.ts:32:14)
+[00:03:37]             │       at Proxy.clickByCssSelector (/dev/shm/workspace/parallel/24/kibana/test/functional/services/common/find.ts:420:7)
+[00:03:37]             │       at TestSubjects.click (/dev/shm/workspace/parallel/24/kibana/test/functional/services/common/test_subjects.ts:109:7)
+[00:03:37]             │       at SpaceSelectorPage.clickCreateSpace (test/functional/page_objects/space_selector_page.ts:59:7)
+[00:03:37]             │       at Context.&lt;anonymous&gt; (test/accessibility/apps/spaces.ts:50:7)
+[00:03:37]             │       at Object.apply (/dev/shm/workspace/parallel/24/kibana/node_modules/@kbn/test/src/functional_test_runner/lib/mocha/wrap_function.js:73:16)</pre>
+
+<p>But we don&#8217;t know <em>why</em> the test didn&#8217;t find the element.  It could be that its not on the right page, or that the element has changed.</p>
+<p>Just above the <code class="literal">✖ fail:</code> line, there is a line <code class="literal">info Taking screenshot ...</code> which tells us the name of the screenshot to look for in the <span class="strong strong"><strong>Google Cloud Storage (GCS) Upload Report:</strong></span></p>
+<p>Clicking the <code class="literal">[Download]</code> link for that png shows this image:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/a11y_screenshot.png" alt="Kibana spaces page meets a11y validations a11y test for click on create space page.png">
+</div>
+</div>
+<p>If we use a running Kibana instance and inspect elements, we find that the <code class="literal">createSpace</code> data-test-subj attribute is on this button in the Spaces page in Stack Management:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/inspect_element.png" alt="Kibana screenshot of Spaces page with developer tools open">
+</div>
+</div>
+<p>We know the test was not on the correct page to find the element to click. We see in the debug log the repeated attempts to find the element. If we scroll to the start of those repeated attempts, we see that the first thing the test did was this attempt to click on the <code class="literal">createSpace</code> element.</p>
+<pre class="literallayout">[00:01:30]           └-&gt; a11y test for manage spaces menu from top nav on Kibana home
+[00:01:30]           └-&gt; a11y test for manage spaces page
+[00:01:30]           └-&gt; a11y test for click on create space page
+[00:01:30]             └-&gt; "before each" hook: global before each for "a11y test for click on create space page"
+[00:01:30]             │ debg TestSubjects.click(createSpace)</pre>
+
+<p>And we can confirm that looking at the test code.</p>
+<p>So we need to backtrack further to find where the test opens the Spaces page. It turns out that the test before this one would have navigated to the proper page, but the test is skipped (marked <code class="literal">it.skip</code> in a PR).</p>
+<pre class="literallayout">it.skip('a11y test for manage spaces page', async () =&gt; {
+  await PageObjects.spaceSelector.clickManageSpaces();</pre>
+
+<p>Perhaps someone skipped the previous tests not realizing that the tests were not independent. A best practice would be for every test to be atomic and not depend on the results of any other test(s). But in UI testing, the setup takes time and we generally need to optimize for groups of tests within a describe block.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development-tests.html">« Testing</a>
+</span>
+<span class="next">
+<a href="ci-metrics.html">CI Metrics »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

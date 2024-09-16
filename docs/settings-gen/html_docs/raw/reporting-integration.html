@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Reporting integration | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Reporting integration | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="development-visualize-index.html" title="Developing Visualizations"/>
+<link rel="next" href="contributing.html" title="Contributing"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="development-visualize-index.html">« Developing Visualizations</a>
+</span>
+<span class="next">
+<a href="contributing.html">Contributing »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Reporting integration</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="reporting-integration"></a>Reporting integration</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>Applications abide by a contract that reporting features use to determine the information that is required to request exports of
+data from Kibana, and how to generate and store the reports.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>These pages document internal APIs and are not guaranteed to be supported across future versions of Kibana.
+However, these docs will be kept up-to-date to reflect the current implementation of Reporting integration in Kibana.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="_reporting_export_types"></a>Reporting Export Types</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+<p>"Export Types" are pieces of code that plug into the Kibana Reporting framework, and are responsible for exporting data on behalf
+of a Kibana application. These pieces of code are implemented as TypeScript classes that extend an abstract base class, and
+implement methods for controlling the creation of report jobs, and asynchronously generating report contents. Their <code class="literal">createJob</code>
+methods handle requests to create report jobs, by accepting jobParams objects and returning "task payload" objects. Their
+<code class="literal">runTask</code> methods generate the report contents by accepting the task payload object created from the <code class="literal">createJob</code> function, which
+is then stored in a system index in Elasticsearch.</p>
+<div class="position-relative"><h4><a id="reporting-share-service-registrations"></a>Share menu extensions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+<p>X-Pack services, such as the reporting features, register with the <code class="literal">share</code> plugin of the Kibana platform to register additional
+actions available to make content shareable.</p>
+<div class="position-relative"><h4><a id="_generate_a_report_job_url"></a>Generate a report job URL</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+<p>To generate a new reporting job, different export types require different <code class="literal">jobParams</code> objects, which are Rison-encoded and used as
+a <code class="literal">jobParams</code> query string variable in the Reporting generation endpoint URL. If you use the aforementioned
+<a class="xref" href="reporting-integration.html#reporting-share-service-registrations" title="Share menu extensions">Sharing plugin registrations</a> then this detail will be abstracted away. If your
+application does not use the Share menu extensions, you will have to generate the URL and create a POST request to the URL.</p>
+<div class="position-relative"><h4><a id="_basic_job_parameters"></a>Basic job parameters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+<p>Certain fields of Reporting job parameters are required for every type of export.</p>
+<pre class="screen">interface BaseParams {
+  title: string; <a id="CO87-1"></a><i class="conum" data-value="1"></i>
+  objectType: string; <a id="CO87-2"></a><i class="conum" data-value="2"></i>
+  browserTimezone: string; <a id="CO87-3"></a><i class="conum" data-value="3"></i>
+  version: string; <a id="CO87-4"></a><i class="conum" data-value="4"></i>
+};</pre>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO87-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">title</code> for the report. This is shown in the listing of reports in <span class="strong strong"><strong>Stack Management &gt; Alerts and
+Insights &gt; Reporting</strong></span> and used as the filename when the report is downloaded.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO87-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">objectType</code> field is automatically added when using internal Reporting APIs. This value used for choosing an icon for the
+report job in the listing of reports in Kibana.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO87-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">browserTimezone</code> field is automatically added when using internal Reporting APIs to craft the job parameters. This is
+used to correctly format time-based data in the user&#8217;s desired timezone.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO87-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">version</code> field is automatically added when using internal Reporting APIs. This is used in cases where job parameters are
+reused after an upgrade of Kibana, and a migration may be needed.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h4><a id="_csv"></a>CSV</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/csv-integration.asciidoc">edit</a></div>
+<div class="position-relative"><h5><a id="_job_parameters_of_csvsearchsource"></a>Job parameters of CsvSearchSource</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/csv-integration.asciidoc">edit</a></div>
+<p>The export type to generate CSV reports and is available in Discover uses "search source" objects. This export type is called
+<code class="literal">csv_searchsource</code> in the code. A configuration for a CSV report job is represented with an interface that includes the
+<code class="literal">BaseParams</code> and the following fields. To create a request for a CSV report, these required job parameters are Rison encoded into
+a query string variable of the report generation URL:</p>
+<pre class="screen">interface JobParamsCSV {
+  searchSource: SerializedSearchSourceFields; <a id="CO88-1"></a><i class="conum" data-value="1"></i>
+  columns?: string[]; <a id="CO88-2"></a><i class="conum" data-value="2"></i>
+};</pre>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO88-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>An object of serialized data that internally represents a search object in Kibana. It will contain a reference to a DataView
+saved object.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO88-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>An array of field names to include as columns in the CSV report.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="_job_parameters_of_csvfromsavedobject"></a>Job parameters of CsvFromSavedObject</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/csv-integration.asciidoc">edit</a></div>
+<p>A newer export type to generate CSV reports is available, currently only by API. This export type is called <code class="literal">csv_v2</code> in the code.</p>
+<pre class="screen">interface JobParamsCsvFromSavedObject {
+  locatorParams: LocatorParams[]; <a id="CO89-1"></a><i class="conum" data-value="1"></i>
+};</pre>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO89-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">locatorParams</code> value is controlled by the Discover application and identifies a search loaded in Discover, including the
+selection of DataView, columns and filters. Only a single value in the array is permitted in the <code class="literal">createJob</code> method.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="_job_payload"></a>Job payload</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/csv-integration.asciidoc">edit</a></div>
+<p>After the job parameters are received by the route handler for the report generation URL, an additional field is automatically
+added to the fields from job parameters:</p>
+<pre class="screen">interface TaskPayloadCSV {
+  pagingStrategy: 'scan' | 'pit' <a id="CO90-1"></a><i class="conum" data-value="1"></i>
+}</pre>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO90-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">pagingStrategy</code> value is taken from the value of the <code class="literal">xpack.reporting.csv.scroll.strategy</code> setting in kibana.yml and used
+to control how the <code class="literal">runTask</code> method pages through all of the data.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h4><a id="_pdf_and_png"></a>PDF and PNG</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/pdf-integration.asciidoc">edit</a></div>
+<div class="position-relative"><h5><a id="_job_parameters"></a>Job parameters</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/pdf-integration.asciidoc">edit</a></div>
+<p>A configuration for a PDF or PNG report job is represented with an interface that includes the <code class="literal">BaseParams</code> and the following
+fields. To create a request for one of these report types, these required job parameters are encoded into a query string variable
+of the report generation URL:</p>
+<pre class="screen">interface BaseParamsPDFV2 {
+  layout: {
+    id: string; <a id="CO91-1"></a><i class="conum" data-value="1"></i>
+    dimensions: {
+      height: number;
+      width: number;
+    };
+  };
+  locatorParams: LocatorParams[]; <a id="CO91-2"></a><i class="conum" data-value="2"></i>
+}
+
+interface BaseParamsPNGV2 {
+  layout: {
+    id: string; <a id="CO91-3"></a><i class="conum" data-value="3"></i>
+    dimensions: {
+      height: number;
+      width: number;
+    };
+  };
+  locatorParams: LocatorParams; <a id="CO91-4"></a><i class="conum" data-value="4"></i>
+}</pre>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO91-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The available <code class="literal">layout.id</code> options for PDF exports are <code class="literal">preserve_layout</code>, <code class="literal">print</code>, and <code class="literal">canvas</code>. These control how dashboard
+panels are captured and positioned into pages in the PDF file.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO91-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The <code class="literal">locatorParams</code> value is controlled by the application loaded in the browser for which a screenshot will be captured. The
+parameters to generate a PDF report allow an array of <code class="literal">locatorParams</code> to support multi-page PDF reports.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO91-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The only available <code class="literal">layout.id</code> option for PNG exports is <code class="literal">preserve_layout</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO91-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The parameters to generate a PNG report allow a single value for <code class="literal">locatorParams</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="_how_applications_make_themselves_screenshot_capable"></a>How applications make themselves screenshot-capable</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/pdf-integration.asciidoc">edit</a></div>
+<p>When generating the PDF, the headless browser launched by the Reporting export type runs a script that looks for a number of
+attributes in the DOM to determine which elements should have their screenshot taken and when the Visualizations are done
+rendering.</p>
+<p>The print layout takes a screenshot of every element with the <code class="literal">data-shared-item</code> attribute and includes the
+individual screenshots in the PDF. The print layout also uses the <code class="literal">data-title</code> and <code class="literal">data-description</code>
+attributes on the same HTMLElement as the <code class="literal">data-shared-item</code> to specify the title and description.</p>
+<p>The preserve layout takes a screenshot of the element with the <code class="literal">data-shared-items-container</code> attribute. Additionally,
+reporting will resize the element with the <code class="literal">data-shared-items-container</code> to be the size specified in the layout dimensions.
+The preserve layout also uses the <code class="literal">data-title</code> and <code class="literal">data-description</code> attributes on the HTMLElement with the
+<code class="literal">data-shared-items-container</code> attribute to specify the title/description for the entire PDF.</p>
+<p>Reporting needs to determine when all of the visualizations have completed rendering, so that it can begin taking screenshots. If
+there are multiple visualizations, the <code class="literal">data-shared-items-count</code> attribute should be specified to let Reporting know how many
+Visualizations to look for. Reporting will look at every element with the <code class="literal">data-shared-item</code> attribute and use the corresponding
+<code class="literal">data-render-complete</code> attribute and <code class="literal">renderComplete</code> events to listen for rendering to complete. When rendering is complete for a
+visualization the <code class="literal">data-render-complete</code> attribute should be set to "true" and it should dispatch a custom DOM <code class="literal">renderComplete</code>
+event.</p>
+<p>If the reporting job uses multiple URLs, before looking for any of the <code class="literal">data-shared-item</code> or <code class="literal">data-shared-items-count</code> attributes,
+it waits for a <code class="literal">data-shared-page</code> attribute that specifies which page is being loaded.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_using_post_urls_for_debugging"></a>Using POST URLs for debugging</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/development/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>Developers can capture a POST URL from a reporting-capable application to access the <code class="literal">jobParams</code> query string variable in the
+public API report generation endpoint. The query string variable can be passed through a URL de-encoder and then passed through a
+Rison-to-JSON converter to make the job parameters human-readable.</p>
+<p>If attempting to send requests to the POST URL to test generating a report, use a shell script containing the curl command that
+POSTs the request. This will avoid any unintentional character escaping that can happen if running the curl command in an
+interactive shell.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development-visualize-index.html">« Developing Visualizations</a>
+</span>
+<span class="next">
+<a href="contributing.html">Contributing »</a>
+</span>
+</div>
+</body>
+</html>

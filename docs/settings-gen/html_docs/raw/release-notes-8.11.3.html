@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.11.3 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.11.3 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.11.4.html" title="Kibana 8.11.4"/>
+<link rel="next" href="release-notes-8.11.2.html" title="Kibana 8.11.2"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.11.4.html">« Kibana 8.11.4</a>
+</span>
+<span class="next">
+<a href="release-notes-8.11.2.html">Kibana 8.11.2 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.11.3</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.11.3"></a>Kibana 8.11.3</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>The 8.11.3 release includes the following bug fixes.</p>
+<div class="position-relative"><h3><a id="fixes-v8.11.3"></a>Bug Fixes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.11.3 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes a 500 error in the Fleet API when a request for the product versions endpoint throws <code class="literal">ECONNREFUSED</code> (<a href="https://github.com/elastic/kibana/pull/172850" class="ulink" target="_top">#172850</a>).
+</li>
+<li class="listitem">
+Fixes agent policy timeout to accept only integers (<a href="https://github.com/elastic/kibana/pull/172222" class="ulink" target="_top">#172222</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes data drift numeric fields not displaying correctly (<a href="https://github.com/elastic/kibana/pull/172504" class="ulink" target="_top">#172504</a>).
+</li>
+<li class="listitem">
+Fixes Data visualizer, ML field stats, and Data Frame Analytics so the <code class="literal">_tier</code> field can be excluded (<a href="https://github.com/elastic/kibana/pull/172223" class="ulink" target="_top">#172223</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Operations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes an issue where running <code class="literal">kibana-keystore</code> commands required <code class="literal">kibana.yml</code> to exist (<a href="https://github.com/elastic/kibana/pull/172943" class="ulink" target="_top">#172943</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.11.4.html">« Kibana 8.11.4</a>
+</span>
+<span class="next">
+<a href="release-notes-8.11.2.html">Kibana 8.11.2 »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.4.2 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.4.2 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.4.3.html" title="Kibana 8.4.3"/>
+<link rel="next" href="release-notes-8.4.1.html" title="Kibana 8.4.1"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.4.3.html">« Kibana 8.4.3</a>
+</span>
+<span class="next">
+<a href="release-notes-8.4.1.html">Kibana 8.4.1 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.4.2</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.4.2"></a>Kibana 8.4.2</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the following information about the Kibana 8.4.2 release.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.4.2"></a>Breaking change</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.</p>
+<p>There are no breaking changes in Kibana 8.4.2.</p>
+<p>To review the breaking changes in previous versions, refer to the following:</p>
+<p><a href="https://www.elastic.co/guide/en/kibana/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0" class="ulink" target="_top">8.3.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0" class="ulink" target="_top">8.2.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0" class="ulink" target="_top">8.1.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0" class="ulink" target="_top">8.0.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2" class="ulink" target="_top">8.0.0-rc2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" class="ulink" target="_top">8.0.0-rc1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" class="ulink" target="_top">8.0.0-beta1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" class="ulink" target="_top">8.0.0-alpha2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" class="ulink" target="_top">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="enhancement-v8.4.2"></a>Enhancements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+Logs a hash of the saved objects encryption key (<code class="literal">xpack.encryptedSavedObjects.encryptionKey</code>) when Kibana starts to assist in identifying mismatched encryption keys <a href="https://github.com/elastic/kibana/pull/139874" class="ulink" target="_top">#139874</a>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h3><a id="fixes-v8.4.2"></a>Bug fixes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Connectors
+</span>
+</dt>
+<dd>
+The connectors table now uses "compatibility" rather than "availability" <a href="https://github.com/elastic/kibana/pull/139024" class="ulink" target="_top">#139024</a>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+Fixes saved search embeddable rendering <a href="https://github.com/elastic/kibana/pull/140264" class="ulink" target="_top">#140264</a>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.4.2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Applies fixes for package policy upgrade API with multiple ids <a href="https://github.com/elastic/kibana/pull/140069" class="ulink" target="_top">#140069</a>
+</li>
+<li class="listitem">
+Improves performance for many integration policies <a href="https://github.com/elastic/kibana/pull/139648" class="ulink" target="_top">#139648</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes "Collapse by" for table and XY visualizations with multiple metrics in <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/140381" class="ulink" target="_top">#140381</a>
+</li>
+<li class="listitem">
+Fixes action menu in <span class="strong strong"><strong>Lens</strong></span> <a href="https://github.com/elastic/kibana/pull/139588" class="ulink" target="_top">#139588</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Explain Log Rate Spikes: Histogram fixes <a href="https://github.com/elastic/kibana/pull/139933" class="ulink" target="_top">#139933</a>
+</li>
+<li class="listitem">
+Explain Log Rate Spikes: Improve streaming headers for certain proxy configs <a href="https://github.com/elastic/kibana/pull/139637" class="ulink" target="_top">#139637</a>
+</li>
+<li class="listitem">
+Fixes navigation for the Basic licence <a href="https://github.com/elastic/kibana/pull/139469" class="ulink" target="_top">#139469</a>
+</li>
+<li class="listitem">
+Corrects file.path field name in v3_windows_anomalous_script job <a href="https://github.com/elastic/kibana/pull/139109" class="ulink" target="_top">#139109</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+Bfetch` response headers now include <code class="literal">X-Accel-Buffering: no</code> <a href="https://github.com/elastic/kibana/pull/139534" class="ulink" target="_top">#139534</a>
+</dd>
+<dt>
+<span class="term">
+Maps
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes issue where percentile aggregation was not working with vector tiles <a href="https://github.com/elastic/kibana/pull/140318" class="ulink" target="_top">#140318</a>
+</li>
+<li class="listitem">
+Fixes Map app crashing on file upload request timeout <a href="https://github.com/elastic/kibana/pull/139760" class="ulink" target="_top">#139760</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Monitoring
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Ensures GlobalState class has it&#8217;s destroy() method called on unmount <a href="https://github.com/elastic/kibana/pull/139908" class="ulink" target="_top">#139908</a>
+</li>
+<li class="listitem">
+Adds KibanaThemeProvider to Stack Monitoring UI <a href="https://github.com/elastic/kibana/pull/139839" class="ulink" target="_top">#139839</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Uptime
+</span>
+</dt>
+<dd>
+Fixes an issue where decryption errors caused the entire suite of monitors to fail syncing <a href="https://github.com/elastic/kibana/pull/140549" class="ulink" target="_top">#140549</a>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.4.3.html">« Kibana 8.4.3</a>
+</span>
+<span class="next">
+<a href="release-notes-8.4.1.html">Kibana 8.4.1 »</a>
+</span>
+</div>
+</body>
+</html>

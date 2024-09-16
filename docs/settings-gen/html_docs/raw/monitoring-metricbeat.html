@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Collect Kibana monitoring data with Metricbeat | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Collect Kibana monitoring data with Metricbeat | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="configuring-monitoring.html" title="Configure monitoring in Kibana"/>
+<link rel="prev" href="monitoring-elastic-agent.html" title="Collect Kibana monitoring data with Elastic Agent"/>
+<link rel="next" href="monitoring-data.html" title="View monitoring data in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="monitoring-elastic-agent.html">« Collect Kibana monitoring data with Elastic Agent</a>
+</span>
+<span class="next">
+<a href="monitoring-data.html">View monitoring data in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="configuring-monitoring.html">Configure monitoring in Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Collect Kibana monitoring data with Metricbeat</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-metricbeat.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="monitoring-metricbeat"></a>Collect Kibana monitoring data with Metricbeat</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-metricbeat.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>In 6.4 and later, you can use Metricbeat to collect data about Kibana
+and ship it to the monitoring cluster, rather than routing it through the
+production cluster as described in <a class="xref" href="monitoring-kibana.html" title="Collect monitoring data using legacy collectors">Legacy collection methods</a>.</p>
+<div class="imageblock">
+<div class="content">
+<img src="user/monitoring/images/metricbeat.png" alt="Example monitoring architecture">
+</div>
+</div>
+<p>To learn about monitoring in general, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html" class="ulink" target="_top">Monitor a cluster</a>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Disable the default collection of Kibana monitoring metrics.<br></p>
+<p>Add the following setting in the Kibana configuration file (<code class="literal">kibana.yml</code>):</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">monitoring.kibana.collection.enabled: false</pre>
+</div>
+<p>Leave the <code class="literal">monitoring.enabled</code> set to its default value (<code class="literal">true</code>).
+For more information, see
+<a class="xref" href="monitoring-settings-kb.html" title="Monitoring settings in Kibana">Monitoring settings in Kibana</a>.</p>
+</li>
+<li class="listitem">
+<a class="xref" href="start-stop.html" title="Start and stop Kibana">Start Kibana</a>.
+</li>
+<li class="listitem">
+<p>Set the <code class="literal">xpack.monitoring.collection.enabled</code> setting to <code class="literal">true</code> on
+each node in the production cluster. By default, it is disabled (<code class="literal">false</code>).</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You can specify this setting in either the <code class="literal">elasticsearch.yml</code> on each
+node or across the cluster as a dynamic cluster setting. If Elasticsearch
+security features are enabled, you must have <code class="literal">monitor</code> cluster privileges to
+view the cluster settings and <code class="literal">manage</code> cluster privileges to change them.</p>
+</div>
+</div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>In Kibana:</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li class="listitem">
+<p>Open Kibana in your web browser.</p>
+<p>If you are running Kibana locally, go to <code class="literal">http://localhost:5601/</code>.</p>
+<p>If the Elastic security features are enabled, log in.</p>
+</li>
+<li class="listitem">
+In the side navigation, click <span class="strong strong"><strong>Stack Monitoring</strong></span>. If data collection is
+disabled, you are prompted to turn it on.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>From the Console or command line, set <code class="literal">xpack.monitoring.collection.enabled</code>
+to <code class="literal">true</code> on the production cluster.<br></p>
+<p>For example, you can use the following APIs to review and change this setting:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">GET _cluster/settings
+
+PUT _cluster/settings
+{
+  "persistent": {
+    "xpack.monitoring.collection.enabled": true
+  }
+}</pre>
+</div>
+<p>For more information, see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitoring-settings.html" class="ulink" target="_top">Monitoring settings in Elasticsearch</a>
+and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-update-settings.html" class="ulink" target="_top">Cluster update settings</a>.</p>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<a href="https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-installation-configuration.html" class="ulink" target="_top">Install Metricbeat</a> on the
+same server as Kibana.
+</li>
+<li class="listitem">
+<p>Enable the Kibana X-Pack module in Metricbeat.<br></p>
+<p>For example, to enable the default configuration in the <code class="literal">modules.d</code> directory,
+run the following command:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">metricbeat modules enable kibana-xpack</pre>
+</div>
+<p>For more information, see
+<a href="https://www.elastic.co/guide/en/beats/metricbeat/master/configuration-metricbeat.html" class="ulink" target="_top">Specify which modules to run</a> and
+<a href="https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-module-kibana.html" class="ulink" target="_top">Kibana module</a>.</p>
+</li>
+<li class="listitem">
+<p>Configure the Kibana X-Pack module in Metricbeat.<br></p>
+<p>The <code class="literal">modules.d/kibana-xpack.yml</code> file contains the following settings:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">- module: kibana
+  metricsets:
+    - stats
+  period: 10s
+  hosts: ["localhost:5601"]
+  #basepath: ""
+  #username: "user"
+  #password: "secret"
+  xpack.enabled: true</pre>
+</div>
+<p>By default, the module collects Kibana monitoring metrics from <code class="literal">localhost:5601</code>.
+If that host and port number are not correct, you must update the <code class="literal">hosts</code>
+setting. If you configured Kibana to use encrypted communications, you must
+access it via HTTPS. For example, use a <code class="literal">hosts</code> setting like
+<code class="literal">https://localhost:5601</code>.</p>
+<p>If the Elastic security features are enabled, you must also provide a user
+ID and password so that Metricbeat can collect metrics successfully:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Create a user on the production cluster that has the
+<code class="literal">remote_monitoring_collector</code> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html" class="ulink" target="_top">built-in role</a>.
+Alternatively, use the <code class="literal">remote_monitoring_user</code>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-users.html" class="ulink" target="_top">built-in user</a>.
+</li>
+<li class="listitem">
+Add the <code class="literal">username</code> and <code class="literal">password</code> settings to the Kibana module configuration
+file.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Optional: Disable the system module in Metricbeat.</p>
+<p>By default, the <a href="https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-module-system.html" class="ulink" target="_top">system module</a> is
+enabled. The information it collects, however, is not shown on the <span class="strong strong"><strong>Monitoring</strong></span>
+page in Kibana. Unless you want to use that information for other purposes, run
+the following command:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">metricbeat modules disable system</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Identify where to send the monitoring data.<br></p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>In production environments, we strongly recommend using a separate cluster
+(referred to as the <em>monitoring cluster</em>) to store the data. Using a separate
+monitoring cluster prevents production cluster outages from impacting your
+ability to access your monitoring data. It also prevents monitoring activities
+from impacting the performance of your production cluster.</p>
+</div>
+</div>
+<p>For example, specify the Elasticsearch output information in the Metricbeat
+configuration file (<code class="literal">metricbeat.yml</code>):</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["http://es-mon-1:9200", "http://es-mon2:9200"] <a id="CO8-1"></a><i class="conum" data-value="1"></i>
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO8-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>In this example, the data is stored on a monitoring cluster with nodes
+<code class="literal">es-mon-1</code> and <code class="literal">es-mon-2</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>If you configured the monitoring cluster to use encrypted communications, you
+must access it via HTTPS. For example, use a <code class="literal">hosts</code> setting like
+<code class="literal">https://es-mon-1:9200</code>.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Elasticsearch monitoring features use ingest pipelines. The
+cluster that stores the monitoring data must have at least one node with the
+<code class="literal">ingest</code> role.</p>
+</div>
+</div>
+<p>If the Elasticsearch security features are enabled on the monitoring cluster, you
+must provide a valid user ID and password so that Metricbeat can send metrics
+successfully:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Create a user on the monitoring cluster that has the
+<code class="literal">remote_monitoring_agent</code> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html" class="ulink" target="_top">built-in role</a>.
+Alternatively, use the <code class="literal">remote_monitoring_user</code>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-users.html" class="ulink" target="_top">built-in user</a>.
+</li>
+<li class="listitem">
+Add the <code class="literal">username</code> and <code class="literal">password</code> settings to the Elasticsearch output information in
+the Metricbeat configuration file.
+</li>
+</ol>
+</div>
+<p>For more information about these configuration options, see
+<a href="https://www.elastic.co/guide/en/beats/metricbeat/master/elasticsearch-output.html" class="ulink" target="_top">Configure the Elasticsearch output</a>.</p>
+</li>
+<li class="listitem">
+<a href="https://www.elastic.co/guide/en/beats/metricbeat/master/metricbeat-starting.html" class="ulink" target="_top">Start Metricbeat</a>.
+</li>
+<li class="listitem">
+<a class="xref" href="monitoring-data.html" title="View monitoring data in Kibana">View the monitoring data in Kibana</a>.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="monitoring-elastic-agent.html">« Collect Kibana monitoring data with Elastic Agent</a>
+</span>
+<span class="next">
+<a href="monitoring-data.html">View monitoring data in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

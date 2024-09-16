@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Term join | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Term join | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps-aggregations.html" title="Plot big data without plotting too much data"/>
+<link rel="prev" href="point-to-point.html" title="Point to point"/>
+<link rel="next" href="maps-search.html" title="Search geographic data"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="point-to-point.html">« Point to point</a>
+</span>
+<span class="next">
+<a href="maps-search.html">Search geographic data »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps-aggregations.html">Plot big data without plotting too much data</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Term join</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="terms-join"></a>Term join</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>Use term joins to augment vector features with properties for <a class="xref" href="vector-style.html#maps-vector-style-data-driven" title="Data driven styling">data driven styling</a> and richer tooltip content.</p>
+<p>Term joins are available for the following <a class="xref" href="vector-layer.html" title="Vector layer">vector layers</a>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Configured GeoJSON
+</li>
+<li class="listitem">
+Documents
+</li>
+<li class="listitem">
+EMS Boundaries
+</li>
+</ul>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_example_term_join"></a>Example term join</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The <a class="xref" href="maps-getting-started.html#maps-add-choropleth-layer" title="Step 2. Add a choropleth layer">choropleth layer example</a> uses a term join to shade world countries by web log traffic.
+Darker shades symbolize countries with more web log traffic, and lighter shades symbolize countries with less traffic.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/gs_add_cloropeth_layer.png" alt="gs add cloropeth layer">
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_how_a_term_join_works"></a>How a term join works</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>A term join uses a shared key to combine vector features, the left source, with the results of an Elasticsearch terms aggregation, the right source.</p>
+<p>The cloropeth example uses the shared key, <a href="https://wikipedia.org/wiki/ISO_3166-1_alpha-2" class="ulink" target="_top">ISO 3166-1 alpha-2 code</a>, to join world countries and web log traffic.
+ISO 3166-1 alpha-2 code is an international standard that identifies countries by a two-letter country code.
+For example, <span class="strong strong"><strong>Sweden</strong></span> has an ISO 3166-1 alpha-2 code of <span class="strong strong"><strong>SE</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/terms_join_shared_key_config.png" alt="terms join shared key config">
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_left_source"></a>Left source</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The left source for the term join is the <a href="https://www.elastic.co/elastic-maps-service" class="ulink" target="_top">Elastic Maps Service (EMS)</a> World Countries. Vector features for this source are provided by EMS. You can also use your own vector features.</p>
+<p>In the following example, <span class="strong strong"><strong>iso2</strong></span> property defines the shared key for the left source.</p>
+<pre class="screen">{
+  geometry: {
+    coordinates: [...],
+    type: "Polygon"
+  },
+  properties: {
+    name: "Sweden",
+    iso2: "SE"
+  },
+  type: "Feature"
+}</pre>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_right_source"></a>Right source</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The right source uses the Kibana sample data set "Sample web logs".
+In this data set, the <span class="strong strong"><strong>geo.src</strong></span> field contains the ISO 3166-1 alpha-2 code of the country of origin.</p>
+<p>A <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-bucket-terms-aggregation.html" class="ulink" target="_top">terms aggregation</a> groups the sample web log documents by <span class="strong strong"><strong>geo.src</strong></span> and calculates metrics for each term.</p>
+<p>The METRICS configuration defines two metric aggregations:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The count of all documents in the terms bucket.
+</li>
+<li class="listitem">
+The average of the field "bytes" for all documents in the terms bucket.
+</li>
+</ul>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/terms_join_metric_config.png" alt="terms join metric config">
+</div>
+</div>
+<p>The right source does not provide individual documents, but instead provides the metrics from a terms aggregation.
+The metrics are calculated from the following sample web logs documents.</p>
+<pre class="screen">{
+  bytes: 1837,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 28, 2019 @ 07:23:08.754"
+},
+{
+  bytes: 971,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 27, 2019 @ 08:10:45.205"
+},
+{
+  bytes: 4277,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 21, 2019 @ 05:24:33.945"
+},
+{
+  bytes: 5624,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 21, 2019 @ 04:57:05.921"
+}</pre>
+<p>The terms aggregation creates a bucket for each unique <span class="strong strong"><strong>geo.src</strong></span> value. Metrics are calucated for all documents in a bucket.</p>
+<p>The following shows an example terms aggregation response. Note the <span class="strong strong"><strong>key</strong></span> property, which defines the shared key for the right source.</p>
+<pre class="screen">{
+  aggregations: {
+    join: {
+      buckets: [
+        {
+          doc_count: 4,
+          key: "SE",
+          avg_of_bytes: {
+            value: 3177.25
+          }
+        },
+        ...
+      ]
+    }
+  }
+}</pre>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_augment_the_left_source_with_metrics_from_the_right_source"></a>Augment the left source with metrics from the right source</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/maps-aggregations.asciidoc">edit</a></div>
+</div></div></div>
+<p>The join adds metrics for each terms aggregation bucket to the world country feature with the corresponding ISO 3166-1 alpha-2 code. Features that do not have a corresponding terms aggregation bucket are not visible on the map.</p>
+<p>The world country features now have two additional properties:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Count of web log traffic originating from the world country
+</li>
+<li class="listitem">
+Average bytes of web log traffic originating from the world country
+</li>
+</ul>
+</div>
+<p>The cloropeth example uses the count of web log traffic to symbolize countries by web log traffic.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="point-to-point.html">« Point to point</a>
+</span>
+<span class="next">
+<a href="maps-search.html">Search geographic data »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Connectors | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Connectors | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="manage-cases-settings.html" title="Configure case settings"/>
+<link rel="next" href="bedrock-action-type.html" title="Amazon Bedrock connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="manage-cases-settings.html">« Configure case settings</a>
+</span>
+<span class="next">
+<a href="bedrock-action-type.html">Amazon Bedrock connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Connectors</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="action-types"></a>Connectors</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+</div></div></div>
+<p>Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+Actions are instantiations of a connector that are linked to rules and run as background tasks on the Kibana server when rule conditions are met. Kibana provides the following types of connectors:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="bedrock-action-type.html" title="Amazon Bedrock connector and action">Amazon Bedrock</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to Amazon Bedrock.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="cases-action-type.html" title="Cases connector and action">Cases</a></p>
+</td>
+<td align="left" valign="top"><p>Add alerts to cases.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="crowdstrike-action-type.html" title="CrowdStrike connector">CrowdStrike</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to CrowdStrike.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="d3security-action-type.html" title="D3 Security connector and action">D3 Security</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to D3 Security.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="gemini-action-type.html" title="Google Gemini connector and action">Google Gemini</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to Google Gemini.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="email-action-type.html" title="Email connector and action">Email</a></p>
+</td>
+<td align="left" valign="top"><p>Send email from your server.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="resilient-action-type.html" title="IBM Resilient connector and action">IBM Resilient</a></p>
+</td>
+<td align="left" valign="top"><p>Create an incident in IBM Resilient.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="index-action-type.html" title="Index connector and action">Index</a></p>
+</td>
+<td align="left" valign="top"><p>Index data into Elasticsearch.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="jira-action-type.html" title="Jira connector and action">Jira</a></p>
+</td>
+<td align="left" valign="top"><p>Create an incident in Jira.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="teams-action-type.html" title="Microsoft Teams connector and action">Microsoft Teams</a></p>
+</td>
+<td align="left" valign="top"><p>Send a message to a Microsoft Teams channel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="obs-ai-assistant-action-type.html" title="Observability AI Assistant connector and action">Observability AI Assistant</a></p>
+</td>
+<td align="left" valign="top"><p>Add AI-driven insights and custom actions to your workflow.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="openai-action-type.html" title="OpenAI connector and action">OpenAI</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to OpenAI.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="opsgenie-action-type.html" title="Opsgenie connector and action">Opsgenie</a></p>
+</td>
+<td align="left" valign="top"><p>Create or close an alert in Opsgenie.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="pagerduty-action-type.html" title="PagerDuty connector and action">PagerDuty</a></p>
+</td>
+<td align="left" valign="top"><p>Send an event in PagerDuty.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="sentinelone-action-type.html" title="SentinelOne connector">SentinelOne</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to SentinelOne.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="server-log-action-type.html" title="Server log connector and action">ServerLog</a></p>
+</td>
+<td align="left" valign="top"><p>Add a message to a Kibana log.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="servicenow-action-type.html" title="ServiceNow ITSM connector and action">ServiceNow ITSM</a></p>
+</td>
+<td align="left" valign="top"><p>Create an incident in ServiceNow.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="servicenow-sir-action-type.html" title="ServiceNow SecOps connector and action">ServiceNow SecOps</a></p>
+</td>
+<td align="left" valign="top"><p>Create a security incident in ServiceNow.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="servicenow-itom-action-type.html" title="ServiceNow ITOM connector and action">ServiceNow ITOM</a></p>
+</td>
+<td align="left" valign="top"><p>Create an event in ServiceNow.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="slack-action-type.html" title="Slack connector and action">Slack</a></p>
+</td>
+<td align="left" valign="top"><p>Send a message to a Slack channel or user.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="swimlane-action-type.html" title="Swimlane connector and action">Swimlane</a></p>
+</td>
+<td align="left" valign="top"><p>Create an incident in Swimlane.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="thehive-action-type.html" title="TheHive connector and action">{thehive}</a></p>
+</td>
+<td align="left" valign="top"><p>Create cases and alerts in {thehive}.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="tines-action-type.html" title="Tines connector">Tines</a></p>
+</td>
+<td align="left" valign="top"><p>Send events to a Tines Story.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="torq-action-type.html" title="Torq connector and action">Torq</a></p>
+</td>
+<td align="left" valign="top"><p>Trigger a Torq workflow.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="webhook-action-type.html" title="Webhook connector and action">Webhook</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to a web service.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="cases-webhook-action-type.html" title="Webhook - Case Management connector and action">Webhook - Case Management</a></p>
+</td>
+<td align="left" valign="top"><p>Send a request to a Case Management web service.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<p><a class="xref" href="xmatters-action-type.html" title="xMatters connector and action">xMatters</a></p>
+</td>
+<td align="left" valign="top"><p>Send actionable alerts to on-call xMatters resources.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Some connector types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels, go to
+<a href="https://www.elastic.co/subscriptions" class="ulink" target="_top">the subscription page</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="connector-management"></a>Managing connectors</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>Rules use connectors to route actions to different destinations like log files, ticketing systems, and messaging tools. While each Kibana app can offer their own types of rules, they typically share connectors. <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span> offers a central place to view and manage all the connectors in the current space.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connector-listing.png" alt="Example connector listing in the Rules UI">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_required_permissions_2"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>Access to connectors is granted based on your privileges to alerting-enabled
+features. For more information, go to <a class="xref" href="alerting-setup.html#alerting-security" title="Security">Security</a>.</p>
+<div class="position-relative"><h3><a id="_connector_networking_configuration"></a>Connector networking configuration</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">action configuration settings</a> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use <code class="literal">xpack.actions.customHostSettings</code> to set per-host configurations.</p>
+<div class="position-relative"><h3><a id="connectors-list"></a>Connector list</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>In <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>, you can find a list of the connectors
+in the current space. You can use the search bar to find specific connectors by
+name and type. The <span class="strong strong"><strong>Type</strong></span> dropdown also enables you to filter to a subset of
+connector types.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connector-filter-by-type.png" alt="Filtering the connector list by types of connectors">
+</div>
+</div>
+<p>You can delete individual connectors using the trash icon. Alternatively, select
+multiple connectors and delete them in bulk using the <span class="strong strong"><strong>Delete</strong></span> button.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connector-delete.png" alt="Deleting connectors individually or in bulk">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You can delete a connector even if there are still actions referencing it.
+When this happens the action will fail to run and errors appear in the Kibana logs.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="creating-new-connector"></a>Creating a new connector</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>New connectors can be created with the <span class="strong strong"><strong>Create connector</strong></span> button, which guides
+you to select the type of connector and configure its properties.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connector-select-type.png" alt="Connector select type">
+</div>
+</div>
+<p>After you create a connector, it is available for use any time you set up an
+action in the current space.</p>
+<p>For out-of-the-box and standardized connectors, refer to
+<a class="xref" href="pre-configured-connectors.html" title="Preconfigured connectors">preconfigured connectors</a>.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You can also manage connectors as resources with the <a href="https://registry.terraform.io/providers/elastic/elasticstack/latest" class="ulink" target="_top">Elasticstack provider</a> for Terraform.
+For more details, refer to the <a href="https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_action_connector" class="ulink" target="_top">elasticstack_kibana_action_connector</a> resource.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="importing-and-exporting-connectors"></a>Importing and exporting connectors</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>To import and export connectors, use the
+<a class="xref" href="managing-saved-objects.html" title="Manage saved objects">Saved Objects Management UI</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connectors-import-banner.png" alt="Connectors import banner" width="50%">
+</div>
+</div>
+<p>If a connector is missing sensitive information after the import, a <span class="strong strong"><strong>Fix</strong></span>
+button appears in <span class="strong strong"><strong>Connectors</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/connectors-with-missing-secrets.png" alt="Connectors with missing secrets">
+</div>
+</div>
+<div class="position-relative"><h3><a id="monitoring-connectors"></a>Monitoring connectors</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/action-types.asciidoc">edit</a></div>
+<p>The <a class="xref" href="task-manager-health-monitoring.html" title="Task Manager health monitoring">Task Manager health API</a> helps you understand the performance of all tasks in your environment.
+However, if connectors fail to run, they will report as successful to Task Manager. The failure stats will not
+accurately depict the performance of connectors.</p>
+<p>For more information on connector successes and failures, refer to the <a class="xref" href="event-log-index.html" title="Event log index">Event log index</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="manage-cases-settings.html">« Configure case settings</a>
+</span>
+<span class="next">
+<a href="bedrock-action-type.html">Amazon Bedrock connector and action »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

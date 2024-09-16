@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Check reindex status API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Check reindex status API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="upgrade-assistant-api.html" title="Upgrade assistant APIs"/>
+<link rel="prev" href="upgrade-assistant-api-default-field.html" title="Add default field API"/>
+<link rel="next" href="cancel-reindex.html" title="Cancel reindex API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="upgrade-assistant-api-default-field.html">« Add default field API</a>
+</span>
+<span class="next">
+<a href="cancel-reindex.html">Cancel reindex API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="upgrade-assistant-api.html">Upgrade assistant APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Check reindex status API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="check-reindex-status"></a>Check reindex status API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental.</p>
+</div>
+</div>
+<p>Check the status of the reindex task.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="check-reindex-status-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/api/upgrade_assistant/reindex/myIndex</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="check-reindex-status-response-codes"></a>Response codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="check-reindex-status-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+  "reindexOp": {
+    "indexName": ".ml-state",
+    "newIndexName": ".reindexed-v7-ml-state", <a id="CO80-1"></a><i class="conum" data-value="1"></i>
+    "status": 0, <a id="CO80-2"></a><i class="conum" data-value="2"></i>
+    "lastCompletedStep": 40, <a id="CO80-3"></a><i class="conum" data-value="3"></i>
+    "reindexTaskId": "QprwvTMzRQ2MLWOW22oQ4Q:11819", <a id="CO80-4"></a><i class="conum" data-value="4"></i>
+    "reindexTaskPercComplete": 0.3, <a id="CO80-5"></a><i class="conum" data-value="5"></i>
+    "errorMessage": null <a id="CO80-6"></a><i class="conum" data-value="6"></i>
+  },
+  "warnings": [], <a id="CO80-7"></a><i class="conum" data-value="7"></i>
+  "hasRequiredPrivileges": true <a id="CO80-8"></a><i class="conum" data-value="8"></i>
+}</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Name of the new index that is being created.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Current status of the reindex. For details, see <a class="xref" href="check-reindex-status.html#status-code" title="Status codes">Status codes</a>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Last successfully completed step of the reindex. For details, see <a class="xref" href="check-reindex-status.html#step-code" title="Step codes">Step codes</a> table.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Task ID of the reindex task in Elasticsearch. Only present if reindexing has started.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal form from 0 to 1.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Error that caused the reindex to fail, if it failed.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-7"><i class="conum" data-value="7"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>An array of any warning codes explaining what changes are required for this reindex. For details, see <a class="xref" href="check-reindex-status.html#warning-code" title="Warning codes">Warning codes</a>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO80-8"><i class="conum" data-value="8"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies if the user has sufficient privileges to reindex this index. When security is unavailable or disables, returns <code class="literal">true</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="status-code"></a>Status codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">0</code>
+</span>
+</dt>
+<dd>
+In progress
+</dd>
+<dt>
+<span class="term">
+<code class="literal">1</code>
+</span>
+</dt>
+<dd>
+Completed
+</dd>
+<dt>
+<span class="term">
+<code class="literal">2</code>
+</span>
+</dt>
+<dd>
+Failed
+</dd>
+<dt>
+<span class="term">
+<code class="literal">3</code>
+</span>
+</dt>
+<dd>
+<p>
+Paused
+</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If the Kibana node that started the reindex is shutdown or restarted, the reindex goes into a paused state after some time.
+To resume the reindex, you must submit a new POST request to the <code class="literal">/api/upgrade_assistant/reindex/&lt;indexName&gt;</code> endpoint.</p>
+</div>
+</div>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">4</code>
+</span>
+</dt>
+<dd>
+Cancelled
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="step-code"></a>Step codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">0</code>
+</span>
+</dt>
+<dd>
+The reindex task has been created in Kibana.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">10</code>
+</span>
+</dt>
+<dd>
+The index group services stopped. Only applies to some system indices.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">20</code>
+</span>
+</dt>
+<dd>
+The index is set to <code class="literal">readonly</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">30</code>
+</span>
+</dt>
+<dd>
+The new destination index has been created.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">40</code>
+</span>
+</dt>
+<dd>
+The reindex task in Elasticsearch has started.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">50</code>
+</span>
+</dt>
+<dd>
+The reindex task in Elasticsearch has completed.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">60</code>
+</span>
+</dt>
+<dd>
+Aliases were created to point to the new index, and the old index has been deleted.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">70</code>
+</span>
+</dt>
+<dd>
+The index group services have resumed. Only applies to some system indices.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="warning-code"></a>Warning codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/upgrade-assistant/check_reindex_status.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">0</code>
+</span>
+</dt>
+<dd>
+Specifies to remove the <code class="literal">_all</code> meta field.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">1</code>
+</span>
+</dt>
+<dd>
+Specifies to convert any coerced boolean values in the source document. For example, <code class="literal">yes</code>, <code class="literal">1</code>, and <code class="literal">off</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">2</code>
+</span>
+</dt>
+<dd>
+Specifies to convert documents to support Elastic Common Schema. Only applies to APM indices created in 6.x.
+</dd>
+</dl>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="upgrade-assistant-api-default-field.html">« Add default field API</a>
+</span>
+<span class="next">
+<a href="cancel-reindex.html">Cancel reindex API »</a>
+</span>
+</div>
+</body>
+</html>

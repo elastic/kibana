@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana Plugin API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana Plugin API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="kibana-architecture.html" title="Architecture"/>
+<link rel="next" href="kibana-platform-api.html" title="Kibana Core API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-architecture.html">« Architecture</a>
+</span>
+<span class="next">
+<a href="kibana-platform-api.html">Kibana Core API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana Plugin API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/kibana-platform-plugin-api.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-platform-plugin-api"></a>Kibana Plugin API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/kibana-platform-plugin-api.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Kibana platform plugins are a significant step toward stabilizing Kibana architecture for all the developers.
+We made sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_anatomy_of_a_plugin"></a>Anatomy of a plugin</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/kibana-platform-plugin-api.asciidoc">edit</a></div>
+</div></div></div>
+<p>Plugins are defined as classes and present themselves to Kibana
+through a simple wrapper function. A plugin can have browser-side code,
+server-side code, or both. There is no architectural difference between
+a plugin in the browser and a plugin on the server.
+In both places, you describe your plugin similarly, and you interact with
+Core and other plugins in the same way.</p>
+<p>The basic file structure of a Kibana plugin named <code class="literal">demo</code> that
+has both client-side and server-side code would be:</p>
+<div class="pre_wrapper lang-tree">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-tree">plugins/
+  demo
+    kibana.json [1]
+    public
+      index.ts  [2]
+      plugin.ts [3]
+    server
+      index.ts  [4]
+      plugin.ts [5]</pre>
+</div>
+<p><span class="strong strong"><strong>[1] <code class="literal">kibana.json</code></strong></span> is a static manifest file that is used to identify the
+plugin and to specify if this plugin has server-side code, browser-side code, or both:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+  "id": "demo",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}</pre>
+</div>
+<p>Learn about the <a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-server/src/types.ts" class="ulink" target="_top">manifest
+file format</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p><code class="literal">package.json</code> files are irrelevant to and ignored by Kibana for discovering and loading plugins.</p>
+</div>
+</div>
+<p><span class="strong strong"><strong>[2] <code class="literal">public/index.ts</code></strong></span> is the entry point into the client-side code of
+this plugin. It must export a function named <code class="literal">plugin</code>, which will
+receive <a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts" class="ulink" target="_top">a standard set of core capabilities</a> as an argument.
+It should return an instance of its plugin class for
+Kibana to load.</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { PluginInitializerContext } from '@kbn/core/server';
+import { MyPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MyPlugin(initializerContext);
+}</pre>
+</div>
+<p><span class="strong strong"><strong>[3] <code class="literal">public/plugin.ts</code></strong></span> is the client-side plugin definition itself.
+Technically speaking, it does not need to be a class or even a separate
+file from the entry point, but <em>all plugins at Elastic</em> should be
+consistent in this way. See all <a href="https://github.com/elastic/kibana/blob/master/src/core/CONVENTIONS.md" class="ulink" target="_top">conventions
+for first-party Elastic plugins</a>.</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
+
+export class MyPlugin implements Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up during Kibana's startup sequence
+  }
+
+  public start(core: CoreStart) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
+    // called when plugin is torn down during Kibana's shutdown sequence
+  }
+}</pre>
+</div>
+<p><span class="strong strong"><strong>[4] <code class="literal">server/index.ts</code></strong></span> is the entry-point into the server-side code of
+this plugin. <a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-server/src/types.ts" class="ulink" target="_top">It is identical</a> in almost every way to the client-side
+entry-point:</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { MyPlugin } = await import('./plugin');
+  return new MyPlugin(initializerContext);
+}</pre>
+</div>
+<p><span class="strong strong"><strong>[5] <code class="literal">server/plugin.ts</code></strong></span> is the server-side plugin definition. The
+shape of this plugin is the same as it’s client-side counter-part:</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
+
+export class MyPlugin implements Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up during Kibana's startup sequence
+  }
+
+  public start(core: CoreStart) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
+    // called when plugin is torn down during Kibana's shutdown sequence
+  }
+}</pre>
+</div>
+<p>Kibana does not impose any technical restrictions on how the
+the internals of a plugin are architected, though there are certain
+considerations related to how plugins integrate with core APIs
+and APIs exposed by other plugins that may greatly impact how
+they are built.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="plugin-lifecycles"></a>Lifecycles &amp; Core Services</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/kibana-platform-plugin-api.asciidoc">edit</a></div>
+</div></div></div>
+<p>The various independent domains that makeup <code class="literal">core</code> are represented by a
+series of services and many of those services expose public interfaces
+that are provided to all plugins. Services expose different features
+at different parts of their lifecycle. We describe the lifecycle of
+core services and plugins with specifically-named functions on the
+service definition.</p>
+<p>Kibana has three lifecycles: <code class="literal">setup</code>,
+<code class="literal">start</code>, and <code class="literal">stop</code>. Each plugin&#8217;s <code class="literal">setup</code> functions is called sequentially
+while Kibana is setting up on the server or when it is being loaded in
+the browser. The <code class="literal">start</code> functions are called sequentially after <code class="literal">setup</code>
+has been completed for all plugins. The <code class="literal">stop</code> functions are called
+sequentially while Kibana is gracefully shutting down the server or
+when the browser tab or window is being closed.</p>
+<p>The table below explains how each lifecycle relates to the state
+of Kibana.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px" width="100%">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+<col class="col_4"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">lifecycle</th>
+<th align="left" valign="top">purpose</th>
+<th align="left" valign="top">server</th>
+<th align="left" valign="top">browser</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><em>setup</em></p></td>
+<td align="left" valign="top"><p>perform "registration" work to setup environment for runtime</p></td>
+<td align="left" valign="top"><p>configure REST API endpoint, register saved object types, etc.</p></td>
+<td align="left" valign="top"><p>configure application routes in SPA, register custom UI elements in extension points, etc.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><em>start</em></p></td>
+<td align="left" valign="top"><p>bootstrap runtime logic</p></td>
+<td align="left" valign="top"><p>respond to an incoming request, request Elasticsearch server, etc.</p></td>
+<td align="left" valign="top"><p>start polling Kibana server, update DOM tree in response to user interactions, etc.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><em>stop</em></p></td>
+<td align="left" valign="top"><p>cleanup runtime</p></td>
+<td align="left" valign="top"><p>dispose of active handles before the server shutdown.</p></td>
+<td align="left" valign="top"><p>store session data in the LocalStorage when the user navigates away from Kibana, etc.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Conversely, there is no equivalent to <code class="literal">uiExports</code> in Kibana Platform plugins.
+As a general rule of thumb, features that were registered via <code class="literal">uiExports</code> are
+now registered during the <code class="literal">setup</code> phase. Most of everything else should move
+to the <code class="literal">start</code> phase.</p>
+<p>The lifecycle-specific contracts exposed by core services are always
+passed as the first argument to the equivalent lifecycle function in a
+plugin. For example, the core <code class="literal">http</code> service exposes a function
+<code class="literal">createRouter</code> to all plugin <code class="literal">setup</code> functions. To use this function to register
+an HTTP route handler, a plugin just accesses it off of the first argument:</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { CoreSetup } from '@kbn/core/server';
+
+export class MyPlugin {
+  public setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+    // handler is called when '/path' resource is requested with `GET` method
+    router.get({ path: '/path', validate: false }, (context, req, res) =&gt; res.ok({ content: 'ok' }));
+  }
+}</pre>
+</div>
+<p>Different service interfaces can and will be passed to <code class="literal">setup</code>, <code class="literal">start</code>, and
+<code class="literal">stop</code> because certain functionality makes sense in the context of a
+running plugin while other types of functionality may have restrictions
+or may only make sense in the context of a plugin that is stopping.</p>
+<p>For example, the <code class="literal">stop</code> function in the browser gets invoked as part of
+the <code class="literal">window.onbeforeunload</code> event, which means you can’t necessarily
+execute asynchronous code here reliably. For that reason,
+<code class="literal">core</code> likely wouldn’t provide any asynchronous functions to plugin
+<code class="literal">stop</code> functions in the browser.</p>
+<p>The current lifecycle function for all plugins will be executed before the next
+lifecycle starts. That is to say that all <code class="literal">setup</code> functions are executed before
+any <code class="literal">start</code> functions are executed.</p>
+<p>These are the contracts exposed by the core services for each lifecycle:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">lifecycle</th>
+<th align="left" valign="top">server contract</th>
+<th align="left" valign="top">browser contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><em>constructor</em></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-server/src/types.ts" class="ulink" target="_top">PluginInitializerContext</a></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts" class="ulink" target="_top">PluginInitializerContext</a></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><em>setup</em></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts" class="ulink" target="_top">CoreSetup</a></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/lifecycle/core-lifecycle-browser-internal/src/internal_core_setup.ts" class="ulink" target="_top">CoreSetup</a></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><em>start</em></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/lifecycle/core-lifecycle-server/src/core_start.ts" class="ulink" target="_top">CoreStart</a></p></td>
+<td align="left" valign="top"><p><a href="https://github.com/elastic/kibana/blob/master/packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts" class="ulink" target="_top">CoreStart</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_integrating_with_other_plugins"></a>Integrating with other plugins</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/kibana-platform-plugin-api.asciidoc">edit</a></div>
+</div></div></div>
+<p>Plugins can expose public interfaces for other plugins to consume. Like
+<code class="literal">core</code>, those interfaces are bound to the lifecycle functions <code class="literal">setup</code>
+and/or <code class="literal">start</code>.</p>
+<p>Anything returned from <code class="literal">setup</code> or <code class="literal">start</code> will act as the interface, and
+while not a technical requirement, all first-party Elastic plugins
+will expose types for that interface as well. Third party plugins
+wishing to allow other plugins to integrate with it are also highly
+encouraged to expose types for their plugin interfaces.</p>
+<p><span class="strong strong"><strong>foobar plugin.ts:</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { Plugin } from '@kbn/core/server';
+export interface FoobarPluginSetup { <a id="CO82-1"></a><i class="conum" data-value="1"></i>
+  getFoo(): string;
+}
+
+export interface FoobarPluginStart { <a id="CO82-2"></a><i class="conum" data-value="1"></i>
+  getBar(): string;
+}
+
+export class MyPlugin implements Plugin&lt;FoobarPluginSetup, FoobarPluginStart&gt; {
+  public setup(): FoobarPluginSetup {
+    return {
+      getFoo() {
+        return 'foo';
+      },
+    };
+  }
+
+  public start(): FoobarPluginStart {
+    return {
+      getBar() {
+        return 'bar';
+      },
+    };
+  }
+}</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO82-1"><i class="conum" data-value="1"></i></a><a href="#CO82-2"></a></p>
+</td>
+<td align="left" valign="top">
+<p>We highly encourage plugin authors to explicitly declare public interfaces for their plugins.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>Unlike core, capabilities exposed by plugins are <em>not</em> automatically
+injected into all plugins. Instead, if a plugin wishes to use the public
+interface provided by another plugin, it must first declare that
+plugin as a dependency in it&#8217;s <a href="https://github.com/elastic/kibana/blob/master/packages/core/plugins/core-plugins-server/src/types.ts" class="ulink" target="_top"><code class="literal">kibana.json</code></a> manifest file.</p>
+<p><span class="strong strong"><strong>demo kibana.json:</strong></span></p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+  "id": "demo",
+  "requiredPlugins": ["foobar"],
+  "server": true,
+  "ui": true
+}</pre>
+</div>
+<p>With that specified in the plugin manifest, the appropriate interfaces
+are then available via the second argument of <code class="literal">setup</code> and/or <code class="literal">start</code>:</p>
+<p><span class="strong strong"><strong>demo plugin.ts:</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
+
+interface DemoSetupPlugins { <a id="CO83-1"></a><i class="conum" data-value="1"></i>
+  foobar: FoobarPluginSetup;
+}
+
+interface DemoStartPlugins {
+  foobar: FoobarPluginStart;
+}
+
+export class AnotherPlugin {
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { <a id="CO83-2"></a><i class="conum" data-value="2"></i>
+    const { foobar } = plugins;
+    foobar.getFoo(); // 'foo'
+    foobar.getBar(); // throws because getBar does not exist
+  }
+
+  public start(core: CoreStart, plugins: DemoStartPlugins) { <a id="CO83-3"></a><i class="conum" data-value="3"></i>
+    const { foobar } = plugins;
+    foobar.getFoo(); // throws because getFoo does not exist
+    foobar.getBar(); // 'bar'
+  }
+
+  public stop() {}
+}</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO83-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The interface for plugin&#8217;s dependencies must be manually composed. You can
+do this by importing the appropriate type from the plugin and constructing an
+interface where the property name is the plugin&#8217;s ID.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO83-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>These manually constructed types should then be used to specify the type of
+the second argument to the plugin.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO83-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Notice that the type for the setup and start lifecycles are different. Plugin lifecycle
+functions can only access the APIs that are exposed <em>during</em> that lifecycle.</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-architecture.html">« Architecture</a>
+</span>
+<span class="next">
+<a href="kibana-platform-api.html">Kibana Core API »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Osquery | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Osquery | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="fleet.html" title="Fleet"/>
+<link rel="next" href="manage-osquery-integration.html" title="Manage the integration"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="fleet.html">« Fleet</a>
+</span>
+<span class="next">
+<a href="manage-osquery-integration.html">Manage the integration »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Osquery</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="osquery"></a>Osquery</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p><a href="https://osquery.io" class="ulink" target="_top">Osquery</a> is an open source tool that lets you query operating systems like a database, providing you with visibility into your infrastructure and operating systems.
+Using basic SQL commands, you can ask questions about devices, such as servers,
+Docker containers, and computers running Linux, macOS, or Windows.
+The <a href="https://osquery.io/schema" class="ulink" target="_top">extensive schema</a> helps with a variety of use cases,
+including vulnerability detection, compliance monitoring, incident investigations, and more.</p>
+<p>With Osquery in Kibana, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Run live queries for one or more agents
+</li>
+<li class="listitem">
+Schedule query packs to capture changes to OS state over time
+</li>
+<li class="listitem">
+View a history of past queries and their results
+</li>
+<li class="listitem">
+Save queries and build a library of queries for specific use cases
+</li>
+</ul>
+</div>
+<p>Osquery in Kibana is powered by the <span class="strong strong"><strong>Osquery Manager</strong></span> integration.
+For information on how to set up <span class="strong strong"><strong>Osquery Manager</strong></span>, refer to <a class="xref" href="manage-osquery-integration.html" title="Manage the integration"><em>Manage the integration</em></a>.</p>
+<div class="position-relative"><h2><a id="_required_privileges_2"></a>Required privileges</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>To use <span class="strong strong"><strong>Osquery Manager</strong></span>, you must be assigned to a role with the following privileges:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">Read</code> privileges for the <code class="literal">logs-osquery_manager.result*</code> index.
+</li>
+<li class="listitem">
+Kibana privileges for <span class="strong strong"><strong>Osquery Manager</strong></span>. The <code class="literal">All</code> privilege
+enables you to run, schedule, and save queries. <code class="literal">Read</code> enables you to
+view live and scheduled query results, but you cannot run live queries or edit.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h2><a id="osquery-run-query"></a>Run live queries</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>To inspect hosts, run a query against one or more agents or policies,
+then view the results.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and then click <span class="strong strong"><strong>Osquery</strong></span>.
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>Live queries</strong></span> view, click <span class="strong strong"><strong>New live query</strong></span>.
+</li>
+<li class="listitem">
+Choose to run a single query or a query pack.
+</li>
+<li class="listitem">
+Select one or more agents or groups to query. Start typing in the search field,
+and you&#8217;ll get suggestions for agents by name, ID, platform, and policy.
+</li>
+<li class="listitem">
+<p>Specify the query or pack to run:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p><span class="strong strong"><strong>Query</strong></span>: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the <span class="strong strong"><strong>Advanced</strong></span> section to set a timeout period for the query, and view or set <a class="xref" href="osquery.html#osquery-map-fields" title="Map result fields to ECS">mapped ECS fields</a> included in the results from the live query (optional).</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Overwriting the query&#8217;s default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the <span class="strong strong"><strong>Timeout</strong></span> field is <code class="literal">60</code>. The maximum supported value is <code class="literal">900</code>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p><span class="strong strong"><strong>Pack</strong></span>: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Refer to <a class="xref" href="osquery.html#osquery-prebuilt-packs" title="Prebuilt packs">prebuilt packs</a> to learn about using and managing Elastic prebuilt packs.</p>
+</div>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/enter-query.png" alt="Select saved query dropdown name showing query name and description">
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Submit</strong></span>.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>To save a single query for future use, click <span class="strong strong"><strong>Save for later</strong></span> and define the ID, description, and other <a class="xref" href="osquery.html#osquery-manage-query" title="Save queries">details</a>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Review the results and do any of the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>View in Discover</strong></span> (<span class="image"><img src="images/discover-button-osquery.png" alt="View in Discover icon" width="20" height="20"></span>) to explore the results in <span class="strong strong"><strong>Discover</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>View in Lens</strong></span> (<span class="image"><img src="images/lens-button-osquery.png" alt="View in Lens icon" width="20" height="20"></span>) to navigate to <span class="strong strong"><strong>Lens</strong></span>, where you can use the drag-and-drop <span class="strong strong"><strong>Lens</strong></span> editor to create visualizations.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add to Case</strong></span> (<span class="image"><img src="images/case-button-osquery.png" alt="Add to Case icon" width="20" height="20"></span>) to add the query results to a new or existing case.
+</li>
+<li class="listitem">
+Click the view details icon (<span class="image"><img src="images/view-osquery-details.png" alt="View details icon" width="20" height="20"></span>) to examine the query ID and statement.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+To view more information about the request, such as failures, open the <span class="strong strong"><strong>Status</strong></span> tab.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="osquery-view-history"></a>View or rerun previous live queries</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>The <span class="strong strong"><strong>Live queries history</strong></span> section on the <span class="strong strong"><strong>Live queries</strong></span> tab shows a log of queries run over the last 30 days. From the Live queries table, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Click the run icon (<span class="image"><img src="images/play-icon.png" alt="Right-pointing triangle"></span>) to rerun a single query or a query pack.
+</li>
+<li class="listitem">
+<p>Click the table icon (<span class="image"><img src="images/table-icon.png" alt="Table icon"></span>) to examine the <a class="xref" href="osquery.html#osquery-results" title="Osquery results">results</a> for a single query or a query pack. From the results table, you can also find the query <a class="xref" href="osquery.html#osquery-status" title="Osquery status">status</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/live-query-check-results.png" alt="Results of OSquery">
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h2><a id="osquery-schedule-query"></a>Schedule queries with packs</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>A pack is a set of grouped queries that perform similar functions or address common use cases. <a class="xref" href="osquery.html#osquery-prebuilt-packs" title="Prebuilt packs">Prebuilt Elastic packs</a> are available to download and can help you get started using the Osquery integration.</p>
+<p>You can also create a custom pack with one or more queries. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.</p>
+<p>You can run packs as live queries or schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click the <span class="strong strong"><strong>Packs</strong></span> tab.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add pack</strong></span> to create a new pack, or click the name of an existing pack, then <span class="strong strong"><strong>Edit</strong></span> to add queries to an existing pack.
+</li>
+<li class="listitem">
+Provide a name for the pack. The short description is optional.
+</li>
+<li class="listitem">
+<p>Schedule the pack to be deployed on specified agent policies (<span class="strong strong"><strong>Policy</strong></span>) or on all agent policies (<span class="strong strong"><strong>Global</strong></span>).</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Pack deployment details are stored within the <a class="xref" href="manage-osquery-integration.html#osquery-custom-config" title="Customize Osquery configuration">Osquery configuration</a>. The <code class="literal">shard</code> field value is the percentage of agents in the policy using the pack.</p>
+</div>
+</div>
+<p>If you choose the <span class="strong strong"><strong>Policy</strong></span> option, configure these fields:</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>When defining pack deployment details, you cannot configure the same policy multiple times. In other words, after specifying a policy, you can either choose to deploy the pack to all of the policy&#8217;s agents or only a subset. You cannot choose both.</p>
+</div>
+</div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Scheduled Elastic Agent policies (optional)</strong></span>: Allows you to deploy the pack to specific agent policies. By default, the pack is deployed to all Elastic Agents that are registered to the policies you define.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Partial deployment (shards)</strong></span>: Allows you to deploy the pack to a portion of the agents on each specified agent policy. After defining a policy, use the <span class="strong strong"><strong>Shard</strong></span> slider to set the amount of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy&#8217;s agents by selecting 50% on the slider.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>If you&#8217;re creating a new pack, add queries to schedule:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add query</strong></span> and then add a saved query or enter a new query.
+Each query must include a unique query ID and the interval at which it should run.
+Optionally, set the minimum Osquery version and platform, specify a timeout period,
+or <a class="xref" href="osquery.html#osquery-map-fields" title="Map result fields to ECS">map ECS fields</a>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Overwriting the query&#8217;s default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the <span class="strong strong"><strong>Timeout</strong></span> field is <code class="literal">60</code>. The maximum supported value is <code class="literal">900</code>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Upload queries from a <code class="literal">.conf</code> query pack by dragging the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click <span class="strong strong"><strong>Example packs</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save pack</strong></span>. The queries run when the policy receives the update.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="osquery-schedule-status"></a>View status of scheduled packs</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the <span class="strong strong"><strong>Packs</strong></span> tab.
+</li>
+<li class="listitem">
+<p>Click a pack name to view the status.</p>
+<p>Details include the last time each query ran, how many results were returned, and the number of agents the query ran against.
+If there are errors, expand the row to view the details, including an option to view more information in the Logs.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/scheduled-pack.png" alt="Shows queries in the pack and details about each query" width="including the last time it ran" height="how many results were returned">
+</div>
+</div>
+</li>
+<li class="listitem">
+View scheduled query results in <a class="xref" href="discover.html" title="Discover"><span class="strong strong"><strong>Discover</strong></span></a> or the drag-and-drop <a class="xref" href="lens.html" title="Create visualizations with Lens"><span class="strong strong"><strong>Lens</strong></span></a> editor.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="osquery-manage-query"></a>Save queries</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>You can save queries in two ways:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+After running a live query, click the <span class="strong strong"><strong>Save for later</strong></span> link.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Saved queries</strong></span> tab, click <span class="strong strong"><strong>Add saved query</strong></span>.
+</li>
+</ul>
+</div>
+<p>Once you save a query, you can only edit it from the <span class="strong strong"><strong>Saved queries</strong></span> tab:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Go to <span class="strong strong"><strong>Saved queries</strong></span>, and then click <span class="strong strong"><strong>Add saved query</strong></span> or the edit icon.
+</li>
+<li class="listitem">
+<p>Provide the following fields:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The unique identifier (required).
+</li>
+<li class="listitem">
+A brief description.
+</li>
+<li class="listitem">
+The SQL query (required). Osquery supports multi-line queries.
+</li>
+<li class="listitem">
+A timeout period (optional). Increase the query&#8217;s default timeout period to support queries that require more time to complete. The default and minimum supported value for the <span class="strong strong"><strong>Timeout</strong></span> field is <code class="literal">60</code>. The maximum supported value is <code class="literal">900</code>.
+</li>
+<li class="listitem">
+The <a class="xref" href="osquery.html#osquery-map-fields" title="Map result fields to ECS">ECS fields</a> to populate when the query is run (optional). These fields are also copied in when you add this query to a pack.
+</li>
+<li class="listitem">
+<p>The defaults to set when you add the query to a pack.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The frequency to run the query.
+</li>
+<li class="listitem">
+The minimum <a href="https://github.com/osquery/osquery/releases)" class="ulink" target="_top">version of Osquery</a> required to run the query.
+</li>
+<li class="listitem">
+The operating system required to run the query. For information about supported platforms per table, refer to the <a href="https://osquery.io/schema" class="ulink" target="_top">Osquery schema</a>.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Test configuration</strong></span> to test the query and any mapped fields:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+From the <span class="strong strong"><strong>Test query</strong></span> panel, select agents or groups to test the query, then click <span class="strong strong"><strong>Submit</strong></span> to run a live query. Result columns with the <span class="image"><img src="images/mapped-icon.png" alt="mapping"></span> icon are mapped. Hover over the icon to see the mapped ECS field.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span> or <span class="strong strong"><strong>Update</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="osquery-prebuilt-packs-queries"></a>Prebuilt Elastic packs and queries</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>The prebuilt Osquery packs are included with the integration. Once you add a pack, you can activate and schedule it.</p>
+<div class="position-relative"><h3><a id="osquery-prebuilt-packs"></a>Prebuilt packs</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>The prebuilt Osquery packs are included with the integration and can be optionally loaded.
+Once added, you can then activate and schedule the packs.</p>
+<p>You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.</p>
+<p>For information about the prebuilt packs that are available, refer to <a class="xref" href="prebuilt-packs.html" title="Prebuilt packs reference"><em>Prebuilt packs reference</em></a>.</p>
+<div class="position-relative"><h4><a id="load-prebuilt-packs"></a>Load and activate prebuilt Elastic packs</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>Follow these steps to load and turn on new or updated prebuilt packs:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Go to <span class="strong strong"><strong>Packs</strong></span>, and then click <span class="strong strong"><strong>Load Elastic prebuilt packs</strong></span>.
+</li>
+<li class="listitem">
+<p>For each pack that you want to activate and schedule:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Turn on the <span class="strong strong"><strong>Active</strong></span> toggle to ensure the pack runs continuously.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You must manually run inactive packs.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Click the pack name, then <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+Update the <span class="strong strong"><strong>Scheduled agent policies</strong></span> to specify the policies where this pack should run.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Update pack</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="copy-prebuilt-packs"></a>Copy prebuilt Elastic packs</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>To modify queries in prebuilt packs, you must first make a copy of the pack.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Go to <span class="strong strong"><strong>Stack Management</strong></span> &#8594; <span class="strong strong"><strong>Saved Objects</strong></span>.
+</li>
+<li class="listitem">
+Search for the Osquery packs you want to modify by name.
+</li>
+<li class="listitem">
+Select the checkboxes of the packs to export.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Export x objects</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Import</strong></span>.
+</li>
+<li class="listitem">
+Select the import option <span class="strong strong"><strong>Create new objects with random IDs</strong></span>, then click <span class="strong strong"><strong>Import</strong></span> to import the pack. This creates a copy of the pack that you can edit.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="osquery-prebuilt-queries"></a>Prebuilt queries</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>A set of saved queries are included with the integration and available to run as a live query.
+Note the following about the prebuilt queries:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The queries are not editable.
+</li>
+<li class="listitem">
+Several of the queries include default ECS mappings to standardize the results.
+</li>
+<li class="listitem">
+The prebuilt Elastic queries all follow the same naming convention and identify
+what type of information is being queried, what operating system it supports if it&#8217;s limited to one or more,
+and that these are Elastic queries. For example, <code class="literal">firewall_rules_windows_elastic</code>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h2><a id="osquery-map-fields"></a>Map result fields to ECS</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>When you save queries or add queries to a pack, you can optionally map Osquery results or static values to fields in
+the <a href="https://www.elastic.co/guide/en/ecs/8.11/ecs-reference.html" class="ulink" target="_top">Elastic Common Schema</a> (ECS).
+This standardizes your Osquery data for use across detections, machine learning,
+and any other areas that rely on ECS-compliant data.
+When the query is run, the results include the original <code class="literal">osquery.&lt;fields&gt;</code>
+and the mapped ECS fields. For example, if you update a query to map <code class="literal">osquery.name</code> to <code class="literal">user.name</code>, the query results include both fields.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Edit saved queries or queries in a pack to map fields:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+For <span class="strong strong"><strong>Saved queries</strong></span>: Open the <span class="strong strong"><strong>Saved queries</strong></span> tab, and then click the edit icon for the query that you want to map.
+</li>
+<li class="listitem">
+For <span class="strong strong"><strong>packs</strong></span>: Open the <span class="strong strong"><strong>Packs</strong></span> tab, edit a pack, and then click the edit icon for the query that you want to map.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>ECS mapping</strong></span> section, select an <span class="strong strong"><strong>ECS field</strong></span> to map.
+</li>
+<li class="listitem">
+<p>In the <span class="strong strong"><strong>Value</strong></span> column, use the dropdown on the left to choose what type of value to map to the ECS field:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Osquery value</strong></span>: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the Osquery field selected.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Static value</strong></span>: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply <code class="literal">tags</code> or your preferred <code class="literal">event.category</code> to the query results.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Map more fields, as needed. To remove any mapped rows, click the delete icon.
+</li>
+<li class="listitem">
+Save your changes.
+</li>
+</ol>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
+</li>
+<li class="listitem">
+Some ECS fields are restricted to a set of allowed values, like <a href="https://www.elastic.co/guide/en/ecs/8.11/ecs-event.html#field-event-category" class="ulink" target="_top">event.category</a>. Use the <a href="https://www.elastic.co/guide/en/ecs/8.11/ecs-field-reference.html" class="ulink" target="_top">ECS Field Reference</a> for help when mapping fields.
+</li>
+<li class="listitem">
+Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an Elasticsearch-compatible
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date.html" class="ulink" target="_top">date</a> type.
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="position-relative"><h2><a id="osquery-extended-tables"></a>Extended tables for Kubernetes queries</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>In addition to the Osquery schema, the Elastic-provided version of Osquery also includes the following tables to support Kubernetes containers. These can be queried with live or scheduled queries.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">host_users</code>
+</li>
+<li class="listitem">
+<code class="literal">host_groups</code>
+</li>
+<li class="listitem">
+<code class="literal">host_processes</code>
+</li>
+</ul>
+</div>
+<p>When querying these tables, the expectation is that the <code class="literal">/etc/passwd</code>, <code class="literal">/etc/group</code>, and <code class="literal">/proc</code> are available in the container under <code class="literal">/hostfs</code> as:
+<code class="literal">/hostfs/etc/passwd</code>, <code class="literal">/hostfs/etc/group</code>, and <code class="literal">/hostfs/proc</code>. For information about the fields available in these tables, see the
+<a href="https://docs.elastic.co/en/integrations/osquery_manager#exported-fields" class="ulink" target="_top">exported fields</a> reference.</p>
+<div class="position-relative"><h2><a id="osquery-status"></a>Osquery status</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>A query can have the following status:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>Successful</p></td>
+<td align="left" valign="top"><p>The query successfully completed.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Failed</p></td>
+<td align="left" valign="top"><p>The query encountered a problem, such as an issue with the query or the agent was disconnected, and might have failed.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Not yet responded</p></td>
+<td align="left" valign="top"><p>The query has not been sent to the agent.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Expired</p></td>
+<td align="left" valign="top"><p>The action request timed out. The agent may be offline.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If an agent is offline, the request status remains <span class="strong strong"><strong>pending</strong></span> as Kibana retries the request.
+By default, a query request times out after one minute. An action timeout error is returned when
+the query does not complete within that interval.</p>
+</div>
+</div>
+<div class="position-relative"><h2><a id="osquery-results"></a>Osquery results</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery.asciidoc">edit</a></div>
+<p>When you run live or scheduled queries, the results are automatically
+stored in an Elasticsearch index, so that you can search, analyze, and visualize this data in Kibana.
+For a list of the Osquery fields that can be returned in query results,
+refer to <a href="https://docs.elastic.co/en/integrations/osquery_manager#exported-fields" class="ulink" target="_top">exported fields</a>.
+Query results can also include ECS fields, if the query has a defined ECS mapping.</p>
+<p>Osquery responses include the following information:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Everything prefaced with <code class="literal">osquery.</code> is part of the query response. These fields are not mapped to ECS by default.
+</li>
+<li class="listitem">
+Results include some ECS fields by default, such as <code class="literal">host.*</code> and <code class="literal">agent.*</code>, which provide information about the host that was queried.
+</li>
+<li class="listitem">
+For live queries, the <code class="literal">action_data.query</code> is the query that was sent.
+</li>
+<li class="listitem">
+For scheduled queries in a pack, the <code class="literal">action_id</code> has the format <code class="literal">pack_&lt;pack-name&gt;_&lt;query-ID&gt;</code>. You can use this information to look up the query that was run.
+</li>
+<li class="listitem">
+By default, all query results are <a href="https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs" class="ulink" target="_top">snapshot logs</a>
+that represent a point in time with a set of results, with no
+<a href="https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs" class="ulink" target="_top">differentials</a>.
+</li>
+<li class="listitem">
+Osquery data is stored in the <code class="literal">logs-osquery_manager.result-&lt;namespace&gt;</code> datastream, and the result row data is under the <code class="literal">osquery</code> property in the document.
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="fleet.html">« Fleet</a>
+</span>
+<span class="next">
+<a href="manage-osquery-integration.html">Manage the integration »</a>
+</span>
+</div>
+</body>
+</html>

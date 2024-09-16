@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Task Manager settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Task Manager settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="spaces-settings-kb.html" title="Spaces settings in Kibana"/>
+<link rel="next" href="telemetry-settings-kbn.html" title="Telemetry settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="spaces-settings-kb.html">« Spaces settings in Kibana</a>
+</span>
+<span class="next">
+<a href="telemetry-settings-kbn.html">Telemetry settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Task Manager settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="task-manager-settings-kb"></a>Task Manager settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Task Manager runs background tasks by polling for work on an interval.  You can configure its behavior to tune for performance and throughput.</p>
+<div class="position-relative"><h4><a id="task-manager-settings"></a>Task Manager settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.max_attempts</code>
+</span>
+</dt>
+<dd>
+The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.poll_interval</code>
+</span>
+</dt>
+<dd>
+How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.request_capacity</code>
+</span>
+</dt>
+<dd>
+How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.max_workers</code>
+</span>
+</dt>
+<dd>
+The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
+Starting in 8.0, it will not be possible to set the value greater than 100.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.enabled</code>
+</span>
+</dt>
+<dd>
+This flag will enable automatic warn and error logging if task manager self detects a performance issue, such as the time between when a task is scheduled to execute and when it actually executes. Defaults to false.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds</code>
+</span>
+</dt>
+<dd>
+The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.ephemeral_tasks.enabled</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">8.8.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 8.8.0.
+</span>
+</span>
+Enables a technical preview feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
+These action tasks will reduce the latency of the time it takes an action to run after it&#8217;s triggered, but are not persisted as SavedObjects.
+These non-persisted action tasks have a risk that they won&#8217;t be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.ephemeral_tasks.request_capacity</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">8.8.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 8.8.0.
+</span>
+</span>
+Sets the size of the ephemeral queue defined above. Defaults to 10.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.event_loop_delay.monitor</code>
+</span>
+</dt>
+<dd>
+Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the <code class="literal">warn_threshold</code> setting.  Defaults to true.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.event_loop_delay.warn_threshold</code>
+</span>
+</dt>
+<dd>
+Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="task-manager-health-settings"></a>Task Manager Health settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/task-manager-settings.asciidoc">edit</a></div>
+<p>Settings that configure the <a class="xref" href="task-manager-health-monitoring.html" title="Task Manager health monitoring">Health monitoring</a> endpoint.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.task_manager.monitored_task_execution_thresholds</code>
+</span>
+</dt>
+<dd>
+<p>
+Configures the threshold of failed task executions at which point the <code class="literal">warn</code> or
+<code class="literal">error</code> health status is set under each task type execution status
+(under <code class="literal">stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status</code>).
+</p>
+<p>This setting allows configuration of both the default level and a
+custom task type specific level. By default, this setting is configured to mark
+the health of every task type as <code class="literal">warning</code> when it exceeds 80% failed executions,
+and as <code class="literal">error</code> at 90%.</p>
+<p>Custom configurations allow you to reduce this threshold to catch failures sooner
+for task types that you might consider critical, such as alerting tasks.</p>
+<p>This value can be set to any number between 0 to 100, and a threshold is hit
+when the value <span class="strong strong"><strong>exceeds</strong></span> this number. This means that you can avoid setting the
+status to <code class="literal">error</code> by setting the threshold at 100, or hit <code class="literal">error</code> the moment
+any task fails by setting the threshold to 0 (as it will exceed 0 once a
+single failure occurs).</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-settings-kb.html">« Spaces settings in Kibana</a>
+</span>
+<span class="next">
+<a href="telemetry-settings-kbn.html">Telemetry settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

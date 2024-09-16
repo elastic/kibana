@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Migrate saved objects | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Migrate saved objects | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="upgrade.html" title="Upgrade Kibana"/>
+<link rel="prev" href="upgrade.html" title="Upgrade Kibana"/>
+<link rel="next" href="resolve-migrations-failures.html" title="Resolve migration failures"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="upgrade.html">« Upgrade Kibana</a>
+</span>
+<span class="next">
+<a href="resolve-migrations-failures.html">Resolve migration failures »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="upgrade.html">Upgrade Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Migrate saved objects</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/saved-objects-migration.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="saved-object-migrations"></a>Migrate saved objects</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/saved-objects-migration.asciidoc">edit</a></div>
+</div></div></div>
+<p>Each time you upgrade Kibana, an upgrade migration is performed to ensure that all <a class="xref" href="managing-saved-objects.html" title="Manage saved objects">saved objects</a> are compatible with the new version.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Kibana includes an <a class="xref" href="upgrade-assistant.html" title="Upgrade Assistant"><span class="strong strong"><strong>Upgrade Assistant</strong></span></a> to help you prepare for an upgrade.
+To access the assistant, go to <span class="strong strong"><strong>Stack Management &gt; Upgrade Assistant</strong></span>.</p>
+</div>
+</div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Kibana 7.12.0 and later uses a new migration process and index naming scheme. Before you upgrade, read the documentation for your version of Kibana.</p>
+</div>
+</div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The <code class="literal">kibana.index</code> and <code class="literal">xpack.tasks.index</code> configuration settings are obsolete and no longer taken into account in 8.x. If you are using custom index names, please perform the necessary adaptations before attempting to upgrade to 8.x.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="upgrade-migrations-process"></a>How saved objects migrations work</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/saved-objects-migration.asciidoc">edit</a></div>
+<p>When you start a new Kibana installation, an upgrade migration is performed before starting plugins or serving HTTP traffic.
+Before you upgrade, shut down old nodes to prevent losing acknowledged writes.
+To reduce the likelihood of old nodes losing acknowledged writes, Kibana 7.12.0 and later
+adds a write block to the outdated index.</p>
+<p>Saved objects are stored in multiple indices. Whilst all of them start with the <code class="literal">.kibana*</code> prefix, other <code class="literal">.kibana*</code> indices exist, which are not used to store saved objects.  The following tables lists the saved objects indices used by each Kibana version.</p>
+<div class="table">
+<p class="title"><strong>Table 1. Saved object indices and aliases per Kibana version</strong></p>
+<div class="table-contents">
+<table border="1" cellpadding="4px" summary="Saved object indices and aliases per Kibana version">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Upgrading from version</th>
+<th align="left" valign="top">Index</th>
+<th align="left" valign="top">Aliases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>6.5.0 through 7.3.x</p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana_N</code></p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>7.4.0 through 7.11.x</p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana_N</code><br>
+<code class="literal">.kibana_task_manager_N</code></p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana</code><br>
+<code class="literal">.kibana_task_manager</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>7.11.x through 8.7.x</p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana_{kibana_version}_001</code><br>
+<code class="literal">.kibana_task_manager_{kibana_version}_001</code></p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana</code>, <code class="literal">.kibana_{kibana_version}</code><br>
+<code class="literal">.kibana_task_manager</code>, <code class="literal">.kibana_task_manager_{kibana_version}</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>8.8.0+</p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana_{kibana_version}_001</code><br>
+<code class="literal">.kibana_alerting_cases_{kibana_version}_001</code>
+<code class="literal">.kibana_analytics_{kibana_version}_001</code>
+<code class="literal">.kibana_ingest_{kibana_version}_001</code>
+<code class="literal">.kibana_task_manager_{kibana_version}_001</code>
+<code class="literal">.kibana_security_solution_{kibana_version}_001</code></p></td>
+<td align="left" valign="top"><p><code class="literal">.kibana</code>, <code class="literal">.kibana_{kibana_version}</code><br>
+<code class="literal">.kibana_alerting_cases</code>, <code class="literal">.kibana_alerting_cases_{kibana_version}</code>
+<code class="literal">.kibana_analytics</code>, <code class="literal">.kibana_analytics_{kibana_version}</code>
+<code class="literal">.kibana_ingest</code>, <code class="literal">.kibana_ingest_{kibana_version}</code>
+<code class="literal">.kibana_task_manager</code>, <code class="literal">.kibana_task_manager_{kibana_version}</code>
+<code class="literal">.kibana_security_solution</code>, <code class="literal">.kibana_security_solution_{kibana_version}</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Starting on 7.11.0, each of the saved objects indices has a couple of aliases, e.g. the <code class="literal">.kibana_8.8.0_001</code> index has a <em>default</em> alias <code class="literal">.kibana</code> and a <em>version</em> alias <code class="literal">.kibana_8.8.0</code>. The <em>default</em> aliases (e.g. <code class="literal">.kibana</code> and <code class="literal">.kibana_task_manager</code>) always point to
+the most up-to-date saved object indices. Then, <em>version</em> aliases are aligned with the deployed Kibana version.</p>
+<p>Starting on 8.6.0, index names aren&#8217;t necessarily aligned with the deployed Kibana version. When updates on a certain index are compatible, Kibana will keep the existing index instead of creating a new one. This allows for a more efficient upgrade process. The following example illustrates a completely valid state for a 8.8.0 deployment:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">.kibana_8.8.0_001</code> index, with <code class="literal">.kibana</code> and <code class="literal">.kibana_8.8.0</code> aliases.
+</li>
+<li class="listitem">
+<code class="literal">.kibana_task_manager_8.7.0_001</code> index, with <code class="literal">.kibana_task_manager</code> and <code class="literal">.kibana_task_manager_8.8.0</code> aliases.
+</li>
+</ul>
+</div>
+<p>Starting on 8.8.0, Kibana splits the main saved object index into multiple ones, as depicted on the table above. When upgrading from a previous version, the Kibana migration process will reindex some saved objects from the <code class="literal">.kibana</code> index into the new indices, depending on their types. Note that the <code class="literal">.kibana</code> index still exists, and it continues to store multiple saved object types.</p>
+<div class="position-relative"><h4><a id="upgrade-migrations-old-indices"></a>Old Kibana indices</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/upgrade/saved-objects-migration.asciidoc">edit</a></div>
+<p>As a deployment is gradually upgraded, multiple Kibana indices are created in Elasticsearch: (<code class="literal">.kibana_1</code>, <code class="literal">.kibana_2</code>, <code class="literal">.kibana_7.12.0_001</code>, <code class="literal">.kibana_7.13.0_001</code>, <code class="literal">.kibana_8.0.0_001</code> etc).
+Kibana only uses those indices that the <em>default</em> and <em>version</em> aliases point to.
+The other, older Kibana saved object indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling Kibana back to a previous version.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="upgrade.html">« Upgrade Kibana</a>
+</span>
+<span class="next">
+<a href="resolve-migrations-failures.html">Resolve migration failures »</a>
+</span>
+</div>
+</body>
+</html>

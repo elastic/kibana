@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Saved Object IDs | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Saved Object IDs | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="managing-saved-objects.html" title="Manage saved objects"/>
+<link rel="prev" href="managing-saved-objects.html" title="Manage saved objects"/>
+<link rel="next" href="xpack-security.html" title="Security"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="managing-saved-objects.html">« Manage saved objects</a>
+</span>
+<span class="next">
+<a href="xpack-security.html">Security »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="managing-saved-objects.html">Manage saved objects</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Saved Object IDs</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="saved-object-ids"></a>Saved Object IDs</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>In the past, many saved object types could have the same ID in different <a class="xref" href="xpack-spaces.html" title="Spaces">spaces</a>. For example, if you copied dashboard "123"
+from the one space to another space, the second dashboard would also have an ID of "123". While the saved object ID is not something
+that users would interact with directly, many aspects of Kibana rely on it, notably URLs. If you have a "deep link" URL to a saved dashboard,
+that URL includes the saved object ID.</p>
+<p><span class="strong strong"><strong>Starting in the 8.0 release</strong></span>, Kibana requires most saved objects to have <em>globally unique</em> IDs. This is a change that we needed to make to
+support sharing saved objects to multiple spaces. Most saved objects cannot be shared to multiple spaces <em>yet</em>, but we needed to start
+enforcing globally unique object IDs first.</p>
+<p>We have made several enhancements to minimize the impact, and this document describes what you need to know about the changes and
+how it will affect you.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="saved-object-ids-impact-upon-upgrading"></a>Impact upon upgrading to 8.x</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>Every time you upgrade Kibana, <a class="xref" href="saved-object-migrations.html" title="Migrate saved objects">saved objects are migrated to a new format</a>. When you
+first upgrade from 7.x to 8.x, this migration process will start enforcing globally unique saved object IDs.</p>
+<p>In practical terms, <span class="strong strong"><strong>any old saved objects that exist in a custom space will have their IDs changed to a new UUID</strong></span>, while saved objects in
+the Default space will be unchanged. This is how we can ensure that every saved object ID is unique. For example: if you had dashboard "123"
+in the Default space and dashboard "123" in Another space, after the upgrade you would have dashboard "123" in the Default space and
+dashboard "456" in Another space.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="saved-object-ids-impact-when-using"></a>Impact when using 8.x</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>After you upgrade, or if you set up a new Kibana instance using 8.x, there are a few more things that behave differently.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="saved-object-ids-impact-when-using-legacy-urls"></a>Accessing saved objects using old URLs</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>When you upgrade Kibana and saved object IDs change, the "deep link" URLs to access those saved objects will also change. To reduce the impact,
+each existing URL is preserved with a special <a class="xref" href="legacy-url-aliases.html" title="Legacy URL Aliases">legacy URL alias</a>. This means that if you use a bookmark for
+a saved object ID that was changed, you&#8217;ll be redirected to the new URL for that saved object.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="saved-object-ids-impact-when-using-import-and-copy"></a>Importing and copying saved objects</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>When you <a class="xref" href="managing-saved-objects.html#managing-saved-objects-copy-to-space" title="Copy to other Kibana spaces">copy a saved object to another space</a>, Kibana effectively
+<a class="xref" href="managing-saved-objects.html#managing-saved-objects-export-objects" title="Import and export">exports it and imports it into that space</a>. In this way, copying a saved object has always behaved
+like an import. In this document when we say "import", it applies to both features.</p>
+<p>Historically, whether you imported or copied a saved object, Kibana would create <em>at most</em> one copy of a saved object in that space. If you
+imported the saved object multiple times, Kibana would overwrite the existing object, because it used the same ID. Since saved object IDs are
+now globally unique, Kibana maintains this functionality by tracking each saved object&#8217;s <em>origin</em>. When you import an object in 8.x, Kibana
+uses either the saved object ID <em>or</em> the origin to determine its destination.</p>
+<p>If you import a saved object using the "Check for existing objects" option&#8201;&#8212;&#8201;whether it was exported from 7.x or 8.x&#8201;&#8212;&#8201;Kibana will
+take the following steps:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+If Kibana finds a matching saved object with the exact same ID in the target space, that will be the import destination&#8201;&#8212;&#8201;you can <span class="strong strong"><strong>overwrite</strong></span> that
+destination or <span class="strong strong"><strong>skip</strong></span> it.
+</li>
+<li class="listitem">
+Otherwise, if Kibana finds a matching saved object with a <em>different</em> ID that has the same origin, that will be the import destination&#8201;&#8212;&#8201;again, you can <span class="strong strong"><strong>overwrite</strong></span> that destination or <span class="strong strong"><strong>skip</strong></span> it.
+</li>
+<li class="listitem">
+Otherwise, if a saved object with the exact same ID exists in a <em>different</em> space, then Kibana will generate a random ID for the import
+destination, preserving the saved object&#8217;s origin.
+</li>
+<li class="listitem">
+Otherwise, Kibana creates the saved object with the given ID.
+</li>
+</ol>
+</div>
+<p>For example, you have a saved object in an <code class="literal">export.ndjson</code> file, and you set up a brand new Kibana instance. You attempt to import the saved
+object using the "Check for existing objects" and "Automatically overwrite conflicts" options. The first time you import the saved object,
+Kibana will create a new object with the same ID (step 4 above). If you import it again, Kibana will find that object and overwrite it (step 1
+above). If you then create a <em>different</em> space and import it there, Kibana will create a new object with a random ID (step 3 above). Finally,
+if you import it into the second space again, Kibana will find the second object with a matching origin and overwrite it (step 2 above).</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>When you import a saved object and it is created with a different ID, if 1. it contains weak links to other saved objects (such as
+a dashboard with a Markdown URL to navigate to another dashboard) and 2. the object&#8217;s ID has changed (step 3 above), those weak links will
+be broken. For more information, refer to <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0.html#known-issue-8.0.0" class="ulink" target="_top">the known issue in the changelog</a>.</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="saved-object-ids-impact-when-using-apis"></a>Using the saved objects APIs</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/saved-objects/saved-object-ids.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you are using the saved objects APIs directly, you should be aware of these changes:</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Some of the saved objects APIs are deprecated in 8.7.0. For more information, refer to the <a class="xref" href="saved-objects-api.html" title="Saved objects APIs">API docs</a></p>
+</div>
+</div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+When using the create or bulk create API, you may encounter conflict errors that <span class="strong strong"><strong>cannot</strong></span> be overridden using the <code class="literal">overwrite: true</code>
+option. This can occur if there is already a saved object with this ID in a <em>different</em> space, or if there is a legacy URL alias for this
+ID in the same space.
+</li>
+<li class="listitem">
+When using the import or copy to space API, objects can potentially be
+created with a different ID as described above.
+</li>
+<li class="listitem">
+When using the delete API, if the saved object exists in multiple spaces, it can only be deleted by using the
+<code class="literal">force</code> option.
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="managing-saved-objects.html">« Manage saved objects</a>
+</span>
+<span class="next">
+<a href="xpack-security.html">Security »</a>
+</span>
+</div>
+</body>
+</html>

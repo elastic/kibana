@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tags | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Tags | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="advanced-options.html" title="Advanced Settings"/>
+<link rel="next" href="upgrade-assistant.html" title="Upgrade Assistant"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="advanced-options.html">« Advanced Settings</a>
+</span>
+<span class="next">
+<a href="upgrade-assistant.html">Upgrade Assistant »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Tags</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="managing-tags"></a>Tags</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+</div></div></div>
+<p>Use tags to categorize your saved objects,
+then filter for related objects based on shared tags.</p>
+<p>To get started, open the main menu, and then click <span class="strong strong"><strong>Stack Management &gt; Tags</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/tags/tag-management-section.png" alt="Tags management">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_required_permissions_10"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+<p>To create tags, you must meet the minimum requirements.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Access to <span class="strong strong"><strong>Tags</strong></span> requires the <code class="literal">Tag Management</code> Kibana privilege. To add the privilege, open the main menu,
+and then click <span class="strong strong"><strong>Stack Management &gt; Roles</strong></span>.
+</li>
+<li class="listitem">
+The <code class="literal">read</code> privilege allows you to assign tags to the saved objects for which you have write permission.
+</li>
+<li class="listitem">
+The <code class="literal">write</code> privilege enables you to create, edit, and delete tags.
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Having the <code class="literal">Tag Management</code> Kibana privilege is not required to
+view tags assigned on objects you have <code class="literal">read</code> access to, or to filter objects by tags
+from the global search.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="settings-create-tag"></a>Create a tag</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+<p>Create a tag to assign to your saved objects.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Create tag</strong></span>.
+</li>
+<li class="listitem">
+<p>Enter a name and select a color for the new tag.</p>
+<p>The name cannot be longer than 50 characters.</p>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create tag</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="settings-assign-tag"></a>Assign a tag to an object</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+<p>To assign and remove tags, you must have <code class="literal">write</code> permission
+on the objects to which you assign the tags.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Find the tag you want to assign.
+</li>
+<li class="listitem">
+Click the actions icon
+<span class="image"><img src="images/actions_icon.png" alt="Actions icon"></span>,
+and then select <span class="strong strong"><strong>Manage assignments</strong></span>.
+</li>
+<li class="listitem">
+<p>Select the objects to which you want to assign or remove tags.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/tags/manage-assignments-flyout.png" alt="Assign flyout" width="75%">
+</div>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save tag assignments</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="settings-delete-tag"></a>Delete a tag</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/managing-tags.asciidoc">edit</a></div>
+<p>When you delete a tag, you remove it from all saved objects that use it.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click the actions icon
+<span class="image"><img src="images/actions_icon.png" alt="Actions icon"></span>, and then select <span class="strong strong"><strong>Delete</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Delete tag</strong></span>.
+</li>
+</ol>
+</div>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>To assign, delete, or clear multiple tags,
+select them in the <span class="strong strong"><strong>Tags</strong></span> view, and then select
+the action from the <span class="strong strong"><strong>selected tags</strong></span> menu.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="advanced-options.html">« Advanced Settings</a>
+</span>
+<span class="next">
+<a href="upgrade-assistant.html">Upgrade Assistant »</a>
+</span>
+</div>
+</body>
+</html>

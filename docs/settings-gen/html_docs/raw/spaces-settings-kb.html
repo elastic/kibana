@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Spaces settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Spaces settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="security-settings-kb.html" title="Security settings in Kibana"/>
+<link rel="next" href="task-manager-settings-kb.html" title="Task Manager settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="security-settings-kb.html">« Security settings in Kibana</a>
+</span>
+<span class="next">
+<a href="task-manager-settings-kb.html">Task Manager settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Spaces settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/spaces-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="spaces-settings-kb"></a>Spaces settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/spaces-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>By default, spaces is enabled in Kibana. To secure spaces, <a class="xref" href="security-settings-kb.html" title="Security settings in Kibana">enable security</a>.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.spaces.maxSpaces</code>
+</span>
+</dt>
+<dd>
+The maximum number of spaces that you can use with the Kibana instance. Some Kibana operations
+return all spaces using a single <code class="literal">_search</code> from Elasticsearch, so you must
+configure this setting lower than the <code class="literal">index.max_result_window</code> in Elasticsearch.
+The default is <code class="literal">1000</code>.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="security-settings-kb.html">« Security settings in Kibana</a>
+</span>
+<span class="next">
+<a href="task-manager-settings-kb.html">Task Manager settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

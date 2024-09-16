@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Add data tutorials | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Add data tutorials | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="development-security.html" title="Security"/>
+<link rel="next" href="development-visualize-index.html" title="Developing Visualizations"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="development-security.html">« Security</a>
+</span>
+<span class="next">
+<a href="development-visualize-index.html">Developing Visualizations »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Add data tutorials</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/add-data-tutorials.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="add-data-tutorials"></a>Add data tutorials</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/add-data-tutorials.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">Add Data</code> in the Kibana Home application contains tutorials for setting up data flows in the Elastic stack.</p>
+<p>Each tutorial contains three sets of instructions:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">On Premise.</code> Set up a data flow when both Kibana and Elasticsearch are running on premise.
+</li>
+<li class="listitem">
+<code class="literal">On Premise Elastic Cloud.</code> Set up a data flow when Kibana is running on premise and Elasticsearch is running on Elastic Cloud.
+</li>
+<li class="listitem">
+<code class="literal">Elastic Cloud.</code> Set up a data flow when both Kibana and Elasticsearch are running on Elastic Cloud.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_creating_a_new_tutorial"></a>Creating a new tutorial</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/add-data-tutorials.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Create a new directory in the <a href="https://github.com/elastic/kibana/tree/main/src/plugins/home/server/tutorials" class="ulink" target="_top">tutorials directory</a>.
+</li>
+<li class="listitem">
+In the new directory, create a file called <code class="literal">index.ts</code> that exports a function.
+The function must return a function object that conforms to the <code class="literal">TutorialSchema</code> interface <a href="https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts" class="ulink" target="_top">tutorial schema</a>.
+</li>
+<li class="listitem">
+Register the tutorial in <a href="https://github.com/elastic/kibana/tree/master/src/plugins/home/server/tutorials/register.ts" class="ulink" target="_top">register.ts</a> by adding it to the <code class="literal">builtInTutorials</code>.
+</li>
+<li class="listitem">
+Add image assets to the <code class="literal">tutorial_resources</code> directory.
+</li>
+<li class="listitem">
+Run Kibana locally to preview the tutorial.
+</li>
+<li class="listitem">
+Create a PR and go through the review process to get the changes approved.
+</li>
+</ol>
+</div>
+<p>If you are creating a new plugin and the tutorial is only related to that plugin, you can also place the <code class="literal">TutorialSchema</code> object into your plugin folder. Add <code class="literal">home</code> to the <code class="literal">requiredPlugins</code> list in your <code class="literal">kibana.json</code> file.
+Then register the tutorial object by calling <code class="literal">home.tutorials.registerTutorial(tutorialObject)</code> in the <code class="literal">setup</code> lifecycle of your server plugin.</p>
+<div class="position-relative"><h5><a id="_variables"></a>Variables</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/add-data-tutorials.asciidoc">edit</a></div>
+<p>String values can contain variables that are substituted when rendered. Variables are specified by <code class="literal">{}</code>.
+For example: <code class="literal">{config.docs.version}</code> is rendered as <code class="literal">6.2</code> when running the tutorial in Kibana 6.2.</p>
+<p><a href="https://github.com/elastic/kibana/tree/master/src/plugins/home/public/application/components/tutorial/replace_template_strings.js" class="ulink" target="_top">Provided variables</a></p>
+<div class="position-relative"><h5><a id="_markdown"></a>Markdown</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/add-data-tutorials.asciidoc">edit</a></div>
+<p>String values can contain limited Markdown syntax.</p>
+<p><a href="https://elastic.github.io/eui/#/editors-syntax/markdown-format" class="ulink" target="_top">Enabled Markdown grammars</a></p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development-security.html">« Security</a>
+</span>
+<span class="next">
+<a href="development-visualize-index.html">Developing Visualizations »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+PUT localhost:5601/api/security/role/custom_reporting_user
+{
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": [ "all" ],
+        "discover": [ "all" ],
+      },
+      "spaces": [ "*" ]
+    }
+  ],
+  "metadata": {} // optional
+}

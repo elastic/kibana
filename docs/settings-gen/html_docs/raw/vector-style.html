@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vector styling | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Vector styling | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="vector-layer.html" title="Vector layer"/>
+<link rel="prev" href="vector-layer.html" title="Vector layer"/>
+<link rel="next" href="maps-vector-style-properties.html" title="Vector style properties"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="vector-layer.html">« Vector layer</a>
+</span>
+<span class="next">
+<a href="maps-vector-style-properties.html">Vector style properties »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="vector-layer.html">Vector layer</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Vector styling</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="vector-style"></a>Vector styling</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+</div></div></div>
+<p>When styling a vector layer, you can customize your data by property, such as size and color.
+For each property, you can specify whether to use a constant or data driven value for the style.</p>
+<div class="position-relative"><h4><a id="maps-vector-style-static"></a>Static styling</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+<p>Use static styling to specify a constant value for a style property.</p>
+<p>This image shows an example of static styling using the <a class="xref" href="add-sample-data.html" title="Add sample data">Kibana sample web logs</a> data set.
+The <span class="strong strong"><strong>kibana_sample_data_logs</strong></span> layer uses static styling for all properties.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/vector_style_static.png" alt="vector style static">
+</div>
+</div>
+<div class="position-relative"><h4><a id="maps-vector-style-data-driven"></a>Data driven styling</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+<p>Use data driven styling to symbolize features by property values.
+To enable data driven styling for a style property, change the selected value from <span class="strong strong"><strong>Fixed</strong></span> or <span class="strong strong"><strong>Solid</strong></span> to <span class="strong strong"><strong>By value</strong></span>.</p>
+<p>This image shows an example of data driven styling using the <a class="xref" href="add-sample-data.html" title="Add sample data">Kibana sample web logs</a> data set.
+The <span class="strong strong"><strong>kibana_sample_data_logs</strong></span> layer uses data driven styling for fill color and symbol size style properties.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The <code class="literal">hour_of_day</code> property determines the fill color for each feature based on where the value fits on a linear scale.
+Light green circles symbolize documents that occur earlier in the day, and dark green circles symbolize documents that occur later in the day.
+</li>
+<li class="listitem">
+The <code class="literal">bytes</code> property determines the size of each symbol based on where the value fits on a linear scale.
+Smaller circles symbolize documents with smaller payloads, and larger circles symbolize documents with larger payloads.
+</li>
+</ul>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/vector_style_dynamic.png" alt="vector style dynamic">
+</div>
+</div>
+<div class="position-relative"><h4><a id="maps-vector-style-quantitative-data-driven"></a>Quantitative data driven styling</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+<p>Quantitative data driven styling symbolizes features from a range of numeric property values.</p>
+<p>Property values are fit from the domain range to the style range on a linear scale.
+For example, let&#8217;s symbolize <a class="xref" href="add-sample-data.html" title="Add sample data">Kibana sample web log</a> documents by size.
+The sample web logs <code class="literal">bytes</code> field ranges from 0 to 18,000. This is the domain range.
+The smallest feature has a symbol radius of 1, and the largest feature has a symbol radius of 24. This is the style range.
+The <code class="literal">bytes</code> property value for each feature will fit on a linear scale from the range of 0 to 18,000 to the style range of 1 to 24.</p>
+<p>For color styles, values are fit from the domain range to the color ramp with one of the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Interpolate (default)</strong></span>. Interpolate values between min and max to a color band on a linear scale. The color ramp is divided into eight bands.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Percentiles</strong></span>. Use percentiles to divide the color ramp into bands that map to values.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Custom</strong></span>. Define custom color ramp bands and ranges.
+</li>
+</ul>
+</div>
+<p>When the property value is undefined for a feature:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Fill color</strong></span> and <span class="strong strong"><strong>Border color</strong></span> are set to transparent and are not visible.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Border width</strong></span> and <span class="strong strong"><strong>Symbol size</strong></span> are set to the minimum size.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Symbol orientation</strong></span> is set to 0.
+</li>
+</ul>
+</div>
+<p>When the symbol range minimum and maximum are the same and there is no range:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Fill color</strong></span> and <span class="strong strong"><strong>Border color</strong></span> are set to last color in the color ramp.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Border width</strong></span> and <span class="strong strong"><strong>Symbol size</strong></span> are set to the maximum size.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="maps-vector-style-qualitative-data-driven"></a>Qualitative data driven styling</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+<p>Qualitative data driven styling symbolizes properties, such as strings and IP addresses, by category.</p>
+<p>Qualitative data driven styling is available for the following styling properties:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Icon</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Fill color</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Border color</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Label color</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Label border color</strong></span>
+</li>
+</ul>
+</div>
+<p>This image shows an example of quantitative data driven styling using the <a class="xref" href="add-sample-data.html" title="Add sample data">Kibana sample web logs</a> data set.
+The <code class="literal">machine.os.keyword</code> property determines the color of each symbol based on category.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/quantitative_data_driven_styling.png" alt="quantitative data driven styling">
+</div>
+</div>
+<div class="position-relative"><h4><a id="maps-vector-style-class"></a>Class styling</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style.asciidoc">edit</a></div>
+<p>Class styling symbolizes features by class and requires multiple layers.
+Use <a class="xref" href="maps-layer-based-filtering.html" title="Filter a single layer">layer filtering</a> to define the class for each layer, and <a class="xref" href="vector-style.html#maps-vector-style-static" title="Static styling">static styling</a> to symbolize each class.</p>
+<p>This image shows an example of class styling using the <a class="xref" href="add-sample-data.html" title="Add sample data">Kibana sample web logs</a> data set.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The <span class="strong strong"><strong>Mac OS requests</strong></span> layer applies the filter <code class="literal">machine.os : osx</code> so the layer only contains Mac OS requests.
+The fill color is a static value of green.
+</li>
+<li class="listitem">
+The <span class="strong strong"><strong>Window OS requests</strong></span> layer applies the filter <code class="literal">machine.os : win*</code> so the layer only contains Window OS requests.
+The fill color is a static value of red.
+</li>
+</ul>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/vector_style_class.png" alt="vector style class">
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="vector-layer.html">« Vector layer</a>
+</span>
+<span class="next">
+<a href="maps-vector-style-properties.html">Vector style properties »</a>
+</span>
+</div>
+</body>
+</html>

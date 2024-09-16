@@ -161,7 +161,7 @@ Something else.
 
 Even more.
 
-`test.setting`::
+`test.setting` {ess-icon}::
 Some description.
 +
 ====

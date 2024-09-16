@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Import geospatial data | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Import geospatial data | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps.html" title="Maps"/>
+<link rel="prev" href="maps-connect-to-ems.html" title="Connect to Elastic Maps Service"/>
+<link rel="next" href="maps-clean-your-data.html" title="Clean your data"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="maps-connect-to-ems.html">« Connect to Elastic Maps Service</a>
+</span>
+<span class="next">
+<a href="maps-clean-your-data.html">Clean your data »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Import geospatial data</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="import-geospatial-data"></a>Import geospatial data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+</div></div></div>
+<p>To import geospatical data into the Elastic Stack, the data must be indexed as <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-point.html" class="ulink" target="_top">geo_point</a> or <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-shape.html" class="ulink" target="_top">geo_shape</a>.
+Geospatial data comes in many formats.
+Choose an import tool based on the format of your geospatial data.</p>
+<div class="position-relative"><h3><a id="import-geospatial-privileges"></a>Security privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p>The Elastic Stack security features provide roles and privileges that control which users can upload files.
+You can manage your roles, privileges, and
+spaces in <span class="strong strong"><strong>Stack Management</strong></span> in Kibana. For more information, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-privileges.html" class="ulink" target="_top">Security privileges</a>,
+<a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana privileges</a>, and <a class="xref" href="kibana-role-management.html" title="Kibana role management">Kibana role management</a>.</p>
+<p>To upload GeoJSON files, shapefiles, and draw features in Kibana with <span class="strong strong"><strong>Maps</strong></span>, you must have:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The <code class="literal">all</code> Kibana privilege for <span class="strong strong"><strong>Maps</strong></span>
+</li>
+<li class="listitem">
+The <code class="literal">all</code> Kibana privilege for <span class="strong strong"><strong>Index Pattern Management</strong></span>
+</li>
+<li class="listitem">
+The <code class="literal">create</code> and <code class="literal">create_index</code> index privileges for destination indices
+</li>
+<li class="listitem">
+To use the index in <span class="strong strong"><strong>Maps</strong></span>, you must also have the <code class="literal">read</code> and <code class="literal">view_index_metadata</code> index privileges for destination indices
+</li>
+</ul>
+</div>
+<p>To upload delimited files (such as CSV, TSV, or JSON files) on the Kibana home page, you must also have:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+The <code class="literal">all</code> Kibana privilege for <span class="strong strong"><strong>Discover</strong></span>
+</li>
+<li class="listitem">
+The <code class="literal">manage_pipeline</code> or <code class="literal">manage_ingest_pipelines</code> cluster privilege
+</li>
+<li class="listitem">
+The <code class="literal">manage</code> index privilege for destination indices
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_upload_delimited_files_with_latitude_and_longitude_columns"></a>Upload delimited files with latitude and longitude columns</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p>On the Kibana home page, you can upload a file and import it into an Elasticsearch index with latitude and longitude columns combined into a <code class="literal">geo_point</code> field.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Go to the Kibana home page and click <span class="strong strong"><strong>Upload a file</strong></span>.
+</li>
+<li class="listitem">
+Select a file in one of the supported file formats.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Import</strong></span>.
+</li>
+<li class="listitem">
+Select the <span class="strong strong"><strong>Advanced</strong></span> tab.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Index name</strong></span>.
+</li>
+<li class="listitem">
+If a combined <code class="literal">geo_point</code> field is not created automatically, click <span class="strong strong"><strong>Add combined field</strong></span>, then click <span class="strong strong"><strong>Add geo point field</strong></span>.
+</li>
+<li class="listitem">
+Fill out the form and click <span class="strong strong"><strong>Add</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Import</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_upload_a_geojson_file"></a>Upload a GeoJSON file</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Upload file</strong></span> indexes GeoJSON features in Elasticsearch, creating a document for each feature.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>GeoJSON feature coordinates must be in EPSG:4326 coordinate reference system..</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a class="xref" href="maps-getting-started.html#maps-create" title="Step 1. Create a map">Create a new map</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Upload file</strong></span>.
+</li>
+<li class="listitem">
+Use the file chooser to select a GeoJSON file with the extension <code class="literal">.json</code> or <code class="literal">.geojson</code>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Import file</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_upload_a_shapefile"></a>Upload a shapefile</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Upload file</strong></span> indexes shapefile features in Elasticsearch, creating a document for each feature.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a class="xref" href="maps-getting-started.html#maps-create" title="Step 1. Create a map">Create a new map</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Upload file</strong></span>.
+</li>
+<li class="listitem">
+Use the file chooser to select the <code class="literal">.shp</code> file from your shapefile folder.
+</li>
+<li class="listitem">
+Use the <code class="literal">.dbf</code> file chooser to select the <code class="literal">.dbf</code> file from your shapefile folder.
+</li>
+<li class="listitem">
+Use the <code class="literal">.prj</code> file chooser to select the <code class="literal">.prj</code> file from your shapefile folder.
+</li>
+<li class="listitem">
+Use the <code class="literal">.shx</code> file chooser to select the <code class="literal">.shx</code> file from your shapefile folder.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Import file</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_draw_features_in_a_map"></a>Draw features in a map</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p>Upload features into Elasticsearch by drawing lines, polygons, circles, bounding boxes, and points in a map.</p>
+<p>To create a new index for drawing:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a class="xref" href="maps-getting-started.html#maps-create" title="Step 1. Create a map">Create a map</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Create index</strong></span>.
+</li>
+<li class="listitem">
+Set <span class="strong strong"><strong>Index name</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create index</strong></span>.
+</li>
+</ol>
+</div>
+<p>To open an existing index for drawing:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a class="xref" href="maps-getting-started.html#maps-create" title="Step 1. Create a map">Create a map</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add layer</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Documents</strong></span>.
+</li>
+<li class="listitem">
+Select the data view that points to your index. A <a class="xref" href="data-views.html" title="Create a data view">data view</a> can point to one or more indices. For feature editing, the data view must point to a single index.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add and close</strong></span>.
+</li>
+<li class="listitem">
+In the legend, click the layer name and select <span class="strong strong"><strong>Edit features</strong></span>.
+</li>
+</ol>
+</div>
+<p>When feature editing is open, a feature editing toolbox is displayed on the left side of the map.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/drawing_layer.png" alt="drawing layer">
+</div>
+</div>
+<p>To draw features:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click on the line, polygon, circle, bounding box, or point icon.
+</li>
+<li class="listitem">
+<p>Move the mouse cursor over the map and follow the on screen instructions to draw a feature.</p>
+<p>When a feature is complete, the feature is added to the index as a new document.</p>
+</li>
+<li class="listitem">
+Repeat to draw additional features.
+</li>
+<li class="listitem">
+When you are finished adding features, go to the legend, and click <span class="strong strong"><strong>Exit</strong></span> under the layer name.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_upload_data_with_ip_addresses"></a>Upload data with IP addresses</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p>The GeoIP processor adds information about the geographical location of IP addresses.
+See <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-processor.html" class="ulink" target="_top">GeoIP processor</a> for details.
+For private IP addresses, see <a href="https://www.elastic.co/blog/enriching-elasticsearch-data-geo-ips-internal-private-ip-addresses" class="ulink" target="_top">Enriching data with GeoIPs from internal, private IP addresses</a>.</p>
+<div class="position-relative"><h3><a id="_upload_data_with_gdal"></a>Upload data with GDAL</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/import-geospatial-data.asciidoc">edit</a></div>
+<p><a href="https://www.gdal.org/" class="ulink" target="_top">GDAL</a> (Geospatial Data Abstraction Library) contains command line tools that can convert geospatial data between 75 different geospatial file formats and index that geospatial data into Elasticsearch.
+See <a href="https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal" class="ulink" target="_top">Ingest geospatial data into Elasticsearch with GDAL</a> for details.</p>
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maps-connect-to-ems.html">« Connect to Elastic Maps Service</a>
+</span>
+<span class="next">
+<a href="maps-clean-your-data.html">Clean your data »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

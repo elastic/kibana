@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Graph troubleshooting and limitations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Graph troubleshooting and limitations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-graph.html" title="Graph"/>
+<link rel="prev" href="graph-configuration.html" title="Configure Graph"/>
+<link rel="next" href="alerting-getting-started.html" title="Alerting"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="graph-configuration.html">« Configure Graph</a>
+</span>
+<span class="next">
+<a href="alerting-getting-started.html">Alerting »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-graph.html">Graph</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Graph troubleshooting and limitations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/graph/troubleshooting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="graph-troubleshooting"></a>Graph troubleshooting and limitations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/graph/troubleshooting.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="position-relative"><h3><a id="_why_are_results_missing"></a>Why are results missing?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/graph/troubleshooting.asciidoc">edit</a></div>
+<p>The default settings in Graph API requests are configured to tune out noisy
+results by using the following strategies:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Only looking at samples of the most-relevant documents for a query
+</li>
+<li class="listitem">
+Only considering terms that have a significant statistical correlation with
+the sample
+</li>
+<li class="listitem">
+Only considering terms to be paired that have at least 3 documents asserting
+that connection
+</li>
+</ul>
+</div>
+<p>These are useful defaults for getting the "big picture" signals from noisy data,
+but they can miss details from individual documents. If you need to perform a
+detailed forensic analysis, you can adjust the following settings to ensure a
+graph exploration produces all of the relevant data:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Increase the <code class="literal">sample_size</code> to a larger number of documents to analyze more
+data on each shard.
+</li>
+<li class="listitem">
+Set the <code class="literal">use_significance</code> setting to <code class="literal">false</code> to retrieve terms regardless
+of any statistical correlation with the sample.
+</li>
+<li class="listitem">
+Set the <code class="literal">min_doc_count</code> for your vertices to 1 to ensure only one document is
+required to assert a relationship.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_what_can_i_do_to_improve_performance"></a>What can I do to improve performance?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/graph/troubleshooting.asciidoc">edit</a></div>
+<p>With the default setting of <code class="literal">use_significance</code> set to <code class="literal">true</code>, the Graph API
+performs a background frequency check of the terms it discovers as part of
+exploration. Each unique term has to have its frequency looked up in the index,
+which costs at least one disk seek. Disk seeks are expensive. If you don&#8217;t need
+to perform this noise-filtering, setting <code class="literal">use_significance</code> to <code class="literal">false</code>
+eliminates all of these expensive checks (at the expense of not performing any
+quality-filtering on the terms).</p>
+<p>If your data is noisy and you need to filter based on significance, you can
+reduce the number of frequency checks by:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Reducing the <code class="literal">sample_size</code>. Considering fewer documents can actually be better
+when the quality of matches is quite variable.
+</li>
+<li class="listitem">
+Avoiding noisy documents that have a large number of terms. You can do this by
+either allowing ranking to naturally favor shorter documents in the top-results
+sample (see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/norms.html" class="ulink" target="_top">enabling norms</a>) or by explicitly excluding
+large documents with your seed and guiding queries.
+</li>
+<li class="listitem">
+Increasing the frequency threshold. Many many terms occur very infrequently
+so even increasing the frequency threshold by one can massively reduce the
+number of candidate terms whose background frequencies are checked.
+</li>
+</ul>
+</div>
+<p>Keep in mind that all of these options reduce the scope of information analyzed
+and can increase the potential to miss what could be interesting details. However,
+the information that&#8217;s lost tends to be associated with lower-quality documents
+with lower-frequency terms, which can be an acceptable trade-off.</p>
+<div class="position-relative"><h3><a id="_limited_support_for_multiple_indices"></a>Limited support for multiple indices</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/graph/troubleshooting.asciidoc">edit</a></div>
+<p>The graph API can explore multiple indices, types, or aliases in a
+single API request, but the assumption is that each "hop" it performs
+is querying the same set of indices. Currently, it is not possible to
+take a term found in a field from one index and use that value to explore
+connections in <em>a different field</em> held in another type or index.</p>
+<p>A good example of where this might be useful is if an IP address is
+found in the <code class="literal">remote_host</code> field of an index called "weblogs20160101",
+you might want to follow that up by looking for the same address in
+the <code class="literal">ip_address</code> field of an index called "knownthreats".</p>
+<p>Supporting this behavior would require extra mappings to indicate that
+the weblogs' <code class="literal">remote_host</code> field contained values that had currency and
+meaning in the <code class="literal">ip_address</code> field of the threats index.</p>
+<p>Since we do not currently support this translation, you would have to
+perform multiple calls to take the values from the weblogs index
+response and build them into a separate request to the threats index.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="graph-configuration.html">« Configure Graph</a>
+</span>
+<span class="next">
+<a href="alerting-getting-started.html">Alerting »</a>
+</span>
+</div>
+</body>
+</html>

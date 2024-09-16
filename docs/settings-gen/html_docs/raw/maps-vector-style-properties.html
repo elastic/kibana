@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vector style properties | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Vector style properties | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="vector-layer.html" title="Vector layer"/>
+<link rel="prev" href="vector-style.html" title="Vector styling"/>
+<link rel="next" href="vector-tooltip.html" title="Vector tooltips"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="vector-style.html">« Vector styling</a>
+</span>
+<span class="next">
+<a href="vector-tooltip.html">Vector tooltips »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="vector-layer.html">Vector layer</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Vector style properties</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style-properties.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-vector-style-properties"></a>Vector style properties</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style-properties.asciidoc">edit</a></div>
+</div></div></div>
+<p>Point, polygon, and line features support different styling properties.</p>
+<div class="position-relative"><h4><a id="point-style-properties"></a>Point style properties</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style-properties.asciidoc">edit</a></div>
+<p>You can add text labels to your Point features by configuring label style properties.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies label content.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label position</strong></span></p></td>
+<td align="left" valign="top"><p>Place label above, in the center of, or below the Point feature.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label visibility</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies the zoom range for which labels are displayed.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label color</strong></span></p></td>
+<td align="left" valign="top"><p>The text color.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label size</strong></span></p></td>
+<td align="left" valign="top"><p>The size of the text, in pixels.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;color</strong></span></p></td>
+<td align="left" valign="top"><p>The color of the label border.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;width</strong></span></p></td>
+<td align="left" valign="top"><p>The width of the label border.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can symbolize Point features as <span class="strong strong"><strong>Circle markers</strong></span> or <span class="strong strong"><strong>Icons</strong></span>.</p>
+<p>Use <span class="strong strong"><strong>Circle marker</strong></span> to symbolize Points as circles.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border color</strong></span></p></td>
+<td align="left" valign="top"><p>The border color of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border width</strong></span></p></td>
+<td align="left" valign="top"><p>The border width of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Fill color</strong></span></p></td>
+<td align="left" valign="top"><p>The fill color of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Symbol size</strong></span></p></td>
+<td align="left" valign="top"><p>The radius of the symbol size, in pixels.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Use <span class="strong strong"><strong>Icon</strong></span> to symbolize Points as icons.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border color</strong></span></p></td>
+<td align="left" valign="top"><p>The border color of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border width</strong></span></p></td>
+<td align="left" valign="top"><p>The border width of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Fill color</strong></span></p></td>
+<td align="left" valign="top"><p>The fill color of the point features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Symbol orientation</strong></span></p></td>
+<td align="left" valign="top"><p>The symbol orientation rotating the icon clockwise.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Symbol size</strong></span></p></td>
+<td align="left" valign="top"><p>The radius of the symbol size, in pixels.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Available icons</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/maki-icons.png" alt="maki icons">
+</div>
+</div>
+<p>Custom Icons</p>
+<p>You can also use your own SVG icon to style Point features in your map. In <span class="strong strong"><strong>Layer settings</strong></span> open the <span class="strong strong"><strong>icon</strong></span> dropdown, and click the <span class="strong strong"><strong>Add custom icon</strong></span> button. For best results, your SVG icon should be monochrome and have limited details.</p>
+<p>Dynamic styling in <span class="strong strong"><strong>Elastic Maps</strong></span> requires rendering SVG icons as PNGs using a <a href="https://en.wikipedia.org/wiki/Signed_distance_function" class="ulink" target="_top">signed distance function</a>. As a result, sharp corners and intricate details may not render correctly. Modifying the settings under <span class="strong strong"><strong>Advanced Options</strong></span> in the <span class="strong strong"><strong>Add custom icon</strong></span> modal may improve rendering.</p>
+<p>Manage your custom icons in <a class="xref" href="maps-settings.html" title="Configure map settings">settings</a>.</p>
+<div class="position-relative"><h4><a id="polygon-style-properties"></a>Polygon style properties</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style-properties.asciidoc">edit</a></div>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border color</strong></span></p></td>
+<td align="left" valign="top"><p>The border color of the polygon features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border width</strong></span></p></td>
+<td align="left" valign="top"><p>The border width of the polygon features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Fill color</strong></span></p></td>
+<td align="left" valign="top"><p>The fill color of the polygon features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies label content. For polygons, the label is positioned at the polygon centroid. For multi-polygons, the label is positioned at the largest polygon centroid.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label visibility</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies the zoom range for which labels are displayed.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label color</strong></span></p></td>
+<td align="left" valign="top"><p>The text color.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label size</strong></span></p></td>
+<td align="left" valign="top"><p>The size of the text, in pixels.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;color</strong></span></p></td>
+<td align="left" valign="top"><p>The color of the label border.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;width</strong></span></p></td>
+<td align="left" valign="top"><p>The width of the label border.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h4><a id="line-style-properties"></a>Line style properties</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/vector-style-properties.asciidoc">edit</a></div>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border color</strong></span></p></td>
+<td align="left" valign="top"><p>The color of the line features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Border width</strong></span></p></td>
+<td align="left" valign="top"><p>The width of the line features.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies label content. For lines, the label is positioned at the center of the line. For multi-lines, the label is positioned at the center of the longest line.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label visibility</strong></span></p></td>
+<td align="left" valign="top"><p>Specifies the zoom range for which labels are displayed.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label color</strong></span></p></td>
+<td align="left" valign="top"><p>The text color.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label size</strong></span></p></td>
+<td align="left" valign="top"><p>The size of the text, in pixels.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;color</strong></span></p></td>
+<td align="left" valign="top"><p>The color of the label border.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Label&nbsp;border&nbsp;width</strong></span></p></td>
+<td align="left" valign="top"><p>The width of the label border.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="vector-style.html">« Vector styling</a>
+</span>
+<span class="next">
+<a href="vector-tooltip.html">Vector tooltips »</a>
+</span>
+</div>
+</body>
+</html>

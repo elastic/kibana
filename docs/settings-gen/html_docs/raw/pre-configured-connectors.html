@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Preconfigured connectors | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Preconfigured connectors | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="xmatters-action-type.html" title="xMatters connector and action"/>
+<link rel="next" href="managing-licenses.html" title="License Management"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="xmatters-action-type.html">« xMatters connector and action</a>
+</span>
+<span class="next">
+<a href="managing-licenses.html">License Management »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Preconfigured connectors</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="pre-configured-connectors"></a>Preconfigured connectors</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you are running Kibana on-prem, you can preconfigure a connector to have all
+the information it needs prior to startup by adding it to the <code class="literal">kibana.yml</code> file.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Elasticsearch Service provides a preconfigured email connector but you cannot create
+additional preconfigured connectors.</p>
+</div>
+</div>
+<p>Preconfigured connectors offer the following benefits:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Require no setup. Configuration and credentials needed to run an action are
+predefined, including the connector name and ID.
+</li>
+<li class="listitem">
+Appear in all spaces because they are not saved objects.
+</li>
+<li class="listitem">
+Cannot be edited or deleted.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="create-preconfigured-connectors"></a>Create preconfigured connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Add <code class="literal">xpack.actions.preconfigured</code> settings to your <code class="literal">kibana.yml</code> file. The
+settings vary depending on which type of connector you&#8217;re adding.
+Refer to <a class="xref" href="alert-action-settings-kb.html#preconfigured-connector-settings" title="Preconfigured connector settings">Preconfigured connector settings</a>.</p>
+<p>This example shows a valid configuration for a Slack connector and a Webhook
+connector:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">  xpack.actions.preconfigured:
+    my-slack1:                  <a id="CO43-1"></a><i class="conum" data-value="1"></i>
+      actionTypeId: .slack      <a id="CO43-2"></a><i class="conum" data-value="2"></i>
+      name: 'Slack #xyz'        <a id="CO43-3"></a><i class="conum" data-value="3"></i>
+      secrets:
+        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+    webhook-service:
+      actionTypeId: .webhook
+      name: 'Email service'
+      config:                   <a id="CO43-4"></a><i class="conum" data-value="4"></i>
+        url: 'https://email-alert-service.elastic.co'
+        method: post
+        headers:
+          header1: value1
+          header2: value2
+      secrets:                  <a id="CO43-5"></a><i class="conum" data-value="5"></i>
+        user: elastic
+        password: changeme</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO43-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The key is the connector identifier, <code class="literal">my-slack1</code> in this example.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO43-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p><code class="literal">actionTypeId</code> is the action type identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO43-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p><code class="literal">name</code> is the name of the preconfigured connector.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO43-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p><code class="literal">config</code> is the configuration specific to the connector type.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO43-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p><code class="literal">secrets</code> is the sensitive configuration, such as username, password, and keys, specific to the connector type.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Sensitive properties, such as passwords, can also be stored in the
+<a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="managing-preconfigured-connectors"></a>View preconfigured connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>When you open the main menu, click <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>.
+Preconfigured connectors appear regardless of which space you are in.
+They are tagged as “preconfigured”, and you cannot delete them.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/preconfigured-connectors-managing.png" alt="Connectors managing tab with pre-configured">
+</div>
+</div>
+<p>Clicking a preconfigured connector shows the description, but not the configuration.</p>
+<div class="position-relative"><h4><a id="built-in-preconfigured-connectors"></a>Built-in preconfigured connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Kibana provides the following built-in preconfigured connectors:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-connector-alert-history" title="Preconfigured alert history Elasticsearch index connector">Preconfigured alert history Elasticsearch index connector</a>
+</li>
+<li class="listitem">
+<a class="xref" href="email-action-type.html#elasticcloud" title="Elastic Cloud"><code class="literal">Elastic-Cloud-SMTP</code> preconfigured email connector</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-connector-alert-history"></a>Preconfigured alert history Elasticsearch index connector</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Kibana offers a preconfigured index connector to facilitate indexing active alert data into Elasticsearch.
+To use this connector, set <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.preconfiguredAlertHistoryEsIndex</code></a> to <code class="literal">true</code>.</p>
+<p>When you subsequently create rules, you can use the <code class="literal">Alert history Elasticsearch index (preconfigured)</code> connector.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/pre-configured-alert-history-connector.png" alt="Creating a rule action that uses the pre-configured alert history connector">
+</div>
+</div>
+<p>Documents are indexed using a preconfigured schema that captures the <a class="xref" href="create-and-manage-rules.html#defining-rules-actions-variables" title="Action variables">action variables</a> available for the rule.
+By default, these documents are indexed into the <code class="literal">kibana-alert-history-default</code> index, but you can specify a different index.
+Index names must start with <code class="literal">kibana-alert-history-</code> to take advantage of the preconfigured alert history index template.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To write documents to the preconfigured index, you must have <code class="literal">all</code> or <code class="literal">write</code> privileges to the <code class="literal">kibana-alert-history-*</code> indices.
+</li>
+<li class="listitem">
+The <code class="literal">kibana-alert-history-*</code> indices are not configured to use ILM so they must be maintained manually. If the index size grows large, consider using the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html" class="ulink" target="_top">delete by query</a> API to clean up older documents in the index.
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="position-relative"><h4><a id="preconfigured-connector-examples"></a>Examples</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-bedrock-configuration" title="Amazon Bedrock connectors">Amazon Bedrock connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-d3security-configuration" title="D3 Security connectors">D3 Security connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-email-configuration" title="Email connectors">Email connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-gen-ai-configuration" title="OpenAI connectors">OpenAI connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-resilient-configuration" title="IBM Resilient connectors">IBM Resilient connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-index-configuration" title="Index connectors">Index connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-jira-configuration" title="Jira connectors">Jira connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-teams-configuration" title="Microsoft Teams connectors">Microsoft Teams connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-opsgenie-configuration" title="Opsgenie connectors">Opsgenie connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-pagerduty-configuration" title="PagerDuty connectors">PagerDuty connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-server-log-configuration" title="Server log connectors">Server log connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-servicenow-itom-configuration" title="ServiceNow ITOM connectors">ServiceNow ITOM connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-servicenow-configuration" title="ServiceNow ITSM connectors">ServiceNow ITSM connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-servicenow-sir-configuration" title="ServiceNow SecOps connectors">ServiceNow SecOps connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-slack-configuration" title="Slack connectors">Slack connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-swimlane-configuration" title="Swimlane connectors">Swimlane connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-torq-configuration" title="Torq connectors">Torq connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-tines-configuration" title="Tines connectors">Tines connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-webhook-configuration" title="Webhook connectors">Webhook connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-cases-webhook-configuration" title="Webhook - Case Management connectors">Webhook - Case Management connectors</a>
+</li>
+<li class="listitem">
+<a class="xref" href="pre-configured-connectors.html#preconfigured-xmatters-configuration" title="xMatters connectors">xMatters connectors</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-bedrock-configuration"></a>Amazon Bedrock connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates an <a class="xref" href="bedrock-action-type.html" title="Amazon Bedrock connector and action">Amazon Bedrock connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-bedrock:
+    name: preconfigured-bedrock-connector-type
+    actionTypeId: .bedrock
+    config:
+      apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <a id="CO44-1"></a><i class="conum" data-value="1"></i>
+      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <a id="CO44-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      accessKey: key-value <a id="CO44-3"></a><i class="conum" data-value="3"></i>
+      secret: secret-value <a id="CO44-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO44-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Amazon Bedrock request URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO44-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The default model to use for requests. Current support is for the Anthropic Claude models, defaulting to Claude 2.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO44-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The AWS access key for authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO44-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The AWS secret for authentication.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-d3security-configuration"></a>D3 Security connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="d3security-action-type.html" title="D3 Security connector and action">D3 Security connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-d3security:
+    name: preconfigured-d3security-connector-type
+    actionTypeId: .d3security
+    config:
+      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <a id="CO45-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      token: superlongtoken <a id="CO45-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO45-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The D3 Security API request URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO45-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The D3 Security token.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-email-configuration"></a>Email connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates an <a class="xref" href="email-action-type.html" title="Email connector and action">email connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-email:
+    name: preconfigured-email-connector-type
+    actionTypeId: .email
+    config:
+      service: other <a id="CO46-1"></a><i class="conum" data-value="1"></i>
+      from: testsender@test.com <a id="CO46-2"></a><i class="conum" data-value="2"></i>
+      host: validhostname <a id="CO46-3"></a><i class="conum" data-value="3"></i>
+      port: 8080 <a id="CO46-4"></a><i class="conum" data-value="4"></i>
+      secure: false <a id="CO46-5"></a><i class="conum" data-value="5"></i>
+      hasAuth: true <a id="CO46-6"></a><i class="conum" data-value="6"></i>
+    secrets:
+      user: testuser <a id="CO46-7"></a><i class="conum" data-value="7"></i>
+      password: passwordkeystorevalue <a id="CO46-8"></a><i class="conum" data-value="8"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The name of the email service. If <code class="literal">service</code> is <code class="literal">elastic_cloud</code> (for Elastic Cloud notifications) or one of Nodemailer&#8217;s well-known email service providers, the <code class="literal">host</code>, <code class="literal">port</code>, and <code class="literal">secure</code> properties are ignored. If <code class="literal">service</code> is <code class="literal">other</code>, the <code class="literal">host</code> and <code class="literal">port</code> properties must be defined. For more information on the <code class="literal">gmail</code> service value, refer to <a href="https://nodemailer.com/usage/using-gmail/" class="ulink" target="_top">Nodemailer Gmail documentation</a>. If <code class="literal">service</code> is <code class="literal">exchange_server</code>, the <code class="literal">tenantId</code>, <code class="literal">clientId</code>, <code class="literal">clientSecret</code>
+properties are required instead of <code class="literal">host</code> and <code class="literal">port</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The email address for all emails sent with this connector. It must be specified in <code class="literal">user@host-name</code> format.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The host name of the service provider.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The port to connect to on the service provider.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>If true, the connection will use TLS when connecting to the service provider.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>If <code class="literal">true</code>, this connector will require values for <code class="literal">user</code> and <code class="literal">password</code> inside the secrets configuration. Defaults to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-7"><i class="conum" data-value="7"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A user name for authentication. Required if <code class="literal">hasAuth</code> is set to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO46-8"><i class="conum" data-value="8"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A password for authentication. Should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>. Required if <code class="literal">hasAuth</code> is set to <code class="literal">true</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h6><a id="preconfigured-email-configuration-amazon-ses"></a>Amazon SES (Simple Email Service)</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Use the following email connector configuration to send email from the
+<a href="http://aws.amazon.com/ses" class="ulink" target="_top">Amazon Simple Email Service</a> (SES) SMTP service:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">config:
+    service: ses
+    // `host`, `port` and `secure` have the following default values and do not need to set:
+    // host: email-smtp.us-east-1.amazonaws.com <a id="CO47-1"></a><i class="conum" data-value="1"></i>
+    // port: 465
+    // secure: true
+secrets:
+    user: &lt;username&gt;
+    password: &lt;password&gt;</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO47-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p><code class="literal">config.host</code> varies depending on the region</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h6><a id="preconfigured-email-configuration-gmail"></a>Gmail</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Use the following email connector configuration to send email from the <a href="https://mail.google.com" class="ulink" target="_top">Gmail</a> SMTP service:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">  config:
+    service: gmail
+    // `host`, `port` and `secure` have the following default values and do not need to set:
+    // host: smtp.gmail.com
+    // port: 465
+    // secure: true
+  secrets:
+    user: &lt;username&gt;
+    password: &lt;password&gt;</pre>
+</div>
+<div class="position-relative"><h6><a id="preconfigured-email-configuration-exchange-basic-auth"></a>Microsoft Exchange with basic authentication</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p><span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">7.16.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 7.16.0. This Microsoft Exchange configuration is deprecated and will be removed later because Microsoft is deprecating basic authentication.
+</span>
+</span></p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">config:
+    service: other
+    host: &lt;your exchange server&gt;
+    port: 465
+    secure: true
+    from: &lt;email address of service account&gt; <a id="CO48-1"></a><i class="conum" data-value="1"></i>
+secrets:
+    user: &lt;email address of service account&gt; <a id="CO48-2"></a><i class="conum" data-value="2"></i>
+    password: &lt;password&gt;</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO48-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Some organizations configure Exchange to validate that the <code class="literal">from</code> field is a valid local email account.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO48-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Many organizations support use of your email address as your username. Check with your system administrator if you receive authentication-related failures.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h6><a id="preconfigured-email-configuration-exchange"></a>Microsoft Exchange with OAuth 2.0</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Use the following email connector configuration to send email from Microsoft Exchange:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">config:
+    service: exchange_server
+    clientId: &lt;The Application (client) ID&gt; <a id="CO49-1"></a><i class="conum" data-value="1"></i>
+    tenantId: &lt;The directory tenant ID, in GUID format.&gt;
+    from: &lt;email address of service account&gt; <a id="CO49-2"></a><i class="conum" data-value="2"></i>
+secrets:
+    clientSecret: &lt;URL-encoded string&gt;</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO49-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>This application information is on the <a href="https://go.microsoft.com/fwlink/?linkid=2083908" class="ulink" target="_top">Azure portal – App registrations</a>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO49-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Some organizations configure Exchange to validate that the <code class="literal">from</code> field is a valid local email account.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h6><a id="preconfigured-email-configuration-outlook"></a>Outlook.com</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>Use the following email connector configuration to send email from the
+<a href="https://www.outlook.com/" class="ulink" target="_top">Outlook.com</a> SMTP service:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">config:
+    service: outlook365
+    // `host`, `port` and `secure` have the following default values and do not need to set:
+    // host: smtp.office365.com
+    // port: 587
+    // secure: false
+secrets:
+    user: &lt;email.address&gt;
+    password: &lt;password&gt;</pre>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-gen-ai-configuration"></a>OpenAI connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="openai-action-type.html" title="OpenAI connector and action">OpenAI connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-open-ai:
+    name: preconfigured-openai-connector-type
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://api.openai.com/v1/chat/completions <a id="CO50-1"></a><i class="conum" data-value="1"></i>
+      apiProvider: 'OpenAI' <a id="CO50-2"></a><i class="conum" data-value="2"></i>
+      defaultModel: gpt-4o <a id="CO50-3"></a><i class="conum" data-value="3"></i>
+    secrets:
+      apiKey: superlongapikey <a id="CO50-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO50-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The OpenAI request URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO50-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The OpenAI API provider, either <code class="literal">OpenAI</code> or <code class="literal">Azure OpenAI</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO50-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The default model to use for requests. This setting is optional and applicable only when <code class="literal">apiProvider</code> is <code class="literal">OpenAI</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO50-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The OpenAI or Azure OpenAI API key for authentication.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-resilient-configuration"></a>IBM Resilient connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="resilient-action-type.html" title="IBM Resilient connector and action">IBM Resilient connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+ my-resilient:
+    name: preconfigured-resilient-connector-type
+    actionTypeId: .resilient
+    config:
+      apiUrl: https://elastic.resilient.net <a id="CO51-1"></a><i class="conum" data-value="1"></i>
+      orgId: ES <a id="CO51-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      apiKeyId: testuser <a id="CO51-3"></a><i class="conum" data-value="3"></i>
+      apiKeySecret: tokenkeystorevalue <a id="CO51-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO51-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The IBM Resilient instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO51-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The IBM Resilient organization identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO51-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The authentication key ID for HTTP basic authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO51-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The authentication key secret for HTTP basic authentication. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-index-configuration"></a>Index connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="index-action-type.html" title="Index connector and action">index connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-index:
+    name: preconfigured-index-connector-type
+    actionTypeId: .index
+    config:
+      index: .kibana <a id="CO52-1"></a><i class="conum" data-value="1"></i>
+      executionTimeField: my-field <a id="CO52-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO52-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Elasticsearch index to be written to.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO52-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A field that indicates when the document was indexed.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-jira-configuration"></a>Jira connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="jira-action-type.html" title="Jira connector and action">Jira connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-jira:
+    name: preconfigured-jira-connector-type
+    actionTypeId: .jira
+    config:
+      apiUrl: https://elastic.atlassian.net <a id="CO53-1"></a><i class="conum" data-value="1"></i>
+      projectKey: ES <a id="CO53-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      email: testuser <a id="CO53-3"></a><i class="conum" data-value="3"></i>
+      apiToken: tokenkeystorevalue <a id="CO53-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO53-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Jira instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO53-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Jira project key.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO53-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The account email for HTTP basic authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO53-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-teams-configuration"></a>Microsoft Teams connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="teams-action-type.html" title="Microsoft Teams connector and action">Microsoft Teams connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-teams:
+    name: preconfigured-teams-connector-type
+    actionTypeId: .teams
+    secrets:
+      webhookUrl: 'https://outlook.office.com/webhook/abcd@0123456/IncomingWebhook/abcdefgh/ijklmnopqrstuvwxyz' <a id="CO54-1"></a><i class="conum" data-value="1"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO54-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The URL of the incoming webhook.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-opsgenie-configuration"></a>Opsgenie connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates an <a class="xref" href="opsgenie-action-type.html" title="Opsgenie connector and action">Opsgenie connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-opsgenie:
+    name: preconfigured-opsgenie-connector-type
+    actionTypeId: .opsgenie
+    config:
+      apiUrl: https://api.opsgenie.com <a id="CO55-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      apiKey: apikey <a id="CO55-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO55-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Opsgenie URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO55-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Opsgenie API authentication key for HTTP basic authentication.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-pagerduty-configuration"></a>PagerDuty connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="pagerduty-action-type.html" title="PagerDuty connector and action">PagerDuty connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-pagerduty:
+    name: preconfigured-pagerduty-connector-type
+    actionTypeId: .pagerduty
+    config:
+      apiUrl: https://test.host <a id="CO56-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      routingKey: testroutingkey <a id="CO56-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO56-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The PagerDuty event URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO56-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-server-log-configuration"></a>Server log connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="server-log-action-type.html" title="Server log connector and action">server log connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log</pre>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-servicenow-itom-configuration"></a>ServiceNow ITOM connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="servicenow-itom-action-type.html" title="ServiceNow ITOM connector and action">ServiceNow ITOM connector</a> with basic authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow-itom:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/ <a id="CO57-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      username: testuser <a id="CO57-2"></a><i class="conum" data-value="2"></i>
+      password: passwordkeystorevalue <a id="CO57-3"></a><i class="conum" data-value="3"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO57-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The ServiceNow instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO57-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A user name.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO57-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A password. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>The following example creates a ServiceNow ITOM connector with OAuth authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/
+      isOAuth: true <a id="CO58-1"></a><i class="conum" data-value="1"></i>
+      userIdentifierValue: testuser@email.com <a id="CO58-2"></a><i class="conum" data-value="2"></i>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <a id="CO58-3"></a><i class="conum" data-value="3"></i>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <a id="CO58-4"></a><i class="conum" data-value="4"></i>
+    secrets:
+      clientSecret: secretsecret <a id="CO58-5"></a><i class="conum" data-value="5"></i>
+      privateKey: |  <a id="CO58-6"></a><i class="conum" data-value="6"></i>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY-----</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies whether the connector uses basic or OAuth authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The user identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client identifier assigned to your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The key identifier assigned to the JWT verifier map of your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client secret assigned to your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO58-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The RSA private key in multiline format. If it has a password, you must also provide <code class="literal">privateKeyPassword</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-servicenow-configuration"></a>ServiceNow ITSM connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="servicenow-action-type.html" title="ServiceNow ITSM connector and action">ServiceNow ITSM connector</a> with basic authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/ <a id="CO59-1"></a><i class="conum" data-value="1"></i>
+      usesTableApi: false <a id="CO59-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      username: testuser <a id="CO59-3"></a><i class="conum" data-value="3"></i>
+      password: passwordkeystorevalue <a id="CO59-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO59-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The ServiceNow instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO59-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies whether the connector uses the Table API or the Import Set API. If <code class="literal">usesTableApi</code> is <code class="literal">false</code>, the Elastic application should be installed in ServiceNow.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO59-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The user name.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO59-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The password. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>The following example creates a ServiceNow ITSM connector with OAuth authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <a id="CO60-1"></a><i class="conum" data-value="1"></i>
+      userIdentifierValue: testuser@email.com <a id="CO60-2"></a><i class="conum" data-value="2"></i>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <a id="CO60-3"></a><i class="conum" data-value="3"></i>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <a id="CO60-4"></a><i class="conum" data-value="4"></i>
+    secrets:
+      clientSecret: secretsecret <a id="CO60-5"></a><i class="conum" data-value="5"></i>
+      privateKey: | <a id="CO60-6"></a><i class="conum" data-value="6"></i>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY-----</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies whether the connector uses basic or OAuth authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The user identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client identifier assigned to your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The key ID assigned to the JWT verifier map of your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client secret assigned to the OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO60-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The RSA private key in multiline format. If it has a password, you must also provide <code class="literal">privateKeyPassword</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-servicenow-sir-configuration"></a>ServiceNow SecOps connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="servicenow-sir-action-type.html" title="ServiceNow SecOps connector and action">ServiceNow SecOps connector</a> with basic authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow-sir:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/ <a id="CO61-1"></a><i class="conum" data-value="1"></i>
+      usesTableApi: false <a id="CO61-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      username: testuser <a id="CO61-3"></a><i class="conum" data-value="3"></i>
+      password: passwordkeystorevalue <a id="CO61-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO61-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The ServiceNow instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO61-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies whether the connector uses the Table API or the Import Set API. If <code class="literal">usesTableApi</code> is false, the Elastic application should be installed in ServiceNow.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO61-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The user name.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO61-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The password. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>The following example creates a ServiceNow SecOps connector with OAuth authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <a id="CO62-1"></a><i class="conum" data-value="1"></i>
+      userIdentifierValue: testuser@email.com <a id="CO62-2"></a><i class="conum" data-value="2"></i>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <a id="CO62-3"></a><i class="conum" data-value="3"></i>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <a id="CO62-4"></a><i class="conum" data-value="4"></i>
+    secrets:
+      clientSecret: secretsecret <a id="CO62-5"></a><i class="conum" data-value="5"></i>
+      privateKey: | <a id="CO62-6"></a><i class="conum" data-value="6"></i>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY-----</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Specifies whether the connector uses basic or OAuth authentication.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The user identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client identifier assigned to the OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The key ID assigned to the JWT verifier map of your OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The client secret assigned to the OAuth application.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO62-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The RSA private key in multiline format. If it has a password, you must also specify
+<code class="literal">privateKeyPassword</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-slack-configuration"></a>Slack connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="slack-action-type.html" title="Slack connector and action">Slack connector</a> with webhook:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-slack:
+    name: preconfigured-slack-webhook-connector-type
+    actionTypeId: .slack
+    secrets:
+      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <a id="CO63-1"></a><i class="conum" data-value="1"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO63-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Slack webhook URL.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>The following example creates a Slack connector with web API:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-slack:
+    name: preconfigured-slack-api-connector-type
+    actionTypeId: .slack_api
+    secrets:
+      token: 'xoxb-xxxx-xxxx-xxxx' <a id="CO64-1"></a><i class="conum" data-value="1"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO64-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Slack bot user OAuth token.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-swimlane-configuration"></a>Swimlane connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="swimlane-action-type.html" title="Swimlane connector and action">Swimlane connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-swimlane:
+    name: preconfigured-swimlane-connector-type
+    actionTypeId: .swimlane
+    config:
+      apiUrl: https://elastic.swimlaneurl.us <a id="CO65-1"></a><i class="conum" data-value="1"></i>
+      appId: app-id <a id="CO65-2"></a><i class="conum" data-value="2"></i>
+      mappings: <a id="CO65-3"></a><i class="conum" data-value="3"></i>
+        alertIdConfig:
+          fieldType: text
+          id: agp4s
+          key: alert-id
+          name: Alert ID
+        caseIdConfig:
+          fieldType: text
+          id: ae1mi
+          key: case-id
+          name: Case ID
+        caseNameConfig:
+          fieldType: text
+          id: anxnr
+          key: case-name
+          name: Case Name
+        commentsConfig:
+          fieldType: comments
+          id: au18d
+          key: comments
+          name: Comments
+        descriptionConfig:
+          fieldType: text
+          id: ae1gd
+          key: description
+          name: Description
+        ruleNameConfig:
+          fieldType: text
+          id: avfsl
+          key: rule-name
+          name: Rule Name
+        severityConfig:
+          fieldType: text
+          id: a71ik
+          key: severity
+          name: severity
+    secrets:
+      apiToken: tokenkeystorevalue <a id="CO65-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO65-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Swimlane instance URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO65-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Swimlane application identifier.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO65-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Field mappings for properties such as the alert identifer, severity, and rule name.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO65-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-tines-configuration"></a>Tines connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="tines-action-type.html" title="Tines connector">Tines connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com <a id="CO66-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      email: some.address@test.com <a id="CO66-2"></a><i class="conum" data-value="2"></i>
+      token: ausergeneratedapitoken <a id="CO66-3"></a><i class="conum" data-value="3"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO66-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Tines tenant URL.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO66-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The email used to sign in to Tines.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO66-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The Tines API token.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-torq-configuration"></a>Torq connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="torq-action-type.html" title="Torq connector and action">Torq connector</a>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.actions.preconfigured:
+  my-torq:
+    name: preconfigured-torq-connector-type
+    actionTypeId: .torq
+    config:
+      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <a id="CO67-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      token: mytorqtoken <a id="CO67-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO67-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The endpoint URL of the Elastic Security integration in Torq.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO67-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The secret of the webhook authentication header.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-webhook-configuration"></a>Webhook connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="webhook-action-type.html" title="Webhook connector and action">webhook connector</a> with basic authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-webhook:
+    name: preconfigured-webhook-connector-type
+    actionTypeId: .webhook
+    config:
+      url: https://test.host <a id="CO68-1"></a><i class="conum" data-value="1"></i>
+      method: post <a id="CO68-2"></a><i class="conum" data-value="2"></i>
+      headers: <a id="CO68-3"></a><i class="conum" data-value="3"></i>
+        testheader: testvalue
+      hasAuth: true <a id="CO68-4"></a><i class="conum" data-value="4"></i>
+    secrets:
+      user: testuser <a id="CO68-5"></a><i class="conum" data-value="5"></i>
+      password: passwordkeystorevalue <a id="CO68-6"></a><i class="conum" data-value="6"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The web service request URL. If you are using the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.allowedHosts</code></a> setting, make sure the hostname is added to the allowed hosts.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The HTTP request method, either <code class="literal">post</code>(default) or <code class="literal">put</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A set of key-value pairs sent as headers with the request.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>If <code class="literal">true</code>, this connector will require values for <code class="literal">user</code> and <code class="literal">password</code> inside the secrets configuration. Defaults to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A valid user name. Required if <code class="literal">hasAuth</code> is set to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO68-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A valid password. Required if <code class="literal">hasAuth</code> is set to <code class="literal">true</code>. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>SSL authentication is not supported in preconfigured webhook connectors.</p>
+</div>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-cases-webhook-configuration"></a>Webhook - Case Management connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates a <a class="xref" href="cases-webhook-action-type.html" title="Webhook - Case Management connector and action">Webhook - Case Management connector</a>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-case-management-webhook:
+    name: Case Management Webhook Connector
+    actionTypeId: .cases-webhook
+    config:
+      hasAuth: true <a id="CO69-1"></a><i class="conum" data-value="1"></i>
+      headers: <a id="CO69-2"></a><i class="conum" data-value="2"></i>
+        'content-type': 'application/json'
+      createIncidentUrl: 'https://example.com/rest/api/2/issue' <a id="CO69-3"></a><i class="conum" data-value="3"></i>
+      createIncidentMethod: 'post' <a id="CO69-4"></a><i class="conum" data-value="4"></i>
+      createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <a id="CO69-5"></a><i class="conum" data-value="5"></i>
+      getIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <a id="CO69-6"></a><i class="conum" data-value="6"></i>
+      getIncidentResponseExternalTitleKey: 'key' <a id="CO69-7"></a><i class="conum" data-value="7"></i>
+      viewIncidentUrl: 'https://example.com/browse/{{{external.system.title}}}' <a id="CO69-8"></a><i class="conum" data-value="8"></i>
+      updateIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <a id="CO69-9"></a><i class="conum" data-value="9"></i>
+      updateIncidentMethod: 'put' <a id="CO69-10"></a><i class="conum" data-value="10"></i>
+      updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <a id="CO69-11"></a><i class="conum" data-value="11"></i>
+      createCommentMethod: 'post', <a id="CO69-12"></a><i class="conum" data-value="12"></i>
+      createCommentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}/comment', <a id="CO69-13"></a><i class="conum" data-value="13"></i>
+      createCommentJson: '{"body": {{{case.comment}}}}', <a id="CO69-14"></a><i class="conum" data-value="14"></i>
+    secrets:
+      user: testuser <a id="CO69-15"></a><i class="conum" data-value="15"></i>
+      password: passwordvalue <a id="CO69-16"></a><i class="conum" data-value="16"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>If <code class="literal">true</code>, this connector will require values for <code class="literal">user</code> and <code class="literal">password</code> inside the secrets configuration.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A set of key-value pairs sent as headers with the request.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A REST API URL string to create a case in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The REST API HTTP request method to create a case in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-5"><i class="conum" data-value="5"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A stringified JSON payload with Mustache variables that is sent to the create case URL to create a case.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-6"><i class="conum" data-value="6"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A REST API URL string with an external service ID Mustache variable to get the case from the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-7"><i class="conum" data-value="7"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A string from the response body of the get case method that corresponds to the external service title.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-8"><i class="conum" data-value="8"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A URL string with either the external service ID or external service title Mustache variable to view a case in the external system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-9"><i class="conum" data-value="9"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The REST API URL to update the case by ID in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-10"><i class="conum" data-value="10"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The REST API HTTP request method to update the case in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-11"><i class="conum" data-value="11"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A stringified JSON payload with Mustache variables that is sent to the update case URL to update a case.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-12"><i class="conum" data-value="12"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The REST API HTTP request method to create a case comment in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-13"><i class="conum" data-value="13"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A REST API URL string to create a case comment by ID in the third-party system.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-14"><i class="conum" data-value="14"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-15"><i class="conum" data-value="15"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A user name, which is required when <code class="literal">hasAuth</code> is <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO69-16"><i class="conum" data-value="16"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A password, which is required when <code class="literal">hasAuth</code> is <code class="literal">true</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="position-relative"><h5><a id="preconfigured-xmatters-configuration"></a>xMatters connectors</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/pre-configured-connectors.asciidoc">edit</a></div>
+<p>The following example creates an <a class="xref" href="xmatters-action-type.html" title="xMatters connector and action">xMatters connector</a> with basic authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      configUrl: https://test.host <a id="CO70-1"></a><i class="conum" data-value="1"></i>
+      usesBasic: true <a id="CO70-2"></a><i class="conum" data-value="2"></i>
+    secrets:
+      user: testuser <a id="CO70-3"></a><i class="conum" data-value="3"></i>
+      password: passwordkeystorevalue <a id="CO70-4"></a><i class="conum" data-value="4"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO70-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The request URL for the Elastic Alerts trigger in xMatters.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO70-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Indicates whether the connector uses HTTP basic authentication. If <code class="literal">true</code>, you must provide <code class="literal">user</code> and <code class="literal">password</code> values. Defaults to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO70-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A user name for authentication, which is required when <code class="literal">usesBasic</code> is <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO70-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>A password for authentication, which is required when <code class="literal">usesBasic</code> is <code class="literal">true</code>. NOTE: This value should be stored in the <a class="xref" href="secure-settings.html#creating-keystore" title="Create the keystore">Kibana keystore</a>.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>The following example creates an xMatters connector with URL authentication:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      usesBasic: false <a id="CO71-1"></a><i class="conum" data-value="1"></i>
+    secrets:
+      secretsUrl: https://test.host?apiKey=1234-abcd <a id="CO71-2"></a><i class="conum" data-value="2"></i></pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO71-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Indicates whether the connector uses HTTP basic authentication. Set to <code class="literal">false</code> to use URL authentication. Defaults to <code class="literal">true</code>.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO71-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xmatters-action-type.html">« xMatters connector and action</a>
+</span>
+<span class="next">
+<a href="managing-licenses.html">License Management »</a>
+</span>
+</div>
+</body>
+</html>

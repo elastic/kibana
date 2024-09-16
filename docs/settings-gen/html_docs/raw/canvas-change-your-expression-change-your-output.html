@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Change your expression, change your output | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Change your expression, change your output | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="canvas-expression-lifecycle.html" title="Canvas expression lifecycle"/>
+<link rel="prev" href="canvas-aliases-and-unnamed-arguments.html" title="Aliases and unnamed arguments"/>
+<link rel="next" href="canvas-fetch-and-manipulate-data.html" title="Fetch and manipulate data"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-aliases-and-unnamed-arguments.html">« Aliases and unnamed arguments</a>
+</span>
+<span class="next">
+<a href="canvas-fetch-and-manipulate-data.html">Fetch and manipulate data »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas.html">Canvas</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas-expression-lifecycle.html">Canvas expression lifecycle</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Change your expression, change your output</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas-change-your-expression-change-your-output"></a>Change your expression, change your output</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can substitute one function for another to change the output. For example, you could change the visualization by swapping out the <a class="xref" href="canvas-function-reference.html#pie_fn" title="pie">pie</a> function for another renderer, a function that returns a <code class="literal">render</code> data type.</p>
+<p>Let’s change that last pie chart into a bubble chart by replacing the <a class="xref" href="canvas-function-reference.html#pie_fn" title="pie">pie</a> function with the <a class="xref" href="canvas-function-reference.html#plot_fn" title="plot">plot</a> function. This is possible because both functions can accept a <code class="literal">pointseries</code> data type as their <em>context</em>. Switching the functions will work, but it won’t produce a useful visualization on its own since you don’t have the x-axis and y-axis defined. You will also need to modify the <a class="xref" href="canvas-function-reference.html#pointseries_fn" title="pointseries">pointseries</a> function to change its output. In this case, you can change the <code class="literal">size</code> argument to <code class="literal">y</code>, so the maximum price values are plotted on the y-axis, and add an <code class="literal">x</code> argument using the <code class="literal">@timestamp</code> field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/canvas-change-your-expression-chart.png" alt="Bubble Chart" width="with price along x axis" height="and time along y axis">
+</div>
+</div>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot
+| render</pre>
+</div>
+<p>Similar to the <a class="xref" href="canvas-function-reference.html#pie_fn" title="pie">pie</a> function, the <a class="xref" href="canvas-function-reference.html#plot_fn" title="plot">plot</a> function takes arguments that control the design elements of the visualization. As one example, passing a <code class="literal">legend</code> argument with a value of <code class="literal">false</code> to the function will hide the legend on the chart.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/canvas-change-your-expression-chart-no-legend.png" alt="Bubble Chart Without Legend">
+</div>
+</div>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot <span class="strong strong"><strong>legend=false</strong></span>
+| render</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-aliases-and-unnamed-arguments.html">« Aliases and unnamed arguments</a>
+</span>
+<span class="next">
+<a href="canvas-fetch-and-manipulate-data.html">Fetch and manipulate data »</a>
+</span>
+</div>
+</body>
+</html>

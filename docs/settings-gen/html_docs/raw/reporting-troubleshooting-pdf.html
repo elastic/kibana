@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Troubleshooting PDF and PNG reports | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Troubleshooting PDF and PNG reports | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="reporting-troubleshooting.html" title="Troubleshooting reporting features"/>
+<link rel="prev" href="reporting-troubleshooting-csv.html" title="Troubleshooting CSV reports"/>
+<link rel="next" href="xpack-ml.html" title="Machine learning"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="reporting-troubleshooting-csv.html">« Troubleshooting CSV reports</a>
+</span>
+<span class="next">
+<a href="xpack-ml.html">Machine learning »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="reporting-getting-started.html">Reporting and sharing</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="reporting-troubleshooting.html">Troubleshooting reporting features</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Troubleshooting PDF and PNG reports</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="reporting-troubleshooting-pdf"></a>Troubleshooting PDF and PNG reports</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>We recommend using PNG/PDF reports to export moderate amounts of data only. The feature enables a high-level
+export capability, but it&#8217;s not intended for bulk export. If you need to export several pages of image data,
+consider using multiple report jobs to export a small number of pages at a time. If the screenshot of exported
+dashboard contains a large number of pixels, consider splitting the large dashboard into smaller artifacts to
+use less memory and CPU resources.</p>
+<p>For the most reliable configuration of PDF/PNG reporting features, consider installing Kibana using <a class="xref" href="docker.html" title="Install Kibana with Docker">Docker</a> or using <a class="xref" href="get-started.html#set-up-on-cloud" title="Set up on cloud">Elastic Cloud</a>.</p>
+</div>
+</div>
+<p>For more advice about common problems, refer to <a class="xref" href="reporting-troubleshooting.html" title="Troubleshooting reporting features"><em>Troubleshooting</em></a>.</p>
+<div class="position-relative"><h4><a id="reporting-diagnostics"></a>Reporting diagnostics</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>Reporting comes with a built-in utility to try to automatically find common issues.
+When Kibana is running, navigate to the <span class="strong strong"><strong>Report Listing</strong></span> page, and click <span class="strong strong"><strong>Run reporting diagnostics</strong></span>.
+This will open up a diagnostic tool that checks various parts of the Kibana deployment and comes up with any relevant recommendations.</p>
+<p>If the diagnostic information doesn&#8217;t reveal the problem, you can troubleshoot further by starting the Kibana server with an environment variable for revealing additional debugging logs.
+Refer to <a class="xref" href="reporting-troubleshooting-pdf.html#reporting-troubleshooting-puppeteer-debug-logs" title="Puppeteer debug logs">Puppeteer debug logs</a>.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-nss-dependency"></a>Network security service libraries</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>You must install Network Security Service (NSS) libraries for reporting features to work.
+Reporting using the Chromium browser relies on these libraries.
+Install the appropriate nss package for your distribution.
+Refer to <a class="xref" href="secure-reporting.html#install-reporting-packages" title="Install the dependencies for the headless browser">Install the dependencies for the headless browser</a>.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-sandbox-dependency"></a>Chromium sandbox requirements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>Chromium uses sandboxing techniques that are built on top of operating system primitives.
+The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel.
+However, many distributions don&#8217;t have user namespaces enabled by default or they require the CAP_SYS_ADMIN capability.
+If the sandbox is not explicitly disabled in Kibana, either based on operating system detection or with the <code class="literal">xpack.screenshotting.browser.chromium.disableSandbox</code> setting, Chrome will try to enable the sandbox.
+If it fails due to operating system or permissions restrictions, Chrome will crash during initialization.</p>
+<p>Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox.
+An exception is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-text-incorrect"></a>Text rendered incorrectly in generated reports</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>If a report label is rendered as an empty rectangle, no system fonts are available.
+Install at least one font package on the system.</p>
+<p>If the report is missing certain Chinese, Japanese or Korean characters, ensure that a system font with those characters is installed.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-missing-data"></a>Missing data in PDF report of data table visualization</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>There is currently a known limitation with the data table visualization that only the first page of data rows, which are the only data
+visible on the screen, are shown in PDF reports.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-pdf-connection-refused"></a>Connection refused errors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>If PDF or PNG reports are not working due to a "connection refused" or "unable to connect" type of error, ensure that the <code class="literal">kibana.yml</code>
+file uses the setting of <code class="literal">server.host: 0.0.0.0</code>.
+Also verify that no firewall rules or other routing rules prevent local services from accessing this address.
+Find out more at <a class="xref" href="secure-reporting.html#set-reporting-server-host" title="Set the server.host for the headless browser">Set the <code class="literal">server.host</code> for the headless browser</a>.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-file-permissions"></a>File permissions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>Ensure that the <code class="literal">headless_shell</code> binary located in your Kibana data directory is owned by the user who is running Kibana, that the
+user has the execute permission, and if applicable, that the filesystem is mounted with the <code class="literal">exec</code> option.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Chromium binary is located in the Kibana installation directory as <code class="literal">data/headless_shell-OS_TYPE/headless_shell</code>.
+The full path is logged the first time Kibana starts when verbose logging is enabled.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-puppeteer-debug-logs"></a>Puppeteer debug logs</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>The Chromium browser that Kibana launches on the server is driven by a NodeJS library for Chromium called Puppeteer.
+The Puppeteer library has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is caused by Kibana or Chromium.
+Learn more <a href="https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips" class="ulink" target="_top">debugging tips</a>.</p>
+<p>Using Puppeteer&#8217;s debug method when launching Kibana would look like:</p>
+<pre class="screen">env DEBUG="puppeteer:*" ./bin/kibana</pre>
+<p>The internal DevTools protocol traffic will be logged via the <code class="literal">debug</code> module under the <code class="literal">puppeteer</code> namespace.</p>
+<p>The Puppeteer logs are very verbose and could possibly contain sensitive information.
+Handle the generated output with care.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-system-requirements"></a>System requirements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>In Elastic Cloud, the Kibana instances that most configurations provide by default is for 1GB of RAM for the
+instance. That is enough for Kibana reporting features when the visualization or dashboard is relatively simple,
+such as a single pie chart or a dashboard with a few visualizations. However, certain visualization types
+incur more load than others. For example, a TSVB panel has a lot of network requests to render.</p>
+<p>If the Kibana instance doesn&#8217;t have enough memory to run the report, the report fails with an error such as <code class="literal">Error: Page crashed!</code>.
+In this case, try increasing the memory for the Kibana instance to 2GB.</p>
+<div class="position-relative"><h4><a id="reporting-troubleshooting-maps-ems"></a>Unable to connect to Elastic Maps Service</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p><a href="https://www.elastic.co/elastic-maps-service" class="ulink" target="_top">Elastic Maps Service (EMS)</a> is a service that hosts tile layers and vector shapes of administrative boundaries.
+If a report contains a map with a missing basemap layer or administrative boundary, the Kibana server does not have access to EMS.
+Refer to <a class="xref" href="maps-connect-to-ems.html" title="Connect to Elastic Maps Service"><em>Connect to Elastic Maps Service</em></a> for information about how to connect your Kibana server to EMS.</p>
+<div class="position-relative"><h4><a id="reporting-manual-chromium-install"></a>Manually install the Chromium browser for Darwin</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/reporting/reporting-pdf-troubleshooting.asciidoc">edit</a></div>
+<p>Chromium is not embedded into Kibana for the Darwin (Mac OS) architecture.
+When running Kibana on Darwin, reporting features will download Chromium into the proper area of the Kibana installation path the first time the server starts.
+If the server does not have access to the internet, you must download the Chromium browser and install it into the Kibana installation path.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Download the Chromium zip file:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip" class="ulink" target="_top">x64</a> systems
+</li>
+<li class="listitem">
+For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip" class="ulink" target="_top">ARM</a> systems
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Copy the zip file into the holding area. Relative to the root directory of Kibana, the path is:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">.chromium/x64</code> for x64 systems
+</li>
+<li class="listitem">
+<code class="literal">.chromium/arm64</code> for ARM systems
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<p>When Kibana starts, it will automatically extract the browser from the zip file and is then ready for PNG and PDF reports.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="reporting-troubleshooting-csv.html">« Troubleshooting CSV reports</a>
+</span>
+<span class="next">
+<a href="xpack-ml.html">Machine learning »</a>
+</span>
+</div>
+</body>
+</html>

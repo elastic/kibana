@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana Core API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana Core API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="kibana-architecture.html" title="Architecture"/>
+<link rel="prev" href="kibana-platform-plugin-api.html" title="Kibana Plugin API"/>
+<link rel="next" href="application-service.html" title="Application service"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-platform-plugin-api.html">« Kibana Plugin API</a>
+</span>
+<span class="next">
+<a href="application-service.html">Application service »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="kibana-architecture.html">Architecture</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana Core API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-platform-api"></a>Kibana Core API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/architecture/core/index.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Kibana Core provides a set of low-level API&#8217;s required to run all Kibana plugins.
+These API&#8217;s are injected into your plugin&#8217;s lifecycle methods and may be invoked during that lifecycle only:</p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import type { PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
+
+export class MyPlugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up during Kibana's startup sequence
+  }
+
+  public start(core: CoreStart) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
+    // called when plugin is torn down during Kibana's shutdown sequence
+  }
+}</pre>
+</div>
+<p>The services that core provides are:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="application-service.html" title="Application service">Application service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="configuration-service.html" title="Configuration service">Configuration service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="elasticsearch-service.html" title="Elasticsearch service">Elasticsearch service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="http-service.html" title="HTTP service">HTTP service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="logging-service.html" title="Logging service">Logging service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="saved-objects-service.html" title="Saved Objects service">Saved Objects service</a>
+</li>
+<li class="listitem">
+<a class="xref" href="ui-settings-service.html" title="UI settings service">UI settings service</a>
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Core provides the Kibana building blocks for plugins and is implemented as a collection of <a class="xref" href="core-packages.html" title="Core packages">packages</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-platform-plugin-api.html">« Kibana Plugin API</a>
+</span>
+<span class="next">
+<a href="application-service.html">Application service »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delete short URL API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Delete short URL API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="short-urls-api.html" title="Short URLs APIs"/>
+<link rel="prev" href="short-urls-api-get.html" title="Get short URL API"/>
+<link rel="next" href="short-urls-api-resolve.html" title="Resolve short URL API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="short-urls-api-get.html">« Get short URL API</a>
+</span>
+<span class="next">
+<a href="short-urls-api-resolve.html">Resolve short URL API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="short-urls-api.html">Short URLs APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Delete short URL API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="short-urls-api-delete"></a>Delete short URL API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Delete a Kibana short URL.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="short-urls-api-delete-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/api/short_url/&lt;id&gt;</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="short-urls-api-delete-path-params"></a>Path parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The short URL ID that you want to remove.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="short-urls-api-delete-response-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="short-urls-api-delete-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/short-urls/delete-short-url.asciidoc">edit</a></div>
+</div></div></div>
+<p>Delete a short URL <code class="literal">12345</code> ID:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X DELETE api/short_url/12345</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/80.kibana"></div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="short-urls-api-get.html">« Get short URL API</a>
+</span>
+<span class="next">
+<a href="short-urls-api-resolve.html">Resolve short URL API »</a>
+</span>
+</div>
+</body>
+</html>

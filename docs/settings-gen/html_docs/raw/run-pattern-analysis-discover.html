@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Run a pattern analysis on your log data | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Run a pattern analysis on your log data | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="discover.html" title="Discover"/>
+<link rel="prev" href="show-field-statistics.html" title="View field statistics"/>
+<link rel="next" href="search-sessions.html" title="Run a search session in the background"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="show-field-statistics.html">« View field statistics</a>
+</span>
+<span class="next">
+<a href="search-sessions.html">Run a search session in the background »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="discover.html">Discover</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Run a pattern analysis on your log data</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/log-pattern-analysis.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="run-pattern-analysis-discover"></a>Run a pattern analysis on your log data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/log-pattern-analysis.asciidoc">edit</a></div>
+</div></div></div>
+<p>Log pattern analysis helps you to find patterns in unstructured log messages and
+makes it easier to examine your data. It performs categorization analysis on a
+selected field of a data view, creates categories based on the data and
+displays them together with a chart that shows the distribution of each category
+and an example document that matches the category.</p>
+<p>Log pattern analysis works on every text field.</p>
+<p>This example uses the <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data">sample web logs data</a>, or you
+can use your own data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, and click <span class="strong strong"><strong>Discover</strong></span>.
+</li>
+<li class="listitem">
+Expand the data view dropdown, and select <span class="strong strong"><strong>Kibana Sample Data Logs</strong></span>.
+</li>
+<li class="listitem">
+If you don&#8217;t see any results, expand the time range, for example, to
+<span class="strong strong"><strong>Last 15 days</strong></span>.
+</li>
+<li class="listitem">
+Click the <span class="strong strong"><strong>Patterns</strong></span> tab next to <span class="strong strong"><strong>Documents</strong></span> and <span class="strong strong"><strong>Field statistics</strong></span>. The
+pattern analysis starts. The results are displayed under the chart. You can
+change the analyzed field by using the field selector. In the
+<span class="strong strong"><strong>Pattern analysis menu</strong></span>, you can change the <span class="strong strong"><strong>Minimum time range</strong></span>. This option
+enables you to widen the time range for calculating patterns which improves
+accuracy. The patterns, however, are still displayed by the time range you
+selected in step 3.
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/log-pattern-analysis-results.png" alt="Log pattern analysis results in Discover.">
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+(optional) Apply filters to one or more patterns. <span class="strong strong"><strong>Discover</strong></span> only displays
+documents that match the selected patterns. Additionally, you can remove
+selected patterns from <span class="strong strong"><strong>Discover</strong></span>, resulting in the display of only those
+documents that don&#8217;t match the selected pattern. These options enable you to
+remove unimportant messages and focus on the more important, actionable data
+during troubleshooting. You can also create a categorization anomaly detection job
+directly from the <span class="strong strong"><strong>Patterns</strong></span> tab to find anomalous behavior in the selected
+pattern.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="show-field-statistics.html">« View field statistics</a>
+</span>
+<span class="next">
+<a href="search-sessions.html">Run a search session in the background »</a>
+</span>
+</div>
+</body>
+</html>

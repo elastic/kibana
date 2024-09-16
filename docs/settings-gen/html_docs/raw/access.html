@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Access Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Access Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="setup.html" title="Set up"/>
+<link rel="prev" href="start-stop.html" title="Start and stop Kibana"/>
+<link rel="next" href="tutorial-secure-access-to-kibana.html" title="Securing access to Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="start-stop.html">« Start and stop Kibana</a>
+</span>
+<span class="next">
+<a href="tutorial-secure-access-to-kibana.html">Securing access to Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Access Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="access"></a>Access Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+</div></div></div>
+<p>The fastest way to access Kibana is to use our hosted Elasticsearch Service. If you <a class="xref" href="install.html" title="Install Kibana">installed Kibana on your own</a>, access Kibana through the web application.</p>
+<div class="position-relative"><h3><a id="_set_up_on_cloud"></a>Set up on cloud</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+<p>There&#8217;s no faster way to get started than with our hosted Elasticsearch Service on Elastic Cloud:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body" class="ulink" target="_top">Get a free trial</a>.
+</li>
+<li class="listitem">
+Log into <a href="https://cloud.elastic.co?page=docs&amp;placement=docs-body" class="ulink" target="_top">Elastic Cloud</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create deployment</strong></span>.
+</li>
+<li class="listitem">
+Give your deployment a name.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create deployment</strong></span> and download the password for the <code class="literal">elastic</code> user.
+</li>
+</ol>
+</div>
+<p>That’s it! Now that you are up and running, it’s time to get some data into
+Kibana. Kibana will open as soon as your deployment is ready.</p>
+<div class="position-relative"><h3><a id="log-on-to-the-web-application"></a>Log on to the web application</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+<p>If you are using a self-managed deployment, access Kibana through the web application on port 5601.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Point your web browser to the machine where you are running Kibana and specify the port number. For example, <code class="literal">localhost:5601</code> or <code class="literal">http://YOURDOMAIN.com:5601</code>.</p>
+<p>To remotely connect to Kibana, set <a class="xref" href="settings.html#server-host">server.host</a> to a non-loopback address.</p>
+</li>
+<li class="listitem">
+Log on to your account.
+</li>
+<li class="listitem">
+Go to the home page, then click <span class="strong strong"><strong>Kibana</strong></span>.
+</li>
+<li class="listitem">
+To make the Kibana page your landing page, click <span class="strong strong"><strong>Make this my landing page</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="status"></a>Check the Kibana status</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+<p>The status page displays information about the server resource usage and installed plugins.</p>
+<p>To view the Kibana status page, use the status endpoint. For example, <code class="literal">localhost:5601/status</code>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/kibana-status-page-7_14_0.png" alt="Kibana server status page">
+</div>
+</div>
+<p>For JSON-formatted server status details, use the <code class="literal">localhost:5601/api/status</code> API endpoint.</p>
+<div class="position-relative"><h3><a id="not-ready"></a>Troubleshoot Kibana UI error</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/access.asciidoc">edit</a></div>
+<p>Troubleshoot the <code class="literal">Kibana Server is not Ready yet</code> error.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>From within a Kibana node, confirm the connection to Elasticsearch:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">curl -XGET elasticsearch_ip_or_hostname:9200/</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Guarantee the health of the three Kibana-backing indices.  All indices must appear and display <code class="literal">status:green</code> and <code class="literal">status:open</code>:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true</pre>
+</div>
+<p>These Kibana-backing indices must also not have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html" class="ulink" target="_top">index settings</a> flagging <code class="literal">read_only_allow_delete</code> or <code class="literal">write</code> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/index-modules-blocks.html" class="ulink" target="_top">index blocks</a>.</p>
+</li>
+<li class="listitem">
+<a class="xref" href="start-stop.html" title="Start and stop Kibana">Shut down all Kibana nodes</a>.
+</li>
+<li class="listitem">
+Choose any Kibana node, then update the config to set the <a class="xref" href="log-settings-examples.html#change-overall-log-level" title="Change overall log level">debug logging</a>.
+</li>
+<li class="listitem">
+<p><a class="xref" href="start-stop.html" title="Start and stop Kibana">Start the node</a>, then check the start-up debug logs for <code class="literal">ERROR</code> messages or other start-up issues.</p>
+<p>For example:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+When Kibana is unable to connect to a healthy Elasticsearch cluster, errors like <code class="literal">master_not_discovered_exception</code> or <code class="literal">unable to revive connection</code> or <code class="literal">license is not available</code> errors appear.
+</li>
+<li class="listitem">
+When one or more Kibana-backing indices are unhealthy, the <code class="literal">index_not_green_timeout</code> error appears.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<p>For more information, refer to our <a href="https://www.elastic.co/blog/troubleshooting-kibana-health" class="ulink" target="_top">walkthrough on troubleshooting Kibana Health</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="start-stop.html">« Start and stop Kibana</a>
+</span>
+<span class="next">
+<a href="tutorial-secure-access-to-kibana.html">Securing access to Kibana »</a>
+</span>
+</div>
+</body>
+</html>

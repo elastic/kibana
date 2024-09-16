@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Update space API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Update space API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="spaces-api.html" title="Kibana spaces APIs"/>
+<link rel="prev" href="spaces-api-post.html" title="Create space API"/>
+<link rel="next" href="spaces-api-get.html" title="Get a space API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="spaces-api-post.html">« Create space API</a>
+</span>
+<span class="next">
+<a href="spaces-api-get.html">Get a space API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="spaces-api.html">Kibana spaces APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Update space API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="spaces-api-put"></a>Update space API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Update an existing Kibana space.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-put-api-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">PUT &lt;kibana host&gt;:&lt;port&gt;/api/spaces/space/&lt;space_id&gt;</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-put-request-body"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The space ID that is part of the Kibana URL when inside the space. You are unable to change the ID with the update operation.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">name</code>
+</span>
+</dt>
+<dd>
+(Required, string) The display name for the space.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">description</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The description for the space.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">disabledFeatures</code>
+</span>
+</dt>
+<dd>
+(Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <a class="xref" href="features-api-get.html" title="Get features API">Features API</a>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">initials</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">color</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">imageUrl</code>
+</span>
+</dt>
+<dd>
+(Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, <code class="literal">initials</code> will not be displayed, and the <code class="literal">color</code> will be visible as the background color for transparent images.
+For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">solution</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The solution defined for the space. Can be one of <code class="literal">security</code>, <code class="literal">oblt</code>, <code class="literal">es</code>, <code class="literal">classic</code>.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="spaces-api-put-response-codes"></a>Response codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="sample-api-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/spaces-management/put.asciidoc">edit</a></div>
+</div></div></div>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X PUT api/spaces/space/marketing
+{
+  "id": "marketing",
+  "name": "Marketing",
+  "description" : "This is the Marketing Space",
+  "color": "#aabbcc",
+  "initials": "MK",
+  "disabledFeatures": [],
+  "imageUrl": ""
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/17.kibana"></div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="spaces-api-post.html">« Create space API</a>
+</span>
+<span class="next">
+<a href="spaces-api-get.html">Get a space API »</a>
+</span>
+</div>
+</body>
+</html>

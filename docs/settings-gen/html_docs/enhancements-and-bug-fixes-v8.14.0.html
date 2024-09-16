@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Enhancements and bug fixes | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Enhancements and bug fixes | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes-8.14.0.html" title="Kibana 8.14.0"/>
+<link rel="prev" href="release-notes-8.14.0.html" title="Kibana 8.14.0"/>
+<link rel="next" href="release-notes-8.13.4.html" title="Kibana 8.13.4"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.14.0.html">« Kibana 8.14.0</a>
+</span>
+<span class="next">
+<a href="release-notes-8.13.4.html">Kibana 8.13.4 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes-8.14.0.html">Kibana 8.14.0</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Enhancements and bug fixes</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="enhancements-and-bug-fixes-v8.14.0"></a>Enhancements and bug fixes</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For detailed information about the 8.14.0 release, review the enhancements and bug fixes.</p>
+<div class="position-relative"><h3><a id="enhancement-v8.14.0"></a>Enhancements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds history chart for multiple conditions (<a href="https://github.com/elastic/kibana/pull/180578" class="ulink" target="_top">#180578</a>).
+</li>
+<li class="listitem">
+Show Alerting rule JSON for API requests (<a href="https://github.com/elastic/kibana/pull/180085" class="ulink" target="_top">#180085</a>).
+</li>
+<li class="listitem">
+Implement tabbed design for existing alert detail pages (<a href="https://github.com/elastic/kibana/pull/179529" class="ulink" target="_top">#179529</a>).
+</li>
+<li class="listitem">
+Adds new rule type selection modal (<a href="https://github.com/elastic/kibana/pull/179285" class="ulink" target="_top">#179285</a>).
+</li>
+<li class="listitem">
+Moves alerts filter controls to <code class="literal">@kbn/alerts-ui-shared</code> package (<a href="https://github.com/elastic/kibana/pull/179243" class="ulink" target="_top">#179243</a>).
+</li>
+<li class="listitem">
+Improves alerts table actions column performance (<a href="https://github.com/elastic/kibana/pull/178632" class="ulink" target="_top">#178632</a>).
+</li>
+<li class="listitem">
+Adds Insights component to alerts details (<a href="https://github.com/elastic/kibana/pull/178330" class="ulink" target="_top">#178330</a>).
+</li>
+<li class="listitem">
+Adds support to dhow the number of additional filters that are applied on the alerts table (<a href="https://github.com/elastic/kibana/pull/177275" class="ulink" target="_top">#177275</a>).
+</li>
+<li class="listitem">
+Adds error boundary to AlertsTable (<a href="https://github.com/elastic/kibana/pull/176412" class="ulink" target="_top">#176412</a>).
+</li>
+<li class="listitem">
+Improves the performance of <code class="literal">join_by_key</code> (<a href="https://github.com/elastic/kibana/pull/175177" class="ulink" target="_top">#175177</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+APM
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Show Universal Profiling data on transaction details page (<a href="https://github.com/elastic/kibana/pull/176922" class="ulink" target="_top">#176922</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Connectors
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for the Jira connector API to support the <code class="literal">otherFields</code> property to pass additional fields to be used when updating or creating issues via the <a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-post" class="ulink" target="_top">Jira API</a> (<a href="https://github.com/elastic/kibana/pull/178627" class="ulink" target="_top">#178627</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Reorganized panel actions in the actions menu (<a href="https://github.com/elastic/kibana/pull/178596" class="ulink" target="_top">#178596</a>).
+</li>
+<li class="listitem">
+Adds panel styling improvements (<a href="https://github.com/elastic/kibana/pull/178139" class="ulink" target="_top">#178139</a>).
+</li>
+<li class="listitem">
+Adds "Apply" button to stop controls selections being automatically applied (<a href="https://github.com/elastic/kibana/pull/174714" class="ulink" target="_top">#174714</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Support field stats for ES|QL query (<a href="https://github.com/elastic/kibana/pull/178433" class="ulink" target="_top">#178433</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.14.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+ES|QL
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Implicit casting changes (<a href="https://github.com/elastic/kibana/pull/182989" class="ulink" target="_top">#182989</a>).
+</li>
+<li class="listitem">
+Adds validation and auto-complete for <code class="literal">date_diff</code> (<a href="https://github.com/elastic/kibana/pull/182513" class="ulink" target="_top">#182513</a>).
+</li>
+<li class="listitem">
+Adds more functions to the validator (<a href="https://github.com/elastic/kibana/pull/180640" class="ulink" target="_top">#180640</a>).
+</li>
+<li class="listitem">
+Adds an enhanced chart switcher to the <span class="strong strong"><strong>Lens</strong></span> inline editing flyout (<a href="https://github.com/elastic/kibana/pull/177790" class="ulink" target="_top">#177790</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds support for dimension mappings in dynamic templates (<a href="https://github.com/elastic/kibana/pull/180023" class="ulink" target="_top">#180023</a>).
+</li>
+<li class="listitem">
+Adds CPU metrics to request diagnostics (<a href="https://github.com/elastic/kibana/pull/179819" class="ulink" target="_top">#179819</a>).
+</li>
+<li class="listitem">
+Adds Settings Framework API and UI (<a href="https://github.com/elastic/kibana/pull/179795" class="ulink" target="_top">#179795</a>).
+</li>
+<li class="listitem">
+Adds an Elastic Defend advanced policy option for pruning capability arrays (<a href="https://github.com/elastic/kibana/pull/179766" class="ulink" target="_top">#179766</a>).
+</li>
+<li class="listitem">
+Adds Agent activity flyout enhancements (<a href="https://github.com/elastic/kibana/pull/179161" class="ulink" target="_top">#179161</a>).
+</li>
+<li class="listitem">
+Adds unhealthy reason (input/output/other) to agent metrics (<a href="https://github.com/elastic/kibana/pull/178605" class="ulink" target="_top">#178605</a>).
+</li>
+<li class="listitem">
+Adds a warning which is displayed when trying to upgrade agent to version &gt; max fleet server version (<a href="https://github.com/elastic/kibana/pull/178079" class="ulink" target="_top">#178079</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Infrastructure
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds alerts count to hosts data (<a href="https://github.com/elastic/kibana/pull/176034" class="ulink" target="_top">#176034</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+combines the chart type selection options into a single, layer-based chart switch (<a href="https://github.com/elastic/kibana/pull/178971" class="ulink" target="_top">#178971</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Hides file upload document count chart until data is searchable (<a href="https://github.com/elastic/kibana/pull/181460" class="ulink" target="_top">#181460</a>).
+</li>
+<li class="listitem">
+Removes technical preview badge for pattern analysis (<a href="https://github.com/elastic/kibana/pull/181020" class="ulink" target="_top">#181020</a>).
+</li>
+<li class="listitem">
+Adds support for ad-hoc Data Views for testing models in Trained Models UI (<a href="https://github.com/elastic/kibana/pull/180795" class="ulink" target="_top">#180795</a>).
+</li>
+<li class="listitem">
+Adds open and edit panel actions for the Single Metric Viewer (<a href="https://github.com/elastic/kibana/pull/179364" class="ulink" target="_top">#179364</a>).
+</li>
+<li class="listitem">
+Improves ES|QL data visualizer performance with early limit and remove option to Analyze all (<a href="https://github.com/elastic/kibana/pull/179286" class="ulink" target="_top">#179286</a>).
+</li>
+<li class="listitem">
+Adds query history for the ES|QL Data visualizer (<a href="https://github.com/elastic/kibana/pull/179098" class="ulink" target="_top">#179098</a>).
+</li>
+<li class="listitem">
+Hides the Filebeat configuration card for Serverless Search file upload (<a href="https://github.com/elastic/kibana/pull/178987" class="ulink" target="_top">#178987</a>).
+</li>
+<li class="listitem">
+Improves performance of Field stats / Index data visualizer by reducing requests for empty fields, making it convenient to add multi-field (<a href="https://github.com/elastic/kibana/pull/178766" class="ulink" target="_top">#178766</a>).
+</li>
+<li class="listitem">
+AIOps: Identify spike/dips with change point detection for log rate analysis (<a href="https://github.com/elastic/kibana/pull/178338" class="ulink" target="_top">#178338</a>).
+</li>
+<li class="listitem">
+Adds ML feature privileges tooltip (<a href="https://github.com/elastic/kibana/pull/181595" class="ulink" target="_top">#181595</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Transforms: Use basic stats for transform list, call full stats only for expanded rows (<a href="https://github.com/elastic/kibana/pull/180271" class="ulink" target="_top">#180271</a>).
+</li>
+<li class="listitem">
+Allows adding a custom description for data view fields (<a href="https://github.com/elastic/kibana/pull/168577" class="ulink" target="_top">#168577</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds an advanced setting to enable simulated function calling (<a href="https://github.com/elastic/kibana/pull/180621" class="ulink" target="_top">#180621</a>).
+</li>
+<li class="listitem">
+Adds a public API for /chat/complete (<a href="https://github.com/elastic/kibana/pull/179618" class="ulink" target="_top">#179618</a>).
+</li>
+<li class="listitem">
+Persists settings in Elasticsearch instead of local storage (<a href="https://github.com/elastic/kibana/pull/179380" class="ulink" target="_top">#179380</a>).
+</li>
+<li class="listitem">
+Allows filtering data views by type (<a href="https://github.com/elastic/kibana/pull/179069" class="ulink" target="_top">#179069</a>).
+</li>
+<li class="listitem">
+Implements contextual actions (<a href="https://github.com/elastic/kibana/pull/178405" class="ulink" target="_top">#178405</a>).
+</li>
+<li class="listitem">
+Adds the ability to create an SLI based on the availability of your synthetics monitors (<a href="https://github.com/elastic/kibana/pull/177842" class="ulink" target="_top">#177842</a>).
+</li>
+<li class="listitem">
+Adds setting for user&#8217;s preferred language for the AI assistant (<a href="https://github.com/elastic/kibana/pull/176444" class="ulink" target="_top">#176444</a>).
+</li>
+<li class="listitem">
+Adds improvements to the AI assistants handling where a generated ES|QL query has syntax errors (<a href="https://github.com/elastic/kibana/pull/179919" class="ulink" target="_top">#179919</a>).
+</li>
+<li class="listitem">
+Adds grouping by multiple values when creating SLOs, allowing for dynamic creation of multiple SLOs from a single SLI definition(<a href="https://github.com/elastic/kibana/pull/175063" class="ulink" target="_top">#175063</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds a new option, <code class="literal">system</code>, to  the <code class="literal">theme:darkMode</code> Kibana advanced setting, that can be used to have Kibana&#8217;s theme follow the system&#8217;s (light or dark) (<a href="https://github.com/elastic/kibana/pull/173044" class="ulink" target="_top">#173044</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Reporting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A feature has been deprecated which allowed users to download a CSV file from a saved search panel in a dashboard, without having a report generated. Now, when users need to access saved search data from a dashboard panel as CSV, a normal report will be generated. To access the deprecated functionality, you can add <code class="literal">xpack.reporting.csv.enablePanelActionDownload: true</code> to kibana.yml, but this ability will be removed in a future version of Kibana (<a href="https://github.com/elastic/kibana/pull/178159" class="ulink" target="_top">#178159</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds <code class="literal">Content-Security-Policy-Report-Only</code> header support (<a href="https://github.com/elastic/kibana/pull/179949" class="ulink" target="_top">#179949</a>).
+</li>
+<li class="listitem">
+Renders a user-friendly UI for unhandled login failures (<a href="https://github.com/elastic/kibana/pull/173959" class="ulink" target="_top">#173959</a>).
+</li>
+<li class="listitem">
+Migrates the Security AI Assistant into a flyout (<a href="https://github.com/elastic/kibana/pull/176657" class="ulink" target="_top">#176657</a>).
+</li>
+<li class="listitem">
+Adds support for LangChain streaming for the <code class="literal">openai-functions</code> agent (<a href="https://github.com/elastic/kibana/pull/174126" class="ulink" target="_top">#174126</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Unified Search
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds auto-refresh pause when the page is not visible (<a href="https://github.com/elastic/kibana/pull/177693" class="ulink" target="_top">#177693</a>).
+</li>
+<li class="listitem">
+Adds support for not clearing the value on the filter builder when the operator changes (<a href="https://github.com/elastic/kibana/pull/176911" class="ulink" target="_top">#176911</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h3><a id="fixes-v8.14.0"></a>Bug Fixes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes bug with aggregation building for Elasticsearch query rule when there are multi-terms and a group by field (<a href="https://github.com/elastic/kibana/pull/182865" class="ulink" target="_top">#182865</a>).
+</li>
+<li class="listitem">
+Fixes using <code class="literal">recoveredCurrent</code> and <code class="literal">activeCurrent</code> to determine how to update old alerts (<a href="https://github.com/elastic/kibana/pull/180934" class="ulink" target="_top">#180934</a>).
+</li>
+<li class="listitem">
+Fixes logging the errors reported by <code class="literal">addLastRunError</code> to the console (<a href="https://github.com/elastic/kibana/pull/179962" class="ulink" target="_top">#179962</a>).
+</li>
+<li class="listitem">
+Preserves relative snooze when adding or removing snooze schedules (<a href="https://github.com/elastic/kibana/pull/178344" class="ulink" target="_top">#178344</a>).
+</li>
+<li class="listitem">
+Reverts changes to notify when there is a change on connector configuration (<a href="https://github.com/elastic/kibana/pull/177054" class="ulink" target="_top">#177054</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+APM
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes the cardinality count for SLOs generated from a single SLI definition was previously incorrect for APM latency and APM availability SLIs (<a href="https://github.com/elastic/kibana/pull/183171" class="ulink" target="_top">#183171</a>).
+</li>
+<li class="listitem">
+Fixes the telemetry collection of Logstash with metricbeat monitoring (<a href="https://github.com/elastic/kibana/pull/182304" class="ulink" target="_top">#182304</a>).
+</li>
+<li class="listitem">
+Fixes otel service detection (<a href="https://github.com/elastic/kibana/pull/180574" class="ulink" target="_top">#180574</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Cases
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Displays the link to the Cases page under observability when Cases Kibana privileges are granted regardless of the other application privileges (<a href="https://github.com/elastic/kibana/pull/182569" class="ulink" target="_top">#182569</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Canvas
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes workpad templates using legacy filters function (<a href="https://github.com/elastic/kibana/pull/176093" class="ulink" target="_top">#176093</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Connectors
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Removes secrets from the connectors before validating in <code class="literal">actionsClient</code> getAll (<a href="https://github.com/elastic/kibana/pull/179837" class="ulink" target="_top">#179837</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes opening panel title edit flyout only when panel title is clicked (<a href="https://github.com/elastic/kibana/pull/180137" class="ulink" target="_top">#180137</a>).
+</li>
+<li class="listitem">
+Disallows copy to dashboard from a maximized panel (<a href="https://github.com/elastic/kibana/pull/179422" class="ulink" target="_top">#179422</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes issue where an ES query rule could be created with a data view, then the data view is changed but there&#8217;s still a reference to the previous data view&#8217;s timestamp field. (<a href="https://github.com/elastic/kibana/pull/182883" class="ulink" target="_top">#182883</a>).
+</li>
+<li class="listitem">
+Fixes view all matches button for timestamps with numeric date formats (<a href="https://github.com/elastic/kibana/pull/181769" class="ulink" target="_top">#181769</a>).
+</li>
+<li class="listitem">
+Fixes time range filters for CSV when a relative time filter is specified in UI (<a href="https://github.com/elastic/kibana/pull/181067" class="ulink" target="_top">#181067</a>).
+</li>
+<li class="listitem">
+Fixes the status list to be static (<a href="https://github.com/elastic/kibana/pull/177435" class="ulink" target="_top">#177435</a>).
+</li>
+<li class="listitem">
+Fixes a timeout for a "View all matches" request (<a href="https://github.com/elastic/kibana/pull/181859" class="ulink" target="_top">#181859</a>).
+</li>
+<li class="listitem">
+Fixes tracking total hits for "View all matches" button (<a href="https://github.com/elastic/kibana/pull/181811" class="ulink" target="_top">#181811</a>).
+</li>
+<li class="listitem">
+Fixes comments bugs in Discover and Data Visualizer (<a href="https://github.com/elastic/kibana/pull/181283" class="ulink" target="_top">#181283</a>).
+</li>
+<li class="listitem">
+Fixes the problem with Discover and queries without the from command (<a href="https://github.com/elastic/kibana/pull/180692" class="ulink" target="_top">#180692</a>).
+</li>
+<li class="listitem">
+Fixes displaying "Unsaved changes" badge on time filter changes in case time range is stored along with saved search (<a href="https://github.com/elastic/kibana/pull/178659" class="ulink" target="_top">#178659</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.14.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+ES|QL
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes validation on string implicit casting for dates and other minor issues (<a href="https://github.com/elastic/kibana/pull/181571" class="ulink" target="_top">#181571</a>).
+</li>
+<li class="listitem">
+Fixes validation for some specific ES|QL types (<a href="https://github.com/elastic/kibana/pull/181381" class="ulink" target="_top">#181381</a>).
+</li>
+<li class="listitem">
+Fixes retrieving the indices from AST parsing (<a href="https://github.com/elastic/kibana/pull/181271" class="ulink" target="_top">#181271</a>).
+</li>
+<li class="listitem">
+Fixes max and min accepting date fields (<a href="https://github.com/elastic/kibana/pull/180945" class="ulink" target="_top">#180945</a>).
+</li>
+<li class="listitem">
+Fixes autocomplete with incompatible arguments (<a href="https://github.com/elastic/kibana/pull/180874" class="ulink" target="_top">#180874</a>).
+</li>
+<li class="listitem">
+Fixes providing the CCS indices on the autosuggestion (<a href="https://github.com/elastic/kibana/pull/180610" class="ulink" target="_top">#180610</a>).
+</li>
+<li class="listitem">
+Fixes to <code class="literal">auto_bucket</code> and constant-only parameters (<a href="https://github.com/elastic/kibana/pull/180509" class="ulink" target="_top">#180509</a>).
+</li>
+<li class="listitem">
+Fixes persisting columns sorting in saved search (<a href="https://github.com/elastic/kibana/pull/180193" class="ulink" target="_top">#180193</a>).
+</li>
+<li class="listitem">
+Fixes client-side validation: make <code class="literal">and</code> and <code class="literal">or</code> accept <code class="literal">null</code> (<a href="https://github.com/elastic/kibana/pull/179707" class="ulink" target="_top">#179707</a>).
+</li>
+<li class="listitem">
+Fixes to the @timestamp column (<a href="https://github.com/elastic/kibana/pull/176834" class="ulink" target="_top">#176834</a>).
+</li>
+<li class="listitem">
+Fixes validation running on outdated queries when typing (<a href="https://github.com/elastic/kibana/pull/180977" class="ulink" target="_top">#180977</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds validation to dataset field in input packages to disallow special characters (<a href="https://github.com/elastic/kibana/pull/182925" class="ulink" target="_top">#182925</a>).
+</li>
+<li class="listitem">
+Fixes rollback input package install on failure (<a href="https://github.com/elastic/kibana/pull/182665" class="ulink" target="_top">#182665</a>).
+</li>
+<li class="listitem">
+Fixes cloudflare template error (<a href="https://github.com/elastic/kibana/pull/182645" class="ulink" target="_top">#182645</a>).
+</li>
+<li class="listitem">
+Fixes displaying <code class="literal">Config</code> and <code class="literal">API reference</code> tabs if they are not needed (<a href="https://github.com/elastic/kibana/pull/182518" class="ulink" target="_top">#182518</a>).
+</li>
+<li class="listitem">
+Fixes allowing fleet-server agent upgrade to newer than fleet-server (<a href="https://github.com/elastic/kibana/pull/181575" class="ulink" target="_top">#181575</a>).
+</li>
+<li class="listitem">
+Fixes flattened inputs in the configuration tab (<a href="https://github.com/elastic/kibana/pull/181155" class="ulink" target="_top">#181155</a>).
+</li>
+<li class="listitem">
+Adds callout when editing an output about plain text secrets being re-saved to secret storage (<a href="https://github.com/elastic/kibana/pull/180334" class="ulink" target="_top">#180334</a>).
+</li>
+<li class="listitem">
+Removes unnecessary field definitions for custom integrations (<a href="https://github.com/elastic/kibana/pull/178293" class="ulink" target="_top">#178293</a>).
+</li>
+<li class="listitem">
+Fixes secrets UI inputs in forms when secrets storage is disabled server side (<a href="https://github.com/elastic/kibana/pull/178045" class="ulink" target="_top">#178045</a>).
+</li>
+<li class="listitem">
+Fixes not being able to preview or download files with special characters (<a href="https://github.com/elastic/kibana/pull/176822" class="ulink" target="_top">#176822</a>).
+</li>
+<li class="listitem">
+Fixes KQL validation being applied in search boxes (<a href="https://github.com/elastic/kibana/pull/176806" class="ulink" target="_top">#176806</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes import to other spaces (<a href="https://github.com/elastic/kibana/pull/183076" class="ulink" target="_top">#183076</a>).
+</li>
+<li class="listitem">
+Fixes clip path cutting mobile view in <span class="strong strong"><strong>Lens</strong></span> (<a href="https://github.com/elastic/kibana/pull/182376" class="ulink" target="_top">#182376</a>).
+</li>
+<li class="listitem">
+Fixes error message layer indexing in <span class="strong strong"><strong>Lens</strong></span> (<a href="https://github.com/elastic/kibana/pull/180898" class="ulink" target="_top">#180898</a>).
+</li>
+<li class="listitem">
+Fixes markdown table borders being visible in the text panels (<a href="https://github.com/elastic/kibana/pull/180454" class="ulink" target="_top">#180454</a>).
+</li>
+<li class="listitem">
+Fixes default formatter for gauge charts in <span class="strong strong"><strong>Lens</strong></span> (<a href="https://github.com/elastic/kibana/pull/179473" class="ulink" target="_top">#179473</a>).
+</li>
+<li class="listitem">
+Fixes error for non-date histogram charts that contain <code class="literal">showCurrentTimeMarker:true</code> setting in <span class="strong strong"><strong>Lens</strong></span> (<a href="https://github.com/elastic/kibana/pull/179452" class="ulink" target="_top">#179452</a>).
+</li>
+<li class="listitem">
+Fixes overriding title when using the inline <span class="strong strong"><strong>Lens</strong></span> editor (<a href="https://github.com/elastic/kibana/pull/182897" class="ulink" target="_top">#182897</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Single Metric Viewer: Ensures edit to different job works as expected (<a href="https://github.com/elastic/kibana/pull/183086" class="ulink" target="_top">#183086</a>).
+</li>
+<li class="listitem">
+Single Metric Viewer: Fixes hover functionality in the anomalies table (<a href="https://github.com/elastic/kibana/pull/182297" class="ulink" target="_top">#182297</a>).
+</li>
+<li class="listitem">
+Single Metric Viewer: Ensures chart displays correctly when opening from a job annotation (<a href="https://github.com/elastic/kibana/pull/182176" class="ulink" target="_top">#182176</a>).
+</li>
+<li class="listitem">
+Single Metric Viewer: Displays error message when insufficient permissions (<a href="https://github.com/elastic/kibana/pull/180858" class="ulink" target="_top">#180858</a>).
+</li>
+<li class="listitem">
+Fixes retention of categorization example limits (<a href="https://github.com/elastic/kibana/pull/182103" class="ulink" target="_top">#182103</a>).
+</li>
+<li class="listitem">
+Fixes responsive layout for Trained Models table (<a href="https://github.com/elastic/kibana/pull/181541" class="ulink" target="_top">#181541</a>).
+</li>
+<li class="listitem">
+Removes datafeed preview frozen tier message in serverless (<a href="https://github.com/elastic/kibana/pull/181440" class="ulink" target="_top">#181440</a>).
+</li>
+<li class="listitem">
+ML anomaly swim lane: Ensure dashboard reset works correctly (<a href="https://github.com/elastic/kibana/pull/181346" class="ulink" target="_top">#181346</a>).
+</li>
+<li class="listitem">
+AIOps: Fixes query string for the change point detection metric charts (<a href="https://github.com/elastic/kibana/pull/181314" class="ulink" target="_top">#181314</a>).
+</li>
+<li class="listitem">
+AIOps: Fixes missing field caps filters for log rate analysis (<a href="https://github.com/elastic/kibana/pull/181109" class="ulink" target="_top">#181109</a>).
+</li>
+<li class="listitem">
+AIOps: Fixes not running log rate analysis twice when no spike/dip is detected (<a href="https://github.com/elastic/kibana/pull/180980" class="ulink" target="_top">#180980</a>).
+</li>
+<li class="listitem">
+Removes all SCSS files in favor of CSS (<a href="https://github.com/elastic/kibana/pull/178314" class="ulink" target="_top">#178314</a>).
+</li>
+<li class="listitem">
+Fixes polling for blocked anomaly detection jobs (<a href="https://github.com/elastic/kibana/pull/178246" class="ulink" target="_top">#178246</a>).
+</li>
+<li class="listitem">
+Adds trained model list permission UI tests (<a href="https://github.com/elastic/kibana/pull/174045" class="ulink" target="_top">#174045</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes transform health rule failure with a long list of continuous transforms (<a href="https://github.com/elastic/kibana/pull/183153" class="ulink" target="_top">#183153</a>).
+</li>
+<li class="listitem">
+The runtime field creation modal now shows indexed values instead of source values in the preview pane (<a href="https://github.com/elastic/kibana/pull/181246" class="ulink" target="_top">#181246</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Monitoring
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes broken KQL filter for Cluster Health rule (<a href="https://github.com/elastic/kibana/pull/183259" class="ulink" target="_top">#183259</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes Triggered column timezone and format (<a href="https://github.com/elastic/kibana/pull/182653" class="ulink" target="_top">#182653</a>).
+</li>
+<li class="listitem">
+Fixes refetching data views on save (<a href="https://github.com/elastic/kibana/pull/181033" class="ulink" target="_top">#181033</a>).
+</li>
+<li class="listitem">
+Allows editing of charts when Elasticsearch query fails (<a href="https://github.com/elastic/kibana/pull/180500" class="ulink" target="_top">#180500</a>).
+</li>
+<li class="listitem">
+Fixes Agent ID not being parsed correctly (<a href="https://github.com/elastic/kibana/pull/180301" class="ulink" target="_top">#180301</a>).
+</li>
+<li class="listitem">
+Changes <code class="literal">Custom KQL</code> to <code class="literal">Custom Query</code> (<a href="https://github.com/elastic/kibana/pull/179497" class="ulink" target="_top">#179497</a>).
+</li>
+<li class="listitem">
+Fixes filtering for a histogram legend value (<a href="https://github.com/elastic/kibana/pull/178551" class="ulink" target="_top">#178551</a>).
+</li>
+<li class="listitem">
+Fixes an OpenAI Connector default model assignment bug (<a href="https://github.com/elastic/kibana/pull/178369" class="ulink" target="_top">#178369</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Update static asset headers to include <code class="literal">public</code> and <code class="literal">immutable</code> <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control" class="ulink" target="_top">cache control directives</a> to a large number of assets served by Kibana, which should reduce the number of requests for static assets in browsers that respect these directives. (<a href="https://github.com/elastic/kibana/pull/180378" class="ulink" target="_top">#180378</a>).
+</li>
+<li class="listitem">
+Omits apiKey from RUM agent (<a href="https://github.com/elastic/kibana/pull/178902" class="ulink" target="_top">#178902</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Presentation
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes clicking "Explore in maps" button not taking users to maps (<a href="https://github.com/elastic/kibana/pull/181903" class="ulink" target="_top">#181903</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixed escaped terminal codes logging in interactive plugin setup (<a href="https://github.com/elastic/kibana/pull/180342" class="ulink" target="_top">#180342</a>).
+</li>
+<li class="listitem">
+Fixes an issue with Security Assistant send to timeline functionality (<a href="https://github.com/elastic/kibana/pull/177771" class="ulink" target="_top">#177771</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+SharedUX
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Fixes multiline query in expanded mode displaying undefined for line number (<a href="https://github.com/elastic/kibana/pull/181544" class="ulink" target="_top">#181544</a>).
+</li>
+<li class="listitem">
+Removes unused legacy markdown component (<a href="https://github.com/elastic/kibana/pull/179272" class="ulink" target="_top">#179272</a>).
+</li>
+<li class="listitem">
+Fixes typo in chromium driver factory page event (<a href="https://github.com/elastic/kibana/pull/178708" class="ulink" target="_top">#178708</a>).
+</li>
+<li class="listitem">
+Fixes not being able to enter the ES|QL editor when the column menu is open (<a href="https://github.com/elastic/kibana/pull/178622" class="ulink" target="_top">#178622</a>).
+</li>
+<li class="listitem">
+Fixes an issue in Reporting with consistently showing the toast message for completed report jobs (<a href="https://github.com/elastic/kibana/pull/177537" class="ulink" target="_top">#177537</a>).
+</li>
+<li class="listitem">
+Fixes time picker to show allowed formats properly in absolute tabs (<a href="https://github.com/elastic/kibana/pull/182152" class="ulink" target="_top">#182152</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.14.0.html">« Kibana 8.14.0</a>
+</span>
+<span class="next">
+<a href="release-notes-8.13.4.html">Kibana 8.13.4 »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

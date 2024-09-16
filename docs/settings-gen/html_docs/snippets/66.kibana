@@ -1,0 +1,12 @@
+$ curl -X POST api/osquery/live_queries \
+{
+  "query": "select * from uptime;",
+  "ecs_mapping": {
+    "host.uptime": {
+      "field": "total_seconds"
+    }
+  },
+  "agent_all": true,
+  "timeout": 120
+}
+

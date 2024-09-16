@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Monitoring settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Monitoring settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="infrastructure-ui-settings-kb.html" title="Metrics settings in Kibana"/>
+<link rel="next" href="reporting-settings-kb.html" title="Reporting settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="infrastructure-ui-settings-kb.html">« Metrics settings in Kibana</a>
+</span>
+<span class="next">
+<a href="reporting-settings-kb.html">Reporting settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Monitoring settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="monitoring-settings-kb"></a>Monitoring settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>By default, <span class="strong strong"><strong>Stack Monitoring</strong></span> is enabled, but data collection is disabled.
+When you first start Kibana monitoring, you are prompted to enable data
+collection. If you are using Elastic Stack security features, you must be signed in as
+a user with the <code class="literal">cluster:manage</code> privilege to enable data collection. The
+built-in <code class="literal">superuser</code> role has this privilege and the built-in <code class="literal">elastic</code> user has
+this role.</p>
+<p>You can adjust how monitoring data is
+collected from Kibana and displayed in Kibana by configuring settings in the
+<code class="literal">kibana.yml</code> file. There are also <code class="literal">monitoring.ui.elasticsearch.*</code> settings,
+which support the same values as <a class="xref" href="settings.html" title="Configure Kibana">Kibana configuration settings</a>.</p>
+<p>To control how data is collected from your Elasticsearch nodes, you configure
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitoring-settings.html" class="ulink" target="_top"><code class="literal">xpack.monitoring.collection</code>
+settings</a> in <code class="literal">elasticsearch.yml</code>. To control how monitoring data is collected
+from Logstash, configure monitoring settings in <code class="literal">logstash.yml</code>.</p>
+<p>For more information, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html" class="ulink" target="_top">Monitor a cluster</a>.</p>
+<div class="position-relative"><h4><a id="monitoring-general-settings"></a>General monitoring settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">monitoring.cluster_alerts.email_notifications.enabled</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">7.11.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 7.11.0.
+</span>
+</span>
+When enabled, sends email notifications for Watcher alerts to the specified email address. The default is <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.cluster_alerts.email_notifications.email_address</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">7.11.0</span>]
+<span class="Admonishment-detail">
+Deprecated in 7.11.0.
+</span>
+</span>
+When enabled, specifies the email address where you want to receive cluster alert notifications.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.ccs.enabled</code>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">true</code> (default) to enable <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html" class="ulink" target="_top">cross-cluster search</a> of your monitoring data. The <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-remote-clusters.html#remote-cluster-settings" class="ulink" target="_top"><code class="literal">remote_cluster_client</code></a> role must exist on each node.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.hosts</code>
+</span>
+</dt>
+<dd>
+<p>
+Specifies the location of the Elasticsearch cluster where your monitoring data is stored.
+</p>
+<p>By default, this is the same as <a class="xref" href="settings.html#elasticsearch-hosts"><code class="literal">elasticsearch.hosts</code></a>. This setting enables
+you to use a single Kibana instance to search and visualize data in your
+production cluster as well as monitor data sent to a dedicated monitoring
+cluster.</p>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.username</code>
+</span>
+</dt>
+<dd>
+<p>
+Specifies the username used by Kibana monitoring to establish a persistent connection
+in Kibana to the Elasticsearch monitoring cluster and to verify licensing status on the Elasticsearch
+monitoring cluster when using <code class="literal">monitoring.ui.elasticsearch.hosts</code>.
+</p>
+<p>All other requests performed by <span class="strong strong"><strong>Stack Monitoring</strong></span> to the monitoring Elasticsearch
+cluster uses the authenticated user&#8217;s credentials, which must be the same on
+both the Elasticsearch monitoring cluster and the Elasticsearch production cluster.</p>
+<p>If not set, Kibana uses the value of the <a class="xref" href="settings.html#elasticsearch-user-passwd"><code class="literal">elasticsearch.username</code></a> setting.</p>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.password</code>
+</span>
+</dt>
+<dd>
+<p>
+Specifies the password used by Kibana monitoring to establish a persistent connection
+in Kibana  to the Elasticsearch monitoring cluster and to verify licensing status on the Elasticsearch
+monitoring cluster when using <code class="literal">monitoring.ui.elasticsearch.hosts</code>.
+</p>
+<p>All other requests performed by <span class="strong strong"><strong>Stack Monitoring</strong></span> to the monitoring Elasticsearch
+cluster use the authenticated user&#8217;s credentials, which must be the same on
+both the Elasticsearch monitoring cluster and the Elasticsearch production cluster.</p>
+<p>If not set, Kibana uses the value of the <a class="xref" href="settings.html#elasticsearch-user-passwd"><code class="literal">elasticsearch.password</code></a> setting.</p>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.serviceAccountToken</code>
+</span>
+</dt>
+<dd>
+Specifies a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-create-service-token.html" class="ulink" target="_top">service account token</a> for the Elasticsearch cluster where your monitoring data is stored when using <code class="literal">monitoring.ui.elasticsearch.hosts</code>.  This setting is an alternative to using <code class="literal">monitoring.ui.elasticsearch.username</code> and <code class="literal">monitoring.ui.elasticsearch.password</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.pingTimeout</code>
+</span>
+</dt>
+<dd>
+Specifies the time in milliseconds to wait for Elasticsearch to respond to internal
+health checks. By default, it matches the <a class="xref" href="settings.html#elasticsearch-pingTimeout"><code class="literal">elasticsearch.pingTimeout</code></a> setting,
+which has a default value of <code class="literal">30000</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.ssl</code>
+</span>
+</dt>
+<dd>
+Shares the same configuration as <a class="xref" href="settings.html#elasticsearch-ssl-cert-key"><code class="literal">elasticsearch.ssl</code></a>. These settings configure encrypted communication between Kibana and the monitoring cluster.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="monitoring-collection-settings"></a>Monitoring collection settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+<p>These settings control how data is collected from Kibana.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">monitoring.kibana.collection.enabled</code>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">true</code> (default) to enable data collection from the Kibana NodeJS server
+for Kibana dashboards to be featured in <span class="strong strong"><strong>Stack Monitoring</strong></span>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.kibana.collection.interval</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Specifies the number of milliseconds to wait in between data sampling on the
+Kibana NodeJS server for the metrics that are displayed in the Kibana dashboards.
+Defaults to <code class="literal">10000</code> (10 seconds).
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="monitoring-ui-settings"></a>Monitoring UI settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+<p>These settings adjust how <span class="strong strong"><strong>Stack Monitoring</strong></span> displays monitoring data.
+However, the defaults work best in most circumstances. For more information
+about configuring Kibana, see
+<a href="https://www.elastic.co/guide/en/kibana/master/settings.html" class="ulink" target="_top">Setting Kibana server properties</a>.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.elasticsearch.logFetchCount</code>
+</span>
+</dt>
+<dd>
+Specifies the number of log entries to display in <span class="strong strong"><strong>Stack Monitoring</strong></span>.
+Defaults to <code class="literal">10</code>. The maximum value is <code class="literal">50</code>.
+</dd>
+<dt>
+<span class="term">
+<a id="monitoring-ui-enabled"></a> <code class="literal">monitoring.ui.enabled</code>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to hide <span class="strong strong"><strong>Stack Monitoring</strong></span>. The monitoring back-end
+continues to run as an agent for sending Kibana stats to the monitoring
+cluster. Defaults to <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.logs.index</code>
+</span>
+</dt>
+<dd>
+Specifies the name of the indices that are shown on the
+<a class="xref" href="elasticsearch-metrics.html#logs-monitor-page" title="Logs"><span class="strong strong"><strong>Logs</strong></span></a> page in <span class="strong strong"><strong>Stack Monitoring</strong></span>. The default value
+is <code class="literal">filebeat-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.metricbeat.index</code>
+</span>
+</dt>
+<dd>
+<span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono u-strikethrough">8.1.1</span>]
+<span class="Admonishment-detail">
+Deprecated in 8.1.1.
+</span>
+</span>
+Used as a workaround to avoid querying <code class="literal">metricbeat-*</code> indices which are now no longer queried. The default value
+is <code class="literal">metricbeat-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.max_bucket_size</code>
+</span>
+</dt>
+<dd>
+Specifies the number of term buckets to return out of the overall terms list when
+performing terms aggregations to retrieve index and node metrics. For more
+information about the <code class="literal">size</code> parameter, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size" class="ulink" target="_top">Terms Aggregation</a>.
+Defaults to <code class="literal">10000</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.min_interval_seconds</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Specifies the minimum number of seconds that a time bucket in a chart can
+represent. Defaults to 10. If you modify the
+<code class="literal">monitoring.ui.collection.interval</code> in <code class="literal">elasticsearch.yml</code>, use the same
+value in this setting.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.kibana.reporting.stale_status_threshold_seconds</code>
+</span>
+</dt>
+<dd>
+Specifies how many seconds can pass before the Kibana status reports are considered stale.
+Defaults to <code class="literal">120</code>.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h5><a id="monitoring-ui-cgroup-settings"></a>Monitoring UI container settings</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/monitoring-settings.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Stack Monitoring</strong></span> exposes the Cgroup statistics that we collect for you to make
+better decisions about your container performance, rather than guessing based on
+the overall machine performance. If you are not running your applications in a
+container, then Cgroup statistics are not useful.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.container.elasticsearch.enabled</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+For Elasticsearch clusters that are running in containers, this setting changes the
+<span class="strong strong"><strong>Node Listing</strong></span> to display the CPU utilization based on the reported Cgroup
+statistics. It also adds the calculated Cgroup CPU utilization to the
+<span class="strong strong"><strong>Node Overview</strong></span> page instead of the overall operating system&#8217;s CPU
+utilization. Defaults to <code class="literal">false</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">monitoring.ui.container.logstash.enabled</code>
+</span>
+</dt>
+<dd>
+For Logstash nodes that are running in containers, this setting
+changes the Logstash <span class="strong strong"><strong>Node Listing</strong></span> to display the CPU utilization
+based on the reported Cgroup statistics. It also adds the
+calculated Cgroup CPU utilization to the Logstash node detail
+pages instead of the overall operating system’s CPU utilization. Defaults to <code class="literal">false</code>.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="infrastructure-ui-settings-kb.html">« Metrics settings in Kibana</a>
+</span>
+<span class="next">
+<a href="reporting-settings-kb.html">Reporting settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

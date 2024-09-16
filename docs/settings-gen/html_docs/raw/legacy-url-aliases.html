@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Legacy URL Aliases | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Legacy URL Aliases | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="advanced.html" title="Advanced"/>
+<link rel="prev" href="sharing-saved-objects.html" title="Sharing saved objects"/>
+<link rel="next" href="plugin-list.html" title="List of Kibana plugins"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="sharing-saved-objects.html">« Sharing saved objects</a>
+</span>
+<span class="next">
+<a href="plugin-list.html">List of Kibana plugins »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="advanced.html">Advanced</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Legacy URL Aliases</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/legacy-url-aliases.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="legacy-url-aliases"></a>Legacy URL Aliases</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/legacy-url-aliases.asciidoc">edit</a></div>
+</div></div></div>
+<p>This page describes legacy URL aliases: what they are, where they come from, and how to disable them.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="legacy-url-aliases-overview"></a>Overview</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/legacy-url-aliases.asciidoc">edit</a></div>
+</div></div></div>
+<p>Many saved object types were converted in Kibana 8.0, so they can eventually be shared across <a class="xref" href="xpack-spaces.html" title="Spaces">spaces</a>. Before 8.0, you could
+have two objects with the same type and same ID in two different spaces. Part of this conversion is to make sure all object IDs of a given
+type are <span class="strong strong"><strong>globally unique across all spaces</strong></span>.</p>
+<p>Kibana creates a special entity called a <span class="strong strong"><strong>legacy URL alias</strong></span> for each saved object that requires a new ID. This legacy URL alias allows
+Kibana to preserve any deep link URLs that exist for these objects.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="legacy-url-aliases-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/legacy-url-aliases.asciidoc">edit</a></div>
+</div></div></div>
+<p>Consider the following scenario:</p>
+<p>You have Kibana 7.16, and you create a new dashboard.The ID of this dashboard is "123". You create a new space called "Bill&#8217;s space" and
+<a class="xref" href="managing-saved-objects.html#managing-saved-objects-copy-to-space" title="Copy to other Kibana spaces">copy</a> your dashboard to the other space. Now you have two different dashboards that can be accessed
+at the following URLs:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Default space</strong></span>: <code class="literal">http://localhost:5601/app/dashboards#/view/123</code>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Bill&#8217;s space</strong></span>: <code class="literal">http://localhost:5601/s/bills-space/app/dashboards#/view/123</code>
+</li>
+</ul>
+</div>
+<p>You use these two dashboards frequently, so you bookmark them in your web browser. After some time, you decide to upgrade to Kibana 8.0. When
+these two dashboards go through the conversion process, the one in "Bill&#8217;s space" will have its ID changed to "456". The URL to access that
+dashboard is different&#8201;&#8212;&#8201;not to worry though, there is a legacy URL alias for that dashboard.</p>
+<p>If you use your bookmark to access that dashboard using its old URL, Kibana detects that you are using a legacy URL, and finds the new object
+ID. If you navigate to <code class="literal">http://localhost:5601/s/bills-space/app/dashboards#/view/123</code>, you&#8217;ll see a message indicating that the dashboard
+has a new URL, and you&#8217;re automatically redirected to <code class="literal">http://localhost:5601/s/bills-space/app/dashboards#/view/456</code>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="legacy-url-aliases-handling-errors"></a>Handling errors</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/advanced/legacy-url-aliases.asciidoc">edit</a></div>
+</div></div></div>
+<p>Legacy URL aliases are intended to be fully transparent, but there are rare situations where this can lead to an error. For example, you
+might have a dashboard and one of the visualizations fails to load, directing you to this page. If you encounter an error in this situation,
+you might want to disable the legacy URL alias completely. This leaves the saved object intact, and you will not lose any data&#8201;&#8212;&#8201;you just
+won&#8217;t be able to use the old URL to access that saved object.</p>
+<p>To disable a legacy URL alias, you need three pieces of information: the <code class="literal">targetSpace</code>, the <code class="literal">targetType</code>, and the <code class="literal">sourceId</code>. Then use the
+<a class="xref" href="spaces-api-disable-legacy-url-aliases.html" title="Disable legacy URL aliases API"><code class="literal">_disable_legacy_url_aliases</code></a> API to disable the problematic legacy URL alias.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="sharing-saved-objects.html">« Sharing saved objects</a>
+</span>
+<span class="next">
+<a href="plugin-list.html">List of Kibana plugins »</a>
+</span>
+</div>
+</body>
+</html>

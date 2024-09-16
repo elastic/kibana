@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reporting production considerations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Reporting production considerations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="production.html" title="Use Kibana in a production environment"/>
+<link rel="prev" href="alerting-production-considerations.html" title="Alerting production considerations"/>
+<link rel="next" href="task-manager-production-considerations.html" title="Task Manager"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="alerting-production-considerations.html">« Alerting production considerations</a>
+</span>
+<span class="next">
+<a href="task-manager-production-considerations.html">Task Manager »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="production.html">Use Kibana in a production environment</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Reporting production considerations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/reporting-production-considerations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="reporting-production-considerations"></a>Reporting production considerations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/reporting-production-considerations.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>To generate reports, Kibana uses the Chromium web browser, which runs on the server in headless mode. Chromium is an open-source project not related to Elastic, and is embedded into Kibana. Chromium may require additional OS dependencies to run properly.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Chromium is not embedded into Kibana for the Darwin (Mac OS) architecture. When
+running on Darwin, Reporting will download Chromium into the proper area of
+the Kibana installation path the first time the server starts. To separately
+download and install the browser, see <a class="xref" href="reporting-troubleshooting-pdf.html#reporting-manual-chromium-install" title="Manually install the Chromium browser for Darwin">Manually install the Chromium browser for Darwin</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="reporting-chromium-sandbox"></a>Chromium sandbox</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/reporting-production-considerations.asciidoc">edit</a></div>
+<p>For an additional layer of security, use the sandbox. The Chromium sandbox uses operating system-provided mechanisms to ensure that code execution cannot make persistent changes to the computer or access confidential information. The specific sandboxing techniques differ for each operating system.</p>
+<div class="position-relative"><h4><a id="reporting-linux-sandbox"></a>Linux sandbox</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/reporting-production-considerations.asciidoc">edit</a></div>
+<p>The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
+distributions don&#8217;t support or allow non-privileged processes to create user namespaces, or they require the CAP_SYS_ADMIN capability. The reporting features
+automatically disable the sandbox when it detects it is running on systems where it is not enabled.
+Without explicitly setting <code class="literal">xpack.screenshotting.browser.chromium.disableSandbox: false</code> in <code class="literal">kibana.yml</code>,
+the reporting features may detect that it can&#8217;t be enabled. In the event it is automatically disabled, you&#8217;ll see the following message in your Kibana startup logs:
+<code class="literal">Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
+Automatically setting 'xpack.screenshotting.browser.chromium.disableSandbox: true'.</code></p>
+<p>Reporting automatically enables the Chromium sandbox at startup when a supported OS is detected. However, if your kernel is 3.8 or newer, it&#8217;s
+recommended to set <code class="literal">xpack.screenshotting.browser.chromium.disableSandbox: false</code> in your <code class="literal">kibana.yml</code> to explicitly enable the sandbox.</p>
+<div class="position-relative"><h4><a id="reporting-docker-sandbox"></a>Docker</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/reporting-production-considerations.asciidoc">edit</a></div>
+<p>When running Kibana in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
+AppArmor profiles that prevent the Chromium sandbox from being used. In these situations, disabling the sandbox is recommended,
+as the container implements similar security mechanisms.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="alerting-production-considerations.html">« Alerting production considerations</a>
+</span>
+<span class="next">
+<a href="task-manager-production-considerations.html">Task Manager »</a>
+</span>
+</div>
+</body>
+</html>

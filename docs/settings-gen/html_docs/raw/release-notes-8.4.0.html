@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.4.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.4.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.4.1.html" title="Kibana 8.4.1"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.4.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.4.1.html">« Kibana 8.4.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.4.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.4.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.4.0"></a>Kibana 8.4.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the following information about the Kibana 8.4.0 release.</p>
+<div class="position-relative"><h3><a id="known-issue-8.4.0"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>If you have alerting rules that have been snoozed, do not upgrade Kibana to 8.4.0. Upgrade to 8.4.1 instead.</p>
+<p>To determine if you have snoozed alerting rules, open the main menu, then click
+<span class="strong strong"><strong>Stack Management</strong></span> &#8594; <span class="strong strong"><strong>Rules and Connectors</strong></span>. Filter the rule list by selecting
+<span class="strong strong"><strong>View</strong></span> &#8594; <span class="strong strong"><strong>Snoozed</strong></span>. If you must upgrade to 8.4.0, for each space, cancel
+the snooze for all affected rules before you upgrade.</p>
+<p>To identify snoozed rules in all Spaces using <span class="strong strong"><strong>Dev Tools</strong></span>, run the following
+query:</p>
+<div class="pre_wrapper lang-console">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-console">GET /.kibana/_search
+{
+  "query": {
+    "exists": {
+      "field": "alert.isSnoozedUntil"
+    }
+  }
+}</pre>
+</div>
+<div class="console_widget" data-snippet="snippets/88.console"></div>
+<p>If you upgraded Kibana to 8.4.0 and you have alerting rules configured to
+snooze notifications, you will receive the following error message:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">FATAL  Error: Unable to complete saved object migrations for the [.kibana] index.</pre>
+</div>
+<p>To fix that problem, restore your previous version, then upgrade to 8.4.1 instead.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.4.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-135669">
+<summary class="title">xpack.agents.* are uneditable in UI when defined in kibana.yml</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+When you configure <code class="literal">setxpack.fleet.agents.fleet_server.hosts</code> and <code class="literal">xpack.fleet.agents.elasticsearch.hosts</code> in kibana.yml, you are unable to update the fields on the Fleet UI.</p>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/135669" class="ulink" target="_top">#135669</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To configure <code class="literal">setxpack.fleet.agents.fleet_server.hosts</code> and <code class="literal">xpack.fleet.agents.elasticsearch.hosts</code> on the Fleet UI, avoid configuring the settings in kibana.yml.</p>
+</div>
+</details>
+<details id="breaking-134336">
+<summary class="title">Removes the legacy charts library</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The legacy implementation of the <span class="strong strong"><strong>Timelion</strong></span> visualization charts library has been removed. All <span class="strong strong"><strong>Timelion</strong></span> visualizations now use the elastic-charts library, which was introduced in 7.15.0.</p>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/134336" class="ulink" target="_top">#134336</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+In 8.4.0 and later, you are unable to configure the <span class="strong strong"><strong>Timelion</strong></span> legacy charts library advanced setting. For information about visualization Advanced Settings, check <a href="https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings" class="ulink" target="_top">Visualization</a>.</p>
+</div>
+</details>
+<p><a href="https://www.elastic.co/guide/en/kibana/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0" class="ulink" target="_top">8.3.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0" class="ulink" target="_top">8.2.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0" class="ulink" target="_top">8.1.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0" class="ulink" target="_top">8.0.0</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2" class="ulink" target="_top">8.0.0-rc2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" class="ulink" target="_top">8.0.0-rc1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" class="ulink" target="_top">8.0.0-beta1</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" class="ulink" target="_top">8.0.0-alpha2</a> | <a href="https://www.elastic.co/guide/en/kibana/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" class="ulink" target="_top">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="deprecations-8.4.0"></a>Deprecations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The following functionality is deprecated in 8.4.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.4.0.</p>
+<details id="deprecation-136422">
+<summary class="title">Deprecates ApiKey authentication for interactive users</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version.</p>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/136422" class="ulink" target="_top">#136422</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To authenticate interactive users via a web browser, use <a class="xref" href="kibana-authentication.html" title="Authentication in Kibana">another authentication method</a>. Use API keys only for programmatic access to Kibana and Elasticsearch.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.4.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.4.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the "updated at" feature in new alerts table <a href="https://github.com/elastic/kibana/pull/136949" class="ulink" target="_top">#136949</a>
+</li>
+<li class="listitem">
+Adds a rule detail table with bulk actions <a href="https://github.com/elastic/kibana/pull/136601" class="ulink" target="_top">#136601</a>
+</li>
+<li class="listitem">
+Adds bulk Actions for Alerts Table <a href="https://github.com/elastic/kibana/pull/135797" class="ulink" target="_top">#135797</a>
+</li>
+<li class="listitem">
+Adds the Alerting stack-monitoring PoC <a href="https://github.com/elastic/kibana/pull/135365" class="ulink" target="_top">#135365</a>
+</li>
+<li class="listitem">
+Adds custom inline/row actions for alerts table <a href="https://github.com/elastic/kibana/pull/134015" class="ulink" target="_top">#134015</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Cases
+</span>
+</dt>
+<dd>
+Adds the ability to customize permissions to prevent users from deleting Cases entities, such as Cases themselves, attachments, and comments <a href="https://github.com/elastic/kibana/pull/135487" class="ulink" target="_top">#135487</a>
+</dd>
+<dt>
+<span class="term">
+Connectors
+</span>
+</dt>
+<dd>
+The Webhook - Case Management connector allows users to build a custom connector for any third-party case/ticket management system <a href="https://github.com/elastic/kibana/pull/131762" class="ulink" target="_top">#131762</a>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+Adds the ability to add a custom number of rows in the results and save the specified number with a Saved Search <a href="https://github.com/elastic/kibana/pull/135726" class="ulink" target="_top">#135726</a>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.4.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Enables package signature verification feature <a href="https://github.com/elastic/kibana/pull/137239" class="ulink" target="_top">#137239</a>
+</li>
+<li class="listitem">
+Modal to allow user to force install an unverified package <a href="https://github.com/elastic/kibana/pull/136108" class="ulink" target="_top">#136108</a>
+</li>
+<li class="listitem">
+Display package verification status <a href="https://github.com/elastic/kibana/pull/135928" class="ulink" target="_top">#135928</a>
+</li>
+<li class="listitem">
+Tag rename and delete feature <a href="https://github.com/elastic/kibana/pull/135712" class="ulink" target="_top">#135712</a>
+</li>
+<li class="listitem">
+Bulk update agent tags ui <a href="https://github.com/elastic/kibana/pull/135646" class="ulink" target="_top">#135646</a>
+</li>
+<li class="listitem">
+Adds API to bulk update tags <a href="https://github.com/elastic/kibana/pull/135520" class="ulink" target="_top">#135520</a>
+</li>
+<li class="listitem">
+Adds and remove agent tags <a href="https://github.com/elastic/kibana/pull/135320" class="ulink" target="_top">#135320</a>
+</li>
+<li class="listitem">
+Support sorting agent list <a href="https://github.com/elastic/kibana/pull/135218" class="ulink" target="_top">#135218</a>
+</li>
+<li class="listitem">
+Promote Logstash output support to GA <a href="https://github.com/elastic/kibana/pull/135028" class="ulink" target="_top">#135028</a>
+</li>
+<li class="listitem">
+Create new API to manage download_source setting <a href="https://github.com/elastic/kibana/pull/134889" class="ulink" target="_top">#134889</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds random sampler to Data visualizer document count chart <a href="https://github.com/elastic/kibana/pull/136150" class="ulink" target="_top">#136150</a>
+</li>
+<li class="listitem">
+Adds explain log rate spikes feature to the ML plugin <a href="https://github.com/elastic/kibana/pull/135948" class="ulink" target="_top">#135948</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Run packs live <a href="https://github.com/elastic/kibana/pull/132198" class="ulink" target="_top">#132198</a>
+</li>
+<li class="listitem">
+Ability to set human readable title of data view &amp; ability to edit data view <a href="https://github.com/elastic/kibana/pull/124191" class="ulink" target="_top">#124191</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Monitoring
+</span>
+</dt>
+<dd>
+Adds stale status reporting for Kibana <a href="https://github.com/elastic/kibana/pull/132613" class="ulink" target="_top">#132613</a>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Beta label to Infrastructure tab <a href="https://github.com/elastic/kibana/pull/136710" class="ulink" target="_top">#136710</a>
+</li>
+<li class="listitem">
+Creates and adds Rule Alerts Summary as a sharable component to the O11y Rule Details <a href="https://github.com/elastic/kibana/pull/135805" class="ulink" target="_top">#135805</a>
+</li>
+<li class="listitem">
+Rule Details Page - Use RuleStatusPanel from triggersActionsUI <a href="https://github.com/elastic/kibana/pull/135643" class="ulink" target="_top">#135643</a>
+</li>
+<li class="listitem">
+Adds Top erroneous transactions to errors details page <a href="https://github.com/elastic/kibana/pull/134929" class="ulink" target="_top">#134929</a>
+</li>
+<li class="listitem">
+Introduces Alerts tab on service overview page <a href="https://github.com/elastic/kibana/pull/134350" class="ulink" target="_top">#134350</a>
+</li>
+<li class="listitem">
+Adds single metric report type <a href="https://github.com/elastic/kibana/pull/132446" class="ulink" target="_top">#132446</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+Adds new bulkUpdatesSchedules method to Task Manager <a href="https://github.com/elastic/kibana/pull/132637" class="ulink" target="_top">#132637</a>
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+Adds the ability to create personal avatars <a href="https://github.com/elastic/kibana/pull/132522" class="ulink" target="_top">#132522</a>
+</dd>
+<dt>
+<span class="term">
+Sharing
+</span>
+</dt>
+<dd>
+Adds the new metric visualization <a href="https://github.com/elastic/kibana/pull/136567" class="ulink" target="_top">#136567</a>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.4.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.4</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.4.1.html">« Kibana 8.4.1</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.4.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tutorial: Create a workpad for monitoring sales | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Tutorial: Create a workpad for monitoring sales | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="canvas.html" title="Canvas"/>
+<link rel="prev" href="canvas-present-workpad.html" title="Present your workpad"/>
+<link rel="next" href="canvas-expression-lifecycle.html" title="Canvas expression lifecycle"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-present-workpad.html">« Present your workpad</a>
+</span>
+<span class="next">
+<a href="canvas-expression-lifecycle.html">Canvas expression lifecycle »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas.html">Canvas</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Tutorial: Create a workpad for monitoring sales</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas-tutorial"></a>Tutorial: Create a workpad for monitoring sales</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+</div></div></div>
+<p>To familiarize yourself with <span class="strong strong"><strong>Canvas</strong></span>, add the Sample eCommerce orders data, then use the data to create a workpad for monitoring sales at an eCommerce store.</p>
+<div class="position-relative"><h3><a id="_open_and_set_up_canvas"></a>Open and set up Canvas</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>To create a workpad of the eCommerce store data, add the data set, then create the workpad.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the home page, click <span class="strong strong"><strong>Try sample data</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Other sample data sets</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Sample eCommerce orders</strong></span> card, click <span class="strong strong"><strong>Add data</strong></span>.
+</li>
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Canvas</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Canvas workpads</strong></span> page, click <span class="strong strong"><strong>Create workpad</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_customize_your_workpad_with_images"></a>Customize your workpad with images</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>To customize your workpad to look the way you want, add your own images.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add element &gt; Image &gt; Image</strong></span>.</p>
+<p>The default Elastic logo image appears on the page.</p>
+</li>
+<li class="listitem">
+<p>Add your own image.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click the Elastic logo.
+</li>
+<li class="listitem">
+<p>Drag the image file to the <span class="strong strong"><strong>Select or drag and drop an image</strong></span> field.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/canvas_tutorialCustomImage_7.17.0.png" alt="The Analytics logo added to the workpad">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_customize_your_data_with_metrics"></a>Customize your data with metrics</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>Customize your data by connecting it to the Sample eCommerce orders data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add element &gt; Chart &gt; Metric</strong></span>.</p>
+<p>By default, the element is connected to the demo data, which enables you to experiment with the element before you connect it to your own.</p>
+</li>
+<li class="listitem">
+<p>To connect the element to your own data, make sure the element is selected, then click <span class="strong strong"><strong>Data &gt; Demo data &gt; Elasticsearch SQL</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>To select the total price field and set it to the sum_total_price field, enter the following in the <span class="strong strong"><strong>Query</strong></span> field:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Save</strong></span>.</p>
+<p>All fields are pulled from the sample eCommerce orders data view.</p>
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>At this point, the element appears as an error, so you need to change the element display options.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Display</strong></span>
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Value</strong></span> dropdowns, make sure <span class="strong strong"><strong>Unique</strong></span> and <span class="strong strong"><strong>sum_total_price</strong></span> are selected.
+</li>
+<li class="listitem">
+Change the <span class="strong strong"><strong>Label</strong></span> to <code class="literal">Total sales</code>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>The error is gone, but the element could use some formatting. To format the number, use the <span class="strong strong"><strong>Canvas</strong></span> expression language.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Expression editor</strong></span>.</p>
+<p>You&#8217;re now looking at the raw data syntax that Canvas uses to display the element.</p>
+</li>
+<li class="listitem">
+Change <code class="literal">metricFormat="0,0.[000]"</code> to <code class="literal">metricFormat="$0a"</code>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Run</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/canvas_tutorialCustomMetric_7.17.0.png" alt="The total sales metric added to the workpad using Elasticsearch SQL">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_show_off_your_data_with_charts"></a>Show off your data with charts</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>To show what your data can do, add charts, graphs, progress monitors, and more to your workpad.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add element &gt; Chart &gt; Area</strong></span>.
+</li>
+<li class="listitem">
+<p>Make sure that the element is selected, then click <span class="strong strong"><strong>Data &gt; Demo data &gt; Elasticsearch SQL</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>To obtain the taxless total price by date, enter the following in the <span class="strong strong"><strong>Query</strong></span> field:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date</pre>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Change the display options.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Display</strong></span>
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>X-axis</strong></span> dropdown, make sure <span class="strong strong"><strong>Value</strong></span> and <span class="strong strong"><strong>order_date</strong></span> are selected.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Y-axis</strong></span> dropdown, select <span class="strong strong"><strong>Value</strong></span>, then select <span class="strong strong"><strong>taxless_total_price</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/canvas_tutorialCustomChart_7.17.0.png" alt="Custom line chart added to the workpad using Elasticsearch SQL">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_show_how_your_data_changes_over_time"></a>Show how your data changes over time</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>To focus your data on a specific time range, add the time filter.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add element &gt; Filter &gt; Time filter</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Display</strong></span>
+</li>
+<li class="listitem">
+To use the date time field from the sample data, enter <code class="literal">order_date</code> in the <span class="strong strong"><strong>Column</strong></span> field, then click <span class="strong strong"><strong>Set</strong></span>.
+</li>
+</ol>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="../setup/images/canvas_tutorialCustomTimeFilter_7.17.0.png" alt="Custom time filter added to the workpad">
+</div>
+</div>
+<p>To see how the data changes, set the time filter to <span class="strong strong"><strong>Last 7 days</strong></span>. As you change the time filter options, the elements automatically update.</p>
+<p>Your workpad is complete!</p>
+<div class="position-relative"><h3><a id="_whats_next_5"></a>What&#8217;s next?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-tutorial.asciidoc">edit</a></div>
+<p>Now that you know the basics, you&#8217;re ready to explore on your own.</p>
+<p>Here are some things to try:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Play with the <a href="https://www.elastic.co/guide/en/kibana/master/add-sample-data.html" class="ulink" target="_top">sample Canvas workpads</a>.
+</li>
+<li class="listitem">
+Build presentations of your own data with <a class="xref" href="canvas.html#create-workpads" title="Create workpads">workpads</a>.
+</li>
+<li class="listitem">
+Deep dive into the <a href="https://www.elastic.co/guide/en/kibana/master/canvas-function-reference.html" class="ulink" target="_top">expression language and functions</a> that drive <span class="strong strong"><strong>Canvas</strong></span>.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-present-workpad.html">« Present your workpad</a>
+</span>
+<span class="next">
+<a href="canvas-expression-lifecycle.html">Canvas expression lifecycle »</a>
+</span>
+</div>
+</body>
+</html>

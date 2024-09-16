@@ -1,0 +1,8 @@
+$ curl -X POST api/index_patterns/index_pattern
+{
+  "override": false,
+  "refresh_fields": true,
+  "index_pattern": {
+     "title": "hello"
+  }
+}

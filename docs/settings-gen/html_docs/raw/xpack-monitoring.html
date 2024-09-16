@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Stack Monitoring | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Stack Monitoring | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="osquery-faq.html" title="Osquery FAQ"/>
+<link rel="next" href="beats-page.html" title="Beats Monitoring Metrics"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="osquery-faq.html">« Osquery FAQ</a>
+</span>
+<span class="next">
+<a href="beats-page.html">Beats Monitoring Metrics »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Stack Monitoring</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/xpack-monitoring.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-monitoring"></a>Stack Monitoring</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/xpack-monitoring.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p>The Kibana monitoring features serve two separate purposes:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+To visualize monitoring data from across the Elastic Stack. You can view health and
+performance data for Elasticsearch, Logstash, Enterprise Search, APM, and Beats in real time,
+as well as analyze past performance.
+</li>
+<li class="listitem">
+To monitor Kibana itself and route that data to the monitoring cluster.
+</li>
+</ol>
+</div>
+<p>If you enable monitoring across the Elastic Stack, each monitored component is
+considered unique based on its persistent UUID, which is written to the
+<a class="xref" href="settings.html" title="Configure Kibana"><code class="literal">path.data</code></a> directory when the node or instance starts.</p>
+<p>For more information, see <a class="xref" href="configuring-monitoring.html" title="Configure monitoring in Kibana"><em>Configure monitoring</em></a> and
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html" class="ulink" target="_top">Monitor a cluster</a>.</p>
+<p>Want to monitor your fleet of Elastic Agents, too? Use Fleet instead of the Stack
+Monitoring UI. To learn more, refer to
+<a href="https://www.elastic.co/guide/en/fleet/master/monitor-elastic-agent.html" class="ulink" target="_top">Monitor Elastic Agents</a>.</p>
+</div>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="osquery-faq.html">« Osquery FAQ</a>
+</span>
+<span class="next">
+<a href="beats-page.html">Beats Monitoring Metrics »</a>
+</span>
+</div>
+</body>
+</html>

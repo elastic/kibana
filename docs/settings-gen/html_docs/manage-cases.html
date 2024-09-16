@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Open and manage cases | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Open and manage cases | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="cases.html" title="Cases"/>
+<link rel="prev" href="setup-cases.html" title="Configure access to cases"/>
+<link rel="next" href="manage-cases-settings.html" title="Configure case settings"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="setup-cases.html">« Configure access to cases</a>
+</span>
+<span class="next">
+<a href="manage-cases-settings.html">Configure case settings »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="cases.html">Cases</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Open and manage cases</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="manage-cases"></a>Open and manage cases</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>To perform these tasks, you must have <a class="xref" href="setup-cases.html" title="Configure access to cases">full access</a> to the appropriate case features in Kibana.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="open-case"></a>Open a new case</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>Open a new case to keep track of issues and share their details with colleagues.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Go to <span class="strong strong"><strong>Management &gt; Stack Management &gt; Cases</strong></span>, then click <span class="strong strong"><strong>Create case</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-create.png" alt="Create a case in Stack Management">
+</div>
+</div>
+</li>
+<li class="listitem">
+If you defined <a class="xref" href="manage-cases-settings.html#case-templates" title="Templates">templates</a>, you can optionally select one to use its default field values. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</li>
+<li class="listitem">
+<p>Give the case a name, severity, and description.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>In the <code class="literal">Description</code> area, you can use
+<a href="https://www.markdownguide.org/cheat-sheet" class="ulink" target="_top">Markdown</a> syntax to create formatted
+text.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Optionally, add a category, assignees, and tags.
+You can add users only if they meet the necessary <a class="xref" href="setup-cases.html" title="Configure access to cases">prerequisites</a>.
+</li>
+<li class="listitem">
+If you defined any <a class="xref" href="manage-cases-settings.html#case-custom-fields" title="Custom fields">custom fields</a>, they appear in the <span class="strong strong"><strong>Additional fields</strong></span> section. <span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono">8.15.0</span>]
+<span class="Admonishment-detail">
+Added in 8.15.0.
+</span>
+</span>
+</li>
+<li class="listitem">
+For the <span class="strong strong"><strong>External incident management system</strong></span>, select a connector. For more
+information, refer to <a class="xref" href="manage-cases-settings.html#case-connectors" title="External incident management systems">External incident management systems</a>.
+</li>
+<li class="listitem">
+After you&#8217;ve completed all of the required fields, click <span class="strong strong"><strong>Create case</strong></span>.
+</li>
+</ol>
+</div>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Alternatively, you can configure your rules to automatically create cases by using <a class="xref" href="cases-action-type.html" title="Cases connector and action">case actions</a>.
+By default, the rule adds all of the alerts within a specified time window to a single case.
+You can optionally choose a field to group the alerts and create separate cases for each group.
+You can also choose whether you want the rule to reopen cases or open new ones when the time window elapses.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="add-case-notifications"></a>Add email notifications</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can configure email notifications that occur when users are assigned to
+cases.</p>
+<p>For hosted Kibana on Elasticsearch Service:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Add the email domains to the <a href="https://www.elastic.co/guide/en/cloud/current/ec-organizations-notifications-domain-allowlist.html" class="ulink" target="_top">notifications domain allowlist</a>.</p>
+<p>You do not need to take any more steps to configure an email connector or update
+Kibana user settings, since the preconfigured Elastic-Cloud-SMTP connector is
+used by default.</p>
+</li>
+</ol>
+</div>
+<p>For self-managed Kibana:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Create a preconfigured email connector.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>At this time, email notifications support only preconfigured connectors,
+which are defined in the <code class="literal">kibana.yml</code> file.
+For examples, refer to <a class="xref" href="pre-configured-connectors.html#preconfigured-email-configuration" title="Email connectors">Email connectors</a> and <a class="xref" href="email-action-type.html#configuring-email" title="Configure email accounts for well-known services">Configure email accounts for well-known services</a>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Set the <code class="literal">notifications.connectors.default.email</code> Kibana setting to the name of
+your email connector.
+</li>
+<li class="listitem">
+If you want the email notifications to contain links back to the case, you
+must configure the <a class="xref" href="settings.html#server-publicBaseUrl">server.publicBaseUrl</a> setting.
+</li>
+</ol>
+</div>
+<p>When you subsequently add assignees to cases, they receive an email.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="add-case-files"></a>Add files</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>After you create a case, you can upload and manage files on the <span class="strong strong"><strong>Files</strong></span> tab:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-files.png" alt="A list of files attached to a case">
+</div>
+</div>
+<p>The acceptable file types and sizes are affected by your <a class="xref" href="cases-settings.html" title="Cases settings in Kibana">case settings</a>.</p>
+<p>To download or delete the file or copy the file hash to your clipboard, open the action menu (…).
+The available hash functions are MD5, SHA-1, and SHA-256.</p>
+<p>When you upload a file, a comment is added to the case activity log.
+To view images, click their name in the activity or file list.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Uploaded files are also accessible in <span class="strong strong"><strong>Stack Management &gt; Files</strong></span>.
+When you export cases as <a class="xref" href="managing-saved-objects.html" title="Manage saved objects">saved objects</a>, the case files are not exported.</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="add-case-visualization"></a>Add visualizations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can also optionally add visualizations.
+For example, you can portray event and alert data through charts and graphs.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-visualization.png" alt="Adding a visualization as a comment within a case">
+</div>
+</div>
+<p>To add a visualization to a comment within your case:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click the <span class="strong strong"><strong>Visualization</strong></span> button. The <span class="strong strong"><strong>Add visualization</strong></span> dialog appears.
+</li>
+<li class="listitem">
+<p>Select an existing visualization from your Visualize Library or create a new
+visualization.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Set an absolute time range for your visualization. This ensures your
+visualization doesn&#8217;t change over time after you save it to your case and
+provides important context for viewers.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+After you&#8217;ve finished creating your visualization, click <span class="strong strong"><strong>Save and return</strong></span> to
+go back to your case.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Preview</strong></span> to see how the visualization will appear in the case comment.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Add Comment</strong></span> to add the visualization to your case.
+</li>
+</ol>
+</div>
+<p>Alternatively, while viewing a <a class="xref" href="dashboard.html" title="Dashboard and visualizations">dashboard</a> you can open a panel&#8217;s menu then click <span class="strong strong"><strong>More &gt; Add to existing case</strong></span> or <span class="strong strong"><strong>More &gt; Add to new case</strong></span>.</p>
+<p>After a visualization has been added to a case, you can modify or interact with it by clicking the <span class="strong strong"><strong>Open Visualization</strong></span> option in the case&#8217;s comment menu.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="manage-case"></a>Manage cases</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>In <span class="strong strong"><strong>Management &gt; Stack Management &gt; Cases</strong></span>, you can search cases and filter
+them by attributes such as assignees, categories, severity, status, and tags. You can also
+select multiple cases and use bulk actions to delete cases or change their
+attributes.</p>
+<p>To view a case, click on its name. You can then:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Add a new comment.
+</li>
+<li class="listitem">
+Edit existing comments and the description.
+</li>
+<li class="listitem">
+Add or remove assignees.
+</li>
+<li class="listitem">
+Add a connector.
+</li>
+<li class="listitem">
+Send updates to external systems (if external connections are configured).
+</li>
+<li class="listitem">
+Edit the category and tags.
+</li>
+<li class="listitem">
+Refresh the case to retrieve the latest updates.
+</li>
+<li class="listitem">
+Change the status.
+</li>
+<li class="listitem">
+Change the severity.
+</li>
+<li class="listitem">
+Close or delete the case.
+</li>
+<li class="listitem">
+Reopen a closed case.
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="setup-cases.html">« Configure access to cases</a>
+</span>
+<span class="next">
+<a href="manage-cases-settings.html">Configure case settings »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

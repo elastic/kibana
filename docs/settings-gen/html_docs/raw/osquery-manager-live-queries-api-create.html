@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create live query API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create live query API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="osquery-manager-api.html" title="Osquery manager API"/>
+<link rel="prev" href="osquery-manager-live-queries-api-get-results.html" title="Get live query results API"/>
+<link rel="next" href="osquery-manager-packs-api-get.html" title="Get pack API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="osquery-manager-live-queries-api-get-results.html">« Get live query results API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-packs-api-get.html">Get pack API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="osquery-manager-api.html">Osquery manager API</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create live query API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="osquery-manager-live-queries-api-create"></a>Create live query API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Create live queries.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-create-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/osquery/live_queries</code></p>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/osquery/live_queries</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-create-path-params"></a>Path parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">space_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) An identifier for the space. When <code class="literal">space_id</code> is not provided in the URL, the default space is used.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-create-body-params"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">agent_ids</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of agent IDs to run the query on.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">agent_all</code>
+</span>
+</dt>
+<dd>
+(Optional, boolean) When <code class="literal">true</code>, the query runs on all agents.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">agent_platforms</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of agent platforms to run the query on.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">agent_policy_ids</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of agent policy IDs to run the query on.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">query</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The SQL query you want to run.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">saved_query_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The ID of a saved query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">ecs_mapping</code>
+</span>
+</dt>
+<dd>
+(Optional, object) Map osquery results columns or static values to Elastic Common Schema (ECS) fields.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">pack_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The ID of the pack you want to run.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert_ids</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of alert IDs associated to the live query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">case_ids</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of case IDs associated to the live query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">event_ids</code>
+</span>
+</dt>
+<dd>
+(Optional, array) A list of event IDs associated to the live query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">metadata</code>
+</span>
+</dt>
+<dd>
+(Optional, object) Custom metadata object associated to the live query.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">timeout</code>
+</span>
+</dt>
+<dd>
+(Optional, number) A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is <code class="literal">60</code>. The maximum supported value is <code class="literal">900</code>.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-create-request-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="osquery-manager-live-queries-api-create-example"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/osquery-manager/live-queries/create.asciidoc">edit</a></div>
+</div></div></div>
+<p>Run a live query on all supported agents:</p>
+<pre class="literallayout">TIP: `osquery_manager` integration has to be added to the agent policy.</pre>
+
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/osquery/live_queries \
+{
+  "query": "select * from uptime;",
+  "ecs_mapping": {
+    "host.uptime": {
+      "field": "total_seconds"
+    }
+  },
+  "agent_all": true,
+  "timeout": 120
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/66.kibana"></div>
+<p>The API returns the live query object:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+  "data": {
+    "action_id": "3c42c847-eb30-4452-80e0-728584042334",
+    "@timestamp": "2022-07-26T09:59:32.220Z",
+    "expiration": "2022-07-26T10:04:32.220Z", # after this time no more agents will run the query
+    "type": "INPUT_ACTION",
+    "input_type": "osquery",
+    "agent_ids": [],
+    "agent_all": true,
+    "agent_platforms": [],
+    "agent_policy_ids": [],
+    "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"], # stores the actual queried agent IDs
+    "user_id": "elastic",
+    "metadata": {
+      "execution_context": {
+        "name": "osquery",
+        "url": "/app/osquery/live_queries/new"
+      }
+    },
+    "queries": [
+      {
+        "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0", # unique ID of the query, use it when querying the live query API to get the single query results
+        "id": "6724a474-cbba-41ef-a1aa-66aebf0879e2", # ID of the query, doesn't have to be unique
+        "query": "select * from uptime;",
+        "timeout": 120,
+        "ecs_mapping": {
+          "host.uptime": {
+            "field": "total_seconds"
+          }
+        },
+        "agents": [
+          "16d7caf5-efd2-4212-9b62-73dafc91fa13" # stores the actual queried agent IDs
+        ]
+      }
+    ]
+  }
+}</pre>
+</div>
+<p>Run a pack on Darwin-supported agents:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/osquery/live_queries \
+{
+  "pack_id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832"
+  "agent_platforms": ["darwin"]
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/67.kibana"></div>
+<p>The API returns the live query object:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+  "data": {
+    "action_id": "3c42c847-eb30-4452-80e0-728584042334",
+    "@timestamp": "2022-07-26T09:59:32.220Z",
+    "expiration": "2022-07-26T10:04:32.220Z", # after this time no more agents will run the query
+    "type": "INPUT_ACTION",
+    "input_type": "osquery",
+    "agent_ids": [],
+    "agent_all": false,
+    "agent_platforms": ["darwin"],
+    "agent_policy_ids": [],
+    "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"], # stores the actual queried agent IDs
+    "user_id": "elastic",
+    "pack_id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832",
+    "pack_name": "test_pack",
+    "pack_prebuilt": false,
+    "metadata": {
+      "execution_context": {
+        "name": "osquery",
+        "url": "/app/osquery/live_queries/new"
+      }
+    },
+    "queries": [
+      {
+        "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0", # unique ID of the query, use it when querying the live query API to get the single query results
+        "id": "uptime", # ID of the query, doesn't have to be unique
+        "query": "select * from uptime;",
+        "ecs_mapping": {
+          "host.uptime": {
+            "field": "total_seconds"
+          }
+        },
+        "agents": [
+          "16d7caf5-efd2-4212-9b62-73dafc91fa13" # stores the actual queried agent IDs
+        ]
+      }
+    ]
+  }
+}</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="osquery-manager-live-queries-api-get-results.html">« Get live query results API</a>
+</span>
+<span class="next">
+<a href="osquery-manager-packs-api-get.html">Get pack API »</a>
+</span>
+</div>
+</body>
+</html>

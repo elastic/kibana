@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Quick start | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Quick start | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="save-load-delete-query.html" title="Save a query"/>
+<link rel="next" href="setup.html" title="Set up"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="save-load-delete-query.html">« Save a query</a>
+</span>
+<span class="next">
+<a href="setup.html">Set up »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Quick start</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="get-started"></a>Quick start</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+</div></div></div>
+<p>To quickly get up and running with Kibana, set up on Cloud, then add a sample data set that you can explore and visualize.</p>
+<p>When you&#8217;re done, you&#8217;ll know how to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="get-started.html#explore-the-data" title="Explore the data">Explore the data with <span class="strong strong"><strong>Discover</strong></span>.</a>
+</li>
+<li class="listitem">
+<a class="xref" href="get-started.html#view-and-analyze-the-data" title="Visualize the data">Visualize the data with <span class="strong strong"><strong>Dashboard</strong></span>.</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_required_privileges"></a>Required privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>You must have <code class="literal">read</code>, <code class="literal">write</code>, and <code class="literal">manage</code> privileges on the <code class="literal">kibana_sample_data_*</code> indices.
+Learn how to <a class="xref" href="tutorial-secure-access-to-kibana.html" title="Securing access to Kibana">secure access to Kibana</a>, or refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-privileges.html" class="ulink" target="_top">Security privileges</a> for more information.</p>
+<div class="position-relative"><h2><a id="set-up-on-cloud"></a>Set up on cloud</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>There&#8217;s no faster way to get started than with our hosted Elasticsearch Service on Elastic Cloud:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<a href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body" class="ulink" target="_top">Get a free trial</a>.
+</li>
+<li class="listitem">
+Log into <a href="https://cloud.elastic.co?page=docs&amp;placement=docs-body" class="ulink" target="_top">Elastic Cloud</a>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create deployment</strong></span>.
+</li>
+<li class="listitem">
+Give your deployment a name.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create deployment</strong></span> and download the password for the <code class="literal">elastic</code> user.
+</li>
+</ol>
+</div>
+<p>That’s it! Now that you are up and running, it’s time to get some data into
+Kibana. Kibana will open as soon as your deployment is ready.</p>
+<div class="position-relative"><h2><a id="gs-get-data-into-kibana"></a>Add the sample data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>Sample data sets come with sample visualizations, dashboards, and more to help you explore Kibana before you ingest or add your own data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the home page, click <span class="strong strong"><strong>Try sample data</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Other sample data sets</strong></span>.
+</li>
+<li class="listitem">
+<p>On the <span class="strong strong"><strong>Sample eCommerce orders</strong></span> card, click <span class="strong strong"><strong>Add data</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/addData_sampleDataCards_8.6.0.png" alt="Add data UI for the sample data sets">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="explore-the-data"></a>Explore the data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Discover</strong></span> displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the data view. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Discover</strong></span>.
+</li>
+<li class="listitem">
+<p>Change the <a class="xref" href="set-time-filter.html" title="Set the time range">time filter</a> to <span class="strong strong"><strong>Last 7 days</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/timeFilter_discover_8.4.0.png" alt="Time filter menu with Last 7 days filter configured">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>To view the sales orders for women&#8217;s clothing that are $60 or more, use the <a class="xref" href="kuery-query.html" title="Kibana Query Language"><span class="strong strong"><strong>KQL</strong></span></a> search field:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">products.taxless_price &gt;= 60 and category : Women's Clothing</pre>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/kql_discover_8.4.0.png" alt="Discover tables that displays only the orders for women&#8217;s clothing that are $60 or more">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>To view only the product categories that contain sales orders, hover over the <span class="strong strong"><strong>category</strong></span> field, then click <span class="strong strong"><strong>+</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/availableFields_discover_8.4.0.png" alt="Discover table that displays only the product categories that contain orders">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="view-and-analyze-the-data"></a>Visualize the data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>A dashboard is a collection of panels that you can use to visualize the data. Panels contain visualizations, interactive controls, text, and more.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Dashboard</strong></span>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>[eCommerce] Revenue Dashboard</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/dashboard_ecommerceRevenueDashboard_8.6.0.png" alt="The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="create-a-visualization"></a>Create a visualization panel</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>Create a treemap visualization panel that shows the top sales regions and manufacturers, then add the panel to the dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+On the dashboard, click <span class="strong strong"><strong>Create visualization</strong></span>.
+</li>
+<li class="listitem">
+<p>In the drag-and-drop visualization editor, open the <span class="strong strong"><strong>Visualization type</strong></span> dropdown, then select <span class="strong strong"><strong>Treemap</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="getting-started/images/visualizationTypeDropdown_lens_8.4.0.png" alt="Chart type menu with Treemap selected">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>From the <span class="strong strong"><strong>Available fields</strong></span> list, drag the following fields to the workspace:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>geoip.city_name</strong></span>
+</li>
+<li class="listitem">
+<p><span class="strong strong"><strong>manufacturer.keyword</strong></span></p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="getting-started/images/ecommerceTreemap_lens_8.4.0.png" alt="Treemap that displays Top values of geoip.city_name and Top values or manufacturer.keyword fields">
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Save and return</strong></span>.</p>
+<p>The treemap appears as the last visualization panel on the dashboard.</p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="interact-with-the-data"></a>Interact with the data</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the <span class="strong strong"><strong>[eCommerce] Controls</strong></span> panel to view the women&#8217;s clothing data from the Gnomehouse manufacturer.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the <span class="strong strong"><strong>Manufacturer</strong></span> dropdown, select <span class="strong strong"><strong>Gnomehouse</strong></span>.
+</li>
+<li class="listitem">
+<p>From the <span class="strong strong"><strong>Category</strong></span> dropdown, select <span class="strong strong"><strong>Women&#8217;s Clothing</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/sampleDataFilter_dashboard_8.6.0.png" alt="The [eCommerce] Revenue Dashboard that shows only the women&#8217;s clothing data from the Gnomehouse manufacturer">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="filter-and-query-the-data"></a>Filter the data</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p>To view a subset of the data, you can apply filters to the dashboard data. Apply a filter to view the women&#8217;s clothing data generated on Wednesday from the Gnomehouse manufacturer.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add filter</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/addFilter_dashboard_8.6.0.png" alt="The Add filter action that applies dashboard-level filters">
+</div>
+</div>
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Field</strong></span> dropdown, select <span class="strong strong"><strong>day_of_week</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Operator</strong></span> dropdown, select <span class="strong strong"><strong>is</strong></span>.
+</li>
+<li class="listitem">
+<p>From the <span class="strong strong"><strong>Value</strong></span> dropdown, select <span class="strong strong"><strong>Wednesday</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/addFilterOptions_dashboard_8.6.0.png" alt="The Add filter options configured to display only the women&#8217;s clothing data generated on Wednesday from the Gnomehouse manufacturer">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add filter</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/dashboard_sampleDataAddFilter_8.6.0.png" alt="The [eCommerce] Revenue Dashboard that shows only the women&#8217;s clothing data generated on Wednesday from the Gnomehouse manufacturer">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="quick-start-whats-next"></a>What&#8217;s next?</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/getting-started/quick-start-guide.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Add your own data.</strong></span> Ready to add your own data? Go to <a href="https://www.elastic.co/guide/en/observability/master/observability-get-started.html" class="ulink" target="_top">Get started with Elastic Observability</a>, or go to <a class="xref" href="connect-to-elasticsearch.html" title="Add data">Add data to Kibana</a> and learn about all the ways you can add data.</p>
+<p><span class="strong strong"><strong>Explore your own data in Discover.</strong></span> Ready to learn more about exploring your data in <span class="strong strong"><strong>Discover</strong></span>? Go to <a class="xref" href="discover.html" title="Discover">Discover</a>.</p>
+<p><span class="strong strong"><strong>Create a dashboard with your own data.</strong></span> Ready to learn more about visualizing your data on a <span class="strong strong"><strong>Dashboard</strong></span>? Go to <a class="xref" href="dashboard.html" title="Dashboard and visualizations">Dashboard</a>.</p>
+<p><span class="strong strong"><strong>Try out the machine learning features.</strong></span> Ready to analyze the sample data sets and generate models for its patterns of behavior? Go to <a href="https://www.elastic.co/guide/en/machine-learning/master/ml-getting-started.html" class="ulink" target="_top">Getting started with machine learning</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="save-load-delete-query.html">« Save a query</a>
+</span>
+<span class="next">
+<a href="setup.html">Set up »</a>
+</span>
+</div>
+</body>
+</html>

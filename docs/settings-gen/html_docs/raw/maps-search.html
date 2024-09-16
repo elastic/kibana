@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Search geographic data | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Search geographic data | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps.html" title="Maps"/>
+<link rel="prev" href="terms-join.html" title="Term join"/>
+<link rel="next" href="maps-create-filter-from-map.html" title="Create filters from a map"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="terms-join.html">« Term join</a>
+</span>
+<span class="next">
+<a href="maps-create-filter-from-map.html">Create filters from a map »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Search geographic data</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-search"></a>Search geographic data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+</div></div></div>
+<p>Search across the layers in your map to focus on just the data you want. Combine free text search with field-based search using the <a class="xref" href="kuery-query.html" title="Kibana Query Language">Kibana Query Language</a>. Set the time filter to restrict layers by time.</p>
+<p>This image shows an example of global search and global time narrowing results.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/global_search_bar.png" alt="global search and global time narrowing results">
+</div>
+</div>
+<p>Only layers requesting data from Elasticsearch are narrowed by global search and global time.
+To add a layer that requests data from Elasticsearch to your map, click <span class="strong strong"><strong>Add layer</strong></span>, then select one of the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Documents
+</li>
+<li class="listitem">
+Choropleth
+</li>
+<li class="listitem">
+Clusters and grid
+</li>
+<li class="listitem">
+Heat map
+</li>
+<li class="listitem">
+Point to point
+</li>
+<li class="listitem">
+Top hits per entity
+</li>
+<li class="listitem">
+Tracks
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="maps-narrow-layer-by-global-search"></a>Narrow layers by global search</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>Layers that request data from Elasticsearch are narrowed when you submit a <a class="xref" href="kibana-concepts-analysts.html#kibana-concepts-searching-your-data" title="Searching your data">search</a>.
+Layers narrowed by semi-structured search and filters contain the filter icon <span class="image"><img src="maps/images/filter_icon.png" alt="filter icon"></span> next to the layer name in the legend.</p>
+<p>To prevent the global search from applying to a layer, configure the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+In <span class="strong strong"><strong>Filtering</strong></span>, clear the <span class="strong strong"><strong>Apply global search to layer data</strong></span> checkbox to turn off global search for the layer source.
+</li>
+<li class="listitem">
+In <span class="strong strong"><strong>Term joins</strong></span>, clear the <span class="strong strong"><strong>Apply global search to join</strong></span> checkbox to turn off global search for the <a class="xref" href="terms-join.html" title="Term join">term join</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="maps-narrow-layer-by-global-time"></a>Narrow layers by global time</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>Layers that request data from Elasticsearch using a <a class="xref" href="data-views.html" title="Create a data view">data view</a> with a configured time field are narrowed by the <a class="xref" href="set-time-filter.html" title="Set the time range">global time</a>.
+These layers contain the clock icon <span class="image"><img src="maps/images/clock_icon.png" alt="clock icon"></span> next to the layer name in the legend.</p>
+<p>Use the time slider to quickly select time slices within the global time range:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="image"><img src="maps/images/timeslider_toggle_icon.png" alt="timeslider icon"></span> to open the time slider.
+</li>
+<li class="listitem">
+Click previous and next buttons to advance the time slice backward or forward.
+</li>
+<li class="listitem">
+Click play to animate your spatial temporal data.
+</li>
+</ol>
+</div>
+<p>To prevent the global time filter from applying to a layer, configure the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+In <span class="strong strong"><strong>Filtering</strong></span>, clear the <span class="strong strong"><strong>Apply global time to layer data</strong></span> checkbox to turn off the global time for the layer source.
+</li>
+<li class="listitem">
+In <span class="strong strong"><strong>Term joins</strong></span>, clear the <span class="strong strong"><strong>Apply global time to join</strong></span> checkbox to turn off the global time for the <a class="xref" href="terms-join.html" title="Term join">term join</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="maps-refresh-layer"></a>Refresh layer data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/search.asciidoc">edit</a></div>
+<p>Layers that request data from Elasticsearch re-fetch data when <a class="xref" href="set-time-filter.html" title="Set the time range">automatic refresh</a> fires and when you click <span class="strong strong"><strong>Refresh</strong></span>.</p>
+<p>To prevent refreshing layer data, configure the following:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+In <span class="strong strong"><strong>Filtering</strong></span>, clear the <span class="strong strong"><strong>Apply global refresh to layer data</strong></span> checkbox to turn off refresh for the layer source.
+</li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="terms-join.html">« Term join</a>
+</span>
+<span class="next">
+<a href="maps-create-filter-from-map.html">Create filters from a map »</a>
+</span>
+</div>
+</body>
+</html>

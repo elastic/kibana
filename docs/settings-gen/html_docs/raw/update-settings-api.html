@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Update settings API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Update settings API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="uptime-apis.html" title="Uptime APIs"/>
+<link rel="prev" href="get-settings-api.html" title="Get settings API"/>
+<link rel="next" href="kibana-plugins.html" title="Kibana plugins"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="get-settings-api.html">« Get settings API</a>
+</span>
+<span class="next">
+<a href="kibana-plugins.html">Kibana plugins »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="uptime-apis.html">Uptime APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Update settings API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="update-settings-api"></a>Update settings API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Updates uptime settings attributes like heartbeatIndices, certExpirationThreshold, certAgeThreshold, defaultConnectors or defaultEmail</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_11"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">PUT &lt;kibana host&gt;:&lt;port&gt;/api/uptime/settings</code></p>
+<p><code class="literal">PUT &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/uptime/settings</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_17"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>uptime</strong></span> feature in <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="settings-api-update-path-params"></a>Path parameters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">space_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) An identifier for the space. If <code class="literal">space_id</code> is not provided in the URL, the default space is used.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="api-update-request-body"></a>Request body</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>A partial update is supported, provided settings keys will be merged with existing settings.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">heartbeatIndices</code>
+</span>
+</dt>
+<dd>
+(Optional, string) index pattern string to be used within uptime app/alerts to query heartbeat data. Defaults to <code class="literal">heartbeat-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">certExpirationThreshold</code>
+</span>
+</dt>
+<dd>
+(Optional, number) Number of days before a certificate expires to trigger an alert. Defaults to <code class="literal">30</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">certAgeThreshold</code>
+</span>
+</dt>
+<dd>
+(Optional, number) Number of days after a certificate is created to trigger an alert. Defaults to <code class="literal">730</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">defaultConnectors</code>
+</span>
+</dt>
+<dd>
+(Optional, array) List of connector IDs to be used as default connectors for new alerts. Defaults to <code class="literal">[]</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">defaultEmail</code>
+</span>
+</dt>
+<dd>
+(Optional, object) Default email configuration for new alerts. Defaults to <code class="literal">{"to": [], "cc": [], "bcc": []}</code>.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="settings-api-update-example"></a>Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">PUT api/uptime/settings
+{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}</pre>
+</div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="settings-api-partial-update-example"></a>Partial update example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/uptime/update-settings.asciidoc">edit</a></div>
+</div></div></div>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">PUT api/uptime/settings
+{
+    "heartbeatIndices": "heartbeat-8*",
+}</pre>
+</div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="get-settings-api.html">« Get settings API</a>
+</span>
+<span class="next">
+<a href="kibana-plugins.html">Kibana plugins »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Run a search session in the background | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Run a search session in the background | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="discover.html" title="Discover"/>
+<link rel="prev" href="run-pattern-analysis-discover.html" title="Run a pattern analysis on your log data"/>
+<link rel="next" href="try-esql.html" title="Using ES|QL"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="run-pattern-analysis-discover.html">« Run a pattern analysis on your log data</a>
+</span>
+<span class="next">
+<a href="try-esql.html">Using ES|QL »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="discover.html">Discover</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Run a search session in the background</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="search-sessions"></a>Run a search session in the background</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+</div></div></div>
+<p>Sometimes you might need to search through large amounts of data, no matter
+how long the search takes.
+Consider a threat hunting scenario, where you need to search through years of data.
+You can save a long-running search, so Kibana processes your request in the
+background, and you can continue your work.</p>
+<p>Save your search session from <span class="strong strong"><strong>Discover</strong></span> or <span class="strong strong"><strong>Dashboard</strong></span>,
+and when your session is complete, view and manage it in <span class="strong strong"><strong>Stack Management</strong></span>.
+Search sessions are <a class="xref" href="search-session-settings-kb.html" title="Search sessions settings in Kibana">enabled by default</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-session.png" alt="Search Session indicator displaying the current state of the search" width="which you can click to stop or save a running Search Session">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_requirements"></a>Requirements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To save a session, you must have permissions for <span class="strong strong"><strong>Discover</strong></span> and <span class="strong strong"><strong>Dashboard</strong></span>,
+and the <a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">search sessions subfeature</a>.
+</li>
+<li class="listitem">
+To view and restore a saved session, you must have access to <span class="strong strong"><strong>Stack Management</strong></span>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_example_save_a_search_session"></a>Example: Save a search session</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<p>You’re trying to understand a trend you see on a dashboard. You
+need to look at several years of data, currently in
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/data-tiers.html#cold-tier" class="ulink" target="_top">cold storage</a>,
+but you don’t have time to wait. You want Kibana to
+continue working in the background, so tomorrow you can
+open your browser and pick up where you left off.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Load your dashboard.</p>
+<p>Your search session begins automatically.
+The icon after the dashboard title displays the current state of the search session.
+A clock icon indicates the search session is in progress.
+A checkmark indicates that the search session is complete.</p>
+</li>
+<li class="listitem">
+<p>To continue a search in the background, click the clock icon,
+and then click <span class="strong strong"><strong>Save session</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-session-awhile.png" alt="Search Session indicator displaying the current state of the search" width="75%">
+</div>
+</div>
+<p>Once you save a search session, you can start a new search,
+navigate to a different application, or close the browser.</p>
+</li>
+<li class="listitem">
+<p>To view your saved searches, open the main menu, and then click
+<span class="strong strong"><strong>Stack Management &gt; Search Sessions</strong></span>.
+For a saved or completed session, you can also open this view from the search sessions popup.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-sessions-menu.png" alt="Search Sessions management view with actions for inspecting" width="extending" height="and deleting a session.">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Use the edit menu in <span class="strong strong"><strong>Search Sessions</strong></span> to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Inspect</strong></span> the queries and filters that makeup the session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Edit the name</strong></span> of a session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Extend</strong></span> the expiration of a completed session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Delete</strong></span> a session.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>To restore a search session, click its name in the <span class="strong strong"><strong>Search Sessions</strong></span> view.</p>
+<p>You&#8217;re returned to the place from where you started the search session. The data is the same, but
+behaves differently:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Relative dates are converted to absolute dates.
+</li>
+<li class="listitem">
+Panning and zooming is disabled for maps.
+</li>
+<li class="listitem">
+Changing a filter, query, or drilldown starts a new search session, which can be slow.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="_limitations"></a>Limitations</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<p>Some visualization features do not fully support background search sessions. When
+you restore a dashboard, panels with unsupported features won&#8217;t load immediately, but instead
+send out additional
+data requests, which can take a while to complete.
+The <span class="strong strong"><strong>Your search session is still running</strong></span> warning appears.
+You can either wait for these additional requests to complete or come back to the dashboard later
+when all data requests have finished.</p>
+<p>A panel on a dashboard can behave like this if one of the following features is used:</p>
+<p><span class="strong strong"><strong>Lens</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A <span class="strong strong"><strong>top values</strong></span> dimension with an enabled <span class="strong strong"><strong>Group other values as "Other"</strong></span> setting.
+This is configurable in the <span class="strong strong"><strong>Advanced</strong></span> section of the dimension.
+</li>
+<li class="listitem">
+An <span class="strong strong"><strong>intervals</strong></span> dimension.
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>Aggregation-based</strong></span> visualizations</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A <span class="strong strong"><strong>terms</strong></span> aggregation with an enabled <span class="strong strong"><strong>Group other values in separate bucket</strong></span> setting.
+</li>
+<li class="listitem">
+A <span class="strong strong"><strong>histogram</strong></span> aggregation.
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>Maps</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Layers using joins, blended layers, or tracks layers.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="run-pattern-analysis-discover.html">« Run a pattern analysis on your log data</a>
+</span>
+<span class="next">
+<a href="try-esql.html">Using ES|QL »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

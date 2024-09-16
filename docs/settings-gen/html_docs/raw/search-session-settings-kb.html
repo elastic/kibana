@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Search sessions settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Search sessions settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="reporting-settings-kb.html" title="Reporting settings in Kibana"/>
+<link rel="next" href="secure-settings.html" title="Secure settings"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="reporting-settings-kb.html">« Reporting settings in Kibana</a>
+</span>
+<span class="next">
+<a href="secure-settings.html">Secure settings »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Search sessions settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/search-sessions-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="search-session-settings-kb"></a>Search sessions settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/search-sessions-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Configure the search session settings in your <code class="literal">kibana.yml</code> configuration file.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">data.search.sessions.enabled</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">true</code> (default) to enable search sessions.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">data.search.sessions.pageSize</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+How many search sessions Kibana processes at once while monitoring
+session progress. The default is <code class="literal">100</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">data.search.sessions.notTouchedTimeout</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+How long Kibana stores search results from unsaved sessions,
+after the last search in the session completes. The default is <code class="literal">5m</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">data.search.sessions.maxUpdateRetries</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+How many retries Kibana can perform while attempting to save a search session. The default is <code class="literal">10</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">data.search.sessions.defaultExpiration</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+How long search session results are stored before they are deleted.
+Extending a search session resets the expiration by the same value. The default is <code class="literal">7d</code>.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="reporting-settings-kb.html">« Reporting settings in Kibana</a>
+</span>
+<span class="next">
+<a href="secure-settings.html">Secure settings »</a>
+</span>
+</div>
+</body>
+</html>

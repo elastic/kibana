@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Osquery FAQ | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Osquery FAQ | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="osquery.html" title="Osquery"/>
+<link rel="prev" href="prebuilt-packs.html" title="Prebuilt packs reference"/>
+<link rel="next" href="xpack-monitoring.html" title="Stack Monitoring"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="prebuilt-packs.html">« Prebuilt packs reference</a>
+</span>
+<span class="next">
+<a href="xpack-monitoring.html">Stack Monitoring »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="osquery.html">Osquery</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Osquery FAQ</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="osquery-faq"></a>Osquery FAQ</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+</div></div></div>
+<p>This list of frequently asked questions answers common questions about
+using Osquery in Kibana.</p>
+<div class="position-relative"><h3><a id="osquery-differences"></a>How is Osquery Manager different from Osquery?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>The Osquery Manager integration brings <a href="https://osquery.io/" class="ulink" target="_top">Osquery</a> capabilities to the Elastic Stack and
+makes it easier to manage Osquery across a large number of hosts.
+Most Osquery functionality works the same way in Kibana as it does when you deploy Osquery yourself.
+However, there are a few differences and known issues, outlined below.</p>
+<div class="position-relative"><h3><a id="osquery-fda"></a>How do I grant Full Disk Access?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>Full Disk Access (FDA) is required to fully query some tables on MacOS. Granting FDA is
+not yet supported for Osquery Manager. This impacts a small set
+of tables that access file directories that are restricted due to heightened permissions from Apple,
+including <a href="https://osquery.io/schema/current#file" class="ulink" target="_top">file</a>,
+<a href="https://osquery.io/schema/current#file_events" class="ulink" target="_top">file_events</a>,
+<a href="https://osquery.io/schema/current#es_process_events" class="ulink" target="_top">es_process_events</a>,
+and any custom tables configured with
+<a href="https://osquery.readthedocs.io/en/stable/deployment/configuration/#automatic-table-construction" class="ulink" target="_top">ATC</a>
+that require access to these directories.
+When querying these tables, you won&#8217;t get results from the restricted directories.</p>
+<div class="position-relative"><h3><a id="osquery-carves"></a>Why can&#8217;t I query the carves table?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>File carving is not yet supported in the Elastic Stack, and
+<a href="https://osquery.io/schema/current#carves" class="ulink" target="_top">carves</a> table queries do not return results.</p>
+<div class="position-relative"><h3><a id="osquery-help-command"></a>Does the Osquery <code class="literal">.help</code> command work in Kibana?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>The <a href="https://osquery.readthedocs.io/en/stable/introduction/sql/#shell-help" class="ulink" target="_top">Osquery <code class="literal">.help</code> command</a>
+is not available when running live queries in Kibana. Instead, refer to the
+<a href="https://osquery.io/schema/" class="ulink" target="_top">Osquery schema</a> for all available tables, fields,
+and supported Operating Systems for each.</p>
+<div class="position-relative"><h3><a id="osquery-extensions"></a>Can I use Osquery extensions in Kibana?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>Osquery Manager does not currently support
+<a href="https://osquery.readthedocs.io/en/stable/deployment/extensions/" class="ulink" target="_top">Osquery extensions</a>.</p>
+<div class="position-relative"><h3><a id="osquery-fim"></a>Can I  do File Integrity Monitoring (FIM)?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>Yes, you can set up
+<a href="https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/" class="ulink" target="_top">Osquery FIM</a> using
+the Advanced configuration option for Osquery Manager (see <a class="xref" href="manage-osquery-integration.html#osquery-custom-config" title="Customize Osquery configuration">Customize Osquery configuration</a>).
+However, Elastic also provides a <a href="https://docs.elastic.co/en/integrations/fim" class="ulink" target="_top">File Integrity Monitoring</a> integration for Elastic Agent, which might prove
+to be easier to configure than the current options available for Osquery Manager.</p>
+<div class="position-relative"><h3><a id="osquery-syntax"></a>Where can I get help with osquery syntax?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>Osquery uses a superset of SQLite for queries.
+To get started with osquery SQL, refer to the
+<a href="https://osquery.readthedocs.io/en/stable/introduction/sql/" class="ulink" target="_top">Osquery documentation</a>.
+For help with more advanced questions, the Osquery community has an active
+Slack workspace and GitHub project. You can find links for both at <a href="https://osquery.io/" class="ulink" target="_top">osquery.io</a>.</p>
+<div class="position-relative"><h3><a id="osquery-updates"></a>How often is Osquery updated for Osquery Manager?</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/osquery/osquery-faq.asciidoc">edit</a></div>
+<p>When a new <a href="https://github.com/osquery/osquery/releases" class="ulink" target="_top">version of Osquery is released</a>,
+it is included in a subsequent Elastic Agent release and applied when the agent is upgraded.
+After that, when running queries from Osquery Manager in Kibana, the updated Osquery version is used.
+Refer to the Fleet and Elastic Agent Guide for help with
+<a href="https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html" class="ulink" target="_top">upgrading Fleet-managed Elastic Agents</a>.</p>
+<p>To check what Osquery version is installed on an Elastic Agent, you can run
+<code class="literal">SELECT version FROM osquery_info;</code> as a live query in Kibana. The <code class="literal">version</code> in the
+response is the Osquery version installed on the agent.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="prebuilt-packs.html">« Prebuilt packs reference</a>
+</span>
+<span class="next">
+<a href="xpack-monitoring.html">Stack Monitoring »</a>
+</span>
+</div>
+</body>
+</html>

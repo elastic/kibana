@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>UI Actions | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="UI Actions | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="plugin-list.html" title="List of Kibana plugins"/>
+<link rel="prev" href="kibana-expressions-plugin.html" title="expressions plugin"/>
+<link rel="next" href="dashboard-enhanced-plugin.html" title="Dashboard app enhancements plugin"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-expressions-plugin.html">« <code class="literal">expressions</code> plugin</a>
+</span>
+<span class="next">
+<a href="dashboard-enhanced-plugin.html">Dashboard app enhancements plugin »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="plugin-list.html">List of Kibana plugins</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>UI Actions</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/src/plugins/ui_actions/README.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="uiactions-plugin"></a>UI Actions</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/src/plugins/ui_actions/README.asciidoc">edit</a></div>
+</div></div></div>
+<p>UI Actions plugins provides API to manage <span class="strong strong"><strong>triggers</strong></span> and <span class="strong strong"><strong>actions</strong></span>.</p>
+<p><span class="strong strong"><strong>Trigger</strong></span> is an abstract description of user&#8217;s intent to perform an action
+(like user clicking on a value inside chart). It allows us to do runtime
+binding between code from different plugins. For, example one such
+trigger is when somebody applies filters on dashboard; another one is when
+somebody opens a Dashboard panel context menu.</p>
+<p><span class="strong strong"><strong>Actions</strong></span> are pieces of code that execute in response to a trigger. For example,
+to the dashboard filtering trigger multiple actions can be attached. Once a user
+filters on the dashboard all possible actions are displayed to the user in a
+popup menu and the user has to chose one.</p>
+<p>In general this plugin provides:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Creating custom functionality (actions).
+</li>
+<li class="listitem">
+Creating custom user interaction events (triggers).
+</li>
+<li class="listitem">
+Attaching and detaching actions to triggers.
+</li>
+<li class="listitem">
+Emitting trigger events.
+</li>
+<li class="listitem">
+Executing actions attached to a given trigger.
+</li>
+<li class="listitem">
+Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+</li>
+</ul>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_basic_usage"></a>Basic usage</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/src/plugins/ui_actions/README.asciidoc">edit</a></div>
+</div></div></div>
+<p>To get started, first you need to know a trigger you will attach your actions to.
+You can either pick an existing one, or register your own one:</p>
+<div class="pre_wrapper lang-typescript jsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript jsx">plugins.uiActions.registerTrigger({
+  id: 'MY_APP_PIE_CHART_CLICK',
+  title: 'Pie chart click',
+  description: 'When user clicks on a pie chart slice.',
+});</pre>
+</div>
+<p>Now, when user clicks on a pie slice you need to "trigger" your trigger and
+provide some context data:</p>
+<div class="pre_wrapper lang-typescript jsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript jsx">plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
+  /* Custom context data. */
+});</pre>
+</div>
+<p>Finally, your code or developers from other plugins can register UI actions that
+listen for the above trigger and execute some code when the trigger is triggered.</p>
+<div class="pre_wrapper lang-typescript jsx">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript jsx">plugins.uiActions.registerAction({
+  id: 'DO_SOMETHING',
+  isCompatible: async (context) =&gt; true,
+  execute: async (context) =&gt; {
+    // Do something.
+  },
+});
+plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');</pre>
+</div>
+<p>Now your <code class="literal">DO_SOMETHING</code> action will automatically execute when <code class="literal">MY_APP_PIE_CHART_CLICK</code>
+trigger is triggered; or, if more than one compatible action is attached to
+that trigger, user will be presented with a context menu popup to select one
+action to execute.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_examples_11"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/src/plugins/ui_actions/README.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://github.com/elastic/kibana/blob/main/examples/ui_action_examples/README.md" class="ulink" target="_top">ui_action examples</a></p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-expressions-plugin.html">« <code class="literal">expressions</code> plugin</a>
+</span>
+<span class="next">
+<a href="dashboard-enhanced-plugin.html">Dashboard app enhancements plugin »</a>
+</span>
+</div>
+</body>
+</html>

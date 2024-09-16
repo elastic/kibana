@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Handling context and argument types | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Handling context and argument types | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="canvas-expression-lifecycle.html" title="Canvas expression lifecycle"/>
+<link rel="prev" href="canvas-expressions-compose-functions-with-subexpressions.html" title="Compose functions with sub-expressions"/>
+<link rel="next" href="canvas-function-reference.html" title="Canvas function reference"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-expressions-compose-functions-with-subexpressions.html">« Compose functions with sub-expressions</a>
+</span>
+<span class="next">
+<a href="canvas-function-reference.html">Canvas function reference »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas.html">Canvas</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="canvas-expression-lifecycle.html">Canvas expression lifecycle</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Handling context and argument types</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas-handling-context-and-argument-types"></a>Handling context and argument types</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/canvas/canvas-expression-lifecycle.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you look through the <a class="xref" href="canvas-function-reference.html" title="Canvas function reference">function docs</a>, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values.</p>
+<p>To explain how this works, consider the following expression from the previous section:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}</pre>
+</div>
+<p>If you <a class="xref" href="canvas-function-reference.html#image_fn" title="image">look at the docs</a> for the <code class="literal">image</code> function, you’ll see that it accepts the <code class="literal">null</code> data type and returns an <code class="literal">image</code> data type. Accepting <code class="literal">null</code> effectively means that it does not use context at all, so if you insert anything to <code class="literal">image</code>, the value that was produced previously will be ignored. When the function executes, it will produce an <code class="literal">image</code> output, which is simply an object of type <code class="literal">image</code> that contains the information required to render an image.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The function does not render an image itself.</p>
+</div>
+</div>
+<p>As explained in the "<a class="xref" href="canvas-fetch-and-manipulate-data.html" title="Fetch and manipulate data">Fetch and manipulate data</a>" section, the output of an expression is just data. So the <code class="literal">image</code> type here is just a specific shape of data, not an actual image.</p>
+<p>Next, let’s take a look at the <code class="literal">asset</code> function. Like <code class="literal">image</code>, it accepts <code class="literal">null</code>, but it returns something different, a <code class="literal">string</code> in this case. Because <code class="literal">asset</code> will produce a string, its output can be used as the input for any function or argument that accepts a string.</p>
+<p><a class="xref" href="canvas-function-reference.html#asset_fn" title="asset">Looking at the docs</a> for the <code class="literal">dataurl</code> argument, its type is <code class="literal">string</code>, meaning it will accept any kind of string. There are some rules about the value of the string that the function itself enforces, but as far as the interpreter is concerned, that expression is valid because the argument accepts a string and the output of <code class="literal">asset</code> is a string.</p>
+<p>The interpreter also attempts to cast some input types into others, which allows you to use a string input even when the function or argument calls for a number. Keep in mind that it’s not able to convert any string value, but if the string is a number, it can easily be cast into a <code class="literal">number</code> type. Take the following expression for example:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">string "0.4"
+| revealImage image={asset asset-06511b39-ec44-408a-a5f3-abe2da44a426}</pre>
+</div>
+<p>If you <a class="xref" href="canvas-function-reference.html#revealImage_fn" title="revealImage">check the docs</a> for the <code class="literal">revealImage</code> function, you’ll see that it accepts a <code class="literal">number</code> but the <code class="literal">string</code> function returns a <code class="literal">string</code> type. In this case, because the string value is a number, it can be converted into a <code class="literal">number</code> type and used without you having to do anything else.</p>
+<p>Most <code class="literal">primitive</code> types can be converted automatically, as you might expect. You just saw that a <code class="literal">string</code> can be cast into a <code class="literal">number</code>, but you can also pretty easily cast things into <code class="literal">boolean</code> too, and you can cast anything to <code class="literal">null</code>.</p>
+<p>There are other useful type casting options available. For example, something of type <code class="literal">datatable</code> can be cast to a type <code class="literal">pointseries</code> simply by only preserving specific columns from the data (namely x, y, size, color, and text). This allows you to treat your source data, which is generally of type <code class="literal">datatable</code>, like a <code class="literal">pointseries</code> type simply by convention.</p>
+<p>You can fetch data from Elasticsearch using <code class="literal">essql</code>, which allows you to aggregate the data, provide a custom name for the value, and insert that data directly to another function that only accepts <code class="literal">pointseries</code> even though <code class="literal">essql</code> will output a <code class="literal">datatable</code> type. This makes the following example expression valid:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">essql "SELECT user AS x, sum(cost) AS y FROM index GROUP BY user"
+| plot</pre>
+</div>
+<p>In the docs you can see that <code class="literal">essql</code> returns a <code class="literal">datatable</code> type, but <code class="literal">plot</code> expects a <code class="literal">pointseries</code> context. This works because the <code class="literal">datatable</code> output will have the columns <code class="literal">x</code> and <code class="literal">y</code> as a result of using <code class="literal">AS</code> in the sql statement to name them. Because the data follows the convention of the <code class="literal">pointseries</code> data type, casting it into <code class="literal">pointseries</code> is possible, and it can be passed directly to <code class="literal">plot</code> as a result.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-expressions-compose-functions-with-subexpressions.html">« Compose functions with sub-expressions</a>
+</span>
+<span class="next">
+<a href="canvas-function-reference.html">Canvas function reference »</a>
+</span>
+</div>
+</body>
+</html>

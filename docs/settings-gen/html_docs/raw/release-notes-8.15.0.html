@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.15.0 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.15.0 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes.html" title="Release notes"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.15.0.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes.html">« Release notes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.15.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.15.0</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.15.0"></a>Kibana 8.15.0</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For information about the Kibana 8.15.0 release, review the following information.</p>
+<p>The 8.15.0 release includes the following known issues.</p>
+<div class="position-relative"><h3><a id="known-issues-8.15.0"></a>Known issues</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<details id="known-178114">
+<summary class="title">Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In 8.15.1, We fixed a bug when processing YAML configuration keys that contain dotted notation in objects in arrays.
+This can manifest as a validation error causing Kibana to not start.</p>
+<p>For more information, refer to <a href="https://github.com/elastic/kibana/pull/190590" class="ulink" target="_top">#190590</a>.</p>
+</div>
+</details>
+<details id="known-187823">
+<summary class="title">Connectors require update due to Microsoft Teams product retirement</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The original method for configuring incoming webhooks in Microsoft Teams is being retired.
+Refer to <a href="https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/" class="ulink" target="_top">Retirement of Office 365 connectors within Microsoft Teams</a> and <a href="https://github.com/elastic/kibana/issues/187823" class="ulink" target="_top">#187823</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+If you used the <span class="strong strong"><strong>Incoming Webhook</strong></span> app in Microsoft Teams to generate a webhook URL for a <a class="xref" href="teams-action-type.html" title="Microsoft Teams connector and action">Microsoft Teams connector</a>, it will stop working in December 2024.</p>
+<p><span class="strong strong"><strong>Workaround</strong></span><br>
+Use the <span class="strong strong"><strong>Workflows</strong></span> app in Microsoft Teams to create a new webhook URL, as described in <a class="xref" href="teams-action-type.html#configuring-teams" title="Configure Microsoft Teams">Configure Microsoft Teams</a>.
+Update your Microsoft Teams connector to use the new URL before the end of December 2024.</p>
+</div>
+</details>
+<details id="known-189283">
+<summary class="title">Incorrect index errors related to inference endpoints</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In 8.15.1, we fixed a UI bug where an index error about the <code class="literal">semantic_text</code> field would be incorrectly displayed when the inference endpoint was configured and available.</p>
+<p>You can ignore this error if you&#8217;ve confirmed that the inference endpoint is configured and the model is deployed.</p>
+<p>This bug is fixed in <a href="https://github.com/elastic/kibana/pull/189283" class="ulink" target="_top">#189283</a>.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="deprecations-8.15.0"></a>Deprecations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The following functionality is deprecated in 8.15.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.15.0.</p>
+<details id="deprecation-uptime">
+<summary class="title">Uptime is deprecated in 8.15.0 and will be removed in 9.0.0.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, but will be completely removed in 9.0.0. You should migrate to Synthetics as an alternative. For more details, refer to the <a href="https://www.elastic.co/guide/en/observability/master/uptime-intro.html" class="ulink" target="_top">Uptime documentation</a>.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="breaking-changes-8.15.0"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.15.0, review the breaking changes, then mitigate the impact to your application.</p>
+<details id="breaking-184036">
+<summary class="title">Adds rate limiting to install by upload endpoint.</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+Rate limiting was added to the upload <code class="literal">api/fleet/epm/packages</code> endpoint. For more information, refer to <a href="https://github.com/elastic/kibana/pull/184036" class="ulink" target="_top">#184036</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+If you do two or more requests in less than 10 seconds, the subsequent requests fail with <code class="literal">429 Too Many Requests</code>.
+Wait 10 seconds before uploading again.
+This change could potentially break automations for users that rely on frequent package uploads.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="features-8.15.0"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.15.0 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Alerting
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Allow decimals in the threshold filed for the Failed transaction rate threshold rule (<a href="https://github.com/elastic/kibana/pull/184647" class="ulink" target="_top">#184647</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Cases
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Cases custom fields and the cases webhook are now GA (<a href="https://github.com/elastic/kibana/pull/187880" class="ulink" target="_top">#187880</a>).
+</li>
+<li class="listitem">
+Allow users to create case using templates (<a href="https://github.com/elastic/kibana/pull/187138" class="ulink" target="_top">#187138</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Dashboards
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adding a panel to a dashboard now opens a flyout and the list of panels available is now organized more logically (<a href="https://github.com/elastic/kibana/pull/183764" class="ulink" target="_top">#183764</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Discover
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+In ES|QL mode, you can now create WHERE clause filters more intuitively by interacting with the table, sidebar and table row viewer, including for ordinal charts (<a href="https://github.com/elastic/kibana/pull/181399" class="ulink" target="_top">#181399</a>) &amp; (<a href="https://github.com/elastic/kibana/pull/184420" class="ulink" target="_top">#184420</a>).
+</li>
+<li class="listitem">
+You can now filter an ES|QL chart by brushing a date histogram (<a href="https://github.com/elastic/kibana/pull/184012" class="ulink" target="_top">#184012</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+For the Elastic Security 8.15.0 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Fleet
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+UI for the custom integration creation with AI (<a href="https://github.com/elastic/kibana/pull/186304" class="ulink" target="_top">#186304</a>).
+</li>
+<li class="listitem">
+Surface option to delete diagnostics files (<a href="https://github.com/elastic/kibana/pull/183690" class="ulink" target="_top">#183690</a>).
+</li>
+<li class="listitem">
+Allow to reset log level for agents &gt;= 8.15.0 (<a href="https://github.com/elastic/kibana/pull/183434" class="ulink" target="_top">#183434</a>).
+</li>
+<li class="listitem">
+Adds warning if need root integrations trying to be used with unprivileged agents (<a href="https://github.com/elastic/kibana/pull/183283" class="ulink" target="_top">#183283</a>).
+</li>
+<li class="listitem">
+Adds unprivileged vs privileged agent count to Fleet UI (<a href="https://github.com/elastic/kibana/pull/183077" class="ulink" target="_top">#183077</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Lens &amp; Visualizations
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+You can now show additional statistics in the legend of your time series charts created with <span class="strong strong"><strong>Lens</strong></span> (<a href="https://github.com/elastic/kibana/pull/182357" class="ulink" target="_top">#182357</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Machine Learning
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Field statistics to the list of available panels in Dashboards (<a href="https://github.com/elastic/kibana/pull/184030" class="ulink" target="_top">#184030</a>).
+</li>
+<li class="listitem">
+Adds ES|QL support for field statistics table in Discover (<a href="https://github.com/elastic/kibana/pull/180849" class="ulink" target="_top">#180849</a>).
+</li>
+<li class="listitem">
+AIOps: Moves Pattern analysis to a tab instead of a flyout in Discover (<a href="https://github.com/elastic/kibana/pull/178916" class="ulink" target="_top">#178916</a>).
+</li>
+<li class="listitem">
+AIOps: Adds AI Assistant contextual insights to the Log Rate Analysis page in the Machine Learning plugin for Observability serverless projects (<a href="https://github.com/elastic/kibana/pull/186509" class="ulink" target="_top">#186509</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Management
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds an advanced <code class="literal">search:timeout</code> setting and changes the timeout behavior to display partial results instead of just an error (<a href="https://github.com/elastic/kibana/pull/179679" class="ulink" target="_top">#179679</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Updates links for integration buttons in Observability solution (<a href="https://github.com/elastic/kibana/pull/184477" class="ulink" target="_top">#184477</a>).
+</li>
+<li class="listitem">
+Adds SLO status, SLI value, error budget remaining and consumed to the burn rate alert context (<a href="https://github.com/elastic/kibana/pull/184471" class="ulink" target="_top">#184471</a>).
+</li>
+<li class="listitem">
+Adds an option to prevent initial backfill for SLOs (<a href="https://github.com/elastic/kibana/pull/184312" class="ulink" target="_top">#184312</a>).
+</li>
+<li class="listitem">
+Updates <code class="literal">Add data</code> links to use improved deep linking (<a href="https://github.com/elastic/kibana/pull/184164" class="ulink" target="_top">#184164</a>).
+</li>
+<li class="listitem">
+Changes the navigation behavior for the Observability guide cards to pre-select the correct solution (<a href="https://github.com/elastic/kibana/pull/184065" class="ulink" target="_top">#184065</a>).
+</li>
+<li class="listitem">
+Updates the Alerts details to now show an history chart for all types of alerts (<a href="https://github.com/elastic/kibana/pull/181824" class="ulink" target="_top">#181824</a>).
+</li>
+<li class="listitem">
+Adds Docs count, Size, Services, Hosts, and Degraded docs KPIs to the dataset quality flyout (<a href="https://github.com/elastic/kibana/pull/179479" class="ulink" target="_top">#179479</a>).
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Improves the <span class="strong strong"><strong>Share</strong></span> menu to let you navigate through a tabbed modal to copy links for Discover, Dashboards, and Lens. (<a href="https://github.com/elastic/kibana/pull/180406" class="ulink" target="_top">#180406</a>).
+</li>
+<li class="listitem">
+Changes the behavior of the "Endpoints and API keys" button in the header to open the Connection details flyout (<a href="https://github.com/elastic/kibana/pull/183236" class="ulink" target="_top">#183236</a>).
+</li>
+<li class="listitem">
+Adds a quick way to create an API keys with a 90-days expiration to the Connection details flyout, and clarifies the Elasticsearch endpoint and Cloud ID information (<a href="https://github.com/elastic/kibana/pull/180912" class="ulink" target="_top">#180912</a>).
+</li>
+<li class="listitem">
+Adds a feedback button to the header in Serverless projects(<a href="https://github.com/elastic/kibana/pull/180942" class="ulink" target="_top">#180942</a>).
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<p>For more information about the features introduced in 8.15.0, refer to <a class="xref" href="whats-new.html" title="What&#8217;s new in 8.15">What&#8217;s new in 8.15</a>.</p>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes.html">« Release notes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.15.0.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

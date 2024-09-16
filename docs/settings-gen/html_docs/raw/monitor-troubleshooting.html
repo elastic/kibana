@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Troubleshooting monitoring in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Troubleshooting monitoring in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-monitoring.html" title="Stack Monitoring"/>
+<link rel="prev" href="logstash-page.html" title="Logstash Monitoring Metrics"/>
+<link rel="next" href="management.html" title="Stack Management"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="logstash-page.html">« Logstash Monitoring Metrics</a>
+</span>
+<span class="next">
+<a href="management.html">Stack Management »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-monitoring.html">Stack Monitoring</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Troubleshooting monitoring in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-troubleshooting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="monitor-troubleshooting"></a>Troubleshooting monitoring in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-troubleshooting.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Use the information in this section to troubleshoot common problems and find
+answers for frequently asked questions related to the Kibana monitoring features.</p>
+<div class="position-relative"><h3><a id="_cannot_view_the_cluster_because_the_license_information_is_invalid"></a>Cannot view the cluster because the license information is invalid</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-troubleshooting.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Symptoms:</strong></span></p>
+<p>The following error appears in a banner at the top of the screen in Kibana on the
+<span class="strong strong"><strong>Stack Monitoring &gt; Clusters</strong></span> page:
+<code class="literal">You can't view the "&lt;my_cluster&gt;" cluster because the license information is invalid.</code></p>
+<p><span class="strong strong"><strong>Resolution:</strong></span></p>
+<p>You cannot monitor a version 6.3 or later cluster from Kibana version 6.2 or earlier.
+To resolve this issue, upgrade Kibana to 6.3 or later. See
+<a href="https://www.elastic.co/guide/en/elastic-stack/master/upgrading-elastic-stack.html" class="ulink" target="_top">Upgrading the Elastic Stack</a>.</p>
+<div class="position-relative"><h3><a id="_filebeat_index_is_corrupt"></a>Filebeat index is corrupt</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-troubleshooting.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Symptoms:</strong></span></p>
+<p>The <span class="strong strong"><strong>Stack Monitoring</strong></span> application displays a Monitoring Request error indicating
+that an illegal argument exception has occurred because fielddata is disabled on
+text fields by default.</p>
+<p><span class="strong strong"><strong>Resolution</strong></span></p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Stop all your Filebeat instances.
+</li>
+<li class="listitem">
+Delete indices beginning with <code class="literal">filebeat-$VERSION</code>, where <code class="literal">VERSION</code> corresponds
+to the version of Filebeat running.
+</li>
+<li class="listitem">
+Restart all your Filebeat instances.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="_no_monitoring_data_is_visible_in_kibana"></a>No monitoring data is visible in Kibana</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-troubleshooting.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Symptoms:</strong></span></p>
+<p>The <span class="strong strong"><strong>Stack Monitoring</strong></span> page in Kibana is empty.</p>
+<p><span class="strong strong"><strong>Resolution:</strong></span></p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Confirm that Kibana is seeking monitoring data from the appropriate Elasticsearch URL.
+By default, data is retrieved from the cluster specified in the
+<code class="literal">elasticsearch.hosts</code> setting in the <code class="literal">kibana.yml</code> file. If you want to retrieve it
+from a different monitoring cluster, set <code class="literal">monitoring.ui.elasticsearch.hosts</code>.
+See <a class="xref" href="monitoring-settings-kb.html" title="Monitoring settings in Kibana">Monitoring settings</a>.
+</li>
+<li class="listitem">
+Confirm that there is monitoring data available at that URL. It is stored in
+indices such as <code class="literal">.monitoring-kibana-*</code> and <code class="literal">.monitoring-es-*</code> or
+<code class="literal">metrics-kibana.stack_monitoring.*</code>, depending on which method is
+used to collect monitoring data. At a minimum, you must have monitoring data
+for the Elasticsearch production cluster. Once that data exists, Kibana can display
+monitoring data for other products in the cluster.
+</li>
+<li class="listitem">
+Set the time filter to “Last 1 hour”.  When monitoring data appears in your
+cluster, the page automatically refreshes with the monitoring summary.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="logstash-page.html">« Logstash Monitoring Metrics</a>
+</span>
+<span class="next">
+<a href="management.html">Stack Management »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Invalidate user sessions API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Invalidate user sessions API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="session-management-api.html" title="User session management APIs"/>
+<link rel="prev" href="session-management-api.html" title="User session management APIs"/>
+<link rel="next" href="saved-objects-api.html" title="Saved objects APIs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="session-management-api.html">« User session management APIs</a>
+</span>
+<span class="next">
+<a href="saved-objects-api.html">Saved objects APIs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="session-management-api.html">User session management APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Invalidate user sessions API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="session-management-api-invalidate"></a>Invalidate user sessions API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Invalidates user sessions that match provided query.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="session-management-api-invalidate-prereqs"></a>Prerequisite</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<p>To use the invalidate user sessions API, you must be a <code class="literal">superuser</code>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="session-management-api-invalidate-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/security/session/_invalidate</code></p>
+</div>
+
+<div class="section child_attributes">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="session-management-api-invalidate-request-body"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">match</code>
+</span>
+</dt>
+<dd>
+(Required, string) Specifies how Kibana determines which sessions to invalidate. Can either be <code class="literal">all</code> to invalidate all existing sessions, or <code class="literal">query</code> to only invalidate sessions that match the query specified in the additional <code class="literal">query</code> parameter.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">query</code>
+</span>
+</dt>
+<dd>
+<p>
+(Optional, object) Specifies the query that Kibana uses to match the sessions to invalidate when the <code class="literal">match</code> parameter is set to <code class="literal">query</code>. You cannot use this parameter if <code class="literal">match</code> is set to <code class="literal">all</code>.
+</p>
+<details open>
+<summary class="title">Properties of <code class="literal">query</code></summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">provider</code>
+</span>
+</dt>
+<dd>
+<p>
+(Required, object) Describes the <a class="xref" href="security-settings-kb.html#authentication-security-settings" title="Authentication security settings">authentication providers</a> for which to invalidate sessions.
+</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">type</code>
+</span>
+</dt>
+<dd>
+(Required, string) The authentication provider <code class="literal">type</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">name</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The authentication provider <code class="literal">name</code>.
+</dd>
+</dl>
+</div>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">username</code>
+</span>
+</dt>
+<dd>
+(Optional, string) The username for which to invalidate sessions.
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="session-management-api-invalidate-response-body"></a>Response body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">total</code>
+</span>
+</dt>
+<dd>
+(number) The number of successfully invalidated sessions.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="session-management-api-invalidate-response-codes"></a>Response codes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">403</code>
+</span>
+</dt>
+<dd>
+Indicates that the user may not be authorized to invalidate sessions for other users. Refer to <a class="xref" href="session-management-api-invalidate.html#session-management-api-invalidate-prereqs" title="Prerequisite">prerequisites</a>.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_examples_5"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/session-management/invalidate.asciidoc">edit</a></div>
+</div></div></div>
+<p>Invalidate all existing sessions:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/session/_invalidate
+{
+  "match" : "all"
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/35.kibana"></div>
+<p>Invalidate sessions that were created by any <a class="xref" href="kibana-authentication.html#saml" title="SAML single sign-on">SAML authentication provider</a>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/session/_invalidate
+{
+  "match" : "query",
+  "query": {
+    "provider" : { "type": "saml" }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/36.kibana"></div>
+<p>Invalidate sessions that were created by the <a class="xref" href="kibana-authentication.html#saml" title="SAML single sign-on">SAML authentication provider</a> with the name <code class="literal">saml1</code>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/session/_invalidate
+{
+  "match" : "query",
+  "query": {
+    "provider" : { "type": "saml", "name": "saml1" }
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/37.kibana"></div>
+<p>Invalidate sessions that were created by any <a class="xref" href="kibana-authentication.html#oidc" title="OpenID Connect single sign-on">OpenID Connect authentication provider</a> for the user with the username <code class="literal">user@my-oidc-sso.com</code>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/security/session/_invalidate
+{
+  "match" : "query",
+  "query": {
+    "provider" : { "type": "oidc" },
+    "username": "user@my-oidc-sso.com"
+  }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/38.kibana"></div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="session-management-api.html">« User session management APIs</a>
+</span>
+<span class="next">
+<a href="saved-objects-api.html">Saved objects APIs »</a>
+</span>
+</div>
+</body>
+</html>

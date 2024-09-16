@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Security production considerations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Security production considerations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="production.html" title="Use Kibana in a production environment"/>
+<link rel="prev" href="production.html" title="Use Kibana in a production environment"/>
+<link rel="next" href="alerting-production-considerations.html" title="Alerting production considerations"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="production.html">« Use Kibana in a production environment</a>
+</span>
+<span class="next">
+<a href="alerting-production-considerations.html">Alerting production considerations »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="production.html">Use Kibana in a production environment</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Security production considerations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="Security-production-considerations"></a>Security production considerations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>To secure your Kibana installation in production, consider these high-priority topics to ensure
+that only authorized users can access Kibana.
+For more information on Kibana&#8217;s security controls, see <a class="xref" href="using-kibana-with-security.html" title="Configure security in Kibana">Configure security</a>.</p>
+<div class="position-relative"><h3><a id="enabling-ssl"></a>Enable SSL/TLS</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+<p>You should use SSL/TLS encryption to ensure that traffic between browsers and the Kibana server cannot be viewed or tampered with by third
+parties. See
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-basic-setup-https.html#encrypt-kibana-http" class="ulink" target="_top">encrypt HTTP client communications for Kibana</a>.</p>
+<p>encrypt-kibana-http</p>
+<div class="position-relative"><h3><a id="configuring-kibana-shield"></a>Use Elastic Stack security features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+<p>You can use Elastic Stack security features to control what Elasticsearch data users can
+access through Kibana.</p>
+<p>When security features are enabled, Kibana users have to log in. They must
+have a role granting <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana privileges</a> and access
+to the indices that they will be working with in Kibana.</p>
+<p>If a user loads a Kibana dashboard that accesses data in an index that they
+are not authorized to view, they get an error that indicates the index does
+not exist.</p>
+<p>For more information on granting access to Kibana, see <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.</p>
+<div class="position-relative"><h3><a id="configuring-security-headers"></a>Use secure HTTP headers</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+<p>The Kibana server can instruct browsers to enable additional security controls using HTTP headers.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Enable HTTP Strict-Transport-Security.</p>
+<p>Use <a class="xref" href="settings.html#server-securityResponseHeaders-strictTransportSecurity"><code class="literal">strictTransportSecurity</code></a> to ensure that browsers will only attempt
+to access Kibana with SSL/TLS encryption. This is designed to prevent manipulator-in-the-middle attacks.
+To configure this with a lifetime of one
+year in your <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">server.securityResponseHeaders.strictTransportSecurity: "max-age=31536000"</pre>
+</div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This header will block unencrypted connections for the entire domain. If you host more than one web application on the same domain
+using different ports or paths, all of them will be affected.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Disable embedding.</p>
+<p>Use <a class="xref" href="settings.html#server-securityResponseHeaders-disableEmbedding"><code class="literal">disableEmbedding</code></a> to ensure
+that Kibana cannot be embedded in other websites.
+To configure this in your <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">server.securityResponseHeaders.disableEmbedding: true</pre>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="csp-strict-mode"></a>Require a Content Security Policy</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/security-production-considerations.asciidoc">edit</a></div>
+<p>Kibana uses a Content Security Policy (CSP) to prevent the browser from allowing
+unsafe scripting, but older browsers will silently ignore this policy. If your
+organization does not need to support very old
+versions of our supported browsers, we recommend that you enable Kibana&#8217;s
+<code class="literal">strict</code> mode for the CSP. This will block access to Kibana
+for any browser that does not enforce even a rudimentary set of CSP
+protections.</p>
+<p>To do this, set <code class="literal">csp.strict</code> to <code class="literal">true</code> in your <code class="literal">kibana.yml</code>:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">csp.strict: true</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="production.html">« Use Kibana in a production environment</a>
+</span>
+<span class="next">
+<a href="alerting-production-considerations.html">Alerting production considerations »</a>
+</span>
+</div>
+</body>
+</html>

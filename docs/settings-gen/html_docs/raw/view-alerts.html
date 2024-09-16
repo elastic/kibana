@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>View alerts | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="View alerts | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="alerting-getting-started.html" title="Alerting"/>
+<link rel="prev" href="create-and-manage-rules.html" title="Create and manage rules"/>
+<link rel="next" href="rule-types.html" title="Rule types"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="create-and-manage-rules.html">« Create and manage rules</a>
+</span>
+<span class="next">
+<a href="rule-types.html">Rule types »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>View alerts</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="view-alerts"></a>View alerts</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+</div></div></div>
+<p>When the conditions of a rule are met, it creates an alert.
+If the rule has actions, they run at the defined frequency.
+For example, the rule can send email notifications for each alert at a custom interval.
+For an introduction to the concepts of rules, alerts, and actions, refer to <a class="xref" href="alerting-getting-started.html" title="Alerting">Alerting</a>.</p>
+<p>You can manage the alerts for each rule in <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Rules</strong></span>.
+Alternatively, manage all your alerts in <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Alerts</strong></span>. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span></p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/stack-management-alerts-page.png" alt="Alerts page with multiple alerts">
+</div>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>You must have the appropriate Kibana alerting features and index privileges to view alerts.
+Refer to <a class="xref" href="alerting-setup.html#alerting-security" title="Security">Alerting security requirements</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="filter-alerts"></a>Filter alerts</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>In <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Alerts</strong></span>, you can filter the list (for example, by alert status or rule type) and customize the filter controls.
+To search for specific alerts, use the KQL bar to create structured queries using <a href="https://www.elastic.co/guide/en/kibana/master/kuery-query.html" class="ulink" target="_top">Kibana Query Language</a>.</p>
+<p>By default, the list contains all the alerts that you have authority to view in the selected time period except those associated with Security rules.
+To view alerts for Security rules, click the query menu and select <span class="strong strong"><strong>Security rule types</strong></span>:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/stack-management-alerts-query-menu.png" alt="The Alerts page with the query menu open">
+</div>
+</div>
+<p>Alternatively, view those alerts in the <a href="https://www.elastic.co/guide/en/security/master/alerts-ui-manage.html" class="ulink" target="_top">Elastic Security app</a>.</p>
+<div class="position-relative"><h3><a id="view-alert-details"></a>View alert details</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+<p>To get more information about a specific alert, open its action menu (…) and select <span class="strong strong"><strong>View alert details</strong></span> in either <span class="strong strong"><strong>Stack Management &gt; Alerts</strong></span> or <span class="strong strong"><strong>Rules</strong></span>.
+There you&#8217;ll see the current status of the alert, its duration, and when it was last updated.
+To help you determine what caused the alert, there is information such as the expected and actual threshold values and a summarized reason for the alert.</p>
+<p>If an alert is affected by a maintenance window, the alert details include its identifier.
+For more information about their impact on alert notifications, refer to <a class="xref" href="maintenance-windows.html" title="Maintenance windows"><em>Maintenance windows</em></a>.</p>
+<div class="position-relative"><h4><a id="alert-status"></a>Alert statuses</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+<p>There are three common alert statuses:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">active</code>
+</span>
+</dt>
+<dd>
+The conditions for the rule are met and actions should be generated according to the notification settings.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">recovered</code>
+</span>
+</dt>
+<dd>
+The conditions for the rule are no longer met and recovery actions should be generated.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">untracked</code>
+</span>
+</dt>
+<dd>
+Actions are no longer generated. For example, you can choose to move active alerts to this state when you disable or delete rules.
+</dd>
+</dl>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>An alert can also be in a "flapping" state when it is switching repeatedly between active and recovered states.
+This state is possible only if you have enabled alert flapping detection in <span class="strong strong"><strong>Stack Management &gt; Rules &gt; Settings</strong></span>.
+For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping.
+For example, you can specify that the alert must change status at least 6 times in the last 10 runs.
+If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="mute-alerts"></a>Mute alerts</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/view-alerts.asciidoc">edit</a></div>
+<p>If an alert is active or flapping, you can mute it to temporarily suppress future actions.
+In both <span class="strong strong"><strong>Stack Management &gt; Alerts</strong></span> and <span class="strong strong"><strong>Rules</strong></span>, you can open the action menu (…) for the appropriate alert and select <span class="strong strong"><strong>Mute</strong></span>.
+To permanently suppress actions for an alert, open the actions menu and select <span class="strong strong"><strong>Mark as untracked</strong></span>.</p>
+<p>To affect the behavior of the rule rather than individual alerts, check out <a class="xref" href="create-and-manage-rules.html#controlling-rules" title="Snooze and disable rules">Snooze and disable rules</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="create-and-manage-rules.html">« Create and manage rules</a>
+</span>
+<span class="next">
+<a href="rule-types.html">Rule types »</a>
+</span>
+</div>
+</body>
+</html>

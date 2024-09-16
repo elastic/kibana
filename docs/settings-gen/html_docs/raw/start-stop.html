@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Start and stop Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Start and stop Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="setup.html" title="Set up"/>
+<link rel="prev" href="url-drilldown-settings-kb.html" title="URL drilldown settings in Kibana"/>
+<link rel="next" href="access.html" title="Access Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="url-drilldown-settings-kb.html">« URL drilldown settings in Kibana</a>
+</span>
+<span class="next">
+<a href="access.html">Access Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Start and stop Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/start-stop.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="start-stop"></a>Start and stop Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/start-stop.asciidoc">edit</a></div>
+</div></div></div>
+<p>The method for starting and stopping Kibana varies depending on how you installed
+it.  If a password protected keystore is used, the environment variable
+<code class="literal">KBN_KEYSTORE_PASSPHRASE_FILE</code> can be used to point to a file containing the password,
+the environment variable <code class="literal">KEYSTORE_PASSWORD</code> can be defined, or you will be prompted
+to enter to enter the password on startup,</p>
+<div class="position-relative"><h3><a id="start-start-targz"></a>Archive packages (<code class="literal">.tar.gz</code>)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/start-stop.asciidoc">edit</a></div>
+<p>If you installed Kibana on Linux or Darwin with a <code class="literal">.tar.gz</code> package, you can
+start and stop Kibana from the command line.</p>
+<div class="position-relative"><h4><a id="_run_kibana_from_the_command_line"></a>Run Kibana from the command line</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/targz-running.asciidoc">edit</a></div>
+<p>Kibana can be started from the command line as follows:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">./bin/kibana</pre>
+</div>
+<p>By default, Kibana runs in the foreground, prints its logs to the
+standard output (<code class="literal">stdout</code>), and can be stopped by pressing <span class="strong strong"><strong>Ctrl-C</strong></span>.</p>
+<p class="exclude">If this is the first time you&#8217;re starting Kibana, this command generates a
+unique link in your terminal to enroll your Kibana instance with Elasticsearch.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In your terminal, click the generated link to open Kibana in your browser.
+</li>
+<li class="listitem">
+In your browser, paste the enrollment token that was generated in the terminal
+when you started Elasticsearch, and then click the button to connect your Kibana instance with Elasticsearch.
+</li>
+<li class="listitem">
+Log in to Kibana as the <code class="literal">elastic</code> user with the password that was
+generated when you started Elasticsearch.
+</li>
+</ol>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you need to reset the password for the <code class="literal">elastic</code> user or other
+built-in users, run the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/reset-password.html" class="ulink" target="_top"><code class="literal">elasticsearch-reset-password</code></a> tool. To generate new enrollment tokens for
+Kibana or Elasticsearch nodes, run the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/create-enrollment-token.html" class="ulink" target="_top"><code class="literal">elasticsearch-create-enrollment-token</code></a> tool.
+These tools are available in the Elasticsearch <code class="literal">bin</code> directory.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="start-stop-zip"></a>Archive packages (<code class="literal">.zip</code>)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/start-stop.asciidoc">edit</a></div>
+<p>If you installed Kibana on Windows with a <code class="literal">.zip</code> package, you can
+stop and start Kibana from the command line.</p>
+<div class="position-relative"><h4><a id="_run_kibana_from_the_command_line_2"></a>Run Kibana from the command line</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/windows-running.asciidoc">edit</a></div>
+<p>Kibana can be started from the command line as follows:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">.\bin\kibana.bat</pre>
+</div>
+<p>By default, Kibana runs in the foreground, prints its logs to <code class="literal">STDOUT</code>,
+and can be stopped by pressing <span class="strong strong"><strong>Ctrl-C</strong></span>.</p>
+<p class="exclude">If this is the first time you&#8217;re starting Kibana, this command generates a
+unique link in your terminal to enroll your Kibana instance with Elasticsearch.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+In your terminal, click the generated link to open Kibana in your browser.
+</li>
+<li class="listitem">
+In your browser, paste the enrollment token that was generated in the terminal
+when you started Elasticsearch, and then click the button to connect your Kibana instance with Elasticsearch.
+</li>
+<li class="listitem">
+Log in to Kibana as the <code class="literal">elastic</code> user with the password that was
+generated when you started Elasticsearch.
+</li>
+</ol>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you need to reset the password for the <code class="literal">elastic</code> user or other
+built-in users, run the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/reset-password.html" class="ulink" target="_top"><code class="literal">elasticsearch-reset-password</code></a> tool. To generate new enrollment tokens for
+Kibana or Elasticsearch nodes, run the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/create-enrollment-token.html" class="ulink" target="_top"><code class="literal">elasticsearch-create-enrollment-token</code></a> tool.
+These tools are available in the Elasticsearch <code class="literal">bin</code> directory.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="start-stop-deb-rpm"></a>Debian and RPM packages</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/start-stop.asciidoc">edit</a></div>
+<div class="position-relative"><h4><a id="_run_kibana_with_systemd"></a>Run Kibana with <code class="literal">systemd</code></h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/systemd.asciidoc">edit</a></div>
+<p>To configure Kibana to start automatically when the system starts,
+run the following commands:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable kibana.service</pre>
+</div>
+<p>Kibana can be started and stopped as follows:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo systemctl start kibana.service
+sudo systemctl stop kibana.service</pre>
+</div>
+<p>These commands provide no feedback as to whether Kibana was started
+successfully or not. Log information can be accessed via
+<code class="literal">journalctl -u kibana.service</code>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="url-drilldown-settings-kb.html">« URL drilldown settings in Kibana</a>
+</span>
+<span class="next">
+<a href="access.html">Access Kibana »</a>
+</span>
+</div>
+</body>
+</html>

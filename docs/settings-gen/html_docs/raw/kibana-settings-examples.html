@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kibana settings examples | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana settings examples | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="settings.html" title="Configure Kibana"/>
+<link rel="next" href="alert-action-settings-kb.html" title="Alerting and action settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="settings.html">« Configure Kibana</a>
+</span>
+<span class="next">
+<a href="alert-action-settings-kb.html">Alerting and action settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana settings examples</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/settings-examples.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="kibana-settings-examples"></a>Kibana settings examples</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/settings-examples.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>This is a set of example settings generated from <code class="literal">docs/settings-gen/source/kibana-settings-schema.yml</code>.</p>
+<p>These examples includes all of the available information that we can provide for a setting, including a description, available options, the default option, a warning, etc. Note that most of these fields are optional.</p>
+<div class="position-relative"><h4><a id="kibana-settings-schema-planetary"></a>Planetary settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings-gen/source/kibana-settings-examples.asciidoc">edit</a></div>
+<p>Planetary settings can be used to configure the planets. Currently only Mercury, Venus, and Earth are supported.</p>
+<p>Note that a group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<a id="kibana-example-setting-mercury"></a> <code class="literal">kibana.example.setting.mercury</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+<p><span class="strong strong"><strong>Technical Preview:</strong></span> This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+<p>The first planet from from <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-sun">The Sun</a> and the smallest in the Solar System.</p>
+<p>In English, it is named after the ancient Roman god Mercurius (Mercury), god of commerce and communication, and the messenger of the gods.</p>
+<p>Mercury is adjacent to the planet <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-venus">Venus</a></p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.</p>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<p>Options:<br>
+&#160; <code class="literal">visit</code> - Arrange a trip to this planet.<br>
+&#160; <code class="literal">inhabit</code> - Build a colony on this planet.<br>
+&#160; <code class="literal">avoid</code> - Don&#8217;t visit this planet at all.<br>
+Default: <code class="literal">avoid</code><br>
+Type: <code class="literal">static</code><br></p>
+</div>
+</div>
+<p><span class="strong strong"><strong>Example</strong></span></p>
+<p>In the following example, two custom host settings
+are defined.  The first provides a custom host setting for mail server
+<code class="literal">mail.example.com</code> using port 465 that supplies server certificate authentication
+data from both a file and inline, and requires TLS for the
+connection.  The second provides a custom host setting for https server
+<code class="literal">webhook.example.com</code> which turns off server certificate authentication,
+that will allow Kibana to connect to the server if it&#8217;s using a self-signed
+certificate.  The individual properties that can be used in the settings are
+documented below.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.actions.customHostSettings:
+  - url: smtp://mail.example.com:465
+    ssl:
+      verificationMode: 'full'
+      certificateAuthoritiesFiles: [ 'one.crt' ]
+      certificateAuthoritiesData: |
+          -----BEGIN CERTIFICATE-----
+          MIIDTD...
+          CwUAMD...
+          ... multiple lines of certificate data ...
+          -----END CERTIFICATE-----
+    smtp:
+      requireTLS: true
+  - url: https://webhook.example.com
+    ssl:
+      verificationMode: 'none'</pre>
+</div>
+</dd>
+<dt>
+<span class="term">
+<a id="kibana-example-setting-venus"></a> <code class="literal">kibana.example.setting.venus</code>
+</span>
+</dt>
+<dd>
+<p><span class="strong strong"><strong>Technical Preview:</strong></span> This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+<p>Venus is the second planet from <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-sun">The Sun</a>.</p>
+<p>It is a terrestrial planet and is the closest in mass and size to its orbital neighbour, <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-earth">Earth</a>.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>All visitors to Venus must have an inter-planetary passport that will be validtip for a minimum of six months beyond your date of return.</p>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<p>Options:<br>
+&#160; <code class="literal">visit</code> - Arrange a trip to this planet.<br>
+&#160; <code class="literal">inhabit</code> - Build a colony on this planet.<br>
+&#160; <code class="literal">avoid</code> - Don&#8217;t visit this planet at all.<br>
+Default: <code class="literal">visit</code><br>
+Type: <code class="literal">static</code><br></p>
+</div>
+</div>
+</dd>
+<dt>
+<span class="term">
+<a id="kibana-example-setting-earth"></a> <code class="literal">kibana.example.setting.earth</code>
+</span>
+</dt>
+<dd>
+<p><span class="strong strong"><strong>Deprecated:</strong></span> Starting in version 8.0.0 this setting is deprecated. Use <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-mercury"><code class="literal">kibana-example-setting-mercury</code></a> or <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-venus"><code class="literal">kibana-example-setting-venus</code></a> instead.</p>
+<p>Earth is the third planet from <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-sun">The Sun</a> and the only astronomical object known to harbor life.</p>
+<p>This is enabled by Earth being an ocean world, the only one in the Solar System sustaining liquid surface water.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>To fully enjoy your trip we recommend bringing sunscreen and a hat.</p>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<p>Options:<br>
+&#160; <code class="literal">visit</code> - Arrange a trip to this planet.<br>
+&#160; <code class="literal">inhabit</code> - Build a colony on this planet.<br>
+&#160; <code class="literal">avoid</code> - Don&#8217;t visit this planet at all.<br>
+Default: <code class="literal">inhabit</code><br>
+Type: <code class="literal">static</code><br></p>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="kibana-settings-schema-solar"></a>Solar settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings-gen/source/kibana-settings-examples.asciidoc">edit</a></div>
+<p>Solar settings can be used to configure the Sun. Use these settings carefully as the Sun provides sustenance to <a class="xref" href="kibana-settings-examples.html#kibana-example-setting-earth">Earth</a> and all of the life that inhabits it.</p>
+<p>Note that your group description can include warnings, examples, etc., just like the settings descriptions.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<a id="kibana-example-setting-sun"></a> <code class="literal">kibana.example.setting.sun</code>
+</span>
+</dt>
+<dd>
+<p>
+The Sun is the star at the center of the Solar System.
+</p>
+<p>It is a massive, nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core, radiating the energy from its surface mainly as visible light and infrared radiation with 10% at ultraviolet energies.</p>
+<p>Specify a value from <code class="literal">0</code> to <code class="literal">10</code>, inclusive.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Due to the heat, visits to the sun should not exceed a day or two. Bring a fan.</p>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<p>Type: <code class="literal">dynamic</code><br></p>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="settings.html">« Configure Kibana</a>
+</span>
+<span class="next">
+<a href="alert-action-settings-kb.html">Alerting and action settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

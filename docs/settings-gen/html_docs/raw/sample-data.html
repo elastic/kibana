@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Installing sample data | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Installing sample data | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="development-getting-started.html" title="Getting started"/>
+<link rel="prev" href="running-kibana-advanced.html" title="Running Kibana"/>
+<link rel="next" href="kibana-debugging.html" title="Debugging Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="running-kibana-advanced.html">« Running Kibana</a>
+</span>
+<span class="next">
+<a href="kibana-debugging.html">Debugging Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development-getting-started.html">Getting started</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Installing sample data</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/sample-data.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="sample-data"></a>Installing sample data</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/sample-data.asciidoc">edit</a></div>
+</div></div></div>
+<p>There are a couple ways to easily get data ingested into Elasticsearch.</p>
+<div class="position-relative"><h4><a id="_sample_data_packages_available_for_one_click_installation"></a>Sample data packages available for one click installation</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/sample-data.asciidoc">edit</a></div>
+<p>The easiest is to install one or more of our available sample data packages. If you have no data, you should be
+prompted to install when running Kibana for the first time. You can also access and install the sample data packages
+by going to the home page and clicking "add sample data".</p>
+<div class="position-relative"><h4><a id="_makelogs_script"></a>makelogs script</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/sample-data.asciidoc">edit</a></div>
+<p>The provided <code class="literal">makelogs</code> script will generate sample data.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">node scripts/makelogs --auth &lt;username&gt;:&lt;password&gt;</pre>
+</div>
+<p>The default username and password combination are <code class="literal">elastic:changeme</code></p>
+<p>Make sure to execute <code class="literal">node scripts/makelogs</code> <span class="strong strong"><strong>after</strong></span> Elasticsearch is up and running!</p>
+<div class="position-relative"><h4><a id="_csv_upload"></a>CSV upload</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/sample-data.asciidoc">edit</a></div>
+<p>You can also use the CSV uploader provided on the Kibana home page.
+Navigate to <span class="strong strong"><strong>Add data</strong></span> &gt; <span class="strong strong"><strong>Upload file</strong></span> to upload your data from a file.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="running-kibana-advanced.html">« Running Kibana</a>
+</span>
+<span class="next">
+<a href="kibana-debugging.html">Debugging Kibana »</a>
+</span>
+</div>
+</body>
+</html>

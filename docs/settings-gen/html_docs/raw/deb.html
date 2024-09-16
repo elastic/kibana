@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Install Kibana with Debian package | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Install Kibana with Debian package | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="install.html" title="Install Kibana"/>
+<link rel="prev" href="windows.html" title="Install Kibana on Windows"/>
+<link rel="next" href="rpm.html" title="Install Kibana with RPM"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="windows.html">« Install Kibana on Windows</a>
+</span>
+<span class="next">
+<a href="rpm.html">Install Kibana with RPM »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="install.html">Install Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Install Kibana with Debian package</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="deb"></a>Install Kibana with Debian package</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Debian package for Kibana can be <a class="xref" href="deb.html#install-deb" title="Download and install the Debian package manually">downloaded from our website</a>
+or from our <a class="xref" href="deb.html#deb-repo" title="Install from the APT repository">APT repository</a>. It can be used to install
+Kibana on any Debian-based system such as Debian and Ubuntu.</p>
+<p>This package contains both free and subscription features.
+<a class="xref" href="managing-licenses.html" title="License Management">Start a 30-day trial</a> to try out all of the features.</p>
+<p>The latest stable version of Kibana can be found on the
+<a href="/downloads/kibana" class="ulink" target="_top">Download Kibana</a> page. Other versions can
+be found on the <a href="/downloads/past-releases" class="ulink" target="_top">Past Releases page</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-key"></a>Import the Elastic PGP key</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+<p>We sign all of our packages with the Elastic Signing Key (PGP key
+<a href="https://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0xD27D666CD88E42B4" class="ulink" target="_top">D88E42B4</a>,
+available from <a href="https://pgp.mit.edu" class="ulink" target="_top">https://pgp.mit.edu</a>) with fingerprint:</p>
+<pre class="literallayout">4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4</pre>
+
+<p>Download and install the public signing key:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-repo"></a>Install from the APT repository</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+<p>Version 8.16.0 of Kibana has not yet been released.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="install-deb"></a>Download and install the Debian package manually</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+<p>Version 8.16.0 of Kibana has not yet been released.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-enroll"></a>Start Elasticsearch and generate an enrollment token for Kibana</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>When you start Elasticsearch for the first time, the following security configuration
+occurs automatically:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Authentication and authorization are enabled, and a password is generated for the <code class="literal">elastic</code> built-in superuser.
+</li>
+<li class="listitem">
+Certificates and keys for TLS are generated for the transport and HTTP layer, and TLS is enabled and configured with these keys and certificates.
+</li>
+</ul>
+</div>
+<p>The password and certificate and keys are output to your terminal.</p>
+<p>You can then generate an enrollment token for Kibana with the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/create-enrollment-token.html" class="ulink" target="_top"><code class="literal">elasticsearch-create-enrollment-token</code></a> tool:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">bin/elasticsearch-create-enrollment-token -s kibana</pre>
+</div>
+<p>Start Kibana and enter the enrollment token to securely connect Kibana with Elasticsearch.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-running-systemd"></a>Run Kibana with <code class="literal">systemd</code></h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/systemd.asciidoc">edit</a></div>
+</div></div></div>
+<p>To configure Kibana to start automatically when the system starts,
+run the following commands:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable kibana.service</pre>
+</div>
+<p>Kibana can be started and stopped as follows:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">sudo systemctl start kibana.service
+sudo systemctl stop kibana.service</pre>
+</div>
+<p>These commands provide no feedback as to whether Kibana was started
+successfully or not. Log information can be accessed via
+<code class="literal">journalctl -u kibana.service</code>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-configuring"></a>Configure Kibana via the config file</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana loads its configuration from the <code class="literal">/etc/kibana/kibana.yml</code>
+file by default.  The format of this config file is explained in
+<a href="https://www.elastic.co/guide/en/kibana/master/settings.html" class="ulink" target="_top">Configuring Kibana</a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="deb-layout"></a>Directory layout of Debian package</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/install/deb.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Debian package places config files, logs, and the data directory in the appropriate
+locations for a Debian-based system:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+<col class="col_4"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Type</th>
+<th align="left" valign="top">Description</th>
+<th align="left" valign="top">Default Location</th>
+<th align="left" valign="top">Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>home</strong></span></p></td>
+<td align="left" valign="top"><p>Kibana home directory or <code class="literal">$KIBANA_HOME</code></p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>bin</strong></span></p></td>
+<td align="left" valign="top"><p>Binary scripts including <code class="literal">kibana</code> to start the Kibana server
+    and <code class="literal">kibana-plugin</code> to install plugins</p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana/bin</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>config</strong></span></p></td>
+<td align="left" valign="top"><p>Configuration files including <code class="literal">kibana.yml</code></p></td>
+<td align="left" valign="top"><p><code class="literal">/etc/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal"><a class="xref" href="settings.html" title="Configure Kibana">KBN_PATH_CONF</a></code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>data</strong></span></p></td>
+<td align="left" valign="top"><p>The location of the data files written to disk by Kibana and its plugins</p></td>
+<td align="left" valign="top"><p><code class="literal">/var/lib/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal">path.data</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>logs</strong></span></p></td>
+<td align="left" valign="top"><p>Logs files location</p></td>
+<td align="left" valign="top"><p><code class="literal">/var/log/kibana</code></p></td>
+<td align="left" valign="top"><p><code class="literal"><a class="xref" href="logging-configuration.html" title="Configure logging">Logging configuration</a></code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>plugins</strong></span></p></td>
+<td align="left" valign="top"><p>Plugin files location. Each plugin will be contained in a subdirectory.</p></td>
+<td align="left" valign="top"><p><code class="literal">/usr/share/kibana/plugins</code></p></td>
+<td align="left" valign="top"><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="windows.html">« Install Kibana on Windows</a>
+</span>
+<span class="next">
+<a href="rpm.html">Install Kibana with RPM »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create Private Location API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create Private Location API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="synthetics-apis.html" title="Synthetics APIs"/>
+<link rel="prev" href="delete-parameters-api.html" title="Delete Parameters API"/>
+<link rel="next" href="delete-private-location-api.html" title="Delete Private Location API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="delete-parameters-api.html">« Delete Parameters API</a>
+</span>
+<span class="next">
+<a href="delete-private-location-api.html">Delete Private Location API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="synthetics-apis.html">Synthetics APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create Private Location API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="create-private-location-api"></a>Create Private Location API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Creates a private location with the following schema.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_8"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/synthetics/private_locations</code></p>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/synthetics/private_locations</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_13"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Synthetics and Uptime</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-location-request-body"></a>Request body</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p>The request body should contain the following attributes:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">label</code>
+</span>
+</dt>
+<dd>
+(Required, string) A label for the private location.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">agentPolicyId</code>
+</span>
+</dt>
+<dd>
+(Required, string) The ID of the agent policy associated with the private location.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">tags</code>
+</span>
+</dt>
+<dd>
+(Optional, array of strings) An array of tags to categorize the private location.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">geo</code>
+</span>
+</dt>
+<dd>
+<p>
+(Optional, object) Geographic coordinates (WGS84) for the location. It should include the following attributes:
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">lat</code> (Required, number): The latitude of the location.
+</li>
+<li class="listitem">
+<code class="literal">lon</code> (Required, number): The longitude of the location.
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-location-create-example"></a>Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/create-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p>Here is an example of a POST request to create a private location:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">POST /api/private_locations
+{
+  "label": "Private Location 1",
+  "agentPolicyId": "abcd1234",
+  "tags": ["private", "testing"],
+  "geo": {
+    "lat": 40.7128,
+    "lon": -74.0060
+  }
+}</pre>
+</div>
+<p>The API returns the created private location as follows:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+  "id": "abcd1234",
+  "label": "Private Location 1",
+  "agentPolicyId": "abcd1234",
+  "tags": ["private", "testing"],
+  "geo": {
+    "lat": 40.7128,
+    "lon": -74.0060
+  }
+}</pre>
+</div>
+<p>If the <code class="literal">agentPolicyId</code> is already used by an existing private location, or if the <code class="literal">label</code> already exists, the API will return a <code class="literal">400 Bad Request</code> response with a corresponding error message.</p>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="delete-parameters-api.html">« Delete Parameters API</a>
+</span>
+<span class="next">
+<a href="delete-private-location-api.html">Delete Private Location API »</a>
+</span>
+</div>
+</body>
+</html>

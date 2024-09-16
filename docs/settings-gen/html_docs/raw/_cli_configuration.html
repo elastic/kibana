@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cli configuration | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Cli configuration | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="logging-configuration.html" title="Configure logging"/>
+<link rel="prev" href="log-settings-examples.html" title="Examples"/>
+<link rel="next" href="configuring-monitoring.html" title="Configure monitoring in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="log-settings-examples.html">« Examples</a>
+</span>
+<span class="next">
+<a href="configuring-monitoring.html">Configure monitoring in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="logging-configuration.html">Configure logging</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Cli configuration</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="_cli_configuration"></a>Cli configuration</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div></div></div>
+<div class="position-relative"><h3><a id="logging-cli-migration"></a>Logging configuration via CLI</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>As is the case for any of Kibana&#8217;s config settings, you can specify your logging configuration via the CLI. For convenience, the <code class="literal">--verbose</code> and <code class="literal">--silent</code> flags exist as shortcuts and will continue to be supported beyond v7.</p>
+<p>If you wish to override these flags, you can always do so by passing your preferred logging configuration directly to the CLI. For example, with the following configuration:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date][%level] %message"
+  root:
+    level: warn
+    appenders: [custom]</pre>
+</div>
+<p>you can override the root logging level with:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">legacy logging</th>
+<th align="left" valign="top">Kibana Platform logging</th>
+<th align="left" valign="top">cli shortcuts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>--verbose</p></td>
+<td align="left" valign="top"><p>--logging.root.level=debug</p></td>
+<td align="left" valign="top"><p>--verbose</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>--silent</p></td>
+<td align="left" valign="top"><p>--logging.root.level=off</p></td>
+<td align="left" valign="top"><p>--silent</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="log-settings-examples.html">« Examples</a>
+</span>
+<span class="next">
+<a href="configuring-monitoring.html">Configure monitoring in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

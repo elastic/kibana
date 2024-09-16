@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Customize interactions with drilldowns | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Customize interactions with drilldowns | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="drilldowns.html" title="Make dashboards interactive"/>
+<link rel="prev" href="dashboard-links.html" title="Create links to other dashboards"/>
+<link rel="next" href="find-dashboards.html" title="Search and filter dashboards"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="dashboard-links.html">« Create links to other dashboards</a>
+</span>
+<span class="next">
+<a href="find-dashboards.html">Search and filter dashboards »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="dashboard.html">Dashboard and visualizations</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="drilldowns.html">Make dashboards interactive</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Customize interactions with drilldowns</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="create-drilldowns"></a>Customize interactions with drilldowns</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+</div></div></div>
+<p>Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction.</p>
+<p>There are three types of drilldowns you can add to dashboards:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Dashboard</strong></span> &mdash; Navigates you from one dashboard to another dashboard. For example, create a drilldown for a <span class="strong strong"><strong>Lens</strong></span> panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>URL</strong></span> &mdash; Navigates you from a dashboard to an external website. For example, a website with the specific host name as a parameter.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Discover</strong></span> &mdash; Navigates you from a <span class="strong strong"><strong>Lens</strong></span> dashboard panel to <span class="strong strong"><strong>Discover</strong></span>. For example, create a drilldown for a <span class="strong strong"><strong>Lens</strong></span> visualization that opens the visualization data in <span class="strong strong"><strong>Discover</strong></span> for further exploration.
+</li>
+</ul>
+</div>
+<p>Third-party developers can create drilldowns. To learn how to code drilldowns, refer to <a href="https://github.com/elastic/kibana/blob/master/x-pack/examples/ui_actions_enhanced_examples" class="ulink" target="_top">this example plugin</a>.</p>
+<div class="position-relative"><h4><a id="dashboard-drilldowns"></a>Create dashboard drilldowns</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Dashboard drilldowns enable you to open a dashboard from another dashboard, taking the time range, filters, and other parameters with you so the context remains the same. Dashboard drilldowns help you to continue your analysis from a new perspective.</p>
+<p>For example, if you have a dashboard that shows the logs and metrics for multiple data centers, you can create a drilldown that navigates from the dashboard that shows multiple data centers, to a dashboard that shows a single data center or server.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_drilldownOnDataTable_8.3.gif" alt="Drilldown on data table that navigates to another dashboard"></span></p>
+<p>The panels you create using the following editors support dashboard drilldowns:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Lens</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Maps</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>TSVB</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Vega</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Aggregation-based</strong></span> area chart, data table, heat map, horitizontal bar chart, line chart, pie chart, tag cloud, and vertical bar chart
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Timelion</strong></span>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="_create_and_set_up_the_dashboards_you_want_to_connect"></a>Create and set up the dashboards you want to connect</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data"><span class="strong strong"><strong>Sample web logs</strong></span></a> data to create a dashboard and add panels, then set a search and filter on the <span class="strong strong"><strong>[Logs] Web Traffic</strong></span> dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Add the <span class="strong strong"><strong>Sample web logs</strong></span> data.
+</li>
+<li class="listitem">
+<p>Create a new dashboard, click <span class="strong strong"><strong>Add from Library</strong></span>, then add the following panels:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>[Logs] Response Codes Over Time + Annotations</strong></span>
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>[Logs] Visits</strong></span>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Set the <a class="xref" href="set-time-filter.html" title="Set the time range">time filter</a> to <span class="strong strong"><strong>Last 30 days</strong></span>.
+</li>
+<li class="listitem">
+Save the dashboard. In the <span class="strong strong"><strong>Title</strong></span> field, enter <code class="literal">Detailed logs</code>.
+</li>
+<li class="listitem">
+<p>Open the <span class="strong strong"><strong>[Logs] Web Traffic</strong></span> dashboard, then set a search and filter.</p>
+<p>Search: <code class="literal">extension.keyword: ("gz" or "css" or "deb")</code><br>
+Filter: <code class="literal">geo.src: US</code></p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h5><a id="_create_the_dashboard_drilldown"></a>Create the dashboard drilldown</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Create a drilldown that opens the <span class="strong strong"><strong>Detailed logs</strong></span> dashboard from the <span class="strong strong"><strong>[Logs] Web Traffic</strong></span> dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu for the <span class="strong strong"><strong>[Logs] Errors by host</strong></span> data table, then select <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Go to dashboard</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Give the drilldown a name. For example, <code class="literal">View details</code>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Choose a destination dashboard</strong></span> dropdown, select <span class="strong strong"><strong>Detailed logs</strong></span>.
+</li>
+<li class="listitem">
+To use the geo.src filter, KQL query, and time filter, select <span class="strong strong"><strong>Use filters and query from origin dashboard</strong></span> and <span class="strong strong"><strong>Use date range from origin dashboard</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+Save the dashboard.
+</li>
+<li class="listitem">
+<p>In the data table panel, hover over a value, click <span class="strong strong"><strong>+</strong></span>, then select <code class="literal">View details</code>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/dashboard_drilldownOnPanel_8.3.png" alt="Drilldown on data table that navigates to another dashboard">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="url-drilldowns"></a>Create URL drilldowns</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <a class="xref" href="url-drilldown.html#variables" title="Variables">variables</a> to a URL template, which configures the behavior of the drilldown. All panels that you create with the visualization editors support dashboard drilldowns.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_urlDrilldownGoToGitHub_8.3.gif" alt="Drilldown on pie chart that navigates to Github"></span></p>
+<p>Some panels support multiple interactions, also known as triggers.
+The <a class="xref" href="create-drilldowns.html#url-template-variables" title="URL template variables">variables</a> you use to create a <a class="xref" href="create-drilldowns.html#url_templating-language" title="URL templating">URL template</a> depends on the trigger you choose. URL drilldowns support these types of triggers:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Single click</strong></span> &mdash; A single data point in the panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Range selection</strong></span> &mdash; A range of values in a panel.
+</li>
+</ul>
+</div>
+<p>For example, <span class="strong strong"><strong>Single click</strong></span> has <code class="literal">{{event.value}}</code> and <span class="strong strong"><strong>Range selection</strong></span> has <code class="literal">{{event.from}}</code> and <code class="literal">{{event.to}}</code>.</p>
+<div class="position-relative"><h5><a id="_create_a_url_drilldown"></a>Create a URL drilldown</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown that opens Github from the dashboard panel.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Add the <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data"><span class="strong strong"><strong>Sample web logs</strong></span></a> data.
+</li>
+<li class="listitem">
+Open the <span class="strong strong"><strong>[Logs] Web Traffic</strong></span> dashboard.
+</li>
+<li class="listitem">
+In the toolbar, click <span class="strong strong"><strong>Edit</strong></span>.
+</li>
+<li class="listitem">
+<p>Create a donut chart</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Create visualization</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Chart type</strong></span> dropdown, select <span class="strong strong"><strong>Donut</strong></span>.
+</li>
+<li class="listitem">
+From the <span class="strong strong"><strong>Available fields</strong></span> list, drag <span class="strong strong"><strong>machine.os.keyword</strong></span> to the workspace.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+Open the donut chart panel menu, then select <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Go to URL</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Give the drilldown a name. For example, <code class="literal">Show on Github</code>.
+</li>
+<li class="listitem">
+For the <span class="strong strong"><strong>Trigger</strong></span>, select <span class="strong strong"><strong>Single click</strong></span>.
+</li>
+<li class="listitem">
+<p>To navigate to the Kibana repository Github issues, enter the following in the <span class="strong strong"><strong>Enter URL</strong></span> field:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}</pre>
+</div>
+<p>Kibana substitutes <code class="literal">{{event.value}}</code> with a value associated with the selected pie slice.</p>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+Save the dashboard.
+</li>
+<li class="listitem">
+<p>On the donut chart panel, click any chart slice, then select <span class="strong strong"><strong>Show on Github</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_urlDrilldownPopup_8.3.png" alt="URL drilldown popup"></span></p>
+</li>
+<li class="listitem">
+<p>In the list of Kibana repository issues, verify that the slice value appears.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_urlDrilldownGithub_8.3.png" alt="Open ios issues in the elastic/kibana repository on Github"></span></p>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="discover-drilldowns"></a>Create Discover drilldowns</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Discover drilldowns enable you to open <span class="strong strong"><strong>Discover</strong></span> from a <span class="strong strong"><strong>Lens</strong></span> dashboard panel, taking the time range, filters, and other parameters with you so the context remains the same.</p>
+<p>For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in <span class="strong strong"><strong>Discover</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/dashboard_discoverDrilldown_8.3.gif" alt="Drilldown on bar vertical stacked chart that navigates to Discover"></span></p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Discover drilldowns are supported only by <span class="strong strong"><strong>Lens</strong></span> panels. To open all of the <span class="strong strong"><strong>Lens</strong></span> dashboard panel data in <span class="strong strong"><strong>Discover</strong></span>, check <a class="xref" href="explore-the-underlying-documents.html" title="Open panel data in Discover">Open panel data in Discover</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h5><a id="_create_the_discover_drilldown"></a>Create the Discover drilldown</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Create a drilldown that opens <span class="strong strong"><strong>Discover</strong></span> from the <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data"><span class="strong strong"><strong>Sample web logs</strong></span></a> data <span class="strong strong"><strong>[Logs] Web Traffic</strong></span> dashboard.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Edit</strong></span>, open the panel menu for the <span class="strong strong"><strong>[Logs] Bytes distribution</strong></span> bar vertical stacked chart, then select <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Open in Discover</strong></span>.
+</li>
+<li class="listitem">
+Give the drilldown a name. For example, <code class="literal">View bytes distribution in Discover</code>.
+</li>
+<li class="listitem">
+To open the Discover drilldown in a new tab, select <span class="strong strong"><strong>Open in new tab</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+<li class="listitem">
+Save the dashboard.
+</li>
+<li class="listitem">
+<p>On the <span class="strong strong"><strong>[Logs] Bytes distribution</strong></span> bar vertical stacked chart, click a bar, then select <span class="strong strong"><strong>View bytes distribution in Discover</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/dashboard_discoverDrilldown_8.3.png" alt="Drilldown on bar vertical stacked chart that navigates to Discover">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="manage-drilldowns"></a>Manage drilldowns</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>Make changes to your drilldowns, make a copy of your drilldowns for another panel, and delete drilldowns.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the panel menu that includes the drilldown, then click <span class="strong strong"><strong>Manage drilldowns</strong></span>.
+</li>
+<li class="listitem">
+<p>On the <span class="strong strong"><strong>Manage</strong></span> tab, use the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To change drilldowns, click <span class="strong strong"><strong>Edit</strong></span> next to the drilldown you want to change, make your changes, then click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+<li class="listitem">
+To make a copy, click <span class="strong strong"><strong>Copy</strong></span> next to the drilldown you want to change, enter the drilldown name, then click <span class="strong strong"><strong>Create drilldown</strong></span>.
+</li>
+<li class="listitem">
+To delete a drilldown, select the drilldown you want to delete, then click <span class="strong strong"><strong>Delete</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="url_templating-language"></a>URL templating</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>The URL template input uses <a href="https://ela.st/handlebars-docs#expressions" class="ulink" target="_top">Handlebars</a> — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">https://github.com/elastic/kibana/issues?q={{event.value}}</pre>
+</div>
+<p>A Handlebars expression is a <code class="literal">{{</code>, some contents, followed by a <code class="literal">}}</code>. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.</p>
+<p><a id="helpers"></a>In addition to  <a href="https://ela.st/handlebars-helpers" class="ulink" target="_top">built-in</a> Handlebars helpers, you can use custom helpers.</p>
+<p>Refer to Handlebars <a href="https://ela.st/handlebars-docs#expressions" class="ulink" target="_top">documentation</a> to learn about advanced use cases.</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Custom helper</th>
+<th align="left" valign="top">Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>json</p></td>
+<td align="left" valign="top">
+<p>Serialize variables in JSON format.</p>
+<p>Example:</p>
+<p><code class="literal">{{json event}}</code><br>
+<code class="literal">{{json event.key event.value}}</code><br>
+<code class="literal">{{json filters=context.panel.filters}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>rison</p></td>
+<td align="left" valign="top">
+<p>Serialize variables in <a href="https://github.com/w33ble/rison-node" class="ulink" target="_top">rison</a> format. Rison is a common format for Kibana apps for storing state in the URL.</p>
+<p>Example:</p>
+<p><code class="literal">{{rison event}}</code><br>
+<code class="literal">{{rison event.key event.value}}</code><br>
+<code class="literal">{{rison filters=context.panel.filters}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>date</p></td>
+<td align="left" valign="top">
+<p>Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the <a href="https://momentjs.com/docs/#/displaying/format/" class="ulink" target="_top">moment</a> docs for different formatting options.</p>
+<p>Example:</p>
+<p><code class="literal">{{date event.from “YYYY MM DD”}}</code><br>
+<code class="literal">{{date “now-15”}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>formatNumber</p></td>
+<td align="left" valign="top">
+<p>Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the <a href="http://numeraljs.com/#format" class="ulink" target="_top">numeral.js</a> for different formatting options.</p>
+<p>Example:</p>
+<p><code class="literal">{{formatNumber event.value "0.0"}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>lowercase</p></td>
+<td align="left" valign="top">
+<p>Converts a string to lower case.</p>
+<p>Example:</p>
+<p><code class="literal">{{lowercase event.value}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>uppercase</p></td>
+<td align="left" valign="top">
+<p>Converts a string to upper case.</p>
+<p>Example:</p>
+<p><code class="literal">{{uppercase event.value}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>trim</p></td>
+<td align="left" valign="top">
+<p>Removes leading and trailing spaces from a string.</p>
+<p>Example:</p>
+<p><code class="literal">{{trim event.value}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>trimLeft</p></td>
+<td align="left" valign="top">
+<p>Removes leading spaces from a string.</p>
+<p>Example:</p>
+<p><code class="literal">{{trimLeft event.value}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>trimRight</p></td>
+<td align="left" valign="top">
+<p>Removes trailing spaces from a string.</p>
+<p>Example:</p>
+<p><code class="literal">{{trimRight event.value}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>mid</p></td>
+<td align="left" valign="top">
+<p>Extracts a substring from a string by start position and number of characters to extract.</p>
+<p>Example:</p>
+<p><code class="literal">{{mid event.value 3 5}}</code> - extracts five characters starting from a third character.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>left</p></td>
+<td align="left" valign="top">
+<p>Extracts a number of characters from a string (starting from left).</p>
+<p>Example:</p>
+<p><code class="literal">{{left event.value 3}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>right</p></td>
+<td align="left" valign="top">
+<p>Extracts a number of characters from a string (starting from right).</p>
+<p>Example:</p>
+<p><code class="literal">{{right event.value 3}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>concat</p></td>
+<td align="left" valign="top">
+<p>Concatenates two or more strings.</p>
+<p>Example:</p>
+<p><code class="literal">{{concat event.value "," event.key}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>replace</p></td>
+<td align="left" valign="top">
+<p>Replaces all substrings within a string.</p>
+<p>Example:</p>
+<p><code class="literal">{{replace event.value "stringToReplace" "stringToReplaceWith"}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>split</p></td>
+<td align="left" valign="top">
+<p>Splits a string using a provided splitter.</p>
+<p>Example:</p>
+<p><code class="literal">{{split event.value ","}}</code></p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>encodeURIComponent</p></td>
+<td align="left" valign="top">
+<p>Escapes string using built in <code class="literal">encodeURIComponent</code> function.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>encodeURIQuery</p></td>
+<td align="left" valign="top">
+<p>Escapes string using built in <code class="literal">encodeURIComponent</code> function, while keeping "@", ":", "$", ",", and ";" characters as is.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h5><a id="url-template-variables"></a>URL template variables</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<p>The URL drilldown template has three sources for variables:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Global</strong></span> static variables that don’t change depending on the  place where the URL drilldown is used or which user interaction executed the drilldown. For example: <code class="literal">{{kibanaUrl}}</code>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Context</strong></span> variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. For example, <code class="literal">{{context.panel.filters}}</code> gives access to filters that applied to the current panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Event</strong></span> variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
+</li>
+</ul>
+</div>
+<p>To ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
+You can access the full list of variables available for the current panel and selected trigger by clicking <span class="strong strong"><strong>Add variable</strong></span> in the top-right corner of a URL template input.</p>
+<div class="position-relative"><h5><a id="variables-reference"></a>Variables reference</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/dashboard/make-dashboards-interactive.asciidoc">edit</a></div>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Source</th>
+<th align="left" valign="top">Variable</th>
+<th align="left" valign="top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Global</strong></span></p></td>
+<td align="left" valign="top"><p>kibanaUrl</p></td>
+<td align="left" valign="top"><p>Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Context</strong></span></p></td>
+<td align="left" valign="top"><p>context.panel</p></td>
+<td align="left" valign="top"><p>Context provided by current dashboard panel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.id</p></td>
+<td align="left" valign="top"><p>ID of a panel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.title</p></td>
+<td align="left" valign="top"><p>Title of a panel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.filters</p></td>
+<td align="left" valign="top"><p>List of Kibana filters applied to a panel.<br>
+Tip: Use in combination with <a class="xref" href="create-drilldowns.html#helpers">rison</a> helper for
+internal Kibana navigations with carrying over current filters.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.query.query</p></td>
+<td align="left" valign="top"><p>Current query string.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.query.language</p></td>
+<td align="left" valign="top"><p>Current query language.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.timeRange.from<br>
+context.panel.timeRange.to</p></td>
+<td align="left" valign="top"><p>Current time picker values.<br>
+Tip: Use in combination with <a class="xref" href="create-drilldowns.html#helpers">date</a> helper to format date.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.indexPatternId<br>
+context.panel.indexPatternIds</p></td>
+<td align="left" valign="top"><p>The data view IDs used by a panel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>context.panel.savedObjectId</p></td>
+<td align="left" valign="top"><p>ID of saved object behind a panel.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Single click</strong></span></p></td>
+<td align="left" valign="top"><p>event.value</p></td>
+<td align="left" valign="top"><p>Value behind clicked data point.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.key</p></td>
+<td align="left" valign="top"><p>Field name behind clicked data point</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.negate</p></td>
+<td align="left" valign="top"><p>Boolean, indicating whether clicked data point resulted in negative filter.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.points</p></td>
+<td align="left" valign="top"><p>Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient.<br></p>
+<p>Example:</p>
+<p><code class="literal">{{json event.points}}</code><br>
+<code class="literal">{{event.points.[0].key}}</code><br>
+<code class="literal">{{event.points.[0].value}}</code>
+<code class="literal">{{#each event.points}}key=value&amp;{{/each}}</code></p>
+<p>Note:</p>
+<p><code class="literal">{{event.value}}</code> is a shorthand for <code class="literal">{{event.points.[0].value}}</code><br>
+<code class="literal">{{event.key}}</code> is a shorthand for <code class="literal">{{event.points.[0].key}}</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Row click</strong></span></p></td>
+<td align="left" valign="top"><p>event.rowIndex</p></td>
+<td align="left" valign="top"><p>Number, representing the row that was clicked, starting from 0.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.values</p></td>
+<td align="left" valign="top"><p>An array of all cell values for the row on which the action will execute. To access a column value, use <code class="literal">{{event.values.[x]}}</code>, where <code class="literal">x</code> represents the column number.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.keys</p></td>
+<td align="left" valign="top"><p>An array of field names for each column.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.columnNames</p></td>
+<td align="left" valign="top"><p>An array of column names.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><span class="strong strong"><strong>Range selection</strong></span></p></td>
+<td align="left" valign="top"><p>event.from<br>
+event.to</p></td>
+<td align="left" valign="top"><p><code class="literal">from</code> and <code class="literal">to</code> values of the selected range as numbers.<br>
+Tip: Consider using <a class="xref" href="create-drilldowns.html#helpers">date</a> helper for date formatting.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p></p></td>
+<td align="left" valign="top"><p>event.key</p></td>
+<td align="left" valign="top"><p>Aggregation field behind the selected range, if available.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="dashboard-links.html">« Create links to other dashboards</a>
+</span>
+<span class="next">
+<a href="find-dashboards.html">Search and filter dashboards »</a>
+</span>
+</div>
+</body>
+</html>

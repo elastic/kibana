@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Configure case settings | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Configure case settings | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="cases.html" title="Cases"/>
+<link rel="prev" href="manage-cases.html" title="Open and manage cases"/>
+<link rel="next" href="action-types.html" title="Connectors"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="manage-cases.html">« Open and manage cases</a>
+</span>
+<span class="next">
+<a href="action-types.html">Connectors »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="cases.html">Cases</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Configure case settings</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="manage-cases-settings"></a>Configure case settings</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>To change case closure options and add custom fields, templates, and connectors for external incident management systems, go to <span class="strong strong"><strong>Stack Management &gt; Cases</strong></span> and click <span class="strong strong"><strong>Settings</strong></span>.</p>
+<p>To perform these tasks, you must have <a class="xref" href="setup-cases.html" title="Configure access to cases">full access</a> to the appropriate case and connector features in Kibana.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-settings.png" alt="View case settings">
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="case-closures"></a>Case closures</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>If you close cases in your external incident management system, they will remain open in <span class="strong strong"><strong>Cases</strong></span> until you close them manually.</p>
+<p>To change whether cases are automatically closed after they are sent to an external system, update the case closure options.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="case-connectors"></a>External incident management systems</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can add connectors to cases to push information to these external incident
+management systems:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+IBM Resilient
+</li>
+<li class="listitem">
+Jira
+</li>
+<li class="listitem">
+ServiceNow ITSM
+</li>
+<li class="listitem">
+ServiceNow SecOps
+</li>
+<li class="listitem">
+Swimlane
+</li>
+<li class="listitem">
+Webhook - Case Management
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>To create connectors and send cases to external systems, you must have the
+appropriate Kibana feature privileges. Refer to <a class="xref" href="setup-cases.html" title="Configure access to cases">Configure access to cases</a>.</p>
+</div>
+</div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>, as described in <a class="xref" href="action-types.html" title="Connectors"><em>Connectors</em></a>.
+Alternatively, you can create them in <span class="strong strong"><strong>Stack Management &gt; Cases &gt; Settings</strong></span>:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+From the <span class="strong strong"><strong>Incident management system</strong></span> list, select <span class="strong strong"><strong>Add new connector</strong></span>.
+</li>
+<li class="listitem">
+Select an external incident management system.
+</li>
+<li class="listitem">
+Enter your required settings. Refer to <a class="xref" href="resilient-action-type.html" title="IBM Resilient connector and action">IBM Resilient</a>,
+<a class="xref" href="jira-action-type.html" title="Jira connector and action">Jira</a>, <a class="xref" href="servicenow-action-type.html" title="ServiceNow ITSM connector and action">ServiceNow ITSM</a>, <a class="xref" href="servicenow-sir-action-type.html" title="ServiceNow SecOps connector and action">ServiceNow SecOps</a>,
+<a class="xref" href="swimlane-action-type.html" title="Swimlane connector and action">Swimlane</a>, or <a class="xref" href="cases-webhook-action-type.html" title="Webhook - Case Management connector and action">Webhook - Case Management</a> for connector
+configuration details.
+</li>
+</ol>
+</div>
+<p>You can subsequently choose the connector when you create cases and use it in case templates.
+To change the default connector for new cases, select the connector from the
+<span class="strong strong"><strong>Incident management system</strong></span> list.</p>
+<p>To update a connector, click <span class="strong strong"><strong>Update &lt;connector name&gt;</strong></span> and edit the connector fields as required.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="case-custom-fields"></a>Custom fields</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can add optional and required fields for customized case collaboration. <span class="Admonishment Admonishment--change">
+[<span class="Admonishment-version u-mono">8.15.0</span>]
+<span class="Admonishment-detail">
+Added in 8.15.0.
+</span>
+</span></p>
+<p>To create a custom field:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>In the <span class="strong strong"><strong>Custom fields</strong></span> section, click <span class="strong strong"><strong>Add field</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-custom-fields-add.png" alt="Add a custom field in case settings">
+</div>
+</div>
+</li>
+<li class="listitem">
+You must provide a field label and type (text or toggle).
+You can optionally designate it as a required field and provide a default value.
+</li>
+</ol>
+</div>
+<p>When you create a custom field, it&#8217;s added to all new and existing cases.
+Existing cases have null values for new text fields until you set them in each case.</p>
+<p>You can subsequently remove or edit custom fields on the <span class="strong strong"><strong>Settings</strong></span> page.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="case-templates"></a>Templates</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/manage-cases-settings.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>You can make the case creation process faster and more consistent by adding templates.
+A template defines values for one or all of the case fields (such as severity, tags, description, and title) as well as any custom fields.</p>
+<p>To create a template:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>In the <span class="strong strong"><strong>Templates</strong></span> section, click <span class="strong strong"><strong>Add template</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/cases-templates-add.png" alt="Add a template in case settings">
+</div>
+</div>
+</li>
+<li class="listitem">
+You must provide a template name and case severity.
+You can optionally add template tags and a description, values for each case field, and a case connector.
+</li>
+</ol>
+</div>
+<p>When users create cases, they can optionally select a template and use its values or override them.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you update or delete templates, existing cases are unaffected.</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="manage-cases.html">« Open and manage cases</a>
+</span>
+<span class="next">
+<a href="action-types.html">Connectors »</a>
+</span>
+</div>
+</body>
+</html>

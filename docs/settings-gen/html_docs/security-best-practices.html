@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Security best practices | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Security best practices | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="development-best-practices.html" title="Best practices"/>
+<link rel="prev" href="stability.html" title="Stability"/>
+<link rel="next" href="typescript.html" title="Typescript"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="stability.html">« Stability</a>
+</span>
+<span class="next">
+<a href="typescript.html">Typescript »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development-best-practices.html">Best practices</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Security best practices</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="security-best-practices"></a>Security best practices</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p>When writing code for Kibana, be sure to follow these best practices to avoid common vulnerabilities. Refer to the included Open Web
+Application Security Project (OWASP) references to learn more about these types of attacks.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_cross_site_scripting_xss"></a>Cross-site Scripting (XSS)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://owasp.org/www-community/attacks/xss" class="ulink" target="_top"><em>OWASP reference for XSS</em></a></p>
+<p>XSS is a class of attacks where malicious scripts are injected into vulnerable websites. Kibana defends against this by using the React
+framework to safely encode data that is rendered in pages, the EUI framework to
+<a href="https://elastic.github.io/eui/#/navigation/link#link-validation" class="ulink" target="_top">automatically sanitize links</a>, and a restrictive <code class="literal">Content-Security-Policy</code>
+header.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Check for dangerous functions or assignments that can result in unescaped user input in the browser DOM. Avoid using:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>React:</strong></span> <a href="https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml" class="ulink" target="_top"><code class="literal">dangerouslySetInnerHtml</code></a>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Browser DOM:</strong></span> <code class="literal">Element.innerHTML</code> and <code class="literal">Element.outerHTML</code>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+If using the aforementioned unsafe functions or assignments is absolutely necessary, follow
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#xss-prevention-rules" class="ulink" target="_top">these XSS prevention
+rules</a> to ensure that user input is not inserted into unsafe locations and that it is escaped properly.
+</li>
+<li class="listitem">
+Use EUI components to build your UI, particularly when rendering <code class="literal">href</code> links. Otherwise, sanitize user input before rendering links to
+ensure that they do not use the <code class="literal">javascript:</code> protocol.
+</li>
+<li class="listitem">
+Don&#8217;t use the <code class="literal">eval</code>, <code class="literal">Function</code>, and <code class="literal">_.template</code> functions&#8201;&#8212;&#8201;these are restricted by ESLint rules.
+</li>
+<li class="listitem">
+Be careful when using <code class="literal">setTimeout</code> and <code class="literal">setInterval</code> in client-side code. If an attacker can manipulate the arguments and pass a string to
+one of these, it is evaluated dynamically, which is equivalent to the dangerous <code class="literal">eval</code> function.
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_cross_site_request_forgery_csrfxsrf"></a>Cross-Site Request Forgery (CSRF/XSRF)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://owasp.org/www-community/attacks/csrf" class="ulink" target="_top"><em>OWASP reference for CSRF</em></a></p>
+<p>CSRF is a class of attacks where a user is forced to execute an action on a vulnerable website that they&#8217;re logged into, usually without
+their knowledge. Kibana defends against this by requiring
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#use-of-custom-request-headers" class="ulink" target="_top">custom
+request headers</a> for API endpoints. For more information, see <a class="xref" href="api.html#api-request-headers" title="Request headers">API Request Headers</a>.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Ensure all HTTP routes are registered with the <a class="xref" href="http-service.html" title="HTTP service">Kibana HTTP service</a> to take advantage of the custom request header
+security control.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Note that HTTP GET requests do <span class="strong strong"><strong>not</strong></span> require the custom request header; any routes that change data should
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods" class="ulink" target="_top">adhere to the HTTP specification and use a different method (PUT, POST, etc.)</a>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_remote_code_execution_rce"></a>Remote Code Execution (RCE)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://owasp.org/www-community/attacks/Command_Injection" class="ulink" target="_top"><em>OWASP reference for Command Injection</em></a>,
+<a href="https://owasp.org/www-community/attacks/Code_Injection" class="ulink" target="_top"><em>OWASP reference for Code Injection</em></a></p>
+<p>RCE is a class of attacks where an attacker executes malicious code or commands on a vulnerable server. Kibana defends against this by using
+ESLint rules to restrict vulnerable functions, and by hooking into or hardening usage of these in third-party dependencies.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Don&#8217;t use the <code class="literal">eval</code>, <code class="literal">Function</code>, and <code class="literal">_.template</code> functions&#8201;&#8212;&#8201;these are restricted by ESLint rules.
+</li>
+<li class="listitem">
+Don&#8217;t use dynamic <code class="literal">require</code>.
+</li>
+<li class="listitem">
+Check for usages of templating libraries. Ensure that user-provided input doesn&#8217;t influence the template and is used only as data for
+rendering the template.
+</li>
+<li class="listitem">
+Take extra caution when spawning child processes with any user input or parameters that are user-controlled.
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prototype_pollution"></a>Prototype Pollution</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p>Prototype Pollution is an attack that is unique to JavaScript environments. Attackers can abuse JavaScript&#8217;s prototype inheritance to
+"pollute" objects in the application, which is often used as a vector for XSS or RCE vulnerabilities. Kibana defends against this by
+hardening sensitive functions (such as those exposed by <code class="literal">child_process</code>), and by requiring validation on all HTTP routes by default.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Check for instances of <code class="literal">anObject[a][b] = c</code> where <code class="literal">a</code>, <code class="literal">b</code>, and <code class="literal">c</code> are controlled by user input. This includes code paths where the
+following logical code steps could be performed in separate files by completely different operations, or by recursively using dynamic
+operations.
+</li>
+<li class="listitem">
+Validate all user input, including API URL parameters, query parameters, and payloads. Preferably, use a schema that only allows specific
+keys and values. At a minimum, implement a deny-list that prevents <code class="literal">__proto__</code> and <code class="literal">prototype.constructor</code> from being used within object
+keys.
+</li>
+<li class="listitem">
+<p>When calling APIs that spawn new processes or perform code generation from strings, protect against Prototype Pollution by checking if
+<code class="literal">Object.hasOwnProperty</code> has arguments to the APIs that originate from an Object. An example is the defunct Code app&#8217;s
+<a href="https://github.com/elastic/kibana/blob/b49192626a8528af5d888545fb14cd1ce66a72e7/x-pack/legacy/plugins/code/server/lsp/workspace_command.ts#L40-L44" class="ulink" target="_top"><code class="literal">spawnProcess</code></a>
+function.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Common Node.js offenders: <code class="literal">child_process.spawn</code>, <code class="literal">child_process.exec</code>, <code class="literal">eval</code>, <code class="literal">Function('some string')</code>, <code class="literal">vm.runInContext(x)</code>,
+<code class="literal">vm.runInNewContext(x)</code>, <code class="literal">vm.runInThisContext()</code>
+</li>
+<li class="listitem">
+Common client-side offenders: <code class="literal">eval</code>, <code class="literal">Function('some string')</code>, <code class="literal">setTimeout('some string', num)</code>, <code class="literal">setInterval('some string', num)</code>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<p>See also:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a href="https://portswigger.net/daily-swig/prototype-pollution-the-dangerous-and-underrated-vulnerability-impacting-javascript-applications" class="ulink" target="_top">Prototype
+pollution: The dangerous and underrated vulnerability impacting JavaScript applications | portswigger.net</a>
+</li>
+<li class="listitem">
+<a href="https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf" class="ulink" target="_top">Prototype
+pollution attack in NodeJS application | Olivier Arteau</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_server_side_request_forgery_ssrf"></a>Server-Side Request Forgery (SSRF)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery" class="ulink" target="_top"><em>OWASP reference for SSRF</em></a></p>
+<p>SSRF is a class of attacks where a vulnerable server is forced to make an unintended request, usually to an HTTP API. This is often used as
+a vector for information disclosure or injection attacks.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Ensure that all outbound requests from the Kibana server use hard-coded URLs.
+</li>
+<li class="listitem">
+<p>If user input is used to construct a URL for an outbound request, ensure that an allow-list is used to validate the endpoints and that
+user input is escaped properly. Ideally, the allow-list should be set in <code class="literal">kibana.yml</code>, so only server administrators can change it.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+This is particularly relevant when using <code class="literal">transport.request</code> with the Elasticsearch client, as no automatic escaping is performed.
+</li>
+<li class="listitem">
+Note that URLs are very hard to validate properly; exact match validation for user input is most preferable, while URL parsing or RegEx
+validation should only be used if absolutely necessary.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_reverse_tabnabbing"></a>Reverse tabnabbing</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p><a href="https://owasp.org/www-community/attacks/Reverse_Tabnabbing" class="ulink" target="_top"><em>OWASP reference for Reverse Tabnabbing</em></a></p>
+<p>Reverse tabnabbing is an attack where a link to a malicious page is used to rewrite a vulnerable parent page. This is often used as a vector
+for phishing attacks. Kibana defends against this by using the EUI framework, which automatically adds the <code class="literal">rel</code> attribute to anchor tags,
+buttons, and other vulnerable DOM elements.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Use EUI components to build your UI whenever possible. Otherwise, ensure that any DOM elements that have an <code class="literal">href</code> attribute also have the
+<code class="literal">rel="noreferrer noopener"</code> attribute specified. For more information, refer to the
+<a href="https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing" class="ulink" target="_top">OWASP HTML5 Security Cheat
+Sheet</a>.
+</li>
+<li class="listitem">
+If using a non-EUI markdown renderer, use a custom link renderer for rendered links.
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_information_disclosure"></a>Information disclosure</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/best-practices/security.asciidoc">edit</a></div>
+</div></div></div>
+<p>Information disclosure is not an attack, but it describes whenever sensitive information is accidentally revealed. This can be configuration
+info, stack traces, or other data that the user is not authorized to access. This concern cannot be addressed with a single security
+control, but at a high level, Kibana relies on the hapi framework to automatically redact stack traces and detailed error messages in HTTP
+5xx response payloads.</p>
+<p><span class="strong strong"><strong>Best practices</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Look for instances where sensitive information might accidentally be revealed, particularly in error messages, in the UI, and URL
+parameters that are exposed to users.
+</li>
+<li class="listitem">
+Make sure that sensitive request data is not forwarded to external resources. For example, copying client request headers and using them
+to make an another request could accidentally expose the user&#8217;s credentials.
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="stability.html">« Stability</a>
+</span>
+<span class="next">
+<a href="typescript.html">Typescript »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

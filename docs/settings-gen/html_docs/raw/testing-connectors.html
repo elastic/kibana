@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test connectors | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Test connectors | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="alerting-troubleshooting.html" title="Troubleshooting and limitations"/>
+<link rel="prev" href="event-log-index.html" title="Event log index"/>
+<link rel="next" href="observability.html" title="Observability"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="event-log-index.html">« Event log index</a>
+</span>
+<span class="next">
+<a href="observability.html">Observability »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-troubleshooting.html">Troubleshooting and limitations</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Test connectors</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/troubleshooting/testing-connectors.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="testing-connectors"></a>Test connectors</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/troubleshooting/testing-connectors.asciidoc">edit</a></div>
+</div></div></div>
+<p>In <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>, you can test a newly created connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save &amp; test" button on Create flyout:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/alerting/images/connector-save-and-test.png" alt="Rule management page with the errors banner">
+</div>
+</div>
+<p>or by directly opening the proper connector edit flyout:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/alerting/images/email-connector-test.png" alt="Rule management page with the errors banner">
+</div>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/alerting/images/teams-connector-test.png" alt="Five clauses define the condition to detect">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_troubleshooting_connectors_with_the_kbn_action_tool"></a><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Troubleshooting connectors with the <code class="literal">kbn-action</code> tool</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/troubleshooting/testing-connectors.asciidoc">edit</a></div>
+<p>You can run an email action via <a href="https://github.com/pmuellr/kbn-action" class="ulink" target="_top">kbn-action</a>.
+In this example, it is a Cloud deployment of the Elastic Stack:</p>
+<div class="pre_wrapper lang-txt">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-txt">$ npm -g install pmuellr/kbn-action
+
+$ export KBN_URLBASE=https://elastic:&lt;password&gt;@&lt;cloud-host&gt;.us-east-1.aws.found.io:9243
+
+$ kbn-action ls
+[
+    {
+        "id": "a692dc89-15b9-4a3c-9e47-9fb6872e49ce",
+        "actionTypeId": ".email",
+        "name": "gmail",
+        "config": {
+            "from": "test@gmail.com",
+            "host": "smtp.gmail.com",
+            "port": 465,
+            "secure": true,
+            "service": null
+        },
+        "isPreconfigured": false,
+        "isDeprecated": false,
+        "referencedByCount": 0
+    }
+]</pre>
+</div>
+<p>You can then run the following test:</p>
+<div class="pre_wrapper lang-txt">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-txt">$ kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce '{subject: "hallo", message: "hallo!", to:["test@yahoo.com"]}'
+{
+    "status": "ok",
+    "data": {
+        "accepted": [
+            "test@yahoo.com"
+        ],
+        "rejected": [],
+        "envelopeTime": 100,
+        "messageTime": 955,
+        "messageSize": 521,
+        "response": "250 2.0.0 OK  1593144408 r5sm8625873qtc.20 - gsmtp",
+        "envelope": {
+            "from": "test@gmail.com",
+            "to": [
+                "test@yahoo.com"
+            ]
+        },
+        "messageId": "&lt;cf9fec58-600f-64fb-5f66-6e55985b935d@gmail.com&gt;"
+    },
+    "actionId": "a692dc89-15b9-4a3c-9e47-9fb6872e49ce"
+}</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="event-log-index.html">« Event log index</a>
+</span>
+<span class="next">
+<a href="observability.html">Observability »</a>
+</span>
+</div>
+</body>
+</html>

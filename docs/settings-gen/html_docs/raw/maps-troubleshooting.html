@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Troubleshoot Maps | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Troubleshoot Maps | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="maps.html" title="Maps"/>
+<link rel="prev" href="indexing-geojson-data-tutorial.html" title="Tutorial: Index GeoJSON data"/>
+<link rel="next" href="reporting-getting-started.html" title="Reporting and sharing"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="indexing-geojson-data-tutorial.html">« Tutorial: Index GeoJSON data</a>
+</span>
+<span class="next">
+<a href="reporting-getting-started.html">Reporting and sharing »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="maps.html">Maps</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Troubleshoot Maps</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps-troubleshooting"></a>Troubleshoot Maps</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.</p>
+<div class="position-relative"><h3><a id="_inspect_elasticsearch_requests"></a>Inspect Elasticsearch requests</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<p>Maps uses the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html" class="ulink" target="_top">Elasticsearch vector tile search API</a> and the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html" class="ulink" target="_top">Elasticsearch search API</a> to get documents and aggregation results from Elasticsearch. Use <span class="strong strong"><strong>Vector tiles</strong></span> inspector to view Elasticsearch vector tile search API requests. Use <span class="strong strong"><strong>Requests</strong></span> inspector to view Elasticsearch search API requests.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/vector_tile_inspector.png" alt="vector tile inspector">
+</div>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/requests_inspector.png" alt="requests inspector">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_solutions_to_common_problems"></a>Solutions to common problems</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<div class="position-relative"><h4><a id="_data_view_not_listed_when_adding_layer"></a>Data view not listed when adding layer</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Verify your geospatial data is correctly mapped as <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-point.html" class="ulink" target="_top">geo_point</a> or <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/geo-shape.html" class="ulink" target="_top">geo_shape</a>.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Run <code class="literal">GET myIndexName/_field_caps?fields=myGeoFieldName</code> in <a class="xref" href="console-kibana.html" title="Run API requests">Console</a>, replacing <code class="literal">myIndexName</code> and <code class="literal">myGeoFieldName</code> with your index and geospatial field name.
+</li>
+<li class="listitem">
+Ensure response specifies <code class="literal">type</code> as <code class="literal">geo_point</code> or <code class="literal">geo_shape</code>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Verify your geospatial data is correctly mapped in your <a class="xref" href="managing-data-views.html#managing-fields" title="Format data fields">data view</a>.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Open your data view in <a class="xref" href="management.html" title="Stack Management">Stack Management</a>.
+</li>
+<li class="listitem">
+Ensure your geospatial field type is <code class="literal">geo_point</code> or <code class="literal">geo_shape</code>.
+</li>
+<li class="listitem">
+Ensure your geospatial field is searchable and aggregatable.
+</li>
+<li class="listitem">
+If your geospatial field type does not match your Elasticsearch mapping, click the <span class="strong strong"><strong>Refresh</strong></span> button to refresh the field list from Elasticsearch.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Data views with thousands of fields can exceed the default maximum payload size.
+Increase <a class="xref" href="settings.html" title="Configure Kibana"><code class="literal">server.maxPayload</code></a> for large data views.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_features_are_not_displayed"></a>Features are not displayed</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Use Inspector to view Elasticsearch responses. Ensure the response is not empty.
+</li>
+<li class="listitem">
+<p>Ensure geometry uses the correct latitude and longitude ordering.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Geo-points expressed as strings are ordered as <code class="literal">"latitude,longitude"</code>. Geo-points expressed as arrays are ordered as the reverse: <code class="literal">[longitude, latitude]</code>.
+</li>
+<li class="listitem">
+Geo-shapes expressed as geojson provide coordinates as <code class="literal">[longitude, latitude]</code>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Ensure fill color and border color are distinguishable from map tiles. It&#8217;s hard to see white features on a white background.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_elastic_maps_service_basemaps_are_not_displayed"></a>Elastic Maps Service basemaps are not displayed</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Maps</strong></span> uses tile and vector data from Elastic Maps Service by default. See <a class="xref" href="maps-connect-to-ems.html" title="Connect to Elastic Maps Service">Connect to Elastic Maps Service</a> for more info.</p>
+<div class="position-relative"><h4><a id="_custom_tiles_are_not_displayed"></a>Custom tiles are not displayed</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/trouble-shooting.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+When using a custom tile service, ensure your tile server has configured <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" class="ulink" target="_top">Cross-Origin Resource Sharing (CORS)</a> so tile requests from your Kibana domain have permission to access your tile server domain.
+</li>
+<li class="listitem">
+Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="indexing-geojson-data-tutorial.html">« Tutorial: Index GeoJSON data</a>
+</span>
+<span class="next">
+<a href="reporting-getting-started.html">Reporting and sharing »</a>
+</span>
+</div>
+</body>
+</html>

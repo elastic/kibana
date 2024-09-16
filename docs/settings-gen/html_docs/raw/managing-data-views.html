@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Manage data views | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Manage data views | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="maintenance-windows.html" title="Maintenance windows"/>
+<link rel="next" href="numeral.html" title="Numeral Formatting"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="maintenance-windows.html">« Maintenance windows</a>
+</span>
+<span class="next">
+<a href="numeral.html">Numeral Formatting »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Manage data views</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="managing-data-views"></a>Manage data views</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+</div></div></div>
+<p>To customize the data fields in your data view,
+you can add runtime fields to the existing documents,
+add scripted fields to compute data on the fly, and change how Kibana displays the data fields.</p>
+<div class="position-relative"><h3><a id="runtime-fields"></a>Explore your data with runtime fields</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Runtime fields are fields that you add to documents after you&#8217;ve ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs.
+You can use runtime fields anywhere data views are used, for example, you can explore runtime fields in <span class="strong strong"><strong>Discover</strong></span> and create visualizations with runtime fields for your dashboard.</p>
+<p>With runtime fields, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Define fields for a specific use case without modifying the underlying schema.
+</li>
+<li class="listitem">
+Override the returned values from index fields.
+</li>
+<li class="listitem">
+Start working on your data without understanding the structure.
+</li>
+<li class="listitem">
+Add fields to existing documents without reindexing your data.
+</li>
+</ul>
+</div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Runtime fields can impact Kibana performance. When you run a query, Elasticsearch uses the fields you index first to shorten the response time.
+Index the fields that you commonly search for and filter on, such as <code class="literal">timestamp</code>, then use runtime fields to limit the number of fields Elasticsearch uses to calculate values.</p>
+</div>
+</div>
+<p>For detailed information on how to use runtime fields with Elasticsearch, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/runtime.html" class="ulink" target="_top">Runtime fields</a>.</p>
+<div class="position-relative"><h4><a id="create-runtime-fields"></a>Add runtime fields</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>To add runtime fields to your data views, open the data view you want to change,
+then define the field values by emitting a single value using
+the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-painless.html" class="ulink" target="_top">Painless scripting language</a>.
+You can also add runtime fields in <a class="xref" href="discover.html#add-field-in-discover" title="Add a field to your data view"><span class="strong strong"><strong>Discover</strong></span></a> and <a class="xref" href="lens.html#change-the-fields" title="Change the fields list"><span class="strong strong"><strong>Lens</strong></span></a>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Select the data view that you want to add the runtime field to, then click <span class="strong strong"><strong>Add field</strong></span>.
+</li>
+<li class="listitem">
+Enter the field <span class="strong strong"><strong>Name</strong></span>, then select the <span class="strong strong"><strong>Type</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Set custom label</strong></span>, then enter the label you want to display where the data view is used,
+such as <span class="strong strong"><strong>Discover</strong></span>.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Set value</strong></span>, then define the script. The script must match the <span class="strong strong"><strong>Type</strong></span>, or the data view fails anywhere it is used.
+</li>
+<li class="listitem">
+<p>To help you define the script, use the <span class="strong strong"><strong>Preview</strong></span>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To view the other available fields, use the <span class="strong strong"><strong>Document ID</strong></span> arrows.
+</li>
+<li class="listitem">
+To filter the fields list, enter the keyword in <span class="strong strong"><strong>Filter fields</strong></span>.
+</li>
+<li class="listitem">
+To pin frequently used fields to the top of the list, hover over the field,
+then click <span class="image"><img src="images/stackManagement-indexPatterns-pinRuntimeField-7.15.png" alt="Icon to pin field to the top of the list"></span>.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create field</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="runtime-field-examples"></a>Runtime field examples</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Try the runtime field examples on your own using the <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data"><span class="strong strong"><strong>Sample web logs</strong></span></a> data.</p>
+<div class="position-relative"><h4><a id="simple-hello-world-example"></a>Return a keyword value</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Return <code class="literal">Hello World!</code>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">emit("Hello World!");</pre>
+</div>
+<p><span class="image"><img src="management/images/runtime_field.png" alt="Runtime field with keyword type"></span></p>
+<div class="position-relative"><h4><a id="perform-a-calculation-on-a-single-field"></a>Perform a calculation on a single field</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Calculate kilobytes from bytes:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">emit(doc['bytes'].value / 1024)</pre>
+</div>
+<div class="position-relative"><h4><a id="return-substring"></a>Return a substring</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Return the string that appears after the last slash in the URL:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">def path = doc["url.keyword"].value;
+if (path != null) {
+    int lastSlashIndex = path.lastIndexOf('/');
+    if (lastSlashIndex &gt; 0) {
+        emit(path.substring(lastSlashIndex+1));
+    return;
+    }
+}
+emit("");</pre>
+</div>
+<div class="position-relative"><h4><a id="composite-runtime-field"></a>Return multiple fields with a composite runtime field</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>A single runtime field can also produce multiple subfields when the type <code class="literal">Composite</code> is selected. The script editor provides default types that can be customized for each subfields.</p>
+<p>Return <code class="literal">keyword</code> and <code class="literal">double</code> type subfields. Note that the first argument for <code class="literal">emit</code> is the name of the subfield.</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">emit('subfield_a', 'Hello');
+emit('subfield_b', 42);</pre>
+</div>
+<p><span class="image"><img src="management/images/runtime_field_composite.png" alt="Runtime field with composite type"></span></p>
+<div class="position-relative"><h4><a id="replace-nulls-with-blanks"></a>Replace nulls with blanks</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Replace <code class="literal">null</code> values with <code class="literal">None</code>:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">def source = doc['referer'].value;
+if (source != null) {
+	emit(source);
+	return;
+}
+else {
+	emit("None");
+}</pre>
+</div>
+<p>Specify the operating system condition:</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">def source = doc['machine.os.keyword'].value;
+if (source != "") {
+	emit(source);
+}
+else {
+	emit("None");
+}</pre>
+</div>
+<div class="position-relative"><h4><a id="manage-runtime-fields"></a>Manage runtime fields</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Edit the settings for runtime fields, or remove runtime fields from data views.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Select the data view that contains the runtime field you want to manage, then open the runtime field edit options or delete the runtime field.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="scripted-fields"></a>Add scripted fields to data views</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<h3>Deprecated in 7.13.</h3>
+<p>Use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/runtime.html" class="ulink" target="_top">runtime fields</a> instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility.</p>
+</div>
+</div>
+<p>Scripted fields compute data on the fly from the data in your Elasticsearch indices. The data is shown on
+the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <a class="xref" href="kuery-query.html" title="Kibana Query Language">Kibana query language</a>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren&#8217;t indexed and cannot be searched using the Kibana default
+query language.</p>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
+Kibana performance. Keep in mind that there&#8217;s no built-in validation of a scripted field. If your scripts are
+buggy, you&#8217;ll get exceptions whenever you try to view the dynamically generated data.</p>
+</div>
+</div>
+<p>When you define a scripted field in Kibana, you have a choice of the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-expression.html" class="ulink" target="_top">Lucene expressions</a> or the
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-painless.html" class="ulink" target="_top">Painless</a> scripting language.</p>
+<p>You can reference any single value numeric field in your expressions, for example:</p>
+<pre class="screen">doc['field_name'].value</pre>
+<p>For more information on scripted fields and additional examples, refer to
+<a href="https://www.elastic.co/blog/using-painless-kibana-scripted-fields" class="ulink" target="_top">Using Painless in Kibana scripted fields</a></p>
+<div class="position-relative"><h4><a id="create-scripted-field"></a>Create scripted fields</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Create and add scripted fields to your data views.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Select the data view you want to add a scripted field to.
+</li>
+<li class="listitem">
+Select the <span class="strong strong"><strong>Scripted fields</strong></span> tab, then click <span class="strong strong"><strong>Add scripted field</strong></span>.
+</li>
+<li class="listitem">
+Enter a <span class="strong strong"><strong>Name</strong></span> for the scripted field, then enter the <span class="strong strong"><strong>Script</strong></span> you want to use to compute a value on the fly from your index data.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create field</strong></span>.
+</li>
+</ol>
+</div>
+<p>For more information about scripted fields in Elasticsearch, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html" class="ulink" target="_top">Scripting</a>.</p>
+<div class="position-relative"><h4><a id="update-scripted-field"></a>Manage scripted fields</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Select the data view that contains the scripted field you want to manage.
+</li>
+<li class="listitem">
+Select the <span class="strong strong"><strong>Scripted fields</strong></span> tab, then open the scripted field edit options or delete the scripted field.
+</li>
+</ol>
+</div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Built-in validation is unsupported for scripted fields. When your scripts contain errors, you receive
+exceptions when you view the dynamically generated data.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="managing-fields"></a>Format data fields</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Kibana uses the same field types as Elasticsearch, however, some Elasticsearch field types are unsupported in Kibana.
+To customize how Kibana displays data fields, use the formatting options.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Click the data view that contains the field you want to change.
+</li>
+<li class="listitem">
+Find the field, then open the edit options (<span class="image"><img src="management/index-patterns/images/edit_icon.png" alt="Data field edit icon"></span>).
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Set custom label</strong></span>, then enter a <span class="strong strong"><strong>Custom label</strong></span> for the field.
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Set format</strong></span>, then enter the <span class="strong strong"><strong>Format</strong></span> for the field.
+</li>
+</ol>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>For numeric fields the default field formatters are based on the <code class="literal">meta.unit</code> field. The unit is associated with a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/api-conventions.html#time-units" class="ulink" target="_top">time unit</a>, percent, or  byte. The convention for percents is to use value 1 to mean 100%.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="string-field-formatters"></a>String field formatters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>String fields support <span class="strong strong"><strong>String</strong></span> and <span class="strong strong"><strong>Url</strong></span> formatters.</p>
+<p>The <span class="strong strong"><strong>String</strong></span> field formatter enables you to apply transforms to the field.</p>
+<p>Supported transformations include:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Convert to lowercase
+</li>
+<li class="listitem">
+Convert to uppercase
+</li>
+<li class="listitem">
+Convert to title case
+</li>
+<li class="listitem">
+Apply the short dots transformation, which replaces the content before the <code class="literal">.</code> character with the first character of
+the content. For example:
+</li>
+</ul>
+</div>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Original</strong></span>
+</p>
+</td>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Becomes</strong></span>
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">com.organizations.project.ClassName</code>
+</p>
+</td>
+<td valign="top">
+<p>
+<p>
+<code class="literal">c.o.p.ClassName</code>
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Base64 decode
+</li>
+<li class="listitem">
+URL param decode
+</li>
+</ul>
+</div>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can specify the following types to the <code class="literal">Url</code> field formatter:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Link</strong></span> &mdash; Converts the contents of the field into an URL. You can specify the width and height of the image, while keeping the aspect ratio.
+When the image is smaller than the specified parameters, the image is unable to upscale.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Image</strong></span> &mdash; Specifies the image directory.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Audio</strong></span> &mdash; Specify the audio directory.
+</li>
+</ul>
+</div>
+<p>To customize URL field formats, use templates. An <span class="strong strong"><strong>URL template</strong></span> enables you to add values
+to a partial URL. To add the contents of the field to a fixed URL, use the <code class="literal">{{value}}</code> string.</p>
+<p>For example, when:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A field contains a user ID
+</li>
+<li class="listitem">
+A field uses the <code class="literal">Url</code> field formatter
+</li>
+<li class="listitem">
+The URI template is <code class="literal">http://company.net/profiles?user_id={­{value}­}</code>
+</li>
+</ul>
+</div>
+<p>The resulting URL replaces <code class="literal">{{value}}</code> with the user ID from the field.</p>
+<p>The <code class="literal">{{value}}</code> template string URL-encodes the contents of the field. When a field encoded into a URL contains
+non-ASCII characters, the characters are replaced with a <code class="literal">%</code> character and the appropriate hexadecimal code. For
+example, field contents <code class="literal">users/admin</code> result in the URL template adding <code class="literal">users%2Fadmin</code>.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Image</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an image at the
+specified URI.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Audio</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an audio file at the specified URI.</p>
+<p>To pass unescaped values directly to the URL, use the <code class="literal">{{rawValue}}</code> string.</p>
+<p>A <span class="strong strong"><strong>Label template</strong></span> enables you to specify a text string that appears instead of the raw URL. You can use the
+<code class="literal">{{value}}</code> template string normally in label templates. You can also use the <code class="literal">{{url}}</code> template string to display
+the formatted URL.</p>
+<div class="position-relative"><h4><a id="field-formatters-date"></a>Date field formatters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Date fields support <span class="strong strong"><strong>Date</strong></span>, <span class="strong strong"><strong>String</strong></span>, and <span class="strong strong"><strong>Url</strong></span> formatters.</p>
+<p>The <span class="strong strong"><strong>Date</strong></span> formatter enables you to choose the display format of date stamps using the <a href="https://momentjs.com/" class="ulink" target="_top">moment.js</a>
+standard format definitions.</p>
+<p>The <span class="strong strong"><strong>String</strong></span> field formatter enables you to apply transforms to the field.</p>
+<p>Supported transformations include:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Convert to lowercase
+</li>
+<li class="listitem">
+Convert to uppercase
+</li>
+<li class="listitem">
+Convert to title case
+</li>
+<li class="listitem">
+Apply the short dots transformation, which replaces the content before the <code class="literal">.</code> character with the first character of
+the content. For example:
+</li>
+</ul>
+</div>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Original</strong></span>
+</p>
+</td>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Becomes</strong></span>
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">com.organizations.project.ClassName</code>
+</p>
+</td>
+<td valign="top">
+<p>
+<p>
+<code class="literal">c.o.p.ClassName</code>
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Base64 decode
+</li>
+<li class="listitem">
+URL param decode
+</li>
+</ul>
+</div>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can specify the following types to the <code class="literal">Url</code> field formatter:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Link</strong></span> &mdash; Converts the contents of the field into an URL. You can specify the width and height of the image, while keeping the aspect ratio.
+When the image is smaller than the specified parameters, the image is unable to upscale.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Image</strong></span> &mdash; Specifies the image directory.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Audio</strong></span> &mdash; Specify the audio directory.
+</li>
+</ul>
+</div>
+<p>To customize URL field formats, use templates. An <span class="strong strong"><strong>URL template</strong></span> enables you to add values
+to a partial URL. To add the contents of the field to a fixed URL, use the <code class="literal">{{value}}</code> string.</p>
+<p>For example, when:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A field contains a user ID
+</li>
+<li class="listitem">
+A field uses the <code class="literal">Url</code> field formatter
+</li>
+<li class="listitem">
+The URI template is <code class="literal">http://company.net/profiles?user_id={­{value}­}</code>
+</li>
+</ul>
+</div>
+<p>The resulting URL replaces <code class="literal">{{value}}</code> with the user ID from the field.</p>
+<p>The <code class="literal">{{value}}</code> template string URL-encodes the contents of the field. When a field encoded into a URL contains
+non-ASCII characters, the characters are replaced with a <code class="literal">%</code> character and the appropriate hexadecimal code. For
+example, field contents <code class="literal">users/admin</code> result in the URL template adding <code class="literal">users%2Fadmin</code>.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Image</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an image at the
+specified URI.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Audio</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an audio file at the specified URI.</p>
+<p>To pass unescaped values directly to the URL, use the <code class="literal">{{rawValue}}</code> string.</p>
+<p>A <span class="strong strong"><strong>Label template</strong></span> enables you to specify a text string that appears instead of the raw URL. You can use the
+<code class="literal">{{value}}</code> template string normally in label templates. You can also use the <code class="literal">{{url}}</code> template string to display
+the formatted URL.</p>
+<div class="position-relative"><h4><a id="field-formatters-geopoint"></a>Geographic point field formatters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Geographic point fields support the <span class="strong strong"><strong>String</strong></span> formatter.</p>
+<p>The <span class="strong strong"><strong>String</strong></span> field formatter enables you to apply transforms to the field.</p>
+<p>Supported transformations include:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Convert to lowercase
+</li>
+<li class="listitem">
+Convert to uppercase
+</li>
+<li class="listitem">
+Convert to title case
+</li>
+<li class="listitem">
+Apply the short dots transformation, which replaces the content before the <code class="literal">.</code> character with the first character of
+the content. For example:
+</li>
+</ul>
+</div>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Original</strong></span>
+</p>
+</td>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Becomes</strong></span>
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">com.organizations.project.ClassName</code>
+</p>
+</td>
+<td valign="top">
+<p>
+<p>
+<code class="literal">c.o.p.ClassName</code>
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Base64 decode
+</li>
+<li class="listitem">
+URL param decode
+</li>
+</ul>
+</div>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h4><a id="field-formatters-numeric"></a>Number field formatters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/manage-data-views.asciidoc">edit</a></div>
+<p>Numeric fields support <span class="strong strong"><strong>Bytes</strong></span>, <span class="strong strong"><strong>Color</strong></span>, <span class="strong strong"><strong>Duration</strong></span>, <span class="strong strong"><strong>Histogram</strong></span>, <span class="strong strong"><strong>Number</strong></span>, <span class="strong strong"><strong>Percentage</strong></span>, <span class="strong strong"><strong>String</strong></span>, and <span class="strong strong"><strong>Url</strong></span> formatters.</p>
+<p>The <span class="strong strong"><strong>Bytes</strong></span>, <span class="strong strong"><strong>Number</strong></span>, and <span class="strong strong"><strong>Percentage</strong></span> formatters enable you to choose the display formats of numbers in the field using
+the <a class="xref" href="numeral.html" title="Numeral Formatting">Elastic numeral pattern</a> syntax that Kibana maintains.</p>
+<p>The <span class="strong strong"><strong>Histogram</strong></span> formatter is used only for the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/histogram.html" class="ulink" target="_top">histogram field type</a>. When you use the <span class="strong strong"><strong>Histogram</strong></span> formatter,
+you can apply the <span class="strong strong"><strong>Bytes</strong></span>, <span class="strong strong"><strong>Number</strong></span>, or <span class="strong strong"><strong>Percentage</strong></span> format to aggregated data.</p>
+<p>You can specify the following types to the <code class="literal">Url</code> field formatter:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Link</strong></span> &mdash; Converts the contents of the field into an URL. You can specify the width and height of the image, while keeping the aspect ratio.
+When the image is smaller than the specified parameters, the image is unable to upscale.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Image</strong></span> &mdash; Specifies the image directory.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Audio</strong></span> &mdash; Specify the audio directory.
+</li>
+</ul>
+</div>
+<p>To customize URL field formats, use templates. An <span class="strong strong"><strong>URL template</strong></span> enables you to add values
+to a partial URL. To add the contents of the field to a fixed URL, use the <code class="literal">{{value}}</code> string.</p>
+<p>For example, when:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A field contains a user ID
+</li>
+<li class="listitem">
+A field uses the <code class="literal">Url</code> field formatter
+</li>
+<li class="listitem">
+The URI template is <code class="literal">http://company.net/profiles?user_id={­{value}­}</code>
+</li>
+</ul>
+</div>
+<p>The resulting URL replaces <code class="literal">{{value}}</code> with the user ID from the field.</p>
+<p>The <code class="literal">{{value}}</code> template string URL-encodes the contents of the field. When a field encoded into a URL contains
+non-ASCII characters, the characters are replaced with a <code class="literal">%</code> character and the appropriate hexadecimal code. For
+example, field contents <code class="literal">users/admin</code> result in the URL template adding <code class="literal">users%2Fadmin</code>.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Image</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an image at the
+specified URI.</p>
+<p>When the formatter type is <span class="strong strong"><strong>Audio</strong></span>, the <code class="literal">{{value}}</code> template string specifies the name of an audio file at the specified URI.</p>
+<p>To pass unescaped values directly to the URL, use the <code class="literal">{{rawValue}}</code> string.</p>
+<p>A <span class="strong strong"><strong>Label template</strong></span> enables you to specify a text string that appears instead of the raw URL. You can use the
+<code class="literal">{{value}}</code> template string normally in label templates. You can also use the <code class="literal">{{url}}</code> template string to display
+the formatted URL.</p>
+<p>The <span class="strong strong"><strong>String</strong></span> field formatter enables you to apply transforms to the field.</p>
+<p>Supported transformations include:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Convert to lowercase
+</li>
+<li class="listitem">
+Convert to uppercase
+</li>
+<li class="listitem">
+Convert to title case
+</li>
+<li class="listitem">
+Apply the short dots transformation, which replaces the content before the <code class="literal">.</code> character with the first character of
+the content. For example:
+</li>
+</ul>
+</div>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Original</strong></span>
+</p>
+</td>
+<td valign="top">
+<p>
+<span class="strong strong"><strong>Becomes</strong></span>
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">com.organizations.project.ClassName</code>
+</p>
+</td>
+<td valign="top">
+<p>
+<p>
+<code class="literal">c.o.p.ClassName</code>
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Base64 decode
+</li>
+<li class="listitem">
+URL param decode
+</li>
+</ul>
+</div>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <span class="strong strong"><strong>Duration</strong></span> field formatter displays the numeric value of a field in the following increments:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Picoseconds
+</li>
+<li class="listitem">
+Nanoseconds
+</li>
+<li class="listitem">
+Microseconds
+</li>
+<li class="listitem">
+Milliseconds
+</li>
+<li class="listitem">
+Seconds
+</li>
+<li class="listitem">
+Minutes
+</li>
+<li class="listitem">
+Hours
+</li>
+<li class="listitem">
+Days
+</li>
+<li class="listitem">
+Weeks
+</li>
+<li class="listitem">
+Months
+</li>
+<li class="listitem">
+Years
+</li>
+</ul>
+</div>
+<p>You can specify these increments with up to 20 decimal places for input and output formats.</p>
+<p>The <span class="strong strong"><strong>Color</strong></span> field formatter enables you to specify colors with ranges of values for a number field.</p>
+<p>When you select the <span class="strong strong"><strong>Color</strong></span> formatter, click <span class="strong strong"><strong>Add Color</strong></span>, then specify the <span class="strong strong"><strong>Range</strong></span>, <span class="strong strong"><strong>Text color</strong></span>, and <span class="strong strong"><strong>Background color</strong></span>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="maintenance-windows.html">« Maintenance windows</a>
+</span>
+<span class="next">
+<a href="numeral.html">Numeral Formatting »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fleet | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Fleet | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="painlesslab.html" title="Debug Painless scripts"/>
+<link rel="next" href="osquery.html" title="Osquery"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="painlesslab.html">« Debug Painless scripts</a>
+</span>
+<span class="next">
+<a href="osquery.html">Osquery »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Fleet</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/fleet/fleet.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="fleet"></a>Fleet</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/fleet/fleet.asciidoc">edit</a></div>
+</div></div></div>
+<p>Fleet in Kibana enables you to manage Elastic Agent installations in
+standalone or Fleet mode.</p>
+<p>Standalone mode requires you to manually configure and manage the agent locally.
+It is recommended for advanced users only.</p>
+<p>Fleet mode offers several advantages:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A central place to configure and monitor your Elastic Agents.
+</li>
+<li class="listitem">
+Ability to trigger Elastic Agent binary and policy upgrades remotely.
+</li>
+<li class="listitem">
+An overview of the data ingest in your Elasticsearch cluster.
+</li>
+</ul>
+</div>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="fleet/images/fleet-start.png" alt="Fleet app in Kibana">
+</div>
+</div>
+<p>Most integration content installed by Fleet isn’t editable. This content is tagged with a <span class="strong strong"><strong>Managed</strong></span> badge in the Kibana UI. Managed content itself cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="fleet/images/system-managed.png" alt="An image of the new managed badge.">
+</div>
+</div>
+<p>When a managed dashboard is cloned, any linked or referenced panels become part of the clone without relying on external sources. The panels are integrated into the cloned dashboard as stand alone components. For example, with a cloned dashboard, the cloned panels become entirely self-contained copy without any dependencies on the original configuration. Clones can be customized and modified without accidentally affecting the original.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The cloned managed content retains the managed badge, but is independent from the original.</p>
+</div>
+</div>
+<p>You can make a complete clone of a whole managed dashboard. If you clone a panel within a managed dashboard, you&#8217;re prompted to save the changes as a new dashboard, which is unlinked from the original managed content.</p>
+<p>To clone a dashboard:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu (&#8801;) and click <span class="strong strong"><strong>Dashboards</strong></span>.
+</li>
+<li class="listitem">
+Click on the name of the managed dashboard to view the dashboard.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Clone</strong></span> in the toolbar.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and return</strong></span> after editing the dashboard.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span>.
+</li>
+</ol>
+</div>
+<p>To clone managed content relating to specific visualization editors, such as Lens, TSVB, and Maps, view the visualization in the editor then begin to make edits. Unlike cloning dashboards, and dashboard panels, the cloned content retains the original configurations. Once finished you are prompted to save the edits as a new visualization. The same applies for altering any saved searches in a managed visualization.</p>
+<div class="position-relative"><h2><a id="_get_started"></a>Get started</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/fleet/fleet.asciidoc">edit</a></div>
+<p>To get started with Fleet, refer to the
+<a href="https://www.elastic.co/guide/en/fleet/master/index.html" class="ulink" target="_top">Fleet</a> docs.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="painlesslab.html">« Debug Painless scripts</a>
+</span>
+<span class="next">
+<a href="osquery.html">Osquery »</a>
+</span>
+</div>
+</body>
+</html>

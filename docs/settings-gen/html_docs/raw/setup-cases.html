@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Configure access to cases | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Configure access to cases | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="cases.html" title="Cases"/>
+<link rel="prev" href="cases.html" title="Cases"/>
+<link rel="next" href="manage-cases.html" title="Open and manage cases"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="cases.html">« Cases</a>
+</span>
+<span class="next">
+<a href="manage-cases.html">Open and manage cases »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="cases.html">Cases</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Configure access to cases</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/setup-cases.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="setup-cases"></a>Configure access to cases</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/cases/setup-cases.asciidoc">edit</a></div>
+</div></div></div>
+<p>To access cases in <span class="strong strong"><strong>Stack Management</strong></span>, you must have the appropriate Kibana
+privileges:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Action</th>
+<th align="left" valign="top">Kibana privileges</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>Give full access to manage cases and settings</p></td>
+<td align="left" valign="top">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">All</code> for the <span class="strong strong"><strong>Cases</strong></span> feature under <span class="strong strong"><strong>Management</strong></span>.
+</li>
+<li class="listitem">
+<code class="literal">All</code> for the <span class="strong strong"><strong>Actions and Connectors</strong></span> feature under <span class="strong strong"><strong>Management</strong></span>.
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The <span class="strong strong"><strong>Actions and Connectors</strong></span> feature privilege is required to create, add,
+delete, and modify case connectors and to send updates to external systems.</p>
+<p>By default, <code class="literal">All</code> for the <span class="strong strong"><strong>Cases</strong></span> feature includes authority to delete cases
+and comments and edit case settings unless you customize the sub-feature privileges.</p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Give assignee access to cases</p></td>
+<td align="left" valign="top">
+<p><code class="literal">All</code> for the <span class="strong strong"><strong>Cases</strong></span> feature under <span class="strong strong"><strong>Management</strong></span>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Before a user can be assigned to a case, they must log into Kibana at
+least once, which creates a user profile.</p>
+<p>This privilege is also required to add <a class="xref" href="cases-action-type.html" title="Cases connector and action">case actions</a> to rules.</p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Give view-only access to cases</p></td>
+<td align="left" valign="top">
+<p><code class="literal">Read</code> for the <span class="strong strong"><strong>Cases</strong></span> feature under <span class="strong strong"><strong>Management</strong></span>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>By default, <code class="literal">Read</code> for the <span class="strong strong"><strong>Cases</strong></span> feature does not include authority to delete cases and comments or edit case settings. You can grant this authority by customizing the sub-feature privileges.</p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Revoke all access to cases</p></td>
+<td align="left" valign="top"><p><code class="literal">None</code> for the <span class="strong strong"><strong>Cases</strong></span> feature under <span class="strong strong"><strong>Management</strong></span>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For more details, refer to <a class="xref" href="kibana-privileges.html" title="Kibana privileges">Kibana privileges</a>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you are using an on-premises Kibana deployment and you want the email
+notifications and the external incident management systems to contain
+links back to Kibana, you must configure the
+<a class="xref" href="settings.html#server-publicBaseUrl"><code class="literal">server.publicBaseUrl</code></a> setting.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="cases.html">« Cases</a>
+</span>
+<span class="next">
+<a href="manage-cases.html">Open and manage cases »</a>
+</span>
+</div>
+</body>
+</html>

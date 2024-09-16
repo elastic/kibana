@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Collect Kibana monitoring data with Elastic Agent | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Collect Kibana monitoring data with Elastic Agent | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="configuring-monitoring.html" title="Configure monitoring in Kibana"/>
+<link rel="prev" href="configuring-monitoring.html" title="Configure monitoring in Kibana"/>
+<link rel="next" href="monitoring-metricbeat.html" title="Collect Kibana monitoring data with Metricbeat"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="configuring-monitoring.html">« Configure monitoring in Kibana</a>
+</span>
+<span class="next">
+<a href="monitoring-metricbeat.html">Collect Kibana monitoring data with Metricbeat »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="configuring-monitoring.html">Configure monitoring in Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Collect Kibana monitoring data with Elastic Agent</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-elastic-agent.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="monitoring-elastic-agent"></a>Collect Kibana monitoring data with Elastic Agent</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-elastic-agent.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>In 8.5 and later, you can use Elastic Agent to collect data about Kibana and ship it to
+the monitoring cluster, rather than <a class="xref" href="monitoring-metricbeat.html" title="Collect Kibana monitoring data with Metricbeat">using Metricbeat</a>
+or routing data through the production cluster as described in
+<a class="xref" href="monitoring-kibana.html" title="Collect monitoring data using legacy collectors">Legacy collection methods</a>.</p>
+<p>To learn about monitoring in general, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html" class="ulink" target="_top">Monitor a cluster</a>.</p>
+<div class="position-relative"><h4><a id="_prerequisites"></a>Prerequisites</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-elastic-agent.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Set up Elasticsearch monitoring and optionally create a monitoring cluster as described
+in the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitoring-production.html" class="ulink" target="_top">Elasticsearch monitoring documentation</a>.
+</li>
+<li class="listitem">
+Create a user on the production cluster that has the
+<code class="literal">remote_monitoring_collector</code> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html" class="ulink" target="_top">built-in role</a>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_add_kibana_monitoring_data"></a>Add Kibana monitoring data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/monitoring-elastic-agent.asciidoc">edit</a></div>
+<p>To collect Kibana monitoring data, add a Kibana integration to an Elastic Agent and
+deploy it to the host where Kibana is running.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Go to the Kibana home page and click <span class="strong strong"><strong>Add integrations</strong></span>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you&#8217;re using a monitoring cluster, use the Kibana instance connected to
+the monitoring cluster.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+In the query bar, search for and select the <span class="strong strong"><strong>Kibana</strong></span> integration for
+Elastic Agent.
+</li>
+<li class="listitem">
+Read the overview to make sure you understand integration requirements and
+other considerations.
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Add Kibana</strong></span>.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you&#8217;re installing an integration for the first time, you may be prompted
+to install Elastic Agent. Click <span class="strong strong"><strong>Add integration only (skip agent installation)</strong></span>.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Configure the integration name and optionally add a description. Make sure you
+configure all required settings:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Under <span class="strong strong"><strong>Collect Kibana logs</strong></span>, modify the log paths to match your Kibana
+environment.
+</li>
+<li class="listitem">
+Under <span class="strong strong"><strong>Collect Kibana metrics</strong></span>, make sure the hosts setting points to your
+Kibana host URLs. By default, the integration collects Kibana monitoring metrics
+from <code class="literal">localhost:5601</code>. If that host and port number are not correct, update the
+<code class="literal">hosts</code> setting. If you configured Kibana to use encrypted communications, you
+must access it via HTTPS. For example, use a <code class="literal">hosts</code> setting like
+<code class="literal">https://localhost:5601</code>.
+</li>
+<li class="listitem">
+If the Elastic security features are enabled, expand <span class="strong strong"><strong>Advanced options</strong></span>
+under the Hosts setting and enter the username and password of a user that has
+the <code class="literal">remote_monitoring_collector</code> role.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+Choose where to add the integration policy. Click <span class="strong strong"><strong>New hosts</strong></span> to add it to
+new agent policy or <span class="strong strong"><strong>Existing hosts</strong></span> to add it to an existing agent policy.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save and continue</strong></span>. This step takes a minute or two to complete. When
+it&#8217;s done, you&#8217;ll have an agent policy that contains an integration for
+collecting monitoring data from Kibana.
+</li>
+<li class="listitem">
+<p>If an Elastic Agent is already assigned to the policy and deployed to the host where
+Kibana is running, you&#8217;re done. Otherwise, you need to deploy an Elastic Agent. To
+deploy an Elastic Agent:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Go to <span class="strong strong"><strong>Fleet &#8594; Agents</strong></span>, then click <span class="strong strong"><strong>Add agent</strong></span>.
+</li>
+<li class="listitem">
+Follow the steps in the <span class="strong strong"><strong>Add agent</strong></span> flyout to download, install,
+and enroll the Elastic Agent. Make sure you choose the agent policy you created
+earlier.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+Wait a minute or two until incoming data is confirmed.
+</li>
+<li class="listitem">
+<a class="xref" href="monitoring-data.html" title="View monitoring data in Kibana">View the monitoring data in Kibana</a>.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="configuring-monitoring.html">« Configure monitoring in Kibana</a>
+</span>
+<span class="next">
+<a href="monitoring-metricbeat.html">Collect Kibana monitoring data with Metricbeat »</a>
+</span>
+</div>
+</body>
+</html>

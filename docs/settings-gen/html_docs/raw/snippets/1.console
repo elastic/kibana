@@ -1,0 +1,14 @@
+PUT _security/role/grant_kibana_system_indices
+{
+  "indices": [
+    {
+      "names": [
+        ".kibana*"
+      ],
+      "privileges": [
+        "all"
+      ],
+      "allow_restricted_indices": true
+    }
+  ]
+}

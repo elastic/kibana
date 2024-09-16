@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Testing Kibana Plugins | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Testing Kibana Plugins | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="external-plugin-development.html" title="External plugin development"/>
+<link rel="prev" href="external-plugin-localization.html" title="Localization for plugins outside the Kibana repo"/>
+<link rel="next" href="advanced.html" title="Advanced"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="external-plugin-localization.html">« Localization for plugins outside the Kibana repo</a>
+</span>
+<span class="next">
+<a href="advanced.html">Advanced »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="external-plugin-development.html">External plugin development</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Testing Kibana Plugins</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/testing-kibana-plugin.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="testing-kibana-plugin"></a>Testing Kibana Plugins</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/testing-kibana-plugin.asciidoc">edit</a></div>
+</div></div></div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_writing_tests"></a>Writing tests</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/testing-kibana-plugin.asciidoc">edit</a></div>
+</div></div></div>
+<p>Learn about <a class="xref" href="development-tests.html" title="Testing">recommended testing approaches </a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_mock_kibana_core_services_in_tests"></a>Mock Kibana Core services in tests</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/testing-kibana-plugin.asciidoc">edit</a></div>
+</div></div></div>
+<p>Core services already provide mocks to simplify testing and make sure
+plugins always rely on valid public contracts:</p>
+<p><span class="strong strong"><strong>my_plugin/server/plugin.test.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { configServiceMock } from '@kbn/core/server/mocks';
+
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(config$);
+…
+const plugin = new MyPlugin({ configService }, …);</pre>
+</div>
+<p>Or if you need to get the whole core <code class="literal">setup</code> or <code class="literal">start</code> contracts:</p>
+<p><span class="strong strong"><strong>my_plugin/server/plugin.test.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">import { coreMock } from '@kbn/core/public/mocks';
+
+const coreSetup = coreMock.createSetup();
+coreSetup.uiSettings.get.mockImplementation((key: string) =&gt; {
+  …
+});
+…
+const plugin = new MyPlugin(coreSetup, ...);</pre>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_writing_mocks_for_your_plugin"></a>Writing mocks for your plugin</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/testing-kibana-plugin.asciidoc">edit</a></div>
+</div></div></div>
+<p>Although it isn’t mandatory, we strongly recommended you export your
+plugin mocks as well, in order for dependent plugins to use them in
+tests. Your plugin mocks should be exported from the root <code class="literal">/server</code> and
+<code class="literal">/public</code> directories in your plugin:</p>
+<p><span class="strong strong"><strong>my_plugin/(server|public)/mocks.ts</strong></span></p>
+<div class="pre_wrapper lang-typescript">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-typescript">const createSetupContractMock = () =&gt; {
+  const startContract: jest.Mocked&lt;MyPluginStartContract&gt;= {
+    isValid: jest.fn(),
+  }
+  // here we already type check as TS infers to the correct type declared above
+  startContract.isValid.mockReturnValue(true);
+  return startContract;
+}
+
+export const myPluginMocks = {
+  createSetup: createSetupContractMock,
+  createStart: …
+}</pre>
+</div>
+<p>Plugin mocks should consist of mocks for <em>public APIs only</em>:
+<code class="literal">setup</code>, <code class="literal">start</code> &amp; <code class="literal">stop</code> contracts. Mocks aren’t necessary for pure functions as
+other plugins can call the original implementation in tests.</p>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="external-plugin-localization.html">« Localization for plugins outside the Kibana repo</a>
+</span>
+<span class="next">
+<a href="advanced.html">Advanced »</a>
+</span>
+</div>
+</body>
+</html>

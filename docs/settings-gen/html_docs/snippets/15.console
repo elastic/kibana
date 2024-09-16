@@ -1,0 +1,11 @@
+POST test/_bulk
+{"index":{}}
+{"name":"aaron","age":23,"hair":"brown"}
+{"index":{}}
+{"name":"sue","age":19,"hair":"red"}
+{"index":{}}
+{"name":"sally","age":19,"hair":"blonde"}
+{"index":{}}
+{"name":"george","age":19,"hair":"blonde"}
+{"index":{}}
+{"name":"fred","age":69,"hair":"blonde"}

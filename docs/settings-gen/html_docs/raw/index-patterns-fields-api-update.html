@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Update index pattern fields API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Update index pattern fields API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index-patterns-api.html" title="Index patterns APIs"/>
+<link rel="prev" href="index-patterns-api-default-set.html" title="Set default index pattern API"/>
+<link rel="next" href="index-patterns-runtime-field-api-get.html" title="Get runtime field API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="index-patterns-api-default-set.html">« Set default index pattern API</a>
+</span>
+<span class="next">
+<a href="index-patterns-runtime-field-api-get.html">Get runtime field API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index-patterns-api.html">Index patterns APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Update index pattern fields API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="index-patterns-fields-api-update"></a>Update index pattern fields API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<h3>Deprecated in 8.0.0.</h3>
+<p>Use the <a href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-data-views" class="ulink" target="_top">data views API</a> instead.</p>
+</div>
+</div>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Update fields presentation metadata, such as <code class="literal">count</code>,
+<code class="literal">customLabel</code>, and <code class="literal">format</code>. You can update multiple fields in one request. Updates
+are merged with persisted metadata. To remove existing metadata, specify <code class="literal">null</code> as the value.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="index-patterns-fields-api-update-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/api/index_patterns/index_pattern/&lt;id&gt;/fields</code></p>
+<p><code class="literal">POST &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/index_patterns/index_pattern/&lt;id&gt;/fields</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="index-patterns-fields-api-update-path-params"></a>Path parameters</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">space_id</code>
+</span>
+</dt>
+<dd>
+(Optional, string) An identifier for the space. If <code class="literal">space_id</code> is not provided in the URL, the default space is used.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The ID of the index pattern fields you want to update.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="index-patterns-fields-api-update-request-body"></a>Request body</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">fields</code>
+</span>
+</dt>
+<dd>
+(Required, object) the field object
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="index-patterns-fields-api-update-errors-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="index-patterns-fields-api-update-example"></a>Examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/index-patterns/update-fields.asciidoc">edit</a></div>
+</div></div></div>
+<p>Set popularity <code class="literal">count</code> for field <code class="literal">foo</code>:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/51.kibana"></div>
+<p>Update multiple metadata fields in one request:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123,
+            "customLabel": "Foo"
+        },
+        "bar": {
+            "customLabel": "Bar"
+        }
+    }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/52.kibana"></div>
+<p>Use <code class="literal">null</code> value to delete metadata:</p>
+<div class="pre_wrapper lang-kibana">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-kibana">$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "customLabel": null
+        }
+    }
+}</pre>
+</div>
+<div class="kibana_widget" data-snippet="snippets/53.kibana"></div>
+<p>The endpoint returns the updated index pattern object:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{
+    "index_pattern": {
+
+    }
+}</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="index-patterns-api-default-set.html">« Set default index pattern API</a>
+</span>
+<span class="next">
+<a href="index-patterns-runtime-field-api-get.html">Get runtime field API »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Alerting production considerations | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Alerting production considerations | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="production.html" title="Use Kibana in a production environment"/>
+<link rel="prev" href="Security-production-considerations.html" title="Security production considerations"/>
+<link rel="next" href="reporting-production-considerations.html" title="Reporting production considerations"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="Security-production-considerations.html">« Security production considerations</a>
+</span>
+<span class="next">
+<a href="reporting-production-considerations.html">Reporting production considerations »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="production.html">Use Kibana in a production environment</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Alerting production considerations</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="alerting-production-considerations"></a>Alerting production considerations</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Alerting runs both rule checks and actions as persistent background tasks managed by the Task Manager.</p>
+<p>When relying on rules and actions as mission critical services, make sure you follow the <a class="xref" href="task-manager-production-considerations.html" title="Task Manager">production considerations</a> for Task Manager.</p>
+<div class="position-relative"><h3><a id="alerting-background-tasks"></a>Running background rule checks and actions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>Kibana uses background tasks to run rules and actions, distributed across all Kibana instances in the cluster.</p>
+<p>By default, each Kibana instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
+These tasks are then run on the Kibana server.</p>
+<p>Rules are recurring background tasks which are rescheduled according to the check interval on completion.
+Actions are non-recurring background tasks which are deleted on completion.</p>
+<p>For more details on Task Manager, see <a class="xref" href="task-manager-production-considerations.html#task-manager-background-tasks" title="Running background tasks">Running background tasks</a>.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Rule and action tasks can run late or at an inconsistent schedule.
+This is typically a symptom of the specific usage of the cluster in question.</p>
+<p>You can address such issues by tweaking the <a class="xref" href="task-manager-settings-kb.html#task-manager-settings" title="Task Manager settings">Task Manager settings</a> or scaling the deployment to better suit your use case.</p>
+<p>For detailed guidance, see <a class="xref" href="alerting-troubleshooting.html" title="Troubleshooting and limitations">Alerting Troubleshooting</a>.</p>
+</div>
+</div>
+<div class="position-relative"><h3><a id="alerting-scaling-guidance"></a>Scaling guidance</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>As rules and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <a class="xref" href="task-manager-production-considerations.html#task-manager-scaling-guidance" title="Scaling guidance">Task Manager Scaling Guidance</a>.</p>
+<p>When estimating the required task throughput, keep the following in mind:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Each rule uses a single recurring task that is scheduled to run at the cadence defined by its check interval.
+</li>
+<li class="listitem">
+Each action uses a single task. However, because actions are taken per instance, alerts can generate a large number of non-recurring tasks.
+</li>
+</ul>
+</div>
+<p>It is difficult to predict how much throughput is needed to ensure all rules and actions are executed at consistent schedules.
+By counting rules as recurring tasks and actions as non-recurring tasks, a rough throughput <a class="xref" href="task-manager-production-considerations.html#task-manager-rough-throughput-estimation" title="Rough throughput estimation">can be estimated</a> as a <em>tasks per minute</em> measurement.</p>
+<p>Predicting the buffer required to account for actions depends heavily on the rule types you use, the amount of alerts they might detect, and the number of actions you might choose to assign to action groups. With that in mind, regularly <a class="xref" href="task-manager-health-monitoring.html" title="Task Manager health monitoring">monitor the health</a> of your Task Manager instances.</p>
+<div class="position-relative"><h3><a id="event-log-ilm"></a>Event log index lifecycle management</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>Alerts and actions log activity in a set of "event log" data streams, one per Kibana version, named <code class="literal">.kibana-event-log-{VERSION}</code>.  These data streams are configured with a lifecycle data retention of 90 days. This can be updated to other values via the standard data stream lifecycle APIs.  Note that the event log data contains the data shown in the alerting pages in Kibana, so reducing the data retention period will result in less data being available to view.</p>
+<p>For more information on data stream lifecycle management, see:
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/data-stream-lifecycle.html" class="ulink" target="_top">Data stream lifecycle</a>.</p>
+<div class="position-relative"><h3><a id="alerting-circuit-breakers"></a>Circuit breakers</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>There are several scenarios where running alerting rules and actions can start to negatively impact the overall health of a Kibana instance either by clogging up Task Manager throughput or by consuming so much CPU/memory that other operations cannot complete in a reasonable amount of time. There are several <a class="xref" href="alert-action-settings-kb.html#alert-settings" title="Alerting settings">configurable</a> circuit breakers to help minimize these effects.</p>
+<div class="position-relative"><h4><a id="_rules_with_very_short_intervals"></a>Rules with very short intervals</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>Running large numbers of rules at very short intervals can quickly clog up Task Manager throughput, leading to higher schedule drift. Use <code class="literal">xpack.alerting.rules.minimumScheduleInterval.value</code> to set a minimum schedule interval for rules. The default (and recommended) value for this configuration is <code class="literal">1m</code>. Use <code class="literal">xpack.alerting.rules.minimumScheduleInterval.enforce</code> to specify whether to strictly enforce this minimum. While the default value for this setting is <code class="literal">false</code> to maintain backwards compatibility with existing rules, set this to <code class="literal">true</code> to prevent new and updated rules from running at an interval below the minimum.</p>
+<p>Another related setting is <code class="literal">xpack.alerting.rules.maxScheduledPerMinute</code>, which limits the number of rules that can run per minute.
+For example if it&#8217;s set to <code class="literal">400</code>, you can have 400 rules with one minute check intervals or 2,000 rules with 5 minute check intervals.
+You cannot create or edit a rule if its check interval would cause this setting to be exceeded.
+To stay within this limit, delete or disable some rules or update the check intervals so that your rules run less frequently.</p>
+<div class="position-relative"><h4><a id="_rules_that_run_for_a_long_time"></a>Rules that run for a long time</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>Rules that run for a long time typically do so because they are issuing resource-intensive Elasticsearch queries or performing CPU-intensive processing. This can block the event loop, making Kibana inaccessible while the rule runs. By default, rule processing is cancelled after <code class="literal">5m</code> but this can be overriden using the <code class="literal">xpack.alerting.rules.run.timeout</code> configuration. This value can also be configured per rule type using <code class="literal">xpack.alerting.rules.run.ruleTypeOverrides</code>. For example, the following configuration sets the global timeout value to <code class="literal">1m</code> while allowing <span class="strong strong"><strong>Index Threshold</strong></span> rules to run for <code class="literal">10m</code> before being cancelled.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.alerting.rules.run:
+  timeout: '1m'
+  ruleTypeOverrides:
+    - id: '.index-threshold'
+      timeout: '10m'</pre>
+</div>
+<p>When a rule run is cancelled, any alerts and actions that were generated during the run are discarded. This behavior is controlled by the <code class="literal">xpack.alerting.cancelAlertsOnRuleTimeout</code> configuration, which defaults to <code class="literal">true</code>. Set this to <code class="literal">false</code> to receive alerts and actions after the timeout, although be aware that these may be incomplete and possibly inaccurate.</p>
+<div class="position-relative"><h4><a id="_rules_that_spawn_too_many_actions"></a>Rules that spawn too many actions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/production-considerations/alerting-production-considerations.asciidoc">edit</a></div>
+<p>Rules that spawn too many actions can quickly clog up Task Manager throughput. This can occur if:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A rule configured with a single action generates many alerts. For example, if a rule configured to run a single email action generates 100,000 alerts, then 100,000 actions will be scheduled during a run.
+</li>
+<li class="listitem">
+A rule configured with multiple actions generates alerts. For example, if a rule configured to run an email action, a server log action and a webhook action generates 30,000 alerts, then 90,000 actions will be scheduled during a run.
+</li>
+</ul>
+</div>
+<p>Use <code class="literal">xpack.alerting.rules.run.actions.max</code> to limit the maximum number of actions a rule can generate per run. This value can also be configured by connector type using <code class="literal">xpack.alerting.rules.run.actions.connectorTypeOverrides</code>. For example, the following config sets the global maximum number of actions to 100 while allowing rules with <span class="strong strong"><strong>Email</strong></span> actions to generate up to 200 actions.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">xpack.alerting.rules.run:
+  actions:
+    max: 100
+    connectorTypeOverrides:
+      - id: '.email'
+        max: 200</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="Security-production-considerations.html">« Security production considerations</a>
+</span>
+<span class="next">
+<a href="reporting-production-considerations.html">Reporting production considerations »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

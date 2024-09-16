@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.0.0-rc2 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.0.0-rc2 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="enhancements-and-bug-fixes-v8.0.0.html" title="Enhancements and bug fixes"/>
+<link rel="next" href="enhancements-and-bug-fixes-v8.0.0-rc2.html" title="Enhancements and bug fixes"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.0.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.0.0-rc2.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.0.0-rc2</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.0.0-rc2"></a>Kibana 8.0.0-rc2</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>For information about the Kibana 8.0.0-rc2 release, review the following information.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.0.0-rc2"></a>Breaking change</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.</p>
+<details id="breaking-122722">
+<summary class="title">Removes the ability to use <code class="literal">elasticsearch.username: elastic</code> in production</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In production, you are no longer able to use the <code class="literal">elastic</code> superuser to authenticate to Elasticsearch. For more information, refer to <a href="https://github.com/elastic/kibana/pull/122722" class="ulink" target="_top">#122722</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you configure <code class="literal">elasticsearch.username: elastic</code>, Kibana fails.</p>
+</div>
+</details>
+<p>To review the breaking changes in previous versions, refer to the following:</p>
+<p><a class="xref" href="release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1" title="Breaking changes">8.0.0-rc1</a> | <a class="xref" href="release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1" title="Breaking changes">8.0.0-beta1</a> | <a class="xref" href="release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2" title="Breaking changes">8.0.0-alpha2</a> |
+<a class="xref" href="release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" title="Breaking changes">8.0.0-alpha1</a></p>
+<div class="position-relative"><h3><a id="features-8.0.0-rc2"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Kibana 8.0.0-rc2 adds the following new and notable features.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Dashboard
+</span>
+</dt>
+<dd>
+Dashboard Integration <a href="https://github.com/elastic/kibana/pull/115991" class="ulink" target="_top">#115991</a>
+</dd>
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.0.0-rc2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Monitoring
+</span>
+</dt>
+<dd>
+Enterprise Search Stack Monitoring <a href="https://github.com/elastic/kibana/pull/114303" class="ulink" target="_top">#114303</a>
+</dd>
+<dt>
+<span class="term">
+Observability
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds Agent Keys in APM settings - Create agent keys <a href="https://github.com/elastic/kibana/pull/120373" class="ulink" target="_top">#120373</a>
+</li>
+<li class="listitem">
+Adds Agent Keys in APM settings - Agent key table <a href="https://github.com/elastic/kibana/pull/119543" class="ulink" target="_top">#119543</a>
+</li>
+<li class="listitem">
+Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors in Uptime <a href="https://github.com/elastic/kibana/pull/118594" class="ulink" target="_top">#118594</a>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+Platform
+</span>
+</dt>
+<dd>
+Changes saved objects management inspect view to a read-only JSON view of the whole saved object <a href="https://github.com/elastic/kibana/pull/112034" class="ulink" target="_top">#112034</a>
+</dd>
+</dl>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="enhancements-and-bug-fixes-v8.0.0.html">« Enhancements and bug fixes</a>
+</span>
+<span class="next">
+<a href="enhancements-and-bug-fixes-v8.0.0-rc2.html">Enhancements and bug fixes »</a>
+</span>
+</div>
+</body>
+</html>

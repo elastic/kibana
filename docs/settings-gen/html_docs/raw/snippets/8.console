@@ -1,0 +1,19 @@
+PUT <kibana host>:<port>/api/security/role/custom_reporting_user
+{
+	"elasticsearch": {
+		"cluster": [],
+		"indices": [],
+		"run_as": []
+	},
+	"kibana": [{
+		"spaces": ["*"],
+		"base": [],
+		"feature": {
+			"dashboard": ["generate_report", 
+      "download_csv_report"],
+      "discover": ["generate_report"],
+			"canvas": ["generate_report"],
+			"visualize": ["generate_report"]
+		}
+	}]
+}

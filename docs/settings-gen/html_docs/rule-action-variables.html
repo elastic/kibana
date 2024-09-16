@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Rule action variables | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Rule action variables | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="alerting-getting-started.html" title="Alerting"/>
+<link rel="prev" href="geo-alerting.html" title="Create a tracking containment rule"/>
+<link rel="next" href="alerting-troubleshooting.html" title="Troubleshooting and limitations"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="geo-alerting.html">« Create a tracking containment rule</a>
+</span>
+<span class="next">
+<a href="alerting-troubleshooting.html">Troubleshooting and limitations »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Rule action variables</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="rule-action-variables"></a>Rule action variables</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+</div></div></div>
+<p>Alerting rules can use the <a href="https://mustache.github.io/mustache.5.html" class="ulink" target="_top">Mustache</a> template syntax
+(<code class="literal">{{variable name}}</code>) to pass values when the actions run.</p>
+<div class="position-relative"><h3><a id="common-rule-action-variables"></a>Common variables</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>The available variables differ by rule type, however there are some common variables:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="rule-action-variables.html#general-rule-action-variables" title="General">General</a>
+</li>
+<li class="listitem">
+<a class="xref" href="rule-action-variables.html#alert-summary-action-variables" title="Action frequency: Summary of alerts">Action frequency: Summary of alerts</a>
+</li>
+<li class="listitem">
+<a class="xref" href="rule-action-variables.html#alert-action-variables" title="Action frequency: For each alert">Action frequency: For each alert</a>
+</li>
+</ul>
+</div>
+<p>Some cases exist where the variable values will be "escaped" when used in a context where escaping is needed. For example:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+For the <a class="xref" href="email-action-type.html" title="Email connector and action">email connector</a>, the <code class="literal">message</code> action configuration property escapes any characters that would be interpreted as Markdown.
+</li>
+<li class="listitem">
+For the <a class="xref" href="slack-action-type.html" title="Slack connector and action">Slack connector</a>, the <code class="literal">message</code> action configuration property escapes any characters that would be interpreted as Slack Markdown.
+</li>
+<li class="listitem">
+For the <a class="xref" href="webhook-action-type.html" title="Webhook connector and action">Webhook connector</a>, the <code class="literal">body</code> action configuration property escapes any characters that are invalid in JSON string values.
+</li>
+</ul>
+</div>
+<p>Mustache also supports "triple braces" of the form <code class="literal">{{{variable name}}}</code>, which indicates no escaping should be done at all. Use this form with caution, since it could end up rendering the variable content such that the resulting parameter is invalid or formatted incorrectly.</p>
+<div class="position-relative"><h4><a id="general-rule-action-variables"></a>General</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>All rule types pass the following variables:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">date</code>
+</span>
+</dt>
+<dd>
+The date the rule scheduled the action, in ISO format.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibanaBaseUrl</code>
+</span>
+</dt>
+<dd>
+The configured <a class="xref" href="settings.html#server-publicBaseUrl"><code class="literal">server.publicBaseUrl</code></a>. If not configured, this will be empty.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.id</code>
+</span>
+</dt>
+<dd>
+The rule identifier.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.name</code>
+</span>
+</dt>
+<dd>
+The rule name.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.params</code>
+</span>
+</dt>
+<dd>
+The rule parameters, which vary by rule type.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.spaceId</code>
+</span>
+</dt>
+<dd>
+The space identifier for the rule.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.tags</code>
+</span>
+</dt>
+<dd>
+The list of tags applied to the rule.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">rule.url</code>
+</span>
+</dt>
+<dd>
+The URL for the rule that generated the alert. This will be an empty string if the <code class="literal">server.publicBaseUrl</code> setting is not configured.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4 class="child_attributes"><a id="alert-summary-action-variables"></a>Action frequency: Summary of alerts</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>If the rule&#8217;s action frequency is a summary of alerts, it passes the following variables:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">alerts.all.count</code>
+</span>
+</dt>
+<dd>
+The count of all alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.all.data</code>
+</span>
+</dt>
+<dd>
+<p>
+An array of objects for all alerts. The following object properties are examples; it is not a comprehensive list.
+</p>
+<details open>
+<summary class="title">Properties of the alerts.all.data objects</summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.end</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert end. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.flapping</code>
+</span>
+</dt>
+<dd>
+A flag on the alert that indicates whether the alert status is changing repeatedly. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.instance.id</code>
+</span>
+</dt>
+<dd>
+ID of the source that generates the alert. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.reason</code>
+</span>
+</dt>
+<dd>
+The reason of the alert (generated with the rule conditions). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.start</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert start. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.status</code>
+</span>
+</dt>
+<dd>
+Alert status (for example, active or OK). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.new.count</code>
+</span>
+</dt>
+<dd>
+The count of new alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.new.data</code>
+</span>
+</dt>
+<dd>
+<p>
+An array of objects for new alerts. The following object properties are examples; it is not a comprehensive list.
+</p>
+<details>
+<summary class="title">Properties of the alerts.new.data objects</summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.end</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert end. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.flapping</code>
+</span>
+</dt>
+<dd>
+A flag on the alert that indicates whether the alert status is changing repeatedly. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.instance.id</code>
+</span>
+</dt>
+<dd>
+ID of the source that generates the alert. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.reason</code>
+</span>
+</dt>
+<dd>
+The reason of the alert (generated with the rule conditions). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.start</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert start. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.status</code>
+</span>
+</dt>
+<dd>
+Alert status (for example, active or OK). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.ongoing.count</code>
+</span>
+</dt>
+<dd>
+The count of ongoing alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.ongoing.data</code>
+</span>
+</dt>
+<dd>
+<p>
+An array of objects for ongoing alerts. The following object properties are examples; it is not a comprehensive list.
+</p>
+<details>
+<summary class="title">Properties of the alerts.ongoing.data objects</summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.end</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert end. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.flapping</code>
+</span>
+</dt>
+<dd>
+A flag on the alert that indicates whether the alert status is changing repeatedly. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.instance.id</code>
+</span>
+</dt>
+<dd>
+ID of the source that generates the alert. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.reason</code>
+</span>
+</dt>
+<dd>
+The reason of the alert (generated with the rule conditions). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.start</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert start. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.status</code>
+</span>
+</dt>
+<dd>
+Alert status (for example, active or OK). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.recovered.count</code>
+</span>
+</dt>
+<dd>
+The count of recovered alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alerts.recovered.data</code>
+</span>
+</dt>
+<dd>
+<p>
+An array of objects for recovered alerts. The following object properties are examples; it is not a comprehensive list.
+</p>
+<details>
+<summary class="title">Properties of the alerts.recovered.data objects</summary>
+<div class="content">
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.end</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert end. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.flapping</code>
+</span>
+</dt>
+<dd>
+A flag on the alert that indicates whether the alert status is changing repeatedly. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.instance.id</code>
+</span>
+</dt>
+<dd>
+ID of the source that generates the alert. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.reason</code>
+</span>
+</dt>
+<dd>
+The reason of the alert (generated with the rule conditions). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.start</code>
+</span>
+</dt>
+<dd>
+Datetime stamp of alert start. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">kibana.alert.status</code>
+</span>
+</dt>
+<dd>
+Alert status (for example, active or OK). <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="alert-action-variables"></a>Action frequency: For each alert</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>If the rule&#8217;s action frequency is not a summary of alerts, it passes the following variables:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">alert.actionGroup</code>
+</span>
+</dt>
+<dd>
+The ID of the action group of the alert that scheduled the action.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.actionGroupName</code>
+</span>
+</dt>
+<dd>
+The name of the action group of the alert that scheduled the action.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.actionSubgroup</code>
+</span>
+</dt>
+<dd>
+The action subgroup of the alert that scheduled the action.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.consecutiveMatches</code>
+</span>
+</dt>
+<dd>
+The number of consecutive runs that meet the rule conditions.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.flapping</code>
+</span>
+</dt>
+<dd>
+A flag on the alert that indicates whether the alert status is changing repeatedly.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.id</code>
+</span>
+</dt>
+<dd>
+The ID of the alert that scheduled the action.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">alert.uuid</code>
+</span>
+</dt>
+<dd>
+A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. <span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h5><a id="defining-rules-actions-variable-context"></a>Context</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>If the rule&#8217;s action frequency is not a summary of alerts, the rule defines additional variables as properties of the variable <code class="literal">context</code>. For example, if a rule type defines a variable <code class="literal">value</code>, it can be used in an action parameter as <code class="literal">{{context.value}}</code>.</p>
+<p>For diagnostic or exploratory purposes, action variables whose values are objects, such as <code class="literal">context</code>, can be referenced directly as variables. The resulting value will be a JSON representation of the object. For example, if an action parameter includes <code class="literal">{{context}}</code>, it will expand to the JSON representation of all the variables and values provided by the rule type. To see all alert-specific variables, use <code class="literal">{{.}}</code>.</p>
+<p>For situations where your rule response returns arrays of data, you can loop through the <code class="literal">context</code>:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{{#context}}{{.}}{{/context}}</pre>
+</div>
+<p>For example, looping through search result hits:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">triggering data was:
+{{#context.hits}} - {{_source.message}}
+{{/context.hits}}</pre>
+</div>
+<div class="position-relative"><h3><a id="enhance-mustache-variables"></a>Enhancing Mustache variables</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</p>
+</div>
+</div>
+<p>You can enhance the values contained in Mustache variables when the Mustache template is rendered by rendering objects as JSON or by using Mustache lambdas.</p>
+<div class="position-relative"><h4><a id="_rendering_objects_as_json"></a>Rendering objects as JSON</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>Some connectors (such as the <a class="xref" href="webhook-action-type.html" title="Webhook connector and action">Webhook connector</a>) expect JSON values to be passed as parameters when the connector is invoked.
+The following capabilities are available:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Array values referenced in braces have a predefined rendering by Mustache as string versions of the array elements, joined with a comma (<code class="literal">,</code>). To render array values as JSON, access the <code class="literal">asJSON</code> property of the array, instead of the array directly. For example, given a Mustache variable <code class="literal">context.values</code> that has the value <code class="literal">[1, 4, 9]</code> the Mustache template <code class="literal">{{context.values}}</code> will render as <code class="literal">1,4,9</code>, and the Mustache template <code class="literal">{{context.values.asJSON}}</code> will render as <code class="literal">[1,4,9]</code>.
+</li>
+<li class="listitem">
+The <a class="xref" href="rule-action-variables.html#parse-hjson-lambda" title="ParseHjson">ParseHjson lambda</a> Mustache lambda makes it easier to create JSON in your templates by using <a href="https://hjson.github.io/" class="ulink" target="_top">Hjson</a>, a syntax extension to JSON, rather than strict JSON.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_using_mustache_lambdas"></a>Using Mustache lambdas</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>Mustache lambdas provide additional rendering capabilities for Mustache templates.
+A Mustache lambda is formatted like a Mustache section. For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{{#EvalMath}} round(context.value, 1) {{/EvalMath}}</pre>
+</div>
+<p>In that example, the lambda <code class="literal">EvalMath</code> is passed the text <code class="literal">round(context.value, 1)</code> and renders a rounded value of the <code class="literal">context.value</code> variable.
+This pattern is used by all the provided Mustache lambdas described in the subsequent sections.</p>
+<div class="position-relative"><h5><a id="_evalmath"></a>EvalMath</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>The EvalMath lambda will evaluate the text passed to it as <a class="xref" href="canvas-tinymath-functions.html" title="TinyMath functions">TinyMath functions</a>.</p>
+<p>For example, when the Mustache variable <code class="literal">context.value</code> is <code class="literal">3.1234</code>, the following template will render as <code class="literal">3.1</code>:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{{#EvalMath}} round(context.value, 1) {{/EvalMath}}</pre>
+</div>
+<p>This lambda can access Mustache variables without having to wrap them in <code class="literal">{{}}</code>.
+However, if the value is in a string form (for example, an Elasticsearch numeric field whose source was indexed as a string), or could be escaped, escaping the value with triple quotes should allow this to work.
+For example, if the Mustache variable <code class="literal">context.value</code> is <code class="literal">"3.1234"</code>, the following template will render as <code class="literal">3.1</code>:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{{#EvalMath}} round( {{{context.value}}} , 1) {{/EvalMath}}</pre>
+</div>
+<div class="position-relative"><h5><a id="parse-hjson-lambda"></a>ParseHjson</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>The ParseHjson lambda provides ease-of-use capabilities when constructing JSON objects.
+<a href="https://hjson.github.io/" class="ulink" target="_top">Hjson</a> is a syntax extension to JSON. It has the following features:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Missing and extra trailing commas are allowed in arrays and objects.
+</li>
+<li class="listitem">
+Comments are supported.
+</li>
+<li class="listitem">
+Property names can be specified without quotes.
+</li>
+<li class="listitem">
+Property values can be specified without quotes (one per line and no commas).
+</li>
+<li class="listitem">
+Multi-line strings have dedent support to remove the leading whitespace.
+</li>
+<li class="listitem">
+Legal JSON documents are supported.
+</li>
+</ul>
+</div>
+<p>To use it, surround your Hjson content with <code class="literal">{{#ParseHjson}}...{{/ParseHjson}}</code>.
+For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">{{#ParseHjson}}
+{
+  # add the rule id and name to the JSON document
+  ruleId:   "{{rule.id}}"
+  ruleName: "{{rule.name}}"
+}
+{{/ParseHjson}}</pre>
+</div>
+<p>When rendered, this template will generate:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">    {
+      "ruleId": "&lt;the rule id is here&gt;",
+      "ruleName": "&lt;the rule name is here&gt;"
+    }</pre>
+</div>
+<div class="position-relative"><h5><a id="_formatdate"></a>FormatDate</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>The FormatDate lambda provides date formatting capabilities.
+Dates can be formatted in an arbitrary time zone and with an arbitrary format string.</p>
+<p>To use it, surround the date and formatting parameters with <code class="literal">{{#FormatDate}}...{{/FormatDate}}</code>.</p>
+<p>The format of the text passed to the lambda is: <code class="literal">&lt;date&gt;; &lt;time zone&gt;; &lt;date format&gt;</code>, where semicolons (<code class="literal">;</code>) separate each parameter.
+The <code class="literal">&lt;date&gt;</code> parameter is required; the <code class="literal">&lt;time zone&gt;</code> and <code class="literal">&lt;date format&gt;</code> parameters are optional.
+The default time zone is <code class="literal">"UTC"</code> and the default date format is <code class="literal">"YYYY-MM-DD hh:mma"</code>.
+For example, the following templates all render the same value:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">    {{#FormatDate}} {{{timestamp}}} {{/FormatDate}}
+    {{#FormatDate}} {{{timestamp}}} ; UTC {{/FormatDate}}
+    {{#FormatDate}} {{{timestamp}}} ; UTC; YYYY-MM-DD hh:mma {{/FormatDate}}
+    {{#FormatDate}} {{{timestamp}}} ; ; YYYY-MM-DD hh:mma {{/FormatDate}}</pre>
+</div>
+<p>The <code class="literal">&lt;time zone&gt;</code> parameter must be a valid time zone identifier as listed in <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" class="ulink" target="_top">TZ database time zone names</a>, such as <code class="literal">"America/New_York"</code>.</p>
+<p>The <code class="literal">&lt;date format&gt;</code> parameter must be a valid date format string as described in the <a href="https://momentjs.com/docs/#/displaying/" class="ulink" target="_top">Moment <code class="literal">format()</code> documentation</a>.
+For example, the date format <code class="literal">"YYYY-MM-DD hh:mma"</code> will render in the following format: <code class="literal">"2023-04-24 11:21pm"</code>.</p>
+<p>The date value itself should usually be referenced with triple braces since some characters in date strings may contain values that are escaped, which would prevent them from being parsed as dates.</p>
+<div class="position-relative"><h5><a id="_formatnumber"></a>FormatNumber</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>The FormatNumber lambda provides number formatting capabilities using the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat" class="ulink" target="_top"><code class="literal">Intl.NumberFormat</code> object</a>.</p>
+<p>Numbers can be formatted with the following <code class="literal">Intl.NumberFormat</code> options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">compactDisplay</code>
+</li>
+<li class="listitem">
+<code class="literal">currencyDisplay</code>
+</li>
+<li class="listitem">
+<code class="literal">currencySign</code>
+</li>
+<li class="listitem">
+<code class="literal">notation</code>
+</li>
+<li class="listitem">
+<code class="literal">signDisplay</code>
+</li>
+<li class="listitem">
+<code class="literal">unitDisplay</code>
+</li>
+<li class="listitem">
+<code class="literal">unit</code>
+</li>
+<li class="listitem">
+<code class="literal">useGrouping</code> - but only values true and false
+</li>
+<li class="listitem">
+<code class="literal">minimumIntegerDigits</code>
+</li>
+<li class="listitem">
+<code class="literal">minimumFractionDigits</code>
+</li>
+<li class="listitem">
+<code class="literal">maximumFractionDigits</code>
+</li>
+<li class="listitem">
+<code class="literal">minimumSignificantDigits</code>
+</li>
+<li class="listitem">
+<code class="literal">maximumSignificantDigits</code>
+</li>
+</ul>
+</div>
+<p>To use the lambda, surround the number and formatting options with <code class="literal">{{#FormatNumber}}...{{/FormatNumber}}</code>.</p>
+<p>The format of the text passed to the lambda is: <code class="literal">&lt;number&gt;; &lt;locales&gt;; &lt;options&gt;</code>, where semicolons (<code class="literal">;</code>) separate each parameter.
+The <code class="literal">&lt;number&gt;</code> parameter is required; it is the value to be formatted.
+The <code class="literal">&lt;locales&gt;</code> and <code class="literal">&lt;options&gt;</code> parameters are optional, but the semicolons must be provided; the values may be empty strings.
+The <code class="literal">&lt;locales&gt;</code> parameter is a list of locales separated by commas (<code class="literal">,</code>).
+The <code class="literal">&lt;options&gt;</code> parameter is a list of key value pairs separated by commas (<code class="literal">,</code>).
+The key value pairs are strings separated by colons (<code class="literal">:</code>) where the key is the name of the option and the value is the value of the option.
+The default locale is <code class="literal">en-US</code> and no options are set by default.</p>
+<p>For more information on locale strings, refer to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument" class="ulink" target="_top">the <code class="literal">locales</code> argument documentation from the <code class="literal">Intl</code> reference</a>.</p>
+<p>The options and values that can be used with them are listed under <code class="literal">options</code> in the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat" class="ulink" target="_top">Intl.NumberFormat() constructor documentation</a>.</p>
+<p>For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+        {{{context.value.condition0}}} ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}</pre>
+</div>
+<p>If the context variable <code class="literal">context.value.condition0</code> has a value of <code class="literal">628.4</code>, it results in the following text:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">    original value: 628.4
+    formatted value: 628,40 €</pre>
+</div>
+<p>The <code class="literal">{{FormatNumber}}</code> and <code class="literal">{{EvalMath}}</code> lambdas can be used together to perform calculations on numbers and then format them. For example:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+      {{#EvalMath}} {{context.value.condition0}} * 0.1 {{/EvalMath}}
+      ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}</pre>
+</div>
+<p>If the context variable <code class="literal">context.value.condition0</code> has a value of <code class="literal">628.4</code>, it results in the following text:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">    original value: 628.4
+    formatted value: 62,84 €</pre>
+</div>
+<div class="position-relative"><h3><a id="mustache-examples"></a>Mustache examples</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/action-variables.asciidoc">edit</a></div>
+<p>This example demonstrates a Mustache template for an email action sent from an Elasticsearch query rule.
+The template references the following Mustache variables:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">date</code>
+</li>
+<li class="listitem">
+<code class="literal">context.title</code>
+</li>
+<li class="listitem">
+<code class="literal">context.conditions</code>
+</li>
+<li class="listitem">
+<code class="literal">context.link</code>
+</li>
+<li class="listitem">
+<code class="literal">context.hits[]._source.event.provider</code>
+</li>
+<li class="listitem">
+<code class="literal">context.hits[]._source.event.action</code>
+</li>
+<li class="listitem">
+<code class="literal">context.hits[]._source.event.duration</code>
+</li>
+</ul>
+</div>
+<p>For example, if you have data like this available as Mustache variables:</p>
+<div class="pre_wrapper lang-json">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-json">{
+  "date": "2023-04-27T22:40:34.153Z",
+  "context": {
+    "title": "rule 'esq' matched query for group host-2",
+    "conditions": "Number of matching documents for group \"host-2\" is less than 1000",
+    "link": "https://example.com/this-will-link-to-Discover",
+    "hits": [
+      {
+        "_source": {
+          "event": {
+            "provider": "alerting",
+            "action": "active-instance",
+            "duration": "96023000000"
+          }
+        }
+      },
+      {
+        "_source": {
+          "@timestamp": "2023-04-27T22:40:22.251Z",
+          "event": {
+            "provider": "alerting",
+            "action": "execute-action"
+          }
+        }
+      }
+    ]
+  }
+}</pre>
+</div>
+<p>You can create the following Mustache template in the email action for your rule:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js"># {{context.title}} <a id="CO37-1"></a><i class="conum" data-value="1"></i>
+
+{{#FormatDate}} {{{date}}} ; America/New_York {{/FormatDate}} <a id="CO37-2"></a><i class="conum" data-value="2"></i>
+
+{{context.conditions}}
+
+**documents** _[view in Discover]({{{context.link}}})_ <a id="CO37-3"></a><i class="conum" data-value="3"></i>
+
+| provider | action | duration | <a id="CO37-4"></a><i class="conum" data-value="4"></i>
+| -------- | ------ | -------- |
+{{#context.hits}}{{#_source.event}}| {{provider}} | {{action}} | {{#duration}}{{#EvalMath}} round( {{{duration}}} / 1000 / 1000 / 1000 ) {{/EvalMath}} sec{{/duration}} {{^duration}}-n/a-{{/duration}} |{{/_source.event}}
+{{/context.hits}}</pre>
+</div>
+<div class="calloutlist">
+<table border="0" summary="Callout list">
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO37-1"><i class="conum" data-value="1"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Renders the value of the <code class="literal">context.title</code> variable as a level 1 heading.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO37-2"><i class="conum" data-value="2"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Renders the value of the <code class="literal">date</code> variable as a formatted date in the America/New_York time zone.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO37-3"><i class="conum" data-value="3"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Shows examples of <code class="literal">**bold**</code>, <code class="literal">_italic_</code>, and <code class="literal">[text](url)</code> links.</p>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top" width="5%">
+<p><a href="#CO37-4"><i class="conum" data-value="4"></i></a></p>
+</td>
+<td align="left" valign="top">
+<p>Shows a table with three columns, with one row per element in the <code class="literal">context.hits</code> array.
+From each of those elements, you can access the <code class="literal">provider</code>, <code class="literal">action</code>, and <code class="literal">duration</code> fields of the <code class="literal">_source.event</code> object.
+The <code class="literal">duration</code> field is rendered as a number of seconds, rounded to the nearest second.
+It&#8217;s stored as nanoseconds so it needs to be divided by a billion to yield seconds.
+The duration field is optional, so you can use a <code class="literal">{{#duration}} ... {{/duration}}</code> section to render the duration if it&#8217;s present and show <code class="literal">-n/a-</code> otherwise.</p>
+</td>
+</tr>
+</table>
+</div>
+<p>When rendered into Markdown and then HTML and viewed in an email client, it looks like this:</p>
+<p class="screenshot"><span class="image"><img src="images/email-mustache-template-rendered.png" alt="Email template rendered in an email client"></span></p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="geo-alerting.html">« Create a tracking containment rule</a>
+</span>
+<span class="next">
+<a href="alerting-troubleshooting.html">Troubleshooting and limitations »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

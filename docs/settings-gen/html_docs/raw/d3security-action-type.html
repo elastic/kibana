@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>D3 Security connector and action | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="D3 Security connector and action | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="crowdstrike-action-type.html" title="CrowdStrike connector"/>
+<link rel="next" href="email-action-type.html" title="Email connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="crowdstrike-action-type.html">« CrowdStrike connector</a>
+</span>
+<span class="next">
+<a href="email-action-type.html">Email connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>D3 Security connector and action</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="d3security-action-type"></a>D3 Security connector and action</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The D3 Security connector uses <a href="https://github.com/axios/axios" class="ulink" target="_top">axios</a> to send a POST request to a D3 Security endpoint. You can use the connector for rule actions.</p>
+<p>To create this connector, you must first configure a webhook key in your D3 SOAR environment. For configuration tips, refer to <a class="xref" href="d3security-action-type.html#configure-d3security" title="Configure D3 Security">Configure D3 Security</a>.</p>
+<div class="position-relative"><h4><a id="define-d3security-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>.  For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/d3security-connector.png" alt="D3 Security connector">
+</div>
+</div>
+<div class="position-relative"><h5><a id="d3security-connector-configuration"></a>Connector configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+<p>D3 Security connectors have the following configuration properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Name
+</span>
+</dt>
+<dd>
+The name of the connector.
+</dd>
+<dt>
+<span class="term">
+URL
+</span>
+</dt>
+<dd>
+The D3 Security API request URL.
+</dd>
+<dt>
+<span class="term">
+Token
+</span>
+</dt>
+<dd>
+The D3 Security token.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="d3security-action-configuration"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+<p>You can test connectors as you&#8217;re creating or editing the connector in Kibana. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/d3security-params-test.png" alt="D3 Security params test">
+</div>
+</div>
+<p>The D3 Security actions have the following configuration properties.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Body
+</span>
+</dt>
+<dd>
+<p>
+A typeless payload sent to the D3 Security API URL. For example:
+</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">this can be any type, it is not validated</pre>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="d3security-connector-networking-configuration"></a>Connector networking configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">Action configuration settings</a> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use <code class="literal">xpack.actions.customHostSettings</code> to set per-host configurations.</p>
+<div class="position-relative"><h4><a id="configure-d3security"></a>Configure D3 Security</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/d3security.asciidoc">edit</a></div>
+<p>To generate an API URL and a token in D3 Security:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Log in to your D3 SOAR environment.
+</li>
+<li class="listitem">
+Navigate to <span class="strong strong"><strong>Configuration</strong></span>.
+</li>
+<li class="listitem">
+Navigate to <span class="strong strong"><strong>Integration</strong></span>. Search for Kibana. Click <span class="strong strong"><strong>Fetch Event</strong></span>.
+</li>
+<li class="listitem">
+Select the <span class="strong strong"><strong>Enable Webhook</strong></span> checkbox.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Set up Webhook Keys</strong></span>.
+</li>
+<li class="listitem">
+Under <span class="strong strong"><strong>Event Ingestion</strong></span>, click the plus sign(+). Select the site for the webhook integration, then click <span class="strong strong"><strong>Generate</strong></span>.
+</li>
+<li class="listitem">
+Copy the request URL and request header value to configure the connector.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="crowdstrike-action-type.html">« CrowdStrike connector</a>
+</span>
+<span class="next">
+<a href="email-action-type.html">Email connector and action »</a>
+</span>
+</div>
+</body>
+</html>

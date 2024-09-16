@@ -1,0 +1,31 @@
+PUT _watcher/watch/error_report
+{
+  "trigger" : {
+    "schedule": {
+      "interval": "1h"
+    }
+  },
+  "actions" : {
+    "email_admin" : {
+      "email": {
+        "to": "'Recipient Name <recipient@example.com>'",
+        "subject": "Error Monitoring Report",
+        "attachments" : {
+          "error_report.pdf" : {
+            "reporting" : {
+              "url": "http://0.0.0.0:5601/api/reporting/generate/printablePdf?jobParams=...",
+              "retries":40,
+              "interval":"15s",
+              "auth":{
+                "basic":{
+                  "username":"elastic",
+                  "password":"changeme"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

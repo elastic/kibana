@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Canvas | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Canvas | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="dashboard-troubleshooting.html" title="Improve dashboard loading time"/>
+<link rel="next" href="edit-workpads.html" title="Edit workpads"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="dashboard-troubleshooting.html">« Improve dashboard loading time</a>
+</span>
+<span class="next">
+<a href="edit-workpads.html">Edit workpads »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Canvas</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="canvas"></a>Canvas</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p><span class="strong strong"><strong>Canvas</strong></span> is a data visualization and presentation tool that allows you to pull live data from Elasticsearch,
+then combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays.
+If you are a little bit creative, a little bit technical, and a whole lot curious, then <span class="strong strong"><strong>Canvas</strong></span> is for you.</p>
+<p>With <span class="strong strong"><strong>Canvas</strong></span>, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Create and personalize your work space with backgrounds, borders, colors, fonts, and more.
+</li>
+<li class="listitem">
+Customize your workpad with your own visualizations, such as images and text.
+</li>
+<li class="listitem">
+Pull your data directly from Elasticsearch, then show it off with charts, graphs, progress monitors, and more.
+</li>
+<li class="listitem">
+Focus the data you want to display with filters.
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/canvas_logWebTrafficWorkpadTemplate_7.17.0.png" alt="Logs Web Traffic workpad template">
+</div>
+</div>
+<div class="position-relative"><h2><a id="create-workpads"></a>Create workpads</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>A <em>workpad</em> provides you with a space where you can build presentations of your live data. You can create a workpad from scratch, start with a preconfigured workpad,
+import an existing workpad, or use a sample data workpad.</p>
+<div class="position-relative"><h3><a id="canvas-minimum-requirements"></a>Minimum requirements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>To create workpads, you must meet the minimum requirements.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you need to set up Kibana, use <a href="https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&amp;elektra=docs" class="ulink" target="_top">our free trial</a>.
+</li>
+<li class="listitem">
+Make sure you have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/getting-started-index.html" class="ulink" target="_top">data indexed into Elasticsearch</a> and a <a class="xref" href="data-views.html" title="Create a data view">data view</a>.
+</li>
+<li class="listitem">
+Have an understanding of <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/documents-indices.html" class="ulink" target="_top">Elasticsearch documents and indices</a>.
+</li>
+<li class="listitem">
+Make sure you have sufficient privileges to create and save workpads. When the read-only indicator appears, you have insufficient privileges,
+and the options to create and save workpads are unavailable. For more information, refer to <a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Granting access to Kibana</a>.
+</li>
+</ul>
+</div>
+<p>To open <span class="strong strong"><strong>Canvas</strong></span>, open the main menu, then click <span class="strong strong"><strong>Canvas</strong></span>.</p>
+<div class="position-relative"><h3><a id="start-with-a-blank-workpad"></a>Start with a blank workpad</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>To use the background colors, images, and data of your choice, start with a blank workpad.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the <span class="strong strong"><strong>Canvas</strong></span> page, click <span class="strong strong"><strong>Create workpad</strong></span>.
+</li>
+<li class="listitem">
+<p>Specify the <span class="strong strong"><strong>Workpad settings</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Add a <span class="strong strong"><strong>Name</strong></span> to your workpad.
+</li>
+<li class="listitem">
+In the <span class="strong strong"><strong>Width</strong></span> and <span class="strong strong"><strong>Height</strong></span> fields, specify the size, or select one of default layouts.
+</li>
+<li class="listitem">
+Click the <span class="strong strong"><strong>Background</strong></span> color picker, then select the color for your workpad.
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="create-workpads-from-templates"></a>Create workpads from templates</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>If you&#8217;re unsure about where to start, you can use one of the preconfigured templates that come with <span class="strong strong"><strong>Canvas</strong></span>.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the <span class="strong strong"><strong>Canvas</strong></span> page, select <span class="strong strong"><strong>Templates</strong></span>.
+</li>
+<li class="listitem">
+Click the preconfigured template that you want to use.
+</li>
+<li class="listitem">
+Add your own <span class="strong strong"><strong>Name</strong></span> to the workpad.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="import-existing-workpads"></a>Import existing workpads</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>When you want to use a workpad that someone else has already started, import the JSON file.</p>
+<p>On the <span class="strong strong"><strong>Canvas</strong></span> page, drag the file to the <span class="strong strong"><strong>Import workpad JSON file</strong></span> field.</p>
+<div class="position-relative"><h3><a id="use-sample-data-workpads"></a>Use sample data workpads</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Each of the Kibana sample data sets comes with a workpad that you can use for your own workpad inspiration.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Add a <a class="xref" href="get-started.html#gs-get-data-into-kibana" title="Add the sample data">sample data set</a>.
+</li>
+<li class="listitem">
+On a sample data card, click <span class="strong strong"><strong>View data</strong></span>, then select <span class="strong strong"><strong>Canvas</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="add-canvas-elements"></a>Add elements</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Create a story about your data by adding elements to your workpad that include images, text, charts, and more.</p>
+<div class="position-relative"><h3><a id="create-elements"></a>Create elements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Choose the type of element you want to use, then use the preconfigured demo data to familiarize yourself with the element. When you&#8217;re ready, connect the element to your own data.
+By default, most of the elements you create use the demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add element</strong></span>, then select the element you want to use.
+</li>
+<li class="listitem">
+<p>To connect the element to your data, select <span class="strong strong"><strong>Data &gt; Demo data</strong></span>, then select one of the following data sources:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Elasticsearch SQL</strong></span> &mdash; Access your data in Elasticsearch using <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/sql-spec.html" class="ulink" target="_top">SQL syntax</a>.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Elasticsearch documents</strong></span> &mdash; Access your data in Elasticsearch without using aggregations. To use, select a data view and fields.
+Use <span class="strong strong"><strong>Elasticsearch documents</strong></span> when you have low-volume datasets, and you want to view raw documents or to plot exact, non-aggregated values on a chart.
+</li>
+<li class="listitem">
+<p><span class="strong strong"><strong>Timelion</strong></span> &mdash; Access your time series data using <a class="xref" href="timelion.html" title="Timelion"><span class="strong strong"><strong>Timelion</strong></span></a> queries. To use <span class="strong strong"><strong>Timelion</strong></span> queries, you can enter a query using the <a class="xref" href="lucene-query.html" title="Lucene query syntax">Lucene Query Syntax</a>.</p>
+<p>Each element can display a different data view, and pages and workpads often contain multiple data views.</p>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>To save, use the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To save a single element, select the element, then click <span class="strong strong"><strong>Edit &gt; Save as new element</strong></span>.
+</li>
+<li class="listitem">
+To save a group of elements, press and hold Shift, select the elements you want to save, then click <span class="strong strong"><strong>Edit &gt; Save as new element</strong></span>.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<p>To access your saved elements, click <span class="strong strong"><strong>Add element &gt; My elements</strong></span>.</p>
+<div class="position-relative"><h3><a id="add-kibana-visualizations"></a>Add panels from the Visualize Library</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Add a panel that you saved in <span class="strong strong"><strong>Visualize Library</strong></span> to your workpad.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add from library</strong></span>, then select the panel you want to add.
+</li>
+<li class="listitem">
+<p>To use the customization options, open the panel menu, then select one of the following options:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Edit map</strong></span> &mdash; Opens <a class="xref" href="maps.html" title="Maps">Maps</a> so that you can edit the panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Edit Visualization</strong></span> &mdash; Opens the visualization editor so that you can edit the panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Panel settings</strong></span> &mdash; Allows you to change the title, description, and time range for the panel.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Inspect</strong></span> &mdash; Allows you to drill down into the panel data.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="add-your-own-images"></a>Add your own images</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>To personalize your workpad, add your own logos and graphics.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Add element &gt; Manage assets</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Manage workpad assets</strong></span> window, drag and drop your images.
+</li>
+<li class="listitem">
+To add the image to the workpad, click <span class="strong strong"><strong>Create image element</strong></span>.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="add-more-pages"></a>Add pages</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Organize and separate your ideas by adding more pages.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Click <span class="strong strong"><strong>Page 1</strong></span>, then click <span class="strong strong"><strong>+</strong></span>.
+</li>
+<li class="listitem">
+On the <span class="strong strong"><strong>Page</strong></span> editor panel, select the page transition from the <span class="strong strong"><strong>Transition</strong></span> dropdown.
+</li>
+</ol>
+</div>
+<div class="position-relative"><h2><a id="workpad-share-options"></a>Share your workpad</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>To share workpads with a larger audience, click <span class="strong strong"><strong>Share</strong></span> in the toolbar. For detailed information about the sharing options, refer to <a class="xref" href="reporting-getting-started.html" title="Reporting and sharing">Reporting</a>.</p>
+<div class="position-relative"><h2><a id="export-single-workpad"></a>Export workpads</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/canvas.asciidoc">edit</a></div>
+<p>Want to export multiple workpads? Go to the <span class="strong strong"><strong>Canvas</strong></span> home page, select the workpads you want to export, then click <span class="strong strong"><strong>Export</strong></span>.</p>
+</div>
+</div>
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="dashboard-troubleshooting.html">« Improve dashboard loading time</a>
+</span>
+<span class="next">
+<a href="edit-workpads.html">Edit workpads »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

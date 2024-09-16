@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Set up | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Set up | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="get-started.html" title="Quick start"/>
+<link rel="next" href="install.html" title="Install Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="get-started.html">« Quick start</a>
+</span>
+<span class="next">
+<a href="install.html">Install Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Set up</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/setup.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="setup"></a>Set up</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/setup.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p>This section includes information on how to setup Kibana and get it running,
+including:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Downloading
+</li>
+<li class="listitem">
+Installing
+</li>
+<li class="listitem">
+Starting
+</li>
+<li class="listitem">
+Configuring
+</li>
+<li class="listitem">
+Upgrading
+</li>
+</ul>
+</div>
+<div class="position-relative"><h2><a id="supported-platforms"></a>Supported platforms</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/setup.asciidoc">edit</a></div>
+<p>Packages of Kibana are provided for and tested against Linux, Darwin, and
+Windows. Since Kibana runs on Node.js, we include the necessary Node.js
+binaries for these platforms. Running Kibana against a separately maintained
+version of Node.js is not supported.</p>
+<p>To support certain older Linux platforms (most notably CentOS7/RHEL7), Kibana
+for Linux ships with a custom build of Node.js with glibc 2.17 support. For
+details, see <a class="xref" href="upgrading-nodejs.html#custom-nodejs-builds" title="Custom builds of Node.js">Custom builds of Node.js</a>.</p>
+<div class="position-relative"><h2><a id="elasticsearch-version"></a>Elasticsearch version</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/setup.asciidoc">edit</a></div>
+<p>Kibana should be configured to run against an Elasticsearch node of the same
+version. This is the officially supported configuration.</p>
+<p>Running different major version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.x and Elasticsearch 2.x) is not supported, nor is running a minor
+version of Kibana that is newer than the version of Elasticsearch (e.g. Kibana
+5.1 and Elasticsearch 5.0).</p>
+<p>Running a minor version of Elasticsearch that is higher than Kibana will
+generally work in order to facilitate an upgrade process where Elasticsearch
+is upgraded first (e.g. Kibana 5.0 and Elasticsearch 5.1). In this
+configuration, a warning will be logged on Kibana server startup, so it&#8217;s only
+meant to be temporary until Kibana is upgraded to the same version as
+Elasticsearch.</p>
+<p>Running different patch version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.0.0 and Elasticsearch 5.0.1) is generally supported, though we
+encourage users to run the same versions of Kibana and Elasticsearch down to
+the patch version.</p>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="get-started.html">« Quick start</a>
+</span>
+<span class="next">
+<a href="install.html">Install Kibana »</a>
+</span>
+</div>
+</body>
+</html>

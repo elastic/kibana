@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rollup Jobs | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Rollup Jobs | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="numeral.html" title="Numeral Formatting"/>
+<link rel="next" href="managing-saved-objects.html" title="Manage saved objects"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="numeral.html">« Numeral Formatting</a>
+</span>
+<span class="next">
+<a href="managing-saved-objects.html">Manage saved objects »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Rollup Jobs</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="data-rollups"></a>Rollup Jobs</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<h3>Deprecated in 8.11.0.</h3>
+<p>Rollups are deprecated and will be removed in a future version. Use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/downsampling.html" class="ulink" target="_top">downsampling</a> instead.</p>
+</div>
+</div>
+<p>A rollup job is a periodic task that aggregates data from indices specified by
+an index pattern, and then rolls it into a new index. Rollup indices are a good
+way to compactly store months or years of historical data for use in
+visualizations and reports.</p>
+<p>To get started, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Rollup Jobs</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/management_rollup_list.png" alt="List of currently active rollup jobs">
+</div>
+</div>
+<p>Before using this feature, you should be familiar with how rollups work.
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/xpack-rollup.html" class="ulink" target="_top">Rolling up historical data</a> is a good source for more
+detailed information.</p>
+<div class="position-relative"><h3><a id="_required_permissions_4"></a>Required permissions</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>The <code class="literal">manage_rollup</code> cluster privilege is required to access <span class="strong strong"><strong>Rollup jobs</strong></span>.</p>
+<p>To add the privilege, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Roles</strong></span>.</p>
+<div class="position-relative"><h3><a id="create-and-manage-rollup-job"></a>Create a rollup job</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>Kibana makes it easy for you to create a rollup job by walking you through
+the process. You fill in the name, data flow, and how often you want to roll
+up the data.  Then you define a date histogram aggregation for the rollup job
+and optionally define terms, histogram, and metrics aggregations.</p>
+<p>When defining the index pattern, you must enter a name that is different than
+the output rollup index. Otherwise, the job will attempt to capture the data in
+the rollup index. For example, if your index pattern is <code class="literal">metricbeat-*</code>, you can
+name your rollup index <code class="literal">rollup-metricbeat</code>, but not <code class="literal">metricbeat-rollup</code>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/management_create_rollup_job.png" alt="Wizard that walks you through creation of a rollup job">
+</div>
+</div>
+<div class="position-relative"><h3><a id="manage-rollup-job"></a>Start, stop, and delete rollup jobs</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>Once you&#8217;ve saved a rollup job, you&#8217;ll see it the <span class="strong strong"><strong>Rollup Jobs</strong></span> overview page,
+where you can drill down for further investigation. The <span class="strong strong"><strong>Manage</strong></span> menu enables
+you to start, stop, and delete the rollup job.
+You must first stop a rollup job before deleting it.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/management_rollup_job_details.png" alt="Rollup job details">
+</div>
+</div>
+<p>You can&#8217;t change a rollup job after you&#8217;ve created it. To select additional
+fields or redefine terms, you must delete the existing job, and then create a
+new one with the updated specifications. Be sure to use a different name for the
+new rollup job&mdash;reusing the same name can lead to problems with mismatched
+job configurations. Refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-job-config.html" class="ulink" target="_top">rollup job
+configuration</a>.</p>
+<div class="position-relative"><h3><a id="rollup-data-tutorial"></a>Try it: Create and visualize rolled up data</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>This example creates a rollup job to capture log data from sample web logs.
+Before you start, <a class="xref" href="add-sample-data.html" title="Add sample data">add the web logs sample data set</a>.</p>
+<p>In this example, you want data that is older than 7 days in the
+<code class="literal">kibana_sample_data_logs</code> index to roll up into the <code class="literal">rollup_logstash</code> index.
+You&#8217;ll bucket the rolled up data on an hourly basis, using <code class="literal">60m</code> for the time
+bucket configuration.</p>
+<p>For this example, the job will perform the rollup every minute. However, you&#8217;d
+typically roll up less frequently in production.</p>
+<div class="position-relative"><h4><a id="_create_the_rollup_job"></a>Create the rollup job</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>As you walk through the <span class="strong strong"><strong>Create rollup job</strong></span> UI, enter the data:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top"><span class="strong strong"><strong>Field</strong></span></th>
+<th align="left" valign="top"><span class="strong strong"><strong>Value</strong></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>Name</p></td>
+<td align="left" valign="top"><p><code class="literal">logs_job</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Index pattern</p></td>
+<td align="left" valign="top"><p><code class="literal">kibana_sample_data_logs</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Rollup index name</p></td>
+<td align="left" valign="top"><p><code class="literal">rollup_logstash</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Frequency</p></td>
+<td align="left" valign="top"><p>Every minute</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Page size</p></td>
+<td align="left" valign="top"><p>1000</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Latency buffer</p></td>
+<td align="left" valign="top"><p>7d</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Date field</p></td>
+<td align="left" valign="top"><p>@timestamp</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Time bucket size</p></td>
+<td align="left" valign="top"><p>60m</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Time zone</p></td>
+<td align="left" valign="top"><p>UTC</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Terms</p></td>
+<td align="left" valign="top"><p>geo.src, machine.os.keyword</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Histogram</p></td>
+<td align="left" valign="top"><p>bytes, memory</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Histogram interval</p></td>
+<td align="left" valign="top"><p>1000</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Metrics</p></td>
+<td align="left" valign="top"><p>bytes (average)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>On the <span class="strong strong"><strong>Review and save</strong></span> page, click <span class="strong strong"><strong>Start job now</strong></span> and <span class="strong strong"><strong>Save</strong></span>.</p>
+<p>The terms, histogram, and metrics fields reflect
+the key information to retain in the rolled up data: where visitors are from (geo.src),
+what operating system they are using (machine.os.keyword),
+and how much data is being sent (bytes).</p>
+<p>You can now use the rolled up data for analysis at a fraction of the storage
+cost of the original index. The original data can live side by side with the new
+rollup index, or you can remove or archive it using
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/index-lifecycle-management.html" class="ulink" target="_top">index lifecycle management (ILM)</a>.</p>
+<div class="position-relative"><h4><a id="_visualize_the_rolled_up_data"></a>Visualize the rolled up data</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/rollups/create_and_manage_rollups.asciidoc">edit</a></div>
+<p>Your next step is to visualize your rolled up data in a vertical bar chart.
+Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Data Views</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Create data view</strong></span>, and select <span class="strong strong"><strong>Rollup data view</strong></span> from the dropdown.
+</li>
+<li class="listitem">
+<p>Enter <span class="strong strong"><strong>rollup_logstash,kibana_sample_logs</strong></span> as your <span class="strong strong"><strong>Data View</strong></span> and <code class="literal">@timestamp</code>
+as the <span class="strong strong"><strong>Time Filter field name</strong></span>.</p>
+<p>The notation for a combination data view with both raw and rolled up data is
+<code class="literal">rollup_logstash,kibana_sample_data_logs</code>. In this data view, <code class="literal">rollup_logstash</code>
+matches the rollup index and <code class="literal">kibana_sample_data_logs</code> matches the raw data.</p>
+</li>
+<li class="listitem">
+Open the main menu, click <span class="strong strong"><strong>Dashboard</strong></span>, then <span class="strong strong"><strong>Create dashboard</strong></span>.
+</li>
+<li class="listitem">
+Set the <a class="xref" href="set-time-filter.html" title="Set the time range">time filter</a> to <span class="strong strong"><strong>Last 90 days</strong></span>.
+</li>
+<li class="listitem">
+On the dashboard, click <span class="strong strong"><strong>Create visualization</strong></span>.
+</li>
+<li class="listitem">
+<p>Choose <code class="literal">rollup_logstash,kibana_sample_data_logs</code>
+as your source to see both the raw and rolled up data.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/management-create-rollup-bar-chart.png" alt="Create visualization of rolled up data">
+</div>
+</div>
+</li>
+<li class="listitem">
+Select <span class="strong strong"><strong>Bar vertical stacked</strong></span> in the chart type dropdown.
+</li>
+<li class="listitem">
+Add the <code class="literal">@timestamp</code> field to the <span class="strong strong"><strong>Horizontal axis</strong></span>.
+</li>
+<li class="listitem">
+<p>Add the <code class="literal">bytes</code> field to the <span class="strong strong"><strong>Vertical axis</strong></span>, defaulting to an <code class="literal">Average of
+bytes</code>.</p>
+<p>Kibana creates a vertical bar chart of your data. Select a section of the chart
+to zoom in.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/management_rollup_job_dashboard.png" alt="Dashboard with rolled up data">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="numeral.html">« Numeral Formatting</a>
+</span>
+<span class="next">
+<a href="managing-saved-objects.html">Manage saved objects »</a>
+</span>
+</div>
+</body>
+</html>

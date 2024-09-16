@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Configure logging | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Configure logging | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="setup.html" title="Set up"/>
+<link rel="prev" href="secure-reporting.html" title="Configure reporting in Kibana"/>
+<link rel="next" href="log-settings-examples.html" title="Examples"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="secure-reporting.html">« Configure reporting in Kibana</a>
+</span>
+<span class="next">
+<a href="log-settings-examples.html">Examples »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Configure logging</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="logging-configuration"></a>Configure logging</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Kibana logging system has three main components: <em>loggers</em>, <em>appenders</em> and <em>layouts</em>. These components allow us to log messages according to message type and level, to control how these messages are formatted and where the final logs will be displayed or stored.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="logging-configuration.html#loggers-appenders-layout" title="Loggers, Appenders and Layouts">Loggers, Appenders and Layouts</a>
+</li>
+<li class="listitem">
+<a class="xref" href="logging-configuration.html#log-level" title="Log level">Log level</a>
+</li>
+<li class="listitem">
+<a class="xref" href="logging-configuration.html#logging-layouts" title="Layouts">Layouts</a>
+</li>
+<li class="listitem">
+<a class="xref" href="logging-configuration.html#logger-hierarchy" title="Logger hierarchy">Logger hierarchy</a>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="loggers-appenders-layout"></a>Loggers, Appenders and Layouts</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p><em>Loggers</em> define what logging settings should be applied to a particular logger.</p>
+<p><em><a class="xref" href="logging-configuration.html#logging-appenders" title="Appenders">Appenders</a></em> define where log messages are displayed (eg. stdout or console) and stored (eg. file on the disk).</p>
+<p><em><a class="xref" href="logging-configuration.html#logging-layouts" title="Layouts">Layouts</a></em> define how log messages are formatted and what type of information they include.</p>
+<div class="position-relative"><h3><a id="log-level"></a>Log level</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Currently we support the following log levels: <em>off</em>, <em>fatal</em>, <em>error</em>, <em>warn</em>, <em>info</em>, <em>debug</em>, <em>trace</em>, <em>all</em>.</p>
+<p>Levels are ordered, so <em>off</em> &gt; <em>fatal</em> &gt; <em>error</em> &gt; <em>warn</em> &gt; <em>info</em> &gt; <em>debug</em> &gt; <em>trace</em> &gt; <em>all</em>.</p>
+<p>A log record will be logged by the logger if its level is higher than or equal to the level of its logger. For example:
+If the output of an API call is configured to log at the <code class="literal">info</code> level and the parameters passed to the API call are set to <code class="literal">debug</code>, with a global logging configuration in <code class="literal">kibana.yml</code> set to <code class="literal">debug</code>, both the output <em>and</em> parameters are logged. If the log level is set to <code class="literal">info</code>, the debug logs are ignored, meaning that you&#8217;ll only get a record for the API output and <em>not</em> for the parameters.</p>
+<p>Logging set at a plugin level is always respected, regardless of the <code class="literal">root</code> logger level. In other words, if root logger is set to fatal and pluginA logging is set to <code class="literal">debug</code>, debug logs are only shown for pluginA, with other logs only reporting on <code class="literal">fatal</code>.</p>
+<p>The <em>all</em> and <em>off</em> levels can only be used in configuration and are handy shortcuts that allow you to log every log record or disable logging entirely for a specific logger. These levels can also be specified using <a class="xref" href="_cli_configuration.html#logging-cli-migration" title="Logging configuration via CLI">cli arguments</a>.</p>
+<div class="position-relative"><h3><a id="logging-layouts"></a>Layouts</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Every appender should know exactly how to format log messages before they are written to the console or file on the disk.
+This behavior is controlled by the layouts and configured through <code class="literal">appender.layout</code> configuration property for every
+custom appender. Currently we don&#8217;t define any default layout for the
+custom appenders, so one should always make the choice explicitly.</p>
+<p>There are two types of layout supported at the moment: <a class="xref" href="logging-configuration.html#pattern-layout" title="Pattern layout"><code class="literal">pattern</code></a> and <a class="xref" href="logging-configuration.html#json-layout" title="JSON layout"><code class="literal">json</code></a>.</p>
+<div class="position-relative"><h4><a id="pattern-layout"></a>Pattern layout</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>With <code class="literal">pattern</code> layout it&#8217;s possible to define a string pattern with special placeholders <code class="literal">%conversion_pattern</code> that will be replaced with data from the actual log message. By default the following pattern is used: <code class="literal">[%date][%level][%logger] %message</code>.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The <code class="literal">pattern</code> layout uses a sub-set of <a href="https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout" class="ulink" target="_top">log4j 2 pattern syntax</a> and <span class="strong strong"><strong>doesn&#8217;t implement</strong></span> all <code class="literal">log4j 2</code> capabilities.</p>
+</div>
+</div>
+<p>The conversions that are provided out of the box are:</p>
+<p><span class="strong strong"><strong>level</strong></span>
+Outputs the <a class="xref" href="logging-configuration.html#log-level" title="Log level">level</a> of the logging event.
+Example of <code class="literal">%level</code> output: <code class="literal">TRACE</code>, <code class="literal">DEBUG</code>, <code class="literal">INFO</code>.</p>
+<p><span class="strong strong"><strong>logger</strong></span>
+Outputs the name of the logger that published the logging event.
+Example of <code class="literal">%logger</code> output: <code class="literal">server</code>, <code class="literal">server.http</code>, <code class="literal">server.http.kibana</code>.</p>
+<p><span class="strong strong"><strong>message</strong></span>
+Outputs the application supplied message associated with the logging event.</p>
+<p><span class="strong strong"><strong>meta</strong></span>
+Outputs the entries of <code class="literal">meta</code> object data in <span class="strong strong"><strong>json</strong></span> format, if one is present in the event.
+Example of <code class="literal">%meta</code> output:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">// Meta{from: 'v7', to: 'v8'}
+'{"from":"v7","to":"v8"}'
+// Meta empty object
+'{}'
+// no Meta provided
+''</pre>
+</div>
+<p><a id="date-format"></a><span class="strong strong"><strong>date</strong></span>
+Outputs the date of the logging event. The date conversion specifier may be followed by a set of braces containing a name of predefined date format and canonical timezone name.
+Timezone name is expected to be one from <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" class="ulink" target="_top">TZ database name</a>.
+Timezone defaults to the host timezone when not explicitly specified.
+Example of <code class="literal">%date</code> output:</p>
+<div class="informaltable">
+<a id="date-conversion-pattern-examples"></a>
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Conversion pattern</th>
+<th align="left" valign="top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date</code></p></td>
+<td align="left" valign="top"><p><code class="literal">2012-02-01T14:30:22.011Z</code> uses <code class="literal">ISO8601</code> format by default</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{ISO8601}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">2012-02-01T14:30:22.011Z</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{ISO8601_TZ}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">2012-02-01T09:30:22.011-05:00</code>   <code class="literal">ISO8601</code> with timezone</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{ISO8601_TZ}{America/Los_Angeles}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">2012-02-01T06:30:22.011-08:00</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{ABSOLUTE}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">09:30:22.011</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{ABSOLUTE}{America/Los_Angeles}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">06:30:22.011</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{UNIX}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">1328106622</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p><code class="literal">%date{UNIX_MILLIS}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">1328106622011</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span class="strong strong"><strong>pid</strong></span>
+Outputs the process ID.</p>
+<p>The pattern layout also offers a <code class="literal">highlight</code> option that allows you to highlight
+some parts of the log message with different colors. Highlighting is quite handy if log messages are forwarded
+to a terminal with color support.</p>
+<div class="position-relative"><h4><a id="json-layout"></a>JSON layout</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>With <code class="literal">json</code> layout log messages will be formatted as JSON strings in <a href="https://www.elastic.co/guide/en/ecs/current/ecs-reference.html" class="ulink" target="_top">ECS format</a> that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself.</p>
+<div class="position-relative"><h3><a id="logger-hierarchy"></a>Logger hierarchy</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
+ancestor of another logger if its name followed by a <code class="literal">.</code> is a prefix of the descendant logger. For example, a logger
+named <code class="literal">a.b</code> is an ancestor of logger <code class="literal">a.b.c</code>. All top-level loggers are descendants of a special <code class="literal">root</code> logger at the top of the logger hierarchy. The <code class="literal">root</code> logger always exists, is fully configured and logs to <code class="literal">info</code> level by default. The <code class="literal">root</code> logger must also be configured if any other logging configuration is specified in your <code class="literal">kibana.yml</code>.</p>
+<p>You can configure <em><a class="xref" href="logging-configuration.html#log-level" title="Log level">log level</a></em> and <em>appenders</em> for a specific logger. If a logger only has a <em>log level</em> configured, then the <em>appenders</em> configuration applied to the logger is inherited from the ancestor logger, up to the <code class="literal">root</code> logger.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>In the current implementation we <em>don&#8217;t support</em> so called <em>appender additivity</em> when log messages are forwarded to <em>every</em> distinct appender within the
+ancestor chain including <code class="literal">root</code>. That means that log messages are only forwarded to appenders that are configured for a particular logger. If a logger doesn&#8217;t have any appenders configured, the configuration of that particular logger will be inherited from its closest ancestor.</p>
+</div>
+</div>
+<div class="position-relative"><h5><a id="dedicated-loggers"></a>Dedicated loggers</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Root</strong></span></p>
+<p>The <code class="literal">root</code> logger has a dedicated configuration node since this logger is special and should always exist. By default <code class="literal">root</code> is configured with <code class="literal">info</code> level and <code class="literal">default</code> appender that is also always available. This is the configuration that all custom loggers will use unless they&#8217;re re-configured explicitly.</p>
+<p>For example to see <em>all</em> log messages that fall back on the <code class="literal">root</code> logger configuration, just add one line to the configuration:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging.root.level: all</pre>
+</div>
+<p>Or disable logging entirely with <code class="literal">off</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging.root.level: off</pre>
+</div>
+<p><span class="strong strong"><strong>Metrics Logs</strong></span></p>
+<p>The <code class="literal">metrics.ops</code> logger is configured with <code class="literal">debug</code> level and will automatically output sample system and process information at a regular interval.
+The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Ops formatted log property</th>
+<th align="left" valign="top">Location in metrics service</th>
+<th align="left" valign="top">Log units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>memory</p></td>
+<td align="left" valign="top"><p>process.memory.heap.used_in_bytes</p></td>
+<td align="left" valign="top"><p><a href="http://numeraljs.com/#format" class="ulink" target="_top">depends on the value</a>, typically MB or GB</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>uptime</p></td>
+<td align="left" valign="top"><p>process.uptime_in_millis</p></td>
+<td align="left" valign="top"><p>HH:mm:ss</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>load</p></td>
+<td align="left" valign="top"><p>os.load</p></td>
+<td align="left" valign="top"><p>[ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"]</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>delay</p></td>
+<td align="left" valign="top"><p>process.event_loop_delay</p></td>
+<td align="left" valign="top"><p>ms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The log interval is the same as the interval at which system and process information is refreshed and is configurable under <code class="literal">ops.interval</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">ops.interval: 5000</pre>
+</div>
+<p>The minimum interval is 100ms and defaults to 5000ms.</p>
+<p><a id="request-response-logger"></a><span class="strong strong"><strong>Request and Response Logs</strong></span></p>
+<p>The <code class="literal">http.server.response</code> logger is configured with <code class="literal">debug</code> level and will automatically output
+data about http requests and responses occurring on the Kibana server.
+The message contains some high-level information, and the corresponding log meta contains the following:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Meta property</th>
+<th align="left" valign="top">Description</th>
+<th align="left" valign="top">Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>client.ip</p></td>
+<td align="left" valign="top"><p>IP address of the requesting client</p></td>
+<td align="left" valign="top"><p>ip</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.request.method</p></td>
+<td align="left" valign="top"><p>http verb for the request (uppercase)</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.request.mime_type</p></td>
+<td align="left" valign="top"><p>(optional) mime as specified in the headers</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.request.referrer</p></td>
+<td align="left" valign="top"><p>(optional) referrer</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.request.headers</p></td>
+<td align="left" valign="top"><p>request headers</p></td>
+<td align="left" valign="top"><p>object</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.response.body.bytes</p></td>
+<td align="left" valign="top"><p>(optional) Calculated response payload size in bytes</p></td>
+<td align="left" valign="top"><p>number</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.response.status_code</p></td>
+<td align="left" valign="top"><p>status code returned</p></td>
+<td align="left" valign="top"><p>number</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.response.headers</p></td>
+<td align="left" valign="top"><p>response headers</p></td>
+<td align="left" valign="top"><p>object</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>http.response.responseTime</p></td>
+<td align="left" valign="top"><p>(optional) Calculated response time in ms</p></td>
+<td align="left" valign="top"><p>number</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>url.path</p></td>
+<td align="left" valign="top"><p>request path</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>url.query</p></td>
+<td align="left" valign="top"><p>(optional) request query string</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>user_agent.original</p></td>
+<td align="left" valign="top"><p>raw user-agent string provided in request headers</p></td>
+<td align="left" valign="top"><p>string</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h3><a id="logging-appenders"></a>Appenders</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<div class="position-relative"><h4><a id="rolling-file-appender"></a>Rolling File Appender</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Similar to Log4j&#8217;s <code class="literal">RollingFileAppender</code>, this appender will log into a file, and rotate it following a rolling
+strategy when the configured policy triggers.</p>
+<div class="position-relative"><h6><a id="_triggering_policies"></a>Triggering Policies</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>The triggering policy determines when a rollover should occur.</p>
+<p>There are currently two policies supported: <code class="literal">size-limit</code> and <code class="literal">time-interval</code>.</p>
+<p><a id="size-limit-triggering-policy"></a><span class="strong strong"><strong>Size-limit triggering policy</strong></span></p>
+<p>This policy will rotate the file when it reaches a predetermined size.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      policy:
+        type: size-limit
+        size: 50mb
+      strategy:
+        //...
+      layout:
+        type: pattern</pre>
+</div>
+<p>The options are:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">size</code>
+</li>
+</ul>
+</div>
+<p>The maximum size the log file should reach before a rollover should be performed. The default value is <code class="literal">100mb</code></p>
+<p><a id="time-interval-triggering-policy"></a><span class="strong strong"><strong>Time-interval triggering policy</strong></span></p>
+<p>This policy will rotate the file every given interval of time.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      policy:
+        type: time-interval
+        interval: 10s
+        modulate: true
+      strategy:
+        //...
+      layout:
+        type: pattern</pre>
+</div>
+<p>The options are:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">interval</code>
+</li>
+</ul>
+</div>
+<p>How often a rollover should occur. The default value is <code class="literal">24h</code></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">modulate</code>
+</li>
+</ul>
+</div>
+<p>Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.</p>
+<p>For example, if modulate is true and the interval is <code class="literal">4h</code>, if the current hour is 3 am then the first rollover will occur at 4 am
+and then next ones will occur at 8 am, noon, 4pm, etc. The default value is <code class="literal">true</code>.</p>
+<div class="position-relative"><h5><a id="_rolling_strategies"></a>Rolling strategies</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>The rolling strategy determines how the rollover should occur: both the naming of the rolled files,
+and their retention policy.</p>
+<p>There is currently one strategy supported: <code class="literal">numeric</code>.</p>
+<p><span class="strong strong"><strong>Numeric rolling strategy</strong></span></p>
+<p>This strategy will suffix the file with a given pattern when rolling,
+and will retains a fixed amount of rolled files.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      policy:
+        // ...
+      strategy:
+        type: numeric
+        pattern: '-%i'
+        max: 2
+      layout:
+        type: pattern</pre>
+</div>
+<p>For example, with this configuration:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
+being written to.
+</li>
+<li class="listitem">
+During the second rollover kibana-1.log is renamed to kibana-2.log and kibana.log is renamed to kibana-1.log.
+A new kibana.log file is created and starts being written to.
+</li>
+<li class="listitem">
+During the third and subsequent rollovers, kibana-2.log is deleted, kibana-1.log is renamed to kibana-2.log and
+kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts being written to.
+</li>
+</ul>
+</div>
+<p>The options are:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">pattern</code>
+</li>
+</ul>
+</div>
+<p>The suffix to append to the file path when rolling. Must include <code class="literal">%i</code>, as this is the value
+that will be converted to the file index.</p>
+<p>For example, with <code class="literal">fileName: /var/logs/kibana.log</code> and <code class="literal">pattern: '-%i'</code>, the rolling files created
+will be <code class="literal">/var/logs/kibana-1.log</code>, <code class="literal">/var/logs/kibana-2.log</code>, and so on. The default value is <code class="literal">-%i</code></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">max</code>
+</li>
+</ul>
+</div>
+<p>The maximum number of files to keep. Once this number is reached, oldest files will be deleted. The default value is <code class="literal">7</code></p>
+<div class="position-relative"><h4><a id="rewrite-appender"></a>Rewrite appender</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>This appender is currently considered experimental and is not intended
+for public consumption. The API is subject to change at any time.</p>
+</div>
+</div>
+<p>Similar to log4j&#8217;s <code class="literal">RewriteAppender</code>, this appender serves as a sort of middleware,
+modifying the provided log events before passing them along to another
+appender.</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console, file] # name of "destination" appender(s)
+      policy:
+        # ...</pre>
+</div>
+<p>The most common use case for the <code class="literal">RewriteAppender</code> is when you want to
+filter or censor sensitive data that may be contained in a log entry.
+In fact, with a default configuration, Kibana will automatically redact
+any <code class="literal">authorization</code>, <code class="literal">cookie</code>, or <code class="literal">set-cookie</code> headers when logging http
+requests &amp; responses.</p>
+<p>To configure additional rewrite rules, you&#8217;ll need to specify a <a class="xref" href="logging-configuration.html#rewrite-policies" title="Rewrite policies"><code class="literal">RewritePolicy</code></a>.</p>
+<div class="position-relative"><h6><a id="rewrite-policies"></a>Rewrite policies</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<p>Rewrite policies exist to indicate which parts of a log record can be
+modified within the rewrite appender.</p>
+<p><span class="strong strong"><strong>Meta</strong></span></p>
+<p>The <code class="literal">meta</code> rewrite policy can read and modify any data contained in the
+<code class="literal">LogMeta</code> before passing it along to a destination appender.</p>
+<p>Meta policies must specify one of three modes, which indicate which action
+to perform on the configured properties:
+- <code class="literal">update</code> updates an existing property at the provided <code class="literal">path</code>.
+- <code class="literal">remove</code> removes an existing property at the provided <code class="literal">path</code>.</p>
+<p>The <code class="literal">properties</code> are listed as a <code class="literal">path</code> and <code class="literal">value</code> pair, where <code class="literal">path</code> is
+the dot-delimited path to the target property in the <code class="literal">LogMeta</code> object, and
+<code class="literal">value</code> is the value to add or update in that target property. When using
+the <code class="literal">remove</code> mode, a <code class="literal">value</code> is not necessary.</p>
+<p>Here&#8217;s an example of how you would replace any <code class="literal">cookie</code> header values with <code class="literal">[REDACTED]</code>:</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console]
+      policy:
+        type: meta # indicates that we want to rewrite the LogMeta
+        mode: update # will update an existing property only
+        properties:
+          - path: "http.request.headers.cookie" # path to property
+            value: "[REDACTED]" # value to replace at path</pre>
+</div>
+<p>Rewrite appenders can even be passed to other rewrite appenders to apply
+multiple filter policies/modes, as long as it doesn&#8217;t create a circular
+reference. Each rewrite appender is applied sequentially (one after the other).</p>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    remove-request-headers:
+      type: rewrite
+      appenders: [censor-response-headers] # redirect to the next rewrite appender
+      policy:
+        type: meta
+        mode: remove
+        properties:
+          - path: "http.request.headers" # remove all request headers
+    censor-response-headers:
+      type: rewrite
+      appenders: [console] # output to console
+      policy:
+        type: meta
+        mode: update
+        properties:
+          - path: "http.response.headers.set-cookie"
+            value: "[REDACTED]"</pre>
+</div>
+<div class="position-relative"><h6><a id="_complete_example_for_rewrite_appender"></a>Complete Example For Rewrite Appender</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/setup/configuring-logging.asciidoc">edit</a></div>
+<div class="pre_wrapper lang-yaml">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-yaml">logging:
+  appenders:
+    custom_console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+        pattern: "[%date][%level][%logger] %message %meta"
+    file:
+      type: file
+      fileName: ./kibana.log
+      layout:
+        type: json
+    censor:
+      type: rewrite
+      appenders: [custom_console, file]
+      policy:
+        type: meta
+        mode: update
+        properties:
+          - path: "http.request.headers.cookie"
+            value: "[REDACTED]"
+  loggers:
+    - name: http.server.response
+      appenders: [censor] # pass these logs to our rewrite appender
+      level: debug</pre>
+</div>
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="secure-reporting.html">« Configure reporting in Kibana</a>
+</span>
+<span class="next">
+<a href="log-settings-examples.html">Examples »</a>
+</span>
+</div>
+</body>
+</html>

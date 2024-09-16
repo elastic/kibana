@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Maps | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Maps | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="index.html" title="Kibana Guide"/>
+<link rel="prev" href="canvas-tinymath-functions.html" title="TinyMath functions"/>
+<link rel="next" href="maps-getting-started.html" title="Build a map to compare metrics by country or region"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="canvas-tinymath-functions.html">« TinyMath functions</a>
+</span>
+<span class="next">
+<a href="maps-getting-started.html">Build a map to compare metrics by country or region »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Maps</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="part">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="maps"></a>Maps</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+</div></div></div>
+<div class="openblock partintro">
+<div class="content">
+<p>Create beautiful maps from your geographical data. With <span class="strong strong"><strong>Maps</strong></span>, you can:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Build maps with multiple layers and indices.
+</li>
+<li class="listitem">
+Animate spatial temporal data.
+</li>
+<li class="listitem">
+Upload GeoJSON files and shapefiles.
+</li>
+<li class="listitem">
+Embed your map in dashboards.
+</li>
+<li class="listitem">
+Symbolize features using data values.
+</li>
+<li class="listitem">
+Focus on only the data that’s important to you.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h3><a id="_build_maps_with_multiple_layers_and_indices"></a>Build maps with multiple layers and indices</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Use multiple layers and indices to show all your data in a single map. Show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. Plot individual documents or use aggregations to plot any data set, no matter how large.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/sample_data_ecommerce.png" alt="sample data ecommerce">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_animate_spatial_temporal_data"></a>Animate spatial temporal data</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Data comes to life with animation. Hard to detect patterns in static data pop out with movement. Use time slider to animate your data and gain deeper insights.</p>
+<p>This animated map uses the time slider to show Portland buses over a period of 15 minutes. The routes come alive as the bus locations update with time.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/timeslider.gif" alt="timeslider">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_upload_geojson_files_and_shapefiles"></a>Upload GeoJSON files and shapefiles</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Use <span class="strong strong"><strong>Maps</strong></span> to drag and drop your GeoJSON and shapefile data into Elasticsearch, and then use them as layers in your map.</p>
+<div class="position-relative"><h3><a id="_embed_your_map_in_dashboards"></a>Embed your map in dashboards</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Viewing data from different angles provides better insights. Dimensions that are obscured in one visualization might be illuminated in another. Add your map to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.</p>
+<p>This choropleth map shows the density of non-emergency service requests in San Diego by council district. The map is embedded in a dashboard, so users can better understand when services are requested and gain insight into the top requested services.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="maps/images/embed_in_dashboard.jpeg" alt="embed in dashboard">
+</div>
+</div>
+<div class="position-relative"><h3><a id="_symbolize_features_using_data_values"></a>Symbolize features using data values</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Customize each layer to highlight meaningful dimensions in your data. For example, use dark colors to symbolize areas with more web log traffic, and lighter colors to symbolize areas with less traffic.</p>
+<div class="position-relative"><h3><a id="_focus_on_only_the_data_thats_important_to_you"></a>Focus on only the data that’s important to you</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/maps/index.asciidoc">edit</a></div>
+<p>Search across the layers in your map to focus on just the data you want. Combine free text search with field-based search using the <a class="xref" href="kuery-query.html" title="Kibana Query Language">Kibana Query Language</a>. Set the time filter to restrict layers by time. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.</p>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="canvas-tinymath-functions.html">« TinyMath functions</a>
+</span>
+<span class="next">
+<a href="maps-getting-started.html">Build a map to compare metrics by country or region »</a>
+</span>
+</div>
+</body>
+</html>

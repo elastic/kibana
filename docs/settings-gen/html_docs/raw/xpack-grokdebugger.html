@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Debug grok expressions | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Debug grok expressions | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="devtools-kibana.html" title="Dev Tools"/>
+<link rel="prev" href="xpack-profiler.html" title="Profile queries and aggregations"/>
+<link rel="next" href="painlesslab.html" title="Debug Painless scripts"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="xpack-profiler.html">« Profile queries and aggregations</a>
+</span>
+<span class="next">
+<a href="painlesslab.html">Debug Painless scripts »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="devtools-kibana.html">Dev Tools</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Debug grok expressions</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/dev-tools/grokdebugger/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-grokdebugger"></a>Debug grok expressions</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/dev-tools/grokdebugger/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>You can build and debug grok patterns in the Kibana <span class="strong strong"><strong>Grok Debugger</strong></span>
+before you use them in your data processing pipelines. Grok is a pattern
+matching syntax that you can use to parse arbitrary text and
+structure it. Grok is good for parsing syslog, apache, and other
+webserver logs, mysql logs, and in general, any log format that is
+written for human consumption.</p>
+<p>Grok patterns are supported in Elasticsearch <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/runtime.html" class="ulink" target="_top">runtime fields</a>, the Elasticsearch
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html" class="ulink" target="_top">grok ingest processor</a>, and the Logstash
+<a href="https://www.elastic.co/guide/en/logstash/master/plugins-filters-grok.html" class="ulink" target="_top">grok filter</a>. For syntax, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/grok.html" class="ulink" target="_top">Grokking grok</a>.</p>
+<p>The Elastic Stack ships with more than 120 reusable grok patterns. For a complete
+list of patterns, see
+<a href="https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns" class="ulink" target="_top">Elasticsearch
+grok patterns</a> and
+<a href="https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns" class="ulink" target="_top">Logstash
+grok patterns</a>.</p>
+<p>Because
+Elasticsearch and Logstash share the same grok implementation and pattern
+libraries, any grok pattern that you create in the <span class="strong strong"><strong>Grok Debugger</strong></span> will work
+in both Elasticsearch and Logstash.</p>
+<div class="position-relative"><h3><a id="grokdebugger-getting-started"></a>Get started</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/dev-tools/grokdebugger/index.asciidoc">edit</a></div>
+<p>This example walks you through using the <span class="strong strong"><strong>Grok Debugger</strong></span>. This tool
+is automatically enabled in Kibana.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you&#8217;re using Elastic Stack security features, you must have the <code class="literal">manage_pipeline</code>
+permission to use the Grok Debugger.</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Open the main menu, click <span class="strong strong"><strong>Dev Tools</strong></span>, then click <span class="strong strong"><strong>Grok Debugger</strong></span>.
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Sample Data</strong></span>, enter a message that is representative of the data that you
+want to parse. For example:</p>
+<div class="pre_wrapper lang-ruby">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ruby">55.3.244.1 GET /index.html 15824 0.043</pre>
+</div>
+</li>
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Grok Pattern</strong></span>, enter the grok pattern that you want to apply to the data.</p>
+<p>To parse the log line in this example, use:</p>
+<div class="pre_wrapper lang-ruby">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ruby">%{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Simulate</strong></span>.</p>
+<p>You&#8217;ll see the simulated event that results from applying the grok
+pattern.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="dev-tools/grokdebugger/images/grok-debugger-overview.png" alt="Grok Debugger">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h3><a id="grokdebugger-custom-patterns"></a>Test custom patterns</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/dev-tools/grokdebugger/index.asciidoc">edit</a></div>
+<p>If the default grok pattern dictionary doesn&#8217;t contain the patterns you need,
+you can define, test, and debug custom patterns using the <span class="strong strong"><strong>Grok Debugger</strong></span>.</p>
+<p>Custom patterns that you enter in the <span class="strong strong"><strong>Grok Debugger</strong></span> are not saved. Custom patterns
+are only available for the current debugging session and have no side effects.</p>
+<p>Follow this example to define a custom pattern.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>In <span class="strong strong"><strong>Sample Data</strong></span>, enter the following sample message:</p>
+<div class="pre_wrapper lang-ruby">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ruby">Jan  1 06:25:43 mailserver14 postfix/cleanup[21403]: BEF25A72965: message-id=&lt;20130101142543.5828399CCAF@mailserver14.example.com&gt;</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Enter this grok pattern:</p>
+<div class="pre_wrapper lang-ruby">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ruby">%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{MSG:syslog_message}</pre>
+</div>
+<p>Notice that the grok pattern references custom patterns called <code class="literal">POSTFIX_QUEUEID</code>
+and <code class="literal">MSG</code>.</p>
+</li>
+<li class="listitem">
+<p>Expand <span class="strong strong"><strong>Custom Patterns</strong></span> and enter pattern definitions for the custom
+patterns that you want to use in the grok expression. You must specify each pattern definition
+on its own line.</p>
+<p>For this example, you must specify pattern definitions
+for <code class="literal">POSTFIX_QUEUEID</code> and <code class="literal">MSG</code>:</p>
+<div class="pre_wrapper lang-ruby">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-ruby">POSTFIX_QUEUEID [0-9A-F]{10,11}
+MSG message-id=&lt;%{GREEDYDATA}&gt;</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>Simulate</strong></span>.</p>
+<p>You&#8217;ll see the simulated output event that results from applying
+the grok pattern that contains the custom pattern:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="dev-tools/grokdebugger/images/grok-debugger-custom-pattern.png" alt="Debugging a custom pattern">
+</div>
+</div>
+<p>If an error occurs, you can continue iterating over
+the custom pattern until the output matches the event
+that you expect.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xpack-profiler.html">« Profile queries and aggregations</a>
+</span>
+<span class="next">
+<a href="painlesslab.html">Debug Painless scripts »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Testing | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Testing | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="contributing.html" title="Contributing"/>
+<link rel="prev" href="development-github.html" title="How we use Git and GitHub"/>
+<link rel="next" href="interpreting-ci-failures.html" title="Interpreting CI Failures"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="development-github.html">« How we use Git and GitHub</a>
+</span>
+<span class="next">
+<a href="interpreting-ci-failures.html">Interpreting CI Failures »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="contributing.html">Contributing</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Testing</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="development-tests"></a>Testing</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+</div></div></div>
+<div class="position-relative"><h4><a id="_running_specific_kibana_tests"></a>Running specific Kibana tests</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+<p>The following table outlines possible test file locations and how to
+invoke them:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px" width="100%">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Test runner</th>
+<th align="left" valign="top">Test location</th>
+<th align="left" valign="top">Runner command (working directory is Kibana
+root)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>Jest</p></td>
+<td align="left" valign="top"><p><code class="literal">**/*.test.{js,mjs,ts,tsx}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">yarn test:jest [test path]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Jest (integration)</p></td>
+<td align="left" valign="top"><p><code class="literal">**/integration_tests/**/*.test.{js,mjs,ts,tsx}</code></p></td>
+<td align="left" valign="top"><p><code class="literal">yarn test:jest_integration [test path]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Functional</p></td>
+<td align="left" valign="top"><p><code class="literal">test/**/config.js</code> <code class="literal">x-pack/test/**/config.js</code></p></td>
+<td align="left" valign="top"><p><code class="literal">node scripts/functional_tests_server --config [directory]/config.js</code> <code class="literal">node scripts/functional_test_runner --config [directory]/config.js --grep=regexp</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Test runner arguments: - Where applicable, the optional arguments
+<code class="literal">--grep=regexp</code> will only run tests or test suites
+whose descriptions matches the regular expression. - <code class="literal">[test path]</code> is
+the relative path to the test file.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_unit_testing"></a>Unit Testing</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana primarily uses Jest for unit testing. Each plugin or package defines a <code class="literal">jest.config.js</code> that extends <a href="https://github.com/elastic/kibana/tree/master/packages/kbn-test/jest-preset.js" class="ulink" target="_top">a preset</a> provided by the <a href="https://github.com/elastic/kibana/tree/master/packages/kbn-test" class="ulink" target="_top"><code class="literal">@kbn/test</code></a> package. Unless you intend to run all unit tests within the project, it&#8217;s most efficient to provide the Jest configuration file for the plugin or package you&#8217;re testing.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn jest --config src/plugins/dashboard/jest.config.js</pre>
+</div>
+<p>A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use <code class="literal">yarn test:jest</code>. Like the Jest CLI, you can also supply a path to determine which tests to run.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">kibana/src/plugins/dashboard/server$ yarn test:jest #or
+kibana/src/plugins/dashboard$ yarn test:jest server #or
+kibana$ yarn test:jest src/plugins/dashboard/server</pre>
+</div>
+<p>Any additional options supplied to <code class="literal">test:jest</code> will be passed onto the Jest CLI with the resulting Jest command always being outputted.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">kibana/src/plugins/dashboard/server$ yarn test:jest --coverage
+
+# is equivalent to
+
+yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/plugins/dashboard/jest.config.js server</pre>
+</div>
+<p>You can generate code coverage report for a single plugin.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn jest --coverage --config src/plugins/console/jest.config.js</pre>
+</div>
+<p>Html report is available in target/kibana-coverage/jest/path/to/plugin</p>
+<div class="position-relative"><h4><a id="_running_browser_automation_tests"></a>Running browser automation tests</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+<p>Check out <a class="xref" href="development-tests.html#development-functional-tests" title="Functional Testing">Functional Testing</a> to learn more about how you can run
+and develop functional tests for Kibana core and plugins.</p>
+<p>You can also look into the <a href="https://github.com/elastic/kibana/tree/master/scripts/README.md" class="ulink" target="_top">Scripts README.md</a>
+to learn more about using the node scripts we provide for building
+Kibana, running integration tests, and starting up Kibana and
+Elasticsearch while you develop.</p>
+<div class="position-relative"><h5><a id="_more_testing_information"></a>More testing information:</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="development-tests.html#development-functional-tests" title="Functional Testing">Functional Testing</a>
+</li>
+<li class="listitem">
+<a class="xref" href="development-tests.html#development-unit-tests" title="Unit testing frameworks">Unit testing frameworks</a>
+</li>
+<li class="listitem">
+<a class="xref" href="development-tests.html#development-accessibility-tests" title="Automated Accessibility Testing">Automated Accessibility Testing</a>
+</li>
+<li class="listitem">
+<a class="xref" href="development-tests.html#development-package-tests" title="Package Testing">Package Testing</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="development-functional-tests"></a>Functional Testing</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>We use functional tests to make sure the Kibana UI works as expected. It replaces hours of manual testing by automating user interaction. To have better control over our functional test environment, and to make it more accessible to plugin authors, Kibana uses a tool called the <code class="literal">FunctionalTestRunner</code>.</p>
+<div class="position-relative"><h5><a id="_running_functional_tests"></a>Running functional tests</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The <code class="literal">FunctionalTestRunner</code> (FTR) is very bare bones and gets most of its functionality from its config file. The Kibana repo contains many FTR config files which use slightly different configurations for the Kibana server or Elasticsearch, have different test files, and potentially other config differences.
+FTR config files are organised in manifest files, based on testing area and type of distribution:
+serverless:
+- ftr_base_serverless_configs.yml
+- ftr_oblt_serverless_configs.yml
+- ftr_security_serverless_configs.yml
+- ftr_search_serverless_configs.yml
+stateful:
+- ftr_platform_stateful_configs.yml
+- ftr_oblt_stateful_configs.yml
+- ftr_security_stateful_configs.yml
+- ftr_search_stateful_configs.yml
+If you’re writing a plugin outside the Kibana repo, you will have your own config file.
+ See <a class="xref" href="external-plugin-functional-tests.html" title="Functional Tests for Plugins outside the Kibana repo">Functional Tests for Plugins outside the Kibana repo</a> for more info.</p>
+<p>There are three ways to run the tests depending on your goals:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Easiest option:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Description: Starts up Kibana &amp; Elasticsearch servers, followed by running tests. This is much slower when running the tests multiple times because slow startup time for the servers. Recommended for single-runs.
+</li>
+<li class="listitem">
+<p><code class="literal">node scripts/functional_tests</code></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+does everything in a single command, including running Elasticsearch and Kibana locally
+</li>
+<li class="listitem">
+tears down everything after the tests run
+</li>
+<li class="listitem">
+exit code reports success/failure of the tests
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Best for development:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Description: Two commands, run in separate terminals, separate the components that are long-running and slow from those that are ephemeral and fast. Tests can be re-run much faster, and this still runs Elasticsearch &amp; Kibana locally.
+</li>
+<li class="listitem">
+<p><code class="literal">node scripts/functional_tests_server</code></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+starts Elasticsearch and Kibana servers
+</li>
+<li class="listitem">
+slow to start
+</li>
+<li class="listitem">
+can be reused for multiple executions of the tests, thereby saving some time when re-running tests
+</li>
+<li class="listitem">
+automatically restarts the Kibana server when relevant changes are detected
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p><code class="literal">node scripts/functional_test_runner</code></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+runs the tests against Kibana &amp; Elasticsearch servers that were started by <code class="literal">node scripts/functional_tests_server</code>
+</li>
+<li class="listitem">
+exit code reports success or failure of the tests
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Custom option:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Description: Runs tests against instances of Elasticsearch &amp; Kibana started some other way (like Elastic Cloud, or an instance you are managing in some other way).
+</li>
+<li class="listitem">
+Just executes the functional tests
+</li>
+<li class="listitem">
+URL, credentials, etc. for Elasticsearch and Kibana are specified via environment variables
+</li>
+<li class="listitem">
+When running against an Elastic Cloud instance, additional environment variables are required <code class="literal">TEST_CLOUD</code> and <code class="literal">ES_SECURITY_ENABLED</code>
+</li>
+<li class="listitem">
+You must run the same branch of tests as the version of Kibana you&#8217;re testing.  To run against a previous minor version use option <code class="literal">--es-version &lt;instance version&gt;</code>
+</li>
+<li class="listitem">
+To run a specific configuration use option <code class="literal">--config &lt;configuration file&gt;</code>
+</li>
+<li class="listitem">
+<p>Here&#8217;s an example that runs against an Elastic Cloud instance</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">export TEST_KIBANA_URL=https://elastic:password@my-kbn-cluster.elastic-cloud.com:443
+export TEST_ES_URL=https://elastic:password@my-es-cluster.elastic-cloud.com:443
+
+export TEST_CLOUD=1
+export ES_SECURITY_ENABLED=1
+
+node scripts/functional_test_runner [--config &lt;config&gt;] [--es-version &lt;instance version&gt;]</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Or you can override any or all of these individual parts of the URL and leave the others to the default values.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">export TEST_KIBANA_PROTOCOL=https
+export TEST_KIBANA_HOSTNAME=my-kibana-instance.internal.net
+export TEST_KIBANA_PORT=443
+export TEST_KIBANA_USER=kibana
+export TEST_KIBANA_PASS=&lt;password&gt;
+
+export TEST_ES_PROTOCOL=http
+export TEST_ES_HOSTNAME=my-es-cluster.internal.net
+export TEST_ES_PORT=9200
+export TEST_ES_USER=elastic
+export TEST_ES_PASS=&lt;password&gt;
+node scripts/functional_test_runner</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">export TEST_BROWSER_HEADLESS=1</pre>
+</div>
+</li>
+<li class="listitem">
+<p>If you are using Google Chrome, you can slow down the local network connection to verify test stability:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">export TEST_THROTTLE_NETWORK=1</pre>
+</div>
+</li>
+<li class="listitem">
+<p>When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node scripts/functional_test_runner --exclude-tag skipCloud
+node scripts/functional_test_runner --exclude-tag skipMKI</pre>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h6><a id="_more_about_node_scriptsfunctional_test_runner"></a>More about <code class="literal">node scripts/functional_test_runner</code></h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>When run without any arguments the <code class="literal">FunctionalTestRunner</code> automatically loads the configuration in the standard location, but you can override that behavior with the <code class="literal">--config</code> flag. List configs with multiple --config arguments.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">--config test/functional/apps/app-name/config.js</code> starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome for a specific app. For example,
+<code class="literal">--config test/functional/apps/home/config.js</code> starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome for the home app.
+</li>
+<li class="listitem">
+<code class="literal">--config test/functional/config.firefox.js</code> starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Firefox.
+</li>
+<li class="listitem">
+<code class="literal">--config test/api_integration/config.js</code> starts Elasticsearch and Kibana servers with the api integration tests configuration.
+</li>
+<li class="listitem">
+<code class="literal">--config test/accessibility/config.ts</code> starts Elasticsearch and Kibana servers with the WebDriver tests configured to run an accessibility audit using <a href="https://www.deque.com/axe/" class="ulink" target="_top">axe</a>.
+</li>
+</ul>
+</div>
+<p>There are also command line flags for <code class="literal">--bail</code> and <code class="literal">--grep</code>, which behave just like their mocha counterparts. For instance, use <code class="literal">--grep=foo</code> to run only tests that match a regular expression.</p>
+<p>Logging can also be customized with <code class="literal">--quiet</code>, <code class="literal">--debug</code>, or <code class="literal">--verbose</code> flags.</p>
+<p>There are also options like <code class="literal">--include</code> to run only the tests defined in a single file or set of files.</p>
+<p>Run <code class="literal">node scripts/functional_test_runner --help</code> to see all available options.</p>
+<div class="position-relative"><h5><a id="_writing_functional_tests"></a>Writing functional tests</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<div class="position-relative"><h6><a id="_environment"></a>Environment</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The tests are written in <a href="https://mochajs.org" class="ulink" target="_top">mocha</a> using <a href="https://github.com/elastic/kibana/tree/main/packages/kbn-expect" class="ulink" target="_top">@kbn/expect</a> for assertions.</p>
+<p>We use <a href="https://www.w3.org/TR/webdriver1/" class="ulink" target="_top">WebDriver Protocol</a> to run tests in both Chrome and Firefox with the help of <a href="https://sites.google.com/a/chromium.org/chromedriver/" class="ulink" target="_top">chromedriver</a> and <a href="https://firefox-source-docs.mozilla.org/testing/geckodriver/" class="ulink" target="_top">geckodriver</a>. When the <code class="literal">FunctionalTestRunner</code> launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use <code class="literal">browser</code> service and <code class="literal">webElementWrapper</code> class to wrap up <a href="https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/" class="ulink" target="_top">Webdriver API</a>.</p>
+<p>The <code class="literal">FunctionalTestRunner</code> automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See <a href="https://github.com/elastic/kibana/blob/master//STYLEGUIDE.mdx" class="ulink" target="_top">STYLEGUIDE.mdx</a>.</p>
+<div class="position-relative"><h6><a id="_definitions"></a>Definitions</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Provider:</strong></span></p>
+<p>Code run by the <code class="literal">FunctionalTestRunner</code> is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to <em>provide</em>. Provider functions will always be called with a single argument: a provider API (see the <a class="xref" href="development-tests.html#functional_test_runner_provider_api" title="Provider API">Provider API Section</a>).</p>
+<p>A config provider:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">// config and test files use `export default`
+export default function (/* { providerAPI } */) {
+  return {
+    // ...
+  }
+}</pre>
+</div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Service</strong></span>
+</span>
+</dt>
+<dd>
+A Service is a named singleton created using a subclass of <code class="literal">FtrService</code>. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services. When you write your own functional tests check for existing services that help with the interactions you&#8217;re looking to execute, and add new services for interactions which aren&#8217;t already encoded in a service.
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Service Providers</strong></span>
+</span>
+</dt>
+<dd>
+For legacy purposes, and for when creating a subclass of <code class="literal">FtrService</code> is inconvenient, you can also create services using a "Service Provider". These are functions which  which create service instances and return them. These instances are cached and provided to tests. Currently these providers may also return a Promise for the service instance, allowing the service to do some setup work before tests run. We expect to fully deprecate and remove support for async service providers in the near future and instead require that services use the <code class="literal">lifecycle</code> service to run setup before tests. Providers which return instances of classes other than <code class="literal">FtrService</code> will likely remain supported for as long as possible.
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Page objects</strong></span>
+</span>
+</dt>
+<dd>
+Page objects are functionally equivalent to services, except they are loaded with a slightly different mechanism and generally defined separate from services. When you write your own functional tests you might want to write some of your services as Page objects, but it is not required.
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Test Files</strong></span>
+</span>
+</dt>
+<dd>
+The <code class="literal">FunctionalTestRunner</code>'s primary purpose is to execute test files. These files export a Test Provider that is called with a Provider API but is not expected to return a value. Instead Test Providers define a suite using <a href="https://mochajs.org/#bdd" class="ulink" target="_top">mocha&#8217;s BDD interface</a>.
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Test Suite</strong></span>
+</span>
+</dt>
+<dd>
+A test suite is a collection of tests defined by calling <code class="literal">describe()</code>, and then populated with tests and setup/teardown hooks by calling <code class="literal">it()</code>, <code class="literal">before()</code>, <code class="literal">beforeEach()</code>, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Tags</strong></span>
+</span>
+</dt>
+<dd>
+<p>
+Use tags in <code class="literal">describe()</code> function to group functional tests. Tags include:
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">ciGroup{id}</code> - Assigns test suite to a specific CI worker
+</li>
+<li class="listitem">
+<code class="literal">skipCloud</code> and <code class="literal">skipFirefox</code> - Excludes test suite from running on Cloud or Firefox
+</li>
+<li class="listitem">
+<code class="literal">includeFirefox</code> - Groups tests that run on Chrome and Firefox
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Cross-browser testing</strong></span>
+</span>
+</dt>
+<dd>
+On CI, all the functional tests are executed in Chrome by default. To also run a suite against Firefox, assign the <code class="literal">includeFirefox</code> tag:
+</dd>
+</dl>
+</div>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">// on CI test suite will be run twice: in Chrome and Firefox
+describe('My Cross-browser Test Suite', function () {
+  this.tags('includeFirefox');
+
+  it('My First Test');
+}</pre>
+</div>
+<p>If the tests do not apply to Firefox, assign the <code class="literal">skipFirefox</code> tag.</p>
+<p>To run tests on Firefox locally, use <code class="literal">config.firefox.js</code>:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node scripts/functional_test_runner --config test/functional/config.firefox.js</pre>
+</div>
+<div class="position-relative"><h6><a id="_using_the_test_user_service"></a>Using the test_user service</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>Tests should run at the positive security boundary condition, meaning that they should be run with the minimum privileges required (and documented) and not as the superuser.
+ This prevents the type of regression where additional privileges accidentally become required to perform the same action.</p>
+<p>The functional UI tests now default to logging in with a user named <code class="literal">test_user</code> and the roles of this user can be changed dynamically without logging in and out.</p>
+<p>In order to achieve this a new service was introduced called <code class="literal">createTestUserService</code> (see <code class="literal">packages/kbn-ftr-common-functional-ui-services/services/security/test_user.ts</code>). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().</p>
+<p>An example of how to set the role like how its defined below:</p>
+<p><code class="literal">await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);</code></p>
+<p>Here we are setting the <code class="literal">test_user</code> to have the <code class="literal">kibana_user</code> role and also role access to a specific data index (<code class="literal">kibana_date_nanos</code>).</p>
+<p>Tests should normally setRoles() in the before() and restoreDefaults() in the after().</p>
+<div class="position-relative"><h6><a id="_anatomy_of_a_test_file"></a>Anatomy of a test file</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>This annotated example file shows the basic structure every test suite uses. It starts by importing <a href="https://github.com/elastic/kibana/tree/main/packages/kbn-expect" class="ulink" target="_top"><code class="literal">@kbn/expect</code></a> and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the <code class="literal">getService()</code> and <code class="literal">getPageObjects()</code> functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. <code class="literal">describe()</code>, <code class="literal">it()</code>, <code class="literal">before()</code> and the lot are used to define suites that happen to automate a browser via services and objects of type <code class="literal">PageObject</code>.</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">import expect from '@kbn/expect';
+// test files must `export default` a function that defines a test suite
+export default function ({ getService, getPageObject }) {
+
+  // most test files will start off by loading some services
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+
+  // for historical reasons, PageObjects are loaded in a single API call
+  // and returned on an object with a key/value for each requested PageObject
+  const PageObjects = getPageObjects(['common', 'visualize']);
+
+  // every file must define a top-level suite before defining hooks/tests
+  describe('My Test Suite', () =&gt; {
+
+    // most suites start with a before hook that navigates to a specific
+    // app/page and restores some archives into {es} with esArchiver
+    before(async () =&gt; {
+      await Promise.all([
+        // start by clearing Saved Objects from the .kibana index
+        await kibanaServer.savedObjects.cleanStandardList();
+        // load some basic log data only if the index doesn't exist
+        esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
+      ]);
+      // go to the page described by `apps.visualize` in the config
+      await PageObjects.common.navigateTo('visualize');
+    });
+
+    // right after the before() hook definition, add the teardown steps
+    // that will tidy up {es} for other test suites
+    after(async () =&gt; {
+      // we clear Kibana Saved Objects but not the makelogs
+      // archive because we don't make any changes to it, and subsequent
+      // suites could use it if they call `.loadIfNeeded()`.
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    // This series of tests illustrate how tests generally verify
+    // one step of a larger process and then move on to the next in
+    // a new test, each step building on top of the previous
+    it('Vis Listing Page is empty');
+    it('Create a new vis');
+    it('Shows new vis in listing page');
+    it('Opens the saved vis');
+    it('Respects time filter changes');
+    it(...
+  });
+
+}</pre>
+</div>
+<div class="position-relative"><h5><a id="functional_test_runner_provider_api"></a>Provider API</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The first and only argument to all providers is a Provider API Object. This object can be used to load service/page objects and config/test files.</p>
+<p>Within config files the API has the following properties</p>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<code class="literal">log</code>
+</p>
+</td>
+<td valign="top">
+<p>
+An instance of the <code class="literal">ToolingLog</code> that is ready for use
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">readConfigFile(path)</code>
+</p>
+</td>
+<td valign="top">
+<p>
+Returns a promise that will resolve to a Config instance that provides the values from the config file at <code class="literal">path</code>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Within service and PageObject Providers the API is:</p>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<code class="literal">getService(name)</code>
+</p>
+</td>
+<td valign="top">
+<p>
+Load and return the singleton instance of a service by name
+</p>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<p>
+<code class="literal">getPageObjects(names)</code>
+</p>
+</td>
+<td valign="top">
+<p>
+Load the singleton instances of `PageObject`s and collect them on an object where each name is the key to the singleton instance of that PageObject
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Within a test Provider the API is exactly the same as the service providers API but with an additional method:</p>
+<div class="informaltable">
+<table border="0" cellpadding="4px">
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+<tbody valign="top">
+<tr>
+<td valign="top">
+<p>
+<code class="literal">loadTestFile(path)</code>
+</p>
+</td>
+<td valign="top">
+<p>
+Load the test file at path in place. Use this method to nest suites from other files into a higher-level suite
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="position-relative"><h5><a id="_service_index"></a>Service Index</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<div class="position-relative"><h6><a id="_built_in_services"></a>Built-in Services</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The <code class="literal">FunctionalTestRunner</code> comes with three built-in services:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<span class="strong strong"><strong>config:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Use <code class="literal">config.get(path)</code> to read any value from the config file
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>log:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">ToolingLog</code> instances are readable streams. The instance provided by this service is automatically piped to stdout by the <code class="literal">FunctionalTestRunner</code> CLI
+</li>
+<li class="listitem">
+<code class="literal">log.verbose()</code>, <code class="literal">log.debug()</code>, <code class="literal">log.info()</code>, <code class="literal">log.warning()</code> all work just like console.log but produce more organized output
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>lifecycle:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Designed primary for use in services
+</li>
+<li class="listitem">
+Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
+</li>
+<li class="listitem">
+Phases include: <code class="literal">beforeLoadTests</code>, <code class="literal">beforeTests</code>, <code class="literal">beforeEachTest</code>, <code class="literal">cleanup</code>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h6><a id="_kibana_services"></a>Kibana Services</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The Kibana functional tests define the vast majority of the actual functionality used by tests.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<span class="strong strong"><strong>browser</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Higher level wrapper for <code class="literal">remote</code> service, which exposes available browser actions
+</li>
+<li class="listitem">
+<p>Popular methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">browser.getWindowSize()</code>
+</li>
+<li class="listitem">
+<code class="literal">browser.refresh()</code>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>testSubjects:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Test subjects are elements that are tagged specifically for selecting from tests
+</li>
+<li class="listitem">
+Use <code class="literal">testSubjects</code> over CSS selectors when possible
+</li>
+<li class="listitem">
+<p>Usage:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Tag your test subject with a <code class="literal">data-test-subj</code> attribute:</p>
+<div class="pre_wrapper lang-html">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-html">&lt;div id="container”&gt;
+  &lt;button id="clickMe” data-test-subj=”containerButton” /&gt;
+&lt;/div&gt;</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click this button using the <code class="literal">testSubjects</code> helper:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">await testSubjects.click(‘containerButton’);</pre>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>Popular methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">testSubjects.find(testSubjectSelector)</code> - Find a test subject in the page; throw if it can&#8217;t be found after some time
+</li>
+<li class="listitem">
+<code class="literal">testSubjects.click(testSubjectSelector)</code> - Click a test subject in the page; throw if it can&#8217;t be found after some time
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>find:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Helpers for <code class="literal">remote.findBy*</code> methods that log and manage timeouts
+</li>
+<li class="listitem">
+<p>Popular methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">find.byCssSelector()</code>
+</li>
+<li class="listitem">
+<code class="literal">find.allByCssSelector()</code>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>retry:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Helpers for retrying operations
+</li>
+<li class="listitem">
+<p>Popular methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">retry.try(fn, onFailureBlock)</code> - Execute <code class="literal">fn</code> in a loop until it succeeds or the default timeout elapses. The optional <code class="literal">onFailureBlock</code> is executed before each retry attempt.
+</li>
+<li class="listitem">
+<code class="literal">retry.tryForTime(ms, fn, onFailureBlock)</code> - Execute <code class="literal">fn</code> in a loop until it succeeds or <code class="literal">ms</code> milliseconds elapses. The optional <code class="literal">onFailureBlock</code> is executed before each retry attempt.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>kibanaServer:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Helpers for interacting with Kibana&#8217;s server
+</li>
+<li class="listitem">
+<p>Commonly used methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">kibanaServer.uiSettings.update()</code>
+</li>
+<li class="listitem">
+<code class="literal">kibanaServer.version.get()</code>
+</li>
+<li class="listitem">
+<code class="literal">kibanaServer.status.getOverallState()</code>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+<dt>
+<span class="term">
+<span class="strong strong"><strong>esArchiver:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Load/unload archives created with the <code class="literal">esArchiver</code>
+</li>
+<li class="listitem">
+<p>Popular methods:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">esArchiver.load(path)</code>
+</li>
+<li class="listitem">
+<code class="literal">esArchiver.loadIfNeeded(path)</code>
+</li>
+<li class="listitem">
+<code class="literal">esArchiver.unload(path)</code>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<p>Full list of services that are used in functional tests can be found here: <a href="https://github.com/elastic/kibana/blob/master/test/functional/services" class="ulink" target="_top">test/functional/services</a></p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<span class="strong strong"><strong>Low-level utilities:</strong></span>
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>es</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Elasticsearch client
+</li>
+<li class="listitem">
+Higher level options: <code class="literal">kibanaServer.uiSettings</code> or <code class="literal">esArchiver</code>
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>remote</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Instance of <a href="https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html" class="ulink" target="_top">WebDriver</a> class
+</li>
+<li class="listitem">
+Responsible for all communication with the browser
+</li>
+<li class="listitem">
+To perform browser actions, use <code class="literal">remote</code> service
+</li>
+<li class="listitem">
+For searching and manipulating with DOM elements, use <code class="literal">testSubjects</code> and <code class="literal">find</code> services
+</li>
+<li class="listitem">
+See the <a href="https://seleniumhq.github.io/selenium/docs/api/javascript/" class="ulink" target="_top">selenium-webdriver docs</a> for the full API.
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h6><a id="_custom_services"></a>Custom Services</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>Services are intentionally generic. They can be literally anything (even nothing). Some services have helpers for interacting with a specific types of UI elements, like <code class="literal">pointSeriesVis</code>, and others are more foundational, like <code class="literal">log</code> or <code class="literal">config</code>. Whenever you want to provide some functionality in a reusable package, consider making a custom service.</p>
+<p>To create a custom service <code class="literal">somethingUseful</code>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p>Create a <code class="literal">test/functional/services/something_useful.js</code> file that looks like this:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">// Services are defined by Provider functions that receive the ServiceProviderAPI
+export function SomethingUsefulProvider({ getService }) {
+  const log = getService('log');
+
+  class SomethingUseful {
+    doSomething() {
+    }
+  }
+  return new SomethingUseful();
+}</pre>
+</div>
+</li>
+<li class="listitem">
+Re-export your provider from <code class="literal">services/index.js</code>
+</li>
+<li class="listitem">
+<p>Import it into <code class="literal">src/functional/config.base.js</code> and add it to the services config:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">import { SomethingUsefulProvider } from './services';
+
+export default function () {
+  return {
+    // … truncated ...
+    services: {
+      somethingUseful: SomethingUsefulProvider
+    }
+  }
+}</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="_pageobjects"></a>PageObjects</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>The purpose for each PageObject is pretty self-explanatory. The visualize PageObject provides helpers for interacting with the visualize app, dashboard is the same for the dashboard app, and so on.</p>
+<p>One exception is the "common" PageObject. A holdover from the intern implementation, the common PageObject is a collection of helpers useful across pages. Now that we have shareable services, and those services can be shared with other <code class="literal">FunctionalTestRunner</code> configurations, we will continue to move functionality out of the common PageObject and into services.</p>
+<p>Please add new methods to existing or new services rather than further expanding the CommonPage class.</p>
+<div class="position-relative"><h5><a id="_gotchas"></a>Gotchas</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>Remember that you can’t run an individual test in the file (<code class="literal">it</code> block) because the whole <code class="literal">describe</code> needs to be run in order. There should only be one top level <code class="literal">describe</code> in a file.</p>
+<div class="position-relative"><h6><a id="_functional_test_timing"></a>Functional Test Timing</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>Another important gotcha is writing stable tests by being mindful of timing. All methods on <code class="literal">remote</code> run asynchronously. It’s better to write interactions that wait for changes on the UI to appear before moving onto the next step.</p>
+<p>For example, rather than writing an interaction that simply clicks a button, write an interaction with the a higher-level purpose in mind:</p>
+<p>Bad example: <code class="literal">PageObjects.app.clickButton()</code></p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">class AppPage {
+  // what can people who call this method expect from the
+  // UI after the promise resolves? Since the reaction to most
+  // clicks is asynchronous the behavior is dependent on timing
+  // and likely to cause test that fail unexpectedly
+  async clickButton () {
+    await testSubjects.click(‘menuButton’);
+  }
+}</pre>
+</div>
+<p>Good example: <code class="literal">PageObjects.app.openMenu()</code></p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">class AppPage {
+  // unlike `clickButton()`, callers of `openMenu()` know
+  // the state that the UI will be in before they move on to
+  // the next step
+  async openMenu () {
+    await testSubjects.click(‘menuButton’);
+    await testSubjects.exists(‘menu’);
+  }
+}</pre>
+</div>
+<p>Writing in this way will ensure your test timings are not flaky or based on assumptions about UI updates after interactions.</p>
+<div class="position-relative"><h5><a id="_debugging"></a>Debugging</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>From the command line run:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node --inspect-brk scripts/functional_test_runner</pre>
+</div>
+<p>This prints out a URL that you can visit in Chrome and debug your functional tests in the browser.</p>
+<p>You can also see additional logs in the terminal by running the <code class="literal">FunctionalTestRunner</code> with the <code class="literal">--debug</code> or <code class="literal">--verbose</code> flag. Add more logs with statements in your tests like</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">// load the log service
+const log = getService(‘log’);
+
+// log.debug only writes when using the `--debug` or `--verbose` flag.
+log.debug(‘done clicking menu’);</pre>
+</div>
+<div class="position-relative"><h5><a id="_macos_testing_performance_tip"></a>MacOS testing performance tip</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator&#8217;s GPU settings. In iTerm2:
+* Open Preferences (Command + ,)
+* In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
+* Open "Advanced GPU Settings&#8230;&#8203;"
+* Uncheck the "Prefer integrated to discrete GPU" option
+* Restart iTerm</p>
+<div class="position-relative"><h4><a id="_flaky_test_runner"></a>Flaky Test Runner</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-functional-tests.asciidoc">edit</a></div>
+<p>If your functional tests are flaky then the Operations team might skip them and ask that you make them less flaky before enabling them once again. This process usually involves looking at the failures which are logged on the relevant Github issue and finding incorrect assumptions or conditions which need to be awaited at some point in the test. To determine if your changes make the test fail less often you can run your tests in the Flaky Test Runner. This tool runs up to 500 executions of a specific ciGroup. To start a build of the Flaky Test Runner create a PR with your changes and then visit <a href="https://ci-stats.kibana.dev/trigger_flaky_test_runner" class="ulink" target="_top">https://ci-stats.kibana.dev/trigger_flaky_test_runner</a>, select your PR, choose the CI Group that your tests are in, and trigger the build.</p>
+<p>This will take you to Buildkite where your build will run and tell you if it failed in any execution.</p>
+<p>A flaky test may only fail once in 1000 runs, so keep this in mind and make sure you use enough executions to really prove that a test isn&#8217;t flaky anymore.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="development-unit-tests"></a>Unit testing frameworks</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>Kibana is doing unit testing doing <code class="literal">Jest</code>.</p>
+<div class="position-relative"><h4><a id="_jest"></a>Jest</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>Jest tests are stored in the same directory as source code files with the <code class="literal">.test.{js,mjs,ts,tsx}</code> suffix.</p>
+<p>Each plugin and package contains it&#8217;s own <code class="literal">jest.config.js</code> file to define its root, and any overrides
+to the jest-preset provided by <code class="literal">@kbn/test</code>. When working on a single plugin or package, you will find
+it&#8217;s more efficient to supply the Jest configuration file when running.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">yarn jest --config src/plugins/discover/jest.config.js</pre>
+</div>
+<div class="position-relative"><h6><a id="_writing_jest_unit_tests"></a>Writing Jest Unit Tests</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>In order to write those tests there are two main things you need to be aware of.
+The first one is the different between <code class="literal">jest.mock</code> and <code class="literal">jest.doMock</code>
+and the second one our <code class="literal">jest mocks file pattern</code>. As we are running <code class="literal">js</code> and <code class="literal">ts</code>
+test files with <code class="literal">babel-jest</code> both techniques are needed
+specially for the tests implemented on Typescript in order to benefit from the
+auto-inference types feature.</p>
+<div class="position-relative"><h6><a id="_jest_mock_vs_jest_domock"></a>Jest.mock vs Jest.doMock</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>Both methods are essentially the same on their roots however the <code class="literal">jest.mock</code>
+calls will get hoisted to the top of the file and can only reference variables
+prefixed with <code class="literal">mock</code>. On the other hand, <code class="literal">jest.doMock</code> won&#8217;t be hoisted and can
+reference pretty much any variable we want, however we have to assure those referenced
+variables are instantiated at the time we need them which lead us to the next
+section where we&#8217;ll talk about our jest mock files pattern.</p>
+<div class="position-relative"><h6><a id="_jest_mock_files_pattern"></a>Jest Mock Files Pattern</h6><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>Specially on typescript it is pretty common to have in unit tests
+<code class="literal">jest.doMock</code> calls which reference for example imported types. Any error
+will thrown from doing that however the test will fail. The reason behind that
+is because despite the <code class="literal">jest.doMock</code> isn&#8217;t being hoisted by <code class="literal">babel-jest</code> the
+import with the types we are referencing will be hoisted to the top and at the
+time we&#8217;ll call the function that variable would not be defined.</p>
+<p>In order to prevent that we develop a protocol that should be followed:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Each module could provide a standard mock in <code class="literal">mymodule.mock.ts</code> in case
+there are other tests that could benefit from using definitions here.
+This file would not have any <code class="literal">jest.mock</code> calls, just dummy objects.
+</li>
+<li class="listitem">
+Each test defines its mocks in <code class="literal">mymodule.test.mocks.ts</code>. This file
+could import relevant mocks from the generalised module&#8217;s mocks
+file <code class="literal">(*.mock.ts)</code> and call <code class="literal">jest.mock</code> for each of them. If there is
+any relevant dummy mock objects to generalise (and to be used by
+other tests), the dummy objects could be defined directly on this file.
+</li>
+<li class="listitem">
+Each test would import its mocks from the test mocks
+file mymodule.test.mocks.ts. <code class="literal">mymodule.test.ts</code> has an import
+like: <code class="literal">import * as Mocks from './mymodule.test.mocks'</code>,
+<code class="literal">import { mockX } from './mymodule.test.mocks'</code>
+or just <code class="literal">import './mymodule.test.mocks'</code> if there isn&#8217;t anything
+exported to be used.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="debugging-unit-tests"></a>Debugging Unit Tests</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>The standard <code class="literal">yarn test</code> task runs several sub tasks and can take
+several minutes to complete, making debugging failures pretty painful.
+In order to ease the pain specialized tasks provide alternate methods
+for running the tests.</p>
+<p>You could also add the <code class="literal">--debug</code> option so that <code class="literal">node</code> is run using
+the <code class="literal">--inspect-brk</code> flag. You’ll need to connect a remote debugger such
+as <a href="https://github.com/node-inspector/node-inspector" class="ulink" target="_top"><code class="literal">node-inspector</code></a>
+to proceed in this mode.</p>
+<div class="position-relative"><h5><a id="_unit_testing_plugins"></a>Unit Testing Plugins</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-unit-tests.asciidoc">edit</a></div>
+<p>Even when using
+<a href="https://github.com/elastic/kibana/tree/main/packages/kbn-plugin-generator" class="ulink" target="_top">Kibana
+plugin generator</a> we do not enforce a way for unit testing your plugin. Please setup and you use
+the tools of your choice. If the plugin will live inside the Kibana repo <code class="literal">Jest</code> must be used.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="development-accessibility-tests"></a>Automated Accessibility Testing</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-accessibility-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>To write an accessibility test, use the provided accessibility service <code class="literal">getService('a11y')</code>. Accessibility tests are fairly straightforward to write as <a href="https://github.com/dequelabs/axe-core" class="ulink" target="_top">axe</a> does most of the heavy lifting. Navigate to the UI that you need to test, then call <code class="literal">testAppSnapshot();</code> from the service imported earlier to make sure axe finds no failures. Navigate through every portion of the UI for the best coverage.</p>
+<p>An example test might look like this:</p>
+<div class="pre_wrapper lang-js">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-js">export default function ({ getService, getPageObjects }) {
+  const { common, home } = getPageObjects(['common', 'home']);
+  const a11y = getService('a11y'); /* this is the wrapping service around axe */
+
+  describe('Kibana Home', () =&gt; {
+    before(async () =&gt; {
+      await common.navigateToApp('home'); /* navigates to the page we want to test */
+    });
+
+    it('Kibana Home view', async () =&gt; {
+      await retry.waitFor(
+        'home page visible',
+        async () =&gt; await testSubjects.exists('homeApp')
+      ); /* confirm you're on the correct page and that it's loaded */
+      await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
+    });
+
+    /**
+     * If these tests were added by our QA team, tests that fail that require significant app code
+     * changes to be fixed will be skipped with a corresponding issue label with more info
+     */
+    // Skipped due to https://github.com/elastic/kibana/issues/99999
+    it.skip('all plugins view page meets a11y requirements', async () =&gt; {
+      await home.clickAllKibanaPlugins();
+      await a11y.testAppSnapshot();
+    });
+
+    /**
+     * Testing all the versions and different views of of a page is important to get good
+     * coverage. Things like empty states, different license levels, different permissions, and
+     * loaded data can all significantly change the UI which necessitates their own test.
+     */
+    it('Add Kibana sample data page', async () =&gt; {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await a11y.testAppSnapshot();
+    });
+  });
+}</pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_running_tests"></a>Running tests</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-accessibility-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>To run the tests locally:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>In one terminal window run:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node scripts/functional_tests_server --config test/accessibility/config.ts</pre>
+</div>
+</li>
+<li class="listitem">
+<p>When the server prints that it is ready, in another terminal window run:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node scripts/functional_test_runner.js --config test/accessibility/config.ts</pre>
+</div>
+</li>
+</ol>
+</div>
+<p>To run the x-pack tests, swap the config file out for
+<code class="literal">x-pack/test/accessibility/apps/{group1,group2,group3}/config.ts</code>.</p>
+<p>The testing is done using <a href="https://github.com/dequelabs/axe-core" class="ulink" target="_top">axe</a>.
+You can run the same thing that runs CI using browser plugins:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a href="https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US" class="ulink" target="_top">Chrome</a>
+</li>
+<li class="listitem">
+<a href="https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/" class="ulink" target="_top">Firefox</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_anatomy_of_a_failure"></a>Anatomy of a failure</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-accessibility-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>Failures can seem confusing if you&#8217;ve never seen one before. Here is a breakdown of what a failure coming from CI might look like:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">1)    Dashboard
+       create dashboard button:
+
+      Error: a11y report:
+
+ VIOLATION
+   [aria-hidden-focus]: Ensures aria-hidden elements do not contain focusable elements
+     Help: https://dequeuniversity.com/rules/axe/3.5/aria-hidden-focus?application=axeAPI
+     Elements:
+       - &lt;span aria-hidden="true"&gt;&lt;button type="button"&gt;Submit&lt;/button&gt;&lt;/span&gt;
+       at Accessibility.testAxeReport (test/accessibility/services/a11y/a11y.ts:90:15)
+       at Accessibility.testAppSnapshot (test/accessibility/services/a11y/a11y.ts:58:18)
+       at process._tickCallback (internal/process/next_tick.js:68:7)</pre>
+</div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+"Dashboard" and "create dashboard button" are the names of the test suite and specific test that failed.
+</li>
+<li class="listitem">
+Always in brackets, "[aria-hidden-focus]" is the name of the axe rule that failed, followed by a short description.
+</li>
+<li class="listitem">
+"Help: &lt;url&gt;" links to the axe documentation for that rule, including severity, remediation tips, and good and bad code examples.
+</li>
+<li class="listitem">
+"Elements:"  points to where in the DOM the failure originated (using HTML syntax). In this example, the problem came from a span with the <code class="literal">aria-hidden="true"</code> attribute and a nested <code class="literal">&lt;button&gt;</code> tag. If the selector is too complicated to find the source of the problem, use the browser plugins mentioned earlier to locate it. If you have a general idea where the issue is coming from, you can also try adding unique IDs to the page to narrow down the location.
+</li>
+<li class="listitem">
+The stack trace points to the internals of axe. The stack trace is there in case the test failure is a bug in axe and not in your code, although this is unlikely.
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="development-package-tests"></a>Package Testing</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-package-tests.asciidoc">edit</a></div>
+</div></div></div>
+<p>Packaging tests use Vagrant virtual machines as hosts and Ansible for
+provisioning and assertions. Kibana distributions are copied from the
+target folder into each VM and installed, along with required
+dependencies.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_setup"></a>Setup</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-package-tests.asciidoc">edit</a></div>
+</div></div></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<p><a href="https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html" class="ulink" target="_top">Ansible</a></p>
+<pre class="screen"># Ubuntu
+sudo apt-get install python3-pip libarchive-tools
+pip3 install --user ansible
+
+# Darwin
+brew install python3
+pip3 install --user ansible</pre>
+</li>
+<li class="listitem">
+<a href="https://www.vagrantup.com/downloads" class="ulink" target="_top">Vagrant</a>
+</li>
+<li class="listitem">
+<a href="https://www.virtualbox.org/wiki/Downloads" class="ulink" target="_top">Virtualbox</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_machines"></a>Machines</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-package-tests.asciidoc">edit</a></div>
+</div></div></div>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+<col class="col_3"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Hostname</th>
+<th align="left" valign="top">IP</th>
+<th align="left" valign="top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>deb</p></td>
+<td align="left" valign="top"><p>192.168.56.5</p></td>
+<td align="left" valign="top"><p>Installation of Kibana’s deb package</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>rpm</p></td>
+<td align="left" valign="top"><p>192.168.56.6</p></td>
+<td align="left" valign="top"><p>Installation of Kibana’s rpm package</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>docker</p></td>
+<td align="left" valign="top"><p>192.168.56.7</p></td>
+<td align="left" valign="top"><p>Installation of Kibana’s docker image</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_running"></a>Running</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-package-tests.asciidoc">edit</a></div>
+</div></div></div>
+<pre class="screen"># Build distributions
+node scripts/build --all-platforms --debug
+
+cd test/package
+
+# Setup virtual machine and networking
+vagrant up &lt;hostname&gt; --no-provision
+
+# Install Kibana and run OS level tests
+# This step can be repeated when adding new tests, it ensures machine state - installations won't run twice
+vagrant provision &lt;hostname&gt;
+
+# Running functional tests
+node scripts/es snapshot \
+  -E network.bind_host=127.0.0.1,192.168.56.1 \
+  -E discovery.type=single-node \
+  --license=trial
+TEST_KIBANA_URL=http://elastic:changeme@&lt;ip&gt;:5601 \
+TEST_ES_URL=http://elastic:changeme@192.168.56.1:9200 \
+  node scripts/functional_test_runner.js --include-tag=smoke</pre>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="_cleanup"></a>Cleanup</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-package-tests.asciidoc">edit</a></div>
+</div></div></div>
+<pre class="literallayout">vagrant destroy &lt;hostname&gt;</pre>
+
+<div class="position-relative"><h4><a id="_cross_browser_compatibility"></a>Cross-browser compatibility</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-tests.asciidoc">edit</a></div>
+<p><span class="strong strong"><strong>Testing IE on OS X</strong></span></p>
+<p><span class="strong strong"><strong>Note:</strong></span> IE11 is not supported from 7.9 onwards.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a href="http://www.vmware.com/products/fusion/fusion-evaluation.html" class="ulink" target="_top">Download
+VMWare Fusion</a>.
+</li>
+<li class="listitem">
+<a href="https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads" class="ulink" target="_top">Download
+IE virtual machines</a> for VMWare.
+</li>
+<li class="listitem">
+Open VMWare and go to Window &gt; Virtual Machine Library. Unzip the
+virtual machine and drag the .vmx file into your Virtual Machine
+Library.
+</li>
+<li class="listitem">
+Right-click on the virtual machine you just added to your library and
+select "<code class="literal">Snapshots…</code>", and then click the "<code class="literal">Take</code>" button in the modal
+that opens. You can roll back to this snapshot when the VM expires in 90
+days.
+</li>
+<li class="listitem">
+In System Preferences &gt; Sharing, change your computer name to be
+something simple, e.g. "<code class="literal">computer</code>".
+</li>
+<li class="listitem">
+Run Kibana with <code class="literal">yarn start --host=computer.local</code> (substituting
+your computer name).
+</li>
+<li class="listitem">
+Now you can run your VM, open the browser, and navigate to
+<code class="literal">http://computer.local:5601</code> to test Kibana.
+</li>
+<li class="listitem">
+Alternatively you can use browserstack
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development-github.html">« How we use Git and GitHub</a>
+</span>
+<span class="next">
+<a href="interpreting-ci-failures.html">Interpreting CI Failures »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>API Keys | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="API Keys | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-security.html" title="Security"/>
+<link rel="prev" href="kibana-privileges.html" title="Kibana privileges"/>
+<link rel="next" href="role-mappings.html" title="Role mappings"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="kibana-privileges.html">« Kibana privileges</a>
+</span>
+<span class="next">
+<a href="role-mappings.html">Role mappings »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-security.html">Security</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>API Keys</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="api-keys"></a>API Keys</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>API keys are security mechanisms used to authenticate and authorize access to Elasticsearch resources. They ensure that only authorized users or applications interact with Elasticsearch.</p>
+<p>For example, if you extract data from an Elasticsearch cluster on a daily basis, you might create an API key tied to your credentials, configure it with minimum access, and then put the API credentials into a cron job. Or you might create API keys to automate ingestion of new data from remote sources, without a live user interaction.</p>
+<p>You can use Kibana to manage your different API keys:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+User API key: allows external services to access the Elastic Stack on behalf of a user.
+</li>
+<li class="listitem">
+Cross-cluster API key: allows other clusters to connect to this cluster.
+</li>
+<li class="listitem">
+Managed API key: created and managed by Kibana to run background tasks.
+</li>
+</ul>
+</div>
+<p>To manage API keys, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Security &gt; API Keys</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/api-keys.png" alt="API Keys UI"></span></p>
+<div class="position-relative"><h3><a id="api-keys-security-privileges"></a>Security privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To use API keys in Kibana, you must have the <code class="literal">manage_security</code>, <code class="literal">manage_api_key</code>, or the <code class="literal">manage_own_api_key</code> cluster privileges.
+</li>
+<li class="listitem">
+To delete API keys, you must have the <code class="literal">manage_api_key</code> or <code class="literal">manage_own_api_key</code> privileges.
+</li>
+<li class="listitem">
+To create or update a <span class="strong strong"><strong>user API key</strong></span>, you must have the <code class="literal">manage_api_key</code> or the <code class="literal">manage_own_api_key</code> privilege.
+</li>
+<li class="listitem">
+To create or update a <span class="strong strong"><strong>cross-cluster API key</strong></span>, you must have the <code class="literal">manage_security</code> privilege and an Enterprise license.
+</li>
+<li class="listitem">
+To have a read-only view on the API keys, you must have access to the page and the <code class="literal">read_security</code> cluster privilege.
+</li>
+</ul>
+</div>
+<p>To manage roles, open the main menu, then click  <span class="strong strong"><strong>Stack Management &gt; Security &gt; Roles</strong></span>, or use the <a class="xref" href="role-management-api.html" title="Kibana role management APIs">Kibana Role Management API</a>.</p>
+<div class="position-relative"><h3><a id="create-api-key"></a>Create an API key</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+<p>To create an API key, open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Security &gt; API Keys &gt; Create API key</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/create-ccr-api-key.png" alt="Create API Key UI"></span></p>
+<p>Refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-create-api-key.html" class="ulink" target="_top">create API key</a> documentation to learn more about creating user API keys.</p>
+<p>Refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-create-cross-cluster-api-key.html" class="ulink" target="_top">create cross-cluster API key</a> documentation to learn more about creating cross-cluster API keys.</p>
+<div class="position-relative"><h3><a id="udpate-api-key"></a>Update an API key</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+<p>To update an API key, open the main menu, click <span class="strong strong"><strong>Stack Management &gt; Security &gt; API Keys</strong></span>, and then click on the name of the key. You cannot update the name or the type of API key.</p>
+<p>Refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-update-api-key.html" class="ulink" target="_top">update API key</a> documentation to learn more about updating user API keys.</p>
+<p>Refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-update-cross-cluster-api-key.html" class="ulink" target="_top">update cross-cluster API key</a> documentation to learn more about updating cross-cluster API keys.</p>
+<div class="position-relative"><h3><a id="view-api-keys"></a>View and delete API keys</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/security/api-keys/index.asciidoc">edit</a></div>
+<p>The <span class="strong strong"><strong>API Keys</strong></span> feature in Kibana lists your API keys, including the name, date created, and status. If an API key expires, its status changes from <code class="literal">Active</code> to <code class="literal">Expired</code>.</p>
+<p>If you have <code class="literal">manage_security</code> or <code class="literal">manage_api_key</code> permissions, you can view the API keys of all users, and see which API key was created by which user in which realm.
+If you have only the <code class="literal">manage_own_api_key</code> permission, you see only a list of your own keys.</p>
+<p>You can delete API keys individually or in bulk, but you need the <code class="literal">manage_api_keys</code> or <code class="literal">manage_own_api_key</code> privileges.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="kibana-privileges.html">« Kibana privileges</a>
+</span>
+<span class="next">
+<a href="role-mappings.html">Role mappings »</a>
+</span>
+</div>
+</body>
+</html>

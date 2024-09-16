@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>APM settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="APM settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="alert-action-settings-kb.html" title="Alerting and action settings in Kibana"/>
+<link rel="next" href="banners-settings-kb.html" title="Banner settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="alert-action-settings-kb.html">« Alerting and action settings in Kibana</a>
+</span>
+<span class="next">
+<a href="banners-settings-kb.html">Banner settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>APM settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/apm-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="apm-settings-kb"></a>APM settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/apm-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>These settings allow the APM app to function, and specify the data that it surfaces.
+Unless you&#8217;ve customized your setup,
+you do not need to configure any settings to use the APM app.
+It is enabled by default.</p>
+<div class="position-relative"><h4><a id="apm-indices-settings-kb"></a>APM indices</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/apm-settings.asciidoc">edit</a></div>
+<p>The APM app uses data views to query APM indices.
+To change the default APM indices that the APM app queries, open the APM app and select <span class="strong strong"><strong>Settings</strong></span> &gt; <span class="strong strong"><strong>Indices</strong></span>.
+Index settings in the APM app take precedence over those set in <code class="literal">kibana.yml</code>.</p>
+<p>Starting in version 8.2.0, APM indices are Kibana Spaces-aware;
+Changes to APM index settings will only apply to the currently enabled space.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="settings/images/apm-settings.png" alt="APM app settings in Kibana">
+</div>
+</div>
+<div class="position-relative"><h4><a id="general-apm-settings-kb"></a>General APM settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/apm-settings.asciidoc">edit</a></div>
+<p>If you&#8217;d like to change any of the default values,
+copy and paste the relevant settings into your <code class="literal">kibana.yml</code> configuration file.
+Changing these settings may disable features of the APM App.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>More settings are available in the <a class="xref" href="advanced-options.html#observability-advanced-settings" title="Observability">Observability advanced settings</a>.</p>
+</div>
+</div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.maxSuggestions</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of suggestions fetched in autocomplete selection boxes. Defaults to <code class="literal">100</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapFingerprintBucketSize</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to <code class="literal">100</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapFingerprintGlobalBucketSize</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to <code class="literal">100</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapEnabled</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to disable service maps. Defaults to <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapTraceIdBucketSize</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of trace IDs sampled for generating service map focused on a specific service. Defaults to <code class="literal">65</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapTraceIdGlobalBucketSize</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of trace IDs sampled for generating the global service map. Defaults to <code class="literal">6</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.serviceMapMaxTracesPerRequest</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of traces per request for generating the global service map. Defaults to <code class="literal">50</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.ui.enabled</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to hide the APM app from the main menu. Defaults to <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.ui.maxTraceItems</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Maximum number of child items displayed when viewing trace details. Defaults to <code class="literal">5000</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.observability.annotations.index</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Index name where Observability annotations are stored. Defaults to <code class="literal">observability-annotations</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.metricsInterval</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Sets a <code class="literal">fixed_interval</code> for date histograms in metrics aggregations. Defaults to <code class="literal">30</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.agent.migrations.enabled</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to disable cloud APM migrations. Defaults to <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.error</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all error indices. Defaults to <code class="literal">logs-apm*,apm-*,traces-*.otel-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.onboarding</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all onboarding indices. Defaults to <code class="literal">apm-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.span</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all span indices. Defaults to <code class="literal">traces-apm*,apm-*,traces-*.otel-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.transaction</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all transaction indices. Defaults to <code class="literal">traces-apm*,apm-*,traces-*.otel-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.metric</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all metrics indices. Defaults to <code class="literal">metrics-apm*,apm-*,metrics-*.otel-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.indices.sourcemap</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Matcher for all source map indices. Defaults to <code class="literal">apm-*</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.autoCreateApmDataView</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to disable the automatic creation of the APM data view when the APM app is opened. Defaults to <code class="literal">true</code>.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">xpack.apm.latestAgentVersionsUrl</code> <span class="image"><a class="image" href="https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&amp;placement=docs-body"><img src="https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg" alt="logo cloud" title="Supported on Elasticsearch Service"></a></span>
+</span>
+</dt>
+<dd>
+Specifies the URL of a self hosted file that contains latest agent versions. Defaults to <code class="literal">https://apm-agent-versions.elastic.co/versions.json</code>. Set to <code class="literal">''</code> to disable requesting latest agent versions.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="alert-action-settings-kb.html">« Alerting and action settings in Kibana</a>
+</span>
+<span class="next">
+<a href="banners-settings-kb.html">Banner settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>

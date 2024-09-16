@@ -1,0 +1,6 @@
+PUT .kibana_7.12.1_001/_settings
+{
+  "index": {
+    "blocks.write": false
+  }
+}

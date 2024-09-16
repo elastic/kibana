@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Webhook connector and action | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Webhook connector and action | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="action-types.html" title="Connectors"/>
+<link rel="prev" href="torq-action-type.html" title="Torq connector and action"/>
+<link rel="next" href="cases-webhook-action-type.html" title="Webhook - Case Management connector and action"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="torq-action-type.html">« Torq connector and action</a>
+</span>
+<span class="next">
+<a href="cases-webhook-action-type.html">Webhook - Case Management connector and action »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="action-types.html">Connectors</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Webhook connector and action</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="webhook-action-type"></a>Webhook connector and action</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The Webhook connector uses <a href="https://github.com/axios/axios" class="ulink" target="_top">axios</a> to send a POST or PUT request to a web service.</p>
+<div class="position-relative"><h4><a id="define-webhook-ui"></a>Create connectors in Kibana</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+<p>You can create connectors in <span class="strong strong"><strong>Stack Management &gt; Connectors</strong></span>
+or as needed when you&#8217;re creating a rule. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/webhook-connector.png" alt="Webhook connector">
+</div>
+</div>
+<div class="position-relative"><h5><a id="webhook-connector-configuration"></a>Connector configuration</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+<p>Webhook connectors have the following configuration properties:</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Name
+</span>
+</dt>
+<dd>
+The name of the connector.
+</dd>
+<dt>
+<span class="term">
+Method
+</span>
+</dt>
+<dd>
+The HTTP request method, either <code class="literal">post</code>(default) or <code class="literal">put</code>.
+</dd>
+<dt>
+<span class="term">
+URL
+</span>
+</dt>
+<dd>
+The request URL. If you are using the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings"><code class="literal">xpack.actions.allowedHosts</code></a> setting, make sure the hostname is added to the allowed hosts.
+</dd>
+<dt>
+<span class="term">
+Authentication
+</span>
+</dt>
+<dd>
+The authentication type: none, basic, or SSL.
+If you choose basic authentication, you must provide a user name and password.
+If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
+</dd>
+<dt>
+<span class="term">
+HTTP headers
+</span>
+</dt>
+<dd>
+A set of key-value pairs sent as headers with the request.
+For example, set <code class="literal">Content-Type</code> to the appropriate media type for your requests.
+</dd>
+<dt>
+<span class="term">
+Certificate authority
+</span>
+</dt>
+<dd>
+<p>
+A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates.
+This option is available for all authentication types.
+</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+CA file
+</span>
+</dt>
+<dd>
+The certificate authority file.
+</dd>
+<dt>
+<span class="term">
+Verification mode
+</span>
+</dt>
+<dd>
+<p>
+Controls the certificate verification.
+</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Use <code class="literal">full</code> to validate that the certificate has an issue date within the <code class="literal">not_before</code> and <code class="literal">not_after</code> dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
+</li>
+<li class="listitem">
+Use <code class="literal">certificate</code> to validate the certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname.
+</li>
+<li class="listitem">
+Use <code class="literal">none</code> to skip certificate validation.
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h4><a id="webhook-action-configuration"></a>Test connectors</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+<p>You can test connectors as you&#8217;re creating or editing the connector in Kibana. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="management/connectors/images/webhook-params-test.png" alt="Webhook params test">
+</div>
+</div>
+<p>Webhook actions have the following properties.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Body
+</span>
+</dt>
+<dd>
+<p>
+A JSON payload sent to the request URL. For example:
+</p>
+<div class="pre_wrapper lang-text">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-text">{
+  "short_description": "{{context.rule.name}}",
+  "description": "{{context.rule.description}}",
+  ...
+}</pre>
+</div>
+</dd>
+</dl>
+</div>
+<p>Mustache template variables (the text enclosed in double braces, for example, <code class="literal">context.rule.name</code>) have
+their values escaped, so that the final JSON will be valid (escaping double quote characters).
+For more information on Mustache template variables, refer to <a class="xref" href="create-and-manage-rules.html#defining-rules-actions-details" title="Actions">Actions</a>.</p>
+<div class="position-relative"><h4><a id="webhook-connector-networking-configuration"></a>Connector networking configuration</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/management/connectors/action-types/webhook.asciidoc">edit</a></div>
+<p>Use the <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">Action configuration settings</a> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use <code class="literal">xpack.actions.customHostSettings</code> to set per-host configurations.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="torq-action-type.html">« Torq connector and action</a>
+</span>
+<span class="next">
+<a href="cases-webhook-action-type.html">Webhook - Case Management connector and action »</a>
+</span>
+</div>
+</body>
+</html>

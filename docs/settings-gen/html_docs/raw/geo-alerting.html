@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create a tracking containment rule | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Create a tracking containment rule | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="rule-types.html" title="Rule types"/>
+<link rel="prev" href="rule-type-es-query.html" title="Create an Elasticsearch query rule"/>
+<link rel="next" href="rule-action-variables.html" title="Rule action variables"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="rule-type-es-query.html">« Create an Elasticsearch query rule</a>
+</span>
+<span class="next">
+<a href="rule-action-variables.html">Rule action variables »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="rule-types.html">Rule types</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Create a tracking containment rule</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/rule-types/geo-rule-types.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="geo-alerting"></a>Create a tracking containment rule</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/rule-types/geo-rule-types.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>The tracking containment rule alerts when an entity is contained or no longer contained within a boundary.</p>
+<p>In <span class="strong strong"><strong>Stack Management</strong></span> &gt; <span class="strong strong"><strong>Rules</strong></span>, click <span class="strong strong"><strong>Create rule</strong></span>.
+Select the <span class="strong strong"><strong>Tracking containment</strong></span> rule type then fill in the name and optional tags.</p>
+<div class="position-relative"><h4><a id="_define_the_conditions_3"></a>Define the conditions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/rule-types/geo-rule-types.asciidoc">edit</a></div>
+<p>When you create a tracking containment rule, you must define the conditions that it detects. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/alerting/images/alert-types-tracking-containment-conditions.png" alt="Creating a tracking containment rule in Kibana" width="75%">
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Define the entities index, which must contain a <code class="literal">geo_point</code> or <code class="literal">geo_shape</code> field, <code class="literal">date</code> field, and entity identifier.
+An entity identifier is a <code class="literal">keyword</code>, <code class="literal">number</code>, or <code class="literal">ip</code> field that identifies the entity.
+Entity data is expected to be updating so that there are entity movements to alert upon.
+</li>
+<li class="listitem">
+Define the boundaries index, which contains <code class="literal">geo_shape</code> data.
+Boundaries data is expected to be static (not updating).
+Boundaries are collected once when the rule is created and anytime after when boundary configuration is modified.
+</li>
+<li class="listitem">
+Set the check interval, which defines how often to evaluate the rule conditions.
+</li>
+<li class="listitem">
+In the advanced options, you can change the number of consecutive runs that must meet the rule conditions before an alert occurs.
+The default value is <code class="literal">1</code>.
+</li>
+</ol>
+</div>
+<p>Entity locations are queried to determine whether they are contained within any monitored boundaries.
+Entity data should be somewhat "real time", meaning the dates of new documents aren&#8217;t older than the current time minus the amount of the interval.
+If data older than <code class="literal">now - &lt;check interval&gt;</code> is ingested, it won&#8217;t trigger a rule.</p>
+<div class="position-relative"><h4><a id="_add_actions_2"></a>Add actions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/rule-types/geo-rule-types.asciidoc">edit</a></div>
+<p>You can optionally send notifications when the rule conditions are met.
+In particular, this rule type supports:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+alert summaries
+</li>
+<li class="listitem">
+actions that run when the containment condition is met
+</li>
+<li class="listitem">
+actions that run when an entity is no longer contained
+</li>
+</ul>
+</div>
+<p>For each action, you must choose a connector, which provides connection information for a Kibana service or third party integration.
+For more information about all the supported connectors, go to <a class="xref" href="action-types.html" title="Connectors"><em>Connectors</em></a>.</p>
+<p>After you select a connector, you must set the action frequency.
+You can choose to create a summary of alerts on each check interval or on a custom interval.
+Alternatively, you can set the action frequency such that actions run for each alert.
+Choose how often the action runs (at each check interval, only when the alert status changes, or at a custom action interval).
+You must also choose an action group, which indicates whether the action runs when the containment condition is met or when an entity is no longer contained.
+Each connector supports a specific set of actions for each action group.
+For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/alerting/images/alert-types-tracking-containment-action-options.png" alt="Action frequency options for an action" width="75%">
+</div>
+</div>
+<p>You can further refine the conditions under which actions run by specifying that actions only run when they match a KQL query or when an alert occurs within a specific time frame.</p>
+<div class="position-relative"><h4><a id="_add_action_variables_2"></a>Add action variables</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/rule-types/geo-rule-types.asciidoc">edit</a></div>
+<p>You can pass rule values to an action to provide contextual details.
+To view the list of variables available for each action, click the "add rule variable" button.
+For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/alert-types-tracking-containment-rule-action-variables.png" alt="Passing rule values to an action" width="75%">
+</div>
+</div>
+<p>The following action variables are specific to the tracking containment rule.
+You can also specify <a class="xref" href="rule-action-variables.html" title="Rule action variables">variables common to all rules</a>.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">context.containingBoundaryId</code>
+</span>
+</dt>
+<dd>
+The identifier for the boundary containing the entity.
+This value is not set for recovered alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.containingBoundaryName</code>
+</span>
+</dt>
+<dd>
+The name of the boundary containing the entity.
+This value is not set for recovered alerts.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.detectionDateTime</code>
+</span>
+</dt>
+<dd>
+The end of the check interval when the alert occurred.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.entityDateTime</code>
+</span>
+</dt>
+<dd>
+The date the entity was recorded in the boundary.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.entityDocumentId</code>
+</span>
+</dt>
+<dd>
+The identifier for the contained entity document.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.entityId</code>
+</span>
+</dt>
+<dd>
+The entity identifier for the document that generated the alert.
+</dd>
+<dt>
+<span class="term">
+<code class="literal">context.entityLocation</code>
+</span>
+</dt>
+<dd>
+The location of the entity.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="rule-type-es-query.html">« Create an Elasticsearch query rule</a>
+</span>
+<span class="next">
+<a href="rule-action-variables.html">Rule action variables »</a>
+</span>
+</div>
+</body>
+</html>

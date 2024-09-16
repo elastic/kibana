@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Run a search session in the background | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Run a search session in the background | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="discover.html" title="Discover"/>
+<link rel="prev" href="run-pattern-analysis-discover.html" title="Run a pattern analysis on your log data"/>
+<link rel="next" href="try-esql.html" title="Using ES|QL"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="run-pattern-analysis-discover.html">« Run a pattern analysis on your log data</a>
+</span>
+<span class="next">
+<a href="try-esql.html">Using ES|QL »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="discover.html">Discover</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Run a search session in the background</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="search-sessions"></a>Run a search session in the background</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+</div></div></div>
+<p>Sometimes you might need to search through large amounts of data, no matter
+how long the search takes.
+Consider a threat hunting scenario, where you need to search through years of data.
+You can save a long-running search, so Kibana processes your request in the
+background, and you can continue your work.</p>
+<p>Save your search session from <span class="strong strong"><strong>Discover</strong></span> or <span class="strong strong"><strong>Dashboard</strong></span>,
+and when your session is complete, view and manage it in <span class="strong strong"><strong>Stack Management</strong></span>.
+Search sessions are <a class="xref" href="search-session-settings-kb.html" title="Search sessions settings in Kibana">enabled by default</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-session.png" alt="Search Session indicator displaying the current state of the search" width="which you can click to stop or save a running Search Session">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_requirements"></a>Requirements</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+To save a session, you must have permissions for <span class="strong strong"><strong>Discover</strong></span> and <span class="strong strong"><strong>Dashboard</strong></span>,
+and the <a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">search sessions subfeature</a>.
+</li>
+<li class="listitem">
+To view and restore a saved session, you must have access to <span class="strong strong"><strong>Stack Management</strong></span>.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_example_save_a_search_session"></a>Example: Save a search session</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<p>You’re trying to understand a trend you see on a dashboard. You
+need to look at several years of data, currently in
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/data-tiers.html#cold-tier" class="ulink" target="_top">cold storage</a>,
+but you don’t have time to wait. You want Kibana to
+continue working in the background, so tomorrow you can
+open your browser and pick up where you left off.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Load your dashboard.</p>
+<p>Your search session begins automatically.
+The icon after the dashboard title displays the current state of the search session.
+A clock icon indicates the search session is in progress.
+A checkmark indicates that the search session is complete.</p>
+</li>
+<li class="listitem">
+<p>To continue a search in the background, click the clock icon,
+and then click <span class="strong strong"><strong>Save session</strong></span>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-session-awhile.png" alt="Search Session indicator displaying the current state of the search" width="75%">
+</div>
+</div>
+<p>Once you save a search session, you can start a new search,
+navigate to a different application, or close the browser.</p>
+</li>
+<li class="listitem">
+<p>To view your saved searches, open the main menu, and then click
+<span class="strong strong"><strong>Stack Management &gt; Search Sessions</strong></span>.
+For a saved or completed session, you can also open this view from the search sessions popup.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/search-sessions-menu.png" alt="Search Sessions management view with actions for inspecting" width="extending" height="and deleting a session.">
+</div>
+</div>
+</li>
+<li class="listitem">
+<p>Use the edit menu in <span class="strong strong"><strong>Search Sessions</strong></span> to:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<span class="strong strong"><strong>Inspect</strong></span> the queries and filters that makeup the session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Edit the name</strong></span> of a session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Extend</strong></span> the expiration of a completed session.
+</li>
+<li class="listitem">
+<span class="strong strong"><strong>Delete</strong></span> a session.
+</li>
+</ul>
+</div>
+</li>
+<li class="listitem">
+<p>To restore a search session, click its name in the <span class="strong strong"><strong>Search Sessions</strong></span> view.</p>
+<p>You&#8217;re returned to the place from where you started the search session. The data is the same, but
+behaves differently:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Relative dates are converted to absolute dates.
+</li>
+<li class="listitem">
+Panning and zooming is disabled for maps.
+</li>
+<li class="listitem">
+Changing a filter, query, or drilldown starts a new search session, which can be slow.
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="position-relative"><h4><a id="_limitations"></a>Limitations</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/search-sessions.asciidoc">edit</a></div>
+<p>Some visualization features do not fully support background search sessions. When
+you restore a dashboard, panels with unsupported features won&#8217;t load immediately, but instead
+send out additional
+data requests, which can take a while to complete.
+The <span class="strong strong"><strong>Your search session is still running</strong></span> warning appears.
+You can either wait for these additional requests to complete or come back to the dashboard later
+when all data requests have finished.</p>
+<p>A panel on a dashboard can behave like this if one of the following features is used:</p>
+<p><span class="strong strong"><strong>Lens</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A <span class="strong strong"><strong>top values</strong></span> dimension with an enabled <span class="strong strong"><strong>Group other values as "Other"</strong></span> setting.
+This is configurable in the <span class="strong strong"><strong>Advanced</strong></span> section of the dimension.
+</li>
+<li class="listitem">
+An <span class="strong strong"><strong>intervals</strong></span> dimension.
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>Aggregation-based</strong></span> visualizations</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+A <span class="strong strong"><strong>terms</strong></span> aggregation with an enabled <span class="strong strong"><strong>Group other values in separate bucket</strong></span> setting.
+</li>
+<li class="listitem">
+A <span class="strong strong"><strong>histogram</strong></span> aggregation.
+</li>
+</ul>
+</div>
+<p><span class="strong strong"><strong>Maps</strong></span></p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Layers using joins, blended layers, or tracks layers.
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="run-pattern-analysis-discover.html">« Run a pattern analysis on your log data</a>
+</span>
+<span class="next">
+<a href="try-esql.html">Using ES|QL »</a>
+</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>How we use Git and GitHub | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="How we use Git and GitHub | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="contributing.html" title="Contributing"/>
+<link rel="prev" href="contributing.html" title="Contributing"/>
+<link rel="next" href="development-tests.html" title="Testing"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="contributing.html">« Contributing</a>
+</span>
+<span class="next">
+<a href="development-tests.html">Testing »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="contributing.html">Contributing</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>How we use Git and GitHub</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="development-github"></a>How we use Git and GitHub</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+</div></div></div>
+<div class="position-relative"><h4><a id="_forking"></a>Forking</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<p>We follow the <a href="https://help.github.com/articles/fork-a-repo/" class="ulink" target="_top">GitHub
+forking model</a> for collaborating on Kibana code. This model assumes that
+you have a remote called <code class="literal">upstream</code> which points to the official Kibana
+repo, which we&#8217;ll refer to in later code snippets.</p>
+<div class="position-relative"><h4><a id="_branching"></a>Branching</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<p>At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">main</code> points to the next minor version.
+</li>
+<li class="listitem">
+<code class="literal">&lt;major&gt;.&lt;minor&gt;</code> is the previously released minor version, including patch releases.
+</li>
+</ul>
+</div>
+<p>As an example, let&#8217;s assume that the main branch is currently a not-yet-released 8.1.0. Once 8.1.0 has reached feature freeze, it will be branched to 8.1 and main will be updated to reflect 8.2.0. The release of 8.1.0 and subsequent patch releases will be cut from the 8.1 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.</p>
+<p>Pull requests are made into the <code class="literal">main</code> branch and then backported when it is safe and appropriate.</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Breaking changes can <em>only</em> be made to <code class="literal">main</code> if there has been at least an 18 month deprecation period <em>and</em> the breaking change has been approved. Telemetry showing current usage is crucial for gaining approval.
+</li>
+<li class="listitem">
+Features should not be backported to a <code class="literal">&lt;major&gt;.&lt;minor&gt;</code> branch.
+</li>
+<li class="listitem">
+Bug fixes can be backported to a <code class="literal">&lt;major&gt;.&lt;minor&gt;</code> branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug&#8217;s severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
+</li>
+<li class="listitem">
+Documentation changes can be backported to any branch at any time.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h4><a id="_commits_and_merging"></a>Commits and Merging</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Feel free to make as many commits as you want, while working on a
+branch.
+</li>
+<li class="listitem">
+When submitting a PR for review, please perform an interactive rebase
+to present a logical history that&#8217;s easy for the reviewers to follow.
+</li>
+<li class="listitem">
+Please use your commit messages to include helpful information on your
+changes, e.g. changes to APIs, UX changes, bugs fixed, and an
+explanation of <em>why</em> you made the changes that you did.
+</li>
+<li class="listitem">
+Resolve merge conflicts by rebasing the target branch over your
+feature branch, and force-pushing (see below for instructions).
+</li>
+<li class="listitem">
+When merging, we&#8217;ll squash your commits into a single commit.
+</li>
+</ul>
+</div>
+<div class="position-relative"><h5><a id="_commit_using_your_elastic_co_email_address"></a>Commit using your <code class="literal">@elastic.co</code> email address</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<p>In order to assist with developer tooling we ask that all Elastic engineers use their <code class="literal">@elastic.co</code> email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the <code class="literal">@elastic</code> organization has at least one commit that is attributed to an <code class="literal">@elastic.co</code> email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Ensure that you don&#8217;t have any staged changes
+</li>
+<li class="listitem">
+Checkout the branch for your PR
+</li>
+<li class="listitem">
+<p>Update the git config for your current repository to commit with your <code class="literal">@elastic.co</code> email:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">git config user.email YOUR_ELASTIC_EMAIL@elastic.co</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Create a commit using the new email address</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">git commit -m 'commit using @elastic.co' --allow-empty</pre>
+</div>
+</li>
+<li class="listitem">
+Push the new commit to your PR and the status should now be green
+</li>
+</ol>
+</div>
+<div class="position-relative"><h5><a id="_rebasing_and_fixing_merge_conflicts"></a>Rebasing and fixing merge conflicts</h5><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<p>Rebasing can be tricky, and fixing merge conflicts can be even trickier
+because it involves force pushing. This is all compounded by the fact
+that attempting to push a rebased branch remotely will be rejected by
+git, and you&#8217;ll be prompted to do a <code class="literal">pull</code>, which is not at all what you
+should do (this will really mess up your branch&#8217;s history).</p>
+<p>Here&#8217;s how you should rebase master onto your branch, and how to fix
+merge conflicts when they arise.</p>
+<p>First, make sure master is up-to-date.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">git checkout master
+git fetch upstream
+git rebase upstream/master</pre>
+</div>
+<p>Then, check out your branch and rebase master on top of it, which will
+apply all of the new commits on master to your branch, and then apply
+all of your branch&#8217;s new commits after that.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">git checkout name-of-your-branch
+git rebase master</pre>
+</div>
+<p>You want to make sure there are no merge conflicts. If there are merge
+conflicts, git will pause the rebase and allow you to fix the conflicts
+before continuing.</p>
+<p>You can use <code class="literal">git status</code> to see which files contain conflicts. They&#8217;ll
+be the ones that aren&#8217;t staged for commit. Open those files, and look
+for where git has marked the conflicts. Resolve the conflicts so that
+the changes you want to make to the code have been incorporated in a way
+that doesn&#8217;t destroy work that&#8217;s been done in master. Refer to master&#8217;s
+commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.</p>
+<p>Once you&#8217;ve resolved all of the merge conflicts, use <code class="literal">git add -A</code> to stage them to be committed, and then use
+ <code class="literal">git rebase --continue</code> to tell git to continue the rebase.</p>
+<p>When the rebase has completed, you will need to force push your branch because the history is now completely different than what&#8217;s on the remote. This is potentially dangerous because it will completely overwrite what you have on the remote, so you need to be sure that you haven&#8217;t lost any work when resolving merge conflicts. (If there weren&#8217;t any merge conflicts, then you can force push without having to worry about this.)</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">git push origin name-of-your-branch --force</pre>
+</div>
+<p>This will overwrite the remote branch with what you have locally. You&#8217;re done!</p>
+<p><span class="strong strong"><strong>Note that you should not run git pull</strong></span>, for example in response to a push rejection like this:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">! [rejected] name-of-your-branch -&gt; name-of-your-branch (non-fast-forward)
+error: failed to push some refs to 'https://github.com/YourGitHubHandle/kibana.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.</pre>
+</div>
+<p>Assuming you&#8217;ve successfully rebased and you&#8217;re happy with the code, you should force push instead.</p>
+<div class="position-relative"><h4><a id="_creating_a_pull_request"></a>Creating a pull request</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/contributing/development-github.asciidoc">edit</a></div>
+<p>See <a class="xref" href="development-pull-request.html" title="Submitting a pull request">Submitting a pull request</a> for the next steps on getting your code changes merged into Kibana.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="contributing.html">« Contributing</a>
+</span>
+<span class="next">
+<a href="development-tests.html">Testing »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

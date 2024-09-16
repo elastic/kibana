@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>View monitoring data in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="View monitoring data in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="configuring-monitoring.html" title="Configure monitoring in Kibana"/>
+<link rel="prev" href="monitoring-metricbeat.html" title="Collect Kibana monitoring data with Metricbeat"/>
+<link rel="next" href="monitoring-kibana.html" title="Collect monitoring data using legacy collectors"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="monitoring-metricbeat.html">« Collect Kibana monitoring data with Metricbeat</a>
+</span>
+<span class="next">
+<a href="monitoring-kibana.html">Collect monitoring data using legacy collectors »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="configuring-monitoring.html">Configure monitoring in Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>View monitoring data in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/viewing-metrics.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="monitoring-data"></a>View monitoring data in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/monitoring/viewing-metrics.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>After you collect monitoring data for one or more products in the Elastic Stack, you
+can configure Kibana to retrieve that information and display it in on the
+<span class="strong strong"><strong>Stack Monitoring</strong></span> page.</p>
+<p>At a minimum, you must have monitoring data for the Elasticsearch production cluster.
+Once that data exists, Kibana can display monitoring data for other products in
+the cluster.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you use a separate monitoring cluster to store the monitoring data, it
+is strongly recommended that you use a separate Kibana instance to view it. If
+you log in to Kibana using SAML, Kerberos, PKI, OpenID Connect, or token
+authentication providers, a dedicated Kibana instance is <span class="strong strong"><strong>required</strong></span>. The security
+tokens that are used in these contexts are cluster-specific, therefore you
+cannot use a single Kibana instance to connect to both production and monitoring
+clusters. For more information about the recommended configuration, see
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitoring-overview.html" class="ulink" target="_top">Monitoring overview</a>.</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Identify where to retrieve monitoring data from.</p>
+<p>If the monitoring data is stored on a dedicated monitoring cluster, it is
+accessible even when the cluster you&#8217;re monitoring is not. If you have at least
+a gold license, you can send data from multiple clusters to the same monitoring
+cluster and view them all through the same instance of Kibana.</p>
+<p>By default, data is retrieved from the cluster specified in the
+<code class="literal">elasticsearch.hosts</code> value in the <code class="literal">kibana.yml</code> file. If you want to retrieve it
+from a different cluster, set <code class="literal">monitoring.ui.elasticsearch.hosts</code>.</p>
+<p>To learn more about typical monitoring architectures,
+see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/how-monitoring-works.html" class="ulink" target="_top">How monitoring works</a> and
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/monitoring-production.html" class="ulink" target="_top">Monitoring in a production environment</a>.</p>
+</li>
+<li class="listitem">
+Verify that <code class="literal">monitoring.ui.enabled</code> is set to <code class="literal">true</code>, which is the
+default value, in the <code class="literal">kibana.yml</code> file. For more information, see
+<a class="xref" href="monitoring-settings-kb.html" title="Monitoring settings in Kibana">Monitoring settings</a>.
+</li>
+<li class="listitem">
+<p>If the Elastic security features are enabled on the monitoring cluster, you
+must provide a user ID and password so Kibana can retrieve the data.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Create a user that has the <code class="literal">monitoring_user</code>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html" class="ulink" target="_top">built-in role</a> on the monitoring cluster.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Make sure the <code class="literal">monitoring_user</code> role has read privileges on <code class="literal">metrics-*</code>
+indices. If it doesn&#8217;t, create a new role with <code class="literal">read</code> and <code class="literal">read_cross_cluster</code>
+index privileges on <code class="literal">metrics-*</code>, then assign the new role (along with
+<code class="literal">monitoring_user</code>) to your user.</p>
+</div>
+</div>
+</li>
+<li class="listitem">
+Add the <code class="literal">monitoring.ui.elasticsearch.username</code> and
+<code class="literal">monitoring.ui.elasticsearch.password</code> settings in the <code class="literal">kibana.yml</code> file.
+If these settings are omitted, Kibana uses the <code class="literal">elasticsearch.username</code> and
+<code class="literal">elasticsearch.password</code> setting values. For more
+information, see <a href="https://www.elastic.co/guide/en/kibana/master/using-kibana-with-security.html" class="ulink" target="_top">Configuring security in Kibana</a>.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+(Optional) Configure Kibana to encrypt communications between the Kibana server
+and the monitoring cluster. See <a class="xref" href="configuring-tls.html" title="Encrypt TLS communications in Kibana"><em>Encrypt TLS communications in Kibana</em></a>.
+</li>
+<li class="listitem">
+<p>If the Elastic security features are enabled on the Kibana server, only users
+that have the authority to access Kibana indices and to read the monitoring indices
+can use the monitoring dashboards.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>These users must exist on the monitoring cluster. If you are accessing a
+remote monitoring cluster, you must use credentials that are valid on both the
+Kibana server and the monitoring cluster.</p>
+</div>
+</div>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Create users that have the <code class="literal">monitoring_user</code> and <code class="literal">kibana_admin</code>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html" class="ulink" target="_top">built-in roles</a>. If you created a new role with
+read privileges on <code class="literal">metrics-*</code> indices, also assign that role to the users.
+</li>
+</ol>
+</div>
+</li>
+<li class="listitem">
+<p>Open Kibana in your web browser.</p>
+<p>By default, if you are running Kibana locally, go to <code class="literal">http://localhost:5601/</code>.</p>
+<p>If the Elastic security features are enabled, log in.</p>
+</li>
+<li class="listitem">
+<p>Open the main menu, then click <span class="strong strong"><strong>Stack Monitoring</strong></span>.</p>
+<p>If data collection is disabled, you are prompted to turn on data collection.
+If Elasticsearch security features are enabled, you must have <code class="literal">manage</code> cluster
+privileges to turn on data collection.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If you are using a separate monitoring cluster, you do not need to turn on
+data collection. The dashboards appear when there is data in the monitoring
+cluster.</p>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<p>You&#8217;ll see cluster alerts
+that require your attention and a summary of the available monitoring metrics
+for Elasticsearch, Logstash, Kibana, and Beats. To view additional information, click the
+Overview, Nodes, Indices, or Instances links.  See <a class="xref" href="xpack-monitoring.html" title="Stack Monitoring">Stack Monitoring</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/monitoring-dashboard.png" alt="Monitoring dashboard">
+</div>
+</div>
+<p>If you encounter problems, see <a class="xref" href="monitor-troubleshooting.html" title="Troubleshooting monitoring in Kibana">Troubleshooting monitoring</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="monitoring-metricbeat.html">« Collect Kibana monitoring data with Metricbeat</a>
+</span>
+<span class="next">
+<a href="monitoring-kibana.html">Collect monitoring data using legacy collectors »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

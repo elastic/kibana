@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<title>Alerting set up | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Alerting set up | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="alerting-getting-started.html" title="Alerting"/>
+<link rel="prev" href="alerting-getting-started.html" title="Alerting"/>
+<link rel="next" href="create-and-manage-rules.html" title="Create and manage rules"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="alerting-getting-started.html">« Alerting</a>
+</span>
+<span class="next">
+<a href="create-and-manage-rules.html">Create and manage rules »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="alerting-getting-started.html">Alerting</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Alerting set up</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="alerting-setup"></a>Alerting set up</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Kibana alerting features are automatically enabled, but might require some additional
+configuration.</p>
+<div class="position-relative"><h3><a id="alerting-prerequisites"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>If you are using an <span class="strong strong"><strong>on-premises</strong></span> Elastic Stack deployment:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+In the <code class="literal">kibana.yml</code> configuration file, add the
+<a class="xref" href="alert-action-settings-kb.html#general-alert-action-settings" title="General settings"><code class="literal">xpack.encryptedSavedObjects.encryptionKey</code></a>
+setting.
+</li>
+<li class="listitem">
+For emails to have a footer with a link back to Kibana, set the
+<a class="xref" href="settings.html#server-publicBaseUrl"><code class="literal">server.publicBaseUrl</code></a> configuration setting.
+</li>
+</ul>
+</div>
+<p>If you are using an <span class="strong strong"><strong>on-premises</strong></span> Elastic Stack deployment with
+<a class="xref" href="using-kibana-with-security.html" title="Configure security in Kibana"><span class="strong strong"><strong>security</strong></span></a>:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+If you are unable to access Kibana alerting features, ensure that you have not
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-settings.html#api-key-service-settings" class="ulink" target="_top">explicitly disabled API keys</a>.
+</li>
+</ul>
+</div>
+<p>The alerting framework uses queries that require the
+<code class="literal">search.allow_expensive_queries</code> setting to be <code class="literal">true</code>. See the scripts
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/query-dsl-script-query.html#_allow_expensive_queries_4" class="ulink" target="_top">documentation</a>.</p>
+<div class="position-relative"><h3><a id="alerting-setup-production"></a>Production considerations and scaling guidance</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>When relying on alerting and actions as mission critical services, make sure you
+follow the
+<a class="xref" href="alerting-production-considerations.html" title="Alerting production considerations">alerting production considerations</a>.</p>
+<p>For more information on the scalability of alerting features, go to
+<a class="xref" href="alerting-production-considerations.html#alerting-scaling-guidance" title="Scaling guidance">Scaling guidance</a>.</p>
+<div class="position-relative"><h3><a id="alerting-security"></a>Security</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>To use alerting features in a Kibana app, you must have the appropriate feature privileges:</p>
+<div class="informaltable">
+<table border="1" cellpadding="4px">
+<colgroup>
+<col class="col_1"/>
+<col class="col_2"/>
+</colgroup>
+<thead>
+<tr>
+<th align="left" valign="top">Action</th>
+<th align="left" valign="top">Kibana privileges</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p>Give full access to manage alerts, connectors, and rules in <span class="strong strong"><strong>Stack Management</strong></span></p></td>
+<td align="left" valign="top">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">All</code> for the <span class="strong strong"><strong>Management &gt; Stack Rules</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">All</code> for the <span class="strong strong"><strong>Management &gt; Rules Settings</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">All</code> for the <span class="strong strong"><strong>Management &gt; Actions and Connectors</strong></span> feature.
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The <span class="strong strong"><strong>Actions and Connectors</strong></span> feature privilege is required to manage connectors.
+To add rule actions and test connectors, you require only <code class="literal">Read</code> privileges.</p>
+<p>By default, <code class="literal">All</code> privileges for the <span class="strong strong"><strong>Rules Settings</strong></span> feature include authority to edit flapping detection settings unless you customize the sub-feature privileges.</p>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> To create a rule that uses the <a class="xref" href="cases-action-type.html" title="Cases connector and action">Cases connector</a>, you must also have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Cases</strong></span> feature.</p>
+<p>The rule type also affects the privileges that are required.
+For example, to create or edit machine learning rules, you must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Analytics &gt; Machine Learning</strong></span> feature.
+For Stack Monitoring rules, you must have the <code class="literal">monitoring_user</code> role.
+For Observability rules, you must have <code class="literal">all</code> privileges for the appropriate Observability features.
+For Security rules, refer to <a href="https://www.elastic.co/guide/en/security/master/detections-permissions-section.html" class="ulink" target="_top">Detections prerequisites and requirements</a>.</p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Give view-only access to alerts, connectors, and rules in  <span class="strong strong"><strong>Stack Management</strong></span></p></td>
+<td align="left" valign="top">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">Read</code> for the <span class="strong strong"><strong>Management &gt; Stack Rules</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">Read</code> for the <span class="strong strong"><strong>Management &gt; Rules Settings</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">Read</code> for the <span class="strong strong"><strong>Management &gt; Actions and Connectors</strong></span> feature.
+</li>
+</ul>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The rule type also affects the privileges that are required.
+For example, to view machine learning rules, you must have <code class="literal">read</code> privileges for the <span class="strong strong"><strong>Analytics &gt; Machine Learning</strong></span> feature.
+For Stack Monitoring rules, you must have the <code class="literal">monitoring_user</code> role.
+For Observability rules, you must have <code class="literal">read</code> privileges for the appropriate Observability features.
+For Security rules, refer to <a href="https://www.elastic.co/guide/en/security/master/detections-permissions-section.html" class="ulink" target="_top">Detections prerequisites and requirements</a>.</p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Give view-only access to alerts in <span class="strong strong"><strong>Discover</strong></span> or <span class="strong strong"><strong>Dashboards</strong></span></p></td>
+<td align="left" valign="top">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">Read</code> index privileges for the <code class="literal">.alerts-*</code> system indices.
+</li>
+</ul>
+</div>
+</td>
+</tr>
+<tr>
+<td align="left" valign="top"><p>Revoke all access to alerts, connectors, and rules in <span class="strong strong"><strong>Stack Management</strong></span>, <span class="strong strong"><strong>Discover</strong></span>, or <span class="strong strong"><strong>Dashboards</strong></span></p></td>
+<td align="left" valign="top">
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<code class="literal">None</code> for the <span class="strong strong"><strong>Management &gt; Stack Rules</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">None</code> for the <span class="strong strong"><strong>Management &gt; Rules Settings</strong></span> feature.
+</li>
+<li class="listitem">
+<code class="literal">None</code> for the <span class="strong strong"><strong>Management &gt; Actions and Connectors</strong></span> feature.
+</li>
+<li class="listitem">
+No index privileges for the <code class="literal">.alerts-*</code> system indices.
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For more information on configuring roles that provide access to features, go to <a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Feature privileges</a>.</p>
+<div class="position-relative"><h4><a id="alerting-authorization"></a>API keys</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>Rules are authorized using an API key.
+Its credentials are used to run all background tasks associated with the rule, including condition checks like Elasticsearch queries and triggered actions.</p>
+<p>If you create or edit a rule in Kibana, an API key is created that captures a snapshot of your privileges at the time of the edit.
+The following actions regenerate the API key in Kibana:</p>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Creating a rule
+</li>
+<li class="listitem">
+Updating a rule
+</li>
+</ul>
+</div>
+<p>When you disable a rule, it retains the associated API key which is reused when the rule is enabled.
+If the API key is missing when you enable the rule (for example, in the case of imported rules), it generates a new key that has your security privileges.</p>
+<p>You can update an API key manually in <span class="strong strong"><strong>Stack Management &gt; Rules</strong></span> or in the rule details page by selecting <span class="strong strong"><strong>Update API key</strong></span> in the actions menu.</p>
+<p>If you manage your rules by using Kibana APIs, they support support both key- and token-based authentication as described in <a class="xref" href="api.html#api-authentication" title="Authentication">Authentication</a>.
+To use key-based authentication, create API keys and use them in the header of your API calls as described in <a class="xref" href="api-keys.html" title="API Keys">API Keys</a>.
+To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically.
+In both cases, the API key is subsequently associated with the rule and used when it runs.</p>
+<div class="important admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>If a rule requires certain privileges, such as index privileges, to run and a user without those privileges updates the rule, the rule will no longer function.
+Conversely, if a user with greater or administrator privileges modifies the rule, it will begin running with increased privileges.
+The same behavior occurs when you change the API key in the header of your API calls.</p>
+</div>
+</div>
+<div class="position-relative"><h4><a id="alerting-restricting-actions"></a>Restrict actions</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>For security reasons you may wish to limit the extent to which Kibana can connect to external services.
+You can use <a class="xref" href="alert-action-settings-kb.html#action-settings" title="Action settings">Action settings</a> to disable certain <a class="xref" href="action-types.html" title="Connectors"><em>Connectors</em></a> and allowlist the hostnames that Kibana can connect with.</p>
+<div class="position-relative"><h3><a id="alerting-spaces"></a>Space isolation</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>Rules and connectors are isolated to the Kibana space in which they were created.
+A rule or connector created in one space will not be visible in another.</p>
+<div class="position-relative"><h3><a id="alerting-ccs-setup"></a>Cross-cluster search</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/alerting/alerting-setup.asciidoc">edit</a></div>
+<p>If you want to use alerting rules with cross-cluster search, you must configure privileges for
+CCS and Kibana. Refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/remote-clusters.html" class="ulink" target="_top">Remote clusters</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="alerting-getting-started.html">« Alerting</a>
+</span>
+<span class="next">
+<a href="create-and-manage-rules.html">Create and manage rules »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

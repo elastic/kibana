@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Get features API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Get features API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="api.html" title="REST API"/>
+<link rel="prev" href="api.html" title="REST API"/>
+<link rel="next" href="spaces-api.html" title="Kibana spaces APIs"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="api.html">« REST API</a>
+</span>
+<span class="next">
+<a href="spaces-api.html">Kibana spaces APIs »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Get features API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/features.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="features-api-get"></a>Get features API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/features.asciidoc">edit</a></div>
+</div></div></div>
+<p><span class="Admonishment Admonishment--preview">
+[<span class="Admonishment-title u-mono">preview</span>]
+<span class="Admonishment-detail">
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+</span>
+</span> Retrieves all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.</p>
+<div class="position-relative"><h3><a id="features-api-get-request"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/features.asciidoc">edit</a></div>
+<p><code class="literal">GET &lt;kibana host&gt;:&lt;port&gt;/api/features</code></p>
+<div class="position-relative"><h3><a id="features-api-get-codes"></a>Response code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/features.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">200</code>
+</span>
+</dt>
+<dd>
+Indicates a successful call.
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h3><a id="features-api-get-example"></a>Example</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/features.asciidoc">edit</a></div>
+<p>The API returns the following:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">  {
+    "id": "discover",
+    "name": "Discover",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "discover"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "search",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "url"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "visualize",
+    "name": "Visualize",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "visualize"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "visualization",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "delete",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dashboard",
+    "name": "Dashboard",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "dashboard"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "dashboard",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "canvas-workpad"
+          ]
+        },
+        "ui": [
+          "createNew",
+          "show",
+          "showWriteControls"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "canvas-workpad",
+            "dashboard"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dev_tools",
+    "name": "Dev Tools",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "console",
+      "searchprofiler",
+      "grokdebugger"
+    ],
+    "privileges": {
+      "all": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      },
+      "read": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    },
+    "privilegesTooltip": "User should also be granted the appropriate Elasticsearch cluster and index privileges"
+  },</pre>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="api.html">« REST API</a>
+</span>
+<span class="next">
+<a href="spaces-api.html">Kibana spaces APIs »</a>
+</span>
+</div>
+</body>
+</html>

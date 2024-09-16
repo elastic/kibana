@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Spaces | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Spaces | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="management.html" title="Stack Management"/>
+<link rel="prev" href="xpack-security-fips-140-2.html" title="FIPS 140-2"/>
+<link rel="next" href="advanced-options.html" title="Advanced Settings"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="xpack-security-fips-140-2.html">« FIPS 140-2</a>
+</span>
+<span class="next">
+<a href="advanced-options.html">Advanced Settings »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="management.html">Stack Management</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Spaces</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter xpack">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-spaces"></a>Spaces</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>Spaces enable you to organize your dashboards and other saved
+objects into meaningful categories. Once inside a space, you see only
+the dashboards and saved objects that belong to that space.</p>
+<p>Kibana creates a default space for you.
+After you create your own
+spaces, you&#8217;re asked to choose a space when you log in to Kibana. You can change your
+current space at any time by using the menu.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/change-space.png" alt="Change current space menu">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_required_privileges_3"></a>Required privileges</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>The <code class="literal">kibana_admin</code> role or equivalent is required to manage <span class="strong strong"><strong>Spaces</strong></span>.</p>
+<div class="position-relative"><h3><a id="spaces-managing"></a>View, create, and delete spaces</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>Open the main menu, then click <span class="strong strong"><strong>Stack Management &gt; Spaces</strong></span> for an overview of your spaces.  This view provides actions
+for you to create, edit, and delete spaces.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/space-management.png" alt="Space management">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_create_or_edit_a_space"></a>Create or edit a space</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>You can create as many spaces as you like. Click <span class="strong strong"><strong>Create a space</strong></span> and provide a name,
+URL identifier, optional description.</p>
+<p>The URL identifier is a short text string that becomes part of the
+Kibana URL when you are inside that space. Kibana suggests a URL identifier based
+on the name of your space, but you can customize the identifier to your liking.
+You cannot change the space identifier once you create the space.</p>
+<p>Kibana also has an <a class="xref" href="spaces-api.html" title="Kibana spaces APIs">API</a>
+if you prefer to create spaces programmatically.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/edit-space.png" alt="Space management">
+</div>
+</div>
+<div class="position-relative"><h4><a id="_delete_a_space"></a>Delete a space</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>Deleting a space permanently removes the space and all of its contents.
+Find the space on the <span class="strong strong"><strong>Spaces</strong></span> overview page and click the trash icon in the Actions column.
+You can&#8217;t delete the default space, but you can customize it to your liking.</p>
+<div class="position-relative"><h3><a id="spaces-control-feature-visibility"></a>Control feature access based on user needs</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>You have control over which features are visible in each space.
+For example, you might hide <span class="strong strong"><strong>Dev Tools</strong></span>
+in your "Executive" space or show <span class="strong strong"><strong>Stack Monitoring</strong></span> only in your "Admin" space.
+You can define which features to show or hide when you add or edit a space.</p>
+<p>Controlling feature
+visibility is not a security feature. To secure access
+to specific features on a per-user basis, you must configure
+<a class="xref" href="xpack-security-authorization.html" title="Granting access to Kibana">Kibana Security</a>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/edit-space-feature-visibility.png" alt="Controlling features visibility">
+</div>
+</div>
+<div class="position-relative"><h3><a id="spaces-control-user-access"></a>Control feature access based on user privileges</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>When using Kibana with security, you can configure applications and features
+based on your users’ privileges. This means different roles can have access
+to different features in the same space.
+Power users might have privileges to create and edit visualizations and dashboards,
+while analysts or executives might have read-only privileges for <span class="strong strong"><strong>Dashboard</strong></span> and <span class="strong strong"><strong>Canvas</strong></span>.
+Refer to <a class="xref" href="kibana-role-management.html#adding_kibana_privileges" title="Kibana privileges">Kibana privileges</a> for details.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/spaces-roles.png" alt="Controlling features visibility">
+</div>
+</div>
+<div class="position-relative"><h3><a id="spaces-moving-objects"></a>Move saved objects between spaces</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>To move saved objects between spaces, you can <a class="xref" href="managing-saved-objects.html#managing-saved-objects-copy-to-space" title="Copy to other Kibana spaces">copy objects</a>, or <a class="xref" href="managing-saved-objects.html#managing-saved-objects-export-objects" title="Import and export">export and import objects</a>.</p>
+<div class="position-relative"><h3><a id="spaces-default-route"></a>Configure a space-level landing page</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>You can create a custom experience for users by configuring the Kibana landing page on a per-space basis.
+The landing page can route users to a specific dashboard, application, or saved object as they enter each space.</p>
+<p>To configure the landing page, use the default route setting in
+<a class="xref" href="advanced-options.html#kibana-general-settings" title="General">Stack Management &gt; Kibana &gt; Advanced settings</a>.
+For example, you might set the default route to <code class="literal">/app/dashboards</code>.</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="images/spaces-configure-landing-page.png" alt="Configure space-level landing page">
+</div>
+</div>
+<div class="position-relative"><h3><a id="spaces-delete-started"></a>Disabling spaces</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/spaces/index.asciidoc">edit</a></div>
+<p>Starting in Kibana 8.0, the Spaces feature cannot be disabled.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xpack-security-fips-140-2.html">« FIPS 140-2</a>
+</span>
+<span class="next">
+<a href="advanced-options.html">Advanced Settings »</a>
+</span>
+</div>
+</body>
+</html>

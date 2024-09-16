@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Anomaly detection | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Anomaly detection | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="xpack-ml.html" title="Machine learning"/>
+<link rel="prev" href="xpack-ml.html" title="Machine learning"/>
+<link rel="next" href="xpack-ml-dfanalytics.html" title="Data frame analytics"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="xpack-ml.html">« Machine learning</a>
+</span>
+<span class="next">
+<a href="xpack-ml-dfanalytics.html">Data frame analytics »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="xpack-ml.html">Machine learning</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Anomaly detection</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="xpack-ml-anomalies"></a>Anomaly detection</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/user/ml/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Elastic machine learning anomaly detection feature automatically models the normal
+behavior of your time series data — learning trends, periodicity, and more — in
+real time to identify anomalies, streamline root cause analysis, and reduce
+false positives. Anomaly detection runs in and scales with Elasticsearch, and
+includes an intuitive UI on the Kibana <span class="strong strong"><strong>Machine Learning</strong></span> page for creating
+anomaly detection jobs and understanding results.</p>
+<p>If you have a license that includes the machine learning features, you can
+create anomaly detection jobs and manage jobs and datafeeds from the <span class="strong strong"><strong>Job Management</strong></span>
+pane:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-job-management.png" alt="Job Management">
+</div>
+</div>
+<p>You can use the <span class="strong strong"><strong>Settings</strong></span> pane to create and edit calendars and the
+filters that are used in custom rules:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-settings.png" alt="Calendar Management">
+</div>
+</div>
+<p>The <span class="strong strong"><strong>Anomaly Explorer</strong></span> and <span class="strong strong"><strong>Single Metric Viewer</strong></span> display the results of your
+anomaly detection jobs. For example:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-single-metric-viewer.png" alt="Single Metric Viewer">
+</div>
+</div>
+<p>You can optionally add annotations by drag-selecting a period of time in
+the <span class="strong strong"><strong>Single Metric Viewer</strong></span> and adding a description. For example, you can add an
+explanation for anomalies in that time period or provide notes about what is
+occurring in your operational environment at that time:</p>
+<div class="imageblock screenshot">
+<div class="content">
+<img src="user/ml/images/ml-annotations-list.png" alt="Single Metric Viewer with annotations">
+</div>
+</div>
+<p>In some circumstances, annotations are also added automatically. For example, if
+the anomaly detection job detects that there is missing data, it annotates the affected
+time period. For more information, see
+<a href="https://www.elastic.co/guide/en/machine-learning/master/ml-delayed-data-detection.html" class="ulink" target="_top">Handling delayed data</a>. The
+<span class="strong strong"><strong>Job Management</strong></span> pane shows the full list of annotations for each job.</p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>The Kibana machine learning features use pop-ups. You must configure your web
+browser so that it does not block pop-up windows or create an exception for your
+Kibana URL.</p>
+</div>
+</div>
+<p>For more information about the anomaly detection feature, see
+<a href="https://www.elastic.co/what-is/elastic-stack-machine-learning" class="ulink" target="_top">Machine learning in the Elastic Stack</a>
+and <a href="https://www.elastic.co/guide/en/machine-learning/master/ml-ad-overview.html" class="ulink" target="_top">Machine learning anomaly detection</a>.</p>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="xpack-ml.html">« Machine learning</a>
+</span>
+<span class="next">
+<a href="xpack-ml-dfanalytics.html">Data frame analytics »</a>
+</span>
+</div>
+</body>
+</html>

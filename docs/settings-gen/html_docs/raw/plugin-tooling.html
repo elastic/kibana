@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Plugin tooling | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Plugin tooling | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="external-plugin-development.html" title="External plugin development"/>
+<link rel="prev" href="external-plugin-development.html" title="External plugin development"/>
+<link rel="next" href="external-plugin-functional-tests.html" title="Functional Tests for Plugins outside the Kibana repo"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="external-plugin-development.html">« External plugin development</a>
+</span>
+<span class="next">
+<a href="external-plugin-functional-tests.html">Functional Tests for Plugins outside the Kibana repo »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="external-plugin-development.html">External plugin development</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Plugin tooling</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="plugin-tooling"></a>Plugin tooling</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+</div></div></div>
+<div class="position-relative"><h4><a id="automatic-plugin-generator"></a>Automatic plugin generator</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+<p>We recommend that you kick-start your plugin by generating it with the <a href="https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator" class="ulink" target="_top">Kibana Plugin Generator</a>. Run the following in the Kibana repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in Kibana&#8217;s <code class="literal">plugins</code> folder.</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">node scripts/generate_plugin</pre>
+</div>
+<div class="position-relative"><h4><a id="_plugin_location"></a>Plugin location</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+<p>The Kibana directory must be named <code class="literal">kibana</code>, and your plugin directory should be located in the root of <code class="literal">kibana</code> in a <code class="literal">plugins</code> directory, for example:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">.
+└── kibana
+    └── plugins
+        ├── foo-plugin
+        └── bar-plugin</pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_build_plugin_distributable"></a>Build plugin distributable</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+</div></div></div>
+<div class="warning admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Kibana distributable is not shipped with <code class="literal">@kbn/optimizer</code> anymore. You need to pre-build your plugin for use in production.</p>
+</div>
+</div>
+<p>You can leverage <a href="https://github.com/elastic/kibana/blob/master/packages/kbn-plugin-helpers" class="ulink" target="_top">@kbn/plugin-helpers</a> to build a distributable archive for your plugin.
+The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
+You don&#8217;t need to install the <code class="literal">plugin-helpers</code> dependency. If you created the plugin using <code class="literal">node scripts/generate_plugin</code> script, <code class="literal">package.json</code> is already pre-configured.
+To build your plugin run within your plugin folder:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">yarn build</pre>
+</div>
+<p>It will output a`zip` archive in <code class="literal">kibana/plugins/my_plugin_name/build/</code> folder.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_install_a_plugin_from_archive"></a>Install a plugin from archive</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+</div></div></div>
+<p>See <a class="xref" href="kibana-plugins.html#install-plugin" title="Install plugins">How to install a plugin</a>.</p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_run_kibana_with_your_plugin_in_dev_mode"></a>Run Kibana with your plugin in dev mode</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/plugin/plugin-tooling.asciidoc">edit</a></div>
+</div></div></div>
+<p>If your plugin isn&#8217;t server only and contains <code class="literal">ui</code> in order for Kibana to pick the browser bundles you need to run <code class="literal">yarn dev --watch</code> in the plugin root folder at a dedicated terminal.</p>
+<p>Then, in a second terminal, run <code class="literal">yarn start</code> at the Kibana root folder. Make sure Kibana found and bootstrapped your plugin by:</p>
+<div class="pre_wrapper lang-shell">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-shell">[INFO ][plugins-system.standard] Setting up […] plugins: […, myPluginName, …]</pre>
+</div>
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="external-plugin-development.html">« External plugin development</a>
+</span>
+<span class="next">
+<a href="external-plugin-functional-tests.html">Functional Tests for Plugins outside the Kibana repo »</a>
+</span>
+</div>
+</body>
+</html>

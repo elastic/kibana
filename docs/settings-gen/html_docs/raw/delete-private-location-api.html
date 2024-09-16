@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delete Private Location API | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Delete Private Location API | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="synthetics-apis.html" title="Synthetics APIs"/>
+<link rel="prev" href="create-private-location-api.html" title="Create Private Location API"/>
+<link rel="next" href="get-private-locations-api.html" title="Get Private Locations API"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="create-private-location-api.html">« Create Private Location API</a>
+</span>
+<span class="next">
+<a href="get-private-locations-api.html">Get Private Locations API »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="api.html">REST API</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="synthetics-apis.html">Synthetics APIs</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Delete Private Location API</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="delete-private-location-api"></a>Delete Private Location API</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Deletes a private location using the provided location ID.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_request_9"></a>Request</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/api/synthetics/private_locations/&lt;location_id&gt;</code></p>
+<p><code class="literal">DELETE &lt;kibana host&gt;:&lt;port&gt;/s/&lt;space_id&gt;/api/synthetics/private_locations/&lt;location_id&gt;</code></p>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h3 class="title"><a id="_prerequisites_14"></a>Prerequisites</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p>You must have <code class="literal">all</code> privileges for the <span class="strong strong"><strong>Synthetics and Uptime</strong></span> feature in the <span class="strong strong"><strong>Observability</strong></span> section of the
+<a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana feature privileges</a>.</p>
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-location-delete-params"></a>Path Parameters</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<code class="literal">location_id</code>
+</span>
+</dt>
+<dd>
+(Required, string) The unique identifier of the private location to be deleted. It must be between 1 and 1024 characters.
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h4 class="title"><a id="private-location-delete-example"></a>Example</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/api/synthetics/private-locations/delete-private-location.asciidoc">edit</a></div>
+</div></div></div>
+<p>Here is an example of a DELETE request to delete a private location:</p>
+<div class="pre_wrapper lang-sh">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-sh">DELETE /api/private-locations/&lt;location_id&gt;</pre>
+</div>
+<p>The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.</p>
+<p>This API will delete the private location with the specified <code class="literal">locationId</code>.</p>
+<p>A location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.</p>
+</div>
+
+</div>
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="create-private-location-api.html">« Create Private Location API</a>
+</span>
+<span class="next">
+<a href="get-private-locations-api.html">Get Private Locations API »</a>
+</span>
+</div>
+</body>
+</html>

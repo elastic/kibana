@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Getting started | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Getting started | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="development.html" title="Developer guide"/>
+<link rel="prev" href="development.html" title="Developer guide"/>
+<link rel="next" href="running-kibana-advanced.html" title="Running Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.optimizely.com/js/18132920325.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Elastic">
+    <meta name="application-name" content="Elastic">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="naver-site-verification" content="936882c1853b701b3cef3721758d80535413dbfd" />
+    <meta name="yandex-verification" content="d8a47e95d0972434" />
+    <meta name="localized" content="true" />
+    <meta name="st:robots" content="follow,index" />
+    <meta property="og:image" content="https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/6202d3378b1f312528798412/elastic-logo.svg" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="172" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="64x64" href="/favicon_64x64_16bit.png">
+    <link rel="apple-touch-icon-precomposed" sizes="32x32" href="/favicon_32x32.png">
+    <link rel="apple-touch-icon-precomposed" sizes="16x16" href="/favicon_16x16.png">
+    <!-- Give IE8 a fighting chance -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/guide/static/styles-v1.css" />
+  </head>
+
+  <!--© 2015-2025 Elasticsearch B.V. -->
+  <!-- All Elastic documentation is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. -->
+  <!-- http://creativecommons.org/licenses/by-nc-nd/4.0/ -->
+
+  <body>
+    <!-- Google Tag Manager -->
+    <script>dataLayer = [];</script><noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-58RLH5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-58RLH5');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-12395217-16"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-12395217-16');
+    </script>
+
+    <!-- Google Tag Manager for GA4 -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KNJMG2M');</script>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNJMG2M" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager for GA4-->
+
+    <div id='elastic-nav' style="display:none;"></div>
+    <script src='https://www.elastic.co/elastic-nav.js'></script>
+
+    <div class="main-container">
+      <section id="content" >
+        <div class="content-wrapper">
+
+          <section id="guide" lang="en">
+            <div class="container-fluid">
+              <div class="row pb-3">
+                <div class="col-12 order-2 col-md-4 order-md-1 col-lg-3 h-almost-full-md sticky-top-md" id="left_col">
+                  <!-- The TOC is appended here -->
+                </div>
+
+                <div class="col-12 order-1 col-md-8 order-md-2 col-lg-7 order-lg-2 guide-section" id="middle_col">
+                  <!-- start body -->
+                  
+<div class="navheader">
+<span class="prev">
+<a href="development.html">« Developer guide</a>
+</span>
+<span class="next">
+<a href="running-kibana-advanced.html">Running Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="development.html">Developer guide</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Getting started</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="development-getting-started"></a>Getting started</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+</div></div></div>
+<p>Get started building your own plugins, or contributing directly to the Kibana repo.</p>
+<div class="position-relative"><h3><a id="developing-on-windows"></a>Developing on Windows</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>We do not support Windows native development anymore and in order to develop Kibana on Windows please <a href="https://docs.microsoft.com/en-us/windows/wsl/setup/environment" class="ulink" target="_top">setup a WSL environment</a> which will
+give you a much better experience.
+In addition to that you will also benefit from <a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps" class="ulink" target="_top">run GUI apps on WSL</a> like Chrome for test and debug purposes.
+Once completed, follow the rest of this guide inside the WSL.</p>
+<div class="position-relative"><h3><a id="get-kibana-code"></a>Get the code</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p><a href="https://help.github.com/en/github/getting-started-with-github/fork-a-repo" class="ulink" target="_top">Fork</a>, then <a href="https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork" class="ulink" target="_top">clone</a> the <a href="https://github.com/elastic/kibana/" class="ulink" target="_top">Kibana repo</a> and change directory into it:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
+cd kibana</pre>
+</div>
+<div class="position-relative"><h3><a id="_install_dependencies"></a>Install dependencies</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>Install the version of Node.js listed in the <code class="literal">.node-version</code> file. This
+can be automated with tools such as
+<a href="https://github.com/nvm-sh/nvm" class="ulink" target="_top">nvm</a> or
+<a href="https://github.com/wbyoung/avn" class="ulink" target="_top">avn</a>. As we also include a <code class="literal">.nvmrc</code> file
+you can switch to the correct version when using nvm by running:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">nvm use</pre>
+</div>
+<p>Install the latest version of <a href="https://classic.yarnpkg.com/en/docs/install" class="ulink" target="_top">yarn v1</a>.</p>
+<p>Bootstrap Kibana and install all the dependencies:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn kbn bootstrap</pre>
+</div>
+<div class="quoteblock">
+<blockquote>
+<p>Node.js native modules could be in use and node-gyp is the tool used to
+build them. There are tools you need to install per platform and python
+versions you need to be using. Please see
+<a href="https://github.com/nodejs/node-gyp#installation" class="ulink" target="_top">https://github.com/nodejs/node-gyp#installation</a>
+and follow the guide according your platform.</p>
+</blockquote>
+</div>
+<p>In case you don&#8217;t have an internet connection, the <code class="literal">yarn kbn bootstrap</code> command will
+fail. As it is likely you have the required node_modules in the
+offline mirror, you can try to run the step in offline mode by using:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn kbn bootstrap --offline</pre>
+</div>
+<p>In any other circumstance where you want to force the node_modules install step
+you can use:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn kbn bootstrap --force-install</pre>
+</div>
+<p>You can also run <code class="literal">yarn kbn</code> to see the other available commands.</p>
+<p>When switching branches which use different versions of npm packages you
+may need to run:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn kbn clean</pre>
+</div>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>Running this command is only necessary in rare circumstance where you need to recover
+a consistent state when problems arise. If you need to run this command often, complete
+this form to provide feedback: <a href="https://ela.st/yarn-kbn-clean" class="ulink" target="_top">https://ela.st/yarn-kbn-clean</a></p>
+</div>
+</div>
+<p>If you have failures during <code class="literal">yarn kbn bootstrap</code> you may have some
+corrupted packages in your yarn cache which you can clean with:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn cache clean</pre>
+</div>
+<div class="position-relative"><h3><a id="_configure_environmental_settings"></a>Configure environmental settings</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<div class="position-relative"><h4><a id="increase-nodejs-heap-size"></a>Increase node.js heap size</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>Kibana is a big project and for some commands it can happen that the
+process hits the default heap limit and crashes with an out-of-memory
+error. If you run into this problem, you can increase maximum heap size
+by setting the <code class="literal">--max_old_space_size</code> option on the command line. To set
+the limit for all commands, simply add the following line to your shell
+config: <code class="literal">export NODE_OPTIONS="--max_old_space_size=2048"</code>.</p>
+<div class="position-relative"><h3><a id="_run_elasticsearch"></a>Run Elasticsearch</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>Run the latest Elasticsearch snapshot. Specify an optional license with the <code class="literal">--license</code> flag.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn es snapshot --license trial</pre>
+</div>
+<p><code class="literal">trial</code> will give you access to all capabilities.</p>
+<p>Read about more options for <a class="xref" href="running-elasticsearch.html" title="Running Elasticsearch during development">Running Elasticsearch during development</a>, like connecting to a remote host, running from source,
+preserving data inbetween runs, running remote cluster, etc.</p>
+<div class="position-relative"><h3><a id="_run_kibana"></a>Run Kibana</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>In another terminal window, start up Kibana. Include <a href="https://github.com/elastic/kibana/tree/master/examples" class="ulink" target="_top">developer examples</a> by adding an optional <code class="literal">--run-examples</code> flag.</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">yarn start --run-examples</pre>
+</div>
+<p>View all available options by running <code class="literal">yarn start --help</code></p>
+<p>Read about more advanced options for <a class="xref" href="running-kibana-advanced.html" title="Running Kibana">Running Kibana</a>.</p>
+<div class="position-relative"><h3><a id="_install_pre_commit_hook_optional"></a>Install pre-commit hook (optional)</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>In case you want to run a couple of checks like linting or check the file casing of the files to commit, we provide
+a way to install a pre-commit hook. To configure it you just need to run the following:</p>
+<div class="pre_wrapper lang-bash">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-bash">node scripts/register_git_hook</pre>
+</div>
+<p>After the script completes the pre-commit hook will be created within the file <code class="literal">.git/hooks/pre-commit</code>.
+If you choose to not install it, don&#8217;t worry, we still run a quick ci check to provide feedback earliest as we can about the same checks.</p>
+<div class="position-relative"><h3><a id="_code_away"></a>Code away!</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<p>You are now ready to start developing. Changes to your files should be picked up automatically. Server side changes will
+cause the Kibana server to reboot.</p>
+<div class="position-relative"><h3><a id="_more_information"></a>More information</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/developer/getting-started/index.asciidoc">edit</a></div>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+<a class="xref" href="running-kibana-advanced.html" title="Running Kibana">Running Kibana</a>
+</li>
+<li class="listitem">
+<a class="xref" href="sample-data.html" title="Installing sample data">Installing sample data</a>
+</li>
+<li class="listitem">
+<a class="xref" href="kibana-debugging.html" title="Debugging Kibana">Debugging Kibana</a>
+</li>
+<li class="listitem">
+<a class="xref" href="building-kibana.html" title="Building a Kibana distributable">Building a Kibana distributable</a>
+</li>
+<li class="listitem">
+<a class="xref" href="development-plugin-resources.html" title="Plugin Resources">Plugin Resources</a>
+</li>
+</ul>
+</div>
+
+
+
+
+
+
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="development.html">« Developer guide</a>
+</span>
+<span class="next">
+<a href="running-kibana-advanced.html">Running Kibana »</a>
+</span>
+</div>
+
+                  <!-- end body -->
+                </div>
+
+                <div class="col-12 order-3 col-lg-2 order-lg-3 h-almost-full-lg sticky-top-lg" id="right_col">
+                  <div id="sticky_content">
+                    <!-- The OTP is appended here -->
+                    <div class="row">
+                      <div class="col-0 col-md-4 col-lg-0" id="bottom_left_col"></div>
+                      <div class="col-12 col-md-8 col-lg-12">
+                        <div id="rtpcontainer">
+                          <div class="mktg-promo" id="most-popular">
+                            <p class="aside-heading">Most Popular</p>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-elasticsearch?page=docs&placement=top-video">
+                                <p class="mb-0">Get Started with Elasticsearch</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/getting-started-kibana?page=docs&placement=top-video">
+                                <p class="mb-0">Intro to Kibana</p>
+                              </a>
+                            </div>
+                            <div class="pb-2">
+                              <p class="media-type">Video</p>
+                              <a href="https://www.elastic.co/webinars/introduction-elk-stack?page=docs&placement=top-video">
+                                <p class="mb-0">ELK for Logs & Metrics</p>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Feedback widget -->
+                        <div id="feedbackWidgetContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+
+        <div id='elastic-footer'></div>
+        <script src='https://www.elastic.co/elastic-footer.js'></script>
+        <!-- Footer Section end-->
+
+      </section>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModalContainer"></div>
+
+    <script src="/guide/static/jquery.js"></script>
+    <script type="text/javascript" src="/guide/static/docs-v1.js"></script>
+    <script type="text/javascript">
+  window.initial_state = {}</script>
+  </body>
+</html>

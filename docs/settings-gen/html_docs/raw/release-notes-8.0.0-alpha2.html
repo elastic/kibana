@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="Kibana diagnostic, diagnostics">
+<title>Kibana 8.0.0-alpha2 | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Kibana 8.0.0-alpha2 | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="release-notes.html" title="Release notes"/>
+<link rel="prev" href="release-notes-8.0.0-beta1.html" title="Kibana 8.0.0-beta1"/>
+<link rel="next" href="release-notes-8.0.0-alpha1.html" title="Kibana 8.0.0-alpha1"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="release-notes-8.0.0-beta1.html">« Kibana 8.0.0-beta1</a>
+</span>
+<span class="next">
+<a href="release-notes-8.0.0-alpha1.html">Kibana 8.0.0-alpha1 »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="release-notes.html">Release notes</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Kibana 8.0.0-alpha2</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="release-notes-8.0.0-alpha2"></a>Kibana 8.0.0-alpha2</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+</div></div></div>
+<p>Review the Kibana 8.0.0-alpha2 changes, then use the <a class="xref" href="upgrade-assistant.html" title="Upgrade Assistant">Upgrade Assistant</a> to complete the upgrade.</p>
+<div class="position-relative"><h3><a id="breaking-changes-8.0.0-alpha2"></a>Breaking changes</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.</p>
+<p>To review the breaking changes in the previous version, refer to <a class="xref" href="release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1" title="Breaking changes">8.0.0-alpha1</a>.</p>
+<details id="breaking-110830">
+<summary class="title">Changes the <code class="literal">GET /api/status</code> default behavior</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+<code class="literal">GET /api/status</code> reports a new and more verbose payload. For more information, refer to <a href="https://github.com/elastic/kibana/pull/110830" class="ulink" target="_top">#110830</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To retrieve the Kibana status in the previous format, use <code class="literal">GET /api/status?v7format=true</code>.</p>
+</div>
+</details>
+<details id="breaking-110738">
+<summary class="title">Removes support for legacy exports</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+In Kibana 8.0.0 and later, the legacy format from Kibana 6.x is unsupported. For more information, refer to <a href="https://github.com/elastic/kibana/pull/110738" class="ulink" target="_top">#110738</a></p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+Using the user interface to import saved objects is restricted to <code class="literal">.ndjson</code> format imports.</p>
+</div>
+</details>
+<details id="breaking-109896">
+<summary class="title">Removes <code class="literal">map.regionmap.*</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The deprecated <code class="literal">map.regionmap.*</code> setting in kibana.yml has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/109896" class="ulink" target="_top">#109896</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+If you have maps that use <code class="literal">map.regionmap</code> layers:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Remove the <code class="literal">map.regionmap</code> layer.
+</li>
+<li class="listitem">
+To recreate the choropleth layer, use <a class="xref" href="import-geospatial-data.html" title="Import geospatial data">GeoJSON upload</a> to index your static vector data into Elasticsearch.
+</li>
+<li class="listitem">
+Create a choropleth layer from the indexed vector data.
+</li>
+</ol>
+</div>
+</div>
+</details>
+<details id="breaking-109798">
+<summary class="title">Removes <code class="literal">kibana.defaultAppId</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The deprecated <code class="literal">kibana.defaultAppId</code> setting in kibana.yml, which is also available as <code class="literal">kibana_legacy.defaultAppId</code>, has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/109798" class="ulink" target="_top">#109798</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you upgrade, remove <code class="literal">kibana.defaultAppId</code> from your kibana.yml file. To configure the default route for users when they enter a space, use the <a class="xref" href="advanced-options.html#defaultroute"><code class="literal">defaultRoute</code></a> in <span class="strong strong"><strong>Advanced Settings</strong></span>.</p>
+</div>
+</details>
+<details id="breaking-109350">
+<summary class="title">Removes <code class="literal">courier:batchSearches</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The deprecated <code class="literal">courier:batchSearches</code> setting in <span class="strong strong"><strong>Advanced Settings</strong></span> has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/109350" class="ulink" target="_top">#109350</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you upgrade, the <code class="literal">courier:batchSearches</code> setting will no longer be available.</p>
+</div>
+</details>
+<details id="breaking-108111">
+<summary class="title">Removes <code class="literal">xpack.task_manager.index</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The deprecated <code class="literal">xpack.task_manager.index</code> setting in kibana.yml has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/108111" class="ulink" target="_top">#108111</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you upgrade, remove <code class="literal">xpack.task_manager.index</code> from your kibana.yml file.</p>
+</div>
+</details>
+<details id="breaking-108103">
+<summary class="title">Removes dashboard-only mode</summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The legacy dashboard-only mode has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/108103" class="ulink" target="_top">#108103</a>.</p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+To grant users access to only dashboards, create a new role, then assign only the <span class="strong strong"><strong>Dashboard</strong></span> feature privilege. For more information, refer to <a class="xref" href="kibana-privileges.html#kibana-feature-privileges" title="Feature privileges">Kibana privileges</a>.</p>
+</div>
+</details>
+<details id="breaking-105979">
+<summary class="title">Removes <code class="literal">xpack.maps.showMapVisualizationTypes</code></summary>
+<div class="content">
+<p><span class="strong strong"><strong>Details</strong></span><br>
+The deprecated <code class="literal">xpack.maps.showMapVisualizationTypes</code> setting in kibana.yml has been removed. For more information, refer to <a href="https://github.com/elastic/kibana/pull/105979" class="ulink" target="_top">#105979</a></p>
+<p><span class="strong strong"><strong>Impact</strong></span><br>
+When you upgrade, remove <code class="literal">xpack.maps.showMapVisualizationTypes</code> from your kibana.yml file.</p>
+</div>
+</details>
+<div class="position-relative"><h3><a id="deprecations-8.0.0-alpha2"></a>Deprecations</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.</p>
+<p>To review the 8.0.0 depcrecations, refer to the <a class="xref" href="release-notes-8.0.0-alpha1.html#deprecations-8.0.0-alpha1" title="Deprecations">8.0.0-alpha1 release notes</a>.</p>
+<div class="position-relative"><h3><a id="features-8.0.0-alpha2"></a>Features</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The 8.0.0-alpha2 release adds the following new and notable feature.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Adds the interactive setup mode <a href="https://github.com/elastic/kibana/pull/106881" class="ulink" target="_top">#106881</a>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="position-relative"><h3><a id="enhancement-v8.0.0-alpha2"></a>Enhancements</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/CHANGELOG.asciidoc">edit</a></div>
+<p>The 8.0.0-alpha2 release includes the following enhancements.</p>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+Elastic Security
+</span>
+</dt>
+<dd>
+For the Elastic Security 8.0.0-alpha2 release information, refer to <a href="https://www.elastic.co/guide/en/security/master/release-notes.html" class="ulink" target="_top"><em>Elastic Security Solution Release Notes</em></a>.
+</dd>
+<dt>
+<span class="term">
+Security
+</span>
+</dt>
+<dd>
+<div class="ulist itemizedlist">
+<ul class="itemizedlist">
+<li class="listitem">
+Interactive setup mode <a href="https://github.com/elastic/kibana/pull/106881" class="ulink" target="_top">#106881</a>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="release-notes-8.0.0-beta1.html">« Kibana 8.0.0-beta1</a>
+</span>
+<span class="next">
+<a href="release-notes-8.0.0-alpha1.html">Kibana 8.0.0-alpha1 »</a>
+</span>
+</div>
+</body>
+</html>

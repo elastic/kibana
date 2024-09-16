@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Using ES|QL | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Using ES|QL | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="discover.html" title="Discover"/>
+<link rel="prev" href="search-sessions.html" title="Run a search session in the background"/>
+<link rel="next" href="dashboard.html" title="Dashboard and visualizations"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="search-sessions.html">« Run a search session in the background</a>
+</span>
+<span class="next">
+<a href="dashboard.html">Dashboard and visualizations »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="discover.html">Discover</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Using ES|QL</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/try-esql.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="chapter">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="try-esql"></a>Using ES|QL</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/try-esql.asciidoc">edit</a></div>
+</div></div></div>
+<p>The Elasticsearch Query Language, ES|QL, makes it easier to explore your data without leaving Discover.</p>
+<p>In this tutorial we&#8217;ll use the Kibana sample web logs in Discover and Lens to explore the data and create visualizations.</p>
+<div class="position-relative"><h3><a id="prerequisite"></a>Prerequisite</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/try-esql.asciidoc">edit</a></div>
+<p>To be able to select <span class="strong strong"><strong>Language ES|QL</strong></span> from the Data views menu the <code class="literal">enableESQL</code> setting must be enabled from <span class="strong strong"><strong>Stack Management &gt; Advanced Settings</strong></span>. It is enabled by default.</p>
+<div class="position-relative"><h3><a id="tutorial-try-esql"></a>Use ES|QL</h3><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/discover/try-esql.asciidoc">edit</a></div>
+<p>To load the sample data:</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+On the home page, click <span class="strong strong"><strong>Try sample data</strong></span>.
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Other sample data sets</strong></span>.
+</li>
+<li class="listitem">
+On the Sample web logs card, click <span class="strong strong"><strong>Add data</strong></span>.
+</li>
+<li class="listitem">
+Open the main menu and select <span class="strong strong"><strong>Discover</strong></span>.
+</li>
+<li class="listitem">
+From the Data views menu, select <span class="strong strong"><strong>Language ES|QL</strong></span>.
+</li>
+</ol>
+</div>
+<p>Let&#8217;s say we want to find out what operating system users have and how much RAM is on their machine.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+Set the time range to <span class="strong strong"><strong>Last 7 days</strong></span>.
+</li>
+<li class="listitem">
+Expand <span class="image"><img src="images/expand-icon-2.png" alt="An image of the expand icon"></span> the query bar.
+</li>
+<li class="listitem">
+Put each processing command on a new line for better readability.
+</li>
+<li class="listitem">
+<p>Copy the query below:</p>
+<div class="pre_wrapper lang-esql">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-esql">FROM kibana_sample_data_logs
+| KEEP machine.os, machine.ram</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>▶Run</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/esql-machine-os-ram.png" alt="An image of the query result"></span></p>
+<div class="note admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>ES|QL keywords are not case sensitive.</p>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<p>Let&#8217;s add <code class="literal">geo.dest</code> to our query, to find out the geographical destination of the visits, and limit the results.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Copy the query below:</p>
+<div class="pre_wrapper lang-esql">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-esql">FROM kibana_sample_data_logs
+| KEEP machine.os, machine.ram, geo.dest
+| LIMIT 10</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>▶Run</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/esql-limit.png" alt="An image of the extended query result"></span></p>
+</li>
+</ol>
+</div>
+<p>Let&#8217;s sort the data by machine ram and filter out the destination GB.</p>
+<div class="olist orderedlist">
+<ol class="orderedlist">
+<li class="listitem">
+<p>Copy the query below:</p>
+<div class="pre_wrapper lang-esql">
+<div class="console_code_copy" title="Copy to clipboard"></div>
+<pre class="programlisting prettyprint lang-esql">FROM kibana_sample_data_logs
+| KEEP machine.os, machine.ram, geo.dest
+| SORT machine.ram desc
+| WHERE geo.dest != "GB"
+| LIMIT 10</pre>
+</div>
+</li>
+<li class="listitem">
+<p>Click <span class="strong strong"><strong>▶Run</strong></span>.</p>
+<p class="screenshot"><span class="image"><img src="images/esql-full-query.png" alt="An image of the full query result"></span></p>
+</li>
+<li class="listitem">
+Click <span class="strong strong"><strong>Save</strong></span> to save the query and visualization to a dashboard.
+</li>
+</ol>
+</div>
+<p>To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization.</p>
+<div class="tip admon">
+<div class="icon"></div>
+<div class="admon_content">
+<p>For the complete ES|QL documentation, including tutorials, examples and the full syntax reference, refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html" class="ulink" target="_top">Elasticsearch documentation</a>.
+For a more detailed overview of ES|QL in Kibana, refer to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-kibana.html" class="ulink" target="_top">Use ES|QL in Kibana</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="search-sessions.html">« Run a search session in the background</a>
+</span>
+<span class="next">
+<a href="dashboard.html">Dashboard and visualizations »</a>
+</span>
+</div>
+</body>
+</html>

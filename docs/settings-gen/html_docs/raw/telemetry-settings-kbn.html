@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Telemetry settings in Kibana | Kibana Guide | Elastic</title>
+<meta class="elastic" name="content" content="Telemetry settings in Kibana | Kibana Guide">
+
+<link rel="home" href="index.html" title="Kibana Guide"/>
+<link rel="up" href="settings.html" title="Configure Kibana"/>
+<link rel="prev" href="task-manager-settings-kb.html" title="Task Manager settings in Kibana"/>
+<link rel="next" href="url-drilldown-settings-kb.html" title="URL drilldown settings in Kibana"/>
+<meta class="elastic" name="product_version" content=""/>
+<meta class="elastic" name="product_name" content=""/>
+<meta class="elastic" name="website_area" content="documentation"/>
+<meta name="DC.type" content="Learn/Docs/"/>
+<meta name="DC.subject" content=""/>
+<meta name="DC.identifier" content=""/>
+</head>
+<body>
+<div class="navheader">
+<span class="prev">
+<a href="task-manager-settings-kb.html">« Task Manager settings in Kibana</a>
+</span>
+<span class="next">
+<a href="url-drilldown-settings-kb.html">URL drilldown settings in Kibana »</a>
+</span>
+</div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div class="breadcrumbs">
+<span class="breadcrumb-link"><a href="/guide/">Elastic Docs</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="index.html">Kibana Guide</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="setup.html">Set up</a></span>
+<span class="chevron-right">›</span><span class="breadcrumb-link"><a href="settings.html">Configure Kibana</a></span>
+</div>
+<div>
+<div><h1 class="title"><a id="id-1"></a>Telemetry settings in Kibana</h1><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/telemetry-settings.asciidoc">edit</a></div>
+</div>
+<!--EXTRA-->
+</div>
+<div id="content">
+<div class="section">
+<div class="titlepage"><div><div>
+<div class="position-relative"><h2 class="title"><a id="telemetry-settings-kbn"></a>Telemetry settings in Kibana</h2><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/telemetry-settings.asciidoc">edit</a></div>
+</div></div></div>
+
+<p>Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.</p>
+<p>Refer to our <a href="https://www.elastic.co/legal/product-privacy-statement" class="ulink" target="_top">Privacy Statement</a> to learn more.</p>
+<p>You can control whether this data is sent from the Kibana servers, or if it should be sent
+from the user&#8217;s browser, in case a firewall is blocking the connections from the server. Additionally, you can disable this feature either in <span class="strong strong"><strong>Stack Management &gt; Kibana &gt; Advanced Settings &gt; Global Settings &gt; Usage collection</strong></span> or the config file with the following settings.</p>
+<div class="position-relative"><h4><a id="telemetry-general-settings"></a>General telemetry settings</h4><a class="edit_me" rel="nofollow" title="Edit this page on GitHub" href="https://github.com/elastic/kibana/edit/master/docs/settings/telemetry-settings.asciidoc">edit</a></div>
+<div class="variablelist">
+<dl class="variablelist">
+<dt>
+<span class="term">
+<a id="telemetry-optIn"></a> <code class="literal">telemetry.optIn</code>
+</span>
+</dt>
+<dd>
+<p>
+  Set to <code class="literal">false</code> to stop sending any telemetry data to Elastic. Reporting your
+cluster statistics helps us improve your user experience. <span class="strong strong"><strong>Default: <code class="literal">true</code>.</strong></span><br>
+</p>
+<p>This setting can be changed at any time in <a class="xref" href="advanced-options.html" title="Advanced Settings">Advanced Settings</a>.
+To prevent users from changing it,
+set <a class="xref" href="settings.html#telemetry-allowChangingOptInStatus"><code class="literal">telemetry.allowChangingOptInStatus</code></a> to <code class="literal">false</code>.</p>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">telemetry.allowChangingOptInStatus</code>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">false</code> to disallow overwriting the <a class="xref" href="telemetry-settings-kbn.html#telemetry-optIn"><code class="literal">telemetry.optIn</code></a> setting via the <a class="xref" href="advanced-options.html" title="Advanced Settings">Advanced Settings</a> in Kibana. <span class="strong strong"><strong>Default: <code class="literal">true</code>.</strong></span>
+</dd>
+<dt>
+<span class="term">
+<code class="literal">telemetry.sendUsageFrom</code>
+</span>
+</dt>
+<dd>
+Set to <code class="literal">'server'</code> to report the cluster statistics from the Kibana server.
+If the server fails to connect to our endpoint at <a href="https://telemetry.elastic.co/" class="ulink" target="_top">https://telemetry.elastic.co/</a>, it assumes
+it is behind a firewall and falls back to <code class="literal">'browser'</code> to send it from users' browsers
+when they are navigating through Kibana. <span class="strong strong"><strong>Default: <code class="literal">'server'</code>.</strong></span>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div><div class="navfooter">
+<span class="prev">
+<a href="task-manager-settings-kb.html">« Task Manager settings in Kibana</a>
+</span>
+<span class="next">
+<a href="url-drilldown-settings-kb.html">URL drilldown settings in Kibana »</a>
+</span>
+</div>
+</body>
+</html>
