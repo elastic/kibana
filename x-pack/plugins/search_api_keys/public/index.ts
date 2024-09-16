@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-
-import { SearchApiKeysPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SearchApiKeysPlugin();
-}
+export { ApiKeyForm } from './components/api_key_form';

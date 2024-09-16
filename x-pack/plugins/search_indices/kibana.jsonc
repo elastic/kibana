@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "share",
+      "searchApiKeys",
     ],
     "optionalPlugins": [
       "cloud",

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { ApiKeyForm } from '@kbn/search-api-keys/public';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const ElasticsearchStartPage = () => {
@@ -29,6 +30,7 @@ export const ElasticsearchStartPage = () => {
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         <EuiLoadingLogo />
+        <ApiKeyForm />
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>

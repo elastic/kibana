@@ -10,7 +10,9 @@
       "xpack",
       "searchApiKeys"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "kibanaReact",
+    ],
     "optionalPlugins": [
       "cloud",
       "console",
