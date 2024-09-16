@@ -29,5 +29,7 @@
     "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
     "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/zod",
   ]
 }
