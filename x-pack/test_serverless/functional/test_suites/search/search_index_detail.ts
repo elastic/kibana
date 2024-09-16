@@ -80,6 +80,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
       });
 
+      it('should have mappings component', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectTabToExist('mappings-Tab')
+      })
       it('back to indices button should redirect to list page', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
         await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();

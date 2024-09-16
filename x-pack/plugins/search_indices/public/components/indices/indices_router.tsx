@@ -5,17 +5,32 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import { SEARCH_INDICES_DETAILS_PATH } from '../../routes';
-import { SearchIndexDetailsPage } from './details_page';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
 import { useKibana } from '../../hooks/use_kibana';
-
+import {
+  SearchIndicesDetailsMappingsTabs,
+  SEARCH_INDICES_DETAILS_PATH,
+  SEARCH_INDICES_DETAILS_TABS_PATH,
+} from '../../routes';
+import { SearchIndexDetailsPage } from './details_page';
 export const SearchIndicesRouter: React.FC = () => {
-  const { application } = useKibana().services;
+  const { application, history } = useKibana().services;
   return (
-    <Routes>
-      <Route exact path={SEARCH_INDICES_DETAILS_PATH} component={SearchIndexDetailsPage} />
-      <Route render={() => application.navigateToApp('elasticsearchStart')} />
-    </Routes>
+    <Router history={history}>
+      <Routes>
+        <Route exact path={SEARCH_INDICES_DETAILS_TABS_PATH}>
+          <Routes>
+            <Route path={SEARCH_INDICES_DETAILS_TABS_PATH} component={SearchIndexDetailsPage} />
+            <Redirect
+              exact
+              from={`${SEARCH_INDICES_DETAILS_PATH}/`}
+              to={`${SEARCH_INDICES_DETAILS_PATH}/${SearchIndicesDetailsMappingsTabs.DATA}`}
+            />
+          </Routes>
+        </Route>
+        <Route render={() => application.navigateToApp('elasticsearchStart')} />
+      </Routes>
+    </Router>
   );
 };

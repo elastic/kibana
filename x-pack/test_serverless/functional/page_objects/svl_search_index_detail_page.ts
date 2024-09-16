@@ -111,5 +111,8 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         await testSubjects.click('reloadButton', 2000);
       });
     },
+    async expectTabToExist(tab:string) {
+      await testSubjects.existOrFail(tab, {timeout: 2000})
+    }
   };
 }

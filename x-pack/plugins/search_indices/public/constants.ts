@@ -18,3 +18,8 @@ export enum MutationKeys {
 export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 export const INDEX_PLACEHOLDER = 'my-index';
+
+export enum Tabs {
+  Data = 'data',
+  Mappings = 'mappings',
+}

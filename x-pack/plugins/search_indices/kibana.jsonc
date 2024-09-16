@@ -17,6 +17,7 @@
       "cloud",
       "console",
       "usageCollection",
+      "indexManagement",
     ],
     "requiredBundles": [
       "kibanaReact",
