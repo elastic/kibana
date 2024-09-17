@@ -598,7 +598,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       loadDegradedFields: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        if (context?.isNonAggregatable) {
+        if (!context?.isNonAggregatable) {
           return dataStreamDetailsClient.getDataStreamDegradedFields({
             dataStream:
               context.showCurrentQualityIssues &&
