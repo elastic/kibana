@@ -38,12 +38,10 @@ import './control_panel.scss';
 const DragHandle = ({
   isEditable,
   controlTitle,
-  hideEmptyDragHandle,
   ...rest // drag info is contained here
 }: {
   isEditable: boolean;
   controlTitle?: string;
-  hideEmptyDragHandle: boolean;
 }) =>
   isEditable ? (
     <button
@@ -113,7 +111,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
-  const controlType = api ? api.type : null;
+  const controlType = api ? api.type : undefined;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
@@ -134,7 +132,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       data-test-subj="control-frame"
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper--grow': controlGrow,
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--large': controlWidth === 'large',
@@ -174,7 +171,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
-                  hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
                   {...attributes}
                   {...listeners}
                 />
