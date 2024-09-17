@@ -57,6 +57,7 @@ jobs:
   alert:
     name: Alert
     runs-on: ubuntu-latest
+    needs: analyze
     if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
     steps:
     - name: Checkout kibana-operations
