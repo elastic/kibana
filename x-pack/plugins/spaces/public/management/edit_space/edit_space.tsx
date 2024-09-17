@@ -131,7 +131,7 @@ export const EditSpace: FC<PageProps> = ({
             logger.error('Encountered error while getting list of roles for space!');
             logger.error(error);
           }
-          handleApiError(error, { logger, toasts: notifications.toasts });
+          dispatch({ type: 'fetch_roles_error', payload: true });
         }
         dispatch({ type: 'update_roles', payload: result });
       });
@@ -139,11 +139,10 @@ export const EditSpace: FC<PageProps> = ({
       setIsLoadingRoles(false);
     };
 
-    if (!state.roles.size) {
-      // maybe we do not make this call if user can't view roles? 🤔
-      getRoles().catch((error) => handleApiError(error, { logger, toasts: notifications.toasts }));
+    if (!state.roles.size && !state.fetchRolesError) {
+      getRoles();
     }
-  }, [dispatch, invokeClient, spaceId, state.roles, logger, notifications.toasts]);
+  }, [dispatch, invokeClient, spaceId, state.roles, state.fetchRolesError, logger]);
 
   useEffect(() => {
     const _getFeatures = async () => {

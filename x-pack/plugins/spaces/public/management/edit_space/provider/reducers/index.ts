@@ -11,9 +11,14 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 export type IDispatchAction =
   | {
-      /** @description  updates a single role record */
+      /** @description  updates the records of roles for a space */
       type: 'update_roles' | 'remove_roles';
       payload: Role[];
+    }
+  | {
+      /** @description  updates to true if user does not have privilege to view roles */
+      type: 'fetch_roles_error';
+      payload: boolean;
     }
   | {
       type: 'string';
@@ -23,6 +28,8 @@ export type IDispatchAction =
 export interface IEditSpaceStoreState {
   /** roles assigned to current space */
   roles: Map<string, Role>;
+  /** track if there was an error on the attempt to fetch roles **/
+  fetchRolesError: boolean;
 }
 
 export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAction> = (
@@ -46,6 +53,10 @@ export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAct
         clonedState.roles.delete(role.name);
       });
 
+      return clonedState;
+    }
+    case 'fetch_roles_error': {
+      clonedState.fetchRolesError = action.payload;
       return clonedState;
     }
     default: {

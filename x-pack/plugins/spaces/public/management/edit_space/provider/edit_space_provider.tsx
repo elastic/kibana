@@ -78,6 +78,7 @@ export const EditSpaceProvider = ({
 
   const initialStoreState = useRef<IEditSpaceStoreState>({
     roles: new Map(),
+    fetchRolesError: false,
   });
 
   const { logger } = services;
