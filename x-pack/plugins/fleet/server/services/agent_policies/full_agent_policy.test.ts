@@ -20,6 +20,7 @@ import { getPackageInfo } from '../epm/packages';
 import {
   generateFleetConfig,
   getFullAgentPolicy,
+  getFullMonitoringSettings,
   transformOutputToFullPolicyOutput,
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
@@ -896,6 +897,146 @@ describe('getFullAgentPolicy', () => {
       agent: {
         limits: { go_max_procs: 2 },
         logging: { level: 'debug' },
+      },
+    });
+  });
+});
+
+describe('getFullMonitoringSettings', () => {
+  it('should return the correct settings when all values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: ['metrics', 'logs', 'traces'],
+        monitoring_pprof_enabled: true,
+        monitoring_http: {
+          enabled: true,
+          host: 'localhost',
+          port: 1111,
+          buffer: { enabled: true },
+        },
+        monitoring_diagnostics: {
+          limit: {
+            interval: '1m',
+            burst: 10,
+          },
+          uploader: {
+            max_retries: 3,
+            init_dur: '1m',
+            max_dur: '10m',
+          },
+        },
+      },
+      {
+        id: 'some-output',
+        is_default: false,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: true,
+      logs: true,
+      metrics: true,
+      traces: true,
+      namespace: 'default',
+      use_output: 'some-output',
+      pprof: { enabled: true },
+      http: {
+        enabled: true,
+        host: 'localhost',
+        port: 1111,
+        buffer: { enabled: true },
+      },
+      diagnostics: {
+        limit: {
+          interval: '1m',
+          burst: 10,
+        },
+        uploader: {
+          max_retries: 3,
+          init_dur: '1m',
+          max_dur: '10m',
+        },
+      },
+    });
+  });
+
+  it('should return the correct settings when some values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: ['metrics'],
+        monitoring_pprof_enabled: false,
+        monitoring_http: {
+          enabled: true,
+          host: 'localhost',
+          buffer: { enabled: false },
+        },
+        monitoring_diagnostics: {
+          limit: {
+            interval: '1m',
+          },
+          uploader: {
+            max_dur: '10m',
+          },
+        },
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: true,
+      traces: false,
+      namespace: 'default',
+      use_output: 'default',
+      pprof: { enabled: false },
+      http: {
+        enabled: true,
+        host: 'localhost',
+        buffer: { enabled: false },
+      },
+      diagnostics: {
+        limit: {
+          interval: '1m',
+        },
+        uploader: {
+          max_dur: '10m',
+        },
+      },
+    });
+  });
+
+  it('should return the correct settings when beats monitoring is disabled and minimal values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: [],
+        monitoring_http: {
+          enabled: true,
+        },
+        monitoring_diagnostics: {},
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: false,
+      logs: false,
+      metrics: false,
+      traces: false,
+      http: {
+        enabled: true,
       },
     });
   });
