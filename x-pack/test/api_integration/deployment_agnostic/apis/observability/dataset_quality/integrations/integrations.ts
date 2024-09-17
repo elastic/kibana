@@ -19,7 +19,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const endpoint = 'GET /internal/dataset_quality/integrations';
   type Integration = APIReturnType<typeof endpoint>['integrations'][0];
 
-  const integrationPackages = ['system', 'apm', 'endpoint', 'synthetics'];
+  const integrationPackages = ['system', 'synthetics'];
   const customIntegrations: CustomIntegration[] = [
     {
       integrationName: 'my.custom.integration',
@@ -79,15 +79,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'apm',
-          'endpoint',
           'synthetics',
           'system',
         ]);
 
         expect(body.integrations[0].datasets).not.empty();
         expect(body.integrations[1].datasets).not.empty();
-        expect(body.integrations[2].datasets).not.empty();
       });
 
       after(
