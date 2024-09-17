@@ -38,6 +38,9 @@ describe('UrlSynchronizer', () => {
         },
         needsSync: true,
       },
+      ui: {
+        pushVsOverlay: 'overlay',
+      },
     };
 
     render(
@@ -60,6 +63,9 @@ describe('UrlSynchronizer', () => {
       panels: {
         byId: {},
         needsSync: true,
+      },
+      ui: {
+        pushVsOverlay: 'overlay',
       },
     };
 
@@ -94,6 +100,9 @@ describe('UrlSynchronizer', () => {
           },
         },
         needsSync: true,
+      },
+      ui: {
+        pushVsOverlay: 'overlay',
       },
     };
 
