@@ -73,6 +73,7 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
+      <EntityInsight name={userName} fieldName={'user.name'} isPreviewMode={isPreviewMode} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
@@ -90,7 +91,6 @@ export const UserPanelContent = ({
           openDetailsPanel={openDetailsPanel}
         />
       )}
-      <EntityInsight name={userName} fieldName={'user.name'} isPreviewMode={isPreviewMode} />
     </FlyoutBody>
   );
 };

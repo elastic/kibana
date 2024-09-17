@@ -30,7 +30,6 @@ export const EntityInsight = <T,>({
     <>
       {hasMisconfigurationFindings && (
         <>
-          <EuiHorizontalRule />
           <EuiAccordion
             initialIsOpen={true}
             id="entityInsight-accordion"
@@ -60,6 +59,7 @@ export const EntityInsight = <T,>({
             />
             <EuiSpacer size="m" />
           </EuiAccordion>
+          <EuiHorizontalRule />
         </>
       )}
     </>
