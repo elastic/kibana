@@ -15,6 +15,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { ISavedObjectsRepository } from '@kbn/core/server';
 
+const constants = jest.requireMock('../constants');
+jest.mock('../constants');
+
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -523,7 +526,7 @@ describe('kibana index telemetry', () => {
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
-        perPage: 10000,
+        perPage: 100,
       });
       expect(telemetry).toStrictEqual({
         count_mw_total: 3,
@@ -550,7 +553,7 @@ describe('kibana index telemetry', () => {
     expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
-      perPage: 10000,
+      perPage: 100,
     });
 
     expect(telemetry).toStrictEqual({
@@ -566,5 +569,31 @@ describe('kibana index telemetry', () => {
     expect(loggerCall).toBe('Error executing alerting telemetry task: getTotalMWCount - {}');
     expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
+  });
+
+  test('should stop on MW max limit count', async () => {
+    constants.TELEMETRY_MW_COUNT_LIMIT = 1
+    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+      close: jest.fn(),
+      find: jest.fn().mockImplementation(async function* () {
+        yield mockedResponse;
+      }),
+    });
+    const telemetry = await getMWTelemetry({
+      savedObjectsClient,
+      logger,
+    });
+
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      namespaces: ['*'],
+      perPage: 100,
+    });
+    expect(telemetry).toStrictEqual({
+      count_mw_total: 2,
+      count_mw_with_repeat_toggle_on: 1,
+      count_mw_with_filter_alert_toggle_on: 1,
+      hasErrors: false,
+    });
   });
 });

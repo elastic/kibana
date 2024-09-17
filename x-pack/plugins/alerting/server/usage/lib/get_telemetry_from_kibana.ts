@@ -25,6 +25,7 @@ import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { TELEMETRY_MW_COUNT_LIMIT } from '../constants';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -514,14 +515,15 @@ export async function getMWTelemetry({
     const mwFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
-      perPage: 10000,
+      perPage: 100,
     });
 
     let countMWTotal = 0;
     let countMWWithRepeatToggleON = 0;
     let countMWWithFilterAlertToggleON = 0;
-    for await (const response of mwFinder.find()) {
+    mwLoop: for await (const response of mwFinder.find()) {
       for (const mwSavedObject of response.saved_objects) {
+        if (countMWTotal > TELEMETRY_MW_COUNT_LIMIT) break mwLoop
         countMWTotal = countMWTotal + 1;
         // scopedQuery property will be null if "Filter alerts" toggle will be off
         if (mwSavedObject.attributes.scopedQuery) {
