@@ -27,6 +27,7 @@ import {
 
 import { PrivilegesRolesForm } from './space_assign_role_privilege_form';
 import type { Space } from '../../../../../common';
+import { FEATURE_PRIVILEGES_ALL, FEATURE_PRIVILEGES_READ } from '../../../../../common/constants';
 import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
 import {
   createPrivilegeAPIClientMock,
@@ -144,33 +145,58 @@ describe('PrivilegesRolesForm', () => {
     });
   });
 
+  it('does not display the the privilege customization form disabled when no role is selected', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    await waitFor(() => null);
+
+    expect(
+      screen.queryByTestId('space-assign-role-privilege-customization-form')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders with the assign roles button disabled when no role is selected', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    await waitFor(() => null);
+
+    expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
   it('preselects the privilege of the selected role when one is provided', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
-    const privilege = 'all';
-
     renderPrivilegeRolesForm({
       preSelectedRoles: [
-        createRole('test_role_1', [{ base: [privilege], feature: {}, spaces: [space.id] }]),
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_ALL], feature: {}, spaces: [space.id] },
+        ]),
       ],
     });
 
     await waitFor(() => null);
 
-    expect(screen.getByTestId(`${privilege}-privilege-button`)).toHaveAttribute(
+    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
       String(true)
     );
   });
 
-  it('displays a warning message when roles with different privilege levels are selected', async () => {
+  it('displays the privilege customization form, when there is a selected role', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     const roles: Role[] = [
-      createRole('test_role_1', [{ base: ['all'], feature: {}, spaces: [space.id] }]),
-      createRole('test_role_2', [{ base: ['read'], feature: {}, spaces: [space.id] }]),
+      createRole('test_role_1', [
+        { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+      ]),
     ];
 
     renderPrivilegeRolesForm({
@@ -179,27 +205,32 @@ describe('PrivilegesRolesForm', () => {
 
     await waitFor(() => null);
 
-    expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument();
+    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+      'aria-pressed',
+      String(true)
+    );
+
+    expect(
+      screen.getByTestId('space-assign-role-privilege-customization-form')
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId('space-assign-role-create-roles-privilege-button')
+    ).not.toBeDisabled();
   });
 
-  describe('applying custom privileges', () => {
-    it('renders with the assign roles button disabled when no role is selected', async () => {
-      getRolesSpy.mockResolvedValue([]);
-      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
-
-      renderPrivilegeRolesForm();
-
-      await waitFor(() => null);
-
-      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
-    });
-
-    it('displays the privilege customization form, when custom privilege button is selected', async () => {
+  describe('selecting multiple roles', () => {
+    it('displays a warning message when roles with different privilege levels are selected', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
       const roles: Role[] = [
-        createRole('test_role_1', [{ base: ['all'], feature: {}, spaces: [space.id] }]),
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_ALL], feature: {}, spaces: [space.id] },
+        ]),
+        createRole('test_role_2', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
       ];
 
       renderPrivilegeRolesForm({
@@ -208,21 +239,33 @@ describe('PrivilegesRolesForm', () => {
 
       await waitFor(() => null);
 
-      expect(
-        screen.queryByTestId('space-assign-role-privilege-customization-form')
-      ).not.toBeInTheDocument();
-
-      await userEvent.click(screen.getByTestId('custom-privilege-button'));
-
-      expect(
-        screen.getByTestId('space-assign-role-privilege-customization-form')
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByTestId('space-assign-role-create-roles-privilege-button')
-      ).not.toBeDisabled();
+      expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument();
     });
 
+    it('does not display the permission conflict message when roles with the same privilege levels are selected', async () => {
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+        createRole('test_role_2', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await waitFor(() => null);
+
+      expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('applying custom privileges', () => {
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -230,14 +273,21 @@ describe('PrivilegesRolesForm', () => {
       const featureIds: string[] = kibanaFeatures.map((kibanaFeature) => kibanaFeature.id);
 
       const roles: Role[] = [
-        createRole('test_role_1', [{ base: ['all'], feature: {}, spaces: [space.id] }]),
-        createRole('test_role_2', [
-          { base: [], feature: { [featureIds[0]]: ['all'] }, spaces: [space.id] },
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_ALL], feature: {}, spaces: [space.id] },
         ]),
-        createRole('test_role_3', [{ base: ['read'], feature: {}, spaces: [space.id] }]),
-        createRole('test_role_4', [{ base: ['read'], feature: {}, spaces: [space.id] }]),
+        createRole('test_role_2', [
+          { base: [], feature: { [featureIds[0]]: [FEATURE_PRIVILEGES_ALL] }, spaces: [space.id] },
+        ]),
+        createRole('test_role_3', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+        createRole('test_role_4', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+        // empty base denotes role with custom privilege
         createRole('test_role_5', [
-          { base: [], feature: { [featureIds[0]]: ['read'] }, spaces: [space.id] },
+          { base: [], feature: { [featureIds[0]]: [FEATURE_PRIVILEGES_READ] }, spaces: [space.id] },
         ]),
       ];
 
@@ -246,10 +296,6 @@ describe('PrivilegesRolesForm', () => {
       });
 
       await waitFor(() => null);
-
-      expect(
-        screen.queryByTestId('space-assign-role-privilege-customization-form')
-      ).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
