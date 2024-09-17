@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FlyoutPanelProps } from './types';
-import { reducer } from './reducer';
-import { initialState, State } from './state';
+import { FlyoutPanelProps } from '../types';
+import { panelsReducer } from './reducers';
+import { initialPanelsState, PanelsState } from './state';
 import {
   closeLeftPanelAction,
   closePanelsAction,
@@ -49,17 +49,18 @@ const previewPanel2: FlyoutPanelProps = {
   id: 'preview2',
   state: { id: 'state' },
 };
-describe('reducer', () => {
+
+describe('panelsReducer', () => {
   describe('should handle openFlyout action', () => {
     it('should add panels to empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = openPanelsAction({
         right: rightPanel1,
         left: leftPanel1,
         preview: previewPanel1,
         id: id1,
       });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -74,7 +75,7 @@ describe('reducer', () => {
     });
 
     it('should override all panels in the state', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -89,7 +90,7 @@ describe('reducer', () => {
         preview: previewPanel2,
         id: id1,
       });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -104,7 +105,7 @@ describe('reducer', () => {
     });
 
     it('should remove all panels despite only passing a single section ', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -117,7 +118,7 @@ describe('reducer', () => {
         right: rightPanel2,
         id: id1,
       });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -132,7 +133,7 @@ describe('reducer', () => {
     });
 
     it('should add panels to a new key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -145,7 +146,7 @@ describe('reducer', () => {
         right: rightPanel2,
         id: id2,
       });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -167,9 +168,9 @@ describe('reducer', () => {
 
   describe('should handle openRightPanel action', () => {
     it('should add right panel to empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = openRightPanelAction({ right: rightPanel1, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -184,7 +185,7 @@ describe('reducer', () => {
     });
 
     it('should replace right panel', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -194,7 +195,7 @@ describe('reducer', () => {
         },
       };
       const action = openRightPanelAction({ right: rightPanel2, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -209,7 +210,7 @@ describe('reducer', () => {
     });
 
     it('should add right panel to a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -219,7 +220,7 @@ describe('reducer', () => {
         },
       };
       const action = openRightPanelAction({ right: rightPanel2, id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -241,9 +242,9 @@ describe('reducer', () => {
 
   describe('should handle openLeftPanel action', () => {
     it('should add left panel to empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = openLeftPanelAction({ left: leftPanel1, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -258,7 +259,7 @@ describe('reducer', () => {
     });
 
     it('should replace only left panel', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -268,7 +269,7 @@ describe('reducer', () => {
         },
       };
       const action = openLeftPanelAction({ left: leftPanel2, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -283,7 +284,7 @@ describe('reducer', () => {
     });
 
     it('should add left panel to a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -293,7 +294,7 @@ describe('reducer', () => {
         },
       };
       const action = openLeftPanelAction({ left: leftPanel2, id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -315,9 +316,9 @@ describe('reducer', () => {
 
   describe('should handle openPreviewPanel action', () => {
     it('should add preview panel to empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = openPreviewPanelAction({ preview: previewPanel1, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -332,7 +333,7 @@ describe('reducer', () => {
     });
 
     it('should add preview panel to the list of preview panels', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -342,7 +343,7 @@ describe('reducer', () => {
         },
       };
       const action = openPreviewPanelAction({ preview: previewPanel2, id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -357,7 +358,7 @@ describe('reducer', () => {
     });
 
     it('should add preview panel to a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -367,7 +368,7 @@ describe('reducer', () => {
         },
       };
       const action = openPreviewPanelAction({ preview: previewPanel2, id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -389,15 +390,18 @@ describe('reducer', () => {
 
   describe('should handle closeRightPanel action', () => {
     it('should return empty state when removing right panel from empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = closeRightPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it(`should return unmodified state when removing right panel when no right panel exist`, () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -407,13 +411,16 @@ describe('reducer', () => {
         },
       };
       const action = closeRightPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it('should remove right panel', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -424,7 +431,7 @@ describe('reducer', () => {
       };
       const action = closeRightPanelAction({ id: id1 });
 
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -439,7 +446,7 @@ describe('reducer', () => {
     });
 
     it('should not remove right panel for a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -450,7 +457,7 @@ describe('reducer', () => {
       };
       const action = closeRightPanelAction({ id: id2 });
 
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -467,15 +474,18 @@ describe('reducer', () => {
 
   describe('should handle closeLeftPanel action', () => {
     it('should return empty state when removing left panel on empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = closeLeftPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it(`should return unmodified state when removing left panel when no left panel exist`, () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: undefined,
@@ -485,13 +495,16 @@ describe('reducer', () => {
         },
       };
       const action = closeLeftPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it('should remove left panel', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -501,7 +514,7 @@ describe('reducer', () => {
         },
       };
       const action = closeLeftPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -516,7 +529,7 @@ describe('reducer', () => {
     });
 
     it('should not remove left panel for a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -526,7 +539,7 @@ describe('reducer', () => {
         },
       };
       const action = closeLeftPanelAction({ id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -543,15 +556,18 @@ describe('reducer', () => {
 
   describe('should handle closePreviewPanel action', () => {
     it('should return empty state when removing preview panel on empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = closePreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it(`should return unmodified state when removing preview panel when no preview panel exist`, () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -561,13 +577,16 @@ describe('reducer', () => {
         },
       };
       const action = closePreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: true,
+      });
     });
 
     it('should remove all preview panels', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: rightPanel1,
@@ -577,7 +596,7 @@ describe('reducer', () => {
         },
       };
       const action = closePreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -592,7 +611,7 @@ describe('reducer', () => {
     });
 
     it('should not remove preview panels for a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -602,7 +621,7 @@ describe('reducer', () => {
         },
       };
       const action = closePreviewPanelAction({ id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -619,15 +638,18 @@ describe('reducer', () => {
 
   describe('should handle previousPreviewPanel action', () => {
     it('should return empty state when previous preview panel on an empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = previousPreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...initialState, needsSync: false });
+      expect(newState).toEqual({
+        ...initialPanelsState,
+        needsSync: false,
+      });
     });
 
     it(`should return unmodified state when previous preview panel when no preview panel exist`, () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -637,13 +659,16 @@ describe('reducer', () => {
         },
       };
       const action = previousPreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: false });
+      expect(newState).toEqual({
+        ...state,
+        needsSync: false,
+      });
     });
 
     it('should remove only last preview panel', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: rightPanel1,
@@ -653,7 +678,7 @@ describe('reducer', () => {
         },
       };
       const action = previousPreviewPanelAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -668,7 +693,7 @@ describe('reducer', () => {
     });
 
     it('should not remove the last preview panel for a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -678,7 +703,7 @@ describe('reducer', () => {
         },
       };
       const action = previousPreviewPanelAction({ id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -695,15 +720,18 @@ describe('reducer', () => {
 
   describe('should handle closeFlyout action', () => {
     it('should return empty state when closing flyout on an empty state', () => {
-      const state: State = initialState;
+      const state: PanelsState = initialPanelsState;
       const action = closePanelsAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
-      expect(newState).toEqual({ ...initialState, needsSync: true });
+      expect(newState).toEqual({
+        ...initialPanelsState,
+        needsSync: true,
+      });
     });
 
     it('should remove all panels', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -713,7 +741,7 @@ describe('reducer', () => {
         },
       };
       const action = closePanelsAction({ id: id1 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {
@@ -728,7 +756,7 @@ describe('reducer', () => {
     });
 
     it('should not remove panels for a different key', () => {
-      const state: State = {
+      const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
@@ -738,7 +766,7 @@ describe('reducer', () => {
         },
       };
       const action = closePanelsAction({ id: id2 });
-      const newState: State = reducer(state, action);
+      const newState: PanelsState = panelsReducer(state, action);
 
       expect(newState).toEqual({
         byId: {

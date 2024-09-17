@@ -20,10 +20,12 @@ export async function createInvestigationItem(
 ): Promise<CreateInvestigationItemResponse> {
   const investigation = await repository.findById(investigationId);
 
+  const now = Date.now();
   const investigationItem = {
     id: v4(),
     createdBy: user.username,
-    createdAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
     ...params,
   };
   investigation.items.push(investigationItem);
