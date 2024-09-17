@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  PhaseExceptDelete,
   PhaseWithDownsample,
   PhaseWithTiming,
 } from '../../../../../common/types';
@@ -129,7 +128,7 @@ const allowWriteAfterShrinkField = {
   defaultValue: false,
 };
 
-const getPriorityField = (phase: PhaseExceptDelete) => ({
+const getPriorityField = (phase: 'hot' | 'warm' | 'cold') => ({
   defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
   validations: [
@@ -495,12 +494,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     frozen: {
       min_age: getMinAgeField('frozen'),
       actions: {
-        allocate: {
-          number_of_replicas: numberOfReplicasField,
-        },
-        set_priority: {
-          priority: getPriorityField('frozen'),
-        },
         searchable_snapshot: searchableSnapshotFields,
       },
     },

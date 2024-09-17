@@ -17,7 +17,7 @@ import { i18nTexts } from '../../../i18n_texts';
 import { DescribedFormRow } from '../../described_form_row';
 
 interface Props {
-  phase: 'warm' | 'cold' | 'frozen';
+  phase: 'warm' | 'cold';
 }
 
 export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
