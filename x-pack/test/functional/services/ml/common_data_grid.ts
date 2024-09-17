@@ -148,9 +148,9 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
     async assertColumnSelectorsSwitchState(expectedState: boolean) {
       await retry.tryForTime(5 * 1000, async () => {
-        const visibilityToggles = await (
-          await find.byClassName('euiDataGrid__controlScroll')
-        ).findAllByCssSelector('[role="switch"]');
+        const visibilityToggles = await find.allByCssSelector(
+          '.euiDataGridColumnSelector__item [role="switch"]'
+        );
 
         await asyncForEachWithLimit(visibilityToggles, 1, async (toggle) => {
           const checked = (await toggle.getAttribute('aria-checked')) === 'true';
