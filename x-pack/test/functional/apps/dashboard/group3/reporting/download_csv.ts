@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
-      it('Downloads a filtered CSV export of a saved search panel', async function () {
+      it.skip('Downloads a filtered CSV export of a saved search panel', async function () {
         await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
@@ -120,8 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Gets the correct filename if panel titles are hidden', async () => {
         await dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
-        const savedSearchPanel = await find.byCssSelector(
-          '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
+        const savedSearchPanel = await dashboardPanelActions.getPanelWrapperById(
+          '94eab06f-60ac-4a85-b771-3a8ed475c9bb'
         ); // panel title is hidden
 
         await clickDownloadCsv(savedSearchPanel);

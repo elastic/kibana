@@ -26,7 +26,7 @@ const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlink
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
-const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for dashboard top nav bar (in edit mode)
+const DASHBOARD_TOP_OFFSET = 96 + 137; // 96 for Kibana navigation bar + 137 for dashboard top nav bar (in edit mode)
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -347,6 +347,11 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`getPanelWrapper(${title})`);
     if (!title) return await this.find.byClassName('embPanel__hoverActionsAnchor');
     return await this.testSubjects.find(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
+  }
+
+  async getPanelWrapperById(embeddableId: string) {
+    this.log.debug(`getPanelWrapperById(${embeddableId})`);
+    return await this.find.byCssSelector(`[data-test-embeddable-id="${embeddableId}"]`);
   }
 
   async getActionWebElementByText(text: string): Promise<WebElementWrapper> {

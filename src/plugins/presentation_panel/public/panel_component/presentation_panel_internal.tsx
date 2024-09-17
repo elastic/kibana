@@ -103,7 +103,6 @@ export const PresentationPanelInternal = <
         hasShadow={showShadow}
         hasBorder={showBorder}
         aria-labelledby={headerId}
-        data-test-embeddable-id={api?.uuid}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
       >

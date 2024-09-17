@@ -461,6 +461,7 @@ export const PresentationPanelHoverActions = ({
       onFocus={updateCombineHoverActions}
       ref={anchorRef}
       className="embPanel__hoverActionsAnchor"
+      data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
         /\s/g,
         ''
