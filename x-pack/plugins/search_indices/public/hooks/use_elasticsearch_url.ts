@@ -23,5 +23,5 @@ export const useElasticsearchUrl = (): string => {
     });
   }, [cloud]);
 
-  return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  return elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
 };
