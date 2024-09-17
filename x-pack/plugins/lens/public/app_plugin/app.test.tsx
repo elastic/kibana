@@ -811,7 +811,7 @@ describe('Lens App', () => {
             title: 'hello there',
           }),
           [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
-          doc.savedObjectId
+          undefined
         );
         // new copy gets a new SO id
         expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
@@ -897,7 +897,7 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
-          state: { savedObjectId: defaultSavedObjectId },
+          state: expect.objectContaining({ savedObjectId: defaultSavedObjectId }),
           isCopied: false,
         });
       });

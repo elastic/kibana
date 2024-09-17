@@ -37,6 +37,10 @@ import type {
 } from '../types';
 import { getVariables } from './variables';
 import { getMergedSearchContext } from './merged_search_context';
+import {
+  getSearchContextIncompatibleMessage,
+  isSearchContextIncompatibleWithDataViews,
+} from '../user_messages/checks';
 
 interface GetExpressionRendererPropsParams {
   unifiedSearch: LensUnifiedSearchContext;
@@ -168,6 +172,14 @@ export async function getExpressionRendererParams(
     activeVisualizationState,
     activeDatasourceState,
   } = await getExpressionFromDocument(state.attributes, documentToExpression);
+
+  // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+  // this is necessary for the dataview embeddable but not the ES|QL one
+  if (
+    isSearchContextIncompatibleWithDataViews(api, searchContext, indexPatternRefs, indexPatterns)
+  ) {
+    addUserMessages([getSearchContextIncompatibleMessage()]);
+  }
 
   if (!newAbortController.signal.aborted && expression) {
     const params: ExpressionWrapperProps = {

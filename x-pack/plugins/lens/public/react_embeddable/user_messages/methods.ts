@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
-import { UserMessagesGetter, AddUserMessages, UserMessage, FramePublicAPI } from '../../types';
+import {
+  UserMessagesGetter,
+  AddUserMessages,
+  UserMessage,
+  FramePublicAPI,
+  SharingSavedObjectProps,
+} from '../../types';
 import {
   getActiveDatasourceIdFromDoc,
   getActiveVisualizationIdFromDoc,
@@ -23,6 +30,7 @@ import {
   VisualizationContext,
   VisualizationContextHelper,
 } from '../types';
+import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 
 function getUpdatedState(
   getVisualizationContext: VisualizationContextHelper['getVisualizationContext'],
@@ -62,7 +70,9 @@ function getUpdatedState(
 export function buildUserMessagesHelper(
   getVisualizationContext: () => VisualizationContext,
   { coreStart, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
-  onBeforeBadgesRender: LensCallbacks['onBeforeBadgesRender']
+  onBeforeBadgesRender: LensCallbacks['onBeforeBadgesRender'],
+  spaces?: SpacesApi,
+  metaInfo?: SharingSavedObjectProps
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
@@ -137,6 +147,11 @@ export function buildUserMessagesHelper(
         },
         activeData,
       };
+
+      if (hasLegacyURLConflict(metaInfo, spaces)) {
+        // @TODO: fix this TS type issue as a follow-up
+        userMessages.push(getLegacyURLConflictsMessage(metaInfo!, spaces!));
+      }
 
       userMessages.push(
         ...(activeDatasource?.getUserMessages(activeDatasourceState, {

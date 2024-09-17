@@ -312,6 +312,7 @@ export const runSaveLensVisualization = async (
     );
     // ignore duplicate title failure, user notified in save modal
   }
+
   try {
     // wrap the doc into a serializable state
     const newDoc = fromDocumentToSerializedState(docToSave, {
@@ -354,7 +355,7 @@ export const runSaveLensVisualization = async (
 
     if (shouldNavigateBackToOrigin) {
       redirectToOrigin({
-        state: newDoc.attributes,
+        state: { ...newDoc, savedObjectId },
         isCopied: saveProps.newCopyOnSave,
       });
       return;

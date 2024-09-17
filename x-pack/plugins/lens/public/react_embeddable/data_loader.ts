@@ -25,6 +25,7 @@ import { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
+import { SharingSavedObjectProps } from '../types';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -45,7 +46,8 @@ export function loadEmbeddableData(
   }: ReactiveConfigs['variables'] & { state$: BehaviorSubject<LensRuntimeState> },
   services: LensEmbeddableStartServices,
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
-  updateRenderCount: () => void
+  updateRenderCount: () => void,
+  metaInfo?: SharingSavedObjectProps
 ) {
   // reset the render on reload
   hasRenderCompleted$.next(false);
@@ -54,7 +56,9 @@ export function loadEmbeddableData(
   const { getUserMessages, addUserMessages, resetRuntimeMessages } = buildUserMessagesHelper(
     getVisualizationContext,
     services,
-    api.onBeforeBadgesRender
+    api.onBeforeBadgesRender,
+    services.spaces,
+    metaInfo
   );
 
   const unifiedSearch$ = new BehaviorSubject<
@@ -151,7 +155,7 @@ export function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     // on data change from the parentApi, reload
-    fetch$(api).subscribe(async (data) => {
+    fetch$(api).subscribe((data) => {
       const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
       unifiedSearch$.next({
         query: data.query,

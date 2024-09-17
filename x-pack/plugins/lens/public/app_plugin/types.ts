@@ -63,7 +63,7 @@ import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/
 import { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
-  state?: LensDocument;
+  state?: LensSerializedState;
   isCopied?: boolean;
 }
 

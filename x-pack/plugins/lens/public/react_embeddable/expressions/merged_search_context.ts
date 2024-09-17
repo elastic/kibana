@@ -10,6 +10,14 @@ import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from
 import { NonNullable } from '../helper';
 import { LensRuntimeState } from '../types';
 
+export interface MergedSearchContext {
+  now: number;
+  timeRange: TimeRange | undefined;
+  query: Query[];
+  filters: Filter[];
+  disableWarningToasts: boolean;
+}
+
 export function getMergedSearchContext(
   state: LensRuntimeState,
   {
@@ -27,13 +35,7 @@ export function getMergedSearchContext(
     data,
     injectFilterReferences,
   }: { data: DataPublicPluginStart; injectFilterReferences: FilterManager['inject'] }
-): {
-  now: number;
-  timeRange: TimeRange | undefined;
-  query: Query[];
-  filters: Filter[];
-  disableWarningToasts: boolean;
-} {
+): MergedSearchContext {
   const context = {
     now: data.nowProvider.get().getTime(),
     timeRange:
