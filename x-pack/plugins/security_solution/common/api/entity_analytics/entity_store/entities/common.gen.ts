@@ -16,8 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-export type UserEntityRecord = z.infer<typeof UserEntityRecord>;
-export const UserEntityRecord = z.object({
+export type UserEntity = z.infer<typeof UserEntity>;
+export const UserEntity = z.object({
   user: z
     .object({
       full_name: z.array(z.string()).optional(),
@@ -44,8 +44,8 @@ export const UserEntityRecord = z.object({
     .optional(),
 });
 
-export type HostEntityRecord = z.infer<typeof HostEntityRecord>;
-export const HostEntityRecord = z.object({
+export type HostEntity = z.infer<typeof HostEntity>;
+export const HostEntity = z.object({
   host: z
     .object({
       hostname: z.array(z.string()).optional(),

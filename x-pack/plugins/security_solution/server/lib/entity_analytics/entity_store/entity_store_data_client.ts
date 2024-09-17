@@ -11,8 +11,8 @@ import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_c
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
-  HostEntityRecord,
-  UserEntityRecord,
+  HostEntity,
+  UserEntity,
 } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityStoreRequestBody,
@@ -137,7 +137,7 @@ export class EntityStoreDataClient {
   }
 
   public async searchEntities(params: SearchEntitiesParams): Promise<{
-    records: Array<UserEntityRecord | HostEntityRecord>;
+    records: Array<UserEntity | HostEntity>;
     total: number;
     inspect: InspectQuery;
   }> {
@@ -154,7 +154,7 @@ export class EntityStoreDataClient {
       },
     };
 
-    const response = await this.options.esClient.search<UserEntityRecord | HostEntityRecord>({
+    const response = await this.options.esClient.search<UserEntity | HostEntity>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
@@ -166,7 +166,7 @@ export class EntityStoreDataClient {
 
     const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
 
-    const records = hits.hits.map((hit) => hit._source as UserEntityRecord | HostEntityRecord);
+    const records = hits.hits.map((hit) => hit._source as UserEntity | HostEntity);
 
     const inspect: InspectQuery = {
       dsl: [JSON.stringify({ index, body: query }, null, 2)],
