@@ -24,6 +24,14 @@ const columns: EuiDataGridColumn[] = [
     id: 'entityType',
     displayAsText: 'Type',
   },
+  {
+    id: 'availablityZone',
+    displayAsText: 'Availability zone',
+  },
+  {
+    id: 'lastSeen',
+    displayAsText: 'Last seen',
+  },
 ];
 
 export function EntitiesGrid() {
@@ -50,7 +58,18 @@ export function EntitiesGrid() {
       return null;
     }
 
-    return <>{data.entity.displayName}</>;
+    switch (columnId) {
+      case 'entityName':
+        return data.entity.displayName;
+      case 'entityType':
+        return data.data_stream.type;
+      case 'availablityZone':
+        return data.cloud?.availability_zone || 'N/A';
+      case 'lastSeen':
+        return data.entity.lastSeenTimestamp;
+      default:
+        return 'N/A';
+    }
   }
 
   return (

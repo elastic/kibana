@@ -5,23 +5,37 @@
  * 2.0.
  */
 
-import { LatestEntity } from '../../../common/entities';
-import { EntitiesESClient } from '../../lib/create_es_client/create_entities_es_client';
+import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+
+const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
+  type: '*',
+  dataset: ENTITY_LATEST,
+});
 
 const MAX_NUMBER_OF_ENTITIES = 500;
+interface LatestEntity {
+  'entity.lastSeenTimestamp': string;
+  'entity.type': string;
+  'entity.displayName': string;
+  'entity.id': string;
+}
 
 export async function getLatestEntities({
-  entitiesESClient,
+  inventoryEsClient,
 }: {
-  entitiesESClient: EntitiesESClient;
+  inventoryEsClient: ObservabilityElasticsearchClient;
 }) {
-  const response = (
-    await entitiesESClient.searchLatest<LatestEntity>('get_latest_entities', {
-      body: {
-        size: MAX_NUMBER_OF_ENTITIES,
-      },
-    })
-  ).hits.hits.map((hit) => hit._source);
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
+    query: `FROM ${ENTITIES_LATEST_ALIAS}
+     | WHERE entity.type IN ("service", "host", "container") 
+     | WHERE entity.definitionId IN ("builtin_services_from_ecs_data", "builtin_hosts_from_ecs_data", "builtin_containers_from_ecs_data")
+     | SORT entity.lastSeenTimestamp DESC
+     | LIMIT ${MAX_NUMBER_OF_ENTITIES}
+     | KEEP entity.id, entity.displayName, entity.lastSeenTimestamp, entity.type
+    `,
+  });
 
-  return response;
+  return esqlResultToPlainObjects<LatestEntity>(latestEntitiesEsqlResponse);
 }
