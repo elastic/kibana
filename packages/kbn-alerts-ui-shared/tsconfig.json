@@ -47,7 +47,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/test-jest-helpers",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks"
   ]
