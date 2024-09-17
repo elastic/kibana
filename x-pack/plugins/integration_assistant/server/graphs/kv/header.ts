@@ -26,6 +26,6 @@ export async function handleHeader({
 
   return {
     grokPattern: pattern.grok_pattern,
-    lastExecutedChain: 'kv_header',
+    lastExecutedChain: 'kvHeader',
   };
 }
