@@ -44,8 +44,7 @@ enabled:
   - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
-  - test/functional/apps/console/monaco/config.ts
-  - test/functional/apps/console/ace/config.ts
+  - test/functional/apps/console/config.ts
   - test/functional/apps/context/config.ts
   - test/functional/apps/dashboard_elements/controls/common/config.ts
   - test/functional/apps/dashboard_elements/controls/options_list/config.ts
