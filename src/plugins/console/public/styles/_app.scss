@@ -152,43 +152,43 @@
 }
 
 .monaco__status_code_line--primary {
-  background-color: transparentize($euiColorVis1, .8);
+  background-color: transparentize($euiColorVis1, .9);
 }
 
 .monaco__status_code_line_number--primary {
-  background-color: transparentize($euiColorVis1, .4);
+  background-color: transparentize($euiColorVis1, .5);
 }
 
 .monaco__status_code_line--success {
-  background-color: transparentize($euiColorSuccess, .8);;
+  background-color: transparentize($euiColorSuccess, .9);
 }
 
 .monaco__status_code_line_number--success {
-  background-color: transparentize($euiColorSuccess, .3);;
+  background-color: transparentize($euiColorSuccess, .5);
 }
 
 .monaco__status_code_line--default {
-  background-color: transparentize($euiColorLightShade, .8);
+  background-color: transparentize($euiColorLightShade, .9);
 }
 
 .monaco__status_code_line_number--default {
-  background-color: transparentize($euiColorLightShade, .4);
+  background-color: transparentize($euiColorLightShade, .5);
 }
 
 .monaco__status_code_line--warning {
-  background-color: transparentize($euiColorWarning, .8);
+  background-color: transparentize($euiColorWarning, .9);
 }
 
 .monaco__status_code_line_number--warning {
-  background-color: transparentize($euiColorWarning, .4);
+  background-color: transparentize($euiColorWarning, .5);
 }
 
 .monaco__status_code_line--danger {
-  background-color: transparentize($euiColorDanger, .8);
+  background-color: transparentize($euiColorDanger, .9);
 }
 
 .monaco__status_code_line_number--danger {
-  background-color: transparentize($euiColorDanger, .6);
+  background-color: transparentize($euiColorDanger, .5);
 }
 
 /*

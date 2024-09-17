@@ -133,8 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.monaco.getOutputText();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index [200]');
-          expect(response).to.contain('# DELETE test-index [200]');
+          expect(response).to.contain('# PUT test-index [200 OK]');
+          expect(response).to.contain('# DELETE test-index [200 OK]');
         });
       });
 
