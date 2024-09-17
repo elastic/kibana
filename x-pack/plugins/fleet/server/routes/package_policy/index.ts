@@ -30,6 +30,7 @@ import {
   UpgradePackagePoliciesResponseBodySchema,
   DryRunPackagePoliciesResponseBodySchema,
   OrphanedPackagePoliciesResponseSchema,
+  CreatePackagePolicyResponseSchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
 
@@ -170,10 +171,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  items: schema.arrayOf(PackagePolicyResponseSchema),
-                }),
+              body: () => OrphanedPackagePoliciesResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -201,7 +199,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: CreatePackagePolicyRequestSchema,
           response: {
             200: {
-              body: () => OrphanedPackagePoliciesResponseSchema,
+              body: () => CreatePackagePolicyResponseSchema,
             },
             400: {
               body: genericErrorResponse,

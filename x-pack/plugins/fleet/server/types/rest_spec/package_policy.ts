@@ -94,6 +94,10 @@ export const CreatePackagePolicyRequestSchema = {
   }),
 };
 
+export const CreatePackagePolicyResponseSchema = schema.object({
+  item: PackagePolicyResponseSchema,
+});
+
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
   body: schema.oneOf([

@@ -42,6 +42,7 @@ import {
   UpgradePackagePoliciesResponseBodySchema,
   DryRunPackagePoliciesResponseBodySchema,
   OrphanedPackagePoliciesResponseSchema,
+  CreatePackagePolicyResponseSchema,
 } from '../../types';
 import type { PackagePolicy } from '../../types';
 
@@ -711,12 +712,13 @@ describe('When calling package policy', () => {
       const request = httpServerMock.createKibanaRequest({
         body: testPackagePolicy,
       });
+      const expectedResponse = { item: testPackagePolicy };
       await createPackagePolicyHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
-        body: { item: testPackagePolicy },
+        body: expectedResponse,
       });
-      const validationResp = PackagePolicyResponseSchema.validate(testPackagePolicy);
-      expect(validationResp).toEqual(testPackagePolicy);
+      const validationResp = CreatePackagePolicyResponseSchema.validate(expectedResponse);
+      expect(validationResp).toEqual(expectedResponse);
     });
   });
 
