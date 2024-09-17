@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -87,7 +87,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -138,7 +138,7 @@ describe('ConfigureCases', () => {
       }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -180,7 +180,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -202,7 +202,7 @@ describe('ConfigureCases', () => {
 
     test('it disables correctly when the user cannot update', () => {
       const newWrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
       });
 
@@ -259,7 +259,7 @@ describe('ConfigureCases', () => {
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -297,7 +297,7 @@ describe('ConfigureCases', () => {
       }));
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
     });
@@ -328,7 +328,7 @@ describe('ConfigureCases', () => {
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -373,7 +373,7 @@ describe('ConfigureCases', () => {
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -414,7 +414,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -468,7 +468,7 @@ describe('ConfigureCases', () => {
         }));
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
@@ -513,7 +513,7 @@ describe('ConfigureCases', () => {
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
     });
 
@@ -562,7 +562,7 @@ describe('ConfigureCases', () => {
 
     test('it show the add flyout when pressing the add connector button', async () => {
       const wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
@@ -597,7 +597,7 @@ describe('ConfigureCases', () => {
         .mockReturnValue(true);
 
       const wrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
       wrapper
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')

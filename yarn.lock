@@ -1831,10 +1831,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.15.3":
-  version "8.15.3"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.3.tgz#0d2753e689a8e5c1f1167a883f8beb863b31b3f0"
-  integrity sha512-sUhVQReQ1VPn4qRlsYyjDOp340LZxYmaQCcu1HgKSYr1NR7pdSUhbSxmEbl/sH4HXh7Avq4bRf14vBvtHi19kA==
+"@elastic/request-converter@^8.15.4":
+  version "8.15.4"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.4.tgz#332dc6266841b5a578c92e1655eee46b82c47ed2"
+  integrity sha512-iZDQpZpygV+AVOweaDzTsMJBfa2hwwduPXNNzk/yTXgC9qtjmns/AjehtLStKXs274+u3fg+BFxVt6NcMwUAAg==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
@@ -14136,10 +14136,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^128.0.0:
-  version "128.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-128.0.0.tgz#7f75a984101199e0bcc2c92fe9f91917fcd1f918"
-  integrity sha512-Ggo21z/dFQxTOTgU0vm0V59Mi79yyR+9AUk/KiVAsRfbDRdVZQYQWfgxnIvD/x8KOKn0oB7haRzDO/KfrKyvOA==
+chromedriver@^128.0.1:
+  version "128.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-128.0.1.tgz#971fb267cc6893a712808cea6c977473ba167145"
+  integrity sha512-UmWqZXXAyuRa37pE+lnU46vJcCM/y0ddF015LHxycEOYfuqsK7k9ZxJuXCQNWbws9e7FAMQj/GJZT92WPgis0g==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -18593,10 +18593,10 @@ gcp-metadata@^6.1.0:
     gaxios "^6.0.0"
     json-bigint "^1.0.0"
 
-geckodriver@^4.4.3:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.4.3.tgz#0f3ae367e784bb0f37df4088d3d551913df1ffde"
-  integrity sha512-79rvaq8pvKVUtuM9XBjQApb04kOVkl3TFRX+zTt1wlmL+wqpt85ocWCdqiENU/3zIzg2Me21eClUcnE7F1kL2w==
+geckodriver@^4.4.4:
+  version "4.4.4"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.4.4.tgz#0aad02533e8cf127573f4d86f1cc5450c913f095"
+  integrity sha512-0zaw19tcmWeluqx7+Y559JGBtidu1D0Lb8ElYKiNEQu8r3sCfrLUf5V10xypl8u29ZLbgRV7WflxCJVTCkCMFA==
   dependencies:
     "@wdio/logger" "^9.0.0"
     "@zip.js/zip.js" "^2.7.48"

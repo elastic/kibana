@@ -16,12 +16,12 @@ export default function ({
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const { common } = getPageObjects(['common']);
 
   describe('expressions explorer', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('expressionsExplorer');
+      await common.navigateToApp('expressionsExplorer');
     });
 
     loadTestFile(require.resolve('./expressions'));

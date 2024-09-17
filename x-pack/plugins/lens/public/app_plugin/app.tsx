@@ -40,7 +40,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import {
   getCurrentTitle,
   isLegacyEditorEmbeddable,
@@ -304,7 +304,7 @@ export function App({
         prevVisState
       );
       if (telemetryEvents && telemetryEvents.length) {
-        trackUiCounterEvents(telemetryEvents);
+        trackSaveUiCounterEvents(telemetryEvents);
       }
       try {
         const newState = await runSaveLensVisualization(

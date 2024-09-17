@@ -111,7 +111,7 @@ describe('useSearchAlertsQuery', () => {
     sort: [],
   };
 
-  const wrapper: FunctionComponent = ({ children }) => (
+  const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
     <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
       {children}
     </QueryClientProvider>

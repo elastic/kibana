@@ -47,7 +47,10 @@ interface FormProviderProps {
   storage?: Storage;
 }
 
-export const FormProvider: React.FC<FormProviderProps> = ({ children, storage = localStorage }) => {
+export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> = ({
+  children,
+  storage = localStorage,
+}) => {
   const models = useLLMsModels();
   const [searchParams] = useSearchParams();
   const index = useMemo(() => searchParams.get('default-index'), [searchParams]);

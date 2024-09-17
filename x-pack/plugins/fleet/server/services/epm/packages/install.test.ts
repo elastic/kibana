@@ -613,7 +613,7 @@ describe('handleInstallPackageFailure', () => {
     expect(install._installPackage).not.toBeCalled();
   });
 
-  it('Should rollback on upgrade on FleetError', async () => {
+  it('should rollback on upgrade on FleetError', async () => {
     const installedPkg: SavedObject<Installation> = {
       id: 'test-package',
       references: [],
@@ -642,7 +642,7 @@ describe('handleInstallPackageFailure', () => {
 
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(mockedLogger.error).toBeCalledWith(
-      'rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
+      'Rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
     );
     expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
     expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
@@ -655,51 +655,240 @@ describe('handleInstallPackageFailure', () => {
     jest.mocked(getInstallationObject).mockReset();
   });
 
-  it('Should update the installation status to: install_failed on rollback error', async () => {
-    jest
-      .mocked(installStateMachine._stateMachineInstallPackage)
-      .mockRejectedValue(new Error('test error'));
+  describe('when installtype is update', () => {
+    it('should update the installation status to: install_failed on rollback error', async () => {
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('test error'));
 
-    const installedPkg: SavedObject<Installation> = {
-      id: 'test-package',
-      references: [],
-      attributes: {
-        name: pkgName,
-        version: '1.0.0',
-        install_version: '1.0.0',
-        format_version: '1.0.0',
-        title: 'Test Package',
-        description: 'A package for testing',
-        owner: {
-          github: 'elastic',
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '1.0.0',
+          install_version: '1.0.0',
+          format_version: '1.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
         },
-      },
-    } as any;
+      } as any;
 
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: new Error('test 123'),
-      esClient: {} as ElasticsearchClient,
-      installedPkg,
-      pkgName,
-      pkgVersion: '2.0.0',
-      spaceId: 'default',
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error('test 123'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+
+      expect(mockedLogger.error).toBeCalledWith(
+        'Rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
+      );
+      expect(mockedLogger.error).toBeCalledWith(
+        'Uninstalling test_package-1.0.0 after error installing: [Error: test error] with install type: install'
+      );
+      expect(mockedLogger.error).toBeCalledWith(
+        expect.stringMatching(/Failed to uninstall or rollback package after installation error/)
+      );
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+        expect.objectContaining({
+          packageInstallContext: expect.objectContaining({
+            packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('when installtype is install', () => {
+    it('should do nothing when installedPkg is not present', async () => {
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('test error'));
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error('test 123'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg: undefined as any,
+        pkgName,
+        pkgVersion: '1.0.0',
+        spaceId: 'default',
+      });
+      expect(mockedLogger.error).toBeCalledWith(
+        'Uninstalling test_package-1.0.0 after error installing: [Error: test 123] with install type: install'
+      );
+      expect(mockedLogger.error).toBeCalledWith(
+        `Failed to uninstall or rollback package after installation error PackageRemovalError: test_package is not installed`
+      );
+    });
+  });
+
+  describe('when installtype is reinstall', () => {
+    it('should retry install from previous failed state', async () => {
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('test error'));
+
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '2.0.0',
+          install_version: '2.0.0',
+          format_version: '2.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
+        },
+      } as any;
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error('test installing'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+      expect(mockedLogger.error).toBeCalledWith(
+        'Error installing test_package-2.0.0: [Error: test installing]'
+      );
+      expect(mockedLogger.debug).toBeCalledWith(
+        expect.stringMatching(
+          /Retrying install of test_package-2.0.0 with install type: reinstall - Attempt 1/
+        )
+      );
+      expect(mockedLogger.debug).toBeCalledWith(
+        'Kicking off install of test_package-2.0.0 from registry'
+      );
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+        expect.objectContaining({
+          retryFromLastState: true,
+          packageInstallContext: expect.objectContaining({
+            packageInfo: expect.objectContaining({
+              name: pkgName,
+              version: '2.0.0',
+            }),
+          }),
+        })
+      );
     });
 
-    expect(mockedLogger.error).toBeCalledWith(
-      'rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
-    );
-    expect(mockedLogger.error).toBeCalledWith(
-      expect.stringMatching(/failed to uninstall or rollback package after installation error/)
-    );
-    expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
-    expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
-      expect.objectContaining({
-        packageInstallContext: expect.objectContaining({
-          packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
-        }),
-      })
-    );
+    it('should retry install from previous failed state when MAX_REINSTALL_RETRIES is not reached', async () => {
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('test error'));
+
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '2.0.0',
+          install_version: '2.0.0',
+          format_version: '2.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
+          latest_install_failed_attempts: [
+            {
+              created_at: '2024-01-24T15:21:13.389Z',
+              target_version: '2.0.0',
+              error: { name: 'error', message: 'test error' },
+            },
+          ],
+        },
+      } as any;
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error('test installing'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+        expect.objectContaining({
+          retryFromLastState: true,
+          packageInstallContext: expect.objectContaining({
+            packageInfo: expect.objectContaining({
+              name: pkgName,
+              version: '2.0.0',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not retry install from previous failed state and when 3 attempts have been done', async () => {
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('test error'));
+
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '2.0.0',
+          install_version: '2.0.0',
+          format_version: '2.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
+          latest_install_failed_attempts: [
+            {
+              created_at: '2024-01-24T15:21:13.389Z',
+              target_version: '2.0.0',
+              error: { name: 'error', message: 'test error' },
+            },
+            {
+              created_at: '2024-01-24T18:21:19.389Z',
+              target_version: '2.0.0',
+              error: { name: 'error', message: 'test error 1' },
+            },
+            {
+              created_at: '2024-01-24T19:25:13.379Z',
+              target_version: '2.0.0',
+              error: { name: 'error', message: 'test error' },
+            },
+          ],
+        },
+      } as any;
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error('test installing'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+
+      expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+    });
   });
 });
 
