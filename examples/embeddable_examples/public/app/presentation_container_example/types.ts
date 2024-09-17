@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
-export type ParentApi = PresentationContainer &
+export type PageApi = PresentationContainer &
   CanAddNewPanel &
   HasExecutionContext &
   HasSaveNotification &

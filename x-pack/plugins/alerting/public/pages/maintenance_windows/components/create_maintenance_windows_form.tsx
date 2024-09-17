@@ -327,7 +327,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   }, [categoryIds, isScopedQueryEnabled]);
 
   return (
-    <Form form={form}>
+    <Form form={form} data-test-subj="createMaintenanceWindowForm">
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
@@ -335,6 +335,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             componentProps={{
               'data-test-subj': 'title-field',
               euiFieldProps: {
+                'data-test-subj': 'createMaintenanceWindowFormNameInput',
                 autoFocus: true,
               },
             }}
@@ -417,6 +418,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             path="recurring"
             componentProps={{
               'data-test-subj': 'recurring-field',
+              euiFieldProps: {
+                'data-test-subj': 'createMaintenanceWindowRepeatSwitch',
+              },
             }}
           />
         </EuiFlexItem>

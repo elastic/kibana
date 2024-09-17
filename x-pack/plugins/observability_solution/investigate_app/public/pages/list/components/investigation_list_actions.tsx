@@ -22,12 +22,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
 import { useDeleteInvestigation } from '../../../hooks/use_delete_investigation';
+import { InvestigationEditForm } from '../../../components/investigation_edit_form/investigation_edit_form';
 export function InvestigationListActions({
   investigation,
 }: {
   investigation: InvestigationResponse;
 }) {
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isEditFormFlyoutVisible, setEditFormFlyoutVisible] = useState<boolean>(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false);
   const {
     mutate: deleteInvestigation,
     isLoading: isDeleting,
@@ -45,7 +47,7 @@ export function InvestigationListActions({
   const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <>
+    <EuiFlexGroup direction="row" gutterSize="s">
       {isDeleteModalVisible && (
         <EuiModal aria-labelledby={modalTitleId} onClose={closeDeleteModal}>
           <EuiModalHeader>
@@ -92,6 +94,30 @@ export function InvestigationListActions({
           </EuiModalFooter>
         </EuiModal>
       )}
+      {isEditFormFlyoutVisible && investigation && (
+        <InvestigationEditForm
+          investigationId={investigation.id}
+          onClose={() => setEditFormFlyoutVisible(false)}
+        />
+      )}
+      <EuiToolTip
+        content={i18n.translate('xpack.investigateApp.investigationList.editAction', {
+          defaultMessage: 'Edit',
+        })}
+      >
+        <EuiButtonIcon
+          data-test-subj="investigateAppInvestigationListEditButton"
+          aria-label={i18n.translate(
+            'xpack.investigateApp.investigationList.editAction.ariaLabel',
+            {
+              defaultMessage: 'Edit investigation "{name}"',
+              values: { name: investigation.title },
+            }
+          )}
+          iconType="pencil"
+          onClick={() => setEditFormFlyoutVisible(true)}
+        />
+      </EuiToolTip>
       <EuiToolTip
         content={i18n.translate('xpack.investigateApp.investigationList.deleteAction', {
           defaultMessage: 'Delete',
@@ -110,6 +136,6 @@ export function InvestigationListActions({
           onClick={() => setIsDeleteModalVisible(true)}
         />
       </EuiToolTip>
-    </>
+    </EuiFlexGroup>
   );
 }

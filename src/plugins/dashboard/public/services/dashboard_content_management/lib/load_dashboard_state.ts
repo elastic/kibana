@@ -14,7 +14,6 @@ import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
 import {
@@ -189,9 +188,7 @@ export const loadDashboardState = async ({
       viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
 
-      controlGroupInput:
-        attributes.controlGroupInput &&
-        rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+      controlGroupInput: attributes.controlGroupInput,
 
       version: convertNumberToDashboardVersion(version),
     },
