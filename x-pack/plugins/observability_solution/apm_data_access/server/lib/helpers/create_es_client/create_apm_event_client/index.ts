@@ -53,9 +53,9 @@ type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
-type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
+export type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
 type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
-type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
+export type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   [ProcessorEvent.error]: APMError;
@@ -90,7 +90,7 @@ export interface APMEventClientConfig {
   options: {
     includeFrozen: boolean;
     inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
-    excludedDataTiers?: IndexLifeCycleDataTier;
+    excludedDataTiers?: IndexLifeCycleDataTier[];
   };
 }
 
@@ -102,7 +102,7 @@ export class APMEventClient {
   /** @deprecated Use {@link excludedDataTiers} instead.
    * See https://www.elastic.co/guide/en/kibana/current/advanced-options.html **/
   private readonly includeFrozen: boolean;
-  private readonly excludedDataTiers?: IndexLifeCycleDataTier;
+  private readonly excludedDataTiers?: IndexLifeCycleDataTier[];
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
 
   constructor(config: APMEventClientConfig) {

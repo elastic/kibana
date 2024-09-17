@@ -40,6 +40,9 @@ export const createRuleTypeMocks = () => {
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
+    uiSettingsClient: {
+      get: jest.fn(),
+    },
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions, getUuid })),
       done: {},

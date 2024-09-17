@@ -26,7 +26,7 @@ export async function alertingEsClient<TParams extends APMEventESSearchRequestPa
   uiSettingsClient: IUiSettingsClient;
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
-  const excludedDataTiers = await uiSettingsClient.get<IndexLifeCycleDataTier>(
+  const excludedDataTiers = await uiSettingsClient.get<IndexLifeCycleDataTier[]>(
     searchExcludedDataTiers
   );
 

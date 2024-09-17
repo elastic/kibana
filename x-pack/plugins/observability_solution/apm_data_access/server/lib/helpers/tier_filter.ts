@@ -8,7 +8,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
 
 export function getExcludedDataTiersFilter(
-  excludedDataTiers: IndexLifeCycleDataTier
+  excludedDataTiers: IndexLifeCycleDataTier[]
 ): QueryDslQueryContainer {
   return {
     bool: {
@@ -28,7 +28,7 @@ export function getIndexFilter({
   excludedDataTiers,
 }: {
   indexFilter?: QueryDslQueryContainer;
-  excludedDataTiers?: IndexLifeCycleDataTier;
+  excludedDataTiers?: IndexLifeCycleDataTier[];
 }): QueryDslQueryContainer | undefined {
   if (!indexFilter) {
     return excludedDataTiers ? getExcludedDataTiersFilter(excludedDataTiers) : undefined;
