@@ -40,6 +40,10 @@ const workerConfig = (languages) => ({
     alias: {
       // swap default umd import for the esm one provided in vscode-uri package
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
+      'react-dom$':
+        process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+      'scheduler/tracing': 'scheduler/tracing-profiling',
+      react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
     },
   },
   stats: 'errors-only',

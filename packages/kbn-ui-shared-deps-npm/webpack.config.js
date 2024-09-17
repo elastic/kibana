@@ -143,8 +143,10 @@ module.exports = (_, argv) => {
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
-        'react-dom$': 'react-dom/profiling',
+        'react-dom$':
+          process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
       },
       extensions: ['.js', '.ts'],
     },
