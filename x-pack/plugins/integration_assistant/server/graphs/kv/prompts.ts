@@ -68,15 +68,19 @@ export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([
   ],
   [
     'human',
-    `Looking at the multiple syslog samples provided in the context, our goal is to identify which RFC they belog to. Then create a regex pattern that can separate the header and the structured body.
+    `Looking at the multiple syslog samples provided in the context, your task is to separate the "header" and the "message body" from this log. Our goal is to identify which RFC they belong to. Then create a regex pattern that can separate the header and the structured body.
 You then have to create a grok pattern using the regex pattern.
+You are given a log entry in a structured format. 
+
+Follow these steps to identify the header pattern:
+1. Identify if the log samples fall under RFC5424 or RFC3164. If not, return 'Custom Format'.
+2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
+3. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
 
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
- - If you cannot match all the logs to the same RFC, return 'Custom Format' for RFC and provide the regex and grok patterns accordingly.
- - If the message part contains any unstructured data , make sure to add this in regex pattern and grok pattern.
  - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
- - Make sure to map the remaining message part to \'message\' in grok pattern.
+ - Make sure to map the remaining message body to \'message\' in grok pattern.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
@@ -110,12 +114,15 @@ export const KV_HEADER_ERROR_PROMPT = ChatPromptTemplate.fromMessages([
 {errors}
 </errors>
 
- You ALWAYS follow these guidelines when writing your response:
+Follow these steps to fix the errors in the header pattern:
+1. Identify any mismatches, incorrect syntax, or logical errors in the pattern.
+2. The log samples contain the header and structured body. The header may contain any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId or any free-form text or non key-value information etc.,
+3. The message body may start with a description, followed by structured key-value pairs.
+4. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
+You ALWAYS follow these guidelines when writing your response:
  <guidelines>
- - Identify any mismatches, incorrect syntax, or logical errors in the pattern.
- - If the message part contains any unstructured data , make sure to add this in grok pattern.
  - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
- - Make sure to map the remaining message part to \'message\' in grok pattern.
+ - Make sure to map the remaining message body to \'message\' in grok pattern.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
