@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Result } from './result';
-export { resultMetaData, resultToField } from './result_metadata';
+import { createContext, useContext } from 'react';
+import { DashboardApi } from './types';
+
+export const DashboardContext = createContext<DashboardApi | undefined>(undefined);
+
+export const useDashboardApi = (): DashboardApi => {
+  const api = useContext<DashboardApi | undefined>(DashboardContext);
+  if (!api) {
+    throw new Error('useDashboardApi must be used inside DashboardContext');
+  }
+  return api;
+};

@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Result } from './result';
-export { resultMetaData, resultToField } from './result_metadata';
+import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import type { DashboardRendererProps } from './dashboard_renderer';
+
+const Component = dynamic(async () => {
+  const { DashboardRenderer } = await import('./dashboard_renderer');
+  return {
+    default: DashboardRenderer,
+  };
+});
+
+export function LazyDashboardRenderer(props: DashboardRendererProps) {
+  return <Component {...props} />;
+}

@@ -8,7 +8,6 @@
  */
 
 import _ from 'lodash';
-import { debounceTime } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -20,7 +19,6 @@ import {
   convertSavedPanelsToPanelMap,
   DashboardContainerInput,
 } from '../../../common';
-import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
@@ -85,24 +83,4 @@ export const loadAndRemoveDashboardState = (
   };
 
   return partialState;
-};
-
-export const startSyncingDashboardUrlState = ({
-  kbnUrlStateStorage,
-  dashboardAPI,
-}: {
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  dashboardAPI: DashboardAPI;
-}) => {
-  const appStateSubscription = kbnUrlStateStorage
-    .change$(DASHBOARD_STATE_STORAGE_KEY)
-    .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
-    .subscribe(() => {
-      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
-      if (Object.keys(stateFromUrl).length === 0) return;
-      dashboardAPI.updateInput(stateFromUrl);
-    });
-
-  const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();
-  return { stopWatchingAppStateInUrl };
 };
