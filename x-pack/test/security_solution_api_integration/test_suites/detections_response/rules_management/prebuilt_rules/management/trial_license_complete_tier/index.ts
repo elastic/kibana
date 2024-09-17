@@ -22,6 +22,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.scalar_array_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.multi_line_string_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.data_source_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.kql_query_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.eql_query_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.esql_query_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.stats'));
   });
 };

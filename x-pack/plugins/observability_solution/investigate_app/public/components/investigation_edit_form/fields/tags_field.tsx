@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { InvestigationForm } from '../investigation_edit_form';
+import { useFetchAllInvestigationTags } from '../../../hooks/use_fetch_all_investigation_tags';
 
 const I18N_TAGS_LABEL = i18n.translate(
   'xpack.investigateApp.investigationEditForm.span.tagsLabel',
@@ -18,6 +19,7 @@ const I18N_TAGS_LABEL = i18n.translate(
 
 export function TagsField() {
   const { control, getFieldState } = useFormContext<InvestigationForm>();
+  const { isLoading, data: tags } = useFetchAllInvestigationTags();
 
   return (
     <EuiFormRow label={I18N_TAGS_LABEL} fullWidth isInvalid={getFieldState('tags').invalid}>
@@ -32,10 +34,10 @@ export function TagsField() {
             aria-label={I18N_TAGS_LABEL}
             placeholder={I18N_TAGS_LABEL}
             fullWidth
-            noSuggestions
             isInvalid={fieldState.invalid}
             isClearable
-            options={[]}
+            isLoading={isLoading}
+            options={tags?.map((tag) => ({ label: tag, value: tag })) ?? []}
             selectedOptions={generateTagOptions(field.value)}
             onChange={(selected) => {
               if (selected.length) {
