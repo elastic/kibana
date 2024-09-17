@@ -17,13 +17,19 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
+const defaultConfig: Pick<ConfigType, 'experimental'> = {
+  experimental: {
+    forceSolutionVisibility: false,
+  },
+};
+
 const createMockConfig = (
   mockConfig: ConfigType = {
+    ...defaultConfig,
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-    forceSolutionVisibility: false,
   }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
@@ -310,11 +316,11 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
+      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
-      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -348,11 +354,11 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
+      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
-      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -385,11 +391,11 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
+      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
-      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -433,11 +439,11 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
+      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
-      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -477,11 +483,11 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -515,11 +521,11 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -556,11 +562,11 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -727,11 +733,11 @@ describe('#update', () => {
     test(`updates space without disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -754,11 +760,11 @@ describe('#update', () => {
     test(`throws bad request when updating space with disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -787,11 +793,11 @@ describe('#update', () => {
     test(`throws bad request when updating space with solution`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
+        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
-        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);

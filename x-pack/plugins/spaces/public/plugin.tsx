@@ -66,7 +66,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     // unless the forceSolutionVisibility flag is set
     const allowSolutionVisibility =
       (onCloud && !this.isServerless && this.config.allowSolutionVisibility) ||
-      Boolean(this.config.forceSolutionVisibility);
+      Boolean(this.config.experimental?.forceSolutionVisibility);
 
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {

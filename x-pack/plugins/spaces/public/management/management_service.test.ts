@@ -24,7 +24,9 @@ describe('ManagementService', () => {
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-    forceSolutionVisibility: false,
+    experimental: {
+      forceSolutionVisibility: false,
+    },
   };
 
   describe('#setup', () => {

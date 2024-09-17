@@ -277,7 +277,7 @@ describe('Spaces plugin', () => {
         // unless the forceSolutionVisibility flag is set
         const plugin = new SpacesPlugin(
           coreMock.createPluginInitializerContext(
-            { allowSolutionVisibility: false, forceSolutionVisibility: true },
+            { allowSolutionVisibility: false, experimental: { forceSolutionVisibility: true } },
             { buildFlavor: 'traditional' }
           )
         );
@@ -313,7 +313,7 @@ describe('Spaces plugin', () => {
         // unless the forceSolutionVisibility flag is set
         const plugin = new SpacesPlugin(
           coreMock.createPluginInitializerContext(
-            { allowSolutionVisibility: false, forceSolutionVisibility: true },
+            { allowSolutionVisibility: false, experimental: { forceSolutionVisibility: true } },
             { buildFlavor: 'traditional' }
           )
         );
@@ -349,7 +349,7 @@ describe('Spaces plugin', () => {
         // unless the forceSolutionVisibility flag is set
         const plugin = new SpacesPlugin(
           coreMock.createPluginInitializerContext(
-            { allowSolutionVisibility: true, forceSolutionVisibility: true },
+            { allowSolutionVisibility: true, experimental: { forceSolutionVisibility: true } },
             { buildFlavor: 'serverless' }
           )
         );

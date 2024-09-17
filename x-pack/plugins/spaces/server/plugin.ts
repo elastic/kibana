@@ -132,7 +132,8 @@ export class SpacesPlugin
           // We only allow "solution" to be set on cloud environments, not on prem
           // unless the forceSolutionVisibility flag is set.
           allowSolutionVisibility:
-            (onCloud && config.allowSolutionVisibility) || config.forceSolutionVisibility,
+            (onCloud && config.allowSolutionVisibility) ||
+            config.experimental.forceSolutionVisibility,
         })
       )
     );
