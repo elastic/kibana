@@ -8,9 +8,9 @@ paths:
       x-labels: [serverless, ess]
       operationId: ImportListItems
       x-codegen-enabled: true
-      summary: Imports list items
+      summary: Import list items
       description: |
-        Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+        Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
         You can import items to a new or existing list.
       requestBody:
