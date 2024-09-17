@@ -90,7 +90,7 @@ export const registerSyntheticsStatusCheckRule = (
         upConfigs,
         dateFormat,
         tz,
-        condition: params.condition,
+        params,
         groupByLocation,
       });
 

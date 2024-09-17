@@ -34,7 +34,7 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
   const numberOfChecks =
     condition && 'numberOfChecks' in condition.window ? condition.window.numberOfChecks : null;
 
-  const { isTimeWindow } = getConditionType(ruleParams.condition);
+  const { useTimeWindow } = getConditionType(ruleParams.condition);
 
   const onTimeWindowChange = useCallback(
     (value: TimeWindow) => {
@@ -62,7 +62,7 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
     [ruleParams.condition, setRuleParams]
   );
 
-  if (!isTimeWindow) {
+  if (!useTimeWindow) {
     return (
       <PopoverExpression
         value={

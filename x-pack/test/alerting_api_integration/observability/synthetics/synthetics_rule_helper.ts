@@ -89,6 +89,7 @@ export class SyntheticsRuleHelper {
           params: {
             documents: [
               {
+                status: 'recovered',
                 reason: '{{context.reason}}',
                 locationNames: '{{context.locationNames}}',
                 locationId: '{{context.locationId}}',
@@ -111,6 +112,7 @@ export class SyntheticsRuleHelper {
           params: {
             documents: [
               {
+                status: 'active',
                 reason: '{{context.reason}}',
                 locationNames: '{{context.locationNames}}',
                 locationId: '{{context.locationId}}',

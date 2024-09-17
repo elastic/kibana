@@ -23,7 +23,6 @@ import {
   DOWN_LABEL,
   getMonitorAlertDocument,
   getMonitorSummary,
-  getReasonMessageForTimeWindow,
   getUngroupedReasonMessage,
 } from './message_utils';
 import {
@@ -243,7 +242,7 @@ export class StatusRuleExecutor {
   }
 
   handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
-    const { isTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
+    const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
@@ -254,7 +253,7 @@ export class StatusRuleExecutor {
           matchesByLocation: [statusConfig],
           locationsThreshold,
           downThreshold,
-          useTimeWindow: isTimeWindow || false,
+          useTimeWindow: useTimeWindow || false,
         });
         if (doesMonitorMeetLocationThreshold) {
           const alertId = idWithLocation;
@@ -282,7 +281,7 @@ export class StatusRuleExecutor {
           matchesByLocation: configs,
           locationsThreshold,
           downThreshold,
-          useTimeWindow: isTimeWindow || false,
+          useTimeWindow: useTimeWindow || false,
         });
 
         if (doesMonitorMeetLocationThreshold) {
@@ -308,11 +307,8 @@ export class StatusRuleExecutor {
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
     const { ping, configId, locationId, checks } = statusConfig;
-    const { numberOfChecks, downThreshold, locationsThreshold } = getConditionType(
-      this.params.condition
-    );
 
-    const baseSummary = getMonitorSummary({
+    return getMonitorSummary({
       monitorInfo: ping,
       statusMessage: DOWN_LABEL,
       locationId: [locationId],
@@ -320,26 +316,8 @@ export class StatusRuleExecutor {
       dateFormat: this.dateFormat ?? 'Y-MM-DD HH:mm:ss',
       tz: this.tz ?? 'UTC',
       checks,
-      downThreshold,
-      numberOfChecks,
-      locationsThreshold,
+      params: this.params,
     });
-
-    const condition = this.params.condition;
-    if (condition?.window && 'time' in condition.window) {
-      const time = condition.window.time;
-      baseSummary.reason = getReasonMessageForTimeWindow({
-        name: baseSummary.monitorName,
-        status: DOWN_LABEL,
-        location: baseSummary.locationNames,
-        downThreshold,
-        timeWindow: time,
-        timestamp: baseSummary.timestamp,
-        locationsThreshold,
-      });
-    }
-
-    return baseSummary;
   }
 
   getUngroupedDownSummary({
@@ -360,9 +338,7 @@ export class StatusRuleExecutor {
       dateFormat: this.dateFormat!,
       tz: this.tz!,
       checks,
-      downThreshold,
-      numberOfChecks,
-      locationsThreshold,
+      params: this.params,
     });
     baseSummary.reason = getUngroupedReasonMessage({
       statusConfigs,

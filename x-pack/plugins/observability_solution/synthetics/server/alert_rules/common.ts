@@ -41,7 +41,7 @@ import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_syn
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule, MonitorStatusAlertDocument } from './status_rule/types';
-import { StatusRuleCondition, getConditionType } from '../../common/rules/status_rule';
+import { StatusRuleParams, getConditionType } from '../../common/rules/status_rule';
 import { SyntheticsMonitorStatusAlertState } from '../../common/runtime_types/alert_rules/common';
 
 export const updateState = (
@@ -150,7 +150,7 @@ export const setRecoveredAlertsContext = ({
   upConfigs,
   dateFormat,
   tz,
-  condition,
+  params,
   groupByLocation,
 }: {
   alertsClient: PublicAlertsClient<
@@ -161,14 +161,14 @@ export const setRecoveredAlertsContext = ({
   >;
   basePath?: IBasePath;
   spaceId?: string;
+  params?: StatusRuleParams;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
-  condition?: StatusRuleCondition;
   groupByLocation: boolean;
 }) => {
-  const { locationsThreshold, downThreshold, numberOfChecks } = getConditionType(condition);
+  const { isDefaultRule } = getConditionType(params?.condition);
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
@@ -206,9 +206,7 @@ export const setRecoveredAlertsContext = ({
       recoveredAlert,
       tz,
       dateFormat,
-      numberOfChecks,
-      locationsThreshold,
-      downThreshold,
+      params,
     });
     let lastErrorMessage = alertHit?.['error.message'];
 
@@ -227,9 +225,7 @@ export const setRecoveredAlertsContext = ({
         locationIds,
         dateFormat,
         tz,
-        numberOfChecks,
-        locationsThreshold,
-        downThreshold,
+        params,
       });
       if (summary) {
         monitorSummary = {
@@ -256,9 +252,7 @@ export const setRecoveredAlertsContext = ({
         spaceId,
         dateFormat,
         tz,
-        downThreshold,
-        numberOfChecks,
-        locationsThreshold,
+        params,
       });
       if (summary) {
         monitorSummary = {
@@ -326,9 +320,7 @@ export const getDefaultRecoveredSummary = ({
   recoveredAlert,
   tz,
   dateFormat,
-  numberOfChecks,
-  locationsThreshold,
-  downThreshold,
+  params,
 }: {
   recoveredAlert: RecoveredAlertData<
     MonitorStatusAlertDocument,
@@ -338,9 +330,7 @@ export const getDefaultRecoveredSummary = ({
   >;
   tz: string;
   dateFormat: string;
-  numberOfChecks: number;
-  locationsThreshold: number;
-  downThreshold: number;
+  params?: StatusRuleParams;
 }) => {
   if (!recoveredAlert.hit) return; // TODO: handle this case
   const hit = recoveredAlert.hit;
@@ -372,9 +362,7 @@ export const getDefaultRecoveredSummary = ({
     configId,
     dateFormat,
     tz,
-    downThreshold,
-    numberOfChecks,
-    locationsThreshold,
+    params,
   });
 };
 
@@ -384,18 +372,14 @@ export const getDeletedMonitorOrLocationSummary = ({
   locationIds,
   dateFormat,
   tz,
-  numberOfChecks,
-  locationsThreshold,
-  downThreshold,
+  params,
 }: {
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   recoveredAlertId: string;
   locationIds: string[];
   dateFormat: string;
   tz: string;
-  numberOfChecks: number;
-  locationsThreshold: number;
-  downThreshold: number;
+  params?: StatusRuleParams;
 }) => {
   const downConfig = staleDownConfigs[recoveredAlertId];
   const { ping } = downConfig;
@@ -406,9 +390,7 @@ export const getDeletedMonitorOrLocationSummary = ({
     configId: downConfig.configId,
     dateFormat,
     tz,
-    downThreshold,
-    numberOfChecks,
-    locationsThreshold,
+    params,
   });
   const lastErrorMessage = monitorSummary.lastErrorMessage;
 
@@ -455,9 +437,7 @@ export const getUpMonitorRecoverySummary = ({
   spaceId,
   dateFormat,
   tz,
-  downThreshold,
-  numberOfChecks,
-  locationsThreshold,
+  params,
 }: {
   upConfigs: AlertOverviewStatus['upConfigs'];
   recoveredAlertId: string;
@@ -468,9 +448,7 @@ export const getUpMonitorRecoverySummary = ({
   spaceId?: string;
   dateFormat: string;
   tz: string;
-  downThreshold: number;
-  numberOfChecks: number;
-  locationsThreshold: number;
+  params?: StatusRuleParams;
 }) => {
   // pull the last error from state, since it is not available on the up ping
   const lastErrorMessage = alertHit?.['error.message'];
@@ -487,9 +465,7 @@ export const getUpMonitorRecoverySummary = ({
     configId,
     dateFormat,
     tz,
-    downThreshold,
-    numberOfChecks,
-    locationsThreshold,
+    params,
   });
 
   // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead

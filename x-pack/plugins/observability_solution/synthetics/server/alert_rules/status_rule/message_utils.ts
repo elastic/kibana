@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { getConditionType, StatusRuleParams, TimeWindow } from '../../../common/rules/status_rule';
+import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
 import { AlertStatusMetaData } from './queries/query_monitor_status_alert';
 import { getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
@@ -61,9 +61,7 @@ export interface MonitorSummaryData {
     downWithinXChecks: number;
     down: number;
   };
-  downThreshold: number;
-  numberOfChecks: number;
-  locationsThreshold: number;
+  params?: StatusRuleParams;
 }
 
 export const getMonitorSummary = ({
@@ -71,13 +69,12 @@ export const getMonitorSummary = ({
   locationId,
   configId,
   tz,
-  downThreshold,
   dateFormat,
   statusMessage,
   checks,
-  locationsThreshold,
-  numberOfChecks,
+  params,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
+  const { downThreshold, locationsThreshold, numberOfChecks } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
   const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
   const formattedLocationName = Array.isArray(locationName)
@@ -126,6 +123,7 @@ export const getMonitorSummary = ({
       downThreshold,
       locationsThreshold,
       numberOfChecks,
+      params,
     }),
     checks,
     downThreshold,
@@ -204,9 +202,7 @@ export const getReasonMessage = ({
   status,
   location,
   checks,
-  downThreshold,
-  locationsThreshold,
-  numberOfChecks,
+  params,
 }: {
   name: string;
   location: string;
@@ -215,10 +211,19 @@ export const getReasonMessage = ({
     downWithinXChecks: number;
     down: number;
   };
-  downThreshold: number;
-  locationsThreshold: number;
-  numberOfChecks: number;
+  params?: StatusRuleParams;
 }) => {
+  const { useTimeWindow, numberOfChecks, locationsThreshold, downThreshold } = getConditionType(
+    params?.condition
+  );
+  if (useTimeWindow) {
+    return getReasonMessageForTimeWindow({
+      name,
+      location,
+      status,
+      params,
+    });
+  }
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
     defaultMessage: `Monitor "{name}" from {location} is {status}. {checksSummary}Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
@@ -245,29 +250,21 @@ export const getReasonMessage = ({
 export const getReasonMessageForTimeWindow = ({
   name,
   location,
-  timestamp,
-  downThreshold,
-  locationsThreshold,
-  timeWindow,
   status = DOWN_LABEL,
+  params,
 }: {
   name: string;
   location: string;
   status?: string;
-  timestamp: string;
-  downThreshold: number;
-  locationsThreshold: number;
-  timeWindow: TimeWindow;
+  params?: StatusRuleParams;
 }) => {
-  const checkedAt = moment(timestamp).format('LLL');
-
+  const { timeWindow, locationsThreshold, downThreshold } = getConditionType(params?.condition);
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
       location,
-      checkedAt,
       downThreshold,
       unitLabel: getTimeUnitLabel(timeWindow),
       locationsThreshold,
