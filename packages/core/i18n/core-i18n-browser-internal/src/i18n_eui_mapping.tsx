@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -541,16 +542,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridCell.focusTrapEnterPrompt',
       { defaultMessage: "Press the Enter key to interact with this cell's contents." }
     ),
+    'euiDataGridCell.focusTrapExitPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapExitPrompt',
+      { defaultMessage: 'Exited cell content.' }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
     ),
-    'euiDataGridHeaderCell.headerActions': i18n.translate(
-      'core.euiDataGridHeaderCell.headerActions',
+    'euiDataGridHeaderCell.actionsButtonAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.actionsButtonAriaLabel', {
+        defaultMessage: '{title}. Click to view column header actions.',
+        values: { title },
+      }),
+    'euiDataGridHeaderCell.actionsEnterKeyInstructions': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsEnterKeyInstructions',
       {
-        defaultMessage: 'Click to view column header actions',
+        defaultMessage: "Press the Enter key to view this column's actions",
       }
     ),
     'euiDataGridHeaderCell.sortedByAscendingSingle': i18n.translate(
@@ -725,6 +735,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFieldPassword.maskPassword': i18n.translate('core.euiFieldPassword.maskPassword', {
       defaultMessage: 'Mask password',
     }),
+    'euiFieldSearch.clearSearchButtonLabel': i18n.translate(
+      'core.euiFieldSearch.clearSearchButtonLabel',
+      { defaultMessage: 'Clear search input' }
+    ),
     'euiFilePicker.removeSelectedAriaLabel': i18n.translate(
       'core.euiFilePicker.removeSelectedAriaLabel',
       {

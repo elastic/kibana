@@ -231,6 +231,15 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
       },
+
+      async clickManageButton() {
+        await testSubjects.click('manageConnectorsLink');
+        await testSubjects.existOrFail('manageConnectorsLink');
+        await browser.switchTab(1);
+        await testSubjects.existOrFail('edit-connector-flyout');
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
+      },
     },
   };
 }

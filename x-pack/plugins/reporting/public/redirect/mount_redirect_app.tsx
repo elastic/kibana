@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
@@ -22,22 +22,19 @@ interface MountParams extends AppMountParameters {
   share: SharePluginSetup;
 }
 
-export const mountRedirectApp = ({
-  element,
-  apiClient,
-  history,
-  screenshotMode,
-  share,
-}: MountParams) => {
+export const mountRedirectApp = (
+  coreStart: CoreStart,
+  { element, apiClient, history, screenshotMode, share }: MountParams
+) => {
   render(
-    <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...coreStart}>
       <RedirectApp
         apiClient={apiClient}
         history={history}
         screenshotMode={screenshotMode}
         share={share}
       />
-    </EuiErrorBoundary>,
+    </KibanaRenderContextProvider>,
     element
   );
 

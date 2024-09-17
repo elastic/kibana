@@ -1,0 +1,25 @@
+# MV_COUNT
+
+The MV_COUNT function calculates the total number of values in a multivalued expression.
+
+## Syntax
+
+`MV_COUNT(field)`
+
+### Parameters
+
+#### field
+
+A multivalued expression.
+
+## Examples
+
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL count_a = MV_COUNT(a)
+```
+
+```esql
+ROW b=["apple", "banana", "cherry", "date"]
+| EVAL count_b = MV_COUNT(b)
+```
