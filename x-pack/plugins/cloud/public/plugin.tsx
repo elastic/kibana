@@ -24,6 +24,7 @@ export interface CloudConfigType {
   id?: string;
   organization_id?: string;
   cname?: string;
+  csp?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -85,6 +86,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
+      csp,
     } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
@@ -97,6 +99,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
+      csp,
       baseUrl,
       ...this.getCloudUrls(),
       kibanaUrl: decodedId?.kibanaUrl,

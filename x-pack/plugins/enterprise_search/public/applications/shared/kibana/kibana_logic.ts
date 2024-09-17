@@ -24,7 +24,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management';
+import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';

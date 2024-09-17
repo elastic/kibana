@@ -7,32 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { alertOriginSchema, blankOriginSchema } from './origin';
 import { investigationNoteSchema } from './investigation_note';
 import { investigationItemSchema } from './investigation_item';
 
-const statusSchema = t.union([
-  t.literal('triage'),
-  t.literal('active'),
-  t.literal('mitigated'),
-  t.literal('resolved'),
-  t.literal('cancelled'),
+const statusSchema = z.union([
+  z.literal('triage'),
+  z.literal('active'),
+  z.literal('mitigated'),
+  z.literal('resolved'),
+  z.literal('cancelled'),
 ]);
 
-const investigationSchema = t.type({
-  id: t.string,
-  title: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-  params: t.type({
-    timeRange: t.type({ from: t.number, to: t.number }),
+const investigationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  createdAt: z.number(),
+  createdBy: z.string(),
+  updatedAt: z.number(),
+  params: z.object({
+    timeRange: z.object({ from: z.number(), to: z.number() }),
   }),
-  origin: t.union([alertOriginSchema, blankOriginSchema]),
+  origin: z.union([alertOriginSchema, blankOriginSchema]),
   status: statusSchema,
-  tags: t.array(t.string),
-  notes: t.array(investigationNoteSchema),
-  items: t.array(investigationItemSchema),
+  tags: z.array(z.string()),
+  notes: z.array(investigationNoteSchema),
+  items: z.array(investigationItemSchema),
 });
 
+type Status = z.infer<typeof statusSchema>;
+
+export type { Status };
 export { investigationSchema, statusSchema };

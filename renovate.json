@@ -371,7 +371,6 @@
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:kibana-management",
-        "team:kibana-gis",
         "team:security-solution"
       ],
       "matchBaseBranches": ["main"],

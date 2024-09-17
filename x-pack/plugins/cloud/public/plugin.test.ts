@@ -31,6 +31,7 @@ describe('Cloud Plugin', () => {
           ...baseConfig,
           id: 'cloudId',
           cname: 'cloud.elastic.co',
+          csp: 'aws',
           ...configParts,
         });
         const plugin = new CloudPlugin(initContext);
@@ -85,6 +86,11 @@ describe('Cloud Plugin', () => {
       it('exposes cname', () => {
         const { setup } = setupPlugin();
         expect(setup.cname).toBe('cloud.elastic.co');
+      });
+
+      it('exposes csp', () => {
+        const { setup } = setupPlugin();
+        expect(setup.csp).toBe('aws');
       });
 
       it('exposes registerCloudService', () => {

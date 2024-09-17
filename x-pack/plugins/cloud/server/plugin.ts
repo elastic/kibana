@@ -37,6 +37,12 @@ export interface CloudSetup {
    */
   cloudId?: string;
   /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
+  /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
   organizationId?: string;
@@ -203,6 +209,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
+      csp: this.config.csp,
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
