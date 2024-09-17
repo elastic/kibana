@@ -35,6 +35,8 @@ import type { CategoryFacet } from '../category_facets';
 
 import { mergeCategoriesAndCount } from '../util';
 
+import { installationStatuses } from '../../../../../../../../common/constants';
+
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 
 export interface IntegrationsURLParameters {
@@ -146,6 +148,18 @@ export const useAvailablePackages = ({
     });
   }
 
+  const installedIntegrationList = useMemo(
+    () =>
+      packageListToIntegrationsList(
+        (eprPackages?.items || []).filter(
+          (pkg) =>
+            pkg.status === installationStatuses.Installed ||
+            pkg.status === installationStatuses.InstallFailed
+        )
+      ),
+    [eprPackages]
+  );
+
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
@@ -238,6 +252,7 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    installedIntegrationList,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||
