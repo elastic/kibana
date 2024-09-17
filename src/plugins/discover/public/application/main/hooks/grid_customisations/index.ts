@@ -25,8 +25,8 @@ export const useContextualGridCustomisations = (params: ContextualGridCustomizat
 
   const virtualColumnsConfiguration = useMemo(() => {
     if (!isLogsContext) return null;
-    if (isLogsContext)
-      return getDataGridColumnsConfiguration({ data, params: { density, rowHeight } });
+
+    return getDataGridColumnsConfiguration({ data, params: { density, rowHeight } });
   }, [data, isLogsContext, density, rowHeight]);
 
   return virtualColumnsConfiguration;

@@ -102,13 +102,9 @@ export function CellActionsPopover({
 }
 
 interface FieldBadgeWithActionsProps {
-  /**
-   * ECS mapping for the key
-   */
+  /* ECS mapping for the key */
   property: string;
-  /**
-   * Value for the mapping, which will be displayed
-   */
+  /* Value for the mapping, which will be displayed */
   text: string;
   icon?: EuiBadgeProps['iconType'];
 }
