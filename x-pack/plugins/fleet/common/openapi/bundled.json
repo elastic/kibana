@@ -7592,6 +7592,72 @@
               },
               "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
             }
+          },
+          "monitoring_pprof_enabled": {
+            "type": "boolean"
+          },
+          "monitoring_http": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "host": {
+                "type": "string"
+              },
+              "port": {
+                "type": "number"
+              },
+              "buffer": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          },
+          "monitoring_diagnostics": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "interval": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "burst": {
+                    "type": "number",
+                    "nullable": true
+                  }
+                }
+              },
+              "uploader": {
+                "type": "object",
+                "properties": {
+                  "max_retries": {
+                    "type": "number",
+                    "nullable": true
+                  },
+                  "init_dur": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "max_dur": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
@@ -7873,6 +7939,101 @@
                 }
               }
             }
+          },
+          "monitoring": {
+            "type": "object",
+            "properties": {
+              "namespace": {
+                "type": "string"
+              },
+              "use_output": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "metrics": {
+                "type": "boolean"
+              },
+              "logs": {
+                "type": "boolean"
+              },
+              "traces": {
+                "type": "boolean"
+              },
+              "pprof": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "http": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "number"
+                  },
+                  "buffer": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "diagnostics": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "object",
+                    "properties": {
+                      "interval": {
+                        "type": "string"
+                      },
+                      "burst": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "uploader": {
+                    "type": "object",
+                    "properties": {
+                      "max_retries": {
+                        "type": "number"
+                      },
+                      "init_dur": {
+                        "type": "string"
+                      },
+                      "max_dur": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "enabled",
+              "metrics",
+              "logs",
+              "traces"
+            ]
           },
           "fleet": {
             "oneOf": [
