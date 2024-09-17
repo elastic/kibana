@@ -21,32 +21,18 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIconTip,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ControlStyle } from '../../..';
 
-import { ControlStateManager } from '../../controls/types';
+import type { ControlStyle, ParentIgnoreSettings } from '../../../../common';
+import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
+import type { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupApi, ControlGroupEditorState } from '../types';
-import { ParentIgnoreSettings } from '../../../../common';
-
-const CONTROL_LAYOUT_OPTIONS = [
-  {
-    id: `oneLine`,
-    'data-test-subj': 'control-editor-layout-oneLine',
-    label: ControlGroupStrings.management.labelPosition.getInlineTitle(),
-  },
-  {
-    id: `twoLine`,
-    'data-test-subj': 'control-editor-layout-twoLine',
-    label: ControlGroupStrings.management.labelPosition.getAboveTitle(),
-  },
-];
+import type { ControlGroupApi, ControlGroupEditorState } from '../types';
+import { ControlSettingTooltipLabel } from './control_setting_tooltip_label';
 
 interface Props {
   onCancel: () => void;
@@ -233,17 +219,3 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
     </>
   );
 };
-
-const ControlSettingTooltipLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
-      <EuiIconTip content={tooltip} position="right" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
