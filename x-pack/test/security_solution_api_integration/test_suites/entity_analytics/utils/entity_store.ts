@@ -22,13 +22,11 @@ export const cleanEngines = async ({
 
   log.info(`Cleaning engines: ${engineTypes.join(', ')}`);
   try {
-    const responses = await Promise.all(
+    await Promise.all(
       engineTypes.map((entityType: 'user' | 'host') =>
         api.deleteEntityEngine({ params: { entityType }, query: { data: true } })
       )
     );
-
-    log.info(`Deleted engines: ${JSON.stringify(responses.map((r) => r.body))}`);
   } catch (e) {
     log.warning(`Error deleting engines: ${e.message}`);
   }
