@@ -171,46 +171,19 @@
 }
 
 .embPanel__hoverActionsAnchor {
-  position: relative;
-  height: 100%;
-
   .embPanel__hoverActionsWrapper {
-    height: $euiSizeXL;
-    position: absolute;
     top: 0;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 $euiSize;
-    flex-wrap: nowrap;
-    min-width: 100%;
     z-index: -1;
-    pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
   }
 
   .embPanel__hoverActions {
     opacity: 0;
-    padding: $euiSizeXS;
-    display: flex;
-    flex-wrap: nowrap;
-    border: $euiBorderThin;
-
-    background-color: $euiColorEmptyShade;
-    height: $euiSizeXL;
-
-    pointer-events: all; // Re-enable pointer-events for hover actions
-  }
-
-  .embPanel--dragHandle {
-    cursor: move;
-
-    img {
-      pointer-events: all !important;
-    }
   }
 
   .embPanel__descriptionTooltipAnchor {
     padding: $euiSizeXS;
   }
+
 
   &:hover .embPanel__hoverActionsWrapper,
   &:focus-within .embPanel__hoverActionsWrapper,
