@@ -163,13 +163,21 @@ describe('SpacesGridPage', () => {
   });
 
   it('renders a "current" badge for the current space', async () => {
-    spacesManager.getActiveSpace.mockResolvedValue(spaces[2]);
-    const current = await spacesManager.getActiveSpace();
-    expect(current.id).toBe('custom-2');
+    const spacesWithCurrent = [
+      { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true },
+      { id: 'test-1', name: 'Test', disabledFeatures: [] },
+      { id: 'test-2', name: 'Test', disabledFeatures: [] },
+    ];
+    const spacesManagerWithCurrent = spacesManagerMock.create();
+    spacesManagerWithCurrent.getSpaces = jest.fn().mockResolvedValue(spacesWithCurrent);
+    spacesManagerWithCurrent.getActiveSpace.mockResolvedValue(spacesWithCurrent[2]);
+
+    const current = await spacesManagerWithCurrent.getActiveSpace();
+    expect(current.id).toBe('test-2');
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManagerWithCurrent}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -189,7 +197,7 @@ describe('SpacesGridPage', () => {
     await act(async () => {});
     wrapper.update();
 
-    const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
+    const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-test-2"]');
     const nameCell = activeRow.find('[data-test-subj="spacesListTableRowNameCell"]');
     const activeBadge = nameCell.find('EuiBadge');
     expect(activeBadge.text()).toBe('current');
