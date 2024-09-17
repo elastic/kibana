@@ -5,94 +5,105 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
-import { KqlQueryReadOnly } from './fields/kql_query';
-import { DataSourceReadOnly } from './fields/data_source/data_source';
-import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
-import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
-import { MachineLearningJobIdReadOnly } from './fields/machine_learning_job_id/machine_learning_job_id';
-import { RelatedIntegrationsReadOnly } from './fields/related_integrations/related_integrations';
-import { RequiredFieldsReadOnly } from './fields/required_fields/required_fields';
-import { SeverityMappingReadOnly } from './fields/severity_mapping/severity_mapping';
-import { RiskScoreMappingReadOnly } from './fields/risk_score_mapping/risk_score_mapping';
-import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
-import { ThreatReadOnly } from './fields/threat/threat';
-import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
-import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
-import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
-import { NameReadOnly } from './fields/name/name';
-import { TagsReadOnly } from './fields/tags/tags';
-import { DescriptionReadOnly } from './fields/description/description';
+import React, { useMemo } from 'react';
+import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
+import type {
+  DiffableRule,
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableNewTermsFields,
+  DiffableEsqlFields,
+  DiffableMachineLearningFields,
+} from '../../../../../../../common/api/detection_engine';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { CustomQueryRuleFieldReadOnly } from './custom_query_rule_field_readonly';
+import { SavedQueryRuleFieldReadOnly } from './saved_query_rule_field_readonly';
+import { EqlRuleFieldReadOnly } from './eql_rule_field_readonly';
+import { EsqlRuleFieldReadOnly } from './esql_rule_field_readonly';
+import { ThreatMatchRuleFieldReadOnly } from './threat_match_rule_field_readonly';
+import { ThresholdRuleFieldReadOnly } from './threshold_rule_field_readonly';
+import { MachineLearningRuleFieldReadOnly } from './machine_learning_rule_field_readonly';
+import { NewTermsRuleFieldReadOnly } from './new_terms_rule_field_readonly';
+import { CommonRuleFieldReadOnly } from './common_rule_field_readonly';
 
 interface FieldReadOnlyProps {
-  fieldName: keyof DiffableAllFields;
-  finalDiffableRule: DiffableAllFields;
+  fieldName: string;
+  finalDiffableRule: DiffableRule;
 }
 
 export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyProps) {
-  switch (fieldName) {
-    case 'data_source':
-      return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
-    case 'description':
-      return <DescriptionReadOnly description={finalDiffableRule.description} />;
-    case 'eql_query':
+  const { data: commonField } = useMemo(
+    () => DiffableCommonFields.keyof().safeParse(fieldName),
+    [fieldName]
+  );
+
+  if (commonField) {
+    return (
+      <CommonRuleFieldReadOnly fieldName={commonField} finalDiffableRule={finalDiffableRule} />
+    );
+  }
+
+  switch (finalDiffableRule.type) {
+    case 'query':
       return (
-        <EqlQueryReadOnly
-          eqlQuery={finalDiffableRule.eql_query}
-          dataSource={finalDiffableRule.data_source}
+        <CustomQueryRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableCustomQueryFields}
+          finalDiffableRule={finalDiffableRule}
         />
       );
-    case 'esql_query':
-      return <EsqlQueryReadOnly esqlQuery={finalDiffableRule.esql_query} />;
-    case 'kql_query':
+    case 'saved_query':
       return (
-        <KqlQueryReadOnly
-          kqlQuery={finalDiffableRule.kql_query}
-          dataSource={finalDiffableRule.data_source}
-          ruleType={finalDiffableRule.type}
+        <SavedQueryRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableSavedQueryFields}
+          finalDiffableRule={finalDiffableRule}
         />
       );
-    case 'machine_learning_job_id':
+    case 'eql':
       return (
-        <MachineLearningJobIdReadOnly
-          machineLearningJobId={finalDiffableRule.machine_learning_job_id}
+        <EqlRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableEqlFields}
+          finalDiffableRule={finalDiffableRule}
         />
       );
-    case 'name':
-      return <NameReadOnly name={finalDiffableRule.name} />;
-    case 'related_integrations':
+    case 'esql':
       return (
-        <RelatedIntegrationsReadOnly relatedIntegrations={finalDiffableRule.related_integrations} />
-      );
-    case 'required_fields':
-      return <RequiredFieldsReadOnly requiredFields={finalDiffableRule.required_fields} />;
-    case 'risk_score_mapping':
-      return <RiskScoreMappingReadOnly riskScoreMapping={finalDiffableRule.risk_score_mapping} />;
-    case 'severity_mapping':
-      return <SeverityMappingReadOnly severityMapping={finalDiffableRule.severity_mapping} />;
-    case 'tags':
-      return <TagsReadOnly tags={finalDiffableRule.tags} />;
-    case 'threat':
-      return <ThreatReadOnly threat={finalDiffableRule.threat} />;
-    case 'threat_index':
-      return <ThreatIndexReadOnly threatIndex={finalDiffableRule.threat_index} />;
-    case 'threat_indicator_path':
-      return (
-        <ThreatIndicatorPathReadOnly
-          threatIndicatorPath={finalDiffableRule.threat_indicator_path}
+        <EsqlRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableEsqlFields}
+          finalDiffableRule={finalDiffableRule}
         />
       );
-    case 'threat_mapping':
-      return <ThreatMappingReadOnly threatMapping={finalDiffableRule.threat_mapping} />;
-    case 'threat_query':
+    case 'threat_match':
       return (
-        <ThreatQueryReadOnly
-          threatQuery={finalDiffableRule.threat_query}
-          dataSource={finalDiffableRule.data_source}
+        <ThreatMatchRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableThreatMatchFields}
+          finalDiffableRule={finalDiffableRule}
+        />
+      );
+    case 'threshold':
+      return (
+        <ThresholdRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableThresholdFields}
+          finalDiffableRule={finalDiffableRule}
+        />
+      );
+    case 'machine_learning':
+      return (
+        <MachineLearningRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableMachineLearningFields}
+          finalDiffableRule={finalDiffableRule}
+        />
+      );
+    case 'new_terms':
+      return (
+        <NewTermsRuleFieldReadOnly
+          fieldName={fieldName as keyof DiffableNewTermsFields}
+          finalDiffableRule={finalDiffableRule}
         />
       );
     default:
-      return null;
+      return assertUnreachable(finalDiffableRule);
   }
 }

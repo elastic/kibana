@@ -10,8 +10,17 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType, KqlQueryType } from '../../../../../../../../common/api/detection_engine';
 import type {
   DiffableAllFields,
+  DiffableCommonFields,
+  DiffableCustomQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableMachineLearningFields,
+  DiffableRule,
+  DiffableSavedQueryFields,
+  DiffableThreatMatchFields,
   SavedKqlQuery,
 } from '../../../../../../../../common/api/detection_engine';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../../../../common/constants';
 
 export const filters = [
   {
@@ -102,4 +111,163 @@ export function mockDataView(spec: Partial<DataViewDeps['spec']> = {}): DataView
   });
 
   return dataView;
+}
+
+const commonDiffableRuleFields: DiffableCommonFields = {
+  rule_id: 'some-rule-id',
+  version: 1,
+
+  name: 'Some Rule Name',
+  tags: [],
+  description: 'Some rule description',
+  severity: 'low',
+  severity_mapping: [],
+  risk_score: 1,
+  risk_score_mapping: [],
+
+  references: [],
+  false_positives: [],
+  threat: [],
+  note: '',
+  setup: '',
+  related_integrations: [],
+  required_fields: [],
+  author: [],
+  license: '',
+
+  rule_schedule: {
+    interval: '5m',
+    lookback: '360s',
+  },
+  exceptions_list: [],
+  max_signals: DEFAULT_MAX_SIGNALS,
+};
+
+const customQueryDiffableRuleFields: DiffableCustomQueryFields = {
+  type: 'query',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+};
+
+export function mockCustomQueryRule(
+  overrides: Partial<DiffableCommonFields & DiffableCustomQueryFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...customQueryDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const savedQueryDiffableRuleFields: DiffableSavedQueryFields = {
+  type: 'saved_query',
+  kql_query: {
+    type: KqlQueryType.saved_query,
+    saved_query_id: 'some-saved-query-id',
+  },
+};
+
+export function mockSavedQueryRule(
+  overrides: Partial<DiffableCommonFields & DiffableSavedQueryFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...savedQueryDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const eqlDiffableRuleFields: DiffableEqlFields = {
+  type: 'eql',
+  eql_query: {
+    query: 'any where true',
+    language: 'eql',
+    filters: [],
+  },
+};
+
+export function mockEqlRule(
+  overrides: Partial<DiffableCommonFields & DiffableEqlFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...eqlDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const esqlDiffableRuleFields: DiffableEsqlFields = {
+  type: 'esql',
+  esql_query: {
+    query: 'SELECT * FROM any',
+    language: 'esql',
+  },
+};
+
+export function mockEsqlRule(
+  overrides: Partial<DiffableCommonFields & DiffableEsqlFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...esqlDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const machineLearningDiffableRuleFields: DiffableMachineLearningFields = {
+  type: 'machine_learning',
+  machine_learning_job_id: 'ml-job-id-123',
+  anomaly_threshold: 0,
+};
+
+export function mockMachineLearningRule(
+  overrides: Partial<DiffableCommonFields & DiffableMachineLearningFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...machineLearningDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const threatMatchDiffableRuleFields: DiffableThreatMatchFields = {
+  type: 'threat_match',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  threat_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  threat_index: [],
+  threat_mapping: [
+    {
+      entries: [
+        {
+          field: 'abc',
+          type: 'mapping',
+          value: 'xyz',
+        },
+      ],
+    },
+  ],
+};
+
+export function mockThreatMatchRule(
+  overrides: Partial<DiffableCommonFields & DiffableThreatMatchFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...threatMatchDiffableRuleFields,
+    ...overrides,
+  };
 }

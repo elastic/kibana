@@ -9,7 +9,8 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { TagsReadOnly } from './tags';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import { mockCustomQueryRule } from '../../storybook/mocks';
 
 export default {
   component: TagsReadOnly,
@@ -17,22 +18,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return (
-    <FieldReadOnly
-      fieldName="tags"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
-  );
+  return <FieldReadOnly fieldName="tags" finalDiffableRule={args.finalDiffableRule} />;
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     tags: ['Elastic', 'Cloud', 'Google Workspace', 'Log Auditing', 'Threat Detection'],
-  },
+  }),
 };
