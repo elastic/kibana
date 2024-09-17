@@ -482,7 +482,9 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }> | undefined"
+              "CallbackFn<{}, ",
+              "ESQLSourceResult",
+              "> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
