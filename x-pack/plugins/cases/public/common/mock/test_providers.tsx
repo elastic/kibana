@@ -79,6 +79,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     defaultOptions: {
       queries: {
         retry: false,
+        // staleTime: 0,
       },
     },
     logger: {
@@ -143,7 +144,7 @@ export const createAppMockRenderer = ({
     defaultOptions: {
       queries: {
         retry: false,
-        staleTime: 0,
+        // staleTime: 0,
       },
     },
     logger: {
