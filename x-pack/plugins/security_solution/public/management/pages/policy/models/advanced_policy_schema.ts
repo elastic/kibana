@@ -1909,6 +1909,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.events.aggregate_process',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.deduplicate_network_events_below_bytes',
     first_supported_version: '8.15',
     documentation: i18n.translate(
