@@ -1509,6 +1509,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "description": [],
+        "signature": [
+          "\"observability:searchExcludedDataTiers\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.QUERY_ALLOW_LEADING_WILDCARDS_ID",
         "type": "string",
         "tags": [],
