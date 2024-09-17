@@ -30,7 +30,6 @@ const chatCompleteBaseRt = t.type({
       messages: t.array(messageRt),
       connectorId: t.string,
       persist: toBooleanRt,
-      scope: assistantScopeType,
     }),
     t.partial({
       conversationId: t.string,
@@ -62,6 +61,7 @@ const chatCompleteInternalRt = t.intersection([
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
+      scope: assistantScopeType,
     }),
   }),
 ]);
@@ -310,6 +310,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       params: {
         body: {
           ...restOfBody,
+          scope: 'observability',
           screenContexts: [
             {
               actions,
