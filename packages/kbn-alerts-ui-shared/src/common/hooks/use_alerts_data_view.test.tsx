@@ -10,7 +10,7 @@
 import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -69,7 +69,7 @@ describe('useAlertsDataView', () => {
       dataView: undefined,
     };
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -80,11 +80,11 @@ describe('useAlertsDataView', () => {
       }
     );
 
-    await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
+    expect(result.current).toEqual(mockedAsyncDataView);
   });
 
   it('fetches indexes and fields for non-siem feature ids, returning a DataViewBase object', async () => {
-    const { result, waitForValueToChange } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -95,7 +95,7 @@ describe('useAlertsDataView', () => {
       }
     );
 
-    await waitForValueToChange(() => result.current.isLoading, { timeout: 5000 });
+    await waitFor(() => null);
 
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(1);
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
@@ -103,21 +103,21 @@ describe('useAlertsDataView', () => {
   });
 
   it('only fetches index names for the siem feature id, returning a DataView', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useAlertsDataView({ ...mockServices, featureIds: [AlertConsumers.SIEM] }),
       {
         wrapper,
       }
     );
 
-    await waitFor(() => expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1));
+    await waitFor(() => null);
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
-
-    await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
+    expect(result.current.dataView).toBe(mockDataView);
   });
 
   it('does not fetch anything if siem and other feature ids are mixed together', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -128,12 +128,12 @@ describe('useAlertsDataView', () => {
       }
     );
 
-    await waitFor(() =>
-      expect(result.current).toEqual({
-        isLoading: false,
-        dataView: undefined,
-      })
-    );
+    await waitFor(() => null);
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      dataView: undefined,
+    });
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
@@ -141,31 +141,30 @@ describe('useAlertsDataView', () => {
   it('returns an undefined data view if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }),
       {
         wrapper,
       }
     );
 
-    await waitFor(() =>
-      expect(result.current).toEqual({
-        isLoading: false,
-        dataView: undefined,
-      })
-    );
+    await waitFor(() => null);
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      dataView: undefined,
+    });
   });
 
   it('shows an error toast if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
-    const { waitFor } = renderHook(
-      () => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }),
-      {
-        wrapper,
-      }
-    );
+    renderHook(() => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }), {
+      wrapper,
+    });
 
-    await waitFor(() => expect(mockServices.toasts.addDanger).toHaveBeenCalled());
+    await waitFor(() => null);
+
+    expect(mockServices.toasts.addDanger).toHaveBeenCalled();
   });
 });
