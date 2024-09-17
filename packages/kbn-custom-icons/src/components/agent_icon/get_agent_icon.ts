@@ -66,6 +66,14 @@ const darkAgentIcons: { [key: string]: string } = {
   rust: darkRustIcon,
 };
 
+const getAgentNameWithoutPrefix = (agentName: string) => {
+  if (agentName.startsWith('opentelemetry/')) {
+    // OpenTelemetry-only splits the agent name by `/` and takes the second part, format is `opentelemetry/{agentName}/{details}`
+    return agentName.split('/')[1];
+  }
+  return agentName;
+};
+
 // This only needs to be exported for testing purposes, since we stub the SVG
 // import values in test.
 export function getAgentIconKey(agentName: string) {
@@ -90,8 +98,7 @@ export function getAgentIconKey(agentName: string) {
     return 'android';
   }
 
-  // Remove "opentelemetry/" prefix
-  const agentNameWithoutPrefix = lowercasedAgentName.replace(/^opentelemetry\//, '');
+  const agentNameWithoutPrefix = getAgentNameWithoutPrefix(lowercasedAgentName);
 
   if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
     return agentNameWithoutPrefix;

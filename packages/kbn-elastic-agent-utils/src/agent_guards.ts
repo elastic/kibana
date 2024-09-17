@@ -31,7 +31,10 @@ export function isJavaAgentName(agentName?: string): agentName is JavaAgentName 
 }
 
 export function isRumAgentName(agentName?: string): agentName is RumAgentName {
-  return RUM_AGENT_NAMES.includes(agentName! as RumAgentName);
+  return (
+    agentName?.startsWith('opentelemetry/webjs') ||
+    RUM_AGENT_NAMES.includes(agentName! as RumAgentName)
+  );
 }
 
 export function isMobileAgentName(agentName?: string) {
@@ -43,12 +46,12 @@ export function isRumOrMobileAgentName(agentName?: string) {
 }
 
 export function isIosAgentName(agentName?: string) {
-  return agentName?.toLowerCase() === 'ios/swift';
+  return agentName?.startsWith('opentelemetry/swift') || agentName?.toLowerCase() === 'ios/swift';
 }
 
 export function isAndroidAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
-  return lowercased === 'android/java';
+  return agentName?.startsWith('opentelemetry/android') || lowercased === 'android/java';
 }
 
 export function isJRubyAgentName(agentName?: string, runtimeName?: string) {

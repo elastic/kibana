@@ -39,6 +39,7 @@ export const ELASTIC_AGENT_NAMES: ElasticAgentName[] = [
 
 export type OpenTelemetryAgentName =
   | 'otlp'
+  | 'opentelemetry'
   | 'opentelemetry/cpp'
   | 'opentelemetry/dotnet'
   | 'opentelemetry/erlang'
@@ -54,6 +55,7 @@ export type OpenTelemetryAgentName =
   | 'opentelemetry/webjs';
 export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'otlp',
+  'opentelemetry',
   'opentelemetry/cpp',
   'opentelemetry/dotnet',
   'opentelemetry/erlang',
