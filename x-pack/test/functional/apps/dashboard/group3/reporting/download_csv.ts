@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingService = getService('reporting');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
   const { reporting, common, dashboard, timePicker } = getPageObjects([
