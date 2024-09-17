@@ -490,16 +490,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      const resp = await alertingApi.helpers.waitForDocumentInIndex({
+      const resp = await alertingApi.helpers.waitForDocumentInIndexForTime({
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         num: 2,
         sort: 'asc',
-        retryOptions: {
-          retryCount: 50,
-          retryDelay: 20_000,
-        },
+        timeout: 240_000,
       });
 
       const resp2 = await alertingApi.helpers.waitForAlertInIndex({
