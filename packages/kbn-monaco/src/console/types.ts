@@ -21,14 +21,14 @@ export interface ConsoleParserResult {
   requests: ParsedRequest[];
 }
 
-export interface OutputParsedResponse {
+export interface ConsoleOutputParsedResponse {
   startOffset: number;
   endOffset?: number;
   data?: Array<Record<string, unknown>>;
 }
 export interface ConsoleOutputParserResult {
   errors: ErrorAnnotation[];
-  responses: OutputParsedResponse[];
+  responses: ConsoleOutputParsedResponse[];
 }
 
 export interface ConsoleWorkerDefinition {
