@@ -20,7 +20,7 @@ export function TraceIdHighlightField(props: HighlightFieldProps) {
     share: { url: urlService },
     core,
   } = getUnifiedDocViewerServices();
-  const canViewApm = core.application.capabilities.apm.show;
+  const canViewApm = core.application.capabilities.apm?.show || false;
 
   const apmLinkToServiceEntityLocator = urlService.locators.get<{ traceId: string }>(
     TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR

@@ -21,11 +21,11 @@ export function ServiceNameHighlightField(props: HighlightFieldProps) {
     share: { url: urlService },
     core,
   } = getUnifiedDocViewerServices();
-  const canViewApm = core.application.capabilities.apm.show;
+  const canViewApm = core.application.capabilities.apm?.show || false;
 
-  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get(
-    OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE
-  );
+  const isEntityCentricExperienceSettingEnabled = canViewApm
+    ? core.uiSettings.get(OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE)
+    : false;
 
   const apmLinkToServiceEntityLocator = urlService.locators.get<{ serviceName: string }>(
     SERVICE_ENTITY_LOCATOR
