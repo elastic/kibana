@@ -54,6 +54,10 @@ interface PrivilegesRolesFormProps {
   features: KibanaFeature[];
   closeFlyout: () => void;
   onSaveCompleted: (response: BulkUpdateRoleResponse) => void;
+  /**
+   * @description default roles that should be selected when the form is opened,
+   * this is useful when the form is opened in edit mode
+   */
   defaultSelected?: Role[];
   storeDispatch: EditSpaceStore['dispatch'];
   spacesClientsInvocator: EditSpaceServices['invokeClient'];
@@ -344,70 +348,99 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const getForm = () => {
     return (
       <EuiForm component="form" fullWidth>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
-            { defaultMessage: 'Select roles(s)' }
-          )}
-          labelAppend={
-            <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
-              {i18n.translate(
-                'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
-                { defaultMessage: 'Manage roles' }
+        <React.Fragment>
+          {!defaultSelected.length && (
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
+                { defaultMessage: 'Select roles(s)' }
               )}
-            </EuiLink>
-          }
-        >
-          <EuiComboBox
-            data-test-subj="space-assign-role-selection-combo-box"
-            aria-label={i18n.translate('xpack.spaces.management.spaceDetails.roles.selectRoles', {
-              defaultMessage: 'Select role to assign to the "{spaceName}" space',
-              values: { spaceName: space.name },
-            })}
-            isLoading={fetchingDataDeps}
-            options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
-            selectedOptions={selectedRoles}
-            onChange={(value) => setSelectedRoles(value)}
-            fullWidth
-          />
-        </EuiFormRow>
-        <>
-          {selectedRolesCombinedPrivileges.length > 1 && (
-            <EuiFormRow>
-              <EuiCallOut
-                color="warning"
-                iconType="iInCircle"
-                data-test-subj="privilege-conflict-callout"
-                title={i18n.translate(
-                  'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+              labelAppend={
+                <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+                  {i18n.translate(
+                    'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
+                    { defaultMessage: 'Manage roles' }
+                  )}
+                </EuiLink>
+              }
+              helpText={i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.selectRolesHelp',
+                {
+                  defaultMessage: 'Select Kibana spaces to which you wish to assign privileges.',
+                }
+              )}
+            >
+              <EuiComboBox
+                data-test-subj="space-assign-role-selection-combo-box"
+                aria-label={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.selectRoles',
                   {
-                    defaultMessage: 'Selected roles have different privileges granted',
+                    defaultMessage: 'Select role to assign to the "{spaceName}" space',
+                    values: { spaceName: space.name },
                   }
                 )}
-              >
-                {i18n.translate(
-                  'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.description',
-                  {
-                    defaultMessage:
-                      'Updating the settings here in a bulk will override current individual settings.',
-                  }
-                )}
-              </EuiCallOut>
+                isLoading={fetchingDataDeps}
+                options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
+                selectedOptions={selectedRoles}
+                onChange={(value) => setSelectedRoles(value)}
+                fullWidth
+              />
             </EuiFormRow>
           )}
-        </>
+        </React.Fragment>
+        <EuiFormRow>
+          {selectedRolesCombinedPrivileges.length > 1 ? (
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="iInCircle"
+              data-test-subj="privilege-conflict-callout"
+              title={i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                {
+                  defaultMessage: 'Selected roles have different privileges granted',
+                }
+              )}
+            >
+              {i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.description',
+                {
+                  defaultMessage:
+                    'Updating the settings here in a bulk will override current individual settings.',
+                }
+              )}
+            </EuiCallOut>
+          ) : (
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="iInCircle"
+              data-test-subj="privilege-info-callout"
+              title={i18n.translate(
+                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                {
+                  defaultMessage: 'Privileges will apply to all current and future spaces.',
+                }
+              )}
+            />
+          )}
+        </EuiFormRow>
         <EuiFormRow
-          helpText={i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.assign.privilegesHelpText',
+          label={i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',
             {
-              defaultMessage:
-                'Assign the privilege you wish to grant to all present and future features across this space',
+              defaultMessage: 'Define role privileges',
             }
           )}
         >
           <EuiButtonGroup
             data-test-subj="space-assign-role-privilege-selection-switch"
-            legend="select the privilege for the features enabled in this space"
+            legend={i18n.translate(
+              'xpack.spaces.management.spaceDetails.roles.assign.privilegeSelectionLegendText',
+              {
+                defaultMessage: 'select the privilege for the features enabled in this space',
+              }
+            )}
             isDisabled={!Boolean(selectedRoles.length)}
             options={[
               {
@@ -444,71 +477,54 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           />
         </EuiFormRow>
         {Boolean(selectedRoles.length) && (
-          <EuiFormRow
-            data-test-subj="space-assign-role-privilege-customization-form"
-            label={i18n.translate(
-              'xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeLabelText',
-              { defaultMessage: 'Customize by feature' }
-            )}
-          >
-            <>
-              <EuiText size="xs">
-                <p>
-                  <FormattedMessage
-                    id="xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeDescriptionText"
-                    defaultMessage="Increase privilege levels per feature basis. Some features might be hidden by the
-                    space or affected by a global space privilege"
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer />
-              <React.Fragment>
-                {!kibanaPrivileges ? (
-                  <EuiLoadingSpinner size="l" />
-                ) : (
-                  <KibanaPrivilegeTable
-                    disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
-                    role={roleCustomizationAnchor.value!}
-                    privilegeIndex={roleCustomizationAnchor.privilegeIndex}
-                    onChange={(featureId, selectedPrivileges) => {
-                      // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
-                      // to all of the selected roles till we decide to commit the changes chosen
-                      setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                        let privilege;
+          <EuiFormRow data-test-subj="space-assign-role-privilege-customization-form">
+            <React.Fragment>
+              {!kibanaPrivileges ? (
+                <EuiLoadingSpinner size="l" />
+              ) : (
+                <KibanaPrivilegeTable
+                  showTitle={false}
+                  disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
+                  role={roleCustomizationAnchor.value!}
+                  privilegeIndex={roleCustomizationAnchor.privilegeIndex}
+                  onChange={(featureId, selectedPrivileges) => {
+                    // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                    // to all of the selected roles till we decide to commit the changes chosen
+                    setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
+                      let privilege;
 
-                        if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                          privilege.feature[featureId] = selectedPrivileges;
-                        }
+                      if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                        privilege.feature[featureId] = selectedPrivileges;
+                      }
 
-                        return { value, privilegeIndex };
-                      });
-                    }}
-                    onChangeAll={(_privilege) => {
-                      // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
-                      // to all of the selected roles till we decide to commit the changes chosen
-                      setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                        let privilege;
+                      return { value, privilegeIndex };
+                    });
+                  }}
+                  onChangeAll={(_privilege) => {
+                    // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                    // to all of the selected roles till we decide to commit the changes chosen
+                    setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
+                      let privilege;
 
-                        if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                          privilege.base = _privilege;
-                        }
+                      if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                        privilege.base = _privilege;
+                      }
 
-                        return { value, privilegeIndex };
-                      });
-                    }}
-                    kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
-                    privilegeCalculator={
-                      new PrivilegeFormCalculator(
-                        new KibanaPrivileges(kibanaPrivileges, features),
-                        roleCustomizationAnchor.value!
-                      )
-                    }
-                    allSpacesSelected={false}
-                    canCustomizeSubFeaturePrivileges={false}
-                  />
-                )}
-              </React.Fragment>
-            </>
+                      return { value, privilegeIndex };
+                    });
+                  }}
+                  kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
+                  privilegeCalculator={
+                    new PrivilegeFormCalculator(
+                      new KibanaPrivileges(kibanaPrivileges, features),
+                      roleCustomizationAnchor.value!
+                    )
+                  }
+                  allSpacesSelected={false}
+                  canCustomizeSubFeaturePrivileges={false}
+                />
+              )}
+            </React.Fragment>
           </EuiFormRow>
         )}
       </EuiForm>

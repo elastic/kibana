@@ -48,6 +48,10 @@ interface Props {
   canCustomizeSubFeaturePrivileges: boolean;
   allSpacesSelected: boolean;
   disabled?: boolean;
+  /**
+   * default is true, to remain backwards compatible
+   */
+  showTitle?: boolean;
 }
 
 interface State {
@@ -58,6 +62,7 @@ export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
     privilegeIndex: -1,
     showLocks: true,
+    showTitle: true,
   };
 
   private featureCategories: Map<string, SecuredFeature[]> = new Map();
@@ -183,16 +188,18 @@ export class FeatureTable extends Component<Props, State> {
       <div>
         <EuiFlexGroup alignItems={'flexEnd'}>
           <EuiFlexItem>
-            <EuiText size="xs">
-              <b>
-                {i18n.translate(
-                  'xpack.security.management.editRole.featureTable.featureVisibilityTitle',
-                  {
-                    defaultMessage: 'Customize feature privileges',
-                  }
-                )}
-              </b>
-            </EuiText>
+            {this.props.showTitle && (
+              <EuiText size="xs">
+                <b>
+                  {i18n.translate(
+                    'xpack.security.management.editRole.featureTable.featureVisibilityTitle',
+                    {
+                      defaultMessage: 'Customize feature privileges',
+                    }
+                  )}
+                </b>
+              </EuiText>
+            )}
           </EuiFlexItem>
           {!this.props.disabled && (
             <EuiFlexItem grow={false}>
