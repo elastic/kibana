@@ -16,7 +16,7 @@ import { SloApiProvider } from './slo_api';
 export type {
   InternalRequestHeader,
   RoleCredentials,
-  SupertestWithoutAuthProviderType
+  SupertestWithoutAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
 
 export const services = {
