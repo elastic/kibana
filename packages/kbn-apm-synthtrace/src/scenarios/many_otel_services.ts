@@ -56,7 +56,8 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services
               .service({
                 name: `${getRandomNameForIndex(index)}-${language}-${index}`,
                 environment: ENVIRONMENT,
-                agentName: `opentelemetry/${language}/elastic`,
+                agentName:
+                  index % 2 ? `opentelemetry/${language}/elastic` : `otlp/${language}/elastic`,
               })
               .instance(`instance-${index}-${instanceIndex}`)
               .defaults({ 'agent.version': agentVersion, 'service.language.name': language })
