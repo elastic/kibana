@@ -19,7 +19,6 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SpacesGridPage } from './spaces_grid_page';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
-import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 const spaces = [
@@ -73,7 +72,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = shallowWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -133,7 +132,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = shallowWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -210,7 +209,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -242,7 +241,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -273,7 +272,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -303,7 +302,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = mountWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         getUrlForApp={getUrlForApp}
@@ -339,7 +338,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = shallowWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notifications}
         getUrlForApp={getUrlForApp}
@@ -375,7 +374,7 @@ describe('SpacesGridPage', () => {
 
     const wrapper = shallowWithIntl(
       <SpacesGridPage
-        spacesManager={spacesManager as unknown as SpacesManager}
+        spacesManager={spacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         getUrlForApp={getUrlForApp}
