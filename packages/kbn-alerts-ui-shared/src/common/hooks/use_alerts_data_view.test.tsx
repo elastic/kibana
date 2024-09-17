@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks/dom';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -51,13 +50,6 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 );
 
 describe('useAlertsDataView', () => {
-  const observabilityFeatureIds = [
-    AlertConsumers.APM,
-    AlertConsumers.INFRASTRUCTURE,
-    AlertConsumers.LOGS,
-    AlertConsumers.UPTIME,
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -73,7 +65,7 @@ describe('useAlertsDataView', () => {
       () =>
         useAlertsDataView({
           ...mockServices,
-          featureIds: observabilityFeatureIds,
+          ruleTypeIds: ['apm'],
         }),
       {
         wrapper,
@@ -88,7 +80,7 @@ describe('useAlertsDataView', () => {
       () =>
         useAlertsDataView({
           ...mockServices,
-          featureIds: observabilityFeatureIds,
+          ruleTypeIds: ['apm, .es-query'],
         }),
       {
         wrapper,
@@ -104,7 +96,7 @@ describe('useAlertsDataView', () => {
 
   it('only fetches index names for the siem feature id, returning a DataView', async () => {
     const { result, waitFor } = renderHook(
-      () => useAlertsDataView({ ...mockServices, featureIds: [AlertConsumers.SIEM] }),
+      () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'] }),
       {
         wrapper,
       }
@@ -121,7 +113,7 @@ describe('useAlertsDataView', () => {
       () =>
         useAlertsDataView({
           ...mockServices,
-          featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+          ruleTypeIds: ['siem.esqlRule', 'apm', 'logs'],
         }),
       {
         wrapper,
@@ -142,7 +134,7 @@ describe('useAlertsDataView', () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
     const { result, waitFor } = renderHook(
-      () => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }),
+      () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['.es-query'] }),
       {
         wrapper,
       }
@@ -160,7 +152,7 @@ describe('useAlertsDataView', () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
     const { waitFor } = renderHook(
-      () => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }),
+      () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['.es-query'] }),
       {
         wrapper,
       }

@@ -108,17 +108,17 @@ describe('find()', () => {
     });
     const query = { match: { [ALERT_WORKFLOW_STATUS]: 'open' } };
     const index = '.alerts-observability.apm.alerts';
-    const featureIds = ['siem'];
+    const ruleTypeIds = ['siem.esqlRule', 'siem.eqlRule'];
     const result = await alertsClient.find({
       query,
       index,
-      featureIds,
+      ruleTypeIds,
     });
     expect(searchAlertsSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         query,
         index,
-        featureIds,
+        ruleTypeIds,
       })
     );
     expect(result).toMatchInlineSnapshot(`

@@ -15,6 +15,7 @@ import type { CaseUI } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 import type { FeatureIdsResponse } from '../../../containers/types';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 
 jest.mock('../../../containers/api');
 
@@ -54,7 +55,7 @@ describe('CaseUI View Page activity tab', () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
         configurationId: 'securitySolution-case',
-        ruleTypeIds: ['siem'],
+        ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
         id: 'case-details-alerts-securitySolution',
         query: {
           ids: {
@@ -88,7 +89,7 @@ describe('CaseUI View Page activity tab', () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
         configurationId: 'case-details-alerts-observability',
-        ruleTypeIds: ['observability'],
+        ruleTypeIds: ['log-threshold'],
         id: 'case-details-alerts-observability',
         query: {
           ids: {

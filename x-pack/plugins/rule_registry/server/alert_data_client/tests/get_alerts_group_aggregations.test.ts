@@ -154,7 +154,7 @@ describe('getGroupAggregations()', () => {
     });
 
     const result = await alertsClient.getGroupAggregations({
-      featureIds: [AlertConsumers.STACK_ALERTS],
+      ruleTypeIds: ['.es-query'],
       groupByField: 'kibana.alert.rule.name',
       aggregations: {},
       filters: [],
