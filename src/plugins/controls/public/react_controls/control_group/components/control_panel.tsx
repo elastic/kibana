@@ -157,7 +157,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           data-test-subj="control-frame-title"
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
-          display="rowCompressed"
         >
           <EuiFormControlLayout
             fullWidth

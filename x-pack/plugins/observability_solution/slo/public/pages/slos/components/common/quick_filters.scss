@@ -2,32 +2,23 @@
   min-height: $euiSize * 4;
 }
 
-.controlsFrame__draggable {
-  height: $euiButtonHeight !important;
-}
-
 .optionsList--filterBtn, .euiFilterButton {
-  height: $euiButtonHeight !important;
+  height: $euiFormControlHeight !important;
 }
 
 .euiFilterGroup {
-  height: $euiButtonHeight !important;
+  height: $euiFormControlHeight !important;
   border-radius: $euiFormControlBorderRadius !important;
 }
 
 .controlPanel {
-  height: $euiButtonHeight !important;
 
   .euiDualRange, .euiRange {
-    height: $euiButtonHeight !important;
-  }
-
-  &--labelWrapper {
-    height: 100% !important;
+    height: $euiFormControlHeight !important;
   }
 
   .controlPanel--label {
-    height: 100% !important;
+    height: $euiFormControlHeight !important;
   }
 }
 
@@ -35,26 +26,15 @@
   padding-bottom: $euiSizeXS;
 }
 
-.euiFlexGroup {
-  height: $euiButtonHeight;
-}
-
-.euiFormControlLayout, .euiFormControlLayout--group, .controlFrame__formControlLayout, .optionsListControl {
-  height: $euiButtonHeight !important;
+.controlPanel--labelWrapper > label {
+  height: $euiFormControlHeight !important;
+  line-height: 3 !important;
 }
 
 .optionsListControl {
-  height: $euiButtonHeight !important;
-}
-
-.--group {
-  height: $euiButtonHeight !important;
+  height: $euiFormControlHeight !important;
 }
 
 .controlFrame__formControlLayout {
-  height: $euiButtonHeight !important;
-}
-
-&.-compresed {
-  height: $euiButtonHeight !important;
+  block-size: $euiFormControlHeight !important;
 }
