@@ -12,8 +12,7 @@ import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 const { FOCUS_CONNECTOR_FIELD } = CLIENT_DEFAULTS;
 
-const { DATE_RANGE_START, DATE_RANGE_END, AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } =
-  CLIENT_DEFAULTS_SYNTHETICS;
+const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
 export const stringifyUrlParams = (params: Partial<SyntheticsUrlParams>, ignoreEmpty = false) => {
   if (ignoreEmpty) {
@@ -39,12 +38,6 @@ const replaceDefaults = (params: Partial<SyntheticsUrlParams>) => {
       delete params[key];
     }
     if (key === 'dateRangeEnd' && val === DATE_RANGE_END) {
-      delete params[key];
-    }
-    if (key === 'refreshPaused' && val === AUTOREFRESH_IS_PAUSED) {
-      delete params[key];
-    }
-    if (key === 'refreshInterval' && val === AUTOREFRESH_INTERVAL_SECONDS) {
       delete params[key];
     }
     if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {
