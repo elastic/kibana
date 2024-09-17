@@ -102,6 +102,32 @@ export const AgentPolicyBaseSchema = {
       }
     )
   ),
+  monitoring_pprof_enabled: schema.maybe(schema.boolean()),
+  monitoring_http: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      host: schema.string({ defaultValue: 'localhost' }),
+      port: schema.number({ min: 0, max: 65353, defaultValue: 6791 }),
+      buffer: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+    })
+  ),
+  monitoring_diagnostics: schema.maybe(
+    schema.object({
+      limit: schema.maybe(
+        schema.object({
+          interval: schema.maybe(schema.nullable(schema.string())),
+          burst: schema.maybe(schema.nullable(schema.number())),
+        })
+      ),
+      uploader: schema.maybe(
+        schema.object({
+          max_retries: schema.maybe(schema.nullable(schema.number())),
+          init_dur: schema.maybe(schema.nullable(schema.string())),
+          max_dur: schema.maybe(schema.nullable(schema.string())),
+        })
+      ),
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

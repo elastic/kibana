@@ -44,6 +44,24 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
+  monitoring_pprof_enabled?: boolean;
+  monitoring_http?: {
+    enabled: boolean;
+    host: string;
+    port: number;
+    buffer: { enabled: boolean };
+  };
+  monitoring_diagnostics?: {
+    limit: {
+      interval: string | null;
+      burst: number | null;
+    };
+    uploader: {
+      max_retries: number | null;
+      init_dur: string | null;
+      max_dur: string | null;
+    };
+  };
 }
 
 export interface GlobalDataTag {
@@ -119,6 +137,26 @@ export interface FullAgentPolicyMonitoring {
   metrics: boolean;
   logs: boolean;
   traces: boolean;
+  pprof?: {
+    enabled: boolean;
+  };
+  http?: {
+    enabled: boolean;
+    host: string;
+    port: number;
+    buffer: { enabled: boolean };
+  };
+  diagnostics?: {
+    limit?: {
+      interval?: string | null;
+      burst?: number | null;
+    };
+    uploader?: {
+      max_retries?: number | null;
+      init_dur?: string | null;
+      max_dur?: string | null;
+    };
+  };
 }
 
 export interface FullAgentPolicy {
