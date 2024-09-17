@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/es-query';
-import { PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
-import { ControlGroupApi } from '../../control_group/types';
-import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
+
+import { StateComparators } from '@kbn/presentation-publishing';
+
+import { CONTROL_GROUP_TYPE } from '../../../../common';
+import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
 export const getMockedControlGroupApi = (
-  dashboardApi: Partial<PublishesUnifiedSearch> = {
-    timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  },
+  dashboardApi?: unknown,
   overwriteApi?: Partial<ControlGroupApi>
 ) => {
   return {
+    type: CONTROL_GROUP_TYPE,
     parentApi: dashboardApi,
     autoApplySelections$: new BehaviorSubject(true),
     ignoreParentSettings$: new BehaviorSubject(undefined),
