@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 import { AgentTypeVendorLogo } from '../agent_type_vendor_logo';
-import { getAgentTypeName } from '../../../../translations';
+import {
+  getAgentTypeName,
+  TECHNICAL_PREVIEW,
+  TECHNICAL_PREVIEW_TOOLTIP,
+} from '../../../../translations';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export const INTEGRATION_SECTION_LABEL = i18n.translate(
@@ -37,6 +41,10 @@ export interface AgentTypeIntegrationProps {
 export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
   ({ agentType, textSize = 's', layout = 'vertical', 'data-test-subj': dataTestSubj }) => {
     const testId = useTestIdGenerator(dataTestSubj);
+
+    const isTechPreview = useMemo(() => {
+      return agentType === 'sentinel_one' || agentType === 'crowdstrike';
+    }, [agentType]);
 
     return (
       <EuiFlexGroup
@@ -69,6 +77,16 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
                 {getAgentTypeName(agentType)}
               </EuiText>
             </EuiFlexItem>
+            {isTechPreview && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={TECHNICAL_PREVIEW}
+                  tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                  iconType="beaker"
+                  size="s"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
