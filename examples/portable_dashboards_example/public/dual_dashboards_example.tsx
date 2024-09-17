@@ -18,19 +18,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  AwaitingDashboardAPI,
-  DashboardAPI,
-  DashboardRenderer,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardApi, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-export const DualReduxExample = () => {
-  const [firstDashboardContainer, setFirstDashboardContainer] = useState<AwaitingDashboardAPI>();
-  const [secondDashboardContainer, setSecondDashboardContainer] = useState<AwaitingDashboardAPI>();
+export const DualDashboardsExample = () => {
+  const [firstDashboardApi, setFirstDashboardApi] = useState<DashboardApi | undefined>();
+  const [secondDashboardApi, setSecondDashboardApi] = useState<DashboardApi | undefined>();
 
-  const ButtonControls = ({ dashboard }: { dashboard: DashboardAPI }) => {
-    const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const ButtonControls = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+    const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
 
     return (
       <EuiButtonGroup
@@ -48,7 +45,7 @@ export const DualReduxExample = () => {
           },
         ]}
         idSelected={viewMode}
-        onChange={(id, value) => dashboard.dispatch.setViewMode(value)}
+        onChange={(id, value) => dashboardApi.setViewMode(value)}
         type="single"
       />
     );
@@ -57,12 +54,12 @@ export const DualReduxExample = () => {
   return (
     <>
       <EuiTitle>
-        <h2>Dual redux example</h2>
+        <h2>Dual dashboards example</h2>
       </EuiTitle>
       <EuiText>
         <p>
-          Use the redux contexts from two different dashboard containers to independently set the
-          view mode of each dashboard.
+          Use the APIs from different dashboards to independently set the view mode of each
+          dashboard.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -73,18 +70,18 @@ export const DualReduxExample = () => {
               <h3>Dashboard #1</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            {firstDashboardContainer && <ButtonControls dashboard={firstDashboardContainer} />}
+            {firstDashboardApi && <ButtonControls dashboardApi={firstDashboardApi} />}
             <EuiSpacer size="m" />
-            <DashboardRenderer ref={setFirstDashboardContainer} />
+            <DashboardRenderer onApiAvailable={setFirstDashboardApi} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>Dashboard #2</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            {secondDashboardContainer && <ButtonControls dashboard={secondDashboardContainer} />}
+            {secondDashboardApi && <ButtonControls dashboardApi={secondDashboardApi} />}
             <EuiSpacer size="m" />
-            <DashboardRenderer ref={setSecondDashboardContainer} />
+            <DashboardRenderer onApiAvailable={setSecondDashboardApi} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

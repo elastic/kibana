@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import { render } from '@testing-library/react';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { EditorMenu } from './editor_menu';
-import { DashboardAPIContext } from '../dashboard_app';
 import { buildMockDashboard } from '../../mocks';
 
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../dashboard_api/types';
 
 jest.mock('../../services/plugin_services', () => {
   const module = jest.requireActual('../../services/plugin_services');
@@ -37,21 +37,14 @@ jest.mock('../../services/plugin_services', () => {
   };
 });
 
-const mockApi = { addNewPanel: jest.fn() } as unknown as jest.Mocked<PresentationContainer>;
-
 describe('editor menu', () => {
-  const defaultProps: ComponentProps<typeof EditorMenu> = {
-    api: mockApi,
-    createNewVisType: jest.fn(),
-  };
-
   it('renders without crashing', async () => {
-    render(<EditorMenu {...defaultProps} />, {
+    render(<EditorMenu createNewVisType={jest.fn()} />, {
       wrapper: ({ children }) => {
         return (
-          <DashboardAPIContext.Provider value={buildMockDashboard()}>
+          <DashboardContext.Provider value={buildMockDashboard() as DashboardApi}>
             {children}
-          </DashboardAPIContext.Provider>
+          </DashboardContext.Provider>
         );
       },
     });
