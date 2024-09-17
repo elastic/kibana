@@ -518,7 +518,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: gap,
+                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });
