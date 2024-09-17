@@ -50,7 +50,31 @@
         "label": "InvestigateAppServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/investigations/{investigationId}/items 2023-10-31\": ",
+          "{ \"GET /api/observability/investigations/_tags 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/investigations/_tags 2023-10-31\", Zod.ZodObject<{ query: Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { query: {}; }, { query: {}; }>, ",
+          "InvestigateAppRouteHandlerResources",
+          ", string[], ",
+          "InvestigateAppRouteCreateOptions",
+          ">; \"GET /api/observability/investigations/_stats 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/investigations/_stats 2023-10-31\", Zod.ZodObject<{ query: Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { query: {}; }, { query: {}; }>, ",
+          "InvestigateAppRouteHandlerResources",
+          ", { count: Partial<Record<\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\", number>>; total: number; }, ",
+          "InvestigateAppRouteCreateOptions",
+          ">; \"GET /api/observability/investigations/{investigationId}/items 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -60,7 +84,7 @@
           },
           "<\"GET /api/observability/investigations/{investigationId}/items 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", ({ id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; })[], ",
+          ", ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[], ",
           "InvestigateAppRouteCreateOptions",
           ">; \"PUT /api/observability/investigations/{investigationId}/items/{itemId} 2023-10-31\": ",
           {
@@ -96,7 +120,7 @@
           },
           "<\"POST /api/observability/investigations/{investigationId}/items 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params: Record<string, any>; type: string; title: string; }; path: { investigationId: string; }; }, { body: { params: Record<string, any>; type: string; title: string; }; path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; }, ",
+          ", { id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; \"DELETE /api/observability/investigations/{investigationId}/notes/{noteId} 2023-10-31\": ",
           {
@@ -132,7 +156,7 @@
           },
           "<\"GET /api/observability/investigations/{investigationId}/notes 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { id: string; createdBy: string; createdAt: number; content: string; }[], ",
+          ", { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[], ",
           "InvestigateAppRouteCreateOptions",
           ">; \"POST /api/observability/investigations/{investigationId}/notes 2023-10-31\": ",
           {
@@ -144,7 +168,7 @@
           },
           "<\"POST /api/observability/investigations/{investigationId}/notes 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ content: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { content: string; }, { content: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { content: string; }; path: { investigationId: string; }; }, { body: { content: string; }; path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { id: string; createdBy: string; createdAt: number; content: string; }, ",
+          ", { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; \"DELETE /api/observability/investigations/{investigationId} 2023-10-31\": ",
           {
@@ -168,7 +192,7 @@
           },
           "<\"PUT /api/observability/investigations/{investigationId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ title: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>>; params: Zod.ZodOptional<Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>>; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }, { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }; path: { investigationId: string; }; }, { body: { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }; path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; content: string; }[]; }, ",
+          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; \"GET /api/observability/investigations/{investigationId} 2023-10-31\": ",
           {
@@ -180,7 +204,7 @@
           },
           "<\"GET /api/observability/investigations/{investigationId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; content: string; }[]; }, ",
+          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; \"GET /api/observability/investigations 2023-10-31\": ",
           {
@@ -190,9 +214,9 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /api/observability/investigations 2023-10-31\", Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ alertId: Zod.ZodOptional<Zod.ZodString>; page: Zod.ZodOptional<Zod.ZodString>; perPage: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { page?: string | undefined; perPage?: string | undefined; alertId?: string | undefined; }, { page?: string | undefined; perPage?: string | undefined; alertId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { page?: string | undefined; perPage?: string | undefined; alertId?: string | undefined; } | undefined; }, { query?: { page?: string | undefined; perPage?: string | undefined; alertId?: string | undefined; } | undefined; }>, ",
+          "<\"GET /api/observability/investigations 2023-10-31\", Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ alertId: Zod.ZodOptional<Zod.ZodString>; search: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodString>; page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; }, { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; } | undefined; }, { query?: { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; } | undefined; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { page: number; results: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; content: string; }[]; }[]; perPage: number; total: number; }, ",
+          ", { page: number; results: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }[]; perPage: number; total: number; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; \"POST /api/observability/investigations 2023-10-31\": ",
           {
@@ -204,7 +228,7 @@
           },
           "<\"POST /api/observability/investigations 2023-10-31\", Zod.ZodObject<{ body: Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }; }, { body: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }; }>, ",
           "InvestigateAppRouteHandlerResources",
-          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; content: string; }[]; }, ",
+          ", { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, ",
           "InvestigateAppRouteCreateOptions",
           ">; }"
         ],

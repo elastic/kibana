@@ -36,4 +36,7 @@ const investigationSchema = z.object({
   items: z.array(investigationItemSchema),
 });
 
+type Status = z.infer<typeof statusSchema>;
+
+export type { Status };
 export { investigationSchema, statusSchema };
