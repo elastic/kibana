@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render as reactRender, waitFor } from '@testing-library/react';
+import { act, render as reactRender, waitFor } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -143,6 +143,7 @@ export const createAppMockRenderer = ({
     defaultOptions: {
       queries: {
         retry: false,
+        staleTime: 0,
       },
     },
     logger: {
@@ -180,10 +181,17 @@ export const createAppMockRenderer = ({
   AppWrapper.displayName = 'AppWrapper';
 
   const render: UiRender = (ui, options) => {
-    return reactRender(ui, {
-      wrapper: AppWrapper,
-      ...options,
+    let result: RenderResult | undefined;
+    act(() => {
+      result = reactRender(ui, {
+        wrapper: AppWrapper,
+        ...options,
+      });
     });
+    if (!result) {
+      throw new Error('Render result is undefined');
+    }
+    return result;
   };
 
   const clearQueryCache = async () => {
