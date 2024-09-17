@@ -15,6 +15,7 @@ import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
+import { cloneDeep } from 'lodash';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
@@ -106,8 +107,15 @@ export const AlertsSearchBar = ({
   };
 
   useEffect(() => {
-    if (initialFilters) {
-      dataService.query.filterManager.addFilters(initialFilters);
+    let isFirstRender = true;
+
+    if (initialFilters?.length && isFirstRender) {
+      console.log('adding filter', {
+        initialFilters,
+        isFirstRender,
+        getFilters: dataService.query.filterManager.getFilters(),
+      });
+      dataService.query.filterManager.addFilters(cloneDeep(initialFilters));
     }
 
     const subscription = dataService.query.state$.subscribe((state) => {
@@ -117,11 +125,12 @@ export const AlertsSearchBar = ({
     });
 
     return () => {
+      isFirstRender = false;
       subscription.unsubscribe();
       dataService.query.filterManager.removeAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialFilters]);
 
   return unifiedSearchBar({
     appName,
