@@ -62,7 +62,7 @@ export const connectorTypesResponseSchema = schema.object({
   }),
   enabled_in_config: schema.boolean({
     meta: {
-      description: 'Indicates whether the connector is enabled through the configs.',
+      description: 'Indicates whether the connector is enabled in the Kibana configuration.',
     },
   }),
   enabled_in_license: schema.boolean({
