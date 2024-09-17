@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldFromDoc, LogDocument, ResourceFields } from '@kbn/discover-utils/src';
+import { getFieldValue, LogDocument, ResourceFields } from '@kbn/discover-utils/src';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
@@ -21,15 +21,15 @@ import * as constants from '../../../../../common/data_types/logs/constants';
  * getUnformattedResourceFields definitions
  */
 export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {
-  const serviceName = getFieldFromDoc(doc, constants.SERVICE_NAME_FIELD);
-  const hostName = getFieldFromDoc(doc, constants.HOST_NAME_FIELD);
-  const agentName = getFieldFromDoc(doc, constants.AGENT_NAME_FIELD);
-  const orchestratorClusterName = getFieldFromDoc(doc, constants.ORCHESTRATOR_CLUSTER_NAME_FIELD);
-  const orchestratorResourceId = getFieldFromDoc(doc, constants.ORCHESTRATOR_RESOURCE_ID_FIELD);
-  const orchestratorNamespace = getFieldFromDoc(doc, constants.ORCHESTRATOR_NAMESPACE_FIELD);
-  const containerName = getFieldFromDoc(doc, constants.CONTAINER_NAME_FIELD);
-  const containerId = getFieldFromDoc(doc, constants.CONTAINER_ID_FIELD);
-  const cloudInstanceId = getFieldFromDoc(doc, constants.CLOUD_INSTANCE_ID_FIELD);
+  const serviceName = getFieldValue(doc, constants.SERVICE_NAME_FIELD);
+  const hostName = getFieldValue(doc, constants.HOST_NAME_FIELD);
+  const agentName = getFieldValue(doc, constants.AGENT_NAME_FIELD);
+  const orchestratorClusterName = getFieldValue(doc, constants.ORCHESTRATOR_CLUSTER_NAME_FIELD);
+  const orchestratorResourceId = getFieldValue(doc, constants.ORCHESTRATOR_RESOURCE_ID_FIELD);
+  const orchestratorNamespace = getFieldValue(doc, constants.ORCHESTRATOR_NAMESPACE_FIELD);
+  const containerName = getFieldValue(doc, constants.CONTAINER_NAME_FIELD);
+  const containerId = getFieldValue(doc, constants.CONTAINER_ID_FIELD);
+  const cloudInstanceId = getFieldValue(doc, constants.CLOUD_INSTANCE_ID_FIELD);
 
   return {
     [constants.SERVICE_NAME_FIELD]: serviceName,
