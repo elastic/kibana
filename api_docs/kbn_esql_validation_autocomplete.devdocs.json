@@ -1536,7 +1536,9 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => () => Promise<{ name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }[]>"
+          " | undefined) => () => Promise<",
+          "ESQLSourceResult",
+          "[]>"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
@@ -3054,7 +3056,9 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }> | undefined"
+              "CallbackFn<{}, ",
+              "ESQLSourceResult",
+              "> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
