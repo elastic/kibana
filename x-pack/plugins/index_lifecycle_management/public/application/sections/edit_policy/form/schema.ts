@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  PhaseWithDownsample,
-  PhaseWithTiming,
-} from '../../../../../common/types';
+import { PhaseWithDownsample, PhaseWithTiming } from '../../../../../common/types';
 import { fieldValidators, FormSchema } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { CLOUD_DEFAULT_REPO, ROLLOVER_FORM_PATHS } from '../constants';
