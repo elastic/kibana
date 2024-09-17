@@ -148,18 +148,6 @@ export const useAvailablePackages = ({
     });
   }
 
-  const installedIntegrationList = useMemo(
-    () =>
-      packageListToIntegrationsList(
-        (eprPackages?.items || []).filter(
-          (pkg) =>
-            pkg.status === installationStatuses.Installed ||
-            pkg.status === installationStatuses.InstallFailed
-        )
-      ),
-    [eprPackages]
-  );
-
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
@@ -252,7 +240,6 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
-    installedIntegrationList,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||

@@ -10,6 +10,8 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 
 import { FleetPlugin } from './plugin';
+export type { GetPackagesResponse } from './types';
+export { installationStatuses } from '../common/constants';
 
 export type { FleetSetup, FleetStart, FleetStartServices } from './plugin';
 
@@ -54,7 +56,7 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters } from './constants';
+export { pagePathGetters, EPM_PACKAGES_MANY } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
