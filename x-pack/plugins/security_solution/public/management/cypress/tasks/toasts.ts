@@ -46,3 +46,7 @@ export const expectAndCloseSuccessToast = () => {
   cy.getByTestSubj('toastCloseButton').click();
   cy.contains('Success').should('not.exist');
 };
+
+export const closeKibanaBrowserSecurityToastIfNecessary = () => {
+  // FIXME:PT implement
+};
