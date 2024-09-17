@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('with kbn: prefix in request', () => {
+    describe('with kbn: prefix in request', () => {
       before(async () => {
         await PageObjects.console.clearEditorText();
       });
