@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import {
@@ -150,10 +151,12 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
   }
 
+  const ebtContextMock$ = new BehaviorSubject({ dscProfiles: [] as string[] });
   const profilesManagerMock = new ProfilesManager(
     rootProfileServiceMock,
     dataSourceProfileServiceMock,
-    documentProfileServiceMock
+    documentProfileServiceMock,
+    ebtContextMock$
   );
 
   const profileProviderServices = createProfileProviderServices();
@@ -169,5 +172,6 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
+    ebtContextMock$,
   };
 };

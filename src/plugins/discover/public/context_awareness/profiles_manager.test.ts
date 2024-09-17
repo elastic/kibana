@@ -21,6 +21,7 @@ describe('ProfilesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mocks = createContextAwarenessMocks();
+    jest.spyOn(mocks.ebtContextMock$, 'next');
   });
 
   it('should return default profiles', () => {
@@ -60,6 +61,10 @@ describe('ProfilesManager', () => {
       mocks.dataSourceProfileProviderMock.profile,
       mocks.documentProfileProviderMock.profile,
     ]);
+
+    expect(mocks.ebtContextMock$.next).toHaveBeenCalledWith({
+      dscProfiles: ['root-profile', 'data-source-profile'],
+    });
   });
 
   it('should expose profiles as an observable', async () => {
