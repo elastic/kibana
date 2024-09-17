@@ -177,8 +177,8 @@ export async function getErrorGroupMainStatistics({
         lastSeen: new Date(fieldsNorm['@timestamp']).getTime(),
         occurrences: bucket.doc_count,
         culprit: fieldsNorm.error.culprit,
-        handled: fieldsNorm.error.exception?.[0].handled,
-        type: fieldsNorm.error.exception?.[0].type,
+        handled: fieldsNorm.error.exception?.[0]?.handled,
+        type: fieldsNorm.error.exception?.[0]?.type,
         traceId: fieldsNorm.trace?.id,
       };
     }) ?? [];

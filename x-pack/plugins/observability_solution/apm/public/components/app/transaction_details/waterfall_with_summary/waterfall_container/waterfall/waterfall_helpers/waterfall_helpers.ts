@@ -171,8 +171,6 @@ function getErrorItem(
     | IWaterfallSpanOrTransaction
     | undefined;
 
-  // console.log('error',error);
-
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
