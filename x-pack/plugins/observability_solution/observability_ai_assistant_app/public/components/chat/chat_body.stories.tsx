@@ -65,7 +65,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
       username: 'elastic',
       full_name: '',
     },
-    scope: 'observability',
   },
   render: (props) => {
     return (
