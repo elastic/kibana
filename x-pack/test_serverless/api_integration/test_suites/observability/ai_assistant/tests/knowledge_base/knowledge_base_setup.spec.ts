@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
-} from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+import { deleteKnowledgeBaseModel, createKnowledgeBaseModel } from './helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
@@ -20,8 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192886
-    // fails to delete all the .ml indices
+    // TODO: https://github.com/elastic/kibana/issues/192757
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
