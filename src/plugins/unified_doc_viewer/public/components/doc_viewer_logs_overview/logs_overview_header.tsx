@@ -16,6 +16,7 @@ import {
   EuiAccordion,
   useGeneratedHtmlId,
   EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
 import {
   LogDocumentOverview,
@@ -97,6 +98,11 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
       data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
       {hasMessageField ? contentField : logLevelAndTimestamp}
+      <EuiButton
+        href={`/app/observability/entities/data_stream/logs-${doc['data_stream.dataset']}-${doc['data_stream.namespace']}/management/parse`}
+      >
+        Parse fields out of message
+      </EuiButton>
     </EuiAccordion>
   ) : null;
 }
