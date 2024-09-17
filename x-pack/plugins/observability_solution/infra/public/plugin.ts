@@ -166,7 +166,7 @@ export class Plugin implements InfraClientPluginClass {
                       label: 'Infrastructure',
                       sortKey: 300,
                       entries: [
-                        { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                        { label: 'Infrastructure Inventory', app: 'metrics', path: '/inventory' },
                         ...(this.config.featureFlags.metricsExplorerEnabled
                           ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
                           : []),
