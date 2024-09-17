@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupChainingSystem } from '../../../../common';
-import { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
+
+import { Filter } from '@kbn/es-query';
+
+import { ControlGroupChainingSystem } from '../../../../common';
 import { chaining$ } from './chaining';
 
 const FILTER_ALPHA = {
