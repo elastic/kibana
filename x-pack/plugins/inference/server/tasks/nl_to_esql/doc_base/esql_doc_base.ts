@@ -8,30 +8,8 @@
 import { once } from 'lodash';
 import { loadData, type EsqlDocData, type EsqlDocEntry } from './load_data';
 import { tryResolveAlias } from './aliases';
-
-interface GetDocsOptions {
-  /**
-   * If true (default), will include general ES|QL documentation entries
-   * such as the overview, syntax and operators page.
-   */
-  addOverview?: boolean;
-  /**
-   * If true (default) will try to resolve aliases for commands.
-   */
-  resolveAliases?: boolean;
-
-  /**
-   * If true (default) will generate a fake doc page for missing keywords.
-   * Useful for the LLM to understand that the requested keyword does not exist.
-   */
-  generateMissingKeywordDoc?: boolean;
-
-  /**
-   * If true (default), additional documentation will be included to help the LLM.
-   * E.g. for STATS, BUCKET will be included.
-   */
-  addSuggestions?: boolean;
-}
+import { getSuggestions } from './suggestions';
+import type { GetDocsOptions } from './types';
 
 const loadDataOnce = once(loadData);
 
@@ -73,14 +51,14 @@ export class EsqlDocumentBase {
     });
 
     if (addSuggestions) {
-      // TODO
+      keywords.push(...getSuggestions(keywords));
     }
 
     if (addOverview) {
       keywords.push(...overviewEntries);
     }
 
-    return keywords.reduce<Record<string, string>>((results, keyword) => {
+    return [...new Set(keywords)].reduce<Record<string, string>>((results, keyword) => {
       if (Object.hasOwn(this.docRecords, keyword)) {
         results[keyword] = this.docRecords[keyword].data;
       } else if (generateMissingKeywordDoc) {
