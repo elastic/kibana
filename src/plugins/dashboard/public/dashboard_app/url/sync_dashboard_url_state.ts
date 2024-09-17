@@ -115,12 +115,12 @@ export const startSyncingExpandedPanelState = ({
   dashboardAPI: DashboardAPI;
   history: History;
 }) => {
-  const expandedPanelSubscription = dashboardAPI?.expandedPanelId.subscribe(() => {
-    const expandedPanel = dashboardAPI.expandedPanelId.value;
-    const hasExpandedPanel = expandedPanel !== undefined ? `/${expandedPanel}` : '';
-    return history.replace({
+  const expandedPanelSubscription = dashboardAPI?.expandedPanelId.subscribe((expandedPanelId) => {
+    history.replace({
       ...history.location,
-      pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}${hasExpandedPanel}`,
+      pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}${
+        Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
+      }`,
     });
   });
   const stopWatchingExpandedPanel = () => expandedPanelSubscription.unsubscribe();

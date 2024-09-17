@@ -19,16 +19,20 @@ import * as dashboardApiHelpers from '../dashboard_container/external_api/dashbo
 /* @link https://github.com/elastic/kibana/pull/190086/
 */
 describe('Dashboard App', () => {
-  /**
-   * The buildMockDashboard function within the DashboardRenderer returns the DashboardAPI to the DashboardApp. The dashboard API is needed in the DashboardApp to see if the expandedPanelId BehaviorSubject is called
-   * In this, we are mocking the buildApiFromDashboardContainer function to return the mockDashboard (dashboardAPI) and then have that accessible
-   * for the test that renders the DashboardApp
-   */
-  const mockDashboard = buildMockDashboard();
-  jest.spyOn(dashboardApiHelpers, 'buildApiFromDashboardContainer').mockImplementation(() => {
-    return mockDashboard;
+  let mockHistory: ReturnType<typeof createMemoryHistory>;
+  let mockDashboard: ReturnType<typeof buildMockDashboard>;
+  beforeEach(() => {
+    /**
+     * The buildMockDashboard function within the DashboardRenderer returns the DashboardAPI to the DashboardApp. The dashboard API is needed in the DashboardApp to see if the expandedPanelId BehaviorSubject is called
+     * In this, we are mocking the buildApiFromDashboardContainer function to return the mockDashboard (dashboardAPI) and then have that accessible
+     * for the test that renders the DashboardApp
+     */
+    mockDashboard = buildMockDashboard();
+    jest.spyOn(dashboardApiHelpers, 'buildApiFromDashboardContainer').mockImplementation(() => {
+      return mockDashboard;
+    });
+    mockHistory = createMemoryHistory();
   });
-  const mockHistory = createMemoryHistory();
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
     const historySpy = jest.spyOn(mockHistory, 'replace');
@@ -51,13 +55,13 @@ describe('Dashboard App', () => {
       />
     );
     expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
-    expect(historySpy).toHaveBeenCalledTimes(2);
+    expect(historySpy).toHaveBeenCalledTimes(1);
     expect(mockHistory.location.pathname).toBe('/create/456');
 
     // test as if minimizing a maximized panel
     rerender(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
 
     expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
-    expect(historySpy).toHaveBeenCalledTimes(2);
+    expect(historySpy).toHaveBeenCalledTimes(1);
   });
 });
