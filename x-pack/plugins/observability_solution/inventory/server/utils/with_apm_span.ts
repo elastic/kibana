@@ -4,5 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const DEFAULT_LOG_SOURCES = ['logs-*-*', 'logs-*', 'filebeat-*', 'kibana_sample_data_logs*'];
+// export { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils';

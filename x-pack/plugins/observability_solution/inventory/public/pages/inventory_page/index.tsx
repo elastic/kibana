@@ -4,5 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import { EntitiesGrid } from '../../components/entities_grid';
 
-export const DEFAULT_LOG_SOURCES = ['logs-*-*', 'logs-*', 'filebeat-*', 'kibana_sample_data_logs*'];
+export function InventoryPage() {
+  return (
+    <div>
+      <EntitiesGrid />
+    </div>
+  );
+}

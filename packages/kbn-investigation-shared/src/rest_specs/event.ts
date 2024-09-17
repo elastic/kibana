@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './additional_field_groups';
-export * from './logs_context_service';
+import { z } from '@kbn/zod';
+import { eventSchema } from '../schema';
+
+const eventResponseSchema = eventSchema;
+
+type EventResponse = z.output<typeof eventResponseSchema>;
+
+export { eventResponseSchema };
+export type { EventResponse };
