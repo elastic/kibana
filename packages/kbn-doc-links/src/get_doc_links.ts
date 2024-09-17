@@ -51,6 +51,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     elasticStackGetStarted: isServerless
       ? `${SERVERLESS_DOCS}`
       : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
+    apiReference: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -89,7 +90,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
-      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
+      serverlessGuide: `${SERVERLESS_DOCS}devtools/run-api-requests-in-the-console`,
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -218,6 +219,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchApplicationsSearch: `${ELASTICSEARCH_DOCS}search-application-client.html`,
       searchLabs: `${SEARCH_LABS_URL}`,
       searchLabsRepo: `${SEARCH_LABS_REPO}`,
+      semanticSearch: `${ELASTICSEARCH_DOCS}semantic-search.html`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       semanticTextField: `${ELASTICSEARCH_DOCS}semantic-text.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,

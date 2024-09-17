@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/191808
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
