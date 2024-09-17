@@ -24,10 +24,9 @@ import {
 describe('Agents guards', () => {
   it('isOpenTelemetryAgentName should guard if the passed agent is an OpenTelemetry one.', () => {
     expect(isOpenTelemetryAgentName('otlp')).toBe(true);
-    expect(isOpenTelemetryAgentName('opentelemetry/java')).toBe(true);
-    expect(isOpenTelemetryAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(
-      true
-    );
+    expect(isOpenTelemetryAgentName('opentelemetry')).toBe(true);
+    expect(isOpenTelemetryAgentName('opentelemetry/nodejs')).toBe(true);
+    expect(isOpenTelemetryAgentName('opentelemetry/nodejs/elastic')).toBe(true);
     expect(isOpenTelemetryAgentName('not-an-agent')).toBe(false);
   });
 
@@ -39,6 +38,9 @@ describe('Agents guards', () => {
   });
 
   it('isRumAgentName should guard if the passed agent is an Rum one.', () => {
+    expect(isRumAgentName('opentelemetry/webjs')).toBe(true);
+    expect(isRumAgentName('opentelemetry/webjs/elastic')).toBe(true);
+    expect(isRumAgentName('opentelemetry/fail')).toBe(false);
     expect(isRumAgentName('rum-js')).toBe(true);
     expect(isRumAgentName('not-an-agent')).toBe(false);
   });
@@ -57,11 +59,17 @@ describe('Agents guards', () => {
   });
 
   it('isIosAgentName should guard if the passed agent is an Ios one.', () => {
+    expect(isIosAgentName('opentelemetry/swift/elastic')).toBe(true);
+    expect(isIosAgentName('opentelemetry/swift')).toBe(true);
+    expect(isIosAgentName('opentelemetry/fail')).toBe(false);
     expect(isIosAgentName('ios/swift')).toBe(true);
     expect(isIosAgentName('not-an-agent')).toBe(false);
   });
 
   it('isAndroidAgentName should guard if the passed agent is an Android one.', () => {
+    expect(isAndroidAgentName('opentelemetry/android/elastic')).toBe(true);
+    expect(isAndroidAgentName('opentelemetry/android')).toBe(true);
+    expect(isAndroidAgentName('opentelemetry/fail')).toBe(false);
     expect(isAndroidAgentName('android/java')).toBe(true);
     expect(isAndroidAgentName('not-an-agent')).toBe(false);
   });
