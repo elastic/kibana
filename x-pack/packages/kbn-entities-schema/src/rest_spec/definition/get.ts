@@ -5,9 +5,12 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
-export const getEntityDefinitionParamsSchema = z.object({
-  id: z.string(),
+export const getEntityDefinitionQuerySchema = z.object({
+  page: z.optional(z.coerce.number()),
+  perPage: z.optional(z.coerce.number()),
+  includeState: z.optional(BooleanFromString).default(false),
 });
 
-export type GetEntityDefinitionParams = z.infer<typeof getEntityDefinitionParamsSchema>;
+export type GetEntityDefinitionQuerySchema = z.infer<typeof getEntityDefinitionQuerySchema>;

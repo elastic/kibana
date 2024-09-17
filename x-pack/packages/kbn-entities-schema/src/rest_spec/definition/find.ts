@@ -37,14 +37,16 @@ export const entitiyDefinitionWithStateSchema = entityDefinitionSchema.extend({
 });
 
 export type EntityDefinitionWithState = z.infer<typeof entitiyDefinitionWithStateSchema> & {
-  resources: {
-    ingestPipelines: IngestGetPipelineResponse;
-    transforms: {
-      history?: TransformGetTransformTransformSummary;
-      latest?: TransformGetTransformTransformSummary;
-      stats: {
-        history?: TransformGetTransformStatsTransformStats;
-        latest?: TransformGetTransformStatsTransformStats;
+  state: {
+    resources: {
+      ingestPipelines: IngestGetPipelineResponse;
+      transforms: {
+        history?: TransformGetTransformTransformSummary;
+        latest?: TransformGetTransformTransformSummary;
+        stats: {
+          history?: TransformGetTransformStatsTransformStats;
+          latest?: TransformGetTransformStatsTransformStats;
+        };
       };
     };
   };

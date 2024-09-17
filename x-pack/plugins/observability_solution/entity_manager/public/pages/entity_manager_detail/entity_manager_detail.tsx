@@ -24,7 +24,7 @@ export function EntityManagerDetailPage() {
   } = useKibana().services;
 
   const { entityId } = useParams<{ entityId: string }>();
-  const { data: definition } = useFetchEntityDefinition({ id: entityId });
+  const { data: definition } = useFetchEntityDefinition({ id: entityId, includeState: true });
 
   useBreadcrumbs([
     {

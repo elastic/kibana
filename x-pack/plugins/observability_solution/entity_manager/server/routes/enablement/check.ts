@@ -6,6 +6,7 @@
  */
 
 import semver from 'semver';
+import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import {
   ERROR_API_KEY_NOT_FOUND,
   ERROR_API_KEY_NOT_VALID,
@@ -68,9 +69,13 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
             esClient,
             soClient,
             id: builtInDefinition.id,
+            includeState: true,
           });
 
-          return { installedDefinition: definitions[0], builtInDefinition };
+          return {
+            installedDefinition: definitions[0] as EntityDefinitionWithState,
+            builtInDefinition,
+          };
         })
       ).then((results) =>
         results.reduce(

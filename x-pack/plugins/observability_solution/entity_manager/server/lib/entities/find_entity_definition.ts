@@ -22,13 +22,14 @@ import { BUILT_IN_ID_PREFIX } from './built_in';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { getEntityDefinitionStats } from './get_entity_definition_stats';
 
-export async function findEntityDefinitions({
+export async function findEntityDefinitions<TIncludeState extends boolean | undefined>({
   soClient,
   esClient,
   builtIn,
   id,
   page = 1,
   perPage = 10,
+  includeState,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -36,7 +37,8 @@ export async function findEntityDefinitions({
   id?: string;
   page?: number;
   perPage?: number;
-}): Promise<EntityDefinitionWithState[]> {
+  includeState?: TIncludeState;
+}): Promise<TIncludeState extends true ? EntityDefinitionWithState[] : EntityDefinition[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
@@ -51,29 +53,40 @@ export async function findEntityDefinitions({
     perPage,
   });
 
+  if (!includeState) {
+    return response.saved_objects.map(({ attributes }) => attributes) as TIncludeState extends true
+      ? EntityDefinitionWithState[]
+      : EntityDefinition[];
+  }
+
   return Promise.all(
     response.saved_objects.map(async ({ attributes }) => {
-      const state = await getEntityDefinitionState(esClient, attributes);
-      const stats = await getEntityDefinitionStats(esClient, attributes);
+      const [state, stats] = await Promise.all([
+        getEntityDefinitionState(esClient, attributes),
+        getEntityDefinitionStats(esClient, attributes),
+      ]);
       return { ...attributes, ...state, stats };
     })
   );
 }
 
-export async function findEntityDefinitionById({
+export async function findEntityDefinitionById<TIncludeState extends boolean | undefined>({
   id,
   esClient,
   soClient,
+  includeState,
 }: {
   id: string;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  includeState?: TIncludeState;
 }) {
-  const [definition] = await findEntityDefinitions({
+  const [definition] = await findEntityDefinitions<TIncludeState>({
     esClient,
     soClient,
     id,
     perPage: 1,
+    includeState,
   });
 
   return definition;
@@ -82,7 +95,7 @@ export async function findEntityDefinitionById({
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
-) {
+): Promise<Pick<EntityDefinitionWithState, 'state'>> {
   const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
   const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
   const historyTransformId = generateHistoryTransformId(definition);
@@ -144,15 +157,15 @@ async function getEntityDefinitionState(
         history: historyTransformStats?.stats.exponential_avg_checkpoint_duration_ms ?? null,
         latest: latestTransformStats?.stats.exponential_avg_checkpoint_duration_ms ?? null,
       },
-    },
-    resources: {
-      ingestPipelines,
-      transforms: {
-        history: historyTransform,
-        latest: latestTransform,
-        stats: {
-          history: historyTransformStats,
-          latest: latestTransformStats,
+      resources: {
+        ingestPipelines,
+        transforms: {
+          history: historyTransform,
+          latest: latestTransform,
+          stats: {
+            history: historyTransformStats,
+            latest: latestTransformStats,
+          },
         },
       },
     },

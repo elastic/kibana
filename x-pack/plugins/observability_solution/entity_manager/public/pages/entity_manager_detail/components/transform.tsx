@@ -29,8 +29,8 @@ const HISTORY_TITLE = i18n.translate('xpack.entityManager.transfrom.historyTitle
 
 export function Transform({ definition, type }: TransformProps) {
   const title = type === 'history' ? HISTORY_TITLE : LATEST_TITLE;
-  const transform = definition.resources.transforms[type];
-  const stats = definition.resources.transforms.stats[type];
+  const transform = definition.state.resources.transforms[type];
+  const stats = definition.state.resources.transforms.stats[type];
 
   if (!transform || !stats) return null;
 

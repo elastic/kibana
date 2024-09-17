@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityDefinitionParamsSchema } from '@kbn/entities-schema';
+import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
 
@@ -50,15 +50,19 @@ import { createEntityManagerServerRoute } from '../../create_entity_manager_serv
  *         description: Not found
  */
 export const getEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'GET /internal/entities/definition/{id}',
+  endpoint: 'GET /internal/entities/definition/{id?}',
   params: z.object({
-    path: getEntityDefinitionParamsSchema,
+    query: getEntityDefinitionQuerySchema,
+    path: z.object({ id: z.optional(z.string()) }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
       const client = await getScopedClient({ request });
-      const result = await client.getEntityDefinition({
-        id: params.path.id,
+      const result = await client.getEntityDefinitions({
+        id: params.path?.id,
+        page: params.query.page,
+        perPage: params.query.perPage,
+        includeState: params.query.includeState,
       });
 
       if (result === null) {

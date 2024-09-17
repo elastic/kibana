@@ -71,12 +71,24 @@ export class EntityClient {
     });
   }
 
-  async getEntityDefinitions({ page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
+  async getEntityDefinitions({
+    id,
+    page = 1,
+    perPage = 10,
+    includeState = false,
+  }: {
+    id?: string;
+    page?: number;
+    perPage?: number;
+    includeState?: boolean;
+  }) {
     const definitions = await findEntityDefinitions({
       esClient: this.options.esClient,
       soClient: this.options.soClient,
       page,
       perPage,
+      id,
+      includeState,
     });
 
     return { definitions };

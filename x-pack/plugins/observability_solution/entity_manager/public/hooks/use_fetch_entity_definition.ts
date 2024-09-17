@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { EntityDefinitionWithState, GetEntityDefinitionParams } from '@kbn/entities-schema';
+import { EntityDefinitionWithState, GetEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { useKibana } from './use_kibana';
 import { entityManagerKeys } from './query_key_factory';
 
-export function useFetchEntityDefinition({ id }: GetEntityDefinitionParams) {
+export function useFetchEntityDefinition({ id }: GetEntityDefinitionQuerySchema & { id: string }) {
   const { http } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({

@@ -139,6 +139,7 @@ export async function installBuiltInEntityDefinitions({
       esClient,
       soClient,
       id: builtInDefinition.id,
+      includeState: true,
     });
 
     if (!installedDefinition) {
@@ -151,7 +152,12 @@ export async function installBuiltInEntityDefinitions({
     }
 
     // verify existing installation
-    if (!shouldReinstallBuiltinDefinition(installedDefinition, builtInDefinition)) {
+    if (
+      !shouldReinstallBuiltinDefinition(
+        installedDefinition as EntityDefinitionWithState,
+        builtInDefinition
+      )
+    ) {
       return installedDefinition;
     }
 
