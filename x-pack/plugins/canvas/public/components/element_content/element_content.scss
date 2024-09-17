@@ -17,3 +17,16 @@
   height: 100%;
   width: 100%;
 }
+
+.canvas__element--selected {
+  .embPanel__hoverActionsAnchor {
+    .embPanel__hoverActionsWrapper {
+      z-index: $euiZLevel9;
+      top: -$euiSizeXL;
+
+      .embPanel__hoverActions {
+        opacity: 1;
+      }
+    }
+  }
+}

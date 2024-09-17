@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
+import { getSelectedPage, getPageById, getSelectedElementId } from '../../state/selectors/workpad';
 import { useExpressionsService } from '../../services';
 import { ElementContent as Component, Props as ComponentProps } from './element_content';
 import { State } from '../../../types';
@@ -17,11 +17,12 @@ export type Props = Omit<ComponentProps, 'renderFunction' | 'backgroundColor'>;
 export const ElementContent = (props: Props) => {
   const expressionsService = useExpressionsService();
   const selectedPageId = useSelector(getSelectedPage);
+  const selectedElementId = useSelector(getSelectedElementId);
   const backgroundColor =
     useSelector((state: State) => getPageById(state, selectedPageId)?.style.background) || '';
   const { renderable } = props;
 
   const renderFunction = renderable ? expressionsService.getRenderer(renderable.as) : null;
 
-  return <Component {...{ ...props, renderFunction, backgroundColor }} />;
+  return <Component {...{ ...props, renderFunction, backgroundColor, selectedElementId }} />;
 };
