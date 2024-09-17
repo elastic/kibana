@@ -500,8 +500,8 @@ paths:
                   records:
                     items:
                       oneOf:
-                        - $ref: '#/components/schemas/UserEntityRecord'
-                        - $ref: '#/components/schemas/HostEntityRecord'
+                        - $ref: '#/components/schemas/UserEntity'
+                        - $ref: '#/components/schemas/HostEntity'
                     type: array
                   total:
                     minimum: 0
@@ -632,7 +632,7 @@ components:
         - user
         - host
       type: string
-    HostEntityRecord:
+    HostEntity:
       type: object
       properties:
         entity:
@@ -755,7 +755,7 @@ components:
       required:
         - status_code
         - message
-    UserEntityRecord:
+    UserEntity:
       type: object
       properties:
         entity:
