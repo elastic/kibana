@@ -18,7 +18,7 @@ const { collapseLiteralStrings } = XJson;
 
 export interface RequestArgs {
   http: HttpSetup;
-  requests: Array<{ url: string; method: string; data: string[] }>;
+  requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -129,7 +129,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           }
 
           if (isMultiRequest) {
-            value = `# ${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
+            const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+            value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
           }
 
           results.push({
@@ -163,7 +164,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (isMultiRequest) {
-          value = `# ${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
+          const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+          value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
         }
 
         const result = {
