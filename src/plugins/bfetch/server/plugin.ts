@@ -212,6 +212,7 @@ export class BfetchServerPlugin
                 const result = await handlerInstance.onBatchItem(batchItem);
                 return { id, result };
               } catch (error) {
+                console.log('error2', error);
                 return { id, error: normalizeError<E>(error) };
               }
             }),

@@ -14,6 +14,8 @@ import { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 import { constants, deflate } from 'zlib';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { SerializableRecord } from '@kbn/utility-types';
+import { IncomingMessage } from 'http';
 
 const delimiter = '\n';
 const pDeflate = promisify(deflate);
@@ -84,8 +86,34 @@ export const createCompressedStream = <Response>(
   results
     .pipe(
       concatMap((message: Response) => {
-        const strMessage = JSON.stringify(message);
-        return zipMessageToStream(output, strMessage, metricCollector);
+        const rawResponse = (message as SerializableRecord).result?.rawResponse as IncomingMessage;
+        if (rawResponse && rawResponse.pipe) {
+          let body = '';
+          // Collect data from the stream
+          const streamPromise = new Promise<void>((resolve, reject) => {
+            rawResponse.on('data', (chunk) => {
+              body += chunk.toString(); // Append incoming data chunks
+            });
+
+            rawResponse.on('end', () => {
+              const result = JSON.parse(body);
+              const newMessage = { ...message, result };
+              const newLine = JSON.stringify(newMessage);
+              zipMessageToStream(output, newLine, metricCollector).then((value) => {
+                resolve(value);
+              });
+            });
+
+            rawResponse.on('error', (e) => {
+              reject(e);
+            });
+          });
+
+          return streamPromise;
+        } else {
+          const strMessage = JSON.stringify(message);
+          return zipMessageToStream(output, strMessage, metricCollector);
+        }
       }),
       catchError((e) => {
         logger.error('Could not serialize or stream a message.');

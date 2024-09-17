@@ -446,10 +446,11 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
+    const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
 
+    let responsePromise;
     if (this.bFetchDisabled) {
-      const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-      return this.deps.http
+      responsePromise = this.deps.http
         .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
           version: '1',
           signal: abortSignal,
@@ -459,28 +460,6 @@ export class SearchInterceptor {
             ...searchOptions,
           }),
         })
-        .then((response) => {
-          switch (strategy) {
-            case ENHANCED_ES_SEARCH_STRATEGY:
-              const typedResponse = response as AsyncSearchGetResponse;
-              const shimmedResponse = shimHitsTotal(typedResponse.response);
-              return {
-                ...typedResponse,
-                rawResponse: shimmedResponse,
-                ...getTotalLoaded(shimmedResponse),
-              };
-            case ESQL_ASYNC_SEARCH_STRATEGY:
-              const esqlResponse = response as SqlGetAsyncResponse;
-              return {
-                id: esqlResponse.id,
-                rawResponse: response,
-                isPartial: esqlResponse.is_partial,
-                isRunning: esqlResponse.is_running,
-              };
-            default:
-              return response;
-          }
-        })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
             throw e.body;
@@ -489,18 +468,41 @@ export class SearchInterceptor {
           }
         }) as Promise<IKibanaSearchResponse>;
     } else {
-      const { executionContext, ...rest } = options || {};
-      return this.batchedFetch(
+      const { executionContext: localExecutionContext, ...rest } = options || {};
+      responsePromise = this.batchedFetch(
         {
           request,
           options: this.getSerializableOptions({
             ...rest,
-            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+            executionContext: this.deps.executionContext.withGlobalContext(localExecutionContext),
           }),
         },
         abortSignal
       );
     }
+
+    return responsePromise.then((response) => {
+      switch (strategy) {
+        case ENHANCED_ES_SEARCH_STRATEGY:
+          const typedResponse = response as unknown as AsyncSearchGetResponse;
+          const shimmedResponse = shimHitsTotal(typedResponse.response);
+          return {
+            ...typedResponse,
+            rawResponse: shimmedResponse,
+            ...getTotalLoaded(shimmedResponse),
+          };
+        case ESQL_ASYNC_SEARCH_STRATEGY:
+          const esqlResponse = response as unknown as SqlGetAsyncResponse;
+          return {
+            id: esqlResponse.id,
+            rawResponse: response,
+            isPartial: esqlResponse.is_partial,
+            isRunning: esqlResponse.is_running,
+          };
+        default:
+          return response;
+      }
+    });
   }
 
   /**

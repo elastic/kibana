@@ -98,7 +98,9 @@ export const esqlAsyncSearchStrategyProvider = (
         rawResponse: body,
         isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
         ...(headers?.warning ? { warning: headers?.warning } : {}),
-        ...(requestParams ? { requestParams: sanitizeRequestParams(meta?.request?.params) } : {}),
+        ...(meta?.request?.params
+          ? { requestParams: sanitizeRequestParams(meta?.request?.params) }
+          : {}),
       };
     };
 
