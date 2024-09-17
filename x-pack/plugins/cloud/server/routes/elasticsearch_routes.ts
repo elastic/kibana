@@ -23,6 +23,9 @@ export function defineRoutes({
     {
       path: ELASTICSEARCH_CONFIG_ROUTE,
       validate: {},
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       const body: ElasticsearchConfigType = {
