@@ -194,8 +194,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   const agentsLinkHref = useCallback(
     (policyId) => {
-      // checking the first policy_id - if it's empty we can return #
-      if (!policy?.policy_id) return '#';
+      if (!policy?.policy_ids?.length) return '#';
 
       return getUrlForApp(PLUGIN_ID, {
         path: pagePathGetters.policy_details({ policyId })[1],
