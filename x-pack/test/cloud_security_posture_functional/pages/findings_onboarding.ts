@@ -78,7 +78,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
       await thirdPartyIntegrationsNoFindingsPrompt.navigateToAction(
         '3p-no-findings-prompt-wiz-integration-button',
-        'headerLeft'
+        'headerLeft' // ID of the header element that is visible when the integration overview page is loaded
       );
 
       await PageObjects.common.waitUntilUrlIncludes('wiz/overview');
