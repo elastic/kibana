@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, map, tap } from 'rxjs';
+import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -147,9 +147,6 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
-      map((response) => {
-        return response.rawResponse;
-      }),
       catchError((e) => {
         throw getKbnSearchError(e);
       })

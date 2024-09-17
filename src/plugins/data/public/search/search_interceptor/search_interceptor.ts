@@ -61,8 +61,10 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { AsyncSearchGetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
   getTotalLoaded,
   IAsyncSearchOptions,
   isRunningResponse,
@@ -457,7 +459,7 @@ export class SearchInterceptor {
             ...searchOptions,
           }),
         })
-        .then(async (response: unknown) => {
+        .then((response) => {
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
               const typedResponse = response as AsyncSearchGetResponse;
@@ -466,6 +468,14 @@ export class SearchInterceptor {
                 ...typedResponse,
                 rawResponse: shimmedResponse,
                 ...getTotalLoaded(shimmedResponse),
+              };
+            case ESQL_ASYNC_SEARCH_STRATEGY:
+              const esqlResponse = response as SqlGetAsyncResponse;
+              return {
+                id: esqlResponse.id,
+                rawResponse: response,
+                isPartial: esqlResponse.is_partial,
+                isRunning: esqlResponse.is_running,
               };
             default:
               return response;

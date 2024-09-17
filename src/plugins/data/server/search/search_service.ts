@@ -402,10 +402,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 !(options.isRestore && searchRequest.id) // and not restoring already tracked search
               ) {
                 // then track this search inside the search-session saved object
-                response = {
-                  ...response,
-                  isRestored: !!searchRequest.id,
-                };
+                response.isRestored = !!searchRequest.id;
+
                 // check if search was already tracked and extended, don't track again in this case
                 if (options.isSearchStored || isInternalSearchStored) {
                   return of({

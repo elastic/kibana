@@ -18,11 +18,10 @@ import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
 } from '../common/async_utils';
-import { pollSearch } from '../../../../common';
+import { pollSearch, sanitizeRequestParams } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../config';
 
 // `drop_null_columns` is going to change the response
@@ -74,14 +73,14 @@ export const esqlAsyncSearchStrategyProvider = (
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
             ...requestParams,
           };
-      const { body, headers, meta } = id
+      const response = id
         ? await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'GET',
               path: `/_query/async/${id}`,
               querystring: { ...params },
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
             {
@@ -90,16 +89,17 @@ export const esqlAsyncSearchStrategyProvider = (
               body: params,
               querystring: dropNullColumns ? 'drop_null_columns' : '',
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           );
 
-      const finalResponse = toAsyncKibanaSearchResponse(
-        body,
-        headers?.warning,
-        // do not return requestParams on polling calls
-        id ? undefined : meta?.request?.params
-      );
-      return finalResponse;
+      const { body, headers, meta } = response;
+      return {
+        id: headers['x-elasticsearch-async-id'] as string,
+        rawResponse: body,
+        isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
+        ...(headers?.warning ? { warning: headers?.warning } : {}),
+        ...(requestParams ? { requestParams: sanitizeRequestParams(meta?.request?.params) } : {}),
+      };
     };
 
     const cancel = async () => {
