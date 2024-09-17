@@ -538,7 +538,7 @@ export class DashboardContainer
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
-  public showSettings = showSettings;
+  public openSettingsFlyout = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public duplicatePanel(id: string) {

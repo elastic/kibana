@@ -188,7 +188,7 @@ export function InternalDashboardTopNav({
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
-                onClick={() => dashboardApi.showSettings()}
+                onClick={() => dashboardApi.openSettingsFlyout()}
               />
             </>
           ) : (
