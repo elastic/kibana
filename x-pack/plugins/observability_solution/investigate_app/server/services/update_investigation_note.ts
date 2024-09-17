@@ -21,7 +21,7 @@ export async function updateInvestigationNote(
     throw new Error('Note not found');
   }
 
-  if (note.createdBy !== user.username) {
+  if (note.createdBy !== user.profile_uid) {
     throw new Error('User does not have permission to update note');
   }
 

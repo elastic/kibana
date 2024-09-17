@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
+import { useFetchUserProfiles } from '../../../../hooks/use_fetch_user_profiles';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { Note } from './note';
@@ -30,8 +31,11 @@ export interface Props {
 export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
   const { investigation, addNote, isAddingNote } = useInvestigation();
-  const [noteInput, setNoteInput] = useState('');
+  const { data: userProfiles, isLoading: isLoadingUserProfiles } = useFetchUserProfiles({
+    profileIds: new Set(investigation?.notes.map((note) => note.createdBy) ?? []),
+  });
 
+  const [noteInput, setNoteInput] = useState('');
   const onAddNote = async (content: string) => {
     await addNote(content);
     setNoteInput('');
@@ -59,7 +63,9 @@ export function InvestigationNotes({ user }: Props) {
               <Note
                 key={currNote.id}
                 note={currNote}
-                disabled={currNote.createdBy !== user.username}
+                userProfile={userProfiles?.[currNote.createdBy]}
+                userProfileLoading={isLoadingUserProfiles}
+                isOwner={currNote.createdBy === user.profile_uid}
               />
             );
           })}
