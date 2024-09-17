@@ -28,7 +28,9 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    const apiActions = actionTags.map((tag) => actions.api.get(tag.substring(tagPrefix.length)));
+    const apiActions = actionTags.map((tag) =>
+      actions.api.actionFromRouteTag(tag.substring(tagPrefix.length))
+    );
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
 

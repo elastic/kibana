@@ -12,6 +12,7 @@ import type {
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
@@ -182,10 +183,10 @@ export function privilegesFactory(
         global: {
           all: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
-            actions.api.get('features'),
-            actions.api.get('taskManager'),
-            actions.api.get('manageSpaces'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'features'),
+            actions.api.get(ApiOperation.Manage, 'taskManager'),
+            actions.api.get(ApiOperation.Manage, 'manageSpaces'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
@@ -197,7 +198,7 @@ export function privilegesFactory(
           ],
           read: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
             actions.ui.get('globalSettings', 'show'),
             ...readActions,
           ],
