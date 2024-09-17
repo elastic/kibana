@@ -400,12 +400,18 @@ export function useComboBoxWithCustomInput(
   disabled = false
 ) {
   const [selectedOptions, setSelected] = useState(defaultValue);
-  const [isInvalid, setIsInvalid] = useState(false);
   const [errors, setErrors] = useState<string[] | undefined>();
 
-  const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelected(selected);
-  };
+  const onChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelected(selected);
+      if (errors && validate) {
+        setErrors(validate(selected));
+      }
+    },
+    [validate, errors]
+  );
+
   const onCreateOption = (searchValue: string) => {
     const normalizedSearchValue = searchValue.trim();
     const newOption = {
@@ -413,7 +419,9 @@ export function useComboBoxWithCustomInput(
       value: normalizedSearchValue,
     };
     setSelected([newOption]);
-    setIsInvalid(!normalizedSearchValue);
+    if (validate) {
+      setErrors(validate([newOption]));
+    }
   };
 
   const validateCallback = useCallback(() => {
@@ -426,7 +434,9 @@ export function useComboBoxWithCustomInput(
 
     return true;
   }, [validate, selectedOptions]);
+
   const value = selectedOptions.length > 0 ? selectedOptions[0]?.value : '';
+  const isInvalid = errors !== undefined;
 
   return {
     props: {

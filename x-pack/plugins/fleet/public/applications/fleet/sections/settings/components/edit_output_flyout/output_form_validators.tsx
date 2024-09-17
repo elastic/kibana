@@ -320,6 +320,16 @@ export function validateKafkaStaticTopic(value: string) {
 
 export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
   const res = [];
+  value.forEach((val, idx) => {
+    if (!val) {
+      res.push(
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
+          defaultMessage: 'Topic is required',
+        })
+      );
+    }
+  });
+
   if (value.length === 0) {
     res.push(
       i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {

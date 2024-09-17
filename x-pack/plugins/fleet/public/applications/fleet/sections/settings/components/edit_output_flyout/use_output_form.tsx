@@ -630,6 +630,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const diskQueuePathValid = diskQueuePathInput.validate();
     const partitioningRandomGroupEventsValid = kafkaPartitionTypeRandomInput.validate();
     const partitioningRoundRobinGroupEventsValid = kafkaPartitionTypeRoundRobinInput.validate();
+    const kafkaStaticTopicInputValid = kafkaStaticTopicInput.validate();
+    const kafkaStaticDynamicTopicInputValid = kafkaDynamicTopicInput.validate();
 
     const kafkaSslKeyValid = kafkaSslKeyInput.value
       ? kafkaSslKeyPlainValid
@@ -662,7 +664,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
         partitioningRandomGroupEventsValid &&
-        partitioningRoundRobinGroupEventsValid
+        partitioningRoundRobinGroupEventsValid &&
+        kafkaStaticTopicInputValid &&
+        kafkaStaticDynamicTopicInputValid
       );
     }
     if (isRemoteElasticsearch) {
@@ -706,6 +710,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     diskQueuePathInput,
     kafkaPartitionTypeRandomInput,
     kafkaPartitionTypeRoundRobinInput,
+    kafkaStaticTopicInput,
+    kafkaDynamicTopicInput,
     isLogstash,
     isKafka,
     isRemoteElasticsearch,
