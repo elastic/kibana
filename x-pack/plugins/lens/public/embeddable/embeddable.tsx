@@ -88,7 +88,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { getSuccessfulRequestTimings } from '../report_performance_metric_util';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -1081,29 +1081,13 @@ export class Embeddable
     });
 
     const inspectorAdapters = this.getInspectorAdapters();
-    const requests = inspectorAdapters.requests?.getRequests() || [];
-
-    let totalTookTime = 0;
-    let allValid = true;
-    let totalTime = 0;
-    for (let i = 0; i < requests.length; i++) {
-      const request = requests[i];
-      if (request.status !== RequestStatus.OK) {
-        allValid = false;
-        break;
-      }
-      totalTookTime +=
-        (request.response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
-          ?.rawResponse?.took ?? 0;
-      totalTime += request.time || 0;
-    }
-
-    if (allValid) {
+    const timings = getSuccessfulRequestTimings(inspectorAdapters);
+    if (timings) {
       const esRequestMetrics = {
         eventName: 'lens_chart_es_request_totals',
-        duration: totalTime,
+        duration: timings.requestTimeTotal,
         key1: 'es_took_total',
-        value1: totalTookTime,
+        value1: timings.esTookTotal,
       };
       reportPerformanceMetricEvent(this.deps.coreStart.analytics, esRequestMetrics);
     }
