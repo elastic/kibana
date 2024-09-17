@@ -40,6 +40,7 @@ import type {
   TimeframePreviewOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -88,6 +89,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 }) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
+
+  const isLoggingRequestsFeatureEnabled = useIsExperimentalFeatureEnabled('loggingRequestsEnabled');
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
@@ -279,7 +282,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      {RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType) ? (
+      {isLoggingRequestsFeatureEnabled &&
+      RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType) ? (
         <EuiFormRow>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
             <EuiFlexItem grow>

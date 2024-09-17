@@ -23,6 +23,7 @@ import {
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -35,9 +36,21 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 jest.mock('./use_preview_invocation_count');
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 // rule types that do not support logged requests
-const ruleTypes: Type[] = ['threshold', 'threat_match', 'machine_learning', 'query', 'new_terms'];
+const doNotSupportLoggedRequests: Type[] = [
+  'threshold',
+  'threat_match',
+  'machine_learning',
+  'query',
+  'new_terms',
+];
+
+const supportLoggedRequests: Type[] = ['esql', 'eql'];
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
@@ -101,6 +114,8 @@ describe('PreviewQuery', () => {
     });
 
     (usePreviewInvocationCount as jest.Mock).mockReturnValue({ invocationCount: 500 });
+
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -142,20 +157,39 @@ describe('PreviewQuery', () => {
     expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
   });
 
-  test('renders "Show Elasticsearch requests" for ES|QL rule type', () => {
-    render(
-      <TestProviders>
-        <RulePreview
-          {...defaultProps}
-          defineRuleData={{ ...defaultProps.defineRuleData, ruleType: 'esql' }}
-        />
-      </TestProviders>
-    );
+  supportLoggedRequests.forEach((ruleType) => {
+    test(`renders "Show Elasticsearch requests" for ${ruleType} rule type`, () => {
+      render(
+        <TestProviders>
+          <RulePreview
+            {...defaultProps}
+            defineRuleData={{ ...defaultProps.defineRuleData, ruleType }}
+          />
+        </TestProviders>
+      );
 
-    expect(screen.getByTestId('show-elasticsearch-requests')).toBeInTheDocument();
+      expect(screen.getByTestId('show-elasticsearch-requests')).toBeInTheDocument();
+    });
   });
 
-  ruleTypes.forEach((ruleType) => {
+  supportLoggedRequests.forEach((ruleType) => {
+    test(`does not render "Show Elasticsearch requests" for ${ruleType} rule type when feature is disabled`, () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <RulePreview
+            {...defaultProps}
+            defineRuleData={{ ...defaultProps.defineRuleData, ruleType }}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('show-elasticsearch-requests')).toBeNull();
+    });
+  });
+
+  doNotSupportLoggedRequests.forEach((ruleType) => {
     test(`does not render "Show Elasticsearch requests" for ${ruleType} rule type`, () => {
       render(
         <TestProviders>

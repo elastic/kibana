@@ -129,6 +129,11 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
+
+  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,

@@ -30,9 +30,16 @@ import { visitEditRulePage } from '../../../../tasks/edit_rule';
 const expectedValidEsqlQuery = 'from auditbeat* METADATA _id';
 
 describe(
-  'Detection ES|QL rules, preview',
+  'Detection rules, preview',
   {
-    tags: ['@ess', '@serverless'],
+    // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
+    // Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      kbnServerArgs: [
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['loggingRequestsEnabled'])}`,
+      ],
+    },
   },
   () => {
     beforeEach(() => {
