@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -15,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover no data', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/discover';
@@ -25,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -34,17 +36,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('when no data opens integrations', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
-      await PageObjects.common.waitUntilUrlIncludes('integrations/browse');
+      await common.waitUntilUrlIncludes('integrations/browse');
     });
 
     it('adds a new data view when no data views', async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
@@ -57,12 +59,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
       });
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
 
       await testSubjects.click('tryESQLLink');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('TextBasedLangEditor');
       await testSubjects.existOrFail('unifiedHistogramChart');
       const rows = await dataGrid.getDocTableRows();

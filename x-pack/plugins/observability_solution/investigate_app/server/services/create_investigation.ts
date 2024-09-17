@@ -8,11 +8,7 @@
 import { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
-
-enum InvestigationStatus {
-  ongoing = 'ongoing',
-  closed = 'closed',
-}
+import { Investigation } from '../models/investigation';
 
 export async function createInvestigation(
   params: CreateInvestigationParams,
@@ -22,11 +18,13 @@ export async function createInvestigation(
     throw new Error(`Investigation [id=${params.id}] already exists`);
   }
 
-  const investigation = {
+  const now = Date.now();
+  const investigation: Investigation = {
     ...params,
-    createdAt: Date.now(),
+    updatedAt: now,
+    createdAt: now,
     createdBy: user.username,
-    status: InvestigationStatus.ongoing,
+    status: 'triage',
     notes: [],
     items: [],
   };
