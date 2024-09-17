@@ -45,6 +45,7 @@ export interface WithDefaultControllerState {
   isIndexNotFoundError?: boolean;
   integration?: Integration;
   expandedDegradedField?: string;
+  isNonAggregatable?: boolean;
 }
 
 export interface WithDataStreamDetails {
