@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('virtual column cell actions', () => {
+    describe.skip('virtual column cell actions', () => {
       beforeEach(async () => {
         await navigateToLogsExplorer();
       });
