@@ -138,6 +138,18 @@ describe('TextBasedLanguagesEditor', () => {
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
   });
 
+  it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
+    const newProps = {
+      ...props,
+      displayDocumentationAsFlyout: true,
+      editorIsInline: false,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
+      0
+    );
+  });
+
   it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
     const newProps = {
       ...props,

@@ -7,8 +7,8 @@
     "*.scss"
   ],
   "scripts": {
-    "make:docs": "ts-node --transpileOnly scripts/generate_esql_docs.ts",
+    "make:docs": "ts-node --transpileOnly src/scripts/generate_esql_docs.ts",
     "postmake:docs": "yarn run lint:fix",
-    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-language-documentation-popover/src/sections/esql_documentation_sections.tsx"
+    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-language-documentation-popover/src/sections/generated"
   }
 }

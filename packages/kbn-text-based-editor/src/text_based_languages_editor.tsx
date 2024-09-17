@@ -77,6 +77,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
+  displayDocumentationAsFlyout,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -562,6 +563,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onLayoutChangeRef.current = onLayoutChange;
 
   const codeEditorOptions: CodeEditorProps['options'] = {
+    hover: {
+      above: false,
+    },
     accessibilitySupport: 'off',
     autoIndent: 'none',
     automaticLayout: true,
@@ -765,6 +769,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         hideQueryHistory={hideHistoryComponent}
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
+        displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+      />
+      <ResizableButton
+        onMouseDownResizeHandler={onMouseDownResizeHandler}
+        onKeyDownResizeHandler={onKeyDownResizeHandler}
+        editorIsInline={editorIsInline}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

@@ -11,7 +11,9 @@ import { css } from '@emotion/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormRow,
   EuiLink,
+  EuiText,
   useEuiTheme,
   EuiFieldSearch,
   EuiComboBox,
@@ -39,27 +41,47 @@ function DocumentationNav({
 
   return (
     <>
-      {linkToDocumentation && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-items: flex-end;
-            padding-top: ${euiTheme.size.xs};
-          `}
-        >
-          <EuiLink
-            external
-            href={linkToDocumentation}
-            target="_blank"
-            data-test-subj="language-documentation-navigation-link"
-          >
-            {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
-              defaultMessage: 'View full ES|QL documentation',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
       <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
+              defaultMessage: 'Select or search topics',
+            })}
+            labelAppend={
+              linkToDocumentation && (
+                <EuiText size="xs">
+                  <EuiLink
+                    external
+                    href={linkToDocumentation}
+                    target="_blank"
+                    data-test-subj="language-documentation-navigation-link"
+                  >
+                    {i18n.translate('languageDocumentationPopover.esqlDocsLinkLabel', {
+                      defaultMessage: 'View full ES|QL documentation',
+                    })}
+                  </EuiLink>
+                </EuiText>
+              )
+            }
+          >
+            <EuiComboBox
+              aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
+                defaultMessage: 'Navigate through the documentation',
+              })}
+              placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
+                defaultMessage: 'Commands and functions',
+              })}
+              data-test-subj="language-documentation-navigation-dropdown"
+              options={filteredGroups}
+              selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
+              singleSelection={{ asPlainText: true }}
+              onChange={onNavigationChange}
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
           css={css`
@@ -77,23 +99,6 @@ function DocumentationNav({
             })}
             fullWidth
             compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiComboBox
-            aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
-              defaultMessage: 'Navigate through the documentation',
-            })}
-            placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
-              defaultMessage: 'Commands and functions',
-            })}
-            data-test-subj="language-documentation-navigation-dropdown"
-            options={filteredGroups}
-            selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
-            singleSelection={{ asPlainText: true }}
-            onChange={onNavigationChange}
-            compressed
-            fullWidth
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -11,12 +11,19 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { functions } from '../sections/esql_documentation_sections';
+import { functions } from '../sections/generated/scalar_functions';
 
 (function () {
   const pathToElasticsearch = process.argv[2];
-  const functionDocs = loadFunctionDocs(pathToElasticsearch);
-  writeFunctionDocs(functionDocs);
+  const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
+  writeFunctionDocs(
+    scalarFunctions,
+    path.join(__dirname, '.../sections/generated/scalar_functions.tsx')
+  );
+  writeFunctionDocs(
+    aggregationFunctions,
+    path.join(__dirname, '.../sections/generated/aggregation_functions.tsx')
+  );
 })();
 
 function loadFunctionDocs(pathToElasticsearch: string) {
@@ -34,21 +41,21 @@ function loadFunctionDocs(pathToElasticsearch: string) {
     .readdirSync(definitionsPath)
     .map((file) => JSON.parse(fs.readFileSync(`${definitionsPath}/${file}`, 'utf-8')));
 
-  // Initialize an empty map
-  const functionMap = new Map<string, string>();
+  const scalarFunctions = new Map<string, string>();
+  const aggregationFunctions = new Map<string, string>();
 
   // Iterate over each file in the directory
   for (const file of docsFiles) {
     // Ensure we only process .md files
     if (path.extname(file) === '.md') {
-      if (
-        !ESFunctionDefinitions.find(
-          (def) => def.name === path.basename(file, '.md') && def.type === 'eval'
-        )
-      ) {
-        // Exclude non-scalar functions (for now)
+      const functionDefinition = ESFunctionDefinitions.find(
+        (def) => def.name === path.basename(file, '.md')
+      );
+
+      if (!functionDefinition) {
         continue;
       }
+
       // Read the file content
       const content = fs.readFileSync(path.join(docsPath, file), 'utf-8');
 
@@ -56,14 +63,19 @@ function loadFunctionDocs(pathToElasticsearch: string) {
       const functionName = path.basename(file, '.md');
 
       // Add the function name and content to the map
-      functionMap.set(functionName, content);
+      if (functionDefinition.type === 'eval') {
+        scalarFunctions.set(functionName, content);
+      }
+      if (functionDefinition.type === 'agg') {
+        aggregationFunctions.set(functionName, content);
+      }
     }
   }
 
-  return functionMap;
+  return { scalarFunctions, aggregationFunctions };
 }
 
-function writeFunctionDocs(functionDocs: Map<string, string>) {
+function writeFunctionDocs(functionDocs: Map<string, string>, pathToDocsFile: string) {
   const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
     const docWithoutLinks = removeAsciiDocInternalCrossReferences(
       doc,
@@ -81,6 +93,9 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
     ),
     description: (
       <Markdown
+        openLinksInNewTab
+        readOnly
+        enableSoftLineBreaks
         markdownContent={i18n.translate(
           'languageDocumentationPopover.documentationESQL.${name}.markdown',
           {
@@ -94,8 +109,6 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
     ),
   };`;
   });
-
-  const pathToDocsFile = path.join(__dirname, '../sections/esql_documentation_sections.tsx');
 
   const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'), {
     parser: require('recast/parsers/babel'),

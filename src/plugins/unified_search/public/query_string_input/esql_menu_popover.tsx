@@ -31,6 +31,7 @@ export const ESQLMenuPopover = () => {
 
   const toggleLanguageComponent = useCallback(async () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
+    setIsESQLMenuPopoverOpen(false);
   }, [isLanguageComponentOpen]);
 
   const esqlPanelItems = useMemo(() => {
@@ -52,6 +53,7 @@ export const ESQLMenuPopover = () => {
         data-test-subj="esql-about"
         target="_blank"
         href={docLinks.links.query.queryESQL}
+        onClick={() => setIsESQLMenuPopoverOpen(false)}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
           defaultMessage: 'Documentation',
@@ -63,6 +65,7 @@ export const ESQLMenuPopover = () => {
         data-test-subj="esql-examples"
         target="_blank"
         href={docLinks.links.query.queryESQLExamples}
+        onClick={() => setIsESQLMenuPopoverOpen(false)}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
           defaultMessage: 'Example queries',
@@ -75,6 +78,7 @@ export const ESQLMenuPopover = () => {
         data-test-subj="esql-feedback"
         target="_blank"
         href={FEEDBACK_LINK}
+        onClick={() => setIsESQLMenuPopoverOpen(false)}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
           defaultMessage: 'Submit feedback',
