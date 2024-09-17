@@ -134,9 +134,9 @@ export const UserPanel = ({
             name: userName,
             email,
           },
+          path: tab ? { tab } : undefined,
           hasMisconfigurationFindings,
         },
-        path: tab ? { tab } : undefined,
       });
     },
     [

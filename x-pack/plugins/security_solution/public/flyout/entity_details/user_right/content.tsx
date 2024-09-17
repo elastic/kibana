@@ -90,7 +90,7 @@ export const UserPanelContent = ({
           openDetailsPanel={openDetailsPanel}
         />
       )}
-      <EntityInsight name={userName} fieldName={'user.name'} />
+      <EntityInsight name={userName} fieldName={'user.name'} isPreviewMode={isPreviewMode} />
     </FlyoutBody>
   );
 };

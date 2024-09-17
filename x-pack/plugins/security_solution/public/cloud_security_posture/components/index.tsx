@@ -16,9 +16,11 @@ import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_pr
 export const EntityInsight = <T,>({
   name,
   fieldName,
+  isPreviewMode,
 }: {
   name: string;
   fieldName: 'host.name' | 'user.name';
+  isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const getSetupStatus = useCspSetupStatusApi();
@@ -51,7 +53,11 @@ export const EntityInsight = <T,>({
             }
           >
             <EuiSpacer size="m" />
-            <MisconfigurationsPreview name={name} fieldName={fieldName} />
+            <MisconfigurationsPreview
+              name={name}
+              fieldName={fieldName}
+              isPreviewMode={isPreviewMode}
+            />
             <EuiSpacer size="m" />
           </EuiAccordion>
         </>

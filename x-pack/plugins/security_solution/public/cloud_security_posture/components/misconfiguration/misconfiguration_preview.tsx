@@ -125,9 +125,11 @@ const MisconfigurationPreviewScore = ({
 export const MisconfigurationsPreview = ({
   name,
   fieldName,
+  isPreviewMode,
 }: {
   name: string;
   fieldName: 'host.name' | 'user.name';
+  isPreviewMode?: boolean;
 }) => {
   const { data } = useMisconfigurationPreview({
     query: buildEntityFlyoutPreviewQuery(fieldName, name),
@@ -160,7 +162,6 @@ export const MisconfigurationsPreview = ({
       ? !!(riskData as HostRiskScore)?.host.risk
       : !!(riskData as UserRiskScore)?.user.risk;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const isPreviewMode = false;
   const goToEntityInsightTab = useCallback(() => {
     openLeftPanel({
       id: fieldName === 'host.name' ? HostDetailsPanelKey : UserDetailsPanelKey,
@@ -198,7 +199,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
