@@ -97,7 +97,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/security-solution-common",
     "@kbn/router-utils",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/logs-data-access-plugin"
   ],
   "exclude": [
     "target/**/*"
