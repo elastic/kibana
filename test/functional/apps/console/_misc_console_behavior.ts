@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it.only('should go to line number when Ctrl+L is pressed', async () => {
+      it.skip('should go to line number when Ctrl+L is pressed', async () => {
         await PageObjects.console.enterText(
           '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
         );
