@@ -803,7 +803,15 @@
               "\nUse to retry block {options.retryCount} times within {options.timeout} period and return block result"
             ],
             "signature": [
-              "<T>(description: string, block: () => Promise<T>, options: TryWithRetriesOptions, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+              "<T>(description: string, block: () => Promise<T>, options: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.TryWithRetriesOptions",
+                "text": "TryWithRetriesOptions"
+              },
+              ", onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
@@ -853,7 +861,13 @@
                   "options.retryCount for how many attempts to retry"
                 ],
                 "signature": [
-                  "TryWithRetriesOptions"
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.TryWithRetriesOptions",
+                    "text": "TryWithRetriesOptions"
+                  }
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
                 "deprecated": false,
@@ -1309,6 +1323,59 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.TryWithRetriesOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "TryWithRetriesOptions",
+        "description": [],
+        "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.TryWithRetriesOptions.retryCount",
+            "type": "number",
+            "tags": [],
+            "label": "retryCount",
+            "description": [],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.TryWithRetriesOptions.retryDelay",
+            "type": "number",
+            "tags": [],
+            "label": "retryDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.TryWithRetriesOptions.timeout",
+            "type": "number",
+            "tags": [],
+            "label": "timeout",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
             "trackAdoption": false
           }
