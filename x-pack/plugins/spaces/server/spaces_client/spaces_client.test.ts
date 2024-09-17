@@ -20,15 +20,8 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-const defaultConfig: Pick<ConfigType, 'experimental'> = {
-  experimental: {
-    forceSolutionVisibility: false,
-  },
-};
-
 const createMockConfig = (
   mockConfig: ConfigType = {
-    ...defaultConfig,
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
@@ -325,7 +318,6 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
-      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
@@ -418,7 +410,6 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
-      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
@@ -456,7 +447,6 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
-      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
@@ -505,7 +495,6 @@ describe('#create', () => {
     } as any);
 
     const mockConfig = createMockConfig({
-      ...defaultConfig,
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
@@ -550,7 +539,6 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
@@ -589,7 +577,6 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
@@ -631,7 +618,6 @@ describe('#create', () => {
       } as any);
 
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
@@ -857,7 +843,6 @@ describe('#update', () => {
     test(`updates space without disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
@@ -885,7 +870,6 @@ describe('#update', () => {
     test(`throws bad request when updating space with disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
@@ -919,7 +903,6 @@ describe('#update', () => {
     test(`throws bad request when updating space with solution`, async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockConfig = createMockConfig({
-        ...defaultConfig,
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
