@@ -165,7 +165,7 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="cloud-details-section"
       >
-        <CloudDetailsPanel cloudId={cloud.cloudId} elasticsearchUrl={elasticsearchUrl} />
+        <CloudDetailsPanel cloudId={cloud.cloudId} elasticsearchUrl={elasticsearchUrl || undefined} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"
