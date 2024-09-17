@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
 import { createSpace, deleteSpace } from '../../tasks/spaces';
 import {
@@ -59,7 +58,6 @@ describe(
     beforeEach(() => {
       login(ROLE.system_indices_superuser);
       navigateToRolePage();
-      closeAllToasts();
       setRoleName(roleName);
       openKibanaFeaturePrivilegesFlyout();
       expandSecuritySolutionCategoryKibanaPrivileges();
@@ -76,7 +74,6 @@ describe(
       clickRoleSaveButton();
 
       navigateToRolePage(roleName);
-      closeAllToasts();
       clickViewPrivilegeSummaryButton();
       cy.getByTestSubj('expandPrivilegeSummaryRow').click({ multiple: true });
 
