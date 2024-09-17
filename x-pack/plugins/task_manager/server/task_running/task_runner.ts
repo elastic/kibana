@@ -11,6 +11,7 @@
  * rescheduling, middleware application, etc.
  */
 
+import { Observable } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
@@ -55,9 +56,10 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
-import { CLAIM_STRATEGY_MGET, type EventLoopDelayConfig } from '../config';
+import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
+import { getNextRunAt } from '../lib/get_next_run_at';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -108,9 +110,10 @@ type Opts = {
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
-  eventLoopDelayConfig: EventLoopDelayConfig;
+  config: TaskManagerConfig;
   allowReadingInvalidState: boolean;
   strategy: string;
+  pollIntervalConfiguration$: Observable<number>;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -160,9 +163,10 @@ export class TaskManagerRunner implements TaskRunner {
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
-  private eventLoopDelayConfig: EventLoopDelayConfig;
+  private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
+  private currentPollInterval: number;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -185,9 +189,10 @@ export class TaskManagerRunner implements TaskRunner {
     onTaskEvent = identity,
     executionContext,
     usageCounter,
-    eventLoopDelayConfig,
+    config,
     allowReadingInvalidState,
     strategy,
+    pollIntervalConfiguration$,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -200,13 +205,17 @@ export class TaskManagerRunner implements TaskRunner {
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
-    this.eventLoopDelayConfig = eventLoopDelayConfig;
+    this.config = config;
     this.taskValidator = new TaskValidator({
       logger: this.logger,
       definitions: this.definitions,
       allowReadingInvalidState,
     });
     this.claimStrategy = strategy;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
   }
 
   /**
@@ -335,7 +344,7 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
-    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
     const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -637,13 +646,20 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
-          const { startedAt, schedule } = this.instance.task;
-
+          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
           return asOk({
             runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+              runAt ||
+              getNextRunAt(
+                {
+                  runAt: this.instance.task.runAt,
+                  startedAt: this.instance.task.startedAt,
+                  schedule: updatedTaskSchedule,
+                },
+                this.currentPollInterval
+              ),
             state,
-            schedule: reschedule ?? schedule,
+            schedule: updatedTaskSchedule,
             attempts,
             status: TaskStatus.Idle,
           });
@@ -791,7 +807,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     const { eventLoopBlockMs = 0 } = taskTiming;
     const taskLabel = `${this.taskType} ${this.instance.task.id}`;
-    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
+    if (eventLoopBlockMs > this.config.event_loop_delay.warn_threshold) {
       this.logger.warn(
         `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
         {

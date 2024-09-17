@@ -11,13 +11,14 @@ import { createContext } from 'react';
 import { createDispatchHook, createSelectorHook, ReactReduxContextValue } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
-import { reducer } from './reducer';
+import { panelsReducer } from './reducers';
 import { initialState, State } from './state';
 
 export const store = configureStore({
-  reducer,
+  reducer: {
+    panels: panelsReducer,
+  },
   devTools: process.env.NODE_ENV !== 'production',
-  enhancers: [],
 });
 
 export const Context = createContext<ReactReduxContextValue<State>>({
@@ -30,7 +31,7 @@ export const useSelector = createSelectorHook(Context);
 
 const stateSelector = (state: State) => state;
 
+const panelsSelector = createSelector(stateSelector, (state) => state.panels);
 export const selectPanelsById = (id: string) =>
-  createSelector(stateSelector, (state) => state.byId[id] || {});
-
-export const selectNeedsSync = () => createSelector(stateSelector, (state) => state.needsSync);
+  createSelector(panelsSelector, (state) => state.byId[id] || {});
+export const selectNeedsSync = () => createSelector(panelsSelector, (state) => state.needsSync);

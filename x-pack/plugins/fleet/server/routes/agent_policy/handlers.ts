@@ -191,6 +191,11 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
     let items = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
