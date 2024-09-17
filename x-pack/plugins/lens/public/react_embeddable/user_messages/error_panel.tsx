@@ -30,22 +30,34 @@ export function VisualizationErrorPanel({
         data-test-subj="embeddable-lens-failure"
         body={
           <>
-            <p>{errors[0].longMessage}</p>
-            {canFixInLens ? (
+            {errors.length ? (
+              <>
+                <p>{errors[0].longMessage}</p>
+                {showMore && !canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
+                    />
+                  </p>
+                ) : null}
+              </>
+            ) : (
               <p>
                 <FormattedMessage
-                  id="xpack.lens.fixErrors"
-                  defaultMessage="Edit in Lens editor to fix the error"
+                  id="xpack.lens.failure"
+                  defaultMessage="Visualization couldn't be displayed"
                 />
               </p>
-            ) : showMore ? (
-              <p>
-                <FormattedMessage
-                  id="xpack.lens.moreErrors"
-                  defaultMessage="Edit in Lens editor to see more errors"
-                />
-              </p>
-            ) : null}
+            )}
           </>
         }
       />

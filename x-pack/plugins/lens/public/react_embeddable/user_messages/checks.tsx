@@ -31,7 +31,7 @@ export function getLegacyURLConflictsMessage(
     uniqueId: 'url-conflict',
     severity: 'error',
     displayLocations: [{ id: 'visualization' }],
-    shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+    shortMessage: i18n.translate('xpack.lens.legacyURLConflict.shortMessage', {
       defaultMessage: `You've encountered a URL conflict`,
     }),
     longMessage: <LegacyURLConfig targetType={DOC_TYPE} sourceId={metaInfo.sourceId!} />,
@@ -61,10 +61,10 @@ export function getSearchContextIncompatibleMessage(): UserMessage {
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
-    shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
+    shortMessage: i18n.translate('xpack.lens.missingTimeRangeParam.shortMessage', {
       defaultMessage: `Missing timeRange property`,
     }),
-    longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
+    longMessage: i18n.translate('xpack.lens.missingTimeRangeParam.longMessage', {
       defaultMessage: `The timeRange property is required for the given configuration`,
     }),
   };
