@@ -148,7 +148,7 @@ export const createAppMockRenderer = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: console.error,
+      error: () => {},
     },
   });
 

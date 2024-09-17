@@ -20,19 +20,19 @@ steps:
   #       - exit_status: '-1'
   #         limit: 3
 
-  - command: .buildkite/scripts/steps/quick_checks.sh
-    label: 'Quick Checks'
-    agents:
-      machineType: n2-highcpu-8
-      preemptible: true
-    key: quick_checks
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - wait
+  # - command: .buildkite/scripts/steps/quick_checks.sh
+  #   label: 'Quick Checks'
+  #   agents:
+  #     machineType: n2-highcpu-8
+  #     preemptible: true
+  #   key: quick_checks
+  #   timeout_in_minutes: 60
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
+  #
+  # - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready

@@ -49,10 +49,15 @@ export type CasesContextStoreAction =
     }
   | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
 
+let count = 0;
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
   action: CasesContextStoreAction
 ): CasesContextState => {
+  if (count === 1) {
+    console.log('calling the casesContextReducer function');
+  }
+  count++;
   switch (action.type) {
     case CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT: {
       return { ...state, createCaseFlyout: { isFlyoutOpen: true, props: action.payload } };
