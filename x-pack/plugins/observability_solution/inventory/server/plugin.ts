@@ -262,7 +262,7 @@ export class InventoryPlugin
             method: 'GET',
             path: `${datastream}/_search`,
             body: {
-              size: 50,
+              size: 100,
               sort: [{ '@timestamp': { order: 'desc' } }],
               query:
                 request.body.filter !== ''

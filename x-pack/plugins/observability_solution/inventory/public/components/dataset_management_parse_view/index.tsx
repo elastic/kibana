@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -30,6 +30,22 @@ import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { planToConsoleOutput } from '../dataset_detail_view/utils';
+
+function useDebounce<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 function deepSortKeys(obj: any): any {
   if (Array.isArray(obj)) {
@@ -71,7 +87,6 @@ export function DatasetManagementParseView() {
   }`);
 
   const [plan, setPlan] = React.useState<unknown>(undefined);
-  const [docI, setDocI] = React.useState<number>(0);
 
   const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
 
@@ -127,6 +142,42 @@ export function DatasetManagementParseView() {
     }
     return undefined;
   }, [logsQueryResult]);
+
+  const [loading, setLoading] = useState(false);
+
+  async function sendPlan() {
+    setLoading(true);
+    const result = await http.post('/api/apply_change/plan', {
+      body: JSON.stringify({
+        datastream: id,
+        change: JSON.parse(code),
+        filter: persistedKqlFilter,
+      }),
+    });
+    setLoading(false);
+    setPlan({
+      ...result,
+      diff: result.simulatedRun.docs.map((after, i) =>
+        after.doc
+          ? calculateDiff({
+              diffMode: 'lines',
+              comparisonValue: deepSortKeys(cleanDoc(after.doc)),
+              baseValue: deepSortKeys(cleanDoc(result.docs[i])),
+            })
+          : after
+      ),
+    });
+  }
+
+  const debouncedCode = useDebounce(code, 1000);
+  const pendingChanges = loading || debouncedCode !== code;
+
+  useEffect(() => {
+    if (debouncedCode) {
+      sendPlan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedCode]);
 
   return details.loading ? (
     <EuiLoadingSpinner />
@@ -203,28 +254,9 @@ export function DatasetManagementParseView() {
           <EuiButton
             data-test-subj="inventoryDatasetManagementParseViewCheckButton"
             fill
-            onClick={async () => {
-              const result = await http.post('/api/apply_change/plan', {
-                body: JSON.stringify({
-                  datastream: id,
-                  change: JSON.parse(code),
-                  filter: persistedKqlFilter,
-                }),
-              });
-              setPlan({
-                ...result,
-                diff: result.simulatedRun.docs.map((after, i) =>
-                  after.doc
-                    ? calculateDiff({
-                        diffMode: 'lines',
-                        comparisonValue: deepSortKeys(cleanDoc(after.doc)),
-                        baseValue: deepSortKeys(cleanDoc(result.docs[i])),
-                      })
-                    : after
-                ),
-              });
-            }}
+            onClick={sendPlan}
           >
+            {pendingChanges && <EuiLoadingSpinner />}{' '}
             {i18n.translate('xpack.inventory.datasetManagementParseView.checkButtonLabel', {
               defaultMessage: 'Check',
             })}
@@ -233,66 +265,7 @@ export function DatasetManagementParseView() {
       </EuiPanel>
       {plan && (
         <>
-          <EuiPanel>
-            <EuiText size="m">
-              <h1>
-                {i18n.translate('xpack.inventory.datasetManagementParseView.h1.testRunLabel', {
-                  defaultMessage: 'Test Run',
-                })}
-              </h1>
-            </EuiText>
-            <EuiSpacer />
-            <EuiButton
-              data-test-subj="inventoryDatasetManagementParseViewPreviousButton"
-              onClick={() => setDocI((docI - 1) % plan.simulatedRun.docs.length)}
-            >
-              {i18n.translate('xpack.inventory.datasetManagementParseView.previousButtonLabel', {
-                defaultMessage: 'Previous',
-              })}
-            </EuiButton>
-            {docI + 1} / {plan.simulatedRun.docs.length}
-            <EuiButton
-              data-test-subj="inventoryDatasetManagementParseViewNextButton"
-              onClick={() => setDocI((docI + 1) % plan.simulatedRun.docs.length)}
-            >
-              {i18n.translate('xpack.inventory.datasetManagementParseView.nextButtonLabel', {
-                defaultMessage: 'Next',
-              })}
-            </EuiButton>
-            <EuiSpacer />
-            <div style={{ overflowY: 'scroll', height: 500 }}>
-              {plan.diff[docI].error ? (
-                <EuiCallOut color="danger">
-                  <pre>{JSON.stringify(plan.simulatedRun.docs[docI], null, 2)}</pre>
-                  <pre>{JSON.stringify(plan.docs[docI], null, 2)}</pre>
-                </EuiCallOut>
-              ) : plan.diff[docI].some((d) => d.added || d.removed) ? (
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  {plan.diff[docI].map((part, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        backgroundColor: part.added
-                          ? 'lightgreen'
-                          : part.removed
-                          ? 'lightcoral'
-                          : 'white',
-                      }}
-                    >
-                      <pre>{part.value}</pre>
-                    </span>
-                  ))}
-                </EuiFlexGroup>
-              ) : (
-                <EuiCallOut>
-                  {i18n.translate(
-                    'xpack.inventory.datasetManagementParseView.noChangeCallOutLabel',
-                    { defaultMessage: 'No change' }
-                  )}
-                </EuiCallOut>
-              )}
-            </div>
-          </EuiPanel>
+          <ResultPanel result={plan} code={code} />
           <EuiPanel>
             <EuiText size="m">
               <h3>
@@ -327,40 +300,84 @@ export function DatasetManagementParseView() {
   );
 }
 
-function ResultPanel(props: { result: any }) {
+function ResultPanel(props: { result: any; code: string }) {
   const {
     core: { http },
   } = useKibana();
-  // split props.result.simulatedRun.docs by _source["data_stream.dataset"]
-  const byDataset = props.result.simulatedRun.docs.reduce((acc: any, doc: any) => {
-    const dataset = doc.doc._source['data_stream.dataset'];
-    if (!acc[dataset]) {
-      acc[dataset] = [];
+
+  // result.simulatedRun.docs is an array of docs after the change
+  // result.docs is an array of docs before the change
+  // for each doc, we calculate the diff between the before and after by comparing the value of all the keys.
+  const diffs = props.result.simulatedRun.docs.map((after, i) => {
+    const before = props.result.docs[i];
+    return Object.keys(after.doc._source)
+      .map((key) => {
+        if (
+          JSON.stringify(deepSortKeys(before._source[key])) ===
+          JSON.stringify(deepSortKeys(after.doc._source[key]))
+        ) {
+          return null;
+        }
+        return {
+          key,
+          before: before._source[key],
+          after: after.doc._source[key],
+        };
+      })
+      .filter((change) => change !== null);
+  });
+
+  const relevantColumns = useMemo(() => {
+    try {
+      return [JSON.parse(props.code).grok.field];
+    } catch (e) {
+      return [];
     }
-    acc[dataset].push(doc.doc);
-    return acc;
-  }, {});
+  }, [props.code]);
 
-  const [selectedDataset, setSelectedDataset] = React.useState<string>(Object.keys(byDataset)[0]);
-
+  // grid columns are all the keys that have at least one change
   const gridColumns = useMemo(() => {
-    return Object.keys(byDataset[selectedDataset][0]._source).map((key) => ({
-      id: key,
-      displayAsText: key,
-      width: 100,
+    const columns = new Set<string>();
+    relevantColumns.forEach((column) => {
+      columns.add(column);
+    });
+    diffs.forEach((diff) => {
+      diff.forEach((change) => {
+        columns.add(change.key);
+      });
+    });
+    return Array.from(columns).map((column) => ({
+      id: column,
+      displayAsText: column,
     }));
-  }, [byDataset, selectedDataset]);
+  }, [diffs, relevantColumns]);
 
   const visibleColumns = gridColumns.map((column) => column.id);
 
+  // grid rows are an object with all the keys that have at least one change (if a key only existis in after, it is shown as is, if it exists in before, it is shown as before -> after)
   const gridRows = useMemo(() => {
-    if (!byDataset[selectedDataset]) {
-      return undefined;
-    }
-    return byDataset[selectedDataset].map((doc: any) => {
-      return doc._source;
-    });
-  }, [byDataset, selectedDataset]);
+    return diffs
+      .map((diff, i) => {
+        if (diff.length === 0) {
+          return undefined;
+        }
+        const row: { [key: string]: string } = {};
+        relevantColumns.forEach((column) => {
+          row[column] = JSON.stringify(
+            deepSortKeys(props.result.simulatedRun.docs[i].doc._source[column])
+          );
+        });
+        diff.forEach((change) => {
+          if (change.before === undefined) {
+            row[change.key] = change.after;
+            return;
+          }
+          row[change.key] = { type: 'change', ...change };
+        });
+        return row;
+      })
+      .filter((r) => Boolean(r));
+  }, [diffs, props.result.simulatedRun.docs, relevantColumns]);
 
   return (
     <>
@@ -372,75 +389,42 @@ function ResultPanel(props: { result: any }) {
             })}
           </h3>
         </EuiTitle>
-        <EuiTabs>
-          {Object.keys(byDataset).map((dataset) => (
-            <EuiTab
-              isSelected={dataset === selectedDataset}
-              key={dataset}
-              onClick={() => setSelectedDataset(dataset)}
-            >
-              {i18n.translate('xpack.inventory.resultPanel.datasetTabLabel', {
-                defaultMessage: 'Dataset {dataset} ({count})',
-                values: { dataset, count: byDataset[dataset].length },
-              })}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        {byDataset[selectedDataset] && (
-          <>
-            <EuiDataGrid
-              aria-label={i18n.translate('xpack.inventory.resultPanel.euiDataGrid.previewLabel', {
-                defaultMessage: 'Preview',
-              })}
-              columns={gridColumns}
-              columnVisibility={{ visibleColumns, setVisibleColumns: () => {} }}
-              rowCount={10}
-              renderCellValue={({ rowIndex, columnId }) => gridRows[rowIndex][columnId] || ''}
-            />
-          </>
-        )}
-      </EuiPanel>
-      <EuiPanel hasShadow={false} hasBorder>
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.inventory.resultPanel.h3.resultsLabel', {
-              defaultMessage: 'Apply change',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiText>
-          {i18n.translate('xpack.inventory.resultPanel.affectedDatastreamsTextLabel', {
-            defaultMessage: 'Affected datastreams:',
+        <EuiCallOut>
+          {i18n.translate('xpack.inventory.resultPanel.outOfCallOutLabel', {
+            defaultMessage: 'Out of ',
           })}
-        </EuiText>
-        <ul>
-          {props.result.affectedDatastreams.map((datastream: any) => (
-            <li key={datastream}>{datastream}</li>
-          ))}
-        </ul>
-        <EuiAccordion buttonContent="Execution Plan" id={'xxxx'}>
-          <CodeEditor
-            languageId="json"
-            value={planToConsoleOutput(props.result.plan)}
-            height={300}
-          />
-        </EuiAccordion>
-        <EuiButton
-          data-test-subj="inventoryResultPanelExecuteChangeButton"
-          onClick={async () => {
-            // execute change sending the plan to api/apply_plan
-            const apiResult = await http.post('/api/apply_plan', {
-              body: JSON.stringify({
-                plan: props.result.plan,
-              }),
-            });
-            alert(apiResult);
+          {props.result.simulatedRun.docs.length}{' '}
+          {i18n.translate('xpack.inventory.resultPanel.documentsCallOutLabel', {
+            defaultMessage: 'documents, ',
+          })}
+          {gridRows.length}{' '}
+          {i18n.translate('xpack.inventory.resultPanel.haveChangesCallOutLabel', {
+            defaultMessage: 'have changes',
+          })}
+        </EuiCallOut>
+        <EuiDataGrid
+          aria-label={i18n.translate('xpack.inventory.resultPanel.euiDataGrid.previewLabel', {
+            defaultMessage: 'Preview',
+          })}
+          columns={gridColumns}
+          columnVisibility={{ visibleColumns, setVisibleColumns: () => {} }}
+          rowCount={gridRows.length}
+          height={300}
+          renderCellValue={({ rowIndex, columnId }) => {
+            const value = gridRows[rowIndex][columnId];
+
+            if (value && value.type === 'change') {
+              return (
+                <>
+                  <span style={{ color: 'red' }}>{JSON.stringify(value.before)}</span> {'->'}{' '}
+                  <span style={{ color: 'green' }}>{JSON.stringify(value.after)}</span>
+                </>
+              );
+            }
+
+            return JSON.stringify(value) || '';
           }}
-        >
-          {i18n.translate('xpack.inventory.resultPanel.executeChangeButtonLabel', {
-            defaultMessage: 'Execute change',
-          })}
-        </EuiButton>
+        />
       </EuiPanel>
     </>
   );
