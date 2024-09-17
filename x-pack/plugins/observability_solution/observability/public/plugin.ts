@@ -48,11 +48,9 @@ import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import type { InventoryPublicSetup, InventoryPublicStart } from '@kbn/inventory-plugin/public';
 import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -361,18 +359,6 @@ export class Plugin
                   ]
                 : [];
 
-              const inventoryLink = pluginsSetup.inventory
-                ? [
-                    {
-                      label: i18n.translate('xpack.observability.inventoryLinkTitle', {
-                        defaultMessage: 'Inventory',
-                      }),
-                      app: INVENTORY_APP_ID,
-                      path: '',
-                    },
-                  ]
-                : [];
-
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -436,7 +422,6 @@ export class Plugin
                   sortKey: 100,
                   entries: [
                     ...overviewLink,
-                    ...inventoryLink,
                     ...alertsLink,
                     ...sloLink,
                     ...casesLink,

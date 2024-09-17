@@ -7,6 +7,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { from } from 'rxjs';
+import { map } from 'rxjs';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -48,6 +50,28 @@ export class InventoryPlugin
     pluginsSetup: InventorySetupDependencies
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
+
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(coreSetup.getStartServices()).pipe(
+        map(([coreStart, pluginsStart]) => {
+          return [
+            {
+              label: '',
+              sortKey: 101,
+              entries: [
+                {
+                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                    defaultMessage: 'Inventory',
+                  }),
+                  app: INVENTORY_APP_ID,
+                  path: '',
+                },
+              ],
+            },
+          ];
+        })
+      )
+    );
 
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
