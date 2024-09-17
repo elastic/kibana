@@ -212,7 +212,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
             onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
             riskEntity={riskEntity}
             selectedSeverity={selectedSeverity}
-            severityCount={severityCount}
             toggleStatus={toggleStatus}
           />
         </HeaderSection>

@@ -4,7 +4,7 @@ info:
   title: Security Solution Entity Analytics API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: http://{kibana_host}:{port}
+  - url: 'http://{kibana_host}:{port}'
     variables:
       kibana_host:
         default: localhost
@@ -57,6 +57,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -88,6 +90,8 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -125,6 +129,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Upsert an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -188,12 +194,14 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Bulk upsert asset criticality records
       tags:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: List asset criticality records, paging, sorting and filtering as needed.
+      description: 'List asset criticality records, paging, sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -264,6 +272,8 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List asset criticality records
       tags:
         - Security Solution Entity Analytics API
@@ -284,10 +294,12 @@ paths:
                       $ref: '#/components/schemas/EngineDescriptor'
                     type: array
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List the Entity Store engines
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}:
+  '/api/entity_store/engines/{entityType}':
     delete:
       operationId: DeleteEntityStore
       parameters:
@@ -313,6 +325,8 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
@@ -332,10 +346,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/init:
+  '/api/entity_store/engines/{entityType}/init':
     post:
       operationId: InitEntityStore
       parameters:
@@ -364,10 +380,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Initialize the Entity Store
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/start:
+  '/api/entity_store/engines/{entityType}/start':
     post:
       operationId: StartEntityStore
       parameters:
@@ -387,10 +405,12 @@ paths:
                   started:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Start the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stats:
+  '/api/entity_store/engines/{entityType}/stats':
     post:
       operationId: GetEntityStoreStats
       parameters:
@@ -422,10 +442,12 @@ paths:
                   type:
                     $ref: '#/components/schemas/EntityType'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get the Entity Store engine stats
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stop:
+  '/api/entity_store/engines/{entityType}/stop':
     post:
       operationId: StopEntityStore
       parameters:
@@ -445,12 +467,14 @@ paths:
                   stopped:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Stop the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/entities/list:
     get:
-      description: List entities records, paging, sorting and filtering as needed.
+      description: 'List entities records, paging, sorting and filtering as needed.'
       operationId: ListEntities
       parameters:
         - in: query
@@ -521,6 +545,8 @@ paths:
                   - per_page
                   - total
           description: Entities returned successfully
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List Entity Store Entities
       tags:
         - Security Solution Entity Analytics API
@@ -553,10 +579,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Run the risk scoring engine
       tags:
         - Security Solution Entity Analytics API
 components:
+  callbacks: !<tag:yaml.org,2002:js/undefined> ''
+  examples: !<tag:yaml.org,2002:js/undefined> ''
+  headers: !<tag:yaml.org,2002:js/undefined> ''
+  links: !<tag:yaml.org,2002:js/undefined> ''
+  parameters: !<tag:yaml.org,2002:js/undefined> ''
+  requestBodies: !<tag:yaml.org,2002:js/undefined> ''
+  responses: !<tag:yaml.org,2002:js/undefined> ''
   schemas:
     AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -644,6 +679,95 @@ components:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+    EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    EntityRiskScoreRecord:
+      type: object
+      properties:
+        '@timestamp':
+          description: The time at which the risk score was calculated.
+          example: '2017-07-21T17:32:28Z'
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+          example: Critical
+        calculated_score:
+          description: The raw numeric value of the given entity's risk score.
+          format: double
+          type: number
+        calculated_score_norm:
+          description: >-
+            The normalized numeric value of the given entity's risk score.
+            Useful for comparing with other entities.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          description: >-
+            The number of risk input documents that contributed to the Category
+            1 score (`category_1_score`).
+          format: integer
+          type: number
+        category_1_score:
+          description: >-
+            The contribution of Category 1 to the overall risk score
+            (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          format: double
+          type: number
+        category_2_count:
+          format: integer
+          type: number
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        criticality_modifier:
+          format: double
+          type: number
+        id_field:
+          description: >-
+            The identifier field defining this risk score. Coupled with
+            `id_value`, uniquely identifies the entity being scored.
+          example: host.name
+          type: string
+        id_value:
+          description: >-
+            The identifier value defining this risk score. Coupled with
+            `id_field`, uniquely identifies the entity being scored.
+          example: example.host
+          type: string
+        inputs:
+          description: >-
+            A list of the highest-risk documents contributing to this risk
+            score. Useful for investigative purposes.
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - id_field
+        - id_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - inputs
+        - notes
     EntityType:
       enum:
         - user
@@ -652,6 +776,13 @@ components:
     HostEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -674,6 +805,8 @@ components:
               format: date-time
               type: string
             schemaVersion:
+              type: string
+            source:
               type: string
             type:
               enum:
@@ -718,6 +851,8 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
             type:
               items:
                 type: string
@@ -760,6 +895,44 @@ components:
       properties:
         success:
           type: boolean
+    RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -775,6 +948,13 @@ components:
     UserEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -798,6 +978,8 @@ components:
               type: string
             schemaVersion:
               type: string
+            source:
+              type: string
             type:
               enum:
                 - node
@@ -812,6 +994,7 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+            - source
         user:
           type: object
           properties:
@@ -837,6 +1020,8 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
             roles:
               items:
                 type: string
@@ -852,3 +1037,4 @@ security:
 tags:
   - description: ''
     name: Security Solution Entity Analytics API
+externalDocs: !<tag:yaml.org,2002:js/undefined> ''

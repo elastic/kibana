@@ -186,8 +186,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SeverityFilterGroup
-              selectedSeverities={severitySelectionRedux}
-              severityCount={severityCount}
+              selectedItems={severitySelectionRedux}
               onSelect={onSelect}
               riskEntity={RiskScoreEntity.host}
             />

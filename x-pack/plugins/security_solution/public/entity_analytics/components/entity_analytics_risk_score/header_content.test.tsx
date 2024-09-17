@@ -11,7 +11,6 @@ import { SecurityPageName } from '../../../../common/constants';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import { RiskScoreHeaderContent } from './header_content';
-import { mockSeverityCount } from './__mocks__';
 
 jest.mock('../../../common/components/links', () => {
   const actual = jest.requireActual('../../../common/components/links');
@@ -40,7 +39,6 @@ describe('RiskScoreHeaderContent', () => {
         onSelectSeverityFilterGroup={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={mockSeverityCount}
         toggleStatus={true}
       />
     );
@@ -72,7 +70,6 @@ describe('RiskScoreHeaderContent', () => {
         onSelectSeverityFilterGroup={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={mockSeverityCount}
         toggleStatus={false}
       />
     );

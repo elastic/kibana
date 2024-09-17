@@ -27,43 +27,11 @@ describe('SeverityFilterGroup', () => {
     mockedTelemetry.reportEntityRiskFiltered.mockClear();
   });
 
-  it('preserves sort order when severityCount is out of order', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SeverityFilterGroup
-          selectedSeverities={[]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
-          onSelect={jest.fn()}
-          riskEntity={RiskScoreEntity.user}
-        />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('risk-filter-button'));
-
-    expect(getByTestId('risk-filter-selectable').textContent).toEqual(
-      ['Unknown', 'Low', 'Moderate', 'High', 'Critical'].join('')
-    );
-  });
-
   it('sends telemetry when selecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
-          selectedSeverities={[]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
+          selectedItems={[]}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
         />
@@ -80,20 +48,13 @@ describe('SeverityFilterGroup', () => {
     const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
-          selectedSeverities={[
+          selectedItems={[
             RiskSeverity.Critical,
             RiskSeverity.High,
             RiskSeverity.Moderate,
             RiskSeverity.Low,
             RiskSeverity.Unknown,
           ]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
         />

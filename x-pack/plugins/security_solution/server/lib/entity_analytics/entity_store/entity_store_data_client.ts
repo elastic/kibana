@@ -10,7 +10,6 @@ import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_c
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
@@ -141,13 +140,7 @@ export class EntityStoreDataClient {
     const index = entityTypes.map(getEntitiesIndexName);
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-
-    const filter = [...createQueryFilterClauses(filterQuery)];
-    const query = {
-      bool: {
-        filter,
-      },
-    };
+    const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
     const response = await this.options.esClient.search<Entity>({
       index,

@@ -187,8 +187,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SeverityFilterGroup
-              selectedSeverities={severitySelectionRedux}
-              severityCount={severityCount}
+              selectedItems={severitySelectionRedux}
               onSelect={onSelect}
               riskEntity={RiskScoreEntity.user}
             />
