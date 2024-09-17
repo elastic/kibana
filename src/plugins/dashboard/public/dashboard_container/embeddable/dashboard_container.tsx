@@ -301,23 +301,42 @@ export class DashboardContainer
     this.select = reduxTools.select;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
+    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
+    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
+    this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
+    this.hasRunMigrations$ = new BehaviorSubject(
+      this.getState().componentState.hasRunClientsideMigrations
+    );
+    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
+    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
     this.publishingSubscription.add(
       this.onStateChange(() => {
-        if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
-        this.savedObjectId.next(this.getDashboardSavedObjectId());
-      })
-    );
-    this.publishingSubscription.add(
-      this.savedObjectId.subscribe(() => {
-        this.hadContentfulRender = false;
-      })
-    );
-
-    this.expandedPanelId = new BehaviorSubject<string | undefined>(undefined);
-    this.publishingSubscription.add(
-      this.onStateChange(() => {
-        if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
-        this.expandedPanelId.next(this.getExpandedPanelId());
+        const state = this.getState();
+        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
+          this.savedObjectId.next(this.getDashboardSavedObjectId());
+        }
+        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
+          this.expandedPanelId.next(this.getExpandedPanelId());
+        }
+        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
+          this.focusedPanelId$.next(state.componentState.focusedPanelId);
+        }
+        if (this.managed$.value !== state.componentState.managed) {
+          this.managed$.next(state.componentState.managed);
+        }
+        if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
+          this.fullScreenMode$.next(state.componentState.fullScreenMode);
+        }
+        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
+          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
+        }
+        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
+          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
+        }
+        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
+          this.hasOverlays$.next(state.componentState.hasOverlays);
+        }
       })
     );
 
@@ -519,7 +538,7 @@ export class DashboardContainer
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
-  public showSettings = showSettings;
+  public openSettingsFlyout = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public duplicatePanel(id: string) {
@@ -533,6 +552,12 @@ export class DashboardContainer
 
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
+  public focusedPanelId$: BehaviorSubject<string | undefined>;
+  public managed$: BehaviorSubject<boolean | undefined>;
+  public fullScreenMode$: BehaviorSubject<boolean | undefined>;
+  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
+  public hasOverlays$: BehaviorSubject<boolean | undefined>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
@@ -795,8 +820,28 @@ export class DashboardContainer
     return this.getState().componentState.expandedPanelId;
   };
 
+  public getPanelsState = () => {
+    return this.getState().explicitInput.panels;
+  };
+
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
+  };
+
+  public setViewMode = (viewMode: ViewMode) => {
+    this.dispatch.setViewMode(viewMode);
+  };
+
+  public setFullScreenMode = (fullScreenMode: boolean) => {
+    this.dispatch.setFullScreenMode(fullScreenMode);
+  };
+
+  public setQuery = (query?: Query | undefined) => this.updateInput({ query });
+
+  public setFilters = (filters?: Filter[] | undefined) => this.updateInput({ filters });
+
+  public setTags = (tags: string[]) => {
+    this.updateInput({ tags });
   };
 
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {

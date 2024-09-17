@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import { debounceTime, skip } from 'rxjs';
+import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import { History } from 'history';
 
@@ -21,12 +21,12 @@ import {
   convertSavedPanelsToPanelMap,
   DashboardContainerInput,
 } from '../../../common';
-import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
 import { SavedDashboardPanel } from '../../../common/content_management';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
+import { DashboardApi } from '../../dashboard_api/types';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -88,40 +88,20 @@ export const loadAndRemoveDashboardState = (
   return partialState;
 };
 
-export const startSyncingDashboardUrlState = ({
-  kbnUrlStateStorage,
-  dashboardAPI,
-}: {
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  dashboardAPI: DashboardAPI;
-}) => {
-  const appStateSubscription = kbnUrlStateStorage
-    .change$(DASHBOARD_STATE_STORAGE_KEY)
-    .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
-    .subscribe(() => {
-      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
-      if (Object.keys(stateFromUrl).length === 0) return;
-      dashboardAPI.updateInput(stateFromUrl);
-    });
-
-  const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();
-  return { stopWatchingAppStateInUrl };
-};
-
 export const startSyncingExpandedPanelState = ({
-  dashboardAPI,
+  dashboardApi,
   history,
 }: {
-  dashboardAPI: DashboardAPI;
+  dashboardApi: DashboardApi;
   history: History;
 }) => {
-  const expandedPanelSubscription = dashboardAPI?.expandedPanelId
+  const expandedPanelSubscription = dashboardApi?.expandedPanelId
     // skip the first value because we don't want to trigger a history.replace on initial load
     .pipe(skip(1))
     .subscribe((expandedPanelId) => {
       history.replace({
         ...history.location,
-        pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}${
+        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId.value)}${
           Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
         }`,
       });
