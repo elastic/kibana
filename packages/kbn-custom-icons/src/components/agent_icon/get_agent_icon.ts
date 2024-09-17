@@ -66,7 +66,7 @@ const darkAgentIcons: { [key: string]: string } = {
   rust: darkRustIcon,
 };
 
-const getAgentNameWithoutPrefix = (agentName: string) => {
+const sanitizeAgentName = (agentName: string) => {
   if (agentName.startsWith('opentelemetry/')) {
     // for OpenTelemetry only split the agent name by `/` and take the second part, format is `opentelemetry/{agentName}/{details}`
     return agentName.split('/')[1];
@@ -98,10 +98,10 @@ export function getAgentIconKey(agentName: string) {
     return 'android';
   }
 
-  const agentNameWithoutPrefix = getAgentNameWithoutPrefix(lowercasedAgentName);
+  const cleanAgentName = sanitizeAgentName(lowercasedAgentName);
 
-  if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
-    return agentNameWithoutPrefix;
+  if (Object.keys(agentIcons).includes(cleanAgentName)) {
+    return cleanAgentName;
   }
 
   // OpenTelemetry-only agents
