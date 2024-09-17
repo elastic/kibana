@@ -11,12 +11,12 @@ import type {
   EngineDescriptor,
   EntityType,
 } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import { HOST_ENTITY_DEFINITION, USER_ENTITY_DEFINITION } from '../definition';
+import { buildHostEntityDefinition, buildUserEntityDefinition } from '../definition';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
 export const getEntityDefinition = (entityType: EntityType) => {
-  if (entityType === 'host') return HOST_ENTITY_DEFINITION;
-  if (entityType === 'user') return USER_ENTITY_DEFINITION;
+  if (entityType === 'host') return buildHostEntityDefinition();
+  if (entityType === 'user') return buildUserEntityDefinition();
 
   throw new Error(`Unsupported entity type: ${entityType}`);
 };
