@@ -186,9 +186,17 @@ function DefinitionsViewContent() {
       managed: definition.managed,
       name: definition.label,
       version: '1.0.0',
-      metadata: definition.extractionDefinitions.flatMap(
-        (extractionDefinition) => extractionDefinition.metadata
-      ),
+      metadata: definition.extractionDefinitions
+        .flatMap((extractionDefinition) => extractionDefinition.metadata)
+        .map((option) => {
+          return {
+            ...option,
+            aggregation: {
+              type: 'terms',
+              limit: 10,
+            },
+          };
+        }),
     };
   }
 

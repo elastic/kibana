@@ -4874,7 +4874,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entityManager-plugin@link:x-pack/plugins/observability_solution/entity_manager":
+"@kbn/entityManager-plugin@link:x-pack/plugins/entity_manager":
   version "0.0.0"
   uid ""
 

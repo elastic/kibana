@@ -63,7 +63,7 @@ const listInventoryDefinitionsRoute = createInventoryServerRoute({
               source: {
                 indexPatterns: definition.indexPatterns,
               },
-              metadata: definition.metadata ?? [],
+              metadata: definition.metadata?.map((option) => ({ ...option, limit: 10 })) ?? [],
             },
           ],
         };
