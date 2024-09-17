@@ -574,4 +574,55 @@ describe('Versioned route', () => {
     ).toStrictEqual(securityConfigDefault);
     expect(router.get).toHaveBeenCalledTimes(1);
   });
+
+  it('validates security configuration', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const validSecurityConfig: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    expect(() =>
+      versionedRouter.get({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: [],
+          },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+    );
+
+    const route = versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      security: validSecurityConfig,
+    });
+
+    expect(() =>
+      route.addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: [{ allRequired: ['foo'], anyRequired: ['bar'] }],
+            },
+          },
+        },
+        handlerFn
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.anyRequired]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
 });

@@ -39,6 +39,7 @@ import {
   removeQueryVersion,
 } from './route_version_utils';
 import { injectResponseHeaders } from './inject_response_headers';
+import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
@@ -94,7 +95,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
-    this.defaultSecurityConfig = this.options.security;
+    this.defaultSecurityConfig = validRouteSecurity(this.options.security);
     this.router.router[this.method](
       {
         path: this.path,
