@@ -23,6 +23,7 @@ paths:
                 - rawSamples
                 - currentPipeline
                 - connectorId
+                - samplesFormat
               properties:
                 packageName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
@@ -34,6 +35,8 @@ paths:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                samplesFormat:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/SamplesFormat"
                 langSmithOptions:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
       responses:

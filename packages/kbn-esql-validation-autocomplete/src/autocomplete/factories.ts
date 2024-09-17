@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
@@ -25,8 +26,8 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 
-const allFunctions = statsAggregationFunctionDefinitions
-  .concat(evalFunctionDefinitions)
+const allFunctions = aggregationFunctionDefinitions
+  .concat(scalarFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
@@ -174,6 +175,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
@@ -195,7 +197,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
@@ -271,7 +273,7 @@ export const buildPoliciesDefinitions = (
 ): SuggestionRawDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    text: getSafeInsertText(label, { dashSupported: true }),
+    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -281,6 +283,7 @@ export const buildPoliciesDefinitions = (
       },
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildMatchingFieldsDefinition = (
@@ -289,7 +292,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: getSafeInsertText(label),
+    text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -301,6 +304,7 @@ export const buildMatchingFieldsDefinition = (
       }
     ),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildOptionDefinition = (
@@ -437,6 +441,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?t_start': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?t_end': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;

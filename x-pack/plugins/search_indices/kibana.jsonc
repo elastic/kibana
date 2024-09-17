@@ -21,6 +21,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
+      "esUiShared"
     ]
   }
 }

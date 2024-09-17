@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -13,6 +15,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
@@ -82,6 +85,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
    * dismissNotification: Optional, if not passed a toast will appear in the dashboard
    */
 
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} api={dashboard} />,
     <AddFromLibraryButton
@@ -90,12 +94,8 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}
     />,
+    <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />,
   ];
-  if (dashboard.controlGroup) {
-    extraButtons.push(
-      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
-    );
-  }
 
   return (
     <div

@@ -362,7 +362,7 @@ packages/deeplinks/devtools @elastic/kibana-management
 packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/kibana-management
 packages/deeplinks/ml @elastic/ml-ui
-packages/deeplinks/observability @elastic/obs-ux-logs-team
+packages/deeplinks/observability @elastic/obs-ux-management-team
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
@@ -402,7 +402,7 @@ x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/packages/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/plugins/observability_solution/entity_manager @elastic/obs-entities
+x-pack/plugins/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
@@ -461,7 +461,7 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -508,8 +508,8 @@ src/plugins/image_embeddable @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
-x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
+x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/plugins/inference @elastic/appex-ai-infra
@@ -522,6 +522,7 @@ x-pack/plugins/integration_assistant @elastic/security-scalability
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
+x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/investigate_app @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
@@ -582,11 +583,11 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-packages/kbn-mapbox-gl @elastic/kibana-gis
-x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
-src/plugins/maps_ems @elastic/kibana-gis
-x-pack/plugins/maps @elastic/kibana-gis
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
+packages/kbn-mapbox-gl @elastic/kibana-presentation
+x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
+src/plugins/maps_ems @elastic/kibana-presentation
+x-pack/plugins/maps @elastic/kibana-presentation
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
@@ -877,6 +878,9 @@ packages/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/kibana-management
+packages/kbn-sse-utils @elastic/obs-knowledge-team
+packages/kbn-sse-utils-client @elastic/obs-knowledge-team
+packages/kbn-sse-utils-server @elastic/obs-knowledge-team
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
@@ -1439,6 +1443,16 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
+# Security Solution OpenAPI bundles
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
+
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
 /x-pack/plugins/security_solution_ess/ @elastic/security-solution
@@ -1482,6 +1496,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
+/x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Threat Hunting Investigations
@@ -1492,7 +1507,6 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 
 /x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
 /x-pack/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
-/x-pack/test/threat_intelligence_cypress @elastic/security-threat-hunting-investigations
 
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
@@ -1778,15 +1792,9 @@ test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-/x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
-/x-pack/plugins/ml/common/openapi             @elastic/platform-docs
-/packages/core/saved-objects/docs/openapi     @elastic/platform-docs
-/plugins/data_views/docs/openapi              @elastic/platform-docs
 oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
 oas_docs/kibana.info.yaml                     @elastic/platform-docs
-oas_docs/makefile                             @elastic/platform-docs
-oas_docs/overlays                             @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
