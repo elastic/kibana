@@ -9,7 +9,7 @@
 
 import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
-import { selectPanelsById, useSelector } from '../redux';
+import { selectPanelsById, useSelector } from '../store/redux';
 
 /**
  * This hook allows you to access the flyout state, read open right, left and preview panels.
