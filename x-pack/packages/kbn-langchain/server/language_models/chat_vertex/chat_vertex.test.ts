@@ -9,10 +9,9 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
+import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
-import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { getLangChainMessage } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 const connectorId = 'mock-connector-id';
 
@@ -56,11 +55,8 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
 });
 
 const callMessages = [
-  getLangChainMessage({
-    role: 'system',
-    content: 'Answer the following questions truthfully and as best you can.',
-  }),
-  getLangChainMessage({ role: 'user', content: 'Question: Do you know my name?\n\n' }),
+  new SystemMessage('Answer the following questions truthfully and as best you can.'),
+  new HumanMessage('Question: Do you know my name?\n\n'),
 ] as unknown as BaseMessage[];
 
 const callOptions = {

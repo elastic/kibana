@@ -19,7 +19,6 @@
     "@kbn/actions-plugin",
     "@kbn/logging-mocks",
     "@kbn/utility-types",
-    "@kbn/tooling-log",
-    "@kbn/elastic-assistant-plugin"
+    "@kbn/tooling-log"
   ]
 }
