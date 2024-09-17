@@ -243,31 +243,31 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
-  DeleteEntityStoreRequestQueryInput,
-  DeleteEntityStoreRequestParamsInput,
-  DeleteEntityStoreResponse,
+  DeleteEntityEngineRequestQueryInput,
+  DeleteEntityEngineRequestParamsInput,
+  DeleteEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type {
-  GetEntityStoreEngineRequestParamsInput,
-  GetEntityStoreEngineResponse,
+  GetEntityEngineRequestParamsInput,
+  GetEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/get.gen';
 import type {
-  InitEntityStoreRequestParamsInput,
-  InitEntityStoreRequestBodyInput,
-  InitEntityStoreResponse,
+  InitEntityEngineRequestParamsInput,
+  InitEntityEngineRequestBodyInput,
+  InitEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/init.gen';
-import type { ListEntityStoreEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
+import type { ListEntityEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
 import type {
-  StartEntityStoreRequestParamsInput,
-  StartEntityStoreResponse,
+  StartEntityEngineRequestParamsInput,
+  StartEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/start.gen';
 import type {
-  GetEntityStoreStatsRequestParamsInput,
-  GetEntityStoreStatsResponse,
+  GetEntityEngineStatsRequestParamsInput,
+  GetEntityEngineStatsResponse,
 } from './entity_analytics/entity_store/engine/stats.gen';
 import type {
-  StopEntityStoreRequestParamsInput,
-  StopEntityStoreResponse,
+  StopEntityEngineRequestParamsInput,
+  StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
 import type {
   ListEntitiesRequestQueryInput,
@@ -651,10 +651,10 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async deleteEntityStore(props: DeleteEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityStore`);
+  async deleteEntityEngine(props: DeleteEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
     return this.kbnClient
-      .request<DeleteEntityStoreResponse>({
+      .request<DeleteEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1200,10 +1200,10 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getEntityStoreEngine(props: GetEntityStoreEngineProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreEngine`);
+  async getEntityEngine(props: GetEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
     return this.kbnClient
-      .request<GetEntityStoreEngineResponse>({
+      .request<GetEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1212,10 +1212,10 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getEntityStoreStats(props: GetEntityStoreStatsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStats`);
+  async getEntityEngineStats(props: GetEntityEngineStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngineStats`);
     return this.kbnClient
-      .request<GetEntityStoreStatsResponse>({
+      .request<GetEntityEngineStatsResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1380,10 +1380,10 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async initEntityStore(props: InitEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
+  async initEntityEngine(props: InitEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
     return this.kbnClient
-      .request<InitEntityStoreResponse>({
+      .request<InitEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1466,10 +1466,10 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async listEntityStoreEngines() {
-    this.log.info(`${new Date().toISOString()} Calling API ListEntityStoreEngines`);
+  async listEntityEngines() {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
     return this.kbnClient
-      .request<ListEntityStoreEnginesResponse>({
+      .request<ListEntityEnginesResponse>({
         path: '/api/entity_store/engines',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1810,10 +1810,10 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async startEntityStore(props: StartEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API StartEntityStore`);
+  async startEntityEngine(props: StartEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
-      .request<StartEntityStoreResponse>({
+      .request<StartEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1822,10 +1822,10 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async stopEntityStore(props: StopEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API StopEntityStore`);
+  async stopEntityEngine(props: StopEntityEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient
-      .request<StopEntityStoreResponse>({
+      .request<StopEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1944,9 +1944,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
-export interface DeleteEntityStoreProps {
-  query: DeleteEntityStoreRequestQueryInput;
-  params: DeleteEntityStoreRequestParamsInput;
+export interface DeleteEntityEngineProps {
+  query: DeleteEntityEngineRequestQueryInput;
+  params: DeleteEntityEngineRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -2041,11 +2041,11 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetEntityStoreEngineProps {
-  params: GetEntityStoreEngineRequestParamsInput;
+export interface GetEntityEngineProps {
+  params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityStoreStatsProps {
-  params: GetEntityStoreStatsRequestParamsInput;
+export interface GetEntityEngineStatsProps {
+  params: GetEntityEngineStatsRequestParamsInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -2077,9 +2077,9 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
-export interface InitEntityStoreProps {
-  params: InitEntityStoreRequestParamsInput;
-  body: InitEntityStoreRequestBodyInput;
+export interface InitEntityEngineProps {
+  params: InitEntityEngineRequestParamsInput;
+  body: InitEntityEngineRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
@@ -2136,11 +2136,11 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
-export interface StartEntityStoreProps {
-  params: StartEntityStoreRequestParamsInput;
+export interface StartEntityEngineProps {
+  params: StartEntityEngineRequestParamsInput;
 }
-export interface StopEntityStoreProps {
-  params: StopEntityStoreRequestParamsInput;
+export interface StopEntityEngineProps {
+  params: StopEntityEngineRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;

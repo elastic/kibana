@@ -38,8 +38,8 @@ import {
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import {
-  DeleteEntityStoreRequestQueryInput,
-  DeleteEntityStoreRequestParamsInput,
+  DeleteEntityEngineRequestQueryInput,
+  DeleteEntityEngineRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
 import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
@@ -80,8 +80,8 @@ import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
-import { GetEntityStoreEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityStoreStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
+import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
+import { GetEntityEngineStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -98,8 +98,8 @@ import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/com
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
 import {
-  InitEntityStoreRequestParamsInput,
-  InitEntityStoreRequestBodyInput,
+  InitEntityEngineRequestParamsInput,
+  InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
@@ -121,8 +121,8 @@ import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import { StartEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
-import { StopEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
@@ -326,7 +326,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    deleteEntityStore(props: DeleteEntityStoreProps) {
+    deleteEntityEngine(props: DeleteEntityEngineProps) {
       return supertest
         .delete(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
@@ -689,14 +689,14 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    getEntityStoreEngine(props: GetEntityStoreEngineProps) {
+    getEntityEngine(props: GetEntityEngineProps) {
       return supertest
         .get(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getEntityStoreStats(props: GetEntityStoreStatsProps) {
+    getEntityEngineStats(props: GetEntityEngineStatsProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stats', props.params))
         .set('kbn-xsrf', 'true')
@@ -799,7 +799,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    initEntityStore(props: InitEntityStoreProps) {
+    initEntityEngine(props: InitEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/init', props.params))
         .set('kbn-xsrf', 'true')
@@ -853,7 +853,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    listEntityStoreEngines() {
+    listEntityEngines() {
       return supertest
         .get('/api/entity_store/engines')
         .set('kbn-xsrf', 'true')
@@ -1079,14 +1079,14 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    startEntityStore(props: StartEntityStoreProps) {
+    startEntityEngine(props: StartEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/start', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    stopEntityStore(props: StopEntityStoreProps) {
+    stopEntityEngine(props: StopEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stop', props.params))
         .set('kbn-xsrf', 'true')
@@ -1182,9 +1182,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
-export interface DeleteEntityStoreProps {
-  query: DeleteEntityStoreRequestQueryInput;
-  params: DeleteEntityStoreRequestParamsInput;
+export interface DeleteEntityEngineProps {
+  query: DeleteEntityEngineRequestQueryInput;
+  params: DeleteEntityEngineRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -1279,11 +1279,11 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetEntityStoreEngineProps {
-  params: GetEntityStoreEngineRequestParamsInput;
+export interface GetEntityEngineProps {
+  params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityStoreStatsProps {
-  params: GetEntityStoreStatsRequestParamsInput;
+export interface GetEntityEngineStatsProps {
+  params: GetEntityEngineStatsRequestParamsInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -1314,9 +1314,9 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
-export interface InitEntityStoreProps {
-  params: InitEntityStoreRequestParamsInput;
-  body: InitEntityStoreRequestBodyInput;
+export interface InitEntityEngineProps {
+  params: InitEntityEngineRequestParamsInput;
+  body: InitEntityEngineRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
@@ -1370,11 +1370,11 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
-export interface StartEntityStoreProps {
-  params: StartEntityStoreRequestParamsInput;
+export interface StartEntityEngineProps {
+  params: StartEntityEngineRequestParamsInput;
 }
-export interface StopEntityStoreProps {
-  params: StopEntityStoreRequestParamsInput;
+export interface StopEntityEngineProps {
+  params: StopEntityEngineRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
