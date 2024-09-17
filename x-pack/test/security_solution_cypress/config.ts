@@ -57,6 +57,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'alertSuppressionForSequenceEqlRuleEnabled',
+        ])}`,
       ],
     },
   };

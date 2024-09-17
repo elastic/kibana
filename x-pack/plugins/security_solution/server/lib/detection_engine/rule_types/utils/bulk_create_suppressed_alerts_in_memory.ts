@@ -8,7 +8,11 @@ import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
-import { ALERT_BUILDING_BLOCK_TYPE, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_TERMS,
+} from '@kbn/rule-data-utils';
 import partition from 'lodash/partition';
 
 import type {
@@ -196,7 +200,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
 
   if (!suppressOnMissingFields) {
     sequences.forEach((sequence) => {
-      // if none of the events in the sequence
+      // if none of the events in the given sequence
       // contain a value, then wrap sequence normally,
       // otherwise wrap as suppressed
       // ask product
@@ -209,7 +213,9 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
 
       if (eventsWithFields.length === 0) {
         // unsuppressible sequence alert
-        unsuppressibleWrappedDocs.concat(...wrapSequences([sequence], buildReasonMessage));
+        const wrappedSequence = wrapSequences([sequence], buildReasonMessage);
+        // console.error('UNSUPPRESSED WRAP SEQUENCE', wrappedSequence);
+        unsuppressibleWrappedDocs.push(...wrappedSequence);
         console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
       } else {
         suppressibleSequences.push(sequence);
@@ -237,9 +243,14 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   );
 
   console.error(
-    'SUPPRESSIBLE WRAPPED original time',
-    sequenceAlerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
+    'SUPPRESSIBLE WRAPPED values',
+    sequenceAlerts.map((doc) => doc._source[ALERT_SUPPRESSION_TERMS])
   );
+
+  // console.error(
+  //   'SUPPRESSIBLE WRAPPED original time',
+  //   sequenceAlerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
+  // );
 
   // the code in executeBulkCreateAlerts should
   // not have to change, and might even allow me to remove
@@ -315,6 +326,7 @@ export const executeBulkCreateAlerts = async <
     : tuple.from.toISOString();
 
   if (unsuppressibleWrappedDocs.length) {
+    console.error('UNSUPPRESSIBLE DOCS WRAPPED');
     const unsuppressedResult = await bulkCreate(
       unsuppressibleWrappedDocs,
       tuple.maxSignals - toReturn.createdSignalsCount,

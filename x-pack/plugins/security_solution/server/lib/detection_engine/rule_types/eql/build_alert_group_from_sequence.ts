@@ -78,6 +78,7 @@ export const buildAlertGroupFromSequence = (
       )
     );
   } catch (error) {
+    console.error(`\n************\nBIG ERROR ${error}\n************\n`);
     ruleExecutionLogger.error(error);
     return [];
   }

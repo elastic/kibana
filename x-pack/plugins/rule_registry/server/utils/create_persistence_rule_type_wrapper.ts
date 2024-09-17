@@ -25,6 +25,8 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_SUPPRESSION_VALUE,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 // import {
@@ -182,6 +184,11 @@ export const suppressAlertsInMemory = <
     (alert) => {
       const instanceId = alert._source[ALERT_INSTANCE_ID];
       const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
+      console.error('INSIDE SUPPRESSION DOCS COUNT', suppressionDocsCount);
+      console.error(
+        'NOT A BUILDING BLOCK',
+        alert._source['kibana.alert.building_block_type'] == null
+      );
       const suppressionEnd = alert._source[ALERT_SUPPRESSION_END];
 
       if (instanceId && idsMap[instanceId] != null) {
@@ -200,6 +207,8 @@ export const suppressAlertsInMemory = <
     []
   );
 
+  console.error('WHAT IS IDS MAP', JSON.stringify(idsMap));
+
   const alertCandidates = filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
     if (instanceId) {
@@ -208,6 +217,11 @@ export const suppressAlertsInMemory = <
     }
     return alert;
   });
+
+  console.error(
+    'INSIDE SUPPRESSION DOCS COUNT',
+    alertCandidates.map((alrt) => alrt._source[ALERT_SUPPRESSION_DOCS_COUNT])
+  );
 
   return {
     alertCandidates,
@@ -495,6 +509,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return acc;
                 }, {});
 
+                console.error('ARE THERE EXISTING ALERTS', existingAlertsByInstanceId.length);
+
                 // filter out alerts that were already suppressed
                 // alert was suppressed if its suppression ends is older
                 // than suppression end of existing alert
@@ -603,12 +619,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   currentTimeOverride,
                 });
 
-                // console.error(
-                //   'WHAT IS AUGMENTED ALERT',
-                //   augmentedAlerts.map(
-                //     (augAlert) => augAlert._source._source['kibana.alert.group.id']
-                //   )
-                // );
+                console.error(
+                  'WHAT IS AUGMENTED ALERT LENGTH',
+                  augmentedAlerts.map((alrt) => alrt?._source?.[ALERT_SUPPRESSION_TERMS])
+                );
 
                 /**
                  * buildingBlockAlerts?.filter((someAlert) => {
@@ -629,7 +643,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 // only create building block alerts for the new eql shell alert
                 const matchingBuildingBlockAlerts =
                   newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
-                    ? getMatchingBuildingBlockAlerts(newAlerts[0]?._source)
+                    ? newAlerts.flatMap((newAlert) =>
+                        getMatchingBuildingBlockAlerts(newAlert?._source)
+                      )
                     : [];
 
                 const augmentedBuildingBlockAlerts =
@@ -655,9 +671,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   body: [
                     ...duplicateAlertUpdates,
                     ...mapAlertsToBulkCreate(augmentedAlerts),
-                    ...(newAlerts?.length > 0
-                      ? mapAlertsToBulkCreate(augmentedBuildingBlockAlerts)
-                      : []),
+                    ...mapAlertsToBulkCreate(augmentedBuildingBlockAlerts),
                   ],
                   refresh: true,
                 });
@@ -686,8 +700,24 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
                   )
                   // Security solution's EQL rule consists of building block alerts which should be filtered out.
-                  // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
-                  .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
+                  .filter((alert) => alert['kibana.alert.building_block_type'] == null);
+
+                console.error('HOW MANY CREATED ALERTS', createdAlerts.length);
+                console.error('HOW MANY DUPLICATE ALERTS', duplicateAlerts.length);
+                console.error(
+                  'HOW MANY SUPPRESSED IN MEMORY ALERTS',
+                  suppressedInMemoryAlerts.length
+                );
+
+                console.error(
+                  'created alerts suppression count',
+                  JSON.stringify(
+                    createdAlerts.map((alrt) => ({
+                      'suppressed values': alrt[ALERT_SUPPRESSION_TERMS],
+                      'suppressed count': alrt['kibana.alert.suppression.docs_count'],
+                    }))
+                  )
+                );
 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory

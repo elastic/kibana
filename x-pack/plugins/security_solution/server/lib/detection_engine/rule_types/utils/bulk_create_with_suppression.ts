@@ -107,7 +107,14 @@ export const bulkCreateWithSuppression = async <
 
   console.error(
     'DO WRAPPED DOCS HAVE INSTANCE IDS',
-    wrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
+    wrappedDocs.reduce(
+      (acc, doc) => ({
+        ...acc,
+        [doc._source[ALERT_INSTANCE_ID]]:
+          acc[doc._source[ALERT_INSTANCE_ID]] != null ? acc[doc._source[ALERT_INSTANCE_ID]] + 1 : 0,
+      }),
+      {}
+    )
   );
 
   let myfunc;

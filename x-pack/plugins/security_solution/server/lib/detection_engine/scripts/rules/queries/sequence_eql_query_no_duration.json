@@ -2,7 +2,7 @@
   "name": "EQL sequence rule",
   "description": "Rule with an eql query",
   "false_positives": ["https://www.example.com/some-article-about-a-false-positive"],
-  "rule_id": "rule-id-eql-1",
+  "rule_id": "rule-id-eql-2",
   "enabled": true,
   "index": ["auditbeat*", "packetbeat*"],
   "interval": "2m",

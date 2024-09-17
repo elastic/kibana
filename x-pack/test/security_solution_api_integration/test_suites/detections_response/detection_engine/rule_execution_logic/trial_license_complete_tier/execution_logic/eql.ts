@@ -510,7 +510,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // TODO: investigate original_time here too
     it('generates shell alerts from EQL sequences in the expected form', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
