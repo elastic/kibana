@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { ListEntityStoreEnginesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/list.gen';
+import type { ListEntityEnginesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/list.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -32,11 +32,7 @@ export const listEntityEnginesRoute = (
         validate: {},
       },
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<ListEntityStoreEnginesResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<ListEntityEnginesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -45,7 +41,7 @@ export const listEntityEnginesRoute = (
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in ListEntityStoreEngines:', e);
+          logger.error('Error in ListEntityEngines:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

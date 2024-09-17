@@ -15,7 +15,7 @@ export const cleanEngines = async ({
   const log = getService('log');
   const api = getService('securitySolutionApi');
 
-  const { body } = await api.listEntityStoreEngines().expect(200);
+  const { body } = await api.listEntityEngines().expect(200);
 
   // @ts-expect-error body is any
   const engineTypes = body.engines.map((engine) => engine.type);
@@ -24,7 +24,7 @@ export const cleanEngines = async ({
   try {
     const responses = await Promise.all(
       engineTypes.map((entityType: 'user' | 'host') =>
-        api.deleteEntityStore({ params: { entityType }, query: { data: true } })
+        api.deleteEntityEngine({ params: { entityType }, query: { data: true } })
       )
     );
 

@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
     return api
-      .initEntityStore({
+      .initEntityEngine({
         params: { entityType },
         body: {},
       })
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('get', () => {
         it('should return the host entity engine', async () => {
           const getResponse = await api
-            .getEntityStoreEngine({
+            .getEntityEngine({
               params: { entityType: 'host' },
             })
             .expect(200);
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should return the user entity engine', async () => {
           const getResponse = await api
-            .getEntityStoreEngine({
+            .getEntityEngine({
               params: { entityType: 'user' },
             })
             .expect(200);
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('list', () => {
         it('should return the list of entity engines', async () => {
-          const { body } = await api.listEntityStoreEngines().expect(200);
+          const { body } = await api.listEntityEngines().expect(200);
 
           // @ts-expect-error body is any
           const sortedEngines = body.engines.sort((a, b) => a.type.localeCompare(b.type));
@@ -178,13 +178,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should stop the entity engine', async () => {
         await api
-          .stopEntityStore({
+          .stopEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
 
         const { body } = await api
-          .getEntityStoreEngine({
+          .getEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
@@ -194,13 +194,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should start the entity engine', async () => {
         await api
-          .startEntityStore({
+          .startEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
 
         const { body } = await api
-          .getEntityStoreEngine({
+          .getEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
         await initEntityEngineForEntityType('host');
 
         await api
-          .deleteEntityStore({
+          .deleteEntityEngine({
             params: { entityType: 'host' },
             query: { data: true },
           })
@@ -228,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
         await initEntityEngineForEntityType('user');
 
         await api
-          .deleteEntityStore({
+          .deleteEntityEngine({
             params: { entityType: 'user' },
             query: { data: true },
           })
