@@ -6,6 +6,7 @@
  */
 import {
   Criteria,
+  EuiAvatar,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -14,6 +15,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
@@ -27,6 +29,7 @@ import { InvestigationListActions } from './investigation_list_actions';
 import { InvestigationStats } from './investigation_stats';
 import { InvestigationsError } from './investigations_error';
 import { SearchBar } from './search_bar/search_bar';
+import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 
 export function InvestigationList() {
   const {
@@ -49,6 +52,10 @@ export function InvestigationList() {
     perPage: pageSize,
     search,
     filter: toFilter(status, tags),
+  });
+
+  const { data: userProfiles, isLoading: isUserProfilesLoading } = useFetchUserProfiles({
+    profileIds: new Set(data?.results.map((i) => i.createdBy)),
   });
 
   const investigations = data?.results ?? [];
@@ -77,6 +84,27 @@ export function InvestigationList() {
         defaultMessage: 'Created by',
       }),
       truncateText: true,
+      render: (value: InvestigationResponse['createdBy']) => {
+        return isUserProfilesLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiToolTip
+            position="top"
+            content={
+              userProfiles?.[value]?.user.full_name ?? userProfiles?.[value]?.user.username ?? value
+            }
+          >
+            <EuiAvatar
+              name={
+                userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value
+              }
+              size="s"
+            />
+          </EuiToolTip>
+        );
+      },
     },
     {
       field: 'tags',

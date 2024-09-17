@@ -32,7 +32,7 @@ export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
   const { investigation, addNote, isAddingNote } = useInvestigation();
   const { data: userProfiles, isLoading: isLoadingUserProfiles } = useFetchUserProfiles({
-    profileIds: new Set(investigation?.notes.map((note) => note.createdBy) ?? []),
+    profileIds: new Set(investigation?.notes.map((note) => note.createdBy)),
   });
 
   const [noteInput, setNoteInput] = useState('');
