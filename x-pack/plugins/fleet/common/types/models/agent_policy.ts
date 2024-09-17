@@ -47,16 +47,16 @@ export interface NewAgentPolicy {
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled: boolean;
-    host: string;
-    port: number;
-    buffer: { enabled: boolean };
+    host?: string;
+    port?: number;
+    buffer?: { enabled: boolean };
   };
   monitoring_diagnostics?: {
-    limit: {
+    limit?: {
       interval: string | null;
       burst: number | null;
     };
-    uploader: {
+    uploader?: {
       max_retries: number | null;
       init_dur: string | null;
       max_dur: string | null;
@@ -142,9 +142,9 @@ export interface FullAgentPolicyMonitoring {
   };
   http?: {
     enabled: boolean;
-    host: string;
-    port: number;
-    buffer: { enabled: boolean };
+    host?: string;
+    port?: number;
+    buffer?: { enabled: boolean };
   };
   diagnostics?: {
     limit?: {
