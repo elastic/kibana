@@ -13,39 +13,93 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
     'svlSearchIndexDetailPage',
   ]);
+  const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
-  const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('search index detail page', () => {
+  describe('Search index detail page', () => {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
-      await es.indices.create({ index: indexName });
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
-          shouldLoginIfPrompted: false,
-        });
-        await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
-      });
     });
-
     after(async () => {
       await esDeleteAllIndices(indexName);
     });
-    it('loads index detail page', async () => {
-      await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-      await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
-    });
-    it('should have embedded dev console', async () => {
-      await testHasEmbeddedConsole(pageObjects);
-    });
-    it('should redirect to indices list page', async () => {
-      await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
-      await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
-      await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
+
+    describe('index details page overview', () => {
+      before(async () => {
+        await es.indices.create({ index: indexName });
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+      after(async () => {
+        await esDeleteAllIndices(indexName);
+      });
+      it('can load index detail page', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
+      });
+      it('should have embedded dev console', async () => {
+        await testHasEmbeddedConsole(pageObjects);
+      });
+      it('should have connection details', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
+      });
+
+      it('should have quick stats', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectQuickStats();
+        await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
+        await es.indices.putMapping({
+          index: indexName,
+          body: {
+            properties: {
+              my_field: {
+                type: 'dense_vector',
+                dims: 3,
+              },
+            },
+          },
+        });
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+
+        await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+      });
+
+      it('back to indices button should redirect to list page', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
+        await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
+        await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
+      });
+
+      describe('page loading error', () => {
+        before(async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await esDeleteAllIndices(indexName);
+        });
+        it('has page load error section', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
+        });
+        it('reload button shows details page again', async () => {
+          await es.indices.create({ index: indexName });
+          await pageObjects.svlSearchIndexDetailPage.clickPageReload();
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+        });
+      });
+      describe('Index more options menu', () => {
+        before(async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        });
+        it('shows action menu in actions popover', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
+          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
+          await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
+        });
+        it('should delete index', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExists();
+          await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
+          await pageObjects.svlSearchIndexDetailPage.clickConfirmingDeleteIndex();
+        });
+      });
     });
   });
 }
