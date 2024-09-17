@@ -8,6 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
@@ -96,6 +97,11 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       consumer: 'uptime',
       ruleTypeId: alertFlyoutVisible,
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
+      initialValues: {
+        name: i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
+          defaultMessage: 'Synthetics monitor status rule',
+        }),
+      },
     });
   }, [isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
 

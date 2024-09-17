@@ -45,22 +45,24 @@ export function FieldPopoverExpression({
 
   const closePopover = () => setSelectedField(selectedField === fieldName ? undefined : fieldName);
   return (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      anchorPosition="downLeft"
-      closePopover={closePopover}
-      button={
-        <EuiExpression
-          description={title}
-          value={label}
-          isActive={Boolean(selectedField)}
-          color={color}
-          onClick={closePopover}
-        />
-      }
-      repositionOnScroll
-    >
-      <div style={{ width: 300 }}>{children}</div>
-    </EuiPopover>
+    <span>
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        anchorPosition="downLeft"
+        closePopover={closePopover}
+        button={
+          <EuiExpression
+            description={title}
+            value={label}
+            isActive={Boolean(selectedField)}
+            color={color}
+            onClick={closePopover}
+          />
+        }
+        repositionOnScroll
+      >
+        <div style={{ width: 300 }}>{children}</div>
+      </EuiPopover>
+    </span>
   );
 }
