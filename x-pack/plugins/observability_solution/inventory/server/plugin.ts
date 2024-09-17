@@ -383,6 +383,122 @@ export class InventoryPlugin
       }
     );
 
+    router.get(
+      {
+        path: '/api/processing_overview/{datastream}',
+        validate: {
+          params: schema.object({
+            datastream: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const datastreams: any = await esClient.transport.request({
+            method: 'GET',
+            path: '/_data_stream',
+          });
+          const datastreamMap = new Map<string, any>();
+          datastreams.data_streams.forEach((datastream: any) => {
+            datastreamMap.set(datastream.name, datastream);
+          });
+          const templates: any = await esClient.transport.request({
+            method: 'GET',
+            path: '/_index_template',
+          });
+          const templateMap = new Map<string, any>();
+          templates.index_templates.forEach((template: any) => {
+            templateMap.set(template.name, template.index_template);
+          });
+          const componentTemplateMap = new Map<string, any>();
+          const componentTemplates: any = await esClient.transport.request({
+            method: 'GET',
+            path: '/_component_template',
+          });
+          componentTemplates.component_templates.forEach((template: any) => {
+            componentTemplateMap.set(template.name, template.component_template);
+          });
+          const pipelines: any = await esClient.transport.request({
+            method: 'GET',
+            path: '/_ingest/pipeline',
+          });
+          const pipelineMap = new Map<string, any>();
+          Object.entries(pipelines).forEach(([id, pipeline]: any) => {
+            pipelineMap.set(id, pipeline);
+          });
+          const nodes = Array.from(datastreamMap.values());
+          const edges = [];
+
+          let fullyResolvedPipeline = null;
+
+          nodes.forEach((node: any) => {
+            // draw the edges between the datastreams. This works like this:
+            // * for the current datastream, resolve the template
+            // * check whether the template has a default pipeline by checking the index settings and all the referenced component templates
+            // * for the default pipeline, resolve all sub-pipelines called via processor
+            // * then check through all of them whether they have a reroute processor.
+            // * if they do, add an edge from the current datastream to the target datastream
+            console.log('taking care of node', node.name);
+            const template = templateMap.get(node.template);
+            // resolve all component templates
+            const componentTemplates = (template.composed_of || []).map((component: any) => {
+              return componentTemplateMap.get(component);
+            });
+            // search for the default pipeline
+            let defaultPipeline = template.template?.settings?.index?.default_pipeline;
+            if (!defaultPipeline) {
+              // search through all component templates
+              for (const componentTemplate of componentTemplates) {
+                defaultPipeline = componentTemplate.template?.settings?.index?.default_pipeline;
+                if (defaultPipeline) {
+                  break;
+                }
+              }
+            }
+            console.log('default pipeline', defaultPipeline);
+            // get default pipeline
+            const defaultPipelineObj = pipelineMap.get(defaultPipeline);
+            // recursively resolve pipelines called via "pipeline" processors
+            const resolvePipeline = (pipeline: any) => {
+              const processors = pipeline?.processors || [];
+              processors.forEach((processor: any) => {
+                console.log('visiting processor', processor);
+                if (processor.pipeline) {
+                  const subPipeline = pipelineMap.get(processor.pipeline.name);
+                  const innerProcessors = resolvePipeline(subPipeline);
+                  processor.pipeline.subProcessors = innerProcessors;
+                }
+                if (processor.reroute) {
+                  // find datastreams that could be the target. processor.reroute.dataset is the middle part of the <type>-<dataset>-<namespace> naming scheme
+                  const targetDatastreams = datastreams.data_streams
+                    .filter((datastream: any) => {
+                      const parts = datastream.name.split('-');
+                      return parts[1] === processor.reroute.dataset;
+                    })
+                    .forEach((datastream: any) => {
+                      edges.push({ source: node.name, target: datastream.name });
+                    });
+                }
+              });
+              return processors;
+            };
+            const resolvedProcessors = resolvePipeline(defaultPipelineObj);
+            if (node.name === request.params.datastream) {
+              fullyResolvedPipeline = resolvedProcessors;
+            }
+          });
+
+          return response.ok({
+            body: { nodes, edges, fullyResolvedPipeline },
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      }
+    );
+
     router.post(
       {
         path: '/api/test_reroute',

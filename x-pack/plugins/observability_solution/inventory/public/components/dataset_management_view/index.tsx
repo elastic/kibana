@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -21,9 +21,12 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
+import { euiLightVars } from '@kbn/ui-theme';
+import { ThemeProvider } from 'styled-components';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { planToConsoleOutput } from '../dataset_detail_view/utils';
+import { Cytoscape } from './cytoscape';
 
 export function DatasetManagementView() {
   const {
@@ -58,6 +61,7 @@ export function DatasetManagementView() {
     <>
       <StorageDetails details={details.value} />
       <RetentionDetails details={retentionInfo.value} />
+      <RoutingDetails id={id} />
       <EuiFlexGroup>
         <EuiButton
           data-test-subj="inventoryDatasetManagementViewSplitUpButton"
@@ -296,6 +300,79 @@ function StorageDetails(props: { details: any }) {
           ]}
           style={{ maxWidth: '400px' }}
         />
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+function RoutingDetails(props: { id: string }) {
+  const {
+    core: {
+      http,
+      application: { navigateToUrl },
+    },
+  } = useKibana();
+  const processingOverviewInfo = useAsync(() => {
+    return http.get(`/api/processing_overview/${props.id}`);
+  }, [http, props.id]);
+
+  console.log(processingOverviewInfo);
+
+  const onSelect = useCallback(
+    (node: any) => {
+      navigateToUrl(`/app/observability/entities/data_stream/${node.data('id')}/management`);
+    },
+    [navigateToUrl]
+  );
+
+  return (
+    <EuiPanel hasBorder>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h3>
+                {i18n.translate('xpack.inventory.details.h5.storageDetailsLabel', {
+                  defaultMessage: 'Routing details',
+                })}
+              </h3>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {processingOverviewInfo.loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <>
+            <ThemeProvider
+              theme={(outerTheme?: any) => ({
+                ...outerTheme,
+                eui: euiLightVars,
+              })}
+            >
+              <Cytoscape
+                elements={[
+                  ...processingOverviewInfo.value.nodes.map((node: any) => ({
+                    data: {
+                      id: node.name,
+                      'service.name': node.name === props.id ? node.name : undefined,
+                      label: node.name,
+                    },
+                  })),
+                  ...processingOverviewInfo.value.edges.map((edge: any) => ({
+                    data: {
+                      source: edge.source,
+                      target: edge.target,
+                    },
+                  })),
+                ]}
+                onSelect={onSelect}
+                height={300}
+                serviceName=""
+                style={{}}
+              />
+            </ThemeProvider>
+          </>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
