@@ -69,7 +69,9 @@ export const createActionRoute = (
         request: {
           params: schema.maybe(
             schema.object({
-              id: schema.maybe(schema.string()),
+              id: schema.maybe(
+                schema.string({ meta: { description: 'An identifier for the connector.' } })
+              ),
             })
           ),
           body: bodySchema,
