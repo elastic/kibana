@@ -200,7 +200,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         path: pagePathGetters.policy_details({ policyId })[1],
       });
     },
-    [getUrlForApp, policy?.policy_id]
+    [getUrlForApp, policy?.policy_ids?.length]
   );
 
   const handleConfigUpload = useCallback(
