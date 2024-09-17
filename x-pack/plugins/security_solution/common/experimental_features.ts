@@ -233,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
+
+  /**
+   * Enables the new Entity Store engine routes
+   */
+  entityStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
