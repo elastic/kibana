@@ -21,10 +21,7 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import {
-  ProfileProviderServices,
-  createProfileProviderServices,
-} from '../profile_providers/profile_provider_services';
+import { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = ({
