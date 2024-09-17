@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { ESQLRealField } from '../validation/types';
 
 /** @internal **/
@@ -25,6 +26,7 @@ export interface ESQLCallbacks {
     }
   >;
   getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
+  http?: HttpStart;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }

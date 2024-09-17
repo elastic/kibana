@@ -279,7 +279,8 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
-      getPolicyMetadata
+      getPolicyMetadata,
+      resourceRetriever
     );
   }
   if (astContext.type === 'setting') {
@@ -566,7 +567,8 @@ async function getExpressionSuggestionsByType(
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  resourceRetriever?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
@@ -1059,9 +1061,103 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...finalSuggestions);
     }
   }
+  if (
+    commands[commands.length - 1].name === 'where' &&
+    (commands[commands.length - 1].args.length === 0 ||
+      commands[commands.length - 1].args[0].type === 'column')
+  ) {
+    const indexPattern = commands[0].args[0].index;
+    // command.text will be something like WHERE<abc>marker_esql_editor - we need to strip the leading WHERE and remove marker_esql_editor in case it's there
+    const valuePrefix = command.text.replace('WHERE', '').replace('marker_esql_editor', '');
+    if (valuePrefix.length > 3) {
+      const reverseLookup = await resourceRetriever?.http?.post('/api/value_field_suggest', {
+        body: JSON.stringify({
+          indexPattern,
+          valuePrefix,
+        }),
+      });
+      console.log(reverseLookup);
+      return [
+        ...reverseLookup.suggestions.map((suggestion: any) => ({
+          label: suggestion,
+          text: suggestion,
+          filterText: suggestion,
+          kind: 'Field',
+          sortText: '1A',
+          detail: '',
+        })),
+        ...uniqBy(suggestions, (suggestion) => suggestion.text),
+      ];
+    }
+  }
+
+  if (
+    commands[commands.length - 1].name === 'where' &&
+    commands[commands.length - 1].args.length > 0
+  ) {
+    const lastArg =
+      commands[commands.length - 1].args[commands[commands.length - 1].args.length - 1];
+    if (
+      lastArg.subtype === 'binary-expression' &&
+      lastArg.args.length === 2 &&
+      lastArg.args[1].type === 'column' &&
+      lastArg.args[0].type === 'column'
+    ) {
+      const indexPattern = commands[0].args[0].index;
+      const valuePrefix = lastArg.args[1].text.replace('marker_esql_editor', '');
+      const fieldName = lastArg.args[0].text;
+      const valueLookup = await resourceRetriever?.http?.post(
+        `/internal/kibana/suggestions/values/${indexPattern}`,
+        {
+          headers: {
+            'Elastic-Api-Version': '1',
+          },
+          body: JSON.stringify({
+            query: valuePrefix,
+            field: fieldName,
+            fieldMeta: {
+              count: 0,
+              name: fieldName,
+              type: 'string',
+              esTypes: ['keyword'],
+              scripted: false,
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+              shortDotsEnable: false,
+              isMapped: true,
+            },
+            method: 'terms_enum',
+          }),
+        }
+      );
+      console.log(valueLookup);
+      return [
+        ...valueLookup.map((suggestion: any) => ({
+          label: suggestion,
+          text: `"${suggestion}"`,
+          filterText: suggestion,
+          kind: 'Field',
+          sortText: '1111A',
+          detail: '',
+        })),
+        ...uniqBy(suggestions, (suggestion) => suggestion.text),
+      ];
+    }
+  }
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
-  return uniqBy(suggestions, (suggestion) => suggestion.text);
+  return [
+    {
+      label: 'test',
+      text: 'test',
+      filterText: 'test',
+      kind: 'Field',
+      sortText: '1A',
+      detail: '',
+    },
+    ...uniqBy(suggestions, (suggestion) => suggestion.text),
+  ];
 }
 
 async function getBuiltinFunctionNextArgument(
@@ -1279,6 +1375,7 @@ async function getFunctionArgsSuggestions(
   offset: number
 ): Promise<SuggestionRawDefinition[]> {
   // XXXXXXX here it is
+  console.log(node.name);
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -1519,6 +1616,7 @@ async function getFunctionArgsSuggestions(
   if (fnDefinition.name === 'count' && !arg) {
     suggestions.push(allStarConstant);
   }
+  console.log(suggestions);
   // XXXX do a special case here for equals
   return suggestions;
 }
