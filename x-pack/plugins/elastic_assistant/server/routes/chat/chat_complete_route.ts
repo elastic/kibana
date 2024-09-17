@@ -99,7 +99,11 @@ export const chatCompleteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
+          const connectorApiUrl = connector?.config?.apiUrl
+            ? (connector.config.apiUrl as string)
+            : undefined;
 
           // replacements
           const anonymizationFieldsRes =
@@ -192,6 +196,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            connectorApiUrl,
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,

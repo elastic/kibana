@@ -14,6 +14,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { OPENAI_CHAT_URL } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -32,6 +33,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
+  connectorApiUrl,
   bedrockChatEnabled,
   connectorId,
   conversationId,
@@ -53,9 +55,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const model = request.body.model;
-  const isOpenAI = llmType === 'openai';
-  const isOssLlm = isOpenAI && !!model && !model.startsWith('gpt-');
+  const isOpeAIType = llmType === 'openai';
+  const isOpenAI = isOpeAIType && (!connectorApiUrl || connectorApiUrl === OPENAI_CHAT_URL);
+  const isOssLlm = isOpeAIType && !isOpenAI;
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   /**
@@ -136,30 +138,29 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     }
   }
 
-  const agentRunnable =
-    isOpenAI && !isOssLlm
-      ? await createOpenAIFunctionsAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(systemPrompts.openai, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
-      ? await createToolCallingAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt:
-            llmType === 'bedrock'
-              ? formatPrompt(systemPrompts.bedrock, systemPrompt)
-              : formatPrompt(systemPrompts.gemini, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : await createStructuredChatAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
-          streamRunnable: isStream,
-        });
+  const agentRunnable = isOpenAI
+    ? await createOpenAIFunctionsAgent({
+        llm: createLlmInstance(),
+        tools,
+        prompt: formatPrompt(systemPrompts.openai, systemPrompt),
+        streamRunnable: isStream,
+      })
+    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
+    ? await createToolCallingAgent({
+        llm: createLlmInstance(),
+        tools,
+        prompt:
+          llmType === 'bedrock'
+            ? formatPrompt(systemPrompts.bedrock, systemPrompt)
+            : formatPrompt(systemPrompts.gemini, systemPrompt),
+        streamRunnable: isStream,
+      })
+    : await createStructuredChatAgent({
+        llm: createLlmInstance(),
+        tools,
+        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+        streamRunnable: isStream,
+      });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 

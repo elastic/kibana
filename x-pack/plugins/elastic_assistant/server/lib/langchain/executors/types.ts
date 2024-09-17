@@ -41,6 +41,7 @@ export interface AgentExecutorParams<T extends boolean> {
   bedrockChatEnabled: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
+  connectorApiUrl?: string;
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;

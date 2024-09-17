@@ -323,6 +323,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   inference: InferenceServerStart;
+  connectorApiUrl?: string;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -349,6 +350,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  connectorApiUrl,
   context,
   actionsClient,
   inference,
@@ -420,6 +422,7 @@ export const langChainExecute = async ({
     assistantTools,
     conversationId,
     connectorId,
+    connectorApiUrl,
     esClient,
     esStore,
     inference,

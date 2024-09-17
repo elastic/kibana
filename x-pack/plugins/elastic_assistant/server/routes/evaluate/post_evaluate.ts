@@ -30,6 +30,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
+import { OPENAI_CHAT_URL } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -195,7 +196,11 @@ export const postEvaluateRoute = (
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
-              const isOpenAI = llmType === 'openai';
+              const connectorApiUrl = connector?.config?.apiUrl
+                ? (connector.config.apiUrl as string)
+                : undefined;
+              const isOpenAI =
+                llmType === 'openai' && (!connectorApiUrl || connectorApiUrl === OPENAI_CHAT_URL);
               const llmClass = getLlmClass(llmType, true);
               const createLlmInstance = () =>
                 new llmClass({
