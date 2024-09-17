@@ -15,7 +15,7 @@ import type { DiscoverServices } from '../../build_services';
  * Dependencies required by profile provider implementations
  */
 export interface ProfileProviderDeps extends DiscoverServices {
-  logsDataAccessPlugin?: LogsDataAccessPluginStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
 }
 
 /**
@@ -34,12 +34,12 @@ export interface ProfileProviderServices extends DiscoverServices {
  * @returns Profile provider services
  */
 export const createProfileProviderServices = async (
-  deps: ProfileProviderDeps = {}
+  discoverServices: ProfileProviderDeps
 ): Promise<ProfileProviderServices> => {
   return {
     ...discoverServices,
     logsContextService: await createLogsContextService({
-      logsDataAccessPlugin: deps.logsDataAccessPlugin,
+      logsDataAccess: discoverServices.logsDataAccess,
     }),
   };
 };

@@ -30,7 +30,6 @@ import type { DiscoverServices } from '../../build_services';
  * @param options Register profile provider options
  */
 export const registerProfileProviders = async ({
-  plugins,
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,

@@ -19,7 +19,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       '@timestamp': (props) => {
-        const timestamp = getFieldValue(props.row, '@timestamp');
+        const timestamp = getFieldValue(props.row, '@timestamp') as string;
 
         return (
           <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">

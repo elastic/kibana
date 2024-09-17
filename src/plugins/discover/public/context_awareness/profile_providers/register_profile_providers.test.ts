@@ -8,7 +8,6 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { DiscoverStartPlugins } from '../../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_pofile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
