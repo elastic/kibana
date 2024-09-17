@@ -9,30 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
-  aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [aiAssistantLogsIndexPattern]: {
-    category: ['observability'],
-    name: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsTab.h3.logIndexPatternLabel',
-      { defaultMessage: 'Logs index pattern' }
-    ),
-    value: 'logs-*',
-    description: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.logIndexPatternDescription',
-      {
-        defaultMessage:
-          'Index pattern used by the AI Assistant when querying for logs. Logs are categorised and used for root cause analysis',
-      }
-    ),
-    schema: schema.string(),
-    type: 'string',
-    requiresPageReload: true,
-  },
   [aiAssistantSimulatedFunctionCalling]: {
     category: ['observability'],
     name: i18n.translate(
