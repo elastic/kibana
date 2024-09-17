@@ -128,6 +128,10 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+import {
+  getConnectorType as getSystemLogExampleConnectorType,
+  connectorAdapter as systemLogConnectorAdapter,
+} from './test_connector';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -350,6 +354,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+    plugins.actions.registerType(getSystemLogExampleConnectorType());
+    plugins.alerting.registerConnectorAdapter(systemLogConnectorAdapter);
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(

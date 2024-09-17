@@ -56,6 +56,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getConnectorUIType } from './test_connector';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -198,6 +199,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getConnectorUIType());
 
     return this.contract.getSetupContract();
   }
