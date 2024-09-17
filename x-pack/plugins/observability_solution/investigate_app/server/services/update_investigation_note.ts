@@ -27,7 +27,7 @@ export async function updateInvestigationNote(
 
   investigation.notes = investigation.notes.filter((currNote) => {
     if (currNote.id === noteId) {
-      currNote.content = params.content;
+      currNote = Object.assign(currNote, { content: params.content, updatedAt: Date.now() });
     }
 
     return currNote;
