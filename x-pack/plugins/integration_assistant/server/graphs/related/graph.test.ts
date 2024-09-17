@@ -28,7 +28,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -41,7 +41,7 @@ jest.mock('../../util/pipeline', () => ({
 }));
 
 describe('runRelatedGraph', () => {
-  const mockClient = {
+  const client = {
     asCurrentUser: {
       indices: {
         getMapping: jest.fn(),
@@ -106,14 +106,14 @@ describe('runRelatedGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getRelatedGraph(mockClient, mockLlm);
+      await getRelatedGraph({ client, model });
     } catch (error) {
-      // noop
+      throw Error(`getRelatedGraph threw an error: ${error}`);
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const relatedGraph = await getRelatedGraph(mockClient, mockLlm);
+    const relatedGraph = await getRelatedGraph({ client, model });
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -125,8 +125,8 @@ describe('runRelatedGraph', () => {
     let response;
     try {
       response = await relatedGraph.invoke(mockedRequestWithPipeline);
-    } catch (e) {
-      // noop
+    } catch (error) {
+      throw Error(`getRelatedGraph threw an error: ${error}`);
     }
 
     expect(response.results).toStrictEqual(relatedExpectedResults);

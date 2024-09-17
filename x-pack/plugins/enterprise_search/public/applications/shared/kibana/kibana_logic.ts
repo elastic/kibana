@@ -24,7 +24,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management';
+import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
@@ -68,8 +68,8 @@ export interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchHomepage?: SearchHomepagePluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -103,8 +103,8 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchHomepage: SearchHomepagePluginStart | null;
-  searchPlayground: SearchPlaygroundPluginStart | null;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
+  searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -150,8 +150,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     searchHomepage: [props.searchHomepage || null, {}],
-    searchPlayground: [props.searchPlayground || null, {}],
     searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
+    searchPlayground: [props.searchPlayground || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

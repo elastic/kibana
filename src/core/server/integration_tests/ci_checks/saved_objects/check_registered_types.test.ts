@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -92,13 +93,14 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
         "entity-definition": "61be3e95966045122b55e181bb39658b1dc9bbe9",
         "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
+        "entity-engine-status": "0738aa1a06d3361911740f8f166071ea43a00927",
         "epm-packages": "8042d4a1522f6c4e6f5486e791b3ffe3a22f88fd",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",
         "exception-list": "4aebc4e61fb5d608cae48eaeb0977e8db21c61a4",
         "exception-list-agnostic": "6d3262d58eee28ac381ec9654f93126a58be6f5d",
-        "favorites": "ef282e9fb5a91df3cc88409a9f86d993fb51a6e9",
+        "favorites": "a68c7c8ae22eaddcca324d8b3bfc80a94e3eec3a",
         "file": "6b65ae5899b60ebe08656fd163ea532e557d3c98",
         "file-upload-usage-collection-telemetry": "06e0a8c04f991e744e09d03ab2bd7f86b2088200",
         "fileShare": "5be52de1747d249a221b5241af2838264e19aaa1",
@@ -110,7 +112,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-proxy": "6cb688f0d2dd856400c1dbc998b28704ff70363d",
         "fleet-setup-lock": "0dc784792c79b5af5a6e6b5dcac06b0dbaa90bde",
         "fleet-space-settings": "b278e82a33978900e53a1253884b5bdbd929c9bb",
-        "fleet-uninstall-tokens": "ed8aa37e3cdd69e4360709e64944bb81cae0c025",
+        "fleet-uninstall-tokens": "371a691206845b364bcf6d3693ca7905ffdb71a4",
         "graph-workspace": "5cc6bb1455b078fd848c37324672163f09b5e376",
         "guided-onboarding-guide-state": "d338972ed887ac480c09a1a7fbf582d6a3827c91",
         "guided-onboarding-plugin-state": "bc109e5ef46ca594fdc179eda15f3095ca0a37a4",
@@ -147,7 +149,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "aea0c371a462e6d07c3ceb3aff11891b47feb09d",
         "rules-settings": "892a2918ebaeba809a612b8d97cec0b07c800b5f",
         "sample-data-telemetry": "37441b12f5b0159c2d6d5138a494c9f440e950b5",
-        "search": "4579401660a4089d5122b2fc8624825cb97b0480",
+        "search": "0aa6eefb37edd3145be340a8b67779c2ca578b22",
         "search-session": "b2fcd840e12a45039ada50b1355faeafa39876d1",
         "search-telemetry": "b568601618744720b5662946d3103e3fb75fe8ee",
         "security-rule": "07abb4d7e707d91675ec0495c73816394c7b521f",

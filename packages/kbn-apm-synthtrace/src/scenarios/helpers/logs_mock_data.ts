@@ -1,19 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { generateShortId } from '@kbn/apm-synthtrace-client';
+import { ELASTIC_AGENT_NAMES } from '@kbn/elastic-agent-utils';
+import { faker } from '@faker-js/faker';
 import { randomInt } from 'crypto';
+import moment from 'moment';
+import { getAtIndexOrRandom } from './get_at_index_or_random';
 
-// Utility function to get a random element from an array
-const getAtIndexOrRandom = <T>(values: T[], index?: number) =>
-  values[index ?? randomInt(values.length)];
+const {
+  internet: { ipv4, userAgent, httpMethod, httpStatusCode },
+  word: { noun, verb },
+} = faker;
 
 // Arrays for data
+const LOG_LEVELS: string[] = ['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
+
+const JAVA_LOG_MESSAGES = [
+  '[main] com.example1.core.ApplicationCore - Critical failure: NullPointerException encountered during startup',
+  '[main] com.example.service.UserService - User registration completed for userId: 12345',
+  '[main] com.example3.util.JsonParser - Parsing JSON response from external API',
+  '[main] com.example4.security.AuthManager - Unauthorized access attempt detected for userId: 67890',
+  '[main] com.example5.dao.UserDao - Database query failed: java.sql.SQLException: Timeout expired',
+];
+
 const IP_ADDRESSES = [
   '223.72.43.22',
   '20.24.184.101',
@@ -50,3 +66,16 @@ export const getGeoCoordinate = (index?: number) => getAtIndexOrRandom(GEO_COORD
 export const getCloudProvider = (index?: number) => getAtIndexOrRandom(CLOUD_PROVIDERS, index);
 export const getCloudRegion = (index?: number) => getAtIndexOrRandom(CLOUD_REGION, index);
 export const getServiceName = (index?: number) => getAtIndexOrRandom(SERVICE_NAMES, index);
+export const getAgentName = (index?: number) => getAtIndexOrRandom(ELASTIC_AGENT_NAMES, index);
+
+export const getJavaLog = () =>
+  `${moment().format('YYYY-MM-DD HH:mm:ss,SSS')} ${getAtIndexOrRandom(
+    LOG_LEVELS
+  )} ${getAtIndexOrRandom(JAVA_LOG_MESSAGES)}`;
+
+export const getWebLog = () => {
+  const path = `/api/${noun()}/${verb()}`;
+  const bytes = randomInt(100, 4000);
+
+  return `${ipv4()} - - [${moment().toISOString()}] "${httpMethod()} ${path} HTTP/1.1" ${httpStatusCode()} ${bytes} "-" "${userAgent()}"`;
+};

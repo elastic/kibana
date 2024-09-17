@@ -40,13 +40,13 @@ describe('getDataStreams', () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
-      type: 'logs',
-      datasetQuery: 'nginx',
+      types: ['logs'],
+      datasetQuery: 'nginx-*',
       uncategorisedOnly: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
-      'logs-*nginx*'
+      'logs-nginx-*'
     );
 
     expect(result.datasetUserPrivileges.canMonitor).toBe(true);
@@ -57,8 +57,8 @@ describe('getDataStreams', () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
+        types: ['logs'],
+        datasetQuery: 'nginx-*',
         uncategorisedOnly: true,
       });
       expect(results.items.length).toBe(1);
@@ -67,8 +67,8 @@ describe('getDataStreams', () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
+        types: ['logs'],
+        datasetQuery: 'nginx-*',
         uncategorisedOnly: false,
       });
       expect(results.items.length).toBe(5);

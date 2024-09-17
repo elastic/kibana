@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import type { GetTransformNodesResponseSchema } from '../../../common/api_schemas/transforms';
+import type { GetTransformNodesResponseSchema } from '../../../server/routes/api_schemas/transforms';
 import {
   addInternalBasePath,
   DEFAULT_REFRESH_INTERVAL_MS,

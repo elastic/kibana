@@ -11,7 +11,12 @@ import { RoleCredentials } from '../../../shared/services';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'svlSearchHomePage']);
+  const pageObjects = getPageObjects([
+    'svlCommonPage',
+    'svlCommonNavigation',
+    'svlSearchHomePage',
+    'embeddedConsole',
+  ]);
   const svlUserManager = getService('svlUserManager');
   const uiSettings = getService('uiSettings');
   let roleAuthc: RoleCredentials;
@@ -56,11 +61,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('has console quickstart link on page', async () => {
       await pageObjects.svlSearchHomePage.expectConsoleLinkExists();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
       await pageObjects.svlSearchHomePage.clickConsoleLink();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
     });
 
     it('has endpoints link and flyout', async () => {

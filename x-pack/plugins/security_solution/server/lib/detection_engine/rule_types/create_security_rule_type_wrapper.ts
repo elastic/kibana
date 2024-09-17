@@ -343,9 +343,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             !isQueryParams(params) &&
             !isEqlParams(params)
           ) {
+            const dataViews = await services.getDataViews();
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
-              dataViews: services.dataViews,
+              dataViews,
               language: params.language,
               ruleExecutionLogger,
             });

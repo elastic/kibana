@@ -1,26 +1,4 @@
 [[saved-objects-api]]
 == Saved objects APIs
 
-Manage {kib} saved objects, including dashboards, visualizations, and more.
-
-NOTE: For the latest details, refer to {api-kibana}/group/endpoint-saved-objects[saved object APIs].
-
-WARNING: Do not write documents directly to the `.kibana` index. When you write directly
-to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
-
-include::saved-objects/export.asciidoc[]
-include::saved-objects/import.asciidoc[]
-include::saved-objects/resolve_import_errors.asciidoc[]
-include::saved-objects/rotate_encryption_key.asciidoc[]
-include::saved-objects/get.asciidoc[]
-include::saved-objects/bulk_get.asciidoc[]
-include::saved-objects/find.asciidoc[]
-include::saved-objects/create.asciidoc[]
-include::saved-objects/bulk_create.asciidoc[]
-include::saved-objects/update.asciidoc[]
-include::saved-objects/bulk_update.asciidoc[]
-include::saved-objects/delete.asciidoc[]
-include::saved-objects/bulk_delete.asciidoc[]
-include::saved-objects/resolve.asciidoc[]
-include::saved-objects/bulk_resolve.asciidoc[]
-
+For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved objects API].

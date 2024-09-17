@@ -5157,8 +5157,14 @@ describe('Package policy service', () => {
           });
         }
       });
+      appContextService.start(
+        createAppContextStartContractMock(undefined, false, {
+          internal: soClient,
+          withoutSpaceExtensions: soClient,
+        })
+      );
 
-      await packagePolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+      await packagePolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
       expect(updateSpy).toHaveBeenCalledTimes(1);
       expect(updateSpy).toHaveBeenCalledWith(
@@ -5269,14 +5275,14 @@ describe('getUpgradeDryRunDiff', () => {
     ]);
   });
 
-  it('should omit spaceId when upgrading package policies with spaceId', async () => {
+  it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
     savedObjectsClient.get.mockImplementation((type, id) =>
       Promise.resolve({
         id,
         type: 'abcd',
         references: [],
         version: '0.9.0',
-        attributes: { ...createPackagePolicyMock(), name: id, spaceId: 'test' },
+        attributes: { ...createPackagePolicyMock(), name: id, spaceIds: ['test'] },
       })
     );
     const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -5296,7 +5302,7 @@ describe('getUpgradeDryRunDiff', () => {
       'ingest-package-policies',
       'package-policy-id-test-spaceId',
       expect.not.objectContaining({
-        spaceId: expect.anything(),
+        spaceIds: expect.anything(),
       }),
       expect.anything()
     );

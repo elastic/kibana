@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findInvalidEcsFields, processMapping } from './validate';
+import { findDuplicateFields, findInvalidEcsFields, processMapping } from './validate';
 
 describe('Testing ecs handler', () => {
   it('processMapping()', async () => {
@@ -88,5 +88,37 @@ describe('findInvalidEcsFields', () => {
 
     const invalid = findInvalidEcsFields(ecsMappingReserved);
     expect(invalid.length).toBe(1);
+  });
+});
+
+describe('findDuplicateFields', () => {
+  it('duplicates: samples with duplicates', async () => {
+    const finalMapping = {
+      teleport_log: {
+        audit: {
+          ei: null,
+          event: {
+            target: 'event.action',
+            confidence: 0.9,
+            type: 'string',
+            date_formats: [],
+          },
+          uid: {
+            target: 'event.action',
+            confidence: 0.8,
+            type: 'string',
+            date_formats: [],
+          },
+        },
+      },
+    };
+    const samples = [
+      '{"teleport_log":{"audit":{"ei":0,"event":"user.login","uid":"8c815e54-c83b-43d7-b578-2bcf5b6775fa","code":"T1000W","time":"2024-05-09T20:58:57.77Z","cluster_name":"teleport.ericbeahan.com","user":"root","success":false,"error":"invalid username, password or second factor","method":"local","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36","addr.remote":"136.32.177.60:52457"}}}',
+      '{"teleport_log":{"audit":{"ei":0,"event":"user.login","uid":"6bf237a0-2753-418d-b01b-2d82ebf42636","code":"T1000W","time":"2024-05-09T21:00:22.747Z","cluster_name":"teleport.ericbeahan.com","user":"teleport-admin","success":false,"error":"invalid username, password or second factor","method":"local","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36","addr.remote":"136.32.177.60:52818"}}}',
+    ];
+    const duplicates = findDuplicateFields(samples, finalMapping);
+    expect(duplicates).toStrictEqual([
+      "One or more samples have matching fields for ECS field 'event.action': teleport_log.audit.event, teleport_log.audit.uid",
+    ]);
   });
 });

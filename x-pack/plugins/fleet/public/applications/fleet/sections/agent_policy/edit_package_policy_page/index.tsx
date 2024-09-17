@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -250,7 +249,10 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
     if (
-      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
       !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
@@ -485,7 +487,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || isEmpty(existingAgentPolicies) || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
@@ -592,7 +594,7 @@ export const EditPackagePolicyForm = memo<{
                                 content: (
                                   <FormattedMessage
                                     id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
-                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations and Agent Policies. Contact your administrator."
                                   />
                                 ),
                               }

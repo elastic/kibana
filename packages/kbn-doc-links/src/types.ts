@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -24,6 +25,7 @@ export interface DocLinksMeta {
 export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
+  readonly apiReference: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -181,6 +183,7 @@ export interface DocLinks {
     readonly searchApplicationsSearch: string;
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
+    readonly semanticSearch: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
     readonly start: string;
@@ -377,6 +380,7 @@ export interface DocLinks {
     readonly percolate: string;
     readonly queryDsl: string;
     readonly queryESQL: string;
+    readonly queryESQLExamples: string;
   };
   readonly date: {
     readonly dateMath: string;

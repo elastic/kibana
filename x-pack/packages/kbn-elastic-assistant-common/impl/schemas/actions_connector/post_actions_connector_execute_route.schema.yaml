@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Execute Connector API endpoint
-  version: '1'
+  version: "1"
 paths:
   /internal/elastic_assistant/actions/connector/{connectorId}/_execute:
     post:
@@ -103,4 +103,3 @@ paths:
                     type: string
                   message:
                     type: string
-

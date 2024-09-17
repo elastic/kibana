@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -17,7 +18,7 @@ const { collapseLiteralStrings } = XJson;
 
 export interface RequestArgs {
   http: HttpSetup;
-  requests: Array<{ url: string; method: string; data: string[] }>;
+  requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -128,7 +129,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           }
 
           if (isMultiRequest) {
-            value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+            const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+            value = `# ${lineNumber}${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
           }
 
           results.push({

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import { SamplesFormat } from '../../../common';
 import type { CategorizationState } from '../../types';
-import { modifySamples, formatSamples } from '../../util/samples';
-import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';
-import { handleCategorizationValidation } from './validate';
-import { handleInvalidCategorization } from './invalid';
-import { handleErrors } from './errors';
-import { handleReview } from './review';
+import { formatSamples, prefixSamples } from '../../util/samples';
+import { handleCategorization } from './categorization';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
+import { handleErrors } from './errors';
+import { handleInvalidCategorization } from './invalid';
+import { handleReview } from './review';
+import type { CategorizationBaseNodeParams, CategorizationGraphParams } from './types';
+import { handleCategorizationValidation } from './validate';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -67,6 +64,10 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
+  hasTriedOnce: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
   errors: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
@@ -103,10 +104,14 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  samplesFormat: {
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'unsupported' }),
+  },
 };
 
-function modelInput(state: CategorizationState): Partial<CategorizationState> {
-  const samples = modifySamples(state);
+function modelJSONInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
@@ -118,11 +123,25 @@ function modelInput(state: CategorizationState): Partial<CategorizationState> {
     initialPipeline,
     finalized: false,
     reviewed: false,
+    lastExecutedChain: 'modelJSONInput',
+  };
+}
+
+function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
+  return {
+    exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
+    ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
+    ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
+    samples: state.rawSamples,
+    initialPipeline,
+    finalized: false,
+    reviewed: false,
     lastExecutedChain: 'modelInput',
   };
 }
 
-function modelOutput(state: CategorizationState): Partial<CategorizationState> {
+function modelOutput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
@@ -133,14 +152,29 @@ function modelOutput(state: CategorizationState): Partial<CategorizationState> {
   };
 }
 
-function validationRouter(state: CategorizationState): string {
+function modelRouter({ state }: CategorizationBaseNodeParams): string {
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    return 'modelJSONInput';
+  }
+  return 'modelInput';
+}
+
+function validationRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
     return 'categorization';
   }
   return 'validateCategorization';
 }
 
-function chainRouter(state: CategorizationState): string {
+function chainRouter({ state }: CategorizationBaseNodeParams): string {
+  if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
+  }
   if (Object.keys(state.errors).length > 0) {
     return 'errors';
   }
@@ -157,44 +191,57 @@ function chainRouter(state: CategorizationState): string {
   return END;
 }
 
-export async function getCategorizationGraph(
-  client: IScopedClusterClient,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function getCategorizationGraph({ client, model }: CategorizationGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
+    .addNode('modelInput', (state: CategorizationState) => modelInput({ state }))
+    .addNode('modelJSONInput', (state: CategorizationState) => modelJSONInput({ state }))
+    .addNode('modelOutput', (state: CategorizationState) => modelOutput({ state }))
     .addNode('handleCategorization', (state: CategorizationState) =>
-      handleCategorization(state, model)
+      handleCategorization({ state, model })
     )
     .addNode('handleValidatePipeline', (state: CategorizationState) =>
-      handleValidatePipeline(state, client)
+      handleValidatePipeline({ state, client })
     )
-    .addNode('handleCategorizationValidation', handleCategorizationValidation)
+    .addNode('handleCategorizationValidation', (state: CategorizationState) =>
+      handleCategorizationValidation({ state })
+    )
     .addNode('handleInvalidCategorization', (state: CategorizationState) =>
-      handleInvalidCategorization(state, model)
+      handleInvalidCategorization({ state, model })
     )
-    .addNode('handleErrors', (state: CategorizationState) => handleErrors(state, model))
-    .addNode('handleReview', (state: CategorizationState) => handleReview(state, model))
-    .addEdge(START, 'modelInput')
+    .addNode('handleErrors', (state: CategorizationState) => handleErrors({ state, model }))
+    .addNode('handleReview', (state: CategorizationState) => handleReview({ state, model }))
+    .addConditionalEdges(START, (state: CategorizationState) => modelRouter({ state }), {
+      modelJSONInput: 'modelJSONInput',
+      modelInput: 'modelInput', // For Non JSON input samples
+    })
     .addEdge('modelOutput', END)
+    .addEdge('modelJSONInput', 'handleValidatePipeline')
     .addEdge('modelInput', 'handleValidatePipeline')
     .addEdge('handleCategorization', 'handleValidatePipeline')
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
-    .addConditionalEdges('handleValidatePipeline', validationRouter, {
-      categorization: 'handleCategorization',
-      validateCategorization: 'handleCategorizationValidation',
-    })
-    .addConditionalEdges('handleCategorizationValidation', chainRouter, {
-      modelOutput: 'modelOutput',
-      errors: 'handleErrors',
-      invalidCategorization: 'handleInvalidCategorization',
-      review: 'handleReview',
-    });
+    .addConditionalEdges(
+      'handleValidatePipeline',
+      (state: CategorizationState) => validationRouter({ state }),
+      {
+        modelOutput: 'modelOutput',
+        categorization: 'handleCategorization',
+        validateCategorization: 'handleCategorizationValidation',
+      }
+    )
+    .addConditionalEdges(
+      'handleCategorizationValidation',
+      (state: CategorizationState) => chainRouter({ state }),
+      {
+        modelOutput: 'modelOutput',
+        errors: 'handleErrors',
+        invalidCategorization: 'handleInvalidCategorization',
+        review: 'handleReview',
+      }
+    );
 
   const compiledCategorizationGraph = workflow.compile();
   return compiledCategorizationGraph;

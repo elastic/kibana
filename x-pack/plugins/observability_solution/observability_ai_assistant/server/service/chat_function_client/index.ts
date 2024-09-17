@@ -16,7 +16,7 @@ import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
+  InstructionOrCallback,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -34,7 +34,7 @@ const ajv = new Ajv({
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
-  private readonly instructions: RegisteredInstruction[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -107,7 +107,7 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(): RegisteredInstruction[] {
+  getInstructions(): InstructionOrCallback[] {
     return this.instructions;
   }
 
@@ -132,7 +132,7 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
-  getActions() {
+  getActions(): Required<ObservabilityAIAssistantScreenContextRequest>['actions'] {
     return this.actions;
   }
 
@@ -146,12 +146,14 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    connectorId,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    connectorId: string;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -169,6 +171,7 @@ export class ChatFunctionClient {
         messages,
         screenContexts: this.screenContexts,
         chat,
+        connectorId,
       },
       signal
     );

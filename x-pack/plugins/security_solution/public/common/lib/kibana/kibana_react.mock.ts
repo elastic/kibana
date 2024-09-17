@@ -57,10 +57,11 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
+import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
-  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
+  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: true, value: 5000 },
   [DEFAULT_APP_TIME_RANGE]: {
     from: DEFAULT_FROM,
     to: DEFAULT_TO,
@@ -212,7 +213,7 @@ export const createStartServicesMock = (
     ml: {
       locator,
     },
-    telemetry: {},
+    telemetry: createTelemetryServiceMock(),
     theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),

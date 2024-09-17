@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ESQLDecimalLiteral, ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
@@ -72,5 +73,18 @@ export const compareTypesWithLiterals = (
   if (b === 'string') {
     return isStringType(a);
   }
+
+  // In Elasticsearch function definitions, time_literal and time_duration are used
+  // time_duration is seconds/min/hour interval
+  // date_period is day/week/month/year interval
+  // time_literal includes time_duration and date_period
+  // So they are equivalent AST's 'timeInterval' (a date unit constant: e.g. 1 year, 15 month)
+  if (a === 'time_literal' || a === 'time_duration' || a === 'date_period')
+    return b === 'timeInterval';
+  if (b === 'time_literal' || b === 'time_duration' || b === 'date_period')
+    return a === 'timeInterval';
+  if (a === 'time_literal') return b === 'time_duration';
+  if (b === 'time_literal') return a === 'time_duration';
+
   return false;
 };

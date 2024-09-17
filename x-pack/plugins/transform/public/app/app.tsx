@@ -14,7 +14,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import type { ExperimentalFeatures } from '../../common/config';
+import type { ExperimentalFeatures } from '../../server/config';
 import { SECTION_SLUG } from './common/constants';
 import type { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';

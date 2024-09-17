@@ -33,7 +33,6 @@ const chatCompleteBaseRt = t.type({
     t.partial({
       conversationId: t.string,
       title: t.string,
-      responseLanguage: t.string,
       disableFunctions: t.union([
         toBooleanRt,
         t.type({
@@ -41,17 +40,15 @@ const chatCompleteBaseRt = t.type({
         }),
       ]),
       instructions: t.array(
-        t.union([
-          t.string,
-          t.intersection([
-            t.type({
-              doc_id: t.string,
-              text: t.string,
-            }),
-            t.partial({
-              system: t.boolean,
-            }),
-          ]),
+        t.intersection([
+          t.partial({ doc_id: t.string }),
+          t.type({
+            text: t.string,
+            instruction_type: t.union([
+              t.literal('user_instruction'),
+              t.literal('application_instruction'),
+            ]),
+          }),
         ])
       ),
     }),
@@ -243,7 +240,6 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      responseLanguage,
       instructions,
       disableFunctions,
     },
@@ -268,7 +264,6 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    responseLanguage,
     instructions,
     simulateFunctionCalling,
     disableFunctions,

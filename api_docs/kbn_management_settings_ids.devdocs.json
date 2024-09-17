@@ -1089,21 +1089,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_RESPONSE_LANGUAGE",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_AI_ASSISTANT_RESPONSE_LANGUAGE",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantResponseLanguage\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN",
         "type": "string",
         "tags": [],
@@ -1516,6 +1501,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingElasticsearchPlugin\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "description": [],
+        "signature": [
+          "\"observability:searchExcludedDataTiers\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

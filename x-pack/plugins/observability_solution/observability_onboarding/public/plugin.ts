@@ -35,6 +35,7 @@ import { ConfigSchema } from '.';
 import {
   OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -78,7 +79,8 @@ export class ObservabilityOnboardingPlugin
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
     } = config;
-
+    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
     // set xpack.observability_onboarding.ui.enabled: true
@@ -109,7 +111,10 @@ export class ObservabilityOnboardingPlugin
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
             context: {
-              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              isDev: isDevEnvironment,
+              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
+              isServerless:
+                Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
               stackVersion,
             },
           });
@@ -124,6 +129,7 @@ export class ObservabilityOnboardingPlugin
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
 
     return {
       locators: this.locators,

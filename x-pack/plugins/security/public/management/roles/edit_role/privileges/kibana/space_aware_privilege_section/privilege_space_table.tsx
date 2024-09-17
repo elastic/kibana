@@ -22,15 +22,14 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
+import { constants, type PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
-import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { copyRole } from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -120,7 +119,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const isExpanded = this.state.expandedSpacesGroups.includes(record.privilegeIndex);
           const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
 
-          let button = null;
+          let button: React.ReactElement | null = null;
           if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
@@ -182,7 +181,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           const basePrivilege =
             privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
-            CUSTOM_PRIVILEGE_VALUE;
+            constants.CUSTOM_PRIVILEGE_VALUE;
 
           const privilege = privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)
             ? '*'

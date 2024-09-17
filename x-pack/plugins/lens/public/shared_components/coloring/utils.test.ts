@@ -6,7 +6,12 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { applyPaletteParams, findMinMaxByColumnId, getContrastColor } from './utils';
+import {
+  applyPaletteParams,
+  findMinMaxByColumnId,
+  getContrastColor,
+  shouldColorByTerms,
+} from './utils';
 
 describe('applyPaletteParams', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
@@ -106,5 +111,19 @@ describe('findMinMaxByColumnId', () => {
         ],
       })
     ).toEqual({ b: { min: 2, max: 53 } });
+  });
+});
+
+describe('shouldColorByTerms', () => {
+  it('should return true if bucketed regardless of value', () => {
+    expect(shouldColorByTerms('number', true)).toBe(true);
+  });
+
+  it('should return false if not bucketed and numeric', () => {
+    expect(shouldColorByTerms('number', false)).toBe(false);
+  });
+
+  it('should return true if not bucketed and non-numeric', () => {
+    expect(shouldColorByTerms('string', false)).toBe(true);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { StructuredOutputParser } from 'langchain/output_parsers';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
 const GOOD_SYNTAX_EXAMPLES =

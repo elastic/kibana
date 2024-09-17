@@ -19,12 +19,14 @@
       "datasetQuality",
       "unifiedSearch",
       "security",
+      "observability",
+      "licensing",
+      "ruleRegistry"
     ],
     "requiredBundles": [
+      "esql",
       "kibanaReact",
       "kibanaUtils",
-      "esql",
-      "esqlDataGrid",
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

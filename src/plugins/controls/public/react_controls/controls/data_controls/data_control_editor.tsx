@@ -1,8 +1,10 @@
-/* * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState } from 'react';
@@ -32,21 +34,28 @@ import {
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { DataControlFieldRegistry } from '../../../types';
-import { CONTROL_WIDTH_OPTIONS } from '../../..';
-import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type ControlWidth,
+  type DefaultDataControlState,
+} from '../../../../common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
+import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import {
+  isDataControlFactory,
+  type DataControlFactory,
+  type DataControlFieldRegistry,
+} from './types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -145,10 +154,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   /** TODO: These should not be props */
   services: { dataViews: dataViewService },
 }: ControlEditorProps<State>) => {
-  const [defaultGrow, defaultWidth] = useBatchedPublishingSubjects(
-    controlGroupApi.grow,
-    controlGroupApi.width
-  );
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''
@@ -156,9 +161,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
-
-  /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
-  // const editorConfig = controlGroup.getEditorConfig();
+  const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
@@ -241,36 +244,37 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             title={<h2>{DataControlEditorStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
             description={DataControlEditorStrings.manageControl.dataSource.getFormGroupDescription()}
           >
-            {/* {!editorConfig?.hideDataViewSelector && ( */}
-            <EuiFormRow
-              label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
-            >
-              {dataViewListError ? (
-                <EuiCallOut
-                  color="danger"
-                  iconType="error"
-                  title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
-                >
-                  <p>{dataViewListError.message}</p>
-                </EuiCallOut>
-              ) : (
-                <DataViewPicker
-                  dataViews={dataViewListItems}
-                  selectedDataViewId={editorState.dataViewId}
-                  onChangeDataViewId={(newDataViewId) => {
-                    setEditorState({ ...editorState, dataViewId: newDataViewId });
-                    setSelectedControlType(undefined);
-                  }}
-                  trigger={{
-                    label:
-                      selectedDataView?.getName() ??
-                      DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
-                  }}
-                  selectableProps={{ isLoading: dataViewListLoading }}
-                />
-              )}
-            </EuiFormRow>
-            {/* )} */}
+            {!editorConfig?.hideDataViewSelector && (
+              <EuiFormRow
+                data-test-subj="control-editor-data-view-picker"
+                label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
+              >
+                {dataViewListError ? (
+                  <EuiCallOut
+                    color="danger"
+                    iconType="error"
+                    title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
+                  >
+                    <p>{dataViewListError.message}</p>
+                  </EuiCallOut>
+                ) : (
+                  <DataViewPicker
+                    dataViews={dataViewListItems}
+                    selectedDataViewId={editorState.dataViewId}
+                    onChangeDataViewId={(newDataViewId) => {
+                      setEditorState({ ...editorState, dataViewId: newDataViewId });
+                      setSelectedControlType(undefined);
+                    }}
+                    trigger={{
+                      label:
+                        selectedDataView?.getName() ??
+                        DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
+                    }}
+                    selectableProps={{ isLoading: dataViewListLoading }}
+                  />
+                )}
+              </EuiFormRow>
+            )}
 
             <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
               {fieldListError ? (
@@ -284,9 +288,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               ) : (
                 <FieldPicker
                   filterPredicate={(field: DataViewField) => {
-                    /** TODO: Make `fieldFilterPredicate` work when refactoring the `ControlGroupRenderer` */
-                    // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
-                    return Boolean(fieldRegistry?.[field.name]);
+                    const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
+                    return Boolean(fieldRegistry?.[field.name]) && customPredicate;
                   }}
                   selectedFieldName={editorState.fieldName}
                   dataView={selectedDataView}
@@ -359,36 +362,34 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 }}
               />
             </EuiFormRow>
-            {/* {!editorConfig?.hideWidthSettings && ( */}
-            <EuiFormRow
-              label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
-            >
-              <div>
-                <EuiButtonGroup
-                  color="primary"
-                  legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
-                  options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={editorState.width ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
-                  onChange={(newWidth: string) =>
-                    setEditorState({ ...editorState, width: newWidth as ControlWidth })
-                  }
-                />
-                <EuiSpacer size="s" />
-                <EuiSwitch
-                  label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
-                  color="primary"
-                  checked={
-                    (editorState.grow === undefined ? defaultGrow : editorState.grow) ??
-                    DEFAULT_CONTROL_GROW
-                  }
-                  onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
-                  data-test-subj="control-editor-grow-switch"
-                />
-              </div>
-            </EuiFormRow>
-            {/* )} */}
+            {!editorConfig?.hideWidthSettings && (
+              <EuiFormRow
+                data-test-subj="control-editor-width-settings"
+                label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
+              >
+                <div>
+                  <EuiButtonGroup
+                    color="primary"
+                    legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
+                    options={CONTROL_WIDTH_OPTIONS}
+                    idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
+                    onChange={(newWidth: string) =>
+                      setEditorState({ ...editorState, width: newWidth as ControlWidth })
+                    }
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
+                    onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </div>
+              </EuiFormRow>
+            )}
           </EuiDescribedFormGroup>
-          {CustomSettingsComponent}
+          {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
           {controlId && (
             <>
               <EuiSpacer size="l" />

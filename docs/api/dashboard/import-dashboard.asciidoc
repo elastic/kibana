@@ -4,7 +4,7 @@
 <titleabbrev>Import dashboard</titleabbrev>
 ++++
 
-deprecated::[7.15.0,Use <<saved-objects-api-import>> instead.]
+deprecated::[7.15.0,Use the {api-kibana}/group/endpoint-saved-objects[saved objects API] instead.]
 
 Import dashboards and corresponding saved objects.
 

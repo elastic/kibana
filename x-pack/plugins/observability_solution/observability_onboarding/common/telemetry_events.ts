@@ -7,13 +7,24 @@
 
 import { type EventTypeOpts } from '@elastic/ebt/client';
 
-export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
+interface ObservabilityOnboardingIntegrationTelemetryFields {
+  installSource: string;
+  pkgName: string;
+  pkgVersion: string;
+  title: string;
+}
+
+interface FlowEventFields {
   flow?: string;
   step?: string;
   step_status?: string;
   step_message?: string;
   uses_legacy_onboarding_page: boolean;
-}> = {
+}
+
+type ObservabilityOnboardingTelemetryEvent = EventTypeOpts<FlowEventFields>;
+
+export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: ObservabilityOnboardingTelemetryEvent = {
   eventType: 'observability_onboarding',
   schema: {
     flow: {
@@ -75,3 +86,45 @@ export const OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT: EventTypeOpts<{
     },
   },
 };
+
+type ObservabilityOnboardingAutodetectTelemetryEvent = EventTypeOpts<
+  FlowEventFields & {
+    integrations?: ObservabilityOnboardingIntegrationTelemetryFields[];
+  }
+>;
+
+export const OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT: ObservabilityOnboardingAutodetectTelemetryEvent =
+  {
+    eventType: 'observability_onboarding_autodetect',
+    schema: {
+      ...OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.schema,
+      integrations: {
+        type: 'array',
+        items: {
+          properties: {
+            installSource: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  'The source of the package used to create the integration. Usually "registry" or "custom".',
+              },
+            },
+            pkgName: {
+              type: 'keyword',
+              _meta: {
+                description: 'The name of the package used to create the integration.',
+              },
+            },
+            pkgVersion: {
+              type: 'keyword',
+              _meta: { description: 'The version of the package used to create the integration.' },
+            },
+            title: { type: 'keyword', _meta: { description: 'The visual name of the package.' } },
+          },
+        },
+        _meta: {
+          optional: true,
+        },
+      },
+    },
+  };

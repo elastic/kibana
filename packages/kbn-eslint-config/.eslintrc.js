@@ -116,6 +116,12 @@ module.exports = {
           exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
         },
         {
+          from: 'zod',
+          to: '@kbn/zod',
+          disallowedMessage: `import from @kbn/zod instead`,
+          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+        },
+        {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,
@@ -308,6 +314,7 @@ module.exports = {
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
+    '@kbn/eslint/no_unsafe_js_yaml': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',

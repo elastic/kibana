@@ -1,31 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import {
-  OPTIONS_LIST_CONTROL,
+import { OPTIONS_LIST_CONTROL } from '../../../../../common';
+import type {
+  OptionsListControlState,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
   OptionsListSuccessResponse,
   OptionsListSuggestions,
-} from '../../../../../common/options_list/types';
-import {
-  getSelectionAsFieldType,
-  OptionsListSelection,
-} from '../../../../../common/options_list/options_list_selections';
-import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
+} from '../../../../../common/options_list';
+import { getSelectionAsFieldType, isValidSearch } from '../../../../../common/options_list';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
@@ -35,9 +35,9 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import { OptionsListStrings } from './options_list_strings';
-import { OptionsListControlApi, OptionsListControlState } from './types';
 import { initializeOptionsListSelections } from './options_list_control_selections';
+import { OptionsListStrings } from './options_list_strings';
+import type { OptionsListControlApi } from './types';
 
 export const getOptionsListControlFactory = (
   services: DataControlServices
@@ -87,6 +87,7 @@ export const getOptionsListControlFactory = (
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
+        'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,
@@ -243,7 +244,7 @@ export const getOptionsListControlFactory = (
                 searchTechnique: searchTechnique$.getValue(),
                 runPastTimeout: runPastTimeout$.getValue(),
                 singleSelect: singleSelect$.getValue(),
-                selections: selections.selectedOptions$.getValue(),
+                selectedOptions: selections.selectedOptions$.getValue(),
                 sort: sort$.getValue(),
                 existsSelected: selections.existsSelected$.getValue(),
                 exclude: selections.exclude$.getValue(),
@@ -277,7 +278,7 @@ export const getOptionsListControlFactory = (
           sort: [
             sort$,
             (sort) => sort$.next(sort),
-            (a, b) => (a ?? OPTIONS_LIST_DEFAULT_SORT) === (b ?? OPTIONS_LIST_DEFAULT_SORT),
+            (a, b) => fastIsEqual(a ?? OPTIONS_LIST_DEFAULT_SORT, b ?? OPTIONS_LIST_DEFAULT_SORT),
           ],
 
           /** This state cannot currently be changed after the control is created */

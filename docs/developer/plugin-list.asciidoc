@@ -570,8 +570,8 @@ security and spaces filtering.
 |Exposes services to access entities data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+|{kib-repo}blob/{branch}/x-pack/plugins/entity_manager/README.md[entityManager]
+|This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -646,6 +646,10 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|Home of the Inventory plugin, which renders the... inventory.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
@@ -795,12 +799,20 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
 |The Search Homepage is a shared homepage for elasticsearch users.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
@@ -832,12 +844,13 @@ Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
-|This plugin contains the ESS/on-prem deployments (non-serverless) specific logic for Security Solution.
+|The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
+This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.mdx[securitySolutionServerless]
-|This plugin contains configuration and code used to create a Serverless Security project.
-It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
+This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]

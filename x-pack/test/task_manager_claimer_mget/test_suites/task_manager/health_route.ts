@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           as_workers: 10,
           as_cost: 20,
         },
-        claim_strategy: 'unsafe_mget',
+        claim_strategy: 'mget',
       });
     });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -11,11 +12,13 @@ import { BehaviorSubject } from 'rxjs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
-import { OptionsListDisplaySettings } from '../options_list_control/types';
+import type {
+  OptionsListDisplaySettings,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
+  OptionsListSuggestions,
+} from '../../../../../common/options_list';
 
 export const getOptionsListMocks = () => {
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);

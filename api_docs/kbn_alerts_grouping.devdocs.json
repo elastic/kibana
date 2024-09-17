@@ -13,7 +13,15 @@
           "\nA coordinator component to show multiple alert tables grouped by one or more fields\n"
         ],
         "signature": [
-          "React.NamedExoticComponent<",
+          "<T extends ",
+          {
+            "pluginId": "@kbn/alerts-grouping",
+            "scope": "public",
+            "docId": "kibKbnAlertsGroupingPluginApi",
+            "section": "def-public.BaseAlertsGroupAggregations",
+            "text": "BaseAlertsGroupAggregations"
+          },
+          ">(props: ",
           {
             "pluginId": "@kbn/alerts-grouping",
             "scope": "public",
@@ -21,15 +29,7 @@
             "section": "def-public.AlertsGroupingProps",
             "text": "AlertsGroupingProps"
           },
-          "<{}>> & { readonly type: (props: ",
-          {
-            "pluginId": "@kbn/alerts-grouping",
-            "scope": "public",
-            "docId": "kibKbnAlertsGroupingPluginApi",
-            "section": "def-public.AlertsGroupingProps",
-            "text": "AlertsGroupingProps"
-          },
-          "<{}>) => JSX.Element; }"
+          "<T>) => JSX.Element"
         ],
         "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
         "deprecated": false,
@@ -39,14 +39,21 @@
           {
             "parentPluginId": "@kbn/alerts-grouping",
             "id": "def-public.AlertsGrouping.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P"
+              {
+                "pluginId": "@kbn/alerts-grouping",
+                "scope": "public",
+                "docId": "kibKbnAlertsGroupingPluginApi",
+                "section": "def-public.AlertsGroupingProps",
+                "text": "AlertsGroupingProps"
+              },
+              "<T>"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -92,6 +99,70 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerts-grouping",
+        "id": "def-public.AlertsGroupAggregationBucket",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertsGroupAggregationBucket",
+        "description": [],
+        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupAggregationBucket.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupAggregationBucket.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupAggregationBucket.isNullGroup",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNullGroup",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupAggregationBucket.unitsCount",
+            "type": "Object",
+            "tags": [],
+            "label": "unitsCount",
+            "description": [],
+            "signature": [
+              "{ value: number; } | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/alerts-grouping",
         "id": "def-public.AlertsGroupingProps",
@@ -460,6 +531,70 @@
                 "text": "HttpSetup"
               },
               "; }"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-grouping",
+        "id": "def-public.BaseAlertsGroupAggregations",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseAlertsGroupAggregations",
+        "description": [],
+        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.BaseAlertsGroupAggregations.groupByFields",
+            "type": "Object",
+            "tags": [],
+            "label": "groupByFields",
+            "description": [],
+            "signature": [
+              "{ doc_count_error_upper_bound: number; sum_other_doc_count: number; buckets: ",
+              {
+                "pluginId": "@kbn/alerts-grouping",
+                "scope": "public",
+                "docId": "kibKbnAlertsGroupingPluginApi",
+                "section": "def-public.AlertsGroupAggregationBucket",
+                "text": "AlertsGroupAggregationBucket"
+              },
+              "[]; }"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.BaseAlertsGroupAggregations.groupsCount",
+            "type": "Object",
+            "tags": [],
+            "label": "groupsCount",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.BaseAlertsGroupAggregations.unitsCount",
+            "type": "Object",
+            "tags": [],
+            "label": "unitsCount",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
             ],
             "path": "packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,

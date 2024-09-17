@@ -78,8 +78,8 @@ export interface NewPackagePolicy {
   namespace?: string;
   enabled: boolean;
   is_managed?: boolean;
-  /** @deprecated */
-  policy_id?: string;
+  /** @deprecated Nullable to allow user to clear existing policy id */
+  policy_id?: string | null;
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;

@@ -1,0 +1,40 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "typings/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    ".storybook/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/observability-shared-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/typed-react-router-config",
+    "@kbn/observability-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/deeplinks-observability",
+    "@kbn/entityManager-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/react-kibana-context-render",
+    "@kbn/es-types",
+    "@kbn/entities-schema"
+  ]
+}
