@@ -18,7 +18,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
   return [...baseFilters, ...additionalFilters].join(' AND ');
 };
 
-export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
+export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     version: '1.0.3',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
