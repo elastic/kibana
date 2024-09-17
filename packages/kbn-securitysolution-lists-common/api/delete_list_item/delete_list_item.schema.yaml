@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteListItem
       x-codegen-enabled: true
-      summary: Deletes a list item
+      summary: Delete a list item
+      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       parameters:
         - name: id
           in: query
