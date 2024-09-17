@@ -41,12 +41,13 @@ export interface WithDefaultControllerState {
   dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
   timeRange: TimeRangeConfig;
+  showCurrentQualityIssues: boolean;
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
   integration?: Integration;
   expandedDegradedField?: string;
-  showCurrentQualityIssues: boolean;
+  isNonAggregatable?: boolean;
 }
 
 export interface WithDataStreamDetails {
@@ -102,7 +103,9 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState;
     }
   | {
-      value: 'initializing.nonAggregatableDataset.done';
+      value:
+        | 'initializing.nonAggregatableDataset.done'
+        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching';
       context: WithDefaultControllerState & WithNonAggregatableDatasetStatus;
     }
   | {
@@ -119,7 +122,9 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value: 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.done';
-      context: WithDefaultControllerState & WithDegradedFieldsData;
+      context: WithDefaultControllerState &
+        WithNonAggregatableDatasetStatus &
+        WithDegradedFieldsData;
     }
   | {
       value:

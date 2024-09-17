@@ -598,16 +598,20 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       loadDegradedFields: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamDetailsClient.getDataStreamDegradedFields({
-          dataStream:
-            context.showCurrentQualityIssues &&
-            'dataStreamSettings' in context &&
-            context.dataStreamSettings
-              ? context.dataStreamSettings.lastBackingIndexName
-              : context.dataStream,
-          start,
-          end,
-        });
+        if (context?.isNonAggregatable) {
+          return dataStreamDetailsClient.getDataStreamDegradedFields({
+            dataStream:
+              context.showCurrentQualityIssues &&
+              'dataStreamSettings' in context &&
+              context.dataStreamSettings
+                ? context.dataStreamSettings.lastBackingIndexName
+                : context.dataStream,
+            start,
+            end,
+          });
+        }
+
+        return Promise.resolve();
       },
 
       loadDegradedFieldValues: (context) => {
