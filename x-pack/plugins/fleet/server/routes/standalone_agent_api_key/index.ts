@@ -21,7 +21,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: CREATE_STANDALONE_AGENT_API_KEY_ROUTE,
       access: 'internal',
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { addAgents: true },
       },
     })
     .addVersion(
