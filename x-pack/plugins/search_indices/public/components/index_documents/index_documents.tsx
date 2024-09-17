@@ -53,26 +53,18 @@ const RecentDocsActionMessage: React.FC<RecentDocsActionMessageProps> = ({ index
         </EuiFlexItem>
         <EuiFlexItem>
           <p>
-            {i18n.translate(
-              'xpack.serverlessSearch.indexManagementTab.documents.recentDocsActionMessage',
-              {
-                defaultMessage:
-                  'You are viewing the {pageSize} most recently ingested documents in this index. To see all documents, view in {discoverLink}.',
-                values: {
-                  pageSize: DEFAULT_PAGE_SIZE,
-                  discoverLink: (
-                    <EuiLink onClick={onClick}>
-                      {i18n.translate(
-                        'xpack.serverlessSearch.indexManagementTab.documents.recentDocsActionMessage.discoverLink',
-                        {
-                          defaultMessage: 'Discover',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
-                },
-              }
-            )}
+            {i18n.translate('xpack.searchIndices.indexDocuments.recentDocsActionMessage', {
+              defaultMessage:
+                'You are viewing the {pageSize} most recently ingested documents in this index. To see all documents, view in',
+              values: {
+                pageSize: DEFAULT_PAGE_SIZE,
+              },
+            })}{' '}
+            <EuiLink onClick={onClick}>
+              {i18n.translate('xpack.searchIndices.indexDocuments.recentDocsActionMessageLink', {
+                defaultMessage: 'Discover.',
+              })}
+            </EuiLink>
           </p>
         </EuiFlexItem>
       </EuiFlexGroup>
