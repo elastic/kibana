@@ -138,6 +138,7 @@ export const getCountsAndMaxData = async ({
     perPage: 0,
     filter,
     type: savedObjectType,
+    namespaces: ['*'],
     aggs: {
       ...getCountsAggregationQuery(savedObjectType),
       ...getMaxBucketOnCaseAggregationQuery(savedObjectType),

@@ -1104,6 +1104,7 @@ describe('utils', () => {
         page: 0,
         perPage: 0,
         type: 'test',
+        namespaces: ['*'],
       });
     });
   });

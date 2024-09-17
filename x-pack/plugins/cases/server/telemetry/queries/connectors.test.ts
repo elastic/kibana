@@ -101,6 +101,7 @@ describe('getConnectorsTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
 
       expect(savedObjectsClient.find.mock.calls[1][0]).toEqual({
@@ -151,6 +152,7 @@ describe('getConnectorsTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
 
       for (const [index, connector] of [
@@ -205,6 +207,7 @@ describe('getConnectorsTelemetryData', () => {
           page: 0,
           perPage: 0,
           type: 'cases-user-actions',
+          namespaces: ['*'],
         });
       }
     });

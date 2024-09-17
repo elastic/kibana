@@ -48,6 +48,7 @@ export const getLatestCasesDates = async ({
       sortField,
       sortOrder: 'desc',
       type: CASE_SAVED_OBJECT,
+      namespaces: ['*'],
     });
 
   const savedObjects = await Promise.all([
@@ -169,6 +170,7 @@ const getCasesSavedObjectTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: {
       ...caseByOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
@@ -275,6 +277,7 @@ const getCommentsSavedObjectTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: {
       ...attachmentsByOwnerAggregationQuery,
       ...attachmentRegistries(),
@@ -332,6 +335,7 @@ const getFilesTelemetry = async (
     perPage: 0,
     type: FILE_SO_TYPE,
     filter: filterCaseIdExists,
+    namespaces: ['*'],
     aggs: { ...filesByOwnerAggregationQuery, ...averageSize(), ...top20MimeTypes() },
   });
 };
@@ -343,6 +347,7 @@ const getAlertsTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
     filter: getOnlyAlertsCommentsFilter(),
     aggs: {
       ...getReferencesAggregationQuery({
@@ -361,6 +366,7 @@ const getConnectorsTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_USER_ACTION_SAVED_OBJECT,
+    namespaces: ['*'],
     filter: getOnlyConnectorsFilter(),
     aggs: {
       ...getReferencesAggregationQuery({

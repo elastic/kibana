@@ -117,6 +117,7 @@ describe('alerts', () => {
         page: 0,
         perPage: 0,
         type: 'cases-comments',
+        namespaces: ['*'],
       });
     });
   });

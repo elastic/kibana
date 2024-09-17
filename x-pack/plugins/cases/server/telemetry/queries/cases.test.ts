@@ -660,6 +660,9 @@ describe('getCasesTelemetryData', () => {
               },
             },
           },
+          "namespaces": Array [
+            "*",
+          ],
           "page": 0,
           "perPage": 0,
           "type": "cases",
@@ -974,6 +977,9 @@ describe('getCasesTelemetryData', () => {
               },
             },
           },
+          "namespaces": Array [
+            "*",
+          ],
           "page": 0,
           "perPage": 0,
           "type": "cases-comments",
@@ -1023,6 +1029,7 @@ describe('getCasesTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-comments',
+        namespaces: ['*'],
       });
 
       expect(savedObjectsClient.find.mock.calls[3][0]).toEqual({
@@ -1068,6 +1075,7 @@ describe('getCasesTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
 
       for (const [index, sortField] of ['created_at', 'updated_at', 'closed_at'].entries()) {
@@ -1079,6 +1087,7 @@ describe('getCasesTelemetryData', () => {
           sortField,
           sortOrder: 'desc',
           type: 'cases',
+          namespaces: ['*'],
         });
       }
 
@@ -1172,6 +1181,9 @@ describe('getCasesTelemetryData', () => {
             "function": "is",
             "type": "function",
           },
+          "namespaces": Array [
+            "*",
+          ],
           "page": 0,
           "perPage": 0,
           "type": "file",

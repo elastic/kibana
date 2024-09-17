@@ -86,6 +86,7 @@ describe('pushes', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
     });
   });
