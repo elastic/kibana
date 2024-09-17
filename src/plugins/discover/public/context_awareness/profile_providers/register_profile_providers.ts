@@ -23,13 +23,14 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from '../../build_services';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
  * @param options Register profile provider options
  */
-export const registerProfileProviders = ({
+export const registerProfileProviders = async ({
+  plugins,
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
@@ -54,7 +55,7 @@ export const registerProfileProviders = ({
   enabledExperimentalProfileIds: string[];
   services: DiscoverServices;
 }) => {
-  const providerServices = createProfileProviderServices(services);
+  const providerServices = await createProfileProviderServices(services);
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);

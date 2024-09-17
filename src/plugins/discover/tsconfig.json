@@ -97,6 +97,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/security-solution-common",
     "@kbn/react-hooks",
+    "@kbn/logs-data-access-plugin"
   ],
   "exclude": [
     "target/**/*"

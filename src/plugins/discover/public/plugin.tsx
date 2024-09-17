@@ -323,7 +323,7 @@ export class DiscoverPlugin
       documentProfileService
     );
 
-    registerProfileProviders({
+    await registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,

@@ -23,6 +23,7 @@ import {
 } from '../profiles';
 import { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
+import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -172,6 +173,8 @@ export const createContextAwarenessMocks = ({
   };
 };
 
-export const createProfileProviderServicesMock = () => {
-  return {} as ProfileProviderServices;
+const createProfileProviderServicesMock = () => {
+  return {
+    logsContextService: createLogsContextServiceMock(),
+  } as ProfileProviderServices;
 };

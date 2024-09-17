@@ -8,15 +8,14 @@
  */
 
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../build_services';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { DiscoverServices } from '../../build_services';
 
 /**
  * Dependencies required by profile provider implementations
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfileProviderDeps extends DiscoverServices {
-  // We will probably soon add uiSettings as a dependency
-  // to consume user configured indices
+  logsDataAccessPlugin?: LogsDataAccessPluginStart;
 }
 
 /**
@@ -34,11 +33,13 @@ export interface ProfileProviderServices extends DiscoverServices {
  * @param _deps Profile provider dependencies
  * @returns Profile provider services
  */
-export const createProfileProviderServices = (
-  discoverServices: ProfileProviderDeps
-): ProfileProviderServices => {
+export const createProfileProviderServices = async (
+  deps: ProfileProviderDeps = {}
+): Promise<ProfileProviderServices> => {
   return {
     ...discoverServices,
-    logsContextService: createLogsContextService(),
+    logsContextService: await createLogsContextService({
+      logsDataAccessPlugin: deps.logsDataAccessPlugin,
+    }),
   };
 };
