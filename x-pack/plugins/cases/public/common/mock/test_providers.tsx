@@ -79,7 +79,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     defaultOptions: {
       queries: {
         retry: false,
-        // staleTime: 0,
+        staleTime: 0,
       },
     },
     logger: {
@@ -144,7 +144,7 @@ export const createAppMockRenderer = ({
     defaultOptions: {
       queries: {
         retry: false,
-        // staleTime: 0,
+        staleTime: 0,
       },
     },
     logger: {
@@ -183,6 +183,7 @@ export const createAppMockRenderer = ({
 
   const render: UiRender = (ui, options) => {
     let result: RenderResult | undefined;
+    // ensures that all the effects and state updates are processed before the function completes
     act(() => {
       result = reactRender(ui, {
         wrapper: AppWrapper,
