@@ -523,7 +523,7 @@ describe('kibana index telemetry', () => {
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
-        perPage: 100,
+        perPage: 10000,
       });
       expect(telemetry).toStrictEqual({
         count_mw_total: 3,
@@ -550,7 +550,7 @@ describe('kibana index telemetry', () => {
     expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
-      perPage: 100,
+      perPage: 10000,
     });
 
     expect(telemetry).toStrictEqual({
