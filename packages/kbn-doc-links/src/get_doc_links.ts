@@ -219,6 +219,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchApplicationsSearch: `${ELASTICSEARCH_DOCS}search-application-client.html`,
       searchLabs: `${SEARCH_LABS_URL}`,
       searchLabsRepo: `${SEARCH_LABS_REPO}`,
+      semanticSearch: `${ELASTICSEARCH_DOCS}semantic-search.html`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       semanticTextField: `${ELASTICSEARCH_DOCS}semantic-text.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
