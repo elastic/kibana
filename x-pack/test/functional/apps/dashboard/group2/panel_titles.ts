@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const { dashboard, lens } = getPageObjects(['dashboard', 'lens']);
 
-  const EMPTY_TITLE = '[No Title]';
+  const EMPTY_TITLE = undefined;
 
   describe('panel titles', () => {
     before(async () => {

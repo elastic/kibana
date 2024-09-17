@@ -107,19 +107,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(testSubject, wrapper);
   }
 
-  async hasContextMenuMoreItem() {
-    this.log.debug('hasContextMenuMoreItem');
-    return await this.testSubjects.exists('embeddablePanelMore-mainMenu', { timeout: 500 });
-  }
-
-  async clickContextMenuMoreItem() {
-    this.log.debug('clickContextMenuMoreItem');
-    await this.expectContextMenuToBeOpen();
-    if (await this.hasContextMenuMoreItem()) {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('embeddablePanelMore-mainMenu');
-    }
-  }
-
   async openContextMenuMorePanel(wrapper?: WebElementWrapper) {
     this.log.debug('openContextMenuMorePanel');
     await this.openContextMenu(wrapper);
@@ -207,6 +194,11 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelActionByTitle(COPY_PANEL_TO_DATA_TEST_SUBJ, title);
   }
 
+  async openInspector(wrapper?: WebElementWrapper) {
+    this.log.debug(`openInspector`);
+    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, wrapper);
+  }
+
   async openInspectorByTitle(title = '') {
     this.log.debug(`openInspector(${title})`);
     const wrapper = await this.getPanelWrapper(title);
@@ -231,11 +223,6 @@ export class DashboardPanelActionsService extends FtrService {
     const response = await this.inspector.getResponse();
     await this.inspector.close();
     return response;
-  }
-
-  async openInspector(wrapper?: WebElementWrapper) {
-    this.log.debug(`openInspector`);
-    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, wrapper);
   }
 
   async legacyUnlinkFromLibrary(title = '') {

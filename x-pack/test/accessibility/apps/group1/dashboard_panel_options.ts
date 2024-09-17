@@ -126,7 +126,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - manage drilldown', async () => {
       await dashboardPanelActions.openContextMenuByTitle(title);
-      await testSubjects.click('embeddablePanelMore-mainMenu');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN');
       await a11y.testAppSnapshot();
       await testSubjects.click('euiFlyoutCloseButton');
