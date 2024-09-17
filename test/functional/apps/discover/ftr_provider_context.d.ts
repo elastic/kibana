@@ -9,12 +9,18 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import {
+  KibanaEBTUIProvider,
+  KibanaEBTServerProvider,
+} from '../../../analytics/services/kibana_ebt';
 import { services as functionalServces } from '../../services';
 import { pageObjects } from '../../page_objects';
 
 const services = {
   ...functionalServces,
   ...commonFunctionalServices,
+  kibana_ebt_server: KibanaEBTServerProvider,
+  kibana_ebt_ui: KibanaEBTUIProvider,
 };
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

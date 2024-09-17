@@ -207,14 +207,20 @@ export class ProfilesManager {
    * Tracks the active profiles in the EBT context
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
-    const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
-    // if (this.ebtContext$) {
-    //   console.log('dscProfiles', dscProfiles);
-    // }
+    if (!this.ebtContext$) {
+      // ebtContext$ was enabled only for Discover pages.
+      // Dashboard panels, Log Explorer, Security Solution pages are excluded from this tracking.
+      // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
+      return;
+    }
 
-    // ebtContext$ was enabled only for Discover pages.
-    // Dashboard panels, Log Explorer, Security Solution pages are excluded from this tracking.
-    this.ebtContext$?.next({
+    const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
+
+    if (isEqual(dscProfiles, this.ebtContext$.getValue().dscProfiles)) {
+      return;
+    }
+
+    this.ebtContext$.next({
       dscProfiles,
     });
   }

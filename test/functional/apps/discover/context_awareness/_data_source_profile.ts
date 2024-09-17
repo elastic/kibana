@@ -20,8 +20,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
+  const monacoEditor = getService('monacoEditor');
+  const ebtUIHelper = getService('kibana_ebt_ui');
 
   describe('data source profile', () => {
+    describe('telemetry', () => {
+      it('should set EBT context for telemetry events with default profile', async () => {
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await discover.waitUntilSearchingHasFinished();
+        await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
+        await ebtUIHelper.setOptIn(true);
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(1, {
+          eventTypes: ['performance_metric'],
+        });
+
+        expect(event.context.dscProfiles).to.eql([
+          'example-root-profile',
+          'default-data-source-profile',
+        ]);
+      });
+
+      it('should set EBT context for telemetry events when example profile', async () => {
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await discover.waitUntilSearchingHasFinished();
+        await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
+        await ebtUIHelper.setOptIn(true);
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(1, {
+          eventTypes: ['performance_metric'],
+        });
+
+        expect(event.context.dscProfiles).to.eql([
+          'example-root-profile',
+          'example-data-source-profile',
+        ]);
+      });
+    });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should render custom @timestamp but not custom log.level', async () => {
