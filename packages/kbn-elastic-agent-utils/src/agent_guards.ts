@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JAVA_AGENT_NAMES, OPEN_TELEMETRY_AGENT_NAMES, RUM_AGENT_NAMES } from './agent_names';
+import {
+  ANDROID_AGENT_NAMES,
+  IOS_AGENT_NAMES,
+  JAVA_AGENT_NAMES,
+  OPEN_TELEMETRY_AGENT_NAMES,
+  RUM_AGENT_NAMES,
+} from './agent_names';
 
 import type {
+  AndroidAgentName,
+  IOSAgentName,
   JavaAgentName,
   OpenTelemetryAgentName,
   RumAgentName,
@@ -46,12 +54,21 @@ export function isRumOrMobileAgentName(agentName?: string) {
 }
 
 export function isIosAgentName(agentName?: string) {
-  return agentName?.startsWith('opentelemetry/swift') || agentName?.toLowerCase() === 'ios/swift';
+  const lowercased = agentName && agentName.toLowerCase();
+
+  return (
+    lowercased?.startsWith('opentelemetry/swift') ||
+    IOS_AGENT_NAMES.includes(agentName! as IOSAgentName)
+  );
 }
 
 export function isAndroidAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
-  return agentName?.startsWith('opentelemetry/android') || lowercased === 'android/java';
+
+  return (
+    lowercased?.startsWith('opentelemetry/android') ||
+    ANDROID_AGENT_NAMES.includes(agentName! as AndroidAgentName)
+  );
 }
 
 export function isJRubyAgentName(agentName?: string, runtimeName?: string) {

@@ -77,6 +77,12 @@ export const JAVA_AGENT_NAMES: JavaAgentName[] = ['java', 'opentelemetry/java'];
 export type RumAgentName = 'js-base' | 'rum-js' | 'opentelemetry/webjs';
 export const RUM_AGENT_NAMES: RumAgentName[] = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
+export type AndroidAgentName = 'android/java' | 'opentelemetry/android';
+export const ANDROID_AGENT_NAMES: AndroidAgentName[] = ['android/java', 'opentelemetry/android'];
+
+export type IOSAgentName = 'ios/swift' | 'opentelemetry/swift';
+export const IOS_AGENT_NAMES: IOSAgentName[] = ['ios/swift', 'opentelemetry/swift'];
+
 export type ServerlessType = 'aws.lambda' | 'azure.functions';
 export const SERVERLESS_TYPE: ServerlessType[] = ['aws.lambda', 'azure.functions'];
 
