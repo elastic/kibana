@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import type { AvailablePackagesHookType, UseGetPackagesQuery } from '@kbn/fleet-plugin/public';
+import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 
 export const PackageList = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
@@ -18,8 +18,3 @@ export const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType>
   import('@kbn/fleet-plugin/public')
     .then((module) => module.AvailablePackagesHook())
     .then((hook) => hook.useAvailablePackages);
-
-export const getPackagesQueryHook = (): Promise<UseGetPackagesQuery> =>
-  import('@kbn/fleet-plugin/public')
-    .then((module) => module.GetPackagesQueryHook())
-    .then((hook) => hook.useGetPackagesQuery);

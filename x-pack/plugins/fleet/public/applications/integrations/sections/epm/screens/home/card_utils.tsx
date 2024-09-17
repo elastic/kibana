@@ -57,6 +57,8 @@ export interface IntegrationCardItem {
   extraLabelsBadges?: React.ReactNode[];
   onCardClick?: () => void;
   isCollectionCard?: boolean;
+  showInstallationStatus?: boolean;
+  isInstalled: boolean;
 }
 
 export const mapToCard = ({
@@ -126,6 +128,10 @@ export const mapToCard = ({
     isUnverified,
     isUpdateAvailable,
     extraLabelsBadges,
+    isInstalled:
+      item.type === 'integration' &&
+      (item?.installationInfo?.install_status === installationStatuses.Installed ||
+        item?.installationInfo?.install_status === installationStatuses.InstallFailed),
   };
 };
 

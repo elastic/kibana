@@ -17,10 +17,18 @@ import { useCompletedCards } from './hooks/use_completed_cards';
 
 export const OnboardingBody = React.memo(() => {
   const bodyConfig = useBodyConfig();
+  const { expandedCardId, setExpandedCardId } = useExpandedCard(spaceId);
+  const { isCardComplete, setCardComplete } = useCompletedCards(spaceId);
 
-  const { expandedCardId, setExpandedCardId } = useExpandedCard();
-  const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
-    useCompletedCards(bodyConfig);
+  const { checkAllCardsComplete, checkCardComplete } = useCheckCompleteCards(
+    bodyConfig,
+    setCardComplete
+  );
+
+  useEffect(() => {
+    // initial auto-check for all cards
+    checkAllCardsComplete();
+  }, [checkAllCardsComplete]);
 
   const createOnToggleExpanded = useCallback(
     (cardId: OnboardingCardId) => () => {

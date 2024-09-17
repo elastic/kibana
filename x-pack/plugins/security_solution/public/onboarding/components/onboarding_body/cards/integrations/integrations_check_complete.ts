@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
+import { EPM_PACKAGES_MANY, installationStatuses } from '@kbn/fleet-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import { getDummyAdditionalBadge } from './integrations_header_badges';
 
-export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async () => {
-  // implement this function
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve({
-          isComplete: true,
-          completeBadgeText: '3 integrations installed',
-          additionalBadges: [getDummyAdditionalBadge()],
-          metadata: {
-            integrationsInstalled: 3,
-          },
-        }),
-      2000
-    )
+export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async ({
+  http,
+}: {
+  http: HttpSetup;
+}) => {
+  const data = await http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
+    version: '2023-10-31',
+  });
+  const installed = (data?.items || []).filter(
+    (pkg) =>
+      pkg.status === installationStatuses.Installed ||
+      pkg.status === installationStatuses.InstallFailed
   );
+  return installed.length > 0;
 };

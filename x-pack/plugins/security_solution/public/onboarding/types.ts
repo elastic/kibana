@@ -8,6 +8,8 @@
 import type React from 'react';
 import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 
@@ -62,7 +64,7 @@ export type OnboardingCardComponent = React.ComponentType<{
   checkCompleteMetadata?: Record<string, unknown>;
 }>;
 
-export type OnboardingCardCheckComplete = () => Promise<CheckCompleteResponse>;
+export type OnboardingCardCheckComplete = ({ http }: { http: HttpSetup }) => Promise<boolean>;
 
 export interface OnboardingCardConfig {
   id: OnboardingCardId;

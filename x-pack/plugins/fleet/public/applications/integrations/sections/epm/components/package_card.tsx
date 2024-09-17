@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import {
   EuiBadge,
   EuiButton,
+  EuiCallOut,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -39,7 +41,7 @@ export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)<{ isquickstart?: boolean }>`
+const Card = styled(EuiCard)<{ isquickstart?: boolean; isQuickstart?: boolean }>`
   min-height: 127px;
   border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
 `;
@@ -59,8 +61,10 @@ export function PackageCard({
   isUnverified,
   isUpdateAvailable,
   showLabels = true,
+  showInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
+  isInstalled,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
 }: PackageCardProps) {
@@ -150,6 +154,28 @@ export function PackageCard({
     );
   }
 
+  const installStatus = useMemo(
+    () =>
+      showInstallationStatus && isInstalled ? (
+        <EuiCallOut
+          css={`
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+          `}
+          iconType="tick"
+          title={
+            <FormattedMessage
+              id="xpack.fleet.packageCard.installedLabel"
+              defaultMessage="Installed"
+            />
+          }
+          color="success"
+        />
+      ) : undefined,
+    [showInstallationStatus, isInstalled]
+  );
+
   const { application } = useStartServices();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
@@ -214,6 +240,7 @@ export function PackageCard({
             {releaseBadge}
             {hasDeferredInstallationsBadge}
             {collectionButton}
+            {installStatus}
           </EuiFlexGroup>
         </Card>
       </TrackApplicationView>

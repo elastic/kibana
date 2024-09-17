@@ -24,6 +24,7 @@ import type {
 import { noop } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { PackageList, fetchAvailablePackagesHook } from './utils';
@@ -135,7 +136,11 @@ const PackageListGridWrapper = ({ useAvailablePackages, onLoaded }: WrapperProps
     setSelectedSubCategory(selectedSubCategory);
   });
 
-  const list: IntegrationCardItem[] = useIntegrationCardList(filteredCards, customCards);
+  const list: IntegrationCardItem[] = useIntegrationCardList({
+    integrationsList: filteredCards,
+    customCards,
+    installedIntegrationList,
+  });
 
   useEffect(() => {
     if (!isLoading) {
