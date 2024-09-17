@@ -6,6 +6,7 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Status } from '@kbn/investigation-shared';
 import { investigationSchema } from '@kbn/investigation-shared';
 import { Investigation, StoredInvestigation } from '../models/investigation';
 import { Paginated, Pagination } from '../models/pagination';
@@ -14,6 +15,11 @@ import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
 export interface Search {
   search: string;
 }
+interface Stats {
+  count: Record<Status, number>;
+  total: number;
+}
+
 export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
@@ -28,6 +34,7 @@ export interface InvestigationRepository {
     pagination: Pagination;
   }): Promise<Paginated<Investigation>>;
   findAllTags(): Promise<string[]>;
+  getStats(): Promise<Stats>;
 }
 
 export function investigationRepositoryFactory({
@@ -140,6 +147,41 @@ export function investigationRepositoryFactory({
       });
 
       return response.aggregations?.tags?.buckets.map((bucket) => bucket.key) ?? [];
+    },
+
+    async getStats(): Promise<{ count: Record<Status, number>; total: number }> {
+      interface AggsStatusTerms {
+        status: { buckets: [{ key: string; doc_count: number }] };
+      }
+
+      const response = await soClient.find<StoredInvestigation, AggsStatusTerms>({
+        type: SO_INVESTIGATION_TYPE,
+        aggs: {
+          status: {
+            terms: {
+              field: 'investigation.attributes.status',
+              size: 10,
+            },
+          },
+        },
+      });
+
+      const countByStatus: Record<Status, number> = {
+        active: 0,
+        triage: 0,
+        mitigated: 0,
+        resolved: 0,
+        cancelled: 0,
+      };
+
+      return {
+        count:
+          response.aggregations?.status?.buckets.reduce(
+            (acc, bucket) => ({ ...acc, [bucket.key]: bucket.doc_count }),
+            countByStatus
+          ) ?? countByStatus,
+        total: response.total,
+      };
     },
   };
 }

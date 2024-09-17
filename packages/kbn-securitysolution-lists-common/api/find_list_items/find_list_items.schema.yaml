@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: FindListItems
       x-codegen-enabled: true
-      summary: Finds list items
+      summary: Get list items
+      description: Get all list items in the specified list.
       parameters:
         - name: list_id
           in: query
