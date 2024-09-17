@@ -9,7 +9,6 @@ import React from 'react';
 import type { DiffableCustomQueryFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface CustomQueryRuleFieldReadOnlyProps {
   fieldName: keyof DiffableCustomQueryFields;
@@ -31,9 +30,7 @@ export function CustomQueryRuleFieldReadOnly({
           ruleType={finalDiffableRule.type}
         />
       );
-    case 'type':
-      return null;
     default:
-      return assertUnreachable(fieldName);
+      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }
 }

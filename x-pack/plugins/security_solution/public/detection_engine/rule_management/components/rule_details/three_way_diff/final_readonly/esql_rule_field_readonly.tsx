@@ -8,7 +8,6 @@
 import React from 'react';
 import type { DiffableEsqlFields } from '../../../../../../../common/api/detection_engine';
 import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface EsqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEsqlFields;
@@ -25,6 +24,6 @@ export function EsqlRuleFieldReadOnly({
     case 'type':
       return null;
     default:
-      return assertUnreachable(fieldName);
+      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }
 }

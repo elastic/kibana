@@ -13,7 +13,6 @@ import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
 import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
 import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface ThreatMatchRuleFieldReadOnlyProps {
   fieldName: keyof DiffableThreatMatchFields;
@@ -55,6 +54,6 @@ export function ThreatMatchRuleFieldReadOnly({
     case 'type':
       return null;
     default:
-      return assertUnreachable(fieldName);
+      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }
 }

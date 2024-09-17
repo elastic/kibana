@@ -8,7 +8,6 @@
 import React from 'react';
 import type { DiffableMachineLearningFields } from '../../../../../../../common/api/detection_engine';
 import { MachineLearningJobIdReadOnly } from './fields/machine_learning_job_id/machine_learning_job_id';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface MachineLearningRuleFieldReadOnlyProps {
   fieldName: keyof DiffableMachineLearningFields;
@@ -29,6 +28,6 @@ export function MachineLearningRuleFieldReadOnly({
     case 'type':
       return null;
     default:
-      return assertUnreachable(fieldName);
+      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }
 }

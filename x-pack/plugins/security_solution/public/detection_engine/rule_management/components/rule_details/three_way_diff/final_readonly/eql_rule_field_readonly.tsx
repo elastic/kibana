@@ -9,7 +9,6 @@ import React from 'react';
 import type { DiffableEqlFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface EqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEqlFields;
@@ -30,6 +29,6 @@ export function EqlRuleFieldReadOnly({ fieldName, finalDiffableRule }: EqlRuleFi
     case 'type':
       return null;
     default:
-      return assertUnreachable(fieldName);
+      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }
 }
