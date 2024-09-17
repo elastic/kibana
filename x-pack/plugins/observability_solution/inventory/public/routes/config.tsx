@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
+import { InventoryPage } from '../pages/inventory_page';
 
 /**
  * The array of route definitions to be used when the application
@@ -28,7 +29,7 @@ const inventoryRoutes = {
         }),
       },
       '/': {
-        element: <></>,
+        element: <InventoryPage />,
       },
     },
   },
