@@ -364,7 +364,7 @@ describe('RiskEngineDataClient', () => {
 
       beforeEach(() => {
         riskEngineCurrentStatusMock = jest.spyOn(
-          RiskEngineDataClient.prototype,
+          RiskEngineDataClient.prototype as unknown as { getCurrentStatus: () => string },
           'getCurrentStatus'
         );
       });
