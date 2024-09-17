@@ -14,7 +14,7 @@ import type {
 } from '@kbn/content-management-utils';
 import { Serializable } from '@kbn/utility-types';
 import { RefreshInterval } from '@kbn/data-plugin/common';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';
 
@@ -63,7 +63,7 @@ export interface SavedDashboardPanel {
 }
 
 type ControlGroupAttributesV1 = Pick<
-  RawControlGroupAttributes,
+  ControlGroupSerializedState,
   'panelsJSON' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettingsJSON'
 >;
 
