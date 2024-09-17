@@ -129,7 +129,7 @@ export function InternalDashboardTopNav({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const dashboardTitle = useMemo(() => {
-    return getDashboardTitle(title ?? '', viewMode, !lastSavedId);
+    return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
   /**

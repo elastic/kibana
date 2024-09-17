@@ -58,7 +58,7 @@ export const DualDashboardsExample = () => {
       </EuiTitle>
       <EuiText>
         <p>
-          Use the dashboardApis from different dashboards to independently set the view mode of each
+          Use the APIs from different dashboards to independently set the view mode of each
           dashboard.
         </p>
       </EuiText>

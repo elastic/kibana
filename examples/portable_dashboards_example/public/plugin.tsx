@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -53,7 +53,12 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
     });
   }
 
-  public async start() {}
+  public async start(core: CoreStart, deps: StartDeps) {
+    deps.dashboard.registerDashboardPanelPlacementSetting(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
+      width: 48,
+      height: 12,
+    }));
+  }
 
   public stop() {}
 }

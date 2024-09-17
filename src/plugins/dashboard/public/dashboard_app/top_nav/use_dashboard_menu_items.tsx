@@ -227,7 +227,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
-        run: () => dashboardApi.showSettings(),
+        run: () => dashboardApi.openSettingsFlyout(),
       },
     };
   }, [
