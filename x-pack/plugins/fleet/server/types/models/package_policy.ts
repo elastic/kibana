@@ -334,15 +334,19 @@ export const PackagePolicySchema = schema.object({
   updated_by: schema.string(),
   created_at: schema.string(),
   created_by: schema.string(),
-  elasticsearch: schema.maybe(
-    schema.object({
-      privileges: schema.maybe(
-        schema.object({
-          cluster: schema.maybe(schema.arrayOf(schema.string())),
-        })
-      ),
-    })
-  ),
+  elasticsearch: schema
+    .maybe(
+      schema.object({
+        privileges: schema.maybe(
+          schema.object({
+            cluster: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
+      })
+    )
+    .extendsDeep({
+      unknowns: 'allow',
+    }),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,

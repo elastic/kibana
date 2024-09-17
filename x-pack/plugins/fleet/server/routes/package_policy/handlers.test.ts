@@ -229,6 +229,11 @@ describe('When calling package policy', () => {
         },
       ],
       spaceIds: ['space1'],
+      elasticsearch: {
+        'index_template.mappings': {
+          dynamic_templates: [],
+        },
+      },
     };
   });
 
@@ -886,6 +891,16 @@ describe('When calling package policy', () => {
               data_stream: { namespace: 'default' },
               use_output: 'default',
               package_policy_id: '1',
+              streams: [
+                {
+                  id: 'logfile-log.logs-d46700b2-47f8-4b1a-9153-14a717dc5edf',
+                  data_stream: {
+                    dataset: 'generic',
+                  },
+                  paths: ['/var/tmp'],
+                  ignore_older: '72h',
+                },
+              ],
             },
           ],
         ],

@@ -217,7 +217,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                       id: schema.string(),
                       data_stream: schema.object({
                         dataset: schema.string(),
-                        type: schema.string(),
+                        type: schema.maybe(schema.string()),
                       }),
                     })
                     .extendsDeep({
