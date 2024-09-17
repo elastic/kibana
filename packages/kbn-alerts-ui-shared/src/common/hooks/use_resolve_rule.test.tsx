@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 import { useResolveRule } from './use_resolve_rule';
