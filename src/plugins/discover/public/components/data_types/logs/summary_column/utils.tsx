@@ -93,13 +93,13 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
   // whereas raw.fields only contains certain fields excluding _ignored
   for (const fieldName in flattened) {
-    if (isFieldAllowed(fieldName)) {
+    if (isFieldAllowed(fieldName) && flattened[fieldName]) {
       flattenedResult[fieldName] = flattened[fieldName];
     }
   }
 
   for (const fieldName in fields) {
-    if (isFieldAllowed(fieldName)) {
+    if (isFieldAllowed(fieldName) && fields[fieldName]) {
       rawFieldResult[fieldName] = fields[fieldName];
     }
   }
