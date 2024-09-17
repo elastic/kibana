@@ -53,7 +53,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
-import { CHART_TYPE } from '../../../common/constants/charts';
+import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
 import type { MlJob } from '../..';
 
@@ -1124,9 +1124,19 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         each(scheduledEvents, (events, time) => {
           const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
-            // Note if the scheduled event coincides with an absence of the underlying metric data,
-            // we don't worry about plotting the event.
             chartPoint.scheduledEvents = events;
+            // We do not want to create additional points for single metric charts
+            // as it could break the chart.
+          } else if (chartType !== CHART_TYPE.SINGLE_METRIC) {
+            // If there's no underlying metric data point for the scheduled event,
+            // create a new chart point with a value of 0.
+            const eventChartPoint: ChartPoint = {
+              date: Number(time),
+              value: 0,
+              entity: SCHEDULE_EVENT_MARKER_ENTITY,
+              scheduledEvents: events,
+            };
+            chartData.push(eventChartPoint);
           }
         });
       }
