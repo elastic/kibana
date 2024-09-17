@@ -12,12 +12,12 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../hooks/use_kibana';
 import { CodeSample } from './code_sample';
 import { CreateIndexFormState } from './types';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '../../constants';
 
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_index';
 
 import { LanguageSelector } from '../shared/language_selector';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export interface CreateIndexCodeViewProps {
   createIndexForm: CreateIndexFormState;
@@ -27,15 +27,17 @@ export interface CreateIndexCodeViewProps {
 const SelectedCodeExamples = DenseVectorSeverlessCodeExamples;
 
 export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProps) => {
-  const { application, cloud, share, console: consolePlugin } = useKibana().services;
+  const { application, share, console: consolePlugin } = useKibana().services;
   // TODO: initing this should be dynamic and possibly saved in the form state
   const [selectedLanguage, setSelectedLanguage] = useState<AvailableLanguages>('python');
+  const elasticsearchUrl = useElasticsearchUrl();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
-      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
+      elasticsearchURL: elasticsearchUrl,
     };
-  }, [createIndexForm.indexName, cloud]);
+  }, [createIndexForm.indexName, elasticsearchUrl]);
   const selectedCodeExample = useMemo(() => {
     return SelectedCodeExamples[selectedLanguage];
   }, [selectedLanguage]);
@@ -43,21 +45,23 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
+        <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}
             onSelectLanguage={(value) => setSelectedLanguage(value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={SelectedCodeExamples.sense.createIndex(codeParams)}
-            application={application}
-            sharePlugin={share}
-            consolePlugin={consolePlugin}
-          />
-        </EuiFlexItem>
+        {selectedLanguage === 'curl' && (
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={SelectedCodeExamples.sense.createIndex(codeParams)}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
