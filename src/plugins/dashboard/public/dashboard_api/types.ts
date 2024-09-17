@@ -58,5 +58,5 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     setViewMode: (viewMode: ViewMode) => void;
-    showSettings: () => void;
+    openSettingsFlyout: () => void;
   };
