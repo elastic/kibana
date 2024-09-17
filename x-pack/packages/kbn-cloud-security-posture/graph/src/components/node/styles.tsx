@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Node } from '@xyflow/react';
+import type { Node, NodeProps as xyNodeProps } from '@xyflow/react';
 import styled from '@emotion/styled';
 import {
   EuiText,
@@ -75,7 +75,7 @@ NodeLabel.defaultProps = {
   textAlign: 'center',
 };
 
-const ExpandButtonSize = '18';
+const ExpandButtonSize = 18;
 
 const RoundEuiButtonIcon = styled(EuiButtonIcon)`
   border-radius: 50%;
@@ -137,7 +137,7 @@ export const NodeButton = ({ x, y, onClick }: NodeButtonProps) => {
 
 NodeButton.ExpandButtonSize = ExpandButtonSize;
 
-export interface NodeData {
+export interface NodeData extends Record<string, unknown> {
   id: string;
   label?: string;
   color?: 'primary' | 'danger' | 'warning';
@@ -147,4 +147,4 @@ export interface NodeData {
   expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
 }
 
-export type NodeProps = Node<NodeData>;
+export type NodeProps = xyNodeProps<Node<NodeData>>;

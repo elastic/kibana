@@ -15,56 +15,52 @@ import {
   NodeIcon,
   NodeButton,
   NodeProps,
-} from './shared/node';
+} from './styles';
 
-export const RectangleNode = (props: NodeProps) => {
+export const EllipseNode: React.FC<NodeProps> = (props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>
       {!interactive || (
         <NodeShapeOnHoverSvg
-          width="81"
-          height="80"
-          viewBox="0 0 81 80"
+          width="90"
+          height="90"
+          viewBox="0 0 90 90"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect
+          <circle
             opacity="0.5"
-            x="1"
-            y="0.5"
-            width="79"
-            height="79"
-            rx="7.5"
+            cx="45"
+            cy="45"
+            r="44.5"
             stroke={euiTheme.colors[color ?? 'primary']}
             strokeDasharray="2 2"
           />
         </NodeShapeOnHoverSvg>
       )}
       <NodeShapeSvg
-        width="65"
-        height="64"
-        viewBox="0 0 65 64"
+        width="72"
+        height="72"
+        viewBox="0 0 72 72"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <rect
-          x="1"
-          y="0.5"
-          width="63"
-          height="63"
-          rx="7.5"
+        <circle
+          cx="36"
+          cy="36"
+          r="35.5"
           fill={useEuiBackgroundColor(color ?? 'primary')}
           stroke={euiTheme.colors[color ?? 'primary']}
         />
-        {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
+        {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
       </NodeShapeSvg>
       {!interactive || (
         <NodeButton
           onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={81 - NodeButton.ExpandButtonSize / 4 + 'px'}
-          y={(80 - NodeButton.ExpandButtonSize / 2) / 2 + 'px'}
+          x={`${90 - NodeButton.ExpandButtonSize / 2}px`}
+          y={`${(90 - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>

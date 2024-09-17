@@ -16,13 +16,13 @@ import {
   NodeIcon,
   NodeButton,
   NodeProps,
-} from './shared/node';
+} from './styles';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
 `;
 
-export const PentagonNode = (props: NodeProps) => {
+export const PentagonNode: React.FC<NodeProps> = (props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
   const { euiTheme } = useEuiTheme();
   return (
@@ -60,8 +60,8 @@ export const PentagonNode = (props: NodeProps) => {
       {!interactive || (
         <NodeButton
           onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={91 - NodeButton.ExpandButtonSize / 2 + 'px'}
-          y={(88 - NodeButton.ExpandButtonSize) / 2 + 'px'}
+          x={`${91 - NodeButton.ExpandButtonSize / 2}px`}
+          y={`${(88 - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>

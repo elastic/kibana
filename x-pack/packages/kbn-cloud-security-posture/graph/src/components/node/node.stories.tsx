@@ -9,8 +9,9 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '.';
-import { type NodeData } from './shared/node';
+import { Story } from '@storybook/react';
+import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '..';
+import { type NodeData } from './styles';
 
 import '@xyflow/react/dist/style.css';
 
@@ -38,11 +39,11 @@ const nodeTypes = {
   diamond: DiamondNode,
 };
 
-const Template = (args: NodeData) => (
+const Template: Story<NodeData> = (args: NodeData) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView
-      attributionPosition="top-right"
+      attributionPosition={undefined}
       nodeTypes={nodeTypes}
       nodes={[
         {

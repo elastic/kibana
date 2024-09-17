@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { DiamondNode } from './diamond_node';
-export { EllipseNode } from './ellipse_node';
-export { HexagonNode } from './hexagon_node';
-export { PentagonNode } from './pentagon_node';
-export { RectangleNode } from './rectangle_node';
+export { DiamondNode } from './node/diamond_node';
+export { EllipseNode } from './node/ellipse_node';
+export { HexagonNode } from './node/hexagon_node';
+export { PentagonNode } from './node/pentagon_node';
+export { RectangleNode } from './node/rectangle_node';

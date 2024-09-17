@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { NodeButton, NodeContainer } from './node';
+import { Story } from '@storybook/react';
+import { NodeButton, type NodeButtonProps, NodeContainer } from './styles';
 
 export default {
   title: 'Components/Graph Components',
@@ -17,7 +18,7 @@ export default {
   },
 };
 
-const Template = (args) => (
+const Template: Story<NodeButtonProps> = (args) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <NodeContainer>
       Hover me

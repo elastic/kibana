@@ -15,9 +15,9 @@ import {
   NodeIcon,
   NodeButton,
   NodeProps,
-} from './shared/node';
+} from './styles';
 
-export const HexagonNode = (props: NodeProps) => {
+export const HexagonNode: React.FC<NodeProps> = (props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
   const { euiTheme } = useEuiTheme();
   return (
@@ -55,8 +55,8 @@ export const HexagonNode = (props: NodeProps) => {
       {!interactive || (
         <NodeButton
           onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={87 - NodeButton.ExpandButtonSize / 2 + 2 + 'px'}
-          y={(96 - NodeButton.ExpandButtonSize) / 2 - 2 + 'px'}
+          x={`${87 - NodeButton.ExpandButtonSize / 2 + 2}px`}
+          y={`${(96 - NodeButton.ExpandButtonSize) / 2 - 2}px`}
         />
       )}
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>

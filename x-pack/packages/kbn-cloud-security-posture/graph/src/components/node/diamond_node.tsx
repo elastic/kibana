@@ -15,9 +15,9 @@ import {
   NodeIcon,
   NodeButton,
   NodeProps,
-} from './shared/node';
+} from './styles';
 
-export const DiamondNode = (props: NodeProps) => {
+export const DiamondNode: React.FC<NodeProps> = (props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
   const { euiTheme } = useEuiTheme();
   return (
@@ -55,8 +55,8 @@ export const DiamondNode = (props: NodeProps) => {
       {!interactive || (
         <NodeButton
           onClick={(e) => expandButtonClick && expandButtonClick(e, props)}
-          x={99 - NodeButton.ExpandButtonSize + 'px'}
-          y={(98 - NodeButton.ExpandButtonSize) / 2 - 4 + 'px'}
+          x={`${99 - NodeButton.ExpandButtonSize}px`}
+          y={`${(98 - NodeButton.ExpandButtonSize) / 2 - 4}px`}
         />
       )}
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
