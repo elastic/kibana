@@ -44,7 +44,6 @@ export const importRuleWithSource = async ({
   mlAuthz,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, allowMissingConnectorSecrets } = importRulePayload;
-  const { rule_source: ruleSource, immutable } = ruleToImport;
 
   await validateMlAuth(mlAuthz, ruleToImport.type);
 
@@ -67,8 +66,9 @@ export const importRuleWithSource = async ({
       existingRule,
       ruleUpdate: ruleToImport,
     });
-    ruleWithUpdates.rule_source = ruleSource;
-    ruleWithUpdates.immutable = immutable;
+    // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
+    ruleWithUpdates.immutable = ruleToImport.immutable;
+    ruleWithUpdates.rule_source = ruleToImport.rule_source;
 
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
@@ -82,8 +82,6 @@ export const importRuleWithSource = async ({
   }
 
   const ruleWithDefaults = applyRuleDefaults(ruleToImport);
-  ruleWithDefaults.rule_source = ruleSource;
-  ruleWithDefaults.immutable = immutable;
 
   const payload = {
     ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
