@@ -137,7 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
         await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
-        await pageObjects.common.sleep(2000);
+        pageObjects.common.sleep(2000);
 
         // Reset setting to its initial value
         await testSubjects.click(fieldTestSubj);
