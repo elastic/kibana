@@ -30,11 +30,19 @@ describe('Dashboard App', () => {
   });
   const mockHistory = createMemoryHistory();
 
+  it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
+    const historySpy = jest.spyOn(mockHistory, 'replace');
+
+    render(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
+    expect(historySpy).toHaveBeenCalledTimes(1);
+    expect(mockHistory.location.pathname).toBe('/create');
+  });
+
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
     const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'next');
     const historySpy = jest.spyOn(mockHistory, 'replace');
 
-    render(
+    const { rerender } = render(
       <DashboardApp
         savedDashboardId=""
         redirectTo={jest.fn()}
@@ -43,10 +51,11 @@ describe('Dashboard App', () => {
       />
     );
     expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
-    expect(historySpy).toHaveBeenCalledTimes(1);
+    expect(historySpy).toHaveBeenCalledTimes(2);
+    expect(mockHistory.location.pathname).toBe('/create/456');
 
     // test as if minimizing a maximized panel
-    render(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
+    rerender(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
 
     expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
     expect(historySpy).toHaveBeenCalledTimes(2);
