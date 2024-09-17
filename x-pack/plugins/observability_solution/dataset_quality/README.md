@@ -18,9 +18,9 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/plugins/observability_solution/dataset_quality/jest.config.js x-pack/plugins/observability_solution/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
-### Agnostic-deployement API tests
+### Deployment-agnostic API tests
 
-The agnostic-deployement API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/).
+The deployment-agnostic API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/).
 
 #### Start server and run test (stateful)
 

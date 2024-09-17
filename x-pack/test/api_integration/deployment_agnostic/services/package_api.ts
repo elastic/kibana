@@ -36,7 +36,6 @@ export function PackageApiProvider({ getService }: DeploymentAgnosticFtrProvider
         .post(`/api/fleet/epm/custom_integrations`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .set('kbn-xsrf', 'xxxx')
         .send({ integrationName, datasets });
       return body;
     },
@@ -49,14 +48,12 @@ export function PackageApiProvider({ getService }: DeploymentAgnosticFtrProvider
         .get(`/api/fleet/epm/packages/${pkg}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .set('kbn-xsrf', 'xxxx')
         .send({ force: true });
 
       const { body } = await supertestWithoutAuth
         .post(`/api/fleet/epm/packages/${pkg}/${version}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .set('kbn-xsrf', 'xxxx')
         .send({ force: true });
       return body;
     },
@@ -64,8 +61,7 @@ export function PackageApiProvider({ getService }: DeploymentAgnosticFtrProvider
       const { body } = await supertestWithoutAuth
         .delete(`/api/fleet/epm/packages/${pkg}`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .set('kbn-xsrf', 'xxxx');
+        .set(samlAuth.getInternalRequestHeader());
       return body;
     },
   };
