@@ -95,7 +95,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`clickPanelAction(${testSubject})`);
 
     await this.scrollPanelIntoView(wrapper);
-    const exists = await this.testSubjects.exists(testSubject, { allowHidden: true });
+    const exists = await this.testSubjects.exists(testSubject);
     if (!exists) await this.openContextMenu(wrapper);
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
@@ -395,6 +395,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   public async expectLinkedToLibrary(title = '', legacy?: boolean) {
     this.log.debug(`expectLinkedToLibrary(${title})`);
+    const isViewMode = await this.dashboard.getIsInViewMode();
+    if (isViewMode) this.dashboard.switchToEditMode();
     if (legacy) {
       await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     } else {
@@ -402,10 +404,13 @@ export class DashboardPanelActionsService extends FtrService {
     }
     await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
     await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    if (isViewMode) this.dashboard.clickCancelOutOfEditMode();
   }
 
   public async expectNotLinkedToLibrary(title = '', legacy?: boolean) {
     this.log.debug(`expectNotLinkedToLibrary(${title})`);
+    const isViewMode = await this.dashboard.getIsInViewMode();
+    if (isViewMode) this.dashboard.switchToEditMode();
     if (legacy) {
       await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
     } else {
@@ -413,5 +418,6 @@ export class DashboardPanelActionsService extends FtrService {
     }
     await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    if (isViewMode) this.dashboard.clickCancelOutOfEditMode();
   }
 }
