@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+const TOPIC_REQUIRED_MESSAGE = 'Topic is required';
+
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
@@ -324,7 +326,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
     if (!val) {
       res.push(
         i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
-          defaultMessage: 'Topic is required',
+          defaultMessage: TOPIC_REQUIRED_MESSAGE,
         })
       );
     }
@@ -333,7 +335,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
   if (value.length === 0) {
     res.push(
       i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
-        defaultMessage: 'Topic is required',
+        defaultMessage: TOPIC_REQUIRED_MESSAGE,
       })
     );
   }

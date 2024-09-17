@@ -161,6 +161,36 @@ function extractKafkaOutputSecrets(
   return Object.keys(secrets).length ? secrets : null;
 }
 
+export function extractDefaultStaticKafkaTopic(o: KafkaOutput): string {
+  if (
+    !o?.topics ||
+    o.topics?.length === 0 ||
+    (o.topics && o?.topics.length > 0 && o.topics[0].topic?.includes('%{['))
+  ) {
+    return '';
+  }
+
+  const lastTopic = o.topics[o.topics.length - 1].topic;
+  return lastTopic || '';
+}
+
+export function extractDefaultDynamicKafkaTopics(
+  o: KafkaOutput
+): Array<EuiComboBoxOptionOption<string>> {
+  if (!o?.topics || o.topics?.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
+    return [];
+  }
+  const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
+  const parsed = matched?.length ? matched[2] : '';
+
+  return [
+    {
+      label: parsed,
+      value: parsed,
+    },
+  ];
+}
+
 export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
@@ -334,45 +364,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
-  const extractDefaultDynamicKafkaTopics = (
-    o: KafkaOutput
-  ): Array<EuiComboBoxOptionOption<string>> => {
-    if (
-      !o?.topics ||
-      o.topics?.length === 0 ||
-      (o.topics && !o.topics[0]?.topic?.includes('%{['))
-    ) {
-      return [];
-    }
-    const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
-    const parsed = matched?.length ? matched[2] : '';
-
-    return [
-      {
-        label: parsed,
-        value: parsed,
-      },
-    ];
-  };
-
   /**
    * Kafka inputs
    */
 
   const kafkaOutput = output as KafkaOutput;
-
-  const extractDefaultStaticKafkaTopic = (o: KafkaOutput): string => {
-    if (
-      !o?.topics ||
-      o.topics?.length === 0 ||
-      (o.topics && o?.topics.length > 0 && o.topics[0].topic?.includes('%{['))
-    ) {
-      return '';
-    }
-
-    const lastTopic = o.topics[o.topics.length - 1].topic;
-    return lastTopic || '';
-  };
 
   const kafkaVersionInput = useInput(
     kafkaOutput?.version ?? '1.0.0',
