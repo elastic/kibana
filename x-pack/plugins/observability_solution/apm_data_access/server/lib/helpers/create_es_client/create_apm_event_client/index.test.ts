@@ -76,8 +76,9 @@ describe('APMEventClient', () => {
             resolve(undefined);
           }, 100);
         });
+
         void incomingRequest.abort();
-      }, 100);
+      }, 200);
     });
 
     expect(abortSignal?.aborted).toBe(true);
