@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Suspense } from 'react';
@@ -12,7 +13,7 @@ import { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
@@ -27,7 +28,7 @@ export const openAddPanelFlyout = ({
   onAddPanel,
   onClose,
 }: {
-  container: PresentationContainer;
+  container: CanAddNewPanel;
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {

@@ -1,0 +1,25 @@
+# MV_MIN
+
+The MV_MIN function converts a multivalued expression into a single valued column containing the minimum value.
+
+## Syntax
+
+`MV_MIN(field)`
+
+### Parameters
+
+#### field
+
+This is a multivalue expression.
+
+## Examples
+
+```esql
+ROW a=[2, 1]
+| EVAL min_a = MV_MIN(a)
+```
+
+```esql
+ROW a=["foo", "bar"]
+| EVAL min_a = MV_MIN(a)
+```

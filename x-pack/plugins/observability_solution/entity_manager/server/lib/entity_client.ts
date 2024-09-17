@@ -10,10 +10,12 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { installEntityDefinition } from './entities/install_entity_definition';
-import { startTransform } from './entities/start_transform';
+import { startTransforms } from './entities/start_transforms';
 import { findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
+
+import { stopTransforms } from './entities/stop_transforms';
 
 export class EntityClient {
   constructor(
@@ -39,7 +41,7 @@ export class EntityClient {
     });
 
     if (!installOnly) {
-      await startTransform(this.options.esClient, definition, this.options.logger);
+      await startTransforms(this.options.esClient, definition, this.options.logger);
     }
 
     return installedDefinition;
@@ -68,14 +70,34 @@ export class EntityClient {
     });
   }
 
-  async getEntityDefinitions({ page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
+  async getEntityDefinitions({
+    id,
+    page = 1,
+    perPage = 10,
+    includeState = false,
+  }: {
+    id?: string;
+    page?: number;
+    perPage?: number;
+    includeState?: boolean;
+  }) {
     const definitions = await findEntityDefinitions({
       esClient: this.options.esClient,
       soClient: this.options.soClient,
       page,
       perPage,
+      id,
+      includeState,
     });
 
     return { definitions };
+  }
+
+  async startEntityDefinition(definition: EntityDefinition) {
+    return startTransforms(this.options.esClient, definition, this.options.logger);
+  }
+
+  async stopEntityDefinition(definition: EntityDefinition) {
+    return stopTransforms(this.options.esClient, definition, this.options.logger);
   }
 }

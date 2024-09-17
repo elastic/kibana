@@ -27,6 +27,7 @@ jest.mock('../constants', () => ({
 
 const taskManagerLogger = mockLogger();
 const taskPartitioner = new TaskPartitioner({
+  logger: taskManagerLogger,
   podName: 'test',
   kibanaDiscoveryService: {} as KibanaDiscoveryService,
   kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,

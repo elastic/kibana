@@ -1,0 +1,29 @@
+# LOG
+
+The LOG function calculates the logarithm of a given value to a specified base.
+
+## Syntax
+
+`LOG(base, number)`
+
+### Parameters
+
+#### base
+
+The base of the logarithm. If the base is `null`, the function will return `null`. If the base is not provided, the function will return the natural logarithm (base e) of the value.
+
+#### number
+
+The numeric value for which the logarithm is to be calculated. If the number is `null`, the function will return `null`.
+
+## Examples
+
+```esql
+ROW base = 2.0, value = 8.0
+| EVAL s = LOG(base, value)
+```
+
+```esql
+ROW value = 100
+| EVAL s = LOG(value)
+```

@@ -92,7 +92,7 @@ function prepareTest() {
             },
           },
         },
-        mlServices: { mlApiServices: {} },
+        mlServices: { mlApi: {} },
         notifications: {
           toasts: {
             addDanger: () => {},
