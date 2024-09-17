@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { naturalLanguageToEsql } from './task';
-export type { NlToEsqlTaskEvent, NlToEsqlTaskParams } from './types';
+export { EsqlDocumentBase } from './esql_doc_base';

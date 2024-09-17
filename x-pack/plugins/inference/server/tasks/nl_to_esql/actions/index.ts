@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { naturalLanguageToEsql } from './task';
-export type { NlToEsqlTaskEvent, NlToEsqlTaskParams } from './types';
+export { requestDocumentation } from './request_documentation';
+export { generateEsqlTask } from './generate_esql';
