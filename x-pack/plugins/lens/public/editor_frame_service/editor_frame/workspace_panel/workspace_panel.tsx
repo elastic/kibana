@@ -206,8 +206,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1:
-            dataReceivedTime.current - visualizationRenderStartTime.current - esTookTime.current,
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
           key3: 'es_took',
