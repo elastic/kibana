@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
 import { getESQLDocsSections } from '../../sections';
@@ -83,7 +84,11 @@ function DocumentationFlyout({
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h3>ES|QL quick reference</h3>
+              <h3>
+                {i18n.translate('languageDocumentationPopover.documentationFlyoutTitle', {
+                  defaultMessage: 'ES|QL quick reference',
+                })}
+              </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             <DocumentationNavigation

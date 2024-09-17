@@ -18,8 +18,7 @@ const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
 export const initialSection = (
   <Markdown
     markdownContent={i18n.translate('languageDocumentationPopover.documentationESQL.markdown', {
-      defaultMessage: `## ES|QL
-
+      defaultMessage: `
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.

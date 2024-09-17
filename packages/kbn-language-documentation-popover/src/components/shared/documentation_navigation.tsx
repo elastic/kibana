@@ -43,39 +43,43 @@ function DocumentationNav({
     <>
       <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
         <EuiFlexItem grow={true}>
-        <EuiFormRow
-          fullWidth
-          label="Select or search topics"
-          labelAppend={linkToDocumentation && (
-            <EuiText size="xs">
-              <EuiLink
-                external
-                href={linkToDocumentation}
-                target="_blank"
-                data-test-subj="language-documentation-navigation-link"
-              >
-                {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
-                  defaultMessage: 'View full ES|QL documentation',
-                })}
-              </EuiLink>
-            </EuiText>
-            )}
-          >
-          <EuiComboBox
-            aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
-              defaultMessage: 'Navigate through the documentation',
-            })}
-            placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
-              defaultMessage: 'Commands and functions',
-            })}
-            data-test-subj="language-documentation-navigation-dropdown"
-            options={filteredGroups}
-            selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
-            singleSelection={{ asPlainText: true }}
-            onChange={onNavigationChange}
-            compressed
+          <EuiFormRow
             fullWidth
-          />
+            label={i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
+              defaultMessage: 'Select or search topics',
+            })}
+            labelAppend={
+              linkToDocumentation && (
+                <EuiText size="xs">
+                  <EuiLink
+                    external
+                    href={linkToDocumentation}
+                    target="_blank"
+                    data-test-subj="language-documentation-navigation-link"
+                  >
+                    {i18n.translate('languageDocumentationPopover.esqlDocsLinkLabel', {
+                      defaultMessage: 'View full ES|QL documentation',
+                    })}
+                  </EuiLink>
+                </EuiText>
+              )
+            }
+          >
+            <EuiComboBox
+              aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
+                defaultMessage: 'Navigate through the documentation',
+              })}
+              placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
+                defaultMessage: 'Commands and functions',
+              })}
+              data-test-subj="language-documentation-navigation-dropdown"
+              options={filteredGroups}
+              selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
+              singleSelection={{ asPlainText: true }}
+              onChange={onNavigationChange}
+              compressed
+              fullWidth
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem
