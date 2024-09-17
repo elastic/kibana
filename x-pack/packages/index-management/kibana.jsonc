@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/index-management",
-  "owner": "@elastic/kibana-management"
-}

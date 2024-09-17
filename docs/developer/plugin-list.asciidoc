@@ -570,7 +570,7 @@ security and spaces filtering.
 |Exposes services to access entities data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/entity_manager/README.md[entityManager]
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
