@@ -6,7 +6,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     retry:
@@ -19,7 +19,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
@@ -36,7 +36,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 10
@@ -53,7 +53,7 @@ steps:
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -70,7 +70,7 @@ steps:
     label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -87,7 +87,7 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -104,7 +104,7 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -121,7 +121,7 @@ steps:
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -138,7 +138,7 @@ steps:
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -155,7 +155,7 @@ steps:
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -172,7 +172,7 @@ steps:
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -189,7 +189,7 @@ steps:
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -206,7 +206,7 @@ steps:
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -223,7 +223,7 @@ steps:
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -240,7 +240,7 @@ steps:
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -257,7 +257,7 @@ steps:
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -274,7 +274,7 @@ steps:
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -291,7 +291,7 @@ steps:
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -308,7 +308,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -325,7 +325,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -342,7 +342,7 @@ steps:
     label: 'Serverless Osquery Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -359,7 +359,7 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
@@ -378,7 +378,7 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
@@ -401,6 +401,6 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
