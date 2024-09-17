@@ -111,6 +111,7 @@ import {
 } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
+import { countBracketsUnclosed } from '../shared/helpers';
 
 type GetFieldsByTypeFn = (
   type: string | string[],
