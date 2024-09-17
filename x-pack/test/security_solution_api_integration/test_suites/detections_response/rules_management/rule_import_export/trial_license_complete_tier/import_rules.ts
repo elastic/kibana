@@ -1596,7 +1596,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 error: {
                   status_code: 400,
                   message:
-                    'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+                    'Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: rule-immutable]',
                 },
               },
             ],
