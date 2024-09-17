@@ -68,7 +68,7 @@ pageLoadAssetSize:
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 174609
+  fleet: 190461
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -86,6 +86,7 @@ pageLoadAssetSize:
   inspector: 148711
   integrationAssistant: 19524
   interactiveSetup: 80000
+  inventory: 27430
   investigate: 17970
   investigateApp: 91898
   kibanaOverview: 56279

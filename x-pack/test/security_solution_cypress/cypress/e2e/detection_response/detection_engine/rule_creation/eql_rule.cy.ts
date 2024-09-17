@@ -71,7 +71,8 @@ import {
   RULES_CREATION_FORM,
 } from '../../../../screens/create_new_rule';
 
-describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skip in MKI due to flake
+describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -231,7 +232,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     const rule = getEqlRule();
 
     it('validates missing data source', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
@@ -258,7 +258,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('validates missing data fields', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
 
@@ -282,7 +281,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('validates syntax errors', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
 

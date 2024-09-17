@@ -8,8 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { BehaviorSubject } from 'rxjs';
+
 import {
   DndContext,
   DragEndEvent,
@@ -21,20 +21,24 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
+  SortableContext,
   arrayMove,
   rectSortingStrategy,
-  SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ControlStyle } from '../../..';
-import { ControlsInOrder } from '../init_controls_manager';
-import { ControlGroupApi } from '../types';
-import { ControlRenderer } from './control_renderer';
-import { ControlClone } from './control_clone';
-import { DefaultControlApi } from '../../controls/types';
+
+import type { ControlStyle } from '../../../../common';
+import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
+import { ControlsInOrder } from '../init_controls_manager';
+import type { ControlGroupApi } from '../types';
+import { ControlClone } from './control_clone';
+import { ControlRenderer } from './control_renderer';
+
+import './control_group.scss';
 
 interface Props {
   applySelections: () => void;
@@ -96,7 +100,7 @@ export function ControlGroup({
   const ApplyButtonComponent = useMemo(() => {
     return (
       <EuiButtonIcon
-        size="m"
+        size="s"
         disabled={!hasUnappliedSelections}
         iconSize="m"
         display="fill"
