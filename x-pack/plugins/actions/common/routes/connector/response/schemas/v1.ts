@@ -26,7 +26,7 @@ export const connectorResponseSchema = schema.object({
     schema.boolean({ meta: { description: 'Indicates whether the connector is missing secrets.' } })
   ),
   is_preconfigured: schema.boolean({
-    meta: { description: 'Indicates whether the connector is preconfigured.' },
+    meta: { description: 'Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ' },
   }),
   is_deprecated: schema.boolean({
     meta: { description: 'Indicates whether the connector is deprecated.' },
