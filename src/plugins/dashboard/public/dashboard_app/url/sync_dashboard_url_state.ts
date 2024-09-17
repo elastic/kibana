@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import { debounceTime } from 'rxjs';
+import { debounceTime, skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import { History } from 'history';
 
@@ -115,14 +115,17 @@ export const startSyncingExpandedPanelState = ({
   dashboardAPI: DashboardAPI;
   history: History;
 }) => {
-  const expandedPanelSubscription = dashboardAPI?.expandedPanelId.subscribe((expandedPanelId) => {
-    history.replace({
-      ...history.location,
-      pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}${
-        Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
-      }`,
+  const expandedPanelSubscription = dashboardAPI?.expandedPanelId
+    // skip the first value because we don't want to trigger a history.replace on initial load
+    .pipe(skip(1))
+    .subscribe((expandedPanelId) => {
+      history.replace({
+        ...history.location,
+        pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}${
+          Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
+        }`,
+      });
     });
-  });
   const stopWatchingExpandedPanel = () => expandedPanelSubscription.unsubscribe();
   return { stopWatchingExpandedPanel };
 };
