@@ -8,20 +8,22 @@
  */
 
 import { omit } from 'lodash';
+import { combineLatest, map } from 'rxjs';
+
 import {
   childrenUnsavedChanges$,
   initializeUnsavedChanges,
-  PresentationContainer,
+  type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
-  PublishesUnsavedChanges,
-  StateComparators,
+  type PublishesUnsavedChanges,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
-import { combineLatest, map } from 'rxjs';
-import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
-import { ControlGroupRuntimeState, ControlPanelsState } from './types';
+
+import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
+import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,

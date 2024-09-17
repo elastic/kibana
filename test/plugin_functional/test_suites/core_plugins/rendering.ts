@@ -102,7 +102,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (stack?|serverless?)',
-        'console.dev.enableMonaco (boolean?)',
         'console.ui.enabled (boolean?)',
         'console.ui.embeddedEnabled (boolean?)',
         'dashboard.allowByValueEmbeddables (boolean?)',
@@ -295,6 +294,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
         'xpack.index_management.enableIndexStats (boolean?|never)',
         'xpack.index_management.enableDataStreamStats (boolean?|never)',
+        'xpack.index_management.enableSizeAndDocCount (boolean?|never)',
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',

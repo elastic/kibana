@@ -27,13 +27,15 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
-import { ControlStyle } from '../..';
-import {
-  CONTROL_GROUP_TYPE,
+import type {
   ControlGroupChainingSystem,
-  DEFAULT_CONTROL_STYLE,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelsState,
+  ControlStyle,
   ParentIgnoreSettings,
 } from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_STYLE } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
@@ -41,12 +43,7 @@ import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_ch
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlPanelsState,
-} from './types';
+import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
