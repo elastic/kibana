@@ -64,7 +64,6 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         return timer(getPollInterval(elapsedTime)).pipe(switchMap(search));
       }),
       tap((response) => {
-        console.log('isAborted', response);
         if (isAbortResponse(response)) {
           throw new AbortError();
         }

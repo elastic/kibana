@@ -121,6 +121,7 @@ export const esqlAsyncSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
+        console.log(e);
         throw getKbnSearchError(e);
       })
     );
