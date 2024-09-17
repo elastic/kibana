@@ -27,12 +27,12 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
       ...(schema
         ? {
             tools: {
-              output: {
+              structuredOutput: {
                 description: `Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.`,
                 schema,
               },
             },
-            toolChoice: { function: 'output' as const },
+            toolChoice: { function: 'structuredOutput' as const },
           }
         : {}),
     }).pipe(

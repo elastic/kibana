@@ -12,6 +12,7 @@ import { ToolSchema, generateFakeToolCallId, isChatCompletionMessageEvent } from
 import {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
+  FunctionCallingMode,
   Message,
   MessageRole,
 } from '../../../common/chat_complete';
@@ -38,11 +39,13 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   tools,
   toolChoice,
   logger,
+  functionCalling,
   ...rest
 }: {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   connectorId: string;
   logger: Pick<Logger, 'debug'>;
+  functionCalling?: FunctionCallingMode;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] })): Observable<NlToEsqlTaskEvent<TToolOptions>> {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
@@ -130,6 +133,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           }),
           client
             .chatComplete({
+              functionCalling,
               connectorId,
               system: `${systemMessage}
 
@@ -233,6 +237,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
 
       return client
         .output('request_documentation', {
+          functionCalling,
           connectorId,
           system: systemMessage,
           previousMessages: messages,

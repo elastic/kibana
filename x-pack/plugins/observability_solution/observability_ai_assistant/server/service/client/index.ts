@@ -299,6 +299,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
+                useSimulatedFunctionCalling: simulateFunctionCalling !== false,
               })
             );
           }),
