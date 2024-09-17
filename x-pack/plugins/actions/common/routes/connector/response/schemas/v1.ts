@@ -32,7 +32,7 @@ export const connectorResponseSchema = schema.object({
     meta: { description: 'Indicates whether the connector is deprecated.' },
   }),
   is_system_action: schema.boolean({
-    meta: { description: 'Indicates whether the connector is system action.' },
+    meta: { description: 'Indicates whether the connector is used for system actions.' },
   }),
 });
 
