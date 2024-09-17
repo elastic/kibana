@@ -122,8 +122,8 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
 
         const strippedFieldName = removeKeywordSuffix(item.label);
         if (
-          // If item is not a ECS field, no need to fetch metadata
-          item.kind === 4 &&
+          // If item is not a field, no need to fetch metadata
+          item.kind === monaco.languages.CompletionItemKind.Variable &&
           // If not ECS, no need to fetch description
           Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
         ) {
