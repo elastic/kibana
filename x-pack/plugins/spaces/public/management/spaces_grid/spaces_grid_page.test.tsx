@@ -200,6 +200,16 @@ describe('SpacesGridPage', () => {
     const nameCell = activeRow.find('[data-test-subj="spacesListTableRowNameCell"]');
     const activeBadge = nameCell.find('EuiBadge');
     expect(activeBadge.text()).toBe('current');
+
+    // ensure that current badge appears only once
+    const currentBadges = wrapper.findWhere((node) => {
+      return (
+        node.type() === 'span' &&
+        node.prop('data-test-subj') &&
+        node.prop('data-test-subj').includes('spacesListCurrentBadge')
+      );
+    });
+    expect(currentBadges.length).toBe(1);
   });
 
   it('renders a non-clickable "switch" action for the current space', async () => {
