@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 
 export type CleanUpRiskEngineErrorResponse = z.infer<typeof CleanUpRiskEngineErrorResponse>;
 export const CleanUpRiskEngineErrorResponse = z.object({
-  risk_engine_cleanup: z.boolean(),
+  cleanup_successful: z.boolean(),
   errors: z.array(
     z.object({
       seq: z.number().int(),
@@ -29,5 +29,5 @@ export const CleanUpRiskEngineErrorResponse = z.object({
 
 export type CleanUpRiskEngineResponse = z.infer<typeof CleanUpRiskEngineResponse>;
 export const CleanUpRiskEngineResponse = z.object({
-  risk_engine_cleanup: z.boolean().optional(),
+  cleanup_successful: z.boolean().optional(),
 });

@@ -19,7 +19,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  risk_engine_cleanup:
+                  cleanup_successful:
                     type: boolean
         '400':
           description: Task manager is unavailable
@@ -39,10 +39,10 @@ components:
     CleanUpRiskEngineErrorResponse:
       type: object
       required:
-        - risk_engine_cleanup
+        - cleanup_successful
         - errors
       properties:
-        risk_engine_cleanup:
+        cleanup_successful:
           type: boolean
           example: false
         errors:

@@ -73,7 +73,7 @@ export const riskEngineCleanupRoute = (
                   ? 400
                   : 500,
                 body: {
-                  risk_engine_cleanup: false,
+                  cleanup_successful: false,
                   errors: errors.map((error, seq) => ({
                     seq: seq + 1,
                     error: error.toString(),
@@ -82,13 +82,13 @@ export const riskEngineCleanupRoute = (
                 bypassErrorFormat: true,
               });
             } else {
-              return response.ok({ body: { risk_engine_cleanup: true } });
+              return response.ok({ body: { cleanup_successful: true } });
             }
           } catch (error) {
             return siemResponse.error({
               statusCode: 500,
               body: {
-                risk_engine_cleanup: false,
+                cleanup_successful: false,
                 errors: {
                   seq: 1,
                   error: JSON.stringify(error),

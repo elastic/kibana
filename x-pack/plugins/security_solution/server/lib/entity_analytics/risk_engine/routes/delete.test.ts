@@ -67,7 +67,7 @@ describe('risk engine cleanup route', () => {
       const request = buildRequest();
       const response = await server.inject(request, context);
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ risk_engine_cleanup: true });
+      expect(response.body).toEqual({ cleanup_successful: true });
     });
 
     it('returns a 400 when cleanup endpoint is called multiple times', async () => {
@@ -78,7 +78,7 @@ describe('risk engine cleanup route', () => {
       const response = await server.inject(request, context);
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        risk_engine_cleanup: false,
+        cleanup_successful: false,
         errors: [
           {
             seq: 1,
@@ -101,7 +101,7 @@ describe('risk engine cleanup route', () => {
           error: '{}',
           seq: 1,
         },
-        risk_engine_cleanup: false,
+        cleanup_successful: false,
         status_code: 500,
       });
     });
@@ -132,7 +132,7 @@ describe('risk engine cleanup route', () => {
             error: 'Error: Error while removing risk score index',
           },
         ],
-        risk_engine_cleanup: false,
+        cleanup_successful: false,
         status_code: 500,
       });
     });
