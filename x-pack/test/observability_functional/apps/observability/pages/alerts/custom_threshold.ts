@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         const aggregationNameA = await testSubjects.find('aggregationNameA');
         return (await aggregationNameA.getVisibleText()) === 'AVERAGE\nmetricset.rtt';
       });
+      await new Promise((r) => setTimeout(r, 1000));
 
       // set second aggregation
       await testSubjects.click('thresholdRuleCustomEquationEditorAddAggregationFieldButton');
@@ -114,6 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
         const aggregationNameB = await testSubjects.find('aggregationNameB');
         return (await aggregationNameB.getVisibleText()) === 'COUNT\nservice.name : "opbeans-node"';
       });
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('can set custom equation', async () => {
@@ -129,6 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         const customEquation = await testSubjects.find('customEquation');
         return (await customEquation.getVisibleText()) === 'EQUATION\nA - B';
       });
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('can set threshold', async () => {

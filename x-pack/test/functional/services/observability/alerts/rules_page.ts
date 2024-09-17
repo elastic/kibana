@@ -35,6 +35,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   };
 
   const clickOnInfrastructureCategory = async () => {
+    await testSubjects.existOrFail('ruleTypeModal');
     const categories = await testSubjects.find('ruleTypeModal');
     const category = await categories.findByCssSelector(`.euiFacetButton[title="Infrastructure"]`);
     await category.click();
@@ -46,6 +47,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   };
 
   const clickOnObservabilityCategory = async () => {
+    await testSubjects.existOrFail('ruleTypeModal');
     const categories = await testSubjects.find('ruleTypeModal');
     const category = await categories.findByCssSelector(`.euiFacetButton[title="Observability"]`);
     await category.click();
