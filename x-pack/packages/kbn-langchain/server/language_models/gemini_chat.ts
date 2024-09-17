@@ -25,7 +25,7 @@ import {
   convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
-} from './gemini_utils';
+} from '../utils/gemini';
 const DEFAULT_GEMINI_TEMPERATURE = 0;
 
 export interface CustomChatModelInput extends BaseChatModelParams {

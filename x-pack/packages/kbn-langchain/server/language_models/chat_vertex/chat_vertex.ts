@@ -21,7 +21,7 @@ import {
   convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
-} from '../gemini_utils';
+} from '../../utils/gemini';
 import { ActionsClientChatConnection } from './connection';
 
 const DEFAULT_GEMINI_TEMPERATURE = 0;
@@ -29,6 +29,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   logger: Logger;
+  streaming: boolean;
   temperature?: number;
   signal?: AbortSignal;
   model?: string;
@@ -123,13 +124,11 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
       }
       return readable;
     });
-
     let usageMetadata: UsageMetadata | undefined;
     let index = 0;
     let partialStreamChunk = '';
     for await (const rawStreamChunk of stream) {
       const streamChunk = rawStreamChunk.toString();
-
       const nextChunk = `${partialStreamChunk + streamChunk}`;
 
       let parsedStreamChunk: EnhancedGenerateContentResponse | null = null;
