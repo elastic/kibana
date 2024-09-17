@@ -8,7 +8,7 @@
 import styled from 'styled-components';
 
 export const Display = styled.div<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'display: none;')};
+  ${({ show }) => (show     ?  '' : 'display: none;')};
 `;
 
 Display.displayName = 'Display';
