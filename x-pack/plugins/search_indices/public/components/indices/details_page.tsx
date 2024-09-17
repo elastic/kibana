@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiButtonEmpty,
   EuiTabbedContent,
-  EuiSpacer,
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,7 +26,6 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
-import { Index, IndexMappingProps } from '@kbn/index-management-shared-types';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
@@ -36,15 +34,10 @@ import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
-import { Tabs } from '../../constants';
 import { SearchIndicesDetailsMappingsTabs } from '../../routes';
 import { SearchIndexDetailsMappings } from './details_page_mappings';
 
-export interface SearchIndexDetailsPageProps {
-  IndexMappingComponent?: React.FC<IndexMappingProps>;
-  index?: Index;
-}
-export const SearchIndexDetailsPage = ({ IndexMappingComponent }: SearchIndexDetailsPageProps) => {
+export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
@@ -69,29 +62,39 @@ export const SearchIndexDetailsPage = ({ IndexMappingComponent }: SearchIndexDet
         name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
           defaultMessage: 'Data',
         }),
-        // isSelected: SearchIndicesDetailsMappingsTabs.DATA === tabId,
         content: <IndexDocuments indexName={indexName} />,
-        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.DATA}-Tab`,
+        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.DATA}Tab`,
       },
       {
         id: SearchIndicesDetailsMappingsTabs.MAPPINGS,
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
-        // isSelected: SearchIndicesDetailsMappingsTabs.MAPPINGS === tabId,
         content: (
           <SearchIndexDetailsMappings
             IndexMappingComponent={indexManagement.getIndexMappingComponent({ history })}
             index={index}
           />
         ),
-        'data-test-subj': `${Tabs.Mappings}-Tab`,
+        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.MAPPINGS}Tab`,
       },
     ];
   }, [index, indexName, indexManagement, history]);
 
   const [selectedTab, setSelectedTab] = useState(SearchIndexDetailsTabs[0]);
 
+  useEffect(() => {
+    const newTab = SearchIndexDetailsTabs.find((tab) => tab.id === tabId);
+    if (newTab) setSelectedTab(newTab);
+  }, [SearchIndexDetailsTabs, tabId]);
+
+  const handleTabClick = useCallback(
+    (tab) => {
+      history.push(`index_details/${indexName}/${tab.id}`);
+    },
+
+    [history, indexName]
+  );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -103,19 +106,6 @@ export const SearchIndexDetailsPage = ({ IndexMappingComponent }: SearchIndexDet
   const refetchIndex = useCallback(() => {
     refetch();
   }, [refetch]);
-
-  useEffect(() => {
-    const newTab = SearchIndexDetailsTabs.find((tab) => tab.id === tabId);
-    if (newTab) setSelectedTab(newTab);
-    // console.log('selectedTab', selectedTab);
-  }, [SearchIndexDetailsTabs, tabId]);
-  const handleTabClick = useCallback(
-    (tab) => {
-      history.push(`index_details/${indexName}/${tab.id}`);
-    },
-
-    [history, indexName]
-  );
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
   const moreOptionsPopover = (
@@ -243,18 +233,17 @@ export const SearchIndexDetailsPage = ({ IndexMappingComponent }: SearchIndexDet
                 </EuiFlexItem>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
           </EuiPageTemplate.Section>
-          {isShowingDeleteModal && (
-            <DeleteIndexModal
-              onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
-              indexName={indexName}
-              navigateToIndexListPage={navigateToIndexListPage}
-            />
-          )}
-          {embeddableConsole}
         </>
       )}
+      {isShowingDeleteModal && (
+        <DeleteIndexModal
+          onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+        />
+      )}
+      {embeddableConsole}
     </EuiPageTemplate>
   );
 };

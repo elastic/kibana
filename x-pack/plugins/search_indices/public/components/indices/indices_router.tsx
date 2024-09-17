@@ -19,7 +19,7 @@ export const SearchIndicesRouter: React.FC = () => {
   return (
     <Router history={history}>
       <Routes>
-        <Route exact path={SEARCH_INDICES_DETAILS_TABS_PATH}>
+        <Route exact path={[SEARCH_INDICES_DETAILS_TABS_PATH, SEARCH_INDICES_DETAILS_PATH]}>
           <Routes>
             <Route path={SEARCH_INDICES_DETAILS_TABS_PATH} component={SearchIndexDetailsPage} />
             <Redirect

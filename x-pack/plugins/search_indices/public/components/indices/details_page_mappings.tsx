@@ -7,14 +7,17 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Index, IndexMappingProps } from '@kbn/index-management-shared-types';
 import React from 'react';
 import { useMemo } from 'react';
-import { SearchIndexDetailsPageProps } from './details_page';
-
+export interface SearchIndexDetailsMappingsProps {
+  IndexMappingComponent?: React.FC<IndexMappingProps>;
+  index?: Index;
+}
 export const SearchIndexDetailsMappings = ({
   IndexMappingComponent,
   index,
-}: SearchIndexDetailsPageProps) => {
+}: SearchIndexDetailsMappingsProps) => {
   const MappingsComponent = useMemo(() => {
     return (
       <>
