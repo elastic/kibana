@@ -5,164 +5,122 @@
  * 2.0.
  */
 
-import { mapQueryResponse } from './overview_trends';
+import type { SyntheticsEsClient } from '../../lib';
+import { fetchTrends } from './overview_trends';
 
-describe('mapQueryResponse', () => {
-  it('should correctly map the response when provided with valid input', () => {
-    const response = {
-      aggregations: {
-        byId: {
-          buckets: [
-            {
-              key: 'config1',
-              byLocation: {
-                buckets: [
-                  {
-                    key: 'location1',
-                    last50: {
-                      buckets: [{ max: { value: 10 } }, { max: { value: 20 } }],
-                    },
-                    stats: { average: 15 },
-                    median: { values: { '50.0': 18 } },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    };
+const mockEsClient: Partial<SyntheticsEsClient> = {
+  msearch: jest.fn(),
+};
 
-    const expectedOutput = [
-      {
-        config1location1: {
-          configId: 'config1',
-          locationId: 'location1',
-          data: [
-            { x: 0, y: 10 },
-            { x: 1, y: 20 },
-          ],
-          average: 15,
-          median: 18,
-        },
-      },
-    ];
-
-    expect(mapQueryResponse(response)).toEqual(expectedOutput);
+describe('fetchTrends', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should handle multiple locations correctly', () => {
-    const response = {
-      aggregations: {
-        byId: {
-          buckets: [
-            {
-              key: 'config1',
-              byLocation: {
-                buckets: [
-                  {
-                    key: 'location1',
-                    last50: {
-                      buckets: [{ max: { value: 10 } }],
-                    },
-                    stats: { average: 10 },
-                    median: { values: { '50.0': 12 } },
+  it('should return correctly formatted trend data with valid input', async () => {
+    const configs = {
+      config1: { locations: ['location1'], interval: 10 },
+    };
+
+    const stats = { avg: 15, min: 10, max: 20, sum: 30, count: 2 };
+
+    const mockResponse = {
+      responses: [
+        {
+          aggregations: {
+            byId: {
+              buckets: [
+                {
+                  key: 'config1',
+                  byLocation: {
+                    buckets: [
+                      {
+                        key: 'location1',
+                        last50: {
+                          buckets: [{ max: { value: 10 } }, { max: { value: 20 } }],
+                        },
+                        stats,
+                        median: { values: { '50.0': 18 } },
+                      },
+                    ],
                   },
-                  {
-                    key: 'location2',
-                    last50: {
-                      buckets: [{ max: { value: 30 } }],
-                    },
-                    stats: { average: 30 },
-                    median: { values: { '50.0': 28 } },
-                  },
-                ],
-              },
+                },
+              ],
             },
-          ],
+          },
         },
+      ],
+    };
+
+    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+    const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
+
+    const expectedOutput = {
+      config1location1: {
+        configId: 'config1',
+        locationId: 'location1',
+        data: [
+          { x: 0, y: 10 },
+          { x: 1, y: 20 },
+        ],
+        ...stats,
+        median: 18,
       },
     };
 
-    const expectedOutput = [
-      {
-        config1location1: {
-          configId: 'config1',
-          locationId: 'location1',
-          data: [{ x: 0, y: 10 }],
-          average: 10,
-          median: 12,
-        },
-        config1location2: {
-          configId: 'config1',
-          locationId: 'location2',
-          data: [{ x: 0, y: 30 }],
-          average: 30,
-          median: 28,
-        },
-      },
-    ];
-
-    expect(mapQueryResponse(response)).toEqual(expectedOutput);
+    expect(result).toEqual(expectedOutput);
+    expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle empty buckets gracefully', () => {
-    const response = {
-      aggregations: {
-        byId: {
-          buckets: [
-            {
-              key: 'config1',
-              byLocation: {
-                buckets: [],
-              },
-            },
-          ],
-        },
-      },
+  it('should return an empty object when no responses are returned', async () => {
+    const configs = {
+      config1: { locations: ['location1'], interval: 10 },
     };
 
-    const expectedOutput = [{}];
+    const mockResponse = {
+      responses: [],
+    };
 
-    expect(mapQueryResponse(response)).toEqual(expectedOutput);
+    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+    const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
+
+    expect(result).toEqual({});
+    expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle missing "last50" or "stats" gracefully', () => {
-    const response = {
-      aggregations: {
-        byId: {
-          buckets: [
-            {
-              key: 'config1',
-              byLocation: {
-                buckets: [
-                  {
-                    key: 'location1',
-                    last50: {
-                      buckets: [],
-                    },
-                    stats: {},
-                    median: { values: { '50.0': 12 } },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
+  it('should handle missing aggregations and return an empty object', async () => {
+    const configs = {
+      config1: { locations: ['location1'], interval: 10 },
     };
 
-    const expectedOutput = [
-      {
-        config1location1: {
-          configId: 'config1',
-          locationId: 'location1',
-          data: [],
-          median: 12,
+    const mockResponse = {
+      responses: [
+        {
+          aggregations: null,
         },
-      },
-    ];
+      ],
+    };
 
-    expect(mapQueryResponse(response)).toEqual(expectedOutput);
+    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+    const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
+
+    expect(result).toEqual({});
+    expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
+  });
+
+  it('should throw an error if msearch fails', async () => {
+    const configs = {
+      config1: { locations: ['location1'], interval: 10 },
+    };
+
+    (mockEsClient.msearch as jest.Mock).mockRejectedValueOnce(new Error('Elasticsearch error'));
+
+    await expect(fetchTrends(mockEsClient as SyntheticsEsClient, configs)).rejects.toThrow(
+      'Elasticsearch error'
+    );
+    expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
   });
 });

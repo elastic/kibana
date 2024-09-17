@@ -22,11 +22,11 @@ export interface OverviewTrend {
   locationId: string;
   data: TrendDatum[];
   count: number;
-  min: number;
-  max: number;
-  avg: number;
-  sum: number;
-  median: number;
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+  sum: number | null;
+  median: number | null;
 }
 
 export type TrendTable = Record<string, OverviewTrend | null | 'loading'>;
