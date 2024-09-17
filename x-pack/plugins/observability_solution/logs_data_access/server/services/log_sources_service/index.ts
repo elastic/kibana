@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
+import { flattenLogSources } from '../../../common/services/log_sources_service/utils';
 import { LogSource, LogSourcesService } from '../../../common/services/log_sources_service/types';
 import { RegisterServicesParams } from '../register_services';
 
@@ -18,8 +19,8 @@ export function createLogSourcesServiceFactory(params: RegisterServicesParams) {
     ): Promise<LogSourcesService> {
       const { uiSettings } = params.deps;
       const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-      return {
-        getLogSources: async () => {
+      const logSourcesService: LogSourcesService = {
+        async getLogSources() {
           const logSources = await uiSettingsClient.get<string[]>(
             OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID
           );
@@ -27,13 +28,18 @@ export function createLogSourcesServiceFactory(params: RegisterServicesParams) {
             indexPattern: logSource,
           }));
         },
-        setLogSources: async (sources: LogSource[]) => {
+        async getFlattenedLogSources() {
+          const logSources = await this.getLogSources();
+          return flattenLogSources(logSources);
+        },
+        async setLogSources(sources: LogSource[]) {
           return await uiSettingsClient.set(
             OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID,
             sources.map((source) => source.indexPattern)
           );
         },
       };
+      return logSourcesService;
     },
     async getScopedLogSourcesService(request: KibanaRequest): Promise<LogSourcesService> {
       const { savedObjects } = params.deps;
