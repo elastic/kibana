@@ -39,6 +39,7 @@ export const OtelKubernetesPanel: React.FC = () => {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const apmLocator = share.url.locators.get('APM_LOCATOR');
 
   if (error) {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
@@ -115,7 +116,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.p.injectAutoinstrumentationLibrariesForLabel',
                     {
                       defaultMessage:
-                        'Annotate your deployments to inject auto-instrumentation libraries for the languages below:',
+                        'Annotate your applications to inject auto-instrumentation libraries for the languages below:',
                     }
                   )}
                 </p>
@@ -215,10 +216,7 @@ spec:
                         defaultMessage: 'Open Services',
                       }
                     ),
-                    href:
-                      dashboardLocator?.getRedirectUrl({
-                        dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                      }) ?? '',
+                    href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
                   },
                 ]}
               />
