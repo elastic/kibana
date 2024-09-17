@@ -22,29 +22,14 @@ import { UserEntityRecord, HostEntityRecord } from './common.gen';
 
 export type ListEntitiesRequestQuery = z.infer<typeof ListEntitiesRequestQuery>;
 export const ListEntitiesRequestQuery = z.object({
-  /**
-   * The field to sort by.
-   */
   sort_field: z.string().optional(),
-  /**
-   * The order to sort by.
-   */
   sort_order: z.enum(['asc', 'desc']).optional(),
-  /**
-   * The page number to return.
-   */
   page: z.coerce.number().int().min(1).optional(),
+  per_page: z.coerce.number().int().min(1).max(10000).optional(),
   /**
-   * The number of records to return per page.
-   */
-  per_page: z.coerce.number().int().min(1).max(1000).optional(),
-  /**
-   * The filterQuery to filter by.
+   * An ES query to filter by.
    */
   filterQuery: z.string().optional(),
-  /**
-   * The entity types to filter by.
-   */
   entities_types: ArrayFromString(EntityType),
 });
 export type ListEntitiesRequestQueryInput = z.input<typeof ListEntitiesRequestQuery>;

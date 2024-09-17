@@ -46,36 +46,27 @@ components:
             lastSeenTimestamp:
               type: string
               format: date-time
-              description: The last seen timestamp of the entity.
             schemaVersion:
               type: string
-              description: The schema version of the entity.
             definitionVersion:
               type: string
-              description: The definition version of the entity.
             displayName:
               type: string
-              description: The display name of the entity.
             identityFields:
               type: array
               items:
                 type: string
-              description: The identity fields of the entity.
             id:
               type: string
-              description: The ID of the entity.
             type:
               type: string
               enum:
                 - node
-              description: The type of the entity.
             firstSeenTimestamp:
               type: string
               format: date-time
-              description: The first seen timestamp of the entity.
             definitionId:
               type: string
-              description: The definition ID of the entity.
           required:
             - lastSeenTimestamp
             - schemaVersion
@@ -130,36 +121,27 @@ components:
             lastSeenTimestamp:
               type: string
               format: date-time
-              description: The last seen timestamp of the entity.
             schemaVersion:
               type: string
-              description: The schema version of the entity.
             definitionVersion:
               type: string
-              description: The definition version of the entity.
             displayName:
               type: string
-              description: The display name of the entity.
             identityFields:
               type: array
               items:
                 type: string
-              description: The identity fields of the entity.
             id:
               type: string
-              description: The ID of the entity.
             type:
               type: string
               enum:
                 - node
-              description: The type of the entity.
             firstSeenTimestamp:
               type: string
               format: date-time
-              description: The first seen timestamp of the entity.
             definitionId:
               type: string
-              description: The definition ID of the entity.
           required:
             - lastSeenTimestamp
             - schemaVersion

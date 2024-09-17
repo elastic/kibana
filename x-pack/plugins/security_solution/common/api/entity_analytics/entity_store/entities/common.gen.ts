@@ -31,41 +31,14 @@ export const UserEntityRecord = z.object({
     .optional(),
   entity: z
     .object({
-      /**
-       * The last seen timestamp of the entity.
-       */
       lastSeenTimestamp: z.string().datetime(),
-      /**
-       * The schema version of the entity.
-       */
       schemaVersion: z.string(),
-      /**
-       * The definition version of the entity.
-       */
       definitionVersion: z.string(),
-      /**
-       * The display name of the entity.
-       */
       displayName: z.string(),
-      /**
-       * The identity fields of the entity.
-       */
       identityFields: z.array(z.string()),
-      /**
-       * The ID of the entity.
-       */
       id: z.string(),
-      /**
-       * The type of the entity.
-       */
       type: z.literal('node'),
-      /**
-       * The first seen timestamp of the entity.
-       */
       firstSeenTimestamp: z.string().datetime(),
-      /**
-       * The definition ID of the entity.
-       */
       definitionId: z.string(),
     })
     .optional(),
@@ -87,41 +60,14 @@ export const HostEntityRecord = z.object({
     .optional(),
   entity: z
     .object({
-      /**
-       * The last seen timestamp of the entity.
-       */
       lastSeenTimestamp: z.string().datetime(),
-      /**
-       * The schema version of the entity.
-       */
       schemaVersion: z.string(),
-      /**
-       * The definition version of the entity.
-       */
       definitionVersion: z.string(),
-      /**
-       * The display name of the entity.
-       */
       displayName: z.string(),
-      /**
-       * The identity fields of the entity.
-       */
       identityFields: z.array(z.string()),
-      /**
-       * The ID of the entity.
-       */
       id: z.string(),
-      /**
-       * The type of the entity.
-       */
       type: z.literal('node'),
-      /**
-       * The first seen timestamp of the entity.
-       */
       firstSeenTimestamp: z.string().datetime(),
-      /**
-       * The definition ID of the entity.
-       */
       definitionId: z.string(),
     })
     .optional(),

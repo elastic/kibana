@@ -38,7 +38,7 @@ interface EntityStoreClientOpts {
 
 interface SearchEntitiesParams {
   entityTypes: EntityType[];
-  filterQuery?: string; // or filter
+  filterQuery?: string;
   page: number;
   perPage: number;
   sortField: string;
