@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -89,6 +89,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
   );
+  const isEditOperation = useRef(Boolean(defaultSelected.length));
 
   useEffect(() => {
     async function fetchRequiredData(spaceId: string) {
@@ -349,7 +350,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     return (
       <EuiForm component="form" fullWidth>
         <React.Fragment>
-          {!defaultSelected.length && (
+          {!isEditOperation.current && (
             <EuiFormRow
               label={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
@@ -538,11 +539,17 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         disabled={!selectedRoles.length}
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
-        data-test-subj="space-assign-role-create-roles-privilege-button"
+        data-test-subj={`space-${
+          isEditOperation.current ? 'update' : 'assign'
+        }-role-create-roles-privilege-button`}
       >
-        {i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
-          defaultMessage: 'Assign roles',
-        })}
+        {isEditOperation.current
+          ? i18n.translate('xpack.spaces.management.spaceDetails.roles.updateRoleButton', {
+              defaultMessage: 'Update',
+            })
+          : i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
+              defaultMessage: 'Assign',
+            })}
       </EuiButton>
     );
   }, [assignRolesToSpace, assigningToRole, selectedRoles.length]);
@@ -552,7 +559,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {defaultSelected.length
+            {isEditOperation.current
               ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
                   defaultMessage: 'Edit role privileges',
                 })

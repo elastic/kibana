@@ -215,7 +215,7 @@ describe('PrivilegesRolesForm', () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId('space-assign-role-create-roles-privilege-button')
+      screen.getByTestId('space-update-role-create-roles-privilege-button')
     ).not.toBeDisabled();
   });
 
