@@ -20,6 +20,7 @@ export enum SUB_ACTION {
   RERANK = 'rerank',
   TEXT_EMBEDDING = 'text_embedding',
   SPARSE_EMBEDDING = 'sparse_embedding',
+  COMPLETION_STREAM = 'completion_stream',
 }
 
 export const DEFAULT_PROVIDER = 'openai';

@@ -26,6 +26,12 @@ import {
   ChatCompleteParams,
   ChatCompleteResponse,
   StreamingResponse,
+  RerankParams,
+  RerankResponse,
+  SparseEmbeddingParams,
+  SparseEmbeddingResponse,
+  TextEmbeddingParams,
+  TextEmbeddingResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 
@@ -52,7 +58,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     throw new Error('Method not implemented.');
   }
 
-  private provider;
   private inferenceId;
   private taskType;
 
@@ -94,11 +99,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       schema: TextEmbeddingParamsSchema,
     });
 
-    /* this.registerSubAction({
-      name: SUB_ACTION.INVOKE_STREAM,
-      method: 'invokeStream',
-      schema: InvokeAIActionParamsSchema,
-    }); */
+    this.registerSubAction({
+      name: SUB_ACTION.COMPLETION_STREAM,
+      method: 'performApiCompletionStream',
+      schema: ChatCompleteParamsSchema,
+    });
   }
 
   /**
@@ -106,17 +111,41 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async performApiCompletion({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
-    const response = await this.esClient?.transport.request({
-      path: `/_inference/${this.taskType}/${this.inferenceId}`,
-      method: 'POST',
-      body: { input },
-    });
-    this.logger.info(
-      `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
-    );
-
+    const response = await this.performInferenceApi({ input }, false);
     // const usageMetadata = response?.data?.usageMetadata;
     return response as ChatCompleteResponse;
+  }
+
+  /**
+   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
+  public async performApiRerank({ input, query }: RerankParams): Promise<RerankResponse> {
+    const response = await this.performInferenceApi({ input, query }, false);
+    return response as RerankResponse;
+  }
+
+  /**
+   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
+  public async performApiSparseEmbedding({
+    input,
+  }: SparseEmbeddingParams): Promise<SparseEmbeddingResponse> {
+    const response = await this.performInferenceApi({ input }, false);
+    return response as SparseEmbeddingResponse;
+  }
+
+  /**
+   * responsible for making a POST request to the Inference API text embedding task endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
+  public async performApiTextEmbedding({
+    input,
+    inputType,
+  }: TextEmbeddingParams): Promise<TextEmbeddingResponse> {
+    const response = await this.performInferenceApi({ input, inputType }, false);
+    return response as TextEmbeddingResponse;
   }
 
   /**
@@ -133,7 +162,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       this.logger.info(
         `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.config?.inferenceId}`
       );
-      // const usageMetadata = response?.data?.usageMetadata;
+      // TODO: const usageMetadata = response?.data?.usageMetadata;
       return response;
     } catch (err) {
       return wrapErr(err.message, this.connector.id, this.logger);
@@ -147,56 +176,19 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
-   *  request to the Inference API with the formatted messages and model. It then returns a Transform stream
+   *  takes input. It calls the streamApi method to make a
+   *  request to the Inference API with the message. It then returns a Transform stream
    *  that pipes the response from the API through the transformToString function,
    *  which parses the proprietary response into a string of the response text alone
    * @param input A message to be sent to the API
    */
-  public async invokeStream({ input }: ChatCompleteParams): Promise<IncomingMessage> {
+  public async performApiCompletionStream({ input }: ChatCompleteParams): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
-      input: JSON.stringify(formatInferencePayload([{ role: 'user', content: input }], 0)),
+      input,
     })) as unknown as IncomingMessage;
     return res;
   }
 }
-
-/** Format the json body to meet Inference API payload requirements */
-const formatInferencePayload = (
-  data: Array<{ role: string; content: string }>,
-  temperature: number
-): Payload => {
-  const payload: Payload = {
-    contents: [],
-    generation_config: {
-      temperature,
-      maxOutputTokens: 10000,
-    },
-  };
-  let previousRole: string | null = null;
-
-  for (const row of data) {
-    const correctRole = row.role === 'assistant' ? 'model' : 'user';
-    if (correctRole === 'user' && previousRole === 'user') {
-      /** Append to the previous 'user' content
-       * This is to ensure that multiturn requests alternate between user and model
-       */
-      payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
-    } else {
-      // Add a new entry
-      payload.contents.push({
-        role: correctRole,
-        parts: [
-          {
-            text: row.content,
-          },
-        ],
-      });
-    }
-    previousRole = correctRole;
-  }
-  return payload;
-};
 
 const wrapErr = (errMessage: string, connectorId: string, logger: Logger) => {
   const message = i18n.translate(
