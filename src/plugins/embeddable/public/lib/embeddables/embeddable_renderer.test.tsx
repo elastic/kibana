@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
@@ -28,7 +27,7 @@ describe('useEmbeddableFactory', () => {
     );
     doStart();
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useEmbeddableFactory({ factory: getFactory(), input: { id: 'hello' } })
     );
 
@@ -36,7 +35,7 @@ describe('useEmbeddableFactory', () => {
 
     expect(loading).toBe(true);
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const [embeddable] = result.current;
     expect(embeddable).toBeDefined();

@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender, act } from '@testing-library/react';
-import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type {
+  RenderOptions,
+  RenderResult,
+  RenderHookOptions,
+  RenderHookResult,
+} from '@testing-library/react';
+import { render as reactRender, act, reactRenderHook, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -35,7 +39,7 @@ import type { MockedFleetStart, MockedFleetStartServices } from './types';
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
- * Test Renderer that includes mocked services and interfaces used during Fleet applicaiton rendering.
+ * Test Renderer that includes mocked services and interfaces used during Fleet application rendering.
  * Any of the properties in this interface can be manipulated prior to `render()` if wanting to customize
  * the rendering context.
  */
@@ -54,9 +58,10 @@ export interface TestRenderer {
   render: UiRender;
   renderHook: <TProps, TResult>(
     callback: (props: TProps) => TResult,
-    wrapper?: WrapperComponent<any>
-  ) => RenderHookResult<TProps, TResult>;
+    wrapper?: RenderHookOptions<any>['wrapper']
+  ) => RenderHookResult<TResult, TProps>;
   setHeaderActionMenu: Function;
+  waitFor: typeof waitFor;
 }
 
 const queryClient = new QueryClient();
@@ -114,14 +119,15 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     HookWrapper,
     renderHook: (
       callback,
-      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+      ExtraWrapper = memo(({ children }: PropsWithChildren) => <>{children}</>)
     ) => {
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper = ({ children }: PropsWithChildren) => (
         <testRendererMocks.HookWrapper>
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>
       );
-      return renderHook(callback, {
+
+      return reactRenderHook(callback, {
         wrapper,
       });
     },
@@ -197,17 +203,18 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     },
     renderHook: (
       callback,
-      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+      ExtraWrapper = memo(({ children }: PropsWithChildren) => <>{children}</>)
     ) => {
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper = ({ children }: PropsWithChildren) => (
         <testRendererMocks.HookWrapper>
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>
       );
-      return renderHook(callback, {
+      return reactRenderHook(callback, {
         wrapper,
       });
     },
+    waitFor,
   };
 
   return testRendererMocks;

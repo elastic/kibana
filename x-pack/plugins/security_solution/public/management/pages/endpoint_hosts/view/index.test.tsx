@@ -1070,8 +1070,11 @@ describe('when on the endpoint list page', () => {
       });
 
       renderResult = render();
-      await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+      });
 
       endpointActionsButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
 

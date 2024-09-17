@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, type WrapperComponent } from '@testing-library/react-hooks';
+import { act, type WrapperComponent } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';

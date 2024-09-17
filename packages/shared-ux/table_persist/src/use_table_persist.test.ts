@@ -8,7 +8,7 @@
  */
 
 import { Criteria } from '@elastic/eui';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useEuiTablePersist } from './use_table_persist';
 import { createStorage } from './storage'; // Mock this if it's external
 

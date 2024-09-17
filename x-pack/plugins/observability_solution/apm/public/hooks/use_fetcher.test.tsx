@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
+import { renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
+import React, { type ReactNode, type PropsWithChildren } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
@@ -22,17 +22,18 @@ interface WrapperProps {
   callback: () => Promise<string>;
   args: string[];
 }
-function wrapper({ children }: WrapperProps) {
+
+function wrapper({ children }: PropsWithChildren<unknown>) {
   return <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>;
 }
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<
-      WrapperProps,
       FetcherResult<string> & {
         refetch: () => void;
-      }
+      },
+      WrapperProps
     >;
 
     beforeEach(() => {
@@ -44,7 +45,7 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
     });
 
-    it('should have loading spinner initally', async () => {
+    it('should have loading spinner initially', async () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -66,7 +67,8 @@ describe('useFetcher', () => {
 
     it('should show success after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+
+      await waitFor(() => null);
 
       expect(hook.result.current).toEqual({
         data: 'response from hook',
@@ -116,7 +118,7 @@ describe('useFetcher', () => {
 
     it('should show error after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -149,7 +151,7 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
 
       // assert: first response has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -179,7 +181,7 @@ describe('useFetcher', () => {
       });
 
       jest.advanceTimersByTime(500);
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
 
       // assert: "second response" has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -202,7 +204,7 @@ describe('useFetcher', () => {
           wrapper,
         }
       );
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
       const firstResult = hook.result.current;
       hook.rerender();
       const secondResult = hook.result.current;
@@ -216,7 +218,7 @@ describe('useFetcher', () => {
         },
         args: ['b'],
       });
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object

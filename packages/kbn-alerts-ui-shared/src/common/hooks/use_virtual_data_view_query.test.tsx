@@ -9,7 +9,7 @@
 
 import React, { FunctionComponent } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import { DataView } from '@kbn/data-views-plugin/common';

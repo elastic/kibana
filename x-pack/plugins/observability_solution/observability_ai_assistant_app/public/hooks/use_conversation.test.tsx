@@ -6,11 +6,11 @@
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
-  act,
   renderHook,
-  type RenderHookResult,
+  act,
   type WrapperComponent,
-} from '@testing-library/react-hooks';
+  type RenderHookResult,
+} from '@testing-library/react';
 import { merge } from 'lodash';
 import React, { PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';
@@ -33,7 +33,7 @@ import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hoo
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
+let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
 type MockedService = DeeplyMockedKeys<Omit<ObservabilityAIAssistantAppService, 'conversations'>> & {
   conversations: DeeplyMockedKeys<

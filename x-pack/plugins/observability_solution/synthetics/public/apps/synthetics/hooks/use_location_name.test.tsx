@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';

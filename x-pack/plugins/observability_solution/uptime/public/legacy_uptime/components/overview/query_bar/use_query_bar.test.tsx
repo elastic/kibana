@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import { MockRouter, MockKibanaProvider } from '../../../lib/helper/rtl_helpers';
 import { SyntaxType, useQueryBar, DEBOUNCE_INTERVAL } from './use_query_bar';
 import { MountWithReduxProvider } from '../../../lib';

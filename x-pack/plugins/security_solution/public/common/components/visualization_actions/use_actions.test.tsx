@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { useKibana } from '../../lib/kibana/kibana_react';

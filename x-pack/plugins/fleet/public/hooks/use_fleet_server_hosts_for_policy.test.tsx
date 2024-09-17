@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { reactRenderHook } from '@testing-library/react';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetEnrollmentSettings } from './use_request/settings';
@@ -54,7 +54,7 @@ describe('useFleetServerHostsForPolicy', () => {
   });
 
   it('should return correct state from api request', () => {
-    const { result } = renderHook(() => useFleetServerHostsForPolicy());
+    const { result } = reactRenderHook(() => useFleetServerHostsForPolicy());
     expect(result.current).toEqual({
       isLoadingInitialRequest: false,
       fleetServerHost: 'https://defaultfleetserver:8220',

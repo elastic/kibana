@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useProfilingKuery } from './use_profiling_kuery';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 

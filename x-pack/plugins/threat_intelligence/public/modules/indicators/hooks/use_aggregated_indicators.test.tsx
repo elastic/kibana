@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import { mockedTimefilterService, TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';

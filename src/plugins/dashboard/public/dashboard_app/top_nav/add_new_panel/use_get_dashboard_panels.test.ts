@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { Action } from '@kbn/ui-actions-plugin/public';

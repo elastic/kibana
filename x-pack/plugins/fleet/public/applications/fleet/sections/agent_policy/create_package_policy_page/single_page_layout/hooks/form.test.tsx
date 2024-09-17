@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -71,8 +71,8 @@ describe('useOnSubmit', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: RenderHookResult<
-    Parameters<typeof useOnSubmit>,
-    ReturnType<typeof useOnSubmit>
+    ReturnType<typeof useOnSubmit>,
+    Parameters<typeof useOnSubmit>
   >;
   const render = ({ isUpdate } = { isUpdate: false }) =>
     (renderResult = testRenderer.renderHook(() =>

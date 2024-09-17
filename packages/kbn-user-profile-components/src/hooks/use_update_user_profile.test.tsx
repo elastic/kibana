@@ -8,13 +8,15 @@
  */
 
 import React from 'react';
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { reactRenderHook, act, type RenderHookOptions, waitFor } from '@testing-library/react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { useUpdateUserProfile } from './use_update_user_profile';
 import { UserProfilesKibanaProvider } from '../services';
+
+type WrapperComponent<T> = RenderHookOptions<T>['wrapper'];
 
 const core = coreMock.createStart();
 const security = {
@@ -62,7 +64,7 @@ describe('useUpdateUserProfile() hook', () => {
   });
 
   test('should call the apiClient with the updated user profile data', async () => {
-    const { result } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = reactRenderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     await act(async () => {
@@ -78,7 +80,7 @@ describe('useUpdateUserProfile() hook', () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = reactRenderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(result.current.isLoading).toBeFalsy();
@@ -90,13 +92,14 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    await waitForNextUpdate();
+
+    await waitFor(() => null);
 
     expect(result.current.isLoading).toBeFalsy();
   });
 
   test('should show a success notification by default', async () => {
-    const { result } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = reactRenderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
@@ -118,7 +121,9 @@ describe('useUpdateUserProfile() hook', () => {
       return true;
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = reactRenderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     await act(async () => {
@@ -146,7 +151,9 @@ describe('useUpdateUserProfile() hook', () => {
       userProfile$: of(initialValue),
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = reactRenderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     const nextValue = { userSettings: { darkMode: 'light' as const } };

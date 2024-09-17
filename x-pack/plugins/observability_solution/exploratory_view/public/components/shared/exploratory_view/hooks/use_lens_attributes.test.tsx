@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
 import { ReportTypes } from '../configurations/constants';
 import { mockDataView } from '../rtl_helpers';

@@ -8,7 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDataGridDensity } from './use_data_grid_density';
 import { DATA_GRID_STYLE_EXPANDED, DataGridDensity } from '../constants';
 

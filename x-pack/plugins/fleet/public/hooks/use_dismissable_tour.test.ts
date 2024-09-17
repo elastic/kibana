@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { reactRenderHook, act } from '@testing-library/react';
 
 import { TOUR_STORAGE_KEYS } from '../constants';
 import { createStartServices } from '../mock';
@@ -22,13 +22,13 @@ describe('useDismissableTour', () => {
     jest.mocked(useStartServices).mockReturnValue(startServices);
   });
   it('should display the tour by default', () => {
-    const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
+    const res = reactRenderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(false);
   });
 
   it('should allow to dismiss the tour', () => {
-    const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
+    const res = reactRenderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
     expect(res.result.current.isHidden).toBe(false);
 
     act(() => res.result.current.dismiss());
@@ -41,7 +41,7 @@ describe('useDismissableTour', () => {
 
   it('should not display the tour if hideAnnouncements:true', () => {
     jest.mocked(startServices.uiSettings.get).mockReturnValue(true);
-    const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
+    const res = reactRenderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(true);
   });
@@ -50,7 +50,7 @@ describe('useDismissableTour', () => {
     startServices.storage.set(TOUR_STORAGE_KEYS.GRANULAR_PRIVILEGES, {
       active: false,
     });
-    const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
+    const res = reactRenderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(true);
   });
