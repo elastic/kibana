@@ -84,6 +84,7 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
                   tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
                   iconType="beaker"
                   size="s"
+                  data-test-subj={testId('betaBadge')}
                 />
               </EuiFlexItem>
             )}
