@@ -19,6 +19,7 @@ import {
   getCluster,
   getCloudProvider,
   getCloudRegion,
+  getAgentName,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
@@ -44,7 +45,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
     const commonLongEntryFields: LogDocument = {
       'trace.id': generateShortId(),
-      'agent.name': 'nodejs',
+      'agent.name': getAgentName(),
       'orchestrator.cluster.name': clusterName,
       'orchestrator.cluster.id': clusterId,
       'orchestrator.namespace': namespace,
@@ -82,7 +83,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .fill(0)
             .map(() => {
               const {
-                serviceName,
                 logMessage: { level, message },
                 commonLongEntryFields,
               } = constructLogsCommonData();
@@ -91,7 +91,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceName)
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults(commonLongEntryFields)
