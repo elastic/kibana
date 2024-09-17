@@ -113,7 +113,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
-  const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder);
+  const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder, panels);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {

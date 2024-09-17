@@ -366,7 +366,9 @@ export class DashboardContainer
         if (this.embeddedExternally$.value !== state.explicitInput.isEmbeddedExternally) {
           this.embeddedExternally$.next(state.explicitInput.isEmbeddedExternally);
         }
-        // panels updated in setPanels since panels isEqual check has performance concerns
+        if (this.panels$.value !== state.explicitInput.panels) {
+          this.panels$.next(state.explicitInput.panels);
+        }
       })
     );
 
@@ -996,7 +998,6 @@ export class DashboardContainer
 
   public setPanels = (panels: DashboardPanelMap) => {
     this.dispatch.setPanels(panels);
-    this.panels$.next(panels);
   };
 
   // ------------------------------------------------------------------------------------------------------

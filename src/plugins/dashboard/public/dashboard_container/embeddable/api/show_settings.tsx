@@ -13,7 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSettings } from '../../component/settings/settings_flyout';
-import { DashboardContainer, DashboardContainerContext } from '../dashboard_container';
+import { DashboardContainer } from '../dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 
 export function showSettings(this: DashboardContainer) {
   const {
@@ -28,14 +29,14 @@ export function showSettings(this: DashboardContainer) {
   this.openOverlay(
     overlays.openFlyout(
       toMountPoint(
-        <DashboardContainerContext.Provider value={this}>
+        <DashboardContext.Provider value={this}>
           <DashboardSettings
             onClose={() => {
               this.dispatch.setHasOverlays(false);
               this.clearOverlays();
             }}
           />
-        </DashboardContainerContext.Provider>,
+        </DashboardContext.Provider>,
         { analytics, i18n, theme }
       ),
       {
