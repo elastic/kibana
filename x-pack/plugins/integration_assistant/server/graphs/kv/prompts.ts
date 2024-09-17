@@ -68,7 +68,7 @@ export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([
   ],
   [
     'human',
-    `Looking at the multiple syslog samples provided in the context,your task is to separate the "header" and the "message body" from this log. our goal is to identify which RFC they belog to. Then create a regex pattern that can separate the header and the structured body.
+    `Looking at the multiple syslog samples provided in the context, your task is to separate the "header" and the "message body" from this log. Our goal is to identify which RFC they belong to. Then create a regex pattern that can separate the header and the structured body.
 You then have to create a grok pattern using the regex pattern.
 You are given a log entry in a structured format. 
 
