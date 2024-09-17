@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 
 jest.mock('./rules_settings_client');
 
