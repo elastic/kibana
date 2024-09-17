@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+        const alertsOpen = await getAlertsByIds(supertest, log, [createdRule.id]);
         expect(alertsOpen.hits.hits.length).toEqual(0);
       });
 
