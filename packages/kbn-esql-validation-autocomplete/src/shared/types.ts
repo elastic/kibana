@@ -13,17 +13,16 @@ import type { ESQLRealField } from '../validation/types';
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
 /** @public **/
+export interface ESQLSourceResult {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams?: Array<{ name: string; title?: string }>;
+  type?: string;
+}
+
 export interface ESQLCallbacks {
-  getSources?: CallbackFn<
-    {},
-    {
-      name: string;
-      hidden: boolean;
-      title?: string;
-      dataStreams?: Array<{ name: string; title?: string }>;
-      type?: string;
-    }
-  >;
+  getSources?: CallbackFn<{}, ESQLSourceResult>;
   getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
   getPolicies?: CallbackFn<
     {},

@@ -130,7 +130,7 @@ describe('thehive createAlert action params validation', () => {
         'createAlertParam.description': ['Description is required.'],
         'createAlertParam.type': ['Type is required.'],
         'createAlertParam.source': ['Source is required.'],
-        'createAlertParam.sourceRef': ['Source Reference is required.'],
+        'createAlertParam.sourceRef': ['Source reference is required.'],
       },
     });
   });
