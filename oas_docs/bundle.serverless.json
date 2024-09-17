@@ -459,11 +459,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -594,11 +594,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -718,11 +718,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -835,11 +835,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -968,11 +968,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -1026,6 +1026,7 @@
             }
           },
           {
+            "description": "An identifier for the connector.",
             "in": "path",
             "name": "id",
             "required": false,
@@ -1096,11 +1097,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -1220,11 +1221,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
@@ -1337,11 +1338,11 @@
                       "type": "boolean"
                     },
                     "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured.",
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
                       "type": "boolean"
                     },
                     "is_system_action": {
-                      "description": "Indicates whether the connector is system action.",
+                      "description": "Indicates whether the connector is used for system actions.",
                       "type": "boolean"
                     },
                     "name": {
