@@ -45,21 +45,23 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
+        <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}
             onSelectLanguage={(value) => setSelectedLanguage(value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={SelectedCodeExamples.sense.createIndex(codeParams)}
-            application={application}
-            sharePlugin={share}
-            consolePlugin={consolePlugin}
-          />
-        </EuiFlexItem>
+        {selectedLanguage === 'curl' && (
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={SelectedCodeExamples.sense.createIndex(codeParams)}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample

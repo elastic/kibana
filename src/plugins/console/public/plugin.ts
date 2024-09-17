@@ -51,7 +51,6 @@ export class ConsoleUIPlugin
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
-      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     httpService.setup(http);
@@ -81,8 +80,8 @@ export class ConsoleUIPlugin
         title: i18n.translate('console.consoleDisplayName', {
           defaultMessage: 'Console',
         }),
-        enableRouting: false,
-        mount: async ({ element }) => {
+        enableRouting: true,
+        mount: async ({ element, history }) => {
           const [core] = await getStartServices();
 
           const {
@@ -100,8 +99,8 @@ export class ConsoleUIPlugin
             notifications,
             usageCollection,
             element,
+            history,
             autocompleteInfo: this.autocompleteInfo,
-            isMonacoEnabled,
             isDevMode: this.ctx.env.mode.dev,
           });
         },
@@ -127,7 +126,6 @@ export class ConsoleUIPlugin
   public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
     const {
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
-      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
     const isDevMode = this.ctx.env.mode.dev;
 
@@ -150,7 +148,6 @@ export class ConsoleUIPlugin
             this._embeddableConsole.setDispatch(d);
           },
           alternateView: this._embeddableConsole.alternateView,
-          isMonacoEnabled,
           isDevMode,
           getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
           setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
