@@ -33,6 +33,8 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointManagementSpaceAwarenessEnabled',
           ])}`,
+          // Enable spaces for serverless
+          `--xpack.spaces.maxSpaces=10`,
         ],
       },
     },
