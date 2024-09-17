@@ -10,13 +10,13 @@
 import React, { useContext } from 'react';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { ControlStateManager } from '../../types';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
+
+import type {
   OptionsListDisplaySettings,
-} from './types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+  OptionsListSelection,
+} from '../../../../../common/options_list';
+import type { ControlStateManager } from '../../types';
+import type { OptionsListComponentApi, OptionsListComponentState } from './types';
 
 export type ContextStateManager = ControlStateManager<
   Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
