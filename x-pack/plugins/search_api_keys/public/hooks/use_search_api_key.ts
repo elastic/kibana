@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useReducer } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APIKeyCreationResponse, APIRoutes } from '../../common/types';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
+
 export enum Status {
   loading = 'loading',
   showCreateButton = 'showCreateButton',
@@ -17,14 +18,40 @@ export enum Status {
   showPreviewKey = 'showPreviewKey',
 }
 
+interface ApiKeyState {
+  status: Status;
+  apiKey: string | null;
+}
+
+type Action =
+  | { type: 'SET_API_KEY'; apiKey: string; status: Status }
+  | { type: 'SET_STATUS'; status: Status }
+  | { type: 'CLEAR_API_KEY' };
+
+const initialState: ApiKeyState = {
+  apiKey: null,
+  status: Status.loading,
+};
+
+const reducer = (state: ApiKeyState, action: Action): ApiKeyState => {
+  switch (action.type) {
+    case 'SET_API_KEY':
+      return { ...state, apiKey: action.apiKey, status: action.status };
+    case 'SET_STATUS':
+      return { ...state, status: action.status };
+    case 'CLEAR_API_KEY':
+      return { ...state, apiKey: null, status: Status.showCreateButton };
+    default:
+      return state;
+  }
+};
+
 export const useSearchApiKey = () => {
   const { http } = useKibana().services;
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>(Status.loading);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const handleSaveKey = useCallback(({ id, encoded }: { id: string; encoded: string }) => {
     sessionStorage.setItem(API_KEY_STORAGE_KEY, JSON.stringify({ id, encoded }));
-    setApiKey(encoded);
-    setStatus(Status.showPreviewKey);
+    dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showPreviewKey });
   }, []);
   const { mutateAsync: validateApiKey } = useMutation(async (id: string) => {
     try {
@@ -51,7 +78,7 @@ export const useSearchApiKey = () => {
         return await http.post<APIKeyCreationResponse>(APIRoutes.API_KEYS);
       } catch (err) {
         if (err.response?.status === 400) {
-          setStatus(Status.showCreateButton);
+          dispatch({ type: 'SET_STATUS', status: Status.showCreateButton });
         } else {
           throw err;
         }
@@ -63,8 +90,11 @@ export const useSearchApiKey = () => {
           API_KEY_STORAGE_KEY,
           JSON.stringify({ id: receivedApiKey.id, encoded: receivedApiKey.encoded })
         );
-        setApiKey(receivedApiKey.encoded);
-        setStatus(Status.showHiddenKey);
+        dispatch({
+          type: 'SET_API_KEY',
+          apiKey: receivedApiKey.encoded,
+          status: Status.showHiddenKey,
+        });
       }
     },
   });
@@ -78,11 +108,16 @@ export const useSearchApiKey = () => {
           const { id, encoded } = JSON.parse(storedKey);
 
           if (await validateApiKey(id)) {
-            setApiKey(encoded);
-            setStatus(Status.showHiddenKey);
+            dispatch({
+              type: 'SET_API_KEY',
+              apiKey: encoded,
+              status: Status.showHiddenKey,
+            });
           } else {
-            setApiKey(null);
             sessionStorage.removeItem(API_KEY_STORAGE_KEY);
+            dispatch({
+              type: 'CLEAR_API_KEY',
+            });
           }
         } else {
           await createApiKey();
@@ -94,8 +129,8 @@ export const useSearchApiKey = () => {
   }, [validateApiKey, createApiKey]);
 
   return {
-    apiKey,
+    apiKey: state.apiKey,
     handleSaveKey,
-    status,
+    status: state.status,
   };
 };
