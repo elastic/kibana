@@ -90,7 +90,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
-      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
+      serverlessGuide: `${SERVERLESS_DOCS}/devtools/run-api-requests-in-the-console`,
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
