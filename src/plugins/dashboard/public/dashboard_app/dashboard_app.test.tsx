@@ -10,7 +10,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { DashboardApp } from './dashboard_app';
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
 import * as dashboardApiHelpers from '../dashboard_container/external_api/dashboard_api';
 
@@ -27,11 +27,13 @@ describe('Dashboard App', () => {
      * In this, we are mocking the buildApiFromDashboardContainer function to return the mockDashboard (dashboardAPI) and then have that accessible
      * for the test that renders the DashboardApp
      */
-    mockDashboard = buildMockDashboard();
-    jest.spyOn(dashboardApiHelpers, 'buildApiFromDashboardContainer').mockImplementation(() => {
-      return mockDashboard;
+    act(() => {
+      mockDashboard = buildMockDashboard();
+      jest.spyOn(dashboardApiHelpers, 'buildApiFromDashboardContainer').mockImplementation(() => {
+        return mockDashboard;
+      });
+      mockHistory = createMemoryHistory();
     });
-    mockHistory = createMemoryHistory();
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
@@ -39,11 +41,15 @@ describe('Dashboard App', () => {
 
     render(<DashboardApp savedDashboardId="" redirectTo={jest.fn()} history={mockHistory} />);
 
-    expect(historySpy).toHaveBeenCalledTimes(0);
-    expect(mockHistory.location.pathname).toBe('/');
+    await waitFor(() => {
+      expect(historySpy).toHaveBeenCalledTimes(0);
+      expect(mockHistory.location.pathname).toBe('/');
+    });
 
     // mock maximized panel
-    mockDashboard.expandedPanelId.next('123');
+    act(() => {
+      mockDashboard.expandedPanelId.next('123');
+    });
 
     expect(historySpy).toHaveBeenCalledTimes(1);
     expect(mockHistory.location.pathname).toBe('/create/123');
@@ -51,6 +57,8 @@ describe('Dashboard App', () => {
 
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
     const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'next');
+    const historySpy = jest.spyOn(mockHistory, 'replace');
+
     render(
       <DashboardApp
         savedDashboardId=""
@@ -59,15 +67,19 @@ describe('Dashboard App', () => {
         expandedPanelId="456"
       />
     );
-    expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
 
-    // render a dashboard with an expanded panel initially,
-    // react testing library limitation on showing the expanded panel subscription
-    mockDashboard.expandedPanelId.next('456');
-    expect(mockHistory.location.pathname).toBe('/create/456');
+    await waitFor(() => {
+      expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
+      expect(historySpy).toHaveBeenCalledTimes(0);
+      // render a dashboard with an expanded panel initially,
+      // react testing library limitation on showing the expanded panel subscription
+      expect(expandedPanelIdSpy).toHaveBeenCalledWith('456');
+    });
 
-    // test as if minimizing a maximized panel
-    mockDashboard.expandedPanelId.next(undefined);
+    // simulate minimizing a panel
+    act(() => {
+      mockDashboard.expandedPanelId.next(undefined);
+    });
 
     expect(mockHistory.location.pathname).toBe('/create');
   });
