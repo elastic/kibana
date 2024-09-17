@@ -12,6 +12,7 @@ import {
   isIosAgentName,
   isJavaAgentName,
   isRumAgentName,
+  hasOpenTelemetryPrefix,
   OpenTelemetryAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils';
@@ -67,10 +68,11 @@ const darkAgentIcons: { [key: string]: string } = {
 };
 
 const sanitizeAgentName = (agentName: string) => {
-  if (agentName.startsWith('opentelemetry/')) {
-    // for OpenTelemetry only split the agent name by `/` and take the second part, format is `opentelemetry/{agentName}/{details}`
+  if (hasOpenTelemetryPrefix(agentName)) {
+    // for OpenTelemetry only split the agent name by `/` and take the second part, format is `(opentelemetry|otlp)/{agentName}/{details}`
     return agentName.split('/')[1];
   }
+
   return agentName;
 };
 
