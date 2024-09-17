@@ -115,15 +115,15 @@ export const AgentPolicyBaseSchema = {
     schema.object({
       limit: schema.maybe(
         schema.object({
-          interval: schema.maybe(schema.nullable(schema.string())),
-          burst: schema.maybe(schema.nullable(schema.number())),
+          interval: schema.maybe(schema.string()),
+          burst: schema.maybe(schema.number()),
         })
       ),
       uploader: schema.maybe(
         schema.object({
-          max_retries: schema.maybe(schema.nullable(schema.number())),
-          init_dur: schema.maybe(schema.nullable(schema.string())),
-          max_dur: schema.maybe(schema.nullable(schema.string())),
+          max_retries: schema.maybe(schema.number()),
+          init_dur: schema.maybe(schema.string()),
+          max_dur: schema.maybe(schema.string()),
         })
       ),
     })

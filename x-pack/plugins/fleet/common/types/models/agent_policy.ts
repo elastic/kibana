@@ -53,13 +53,13 @@ export interface NewAgentPolicy {
   };
   monitoring_diagnostics?: {
     limit?: {
-      interval: string | null;
-      burst: number | null;
+      interval?: string;
+      burst?: number;
     };
     uploader?: {
-      max_retries: number | null;
-      init_dur: string | null;
-      max_dur: string | null;
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
     };
   };
 }
@@ -148,13 +148,13 @@ export interface FullAgentPolicyMonitoring {
   };
   diagnostics?: {
     limit?: {
-      interval?: string | null;
-      burst?: number | null;
+      interval?: string;
+      burst?: number;
     };
     uploader?: {
-      max_retries?: number | null;
-      init_dur?: string | null;
-      max_dur?: string | null;
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
     };
   };
 }
