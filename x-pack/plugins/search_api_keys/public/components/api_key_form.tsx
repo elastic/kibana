@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -20,65 +21,63 @@ import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
 
 export const ApiKeyForm = () => {
+  const { euiTheme } = useEuiTheme();
   const [showFlyout, setShowFlyout] = useState(false);
-  const { apiKey, isLoading, status, handleSaveKey } = useSearchApiKey();
+  const { apiKey, status, handleSaveKey } = useSearchApiKey();
   const handleAddToClipboard = useCallback(
     () => apiKey && navigator.clipboard.writeText(apiKey),
     [apiKey]
   );
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <EuiTitle size="xxxs">
+    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
+      <EuiFlexItem grow={0}>
+        <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
           <h6>
             <FormattedMessage id="xpack.searchIndices.apiKeyForm.title" defaultMessage="API Key" />
           </h6>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
-        {apiKey && (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiCode language="text" color="success">
-                {status === Status.showHiddenKey ? '•'.repeat(30) : apiKey}
-              </EuiCode>
-            </EuiFlexItem>
-            {status === Status.showPreviewKey && (
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  iconType="copy"
-                  color="success"
-                  onClick={handleAddToClipboard}
-                  aria-label={i18n.translate('xpack.searchIndices.apiKeyForm.copyButton', {
-                    defaultMessage: 'Copy button',
-                  })}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-        {status === Status.showCreateButton && (
-          <>
-            <EuiButton
-              color="warning"
-              size="s"
-              iconSide="left"
-              iconType="key"
-              isLoading={isLoading}
-              onClick={() => setShowFlyout(true)}
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.apiKeyForm.createButton"
-                defaultMessage="Create an API Key"
+      {apiKey && (
+        <>
+          <EuiFlexItem grow={0}>
+            <EuiCode language="text" color="success" css={{ color: euiTheme.colors.successText }}>
+              {status === Status.showHiddenKey ? '•'.repeat(30) : apiKey}
+            </EuiCode>
+          </EuiFlexItem>
+          {status === Status.showPreviewKey && (
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                iconType="copy"
+                color="success"
+                onClick={handleAddToClipboard}
+                aria-label={i18n.translate('xpack.searchIndices.apiKeyForm.copyButton', {
+                  defaultMessage: 'Copy button',
+                })}
               />
-            </EuiButton>
-            {showFlyout && (
-              <ApiKeyFlyoutWrapper onClose={() => setShowFlyout(false)} onSuccess={handleSaveKey} />
-            )}
-          </>
-        )}
-      </EuiFlexItem>
+            </EuiFlexItem>
+          )}
+        </>
+      )}
+      {status === Status.showCreateButton && (
+        <EuiFlexItem grow={0}>
+          <EuiButton
+            color="warning"
+            size="s"
+            iconSide="left"
+            iconType="key"
+            onClick={() => setShowFlyout(true)}
+          >
+            <FormattedMessage
+              id="xpack.searchIndices.apiKeyForm.createButton"
+              defaultMessage="Create an API Key"
+            />
+          </EuiButton>
+          {showFlyout && (
+            <ApiKeyFlyoutWrapper onClose={() => setShowFlyout(false)} onSuccess={handleSaveKey} />
+          )}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
