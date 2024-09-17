@@ -8,9 +8,9 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { TIME_SLIDER_CONTROL } from '../../../../common';
 import type { ControlsPluginStartDeps } from '../../../types';
 import { registerControlFactory } from '../../control_factory_registry';
-import { TIME_SLIDER_CONTROL } from '../../../../common';
 
 export function registerTimeSliderControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
   registerControlFactory(TIME_SLIDER_CONTROL, async () => {
@@ -18,9 +18,6 @@ export function registerTimeSliderControl(coreSetup: CoreSetup<ControlsPluginSta
       import('./get_timeslider_control_factory'),
       coreSetup.getStartServices(),
     ]);
-    return getTimesliderControlFactory({
-      core: coreStart,
-      data: depsStart.data,
-    });
+    return getTimesliderControlFactory();
   });
 }
