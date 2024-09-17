@@ -100,6 +100,7 @@ import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
+import { migrateAgentPolicyToV8160 } from './migrations/to_v8_16_0';
 
 /*
  * Saved object types and mappings
@@ -234,6 +235,7 @@ export const getSavedObjectTypes = (
         '8.4.0': migrateAgentPolicyToV840,
         '8.5.0': migrateAgentPolicyToV850,
         '8.9.0': migrateAgentPolicyToV890,
+        '8.16.0': migrateAgentPolicyToV8160,
       },
       modelVersions: {
         '1': {
