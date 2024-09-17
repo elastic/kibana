@@ -2462,7 +2462,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('alerts has intended_timestamp set to the time of the manual run', async () => {
+      // Flakey test - https://github.com/elastic/kibana/issues/192935
+      it.skip('alerts has intended_timestamp set to the time of the manual run', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
         const secondTimestamp = new Date().toISOString();
