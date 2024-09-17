@@ -9,9 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
-  const testSubjects = getService('testSubjects');
 
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
@@ -35,14 +34,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-      const createPackageHeaderElementExists = await testSubjects.exists(
+      await notInstalledVulnerabilities.navigateToAction(
+        'cnvm-not-installed-action',
         'createPackagePolicy_pageTitle'
       );
-
-      if (!createPackageHeaderElementExists) {
-        throw new Error('Integration installation page not found');
-      }
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
@@ -53,14 +48,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction('cspm-not-installed-action');
-      const createPackageHeaderElementExists = await testSubjects.exists(
+      await notInstalledCSP.navigateToAction(
+        'cspm-not-installed-action',
         'createPackagePolicy_pageTitle'
       );
-
-      if (!createPackageHeaderElementExists) {
-        throw new Error('Integration installation page not found');
-      }
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
@@ -71,14 +62,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction('kspm-not-installed-action');
-      const createPackageHeaderElementExists = await testSubjects.exists(
+      await notInstalledCSP.navigateToAction(
+        'kspm-not-installed-action',
         'createPackagePolicy_pageTitle'
       );
-
-      if (!createPackageHeaderElementExists) {
-        throw new Error('Integration installation page not found');
-      }
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
@@ -90,13 +77,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await thirdPartyIntegrationsNoFindingsPrompt.navigateToAction(
-        '3p-no-findings-prompt-wiz-integration-button'
+        '3p-no-findings-prompt-wiz-integration-button',
+        'headerLeft'
       );
-      const integrationPageHeaderElementExists = await testSubjects.exists('headerLeft');
-
-      if (!integrationPageHeaderElementExists) {
-        throw new Error('Integration overview page not found');
-      }
 
       await PageObjects.common.waitUntilUrlIncludes('wiz/overview');
     });
