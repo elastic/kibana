@@ -22,7 +22,7 @@ import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_f
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
-import { traverseAndMutateDoc } from './strip_non_ecs_fields';
+import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
 
@@ -112,11 +112,9 @@ export const transformHitToAlert = ({
       overrides,
     });
 
-    const {
-      result: validatedSource,
-      removed: removedSourceFields,
-      fieldsToAdd,
-    } = traverseAndMutateDoc(mergedDoc._source);
+    const { result: validatedSource, removed: removedSourceFields } = traverseAndMutateDoc(
+      mergedDoc._source
+    );
 
     // The `alertFields` we add to alerts contain `event.kind: 'signal'` in dot notation. To avoid duplicating `event.kind`,
     // we remove any existing `event.kind` field here before we merge `alertFields` into `validatedSource` later on
@@ -135,9 +133,6 @@ export const transformHitToAlert = ({
     if (thresholdResult != null && isThresholdResult(thresholdResult)) {
       validatedSource[ALERT_THRESHOLD_RESULT] = thresholdResult;
     }
-    fieldsToAdd.forEach(({ key, value }) => {
-      validatedSource[key] = value;
-    });
     return validatedSource as BaseFieldsLatest;
   }
 

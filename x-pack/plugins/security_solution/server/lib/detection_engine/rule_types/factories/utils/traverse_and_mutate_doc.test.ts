@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { traverseAndMutateDoc } from './strip_non_ecs_fields';
+import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 
-describe('traverseDoc', () => {
+describe('traverseAndMutateDoc', () => {
   it('should not strip ECS compliant fields', () => {
     const document = {
       client: {
@@ -280,7 +280,6 @@ describe('traverseDoc', () => {
           message: 'test message',
         },
         removed: [],
-        fieldsToAdd: [],
       });
     });
 
@@ -306,7 +305,6 @@ describe('traverseDoc', () => {
           message: 'test message',
         },
         removed: [],
-        fieldsToAdd: [],
       });
     });
   });
@@ -412,6 +410,7 @@ describe('traverseDoc', () => {
         event: {
           category: 'start',
         },
+        'kibana.alert.original_event.category': 'start',
       });
       expect(removed).toEqual([
         {
@@ -434,6 +433,8 @@ describe('traverseDoc', () => {
           created: '2020-12-12',
           end: [2345562, '2022-10-12'],
         },
+        'kibana.alert.original_event.created': '2020-12-12',
+        'kibana.alert.original_event.end': [2345562, '2022-10-12'],
       });
       expect(removed).toEqual([]);
     });
@@ -741,100 +742,100 @@ describe('traverseDoc', () => {
 
   describe('fieldsToAdd', () => {
     it('should extract a nested event field to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ event: { action: 'test' } });
-      expect(result).toEqual({ event: { action: 'test' } });
+      const { result, removed } = traverseAndMutateDoc({ event: { action: 'test' } });
+      expect(result).toEqual({
+        event: { action: 'test' },
+        'kibana.alert.original_event.action': 'test',
+      });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.action', value: 'test' }]);
     });
 
     it('should extract multiple nested event fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         event: { action: 'test', field2: 'test2' },
       });
-      expect(result).toEqual({ event: { action: 'test', field2: 'test2' } });
+      expect(result).toEqual({
+        event: { action: 'test', field2: 'test2' },
+        'kibana.alert.original_event.action': 'test',
+        'kibana.alert.original_event.field2': 'test2',
+      });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([
-        { key: 'kibana.alert.original_event.action', value: 'test' },
-        { key: 'kibana.alert.original_event.field2', value: 'test2' },
-      ]);
     });
 
     it('should extract a dot notation event field to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ 'event.action': 'test' });
-      expect(result).toEqual({ 'event.action': 'test' });
+      const { result, removed } = traverseAndMutateDoc({ 'event.action': 'test' });
+      expect(result).toEqual({
+        'event.action': 'test',
+        'kibana.alert.original_event.action': 'test',
+      });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.action', value: 'test' }]);
     });
 
     it('should extract multiple dot notation event fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'event.action': 'test',
         'event.field2': 'test2',
       });
-      expect(result).toEqual({ 'event.action': 'test', 'event.field2': 'test2' });
+      expect(result).toEqual({
+        'event.action': 'test',
+        'event.field2': 'test2',
+        'kibana.alert.original_event.action': 'test',
+        'kibana.alert.original_event.field2': 'test2',
+      });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([
-        { key: 'kibana.alert.original_event.action', value: 'test' },
-        { key: 'kibana.alert.original_event.field2', value: 'test2' },
-      ]);
     });
 
     it('should extract mixed notation fields to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         event: { 'field.subfield': 'test', 'field2.subfield': 'test2' },
       });
       expect(result).toEqual({
         event: { 'field.subfield': 'test', 'field2.subfield': 'test2' },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field2.subfield': 'test2',
       });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([
-        { key: 'kibana.alert.original_event.field.subfield', value: 'test' },
-        { key: 'kibana.alert.original_event.field2.subfield', value: 'test2' },
-      ]);
     });
 
     it('should extract mixed notation with dot notation first to kibana.alert.original_event', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'event.field': { subfield: 'test', subfield2: 'test2' },
       });
       expect(result).toEqual({
         'event.field': { subfield: 'test', subfield2: 'test2' },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field.subfield2': 'test2',
       });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([
-        { key: 'kibana.alert.original_event.field.subfield', value: 'test' },
-        { key: 'kibana.alert.original_event.field.subfield2', value: 'test2' },
-      ]);
     });
 
     it('should not extract original event fields if they are not top level', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         'top_field.event.action': 'test',
       });
       expect(result).toEqual({ 'top_field.event.action': 'test' });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([]);
     });
 
     it('should not duplicate added fields', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({ event: { event: 'test' } });
-      expect(result).toEqual({ event: { event: 'test' } });
+      const { result, removed } = traverseAndMutateDoc({ event: { event: 'test' } });
+      expect(result).toEqual({
+        event: { event: 'test' },
+        'kibana.alert.original_event.event': 'test',
+      });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([{ key: 'kibana.alert.original_event.event', value: 'test' }]);
     });
 
     it('should work on multiple levels of nesting', () => {
-      const { result, removed, fieldsToAdd } = traverseAndMutateDoc({
+      const { result, removed } = traverseAndMutateDoc({
         event: { field: { subfield: 'test', subfield2: 'test2' } },
       });
       expect(result).toEqual({
         event: { field: { subfield: 'test', subfield2: 'test2' } },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field.subfield2': 'test2',
       });
       expect(removed).toEqual([]);
-      expect(fieldsToAdd).toEqual([
-        { key: 'kibana.alert.original_event.field.subfield', value: 'test' },
-        { key: 'kibana.alert.original_event.field.subfield2', value: 'test2' },
-      ]);
     });
   });
 });

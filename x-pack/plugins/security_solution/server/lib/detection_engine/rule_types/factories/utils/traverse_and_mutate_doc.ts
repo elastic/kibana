@@ -165,18 +165,24 @@ const bannedFields = ['kibana', 'signal', 'threshold_result', ALERT_THRESHOLD_RE
  * is computationally expensive so we only want to traverse it once, therefore a few distinct cases are handled in this function:
  * 1. Fields that we must explicitly remove, like `kibana` and `signal`, fields, are removed from the document.
  * 2. Fields that are incompatible with ECS are removed.
- * 3. All `event.*` fields are collected and returned in `fieldsToAdd` as `kibana.alert.original_event.*` so we can add them after traversing the document.
+ * 3. All `event.*` fields are collected and copied to `kibana.alert.original_event.*` using `fieldsToAdd`
  * @param document The document to traverse
- * @returns The mutated document, a list of removed fields, and a list of new fields to add
+ * @returns The mutated document, a list of removed fields
  */
-export const traverseAndMutateDoc = <T extends SourceFieldRecord>(document: T) => {
-  return internalTraverseAndMutateDoc({
+export const traverseAndMutateDoc = (document: SourceFieldRecord) => {
+  const { result, removed, fieldsToAdd } = internalTraverseAndMutateDoc({
     document,
     path: [],
     topLevel: true,
     removed: [],
     fieldsToAdd: [],
   });
+
+  fieldsToAdd.forEach(({ key, value }) => {
+    result[key] = value;
+  });
+
+  return { result, removed };
 };
 
 const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
