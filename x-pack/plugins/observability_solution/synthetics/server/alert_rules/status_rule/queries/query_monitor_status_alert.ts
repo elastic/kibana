@@ -28,6 +28,7 @@ const fields = [
   'agent',
   'url',
   'state',
+  'tags',
 ];
 
 export interface AlertStatusMetaData {
