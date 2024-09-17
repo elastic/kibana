@@ -628,6 +628,7 @@ export class TaskRunner<
           this.alertingEventLogger.reportGap({
             gap,
           });
+          this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
         }
 
         if (!this.cancelled) {
