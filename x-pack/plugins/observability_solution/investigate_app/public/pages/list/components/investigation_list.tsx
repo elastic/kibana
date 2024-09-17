@@ -10,6 +10,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -23,6 +24,7 @@ import { InvestigationStatusBadge } from '../../../components/investigation_stat
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
+import { InvestigationStats } from './investigation_stats';
 import { InvestigationsError } from './investigations_error';
 import { SearchBar } from './search_bar/search_bar';
 
@@ -82,11 +84,15 @@ export function InvestigationList() {
         defaultMessage: 'Tags',
       }),
       render: (value: InvestigationResponse['tags']) => {
-        return value.map((tag) => (
-          <EuiBadge color={'hollow'} key="tag">
-            {tag}
-          </EuiBadge>
-        ));
+        return (
+          <EuiFlexGroup wrap gutterSize="xs">
+            {value.map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
       },
     },
     {
@@ -153,6 +159,7 @@ export function InvestigationList() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      <InvestigationStats />
       <SearchBar
         isLoading={isLoading}
         onSearch={(value) => setSearch(value)}
