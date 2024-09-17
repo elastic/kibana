@@ -62,6 +62,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug(`toggleContextMenu`);
+    await this.scrollPanelIntoView(wrapper);
     const toggleMenuItem = await this.findContextMenu(wrapper);
     await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
@@ -79,9 +80,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${wrapper}`);
-    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen', {
-      allowHidden: true,
-    });
+    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen');
     if (!open) await this.toggleContextMenu(wrapper);
     await this.expectContextMenuToBeOpen();
   }
