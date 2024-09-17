@@ -21,9 +21,9 @@ import {
   openPreviewPanelAction,
   urlChangedAction,
 } from './actions';
-import { initialState } from './state';
+import { initialPanelsState } from './state';
 
-export const reducer = createReducer(initialState, (builder) => {
+export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
     if (id in state.byId) {
       state.byId[id].right = right;
@@ -72,7 +72,7 @@ export const reducer = createReducer(initialState, (builder) => {
     if (id in state.byId) {
       if (state.byId[id].preview) {
         const previewIdenticalToLastOne = deepEqual(preview, state.byId[id].preview?.at(-1));
-        // Only append preview when it does not match the last item in state.byId[id].preview
+        // Only append preview when it does not match the last item in state.data.byId[id].preview
         if (!previewIdenticalToLastOne) {
           state.byId[id].preview?.push(preview);
         }
