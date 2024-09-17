@@ -281,6 +281,8 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        react: worker.reactVersion === '18' ? 'react-18' : 'react',
+        'react-dom': worker.reactVersion === '18' ? 'react-dom-18' : 'react-dom',
       },
     },
 

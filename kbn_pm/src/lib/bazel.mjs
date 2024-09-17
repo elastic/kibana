@@ -58,15 +58,19 @@ function throwBazelError(log, name, code, output) {
 /**
  * @param {import('./log.mjs').Log} log
  * @param {string[]} inputArgs
- * @param {{ quiet?: boolean; offline?: boolean, env?: Record<string, string> } | undefined} opts
+ * @param {{ quiet?: boolean; offline?: boolean, reactVersion?: string, env?: Record<string, string> } | undefined} opts
  */
 async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
-  const args = [...inputArgs, ...(opts?.offline ? ['--config=offline'] : [])];
+  const args = [
+    ...inputArgs,
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
+    ...(opts?.offline ? ['--config=offline'] : []),
+  ];
   log.debug(`> bazel ${args.join(' ')}`);
   await bazel(args, {
-    env: opts?.env,
+    env: { ...opts?.env, REACT_18: opts?.reactVersion === '18' ? 'true' : 'false' },
     cwd: REPO_ROOT,
     quiet: opts?.quiet,
     logPrefix: Color.info('[bazel]'),
@@ -161,12 +165,13 @@ export async function installYarnDeps(log, opts = undefined) {
 
 /**
  * @param {import('./log.mjs').Log} log
- * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
+ * @param {{ offline?: boolean, quiet?: boolean, reactVersion?: string } | undefined} opts
  */
 export async function buildWebpackBundles(log, opts = undefined) {
   await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
+    reactVersion: opts?.reactVersion,
   });
 
   log.success('shared bundles built');
