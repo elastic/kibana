@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getColumnsWithMetadata } from './ecs_metadata_helper';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import type { ESQLRealField } from '../../validation/types';
+import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
 
-describe('getColumnsWithMetadata', () => {
+describe('enrichFieldsWithECSInfo', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
     const columns: ESQLRealField[] = [
       { name: 'ecs.version', type: 'keyword' },
@@ -19,7 +18,7 @@ describe('getColumnsWithMetadata', () => {
       { name: 'field2', type: 'double' },
     ];
 
-    const result = await getColumnsWithMetadata(columns);
+    const result = await enrichFieldsWithECSInfo(columns);
     expect(result).toEqual(columns);
   });
 
@@ -42,15 +41,23 @@ describe('getColumnsWithMetadata', () => {
           },
         }),
       }),
-    } as unknown as FieldsMetadataPublicStart;
+    };
+    const fieldsMetadataCache = await (
+      await fieldsMetadata.getClient()
+    ).find({
+      attributes: ['type'],
+    });
 
-    const result = await getColumnsWithMetadata(columns, fieldsMetadata);
+    const result = await enrichFieldsWithECSInfo(
+      columns,
+      fieldsMetadataCache.fields as ECSMetadata
+    );
 
     expect(result).toEqual([
       {
         name: 'ecs.field',
         type: 'text',
-        metadata: { description: 'ECS field description' },
+        isEcs: true,
       },
       { name: 'ecs.fakeBooleanField', type: 'boolean' },
       { name: 'field2', type: 'double' },
@@ -68,19 +75,27 @@ describe('getColumnsWithMetadata', () => {
         find: jest.fn().mockResolvedValue({
           fields: {
             'ecs.version': { description: 'ECS version field', type: 'keyword' },
-          },
+          } as unknown as ECSMetadata,
         }),
       }),
-    } as unknown as FieldsMetadataPublicStart;
+    };
 
-    const result = await getColumnsWithMetadata(columns, fieldsMetadata);
+    const fieldsMetadataCache = await (
+      await fieldsMetadata.getClient()
+    ).find({
+      attributes: ['type'],
+    });
+    const result = await enrichFieldsWithECSInfo(
+      columns,
+      fieldsMetadataCache.fields as ECSMetadata
+    );
 
     expect(result).toEqual([
-      { name: 'ecs.version', type: 'keyword', metadata: { description: 'ECS version field' } },
+      { name: 'ecs.version', type: 'keyword', isEcs: true },
       {
         name: 'ecs.version.keyword',
         type: 'keyword',
-        metadata: { description: 'ECS version field' },
+        isEcs: true,
       },
       { name: 'field2', type: 'double' },
     ]);
