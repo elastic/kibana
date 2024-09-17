@@ -62,7 +62,7 @@ export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: st
 };
 
 export const getPathParameters = (path: string): KnownParameters => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+  return Array.from(path.matchAll(/\{([^{}?]+\??)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
     acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
     return acc;

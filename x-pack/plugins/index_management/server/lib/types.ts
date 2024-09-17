@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/index-management'],
-};
+export interface MeteringStats {
+  name: string;
+  num_docs: number;
+  size_in_bytes: number;
+}
