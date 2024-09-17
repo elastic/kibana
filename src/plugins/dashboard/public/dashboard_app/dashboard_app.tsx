@@ -23,7 +23,7 @@ import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
-import { loadAndRemoveDashboardState } from './url/sync_dashboard_url_state';
+import { loadAndRemoveDashboardState } from './url/url_utils';
 import {
   getSessionURLObservable,
   getSearchSessionIdFromURL,
