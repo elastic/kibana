@@ -1,95 +1,52 @@
 ---
 # This is a demo file for testing purposes only
 
-# [Required] An Elastic product name: 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'
 product: Kibana
-
-# [Required] This will be the settings page title
 collection: Example settings file
-
 page_description: 
-  - "This is a set of example settings generated from `docs/settings-gen/source/kibana-settings-schema.yml`."
+  - "This page is a set of example settings generated from `docs/settings-gen/source/kibana-settings-schema.yml`."
   - "These examples includes all of the available information that we can provide for a setting, including a description, available options, the default option, a warning, etc. Note that most of these fields are optional."
 
 groups:
-    # [Optional] The title of the sections that divide up a single settings page. Examples: 'General settings', 'Action settings', 'Preconfigured connector settings'
   - group: Planetary settings
-
-    # [Optional] Links from other places in the documentation can use this ID. For example, "For more information, see [General settings](./general-alert-action-settings)"
     group_id: kibana-settings-schema-planetary
-
-    # [Optional] Markdown format wrapped in single or double quotation marks. This becomes the description content below the group title. Each bullet renders as a separate paragraph.
     description:
      - "Planetary settings can be used to configure the planets. Currently only Mercury, Venus, and Earth are supported."
-     - "Note that a group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions."
+     - "A group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions."
     settings:
-
-        # [Required] The setting name.
       - setting: kibana.example.setting.mercury
         id: kibana-example-setting-mercury
-
-        # [Required] Markdown format wrapped in single or double quotation marks. This becomes the description content below the setting. Each bullet renders as a separate paragraph.
         description:
           - "The first planet from from <<kibana-example-setting-sun,The Sun>> and the smallest in the Solar System."
           - "In English, it is named after the ancient Roman god Mercurius (Mercury), god of commerce and communication, and the messenger of the gods."
           - "Mercury is adjacent to the planet <<kibana-example-setting-venus,Venus>>"
-        
-        # [Optional] Link to an asciidoc file in the settings-gen/examples/ directory, that contains the example description and code
         example: example-setting-example.asciidoc
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. This would typically be 'Deprecated' or 'Technical Preview'. The state will appear directly below the setting name.
-        # For a beta release, 'state' can be set to "Technical Preview" and 'state_guidance' to "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
         state: Technical Preview
         state_guidance: "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. Can be one of 'note:', 'warning:', 'tip:', 'important:'. The warning, note, or whichever will appear below the last paragraph of the setting description.
         warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2."
-
-        # [Optional] The default value for the setting.
         default: avoid
-
-        # [Required only for Elasticsearch settings] One of 'dynamic', 'static'.
         type: static
-
-        # [Optional] A YAML list of options that can be set.
         options:
           - option: visit
-            # [Optional] Markdown format wrapped in single or double quotation marks.
             description: "Arrange a trip to this planet."
           - option: inhabit
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
-
-        # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
           - self-managed
           - cloud
 
-        # [Required] The setting name.
       - setting: kibana.example.setting.venus
         id: kibana-example-setting-venus
-
-        # [Required] Markdown format wrapped in single or double quotation marks. This becomes the description content below the setting. Each bullet renders as a separate paragraph.
         description:
           - "Venus is the second planet from <<kibana-example-setting-sun,The Sun>>."
           - "It is a terrestrial planet and is the closest in mass and size to its orbital neighbour, <<kibana-example-setting-earth,Earth>>."
-        
-        # [Optional] Markdown format wrapped in single or double quotation marks. This would typically be 'Deprecated' or 'Technical Preview'. The state will appear directly below the setting name.
-        # For a beta release, 'state' can be set to "Technical Preview" and 'state_guidance' to "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
         state: Technical Preview
         state_guidance: "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. Can be one of 'note:', 'warning:', 'tip:', 'important:'. The warning, note, or whichever will appear below the last paragraph of the setting description.
         important: "All visitors to Venus must have an inter-planetary passport that will be validtip for a minimum of six months beyond your date of return."
-
-        # [Optional] The default value for the setting.
         default: visit
-
-        # [Required only for Elasticsearch settings] One of 'dynamic', 'static'.
-        type: static
-
-        # [Optional] A YAML list of options that can be set.
+        type: static.
         options:
           - option: visit
             # [Optional] Markdown format wrapped in single or double quotation marks.
@@ -98,35 +55,19 @@ groups:
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
-
-        # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
           - self-managed
 
-        # [Required] The setting name.
       - setting: kibana.example.setting.earth
         id: kibana-example-setting-earth
-
-        # [Required] Markdown format wrapped in single or double quotation marks. This becomes the description content below the setting. Each bullet renders as a separate paragraph.
         description:
           - "Earth is the third planet from <<kibana-example-setting-sun,The Sun>> and the only astronomical object known to harbor life."
           - "This is enabled by Earth being an ocean world, the only one in the Solar System sustaining liquid surface water."
-        
-        # [Optional] Markdown format wrapped in single or double quotation marks. This would typically be 'Deprecated' or 'Technical Preview'. The state will appear directly below the setting name.
-        # For a beta release, 'state' can be set to "Technical Preview" and 'state_guidance' to "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
         state: Deprecated
         state_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<kibana-example-setting-mercury,`kibana-example-setting-mercury`>> or <<kibana-example-setting-venus,`kibana-example-setting-venus`>> instead."
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. Can be one of 'note:', 'warning:', 'tip:', 'important:'. The warning, note, or whichever will appear below the last paragraph of the setting description.
         tip: "To fully enjoy your trip we recommend bringing sunscreen and a hat."
-
-        # [Optional] The default value for the setting.
         default: inhabit
-
-        # [Required only for Elasticsearch settings] One of 'dynamic', 'static'.
         type: static
-
-        # [Optional] A YAML list of options that can be set.
         options:
           - option: visit
             # [Optional] Markdown format wrapped in single or double quotation marks.
@@ -135,43 +76,23 @@ groups:
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
-
-        # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
           - self-managed
 
-    # [Optional] The title of the sections that divide up a single settings page. Examples: 'General settings', 'Action settings', 'Preconfigured connector settings'
   - group: Solar settings
-
-    # [Optional] Links from other places in the documentation can use this ID. For example, "For more information, see [General settings](./general-alert-action-settings)"
     group_id: kibana-settings-schema-solar
-
-    # [Optional] Markdown format wrapped in single or double quotation marks. This becomes the description content below the group title. Each bullet renders as a separate paragraph.
     description:
      - "Solar settings can be used to configure the Sun. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it."
-     - "Note that your group description can include warnings, examples, etc., just like the settings descriptions."
+     - "Your group description can include warnings, examples, etc., just like the settings descriptions."
 
     settings:
-
-        # [Required] The setting name.
       - setting: kibana.example.setting.sun
         id: kibana-example-setting-sun
-
-        # [Required] Markdown format wrapped in single or double quotation marks. This becomes the description content below the setting. Each bullet renders as a separate paragraph.
         description:
           - "The Sun is the star at the center of the Solar System."
           - "It is a massive, nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core, radiating the energy from its surface mainly as visible light and infrared radiation with 10% at ultraviolet energies."
           - "Specify a value from `0` to `10`, inclusive."
-        
-        # [Optional] Markdown format wrapped in single or double quotation marks. This would typically be 'Deprecated' or 'Technical Preview'. The state will appear directly below the setting name.
-        # For a beta release, 'state' can be set to "Technical Preview" and 'state_guidance' to "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. Can be one of 'note:', 'warning:', 'tip:', 'important:'. The warning, note, or whichever will appear below the last paragraph of the setting description.
         warning: "Due to the heat, visits to the sun should not exceed a day or two. Bring a fan."
-
-        # [Required only for Elasticsearch settings] One of 'dynamic', 'static'.
         type: dynamic
-
-        # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
           - self-managed

@@ -3,7 +3,7 @@
 // Collection: Example settings file
 // Product: Kibana
 
-This is a set of example settings generated from `docs/settings-gen/source/kibana-settings-schema.yml`.
+This page is a set of example settings generated from `docs/settings-gen/source/kibana-settings-schema.yml`.
 
 These examples includes all of the available information that we can provide for a setting, including a description, available options, the default option, a warning, etc. Note that most of these fields are optional.
 
@@ -14,7 +14,7 @@ These examples includes all of the available information that we can provide for
 
 Planetary settings can be used to configure the planets. Currently only Mercury, Venus, and Earth are supported.
 
-Note that a group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions.
+A group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions.
 
 
 [[kibana-example-setting-mercury]] `kibana.example.setting.mercury` {ess-icon}::
@@ -59,7 +59,7 @@ Options: +
 {nbsp} `inhabit` - Build a colony on this planet. +
 {nbsp} `avoid` - Don't visit this planet at all. +
 Default: `visit` +
-Type: `static` +
+Type: `static.` +
 ====
 
 
@@ -89,7 +89,7 @@ Type: `static` +
 
 Solar settings can be used to configure the Sun. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it.
 
-Note that your group description can include warnings, examples, etc., just like the settings descriptions.
+Your group description can include warnings, examples, etc., just like the settings descriptions.
 
 
 [[kibana-example-setting-sun]] `kibana.example.setting.sun`::
