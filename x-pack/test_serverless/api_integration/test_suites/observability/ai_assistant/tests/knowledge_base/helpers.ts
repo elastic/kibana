@@ -18,14 +18,3 @@ export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
   await ml.testResources.cleanMLSavedObjects();
 }
-
-export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
-  const config = {
-    ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
-    input: {
-      field_names: ['text_field'],
-    },
-  };
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
-  await ml.api.assureMlStatsIndexExists();
-}

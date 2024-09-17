@@ -13,13 +13,13 @@ import {
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
-  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
 import {
   LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { deleteKnowledgeBaseModel } from './helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';

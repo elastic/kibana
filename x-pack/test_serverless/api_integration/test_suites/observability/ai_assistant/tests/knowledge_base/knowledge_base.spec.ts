@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import {
   clearKnowledgeBase,
   createKnowledgeBaseModel,
-  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+import { deleteKnowledgeBaseModel } from './helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
