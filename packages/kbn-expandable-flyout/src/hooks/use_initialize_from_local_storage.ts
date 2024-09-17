@@ -9,7 +9,6 @@
 
 import { EXPANDABLE_FLYOUT_LOCAL_STORAGE, PUSH_VS_OVERLAY_LOCAL_STORAGE } from '../constants';
 import { useDispatch } from '../store/redux';
-import { useExpandableFlyoutContext } from '../context';
 import { changePushVsOverlayAction } from '../store/actions';
 
 /**
@@ -17,19 +16,15 @@ import { changePushVsOverlayAction } from '../store/actions';
  */
 export const useInitializeFromLocalStorage = () => {
   const dispatch = useDispatch();
-  const { urlKey } = useExpandableFlyoutContext();
-  if (!urlKey) {
-    return;
-  }
 
-  const pushVsOverlay = localStorage.getItem(
-    `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-  );
+  const expandableFlyout = localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE);
+  if (!expandableFlyout) return;
+
+  const pushVsOverlay = JSON.parse(expandableFlyout)[PUSH_VS_OVERLAY_LOCAL_STORAGE];
   if (pushVsOverlay) {
     dispatch(
       changePushVsOverlayAction({
         type: pushVsOverlay as 'push' | 'overlay',
-        id: urlKey,
         savedToLocalStorage: false,
       })
     );

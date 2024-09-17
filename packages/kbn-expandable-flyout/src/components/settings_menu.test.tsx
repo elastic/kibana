@@ -22,6 +22,7 @@ import {
 import { TestProvider } from '../test/provider';
 import { localStorageMock } from '../../__mocks__';
 import { EXPANDABLE_FLYOUT_LOCAL_STORAGE, PUSH_VS_OVERLAY_LOCAL_STORAGE } from '../constants';
+import { initialPanelsState } from '../store/state';
 
 describe('SettingsMenu', () => {
   beforeEach(() => {
@@ -31,7 +32,6 @@ describe('SettingsMenu', () => {
   });
 
   it('should render the flyout type button group', () => {
-    const urlKey = 'flyout';
     const flyoutCustomProps = {
       hideSettings: false,
       pushVsOverlay: {
@@ -42,7 +42,7 @@ describe('SettingsMenu', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProvider>
-        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
       </TestProvider>
     );
 
@@ -55,8 +55,38 @@ describe('SettingsMenu', () => {
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toBeInTheDocument();
   });
 
+  it('should have the type selected if option is enabled', () => {
+    const state = {
+      panels: initialPanelsState,
+      ui: {
+        pushVsOverlay: 'push' as const,
+      },
+    };
+    const flyoutCustomProps = {
+      hideSettings: false,
+      pushVsOverlay: {
+        disabled: false,
+        tooltip: '',
+      },
+    };
+
+    const { getByTestId } = render(
+      <TestProvider state={state}>
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
+      </TestProvider>
+    );
+
+    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+
+    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID)).toHaveClass(
+      'euiButtonGroupButton-isSelected'
+    );
+    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID)).not.toHaveClass(
+      'euiButtonGroupButton-isSelected'
+    );
+  });
+
   it('should select correct the flyout type', () => {
-    const urlKey = 'flyout';
     const flyoutCustomProps = {
       hideSettings: false,
       pushVsOverlay: {
@@ -67,36 +97,50 @@ describe('SettingsMenu', () => {
 
     const { getByTestId } = render(
       <TestProvider>
-        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
       </TestProvider>
     );
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual(null);
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
 
     getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
     getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual('push');
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(
+      JSON.stringify({ [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'push' })
+    );
 
     getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID).click();
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual('overlay');
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(
+      JSON.stringify({ [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'overlay' })
+    );
+  });
+
+  it('should not save to local storage if the option is disabled', () => {
+    const flyoutCustomProps = {
+      hideSettings: false,
+      pushVsOverlay: {
+        disabled: true,
+        tooltip: '',
+      },
+    };
+
+    const { getByTestId } = render(
+      <TestProvider>
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
+      </TestProvider>
+    );
+
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
+
+    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+    getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
   });
 
   it('should render the the flyout type button group disabled', () => {
-    const urlKey = 'flyout';
     const flyoutCustomProps = {
       hideSettings: false,
       pushVsOverlay: {
@@ -107,17 +151,23 @@ describe('SettingsMenu', () => {
 
     const { getByTestId } = render(
       <TestProvider>
-        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
       </TestProvider>
     );
 
     getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute('disabled');
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
+
+    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID)).toHaveClass(
+      'euiButtonGroupButton-isSelected'
+    );
+    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID)).not.toHaveClass(
+      'euiButtonGroupButton-isSelected'
+    );
   });
 
   it('should not render the information icon if the tooltip is empty', () => {
-    const urlKey = 'flyout';
     const flyoutCustomProps = {
       hideSettings: false,
       pushVsOverlay: {
@@ -128,7 +178,7 @@ describe('SettingsMenu', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProvider>
-        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
+        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
       </TestProvider>
     );
 

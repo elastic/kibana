@@ -11,14 +11,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useInitializeFromLocalStorage } from './use_initialize_from_local_storage';
 import { localStorageMock } from '../../__mocks__';
 import { EXPANDABLE_FLYOUT_LOCAL_STORAGE, PUSH_VS_OVERLAY_LOCAL_STORAGE } from '../constants';
-import { useExpandableFlyoutContext } from '../context';
 import { useDispatch } from '../store/redux';
 import { changePushVsOverlayAction } from '../store/actions';
 
-jest.mock('../context');
 jest.mock('../store/redux');
-
-const urlKey = 'flyout';
 
 describe('useInitializeFromLocalStorage', () => {
   beforeEach(() => {
@@ -30,13 +26,14 @@ describe('useInitializeFromLocalStorage', () => {
   // if this test fails, it's very likely because the data format of the values saved in local storage
   // has changed and we might need to run a migration
   it('should retrieve push/overlay value from local storage', () => {
-    (useExpandableFlyoutContext as jest.Mock).mockReturnValue({ urlKey });
     const mockUseDispatch = jest.fn();
     (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
 
     localStorage.setItem(
-      `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`,
-      'push'
+      EXPANDABLE_FLYOUT_LOCAL_STORAGE,
+      JSON.stringify({
+        [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'push',
+      })
     );
 
     renderHook(() => useInitializeFromLocalStorage());
@@ -44,9 +41,33 @@ describe('useInitializeFromLocalStorage', () => {
     expect(mockUseDispatch).toHaveBeenCalledWith(
       changePushVsOverlayAction({
         type: 'push',
-        id: urlKey,
         savedToLocalStorage: false,
       })
     );
+  });
+
+  it('should not dispatch action if expandable flyout key is not present in local storage', () => {
+    const mockUseDispatch = jest.fn();
+    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+
+    localStorage.setItem(
+      EXPANDABLE_FLYOUT_LOCAL_STORAGE,
+      JSON.stringify({
+        wrong_key: 'push',
+      })
+    );
+
+    renderHook(() => useInitializeFromLocalStorage());
+
+    expect(mockUseDispatch).not.toHaveBeenCalled();
+  });
+
+  it('should not dispatch action if expandable flyout key is present in local storage but not push/overlay', () => {
+    const mockUseDispatch = jest.fn();
+    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+
+    renderHook(() => useInitializeFromLocalStorage());
+
+    expect(mockUseDispatch).not.toHaveBeenCalled();
   });
 });

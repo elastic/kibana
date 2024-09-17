@@ -115,11 +115,7 @@ export const Right: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -149,11 +145,7 @@ export const Left: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -187,11 +179,7 @@ export const Preview: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -228,11 +216,7 @@ export const MultiplePreviews: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -260,11 +244,7 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'push',
     },
   };
 
@@ -291,11 +271,7 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'push',
     },
   };
 
@@ -322,11 +298,7 @@ export const DisableTypeSelection: Story<void> = () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {
-          memory: 'overlay',
-        },
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 

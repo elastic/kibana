@@ -789,41 +789,27 @@ describe('uiReducer', () => {
       const state: UiState = initialUiState;
       const action = changePushVsOverlayAction({
         type: 'push',
-        id: id1,
         savedToLocalStorage: false,
       });
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
-        pushVsOverlay: {
-          byId: {
-            [id1]: 'push',
-          },
-        },
+        pushVsOverlay: 'push',
       });
     });
 
     it('should override value if id already exists', () => {
       const state: UiState = {
-        pushVsOverlay: {
-          byId: {
-            [id1]: 'push',
-          },
-        },
+        pushVsOverlay: 'push',
       };
       const action = changePushVsOverlayAction({
         type: 'overlay',
-        id: id1,
         savedToLocalStorage: false,
       });
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
-        pushVsOverlay: {
-          byId: {
-            [id1]: 'overlay',
-          },
-        },
+        pushVsOverlay: 'overlay',
       });
     });
   });

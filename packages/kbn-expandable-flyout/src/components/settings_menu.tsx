@@ -31,7 +31,7 @@ import {
   SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID,
 } from './test_ids';
-import { selectPushVsOverlayById, useDispatch, useSelector } from '../store/redux';
+import { selectPushVsOverlay, useDispatch, useSelector } from '../store/redux';
 
 const SETTINGS_MENU_ICON_BUTTON = i18n.translate('expandableFlyout.settingsMenu.popoverButton', {
   defaultMessage: 'Open flyout settings menu',
@@ -83,10 +83,6 @@ export interface FlyoutCustomProps {
 
 export interface SettingsMenuProps {
   /**
-   * Unique key to identify the flyout
-   */
-  urlKey: string | undefined;
-  /**
    * Custom props to populate the content of the settings meny
    */
   flyoutCustomProps?: FlyoutCustomProps;
@@ -98,10 +94,12 @@ export interface SettingsMenuProps {
  * - Flyout type: overlay or push
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ urlKey, flyoutCustomProps }: SettingsMenuProps) => {
+  ({ flyoutCustomProps }: SettingsMenuProps) => {
     const dispatch = useDispatch();
 
-    const flyoutType = useSelector(selectPushVsOverlayById(urlKey || 'memory'));
+    // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
+    const type = useSelector(selectPushVsOverlay);
+    const flyoutType = flyoutCustomProps?.pushVsOverlay?.disabled ? 'overlay' : type;
 
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = () => {
@@ -113,13 +111,12 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
         dispatch(
           changePushVsOverlayAction({
             type: id as EuiFlyoutProps['type'] as 'overlay' | 'push',
-            id: urlKey || 'memory',
-            savedToLocalStorage: urlKey != null,
+            savedToLocalStorage: !flyoutCustomProps?.pushVsOverlay?.disabled,
           })
         );
         setPopover(false);
       },
-      [dispatch, urlKey]
+      [dispatch, flyoutCustomProps?.pushVsOverlay?.disabled]
     );
 
     const panels = [
@@ -161,7 +158,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   toolTipContent: FLYOUT_TYPE_PUSH_TOOLTIP,
                 },
               ]}
-              idSelected={flyoutType || 'overlay'}
+              idSelected={flyoutType}
               onChange={pushVsOverlayOnChange}
               isDisabled={flyoutCustomProps?.pushVsOverlay?.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}

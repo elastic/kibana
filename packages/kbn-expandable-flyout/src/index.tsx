@@ -12,7 +12,6 @@ import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useInitializeFromLocalStorage } from './hooks/use_initialize_from_local_storage';
-import { useExpandableFlyoutContext } from './context';
 import { FlyoutCustomProps, SettingsMenu } from './components/settings_menu';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
@@ -23,7 +22,7 @@ import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
 import { LeftSection } from './components/left_section';
 import { isPreviewBanner } from './components/preview_section';
-import { selectPushVsOverlayById, useSelector } from './store/redux';
+import { selectPushVsOverlay, useSelector } from './store/redux';
 
 const flyoutInnerStyles = { height: '100%' };
 
@@ -63,8 +62,9 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
   useInitializeFromLocalStorage();
 
-  const { urlKey } = useExpandableFlyoutContext();
-  const flyoutType = useSelector(selectPushVsOverlayById(urlKey || 'memory'));
+  // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
+  const type = useSelector(selectPushVsOverlay);
+  const flyoutType = flyoutCustomProps?.pushVsOverlay?.disabled ? 'overlay' : type;
 
   const { left, right, preview } = useExpandableFlyoutState();
   const { closeFlyout } = useExpandableFlyoutApi();
@@ -151,9 +151,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         />
       ) : null}
 
-      {!flyoutCustomProps?.hideSettings && (
-        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
-      )}
+      {!flyoutCustomProps?.hideSettings && <SettingsMenu flyoutCustomProps={flyoutCustomProps} />}
     </EuiFlyout>
   );
 };

@@ -13,8 +13,6 @@ import { savePushVsOverlayToLocalStorageMiddleware } from './middlewares';
 import { createAction, type MiddlewareAPI } from '@reduxjs/toolkit';
 import { changePushVsOverlayAction } from './actions';
 
-const urlKey = 'flyout';
-
 const noTypeAction = createAction<{
   type: 'no_type';
 }>('no_type_action');
@@ -32,44 +30,30 @@ describe('pushVsOverlayMiddleware', () => {
   it('should ignore action without type', () => {
     savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(noTypeAction);
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual(null);
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
   });
 
   it('should ignore action of types other than changePushVsOverlayAction', () => {
     savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(randomAction);
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual(null);
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
   });
 
   it('should save value to local storage if action is of type changePushVsOverlayAction', () => {
     savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(
-      changePushVsOverlayAction({ id: urlKey, type: 'push', savedToLocalStorage: true })
+      changePushVsOverlayAction({ type: 'push', savedToLocalStorage: true })
     );
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual('push');
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(
+      JSON.stringify({ [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'push' })
+    );
   });
 
   it('should not save value to local storage if savedToLocalStorage is false', () => {
     savePushVsOverlayToLocalStorageMiddleware({} as MiddlewareAPI)(jest.fn)(
-      changePushVsOverlayAction({ id: urlKey, type: 'push', savedToLocalStorage: false })
+      changePushVsOverlayAction({ type: 'push', savedToLocalStorage: false })
     );
 
-    expect(
-      localStorage.getItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
-      )
-    ).toEqual(null);
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
   });
 });

@@ -129,10 +129,6 @@ export const changePushVsOverlayAction = createAction<{
    */
   type: 'push' | 'overlay';
   /**
-   * Unique identifier for the flyout (either the urlKey or 'memory')
-   */
-  id: string;
-  /**
    * Used in the redux middleware to decide if the value needs to be saved to local storage.
    * This is used to avoid saving the value to local storage when the value is changed by code instead of by a user action.
    */

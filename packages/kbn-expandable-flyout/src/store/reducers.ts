@@ -152,7 +152,7 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
 });
 
 export const uiReducer = createReducer(initialUiState, (builder) => {
-  builder.addCase(changePushVsOverlayAction, (state, { payload: { type, id } }) => {
-    state.pushVsOverlay.byId[id] = type;
+  builder.addCase(changePushVsOverlayAction, (state, { payload: { type } }) => {
+    state.pushVsOverlay = type;
   });
 });

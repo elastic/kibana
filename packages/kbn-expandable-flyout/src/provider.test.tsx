@@ -39,9 +39,7 @@ describe('UrlSynchronizer', () => {
         needsSync: true,
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay',
       },
     };
 
@@ -67,9 +65,7 @@ describe('UrlSynchronizer', () => {
         needsSync: true,
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay',
       },
     };
 
@@ -106,9 +102,7 @@ describe('UrlSynchronizer', () => {
         needsSync: true,
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay',
       },
     };
 

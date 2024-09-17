@@ -22,8 +22,10 @@ export const savePushVsOverlayToLocalStorageMiddleware =
 
     if (changePushVsOverlayAction.match(action) && action.payload.savedToLocalStorage) {
       localStorage.setItem(
-        `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${action.payload.id}`,
-        action.payload.type
+        EXPANDABLE_FLYOUT_LOCAL_STORAGE,
+        JSON.stringify({
+          [PUSH_VS_OVERLAY_LOCAL_STORAGE]: action.payload.type,
+        })
       );
     }
 

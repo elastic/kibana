@@ -34,9 +34,7 @@ describe('PreviewSection', () => {
       },
     },
     ui: {
-      pushVsOverlay: {
-        byId: {},
-      },
+      pushVsOverlay: 'overlay',
     },
   };
 

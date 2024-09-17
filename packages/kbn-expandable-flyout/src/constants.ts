@@ -12,5 +12,5 @@
  */
 export const REDUX_ID_FOR_MEMORY_STORAGE = 'memory';
 
-export const EXPANDABLE_FLYOUT_LOCAL_STORAGE = 'expandableFlyout';
+export const EXPANDABLE_FLYOUT_LOCAL_STORAGE = 'expandableFlyout.ui';
 export const PUSH_VS_OVERLAY_LOCAL_STORAGE = 'pushVsOverlay';

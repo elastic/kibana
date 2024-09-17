@@ -37,9 +37,7 @@ describe('ExpandableFlyout', () => {
         byId: {},
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay',
       },
     };
 
@@ -66,9 +64,7 @@ describe('ExpandableFlyout', () => {
         },
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -95,9 +91,7 @@ describe('ExpandableFlyout', () => {
         },
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -126,9 +120,7 @@ describe('ExpandableFlyout', () => {
         },
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -155,9 +147,7 @@ describe('ExpandableFlyout', () => {
         },
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -185,9 +175,7 @@ describe('ExpandableFlyout', () => {
         },
       },
       ui: {
-        pushVsOverlay: {
-          byId: {},
-        },
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
