@@ -15,12 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { DocumentEntry, KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import { DocumentEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {
   entry?: DocumentEntry;
-  setEntry: React.Dispatch<React.SetStateAction<Partial<KnowledgeBaseEntryCreateProps>>>;
+  setEntry: React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>;
 }
 
 export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }) => {

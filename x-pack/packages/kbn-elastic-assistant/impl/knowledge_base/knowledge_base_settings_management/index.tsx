@@ -209,7 +209,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
               ),
             }}
           />
-          <SetupKnowledgeBaseButton display={'mini'} />
+          {!isKbSetup && !isKbLoading && <SetupKnowledgeBaseButton display={'mini'} />}
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable
@@ -230,16 +230,23 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry)} // TODO: KB-RBAC disable for global entries if user doesn't have global RBAC
+        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry) || isModifyingEntry} // TODO: KB-RBAC disable for global entries if user doesn't have global RBAC
       >
         <>
           {selectedEntry?.type === DocumentEntryType.value ? (
             <DocumentEntryEditor
               entry={selectedEntry as DocumentEntry}
-              setEntry={setSelectedEntry}
+              setEntry={
+                setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
+              }
             />
           ) : (
-            <IndexEntryEditor entry={selectedEntry as IndexEntry} setEntry={setSelectedEntry} />
+            <IndexEntryEditor
+              entry={selectedEntry as IndexEntry}
+              setEntry={
+                setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
+              }
+            />
           )}
         </>
       </Flyout>

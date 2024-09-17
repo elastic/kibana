@@ -13,12 +13,12 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { IndexEntry, KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {
   entry?: IndexEntry;
-  setEntry: React.Dispatch<React.SetStateAction<Partial<KnowledgeBaseEntryCreateProps>>>;
+  setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }) => {
