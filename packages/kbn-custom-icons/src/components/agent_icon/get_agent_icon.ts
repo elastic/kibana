@@ -68,7 +68,7 @@ const darkAgentIcons: { [key: string]: string } = {
 
 const getAgentNameWithoutPrefix = (agentName: string) => {
   if (agentName.startsWith('opentelemetry/')) {
-    // OpenTelemetry-only splits the agent name by `/` and takes the second part, format is `opentelemetry/{agentName}/{details}`
+    // for OpenTelemetry only split the agent name by `/` and take the second part, format is `opentelemetry/{agentName}/{details}`
     return agentName.split('/')[1];
   }
   return agentName;
