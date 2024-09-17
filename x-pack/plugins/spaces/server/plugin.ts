@@ -133,7 +133,7 @@ export class SpacesPlugin
           // unless the forceSolutionVisibility flag is set.
           allowSolutionVisibility:
             (onCloud && config.allowSolutionVisibility) ||
-            config.experimental.forceSolutionVisibility,
+            Boolean(config.experimental?.forceSolutionVisibility),
         })
       )
     );
