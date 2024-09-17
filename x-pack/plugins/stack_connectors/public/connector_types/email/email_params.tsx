@@ -64,6 +64,16 @@ export const EmailParamsFields = ({
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
 
+  const getFormattedEmailOptions = (
+    searchValue: string,
+    previousOptions: Array<{ label: string }>
+  ): Array<{ label: string }> => {
+    const formattedOptions: Array<{ label: string }> = searchValue
+      .split(',')
+      .map((value) => ({ label: value.trim() }));
+    return [...previousOptions, ...formattedOptions];
+  };
+
   return (
     <>
       <EuiFormRow
@@ -105,7 +115,7 @@ export const EmailParamsFields = ({
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {
-            const newOptions = [...toOptions, { label: searchValue }];
+            const newOptions = getFormattedEmailOptions(searchValue, toOptions);
             editAction(
               'to',
               newOptions.map((newOption) => newOption.label),
@@ -148,7 +158,7 @@ export const EmailParamsFields = ({
             data-test-subj="ccEmailAddressInput"
             selectedOptions={ccOptions}
             onCreateOption={(searchValue: string) => {
-              const newOptions = [...ccOptions, { label: searchValue }];
+              const newOptions = getFormattedEmailOptions(searchValue, ccOptions);
               editAction(
                 'cc',
                 newOptions.map((newOption) => newOption.label),
@@ -192,7 +202,7 @@ export const EmailParamsFields = ({
             data-test-subj="bccEmailAddressInput"
             selectedOptions={bccOptions}
             onCreateOption={(searchValue: string) => {
-              const newOptions = [...bccOptions, { label: searchValue }];
+              const newOptions = getFormattedEmailOptions(searchValue, bccOptions);
               editAction(
                 'bcc',
                 newOptions.map((newOption) => newOption.label),
