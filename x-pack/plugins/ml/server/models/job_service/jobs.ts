@@ -14,6 +14,7 @@ import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
   isJobWithGeoData,
+  createDatafeedId,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import type { JobAction } from '../../../common/constants/job_actions';
@@ -626,7 +627,7 @@ export function jobsProvider(
   }
 
   async function getLookBackProgress(jobId: string, start: number, end: number) {
-    const datafeedId = `datafeed-${jobId}`;
+    const datafeedId = createDatafeedId(jobId);
     const [body, isRunning] = await Promise.all([
       mlClient.getJobStats({ job_id: jobId }),
       isDatafeedRunning(datafeedId),

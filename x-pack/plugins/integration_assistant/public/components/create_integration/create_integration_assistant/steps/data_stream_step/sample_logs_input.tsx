@@ -13,6 +13,7 @@ import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
+import { partialShuffleArray } from './utils';
 
 const MaxLogsSampleRows = 10;
 
@@ -64,46 +65,92 @@ export const parseJSONArray = (
   return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
 };
 
-interface ParseLogsErrorResult {
+/**
+ * Selects samples from the backend from an array of log samples type T.
+ *
+ * This is a generic function to apply to arrays of any type.
+ *
+ * The array is changed in-place so that it will:
+ *   - have no more than MaxLogsSampleRows; and
+ *   - be shuffled using the reproducible shuffle algorithm;
+ *   - however, the first element will be kept in-place.
+ *
+ * The idea is to perform the same amount of operations on the array
+ * regardless of its size and to not use any extra memory.
+ *
+ * @param array - The array to select from (cannot be empty).
+ * @template T - The type of elements in the array.
+ * @returns Whether the array was truncated.
+ */
+function trimShuffleLogsSample<T>(array: T[]): boolean {
+  const willTruncate = array.length > MaxLogsSampleRows;
+  const numElements = willTruncate ? MaxLogsSampleRows : array.length;
+
+  partialShuffleArray(array, 1, numElements);
+
+  if (willTruncate) {
+    array.length = numElements;
+  }
+
+  return willTruncate;
+}
+
+// The error message structure.
+interface PrepareLogsErrorResult {
   error: string;
 }
 
-interface ParseLogsSuccessResult {
+// The parsed logs sample structure.
+interface PrepareLogsSuccessResult {
   // Format of the samples, if able to be determined.
   samplesFormat?: SamplesFormat;
   // The parsed log samples. If samplesFormat is (ND)JSON, these are JSON strings.
   logSamples: string[];
+  // Whether the log samples were truncated.
+  isTruncated: boolean;
 }
 
-type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
+type PrepareLogsResult = PrepareLogsErrorResult | PrepareLogsSuccessResult;
 
 /**
- * Parse the logs sample file content and return the parsed logs sample.
+ * Prepares the logs sample to send to the backend from the user-provided file.
  *
  * This function will return an error message if the file content is not valid, that is:
  *  - it is too large to parse (the memory required is 2-3x of the file size); or
  *  - it looks like a JSON format, but there is no array; or
- *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
+ *  - it looks like (ND)JSON format, but the items are not JSON dictionaries; or
+ *  - the list of entries is empty.
+ * In other cases it will parse and return the `logSamples` array of strings.
  *
- * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
- * If the file content is (ND)JSON, it will additionally fill out the `samplesFormat`
- * field with name 'json' or 'ndjson'; otherwise it will be undefined.
+ * Additionally if the format was (ND)JSON:
+ *  - the `samplesFormat` field will be filled out with the format description; and
+ *  - the samples will be serialized back to JSON strings;
+ * otherwise:
+ *  - the `samplesFormat` field will be undefined; and
+ *  - the samples will be strings with unknown structure.
+ *
+ * In all cases it will also:
+ *  - shuffle the parsed logs sample using the reproducible shuffle algorithm;
+ *  - return no more than MaxLogsSampleRows entries.
+ *
+ * @param fileContent The content of the user-provided logs sample file.
+ * @returns The parsed logs sample structure or an error message.
  */
-const parseLogsContent = (fileContent: string): ParseLogsResult => {
-  let parsedContent: unknown[];
-  let samplesFormat: SamplesFormat;
+const prepareLogsContent = (fileContent: string): PrepareLogsResult => {
+  let parsedJSONContent: unknown[];
+  let jsonSamplesFormat: SamplesFormat;
 
   try {
-    parsedContent = parseNDJSON(fileContent);
+    parsedJSONContent = parseNDJSON(fileContent);
 
     // Special case for files that can be parsed as both JSON and NDJSON:
     //   for a one-line array [] -> extract its contents (it's a JSON)
     //   for a one-line object {} -> do nothing (keep as NDJSON)
-    if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
-      parsedContent = parsedContent[0];
-      samplesFormat = { name: 'json', json_path: [] };
+    if (parsedJSONContent.length === 1 && Array.isArray(parsedJSONContent[0])) {
+      parsedJSONContent = parsedJSONContent[0];
+      jsonSamplesFormat = { name: 'json', json_path: [] };
     } else {
-      samplesFormat = { name: 'ndjson', multiline: false };
+      jsonSamplesFormat = { name: 'ndjson', multiline: false };
     }
   } catch (parseNDJSONError) {
     if (parseNDJSONError instanceof RangeError) {
@@ -114,33 +161,53 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
       if (errorNoArrayFound) {
         return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
       }
-      parsedContent = entries;
-      samplesFormat = { name: 'json', json_path: pathToEntries };
+      parsedJSONContent = entries;
+      jsonSamplesFormat = { name: 'json', json_path: pathToEntries };
     } catch (parseJSONError) {
       if (parseJSONError instanceof RangeError) {
         return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
       }
       try {
-        parsedContent = parseNDJSON(fileContent, true);
-        samplesFormat = { name: 'ndjson', multiline: true };
+        parsedJSONContent = parseNDJSON(fileContent, true);
+        jsonSamplesFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
         if (parseMultilineNDJSONError instanceof RangeError) {
           return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
         }
+        // This is an unknown format, so split into lines and return no samplesFormat.
+        const fileLines = fileContent.split('\n').filter((line) => line.trim() !== '');
+        if (fileLines.length === 0) {
+          return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
+        }
+
+        const isTruncated = trimShuffleLogsSample(fileLines);
+
         return {
-          logSamples: fileContent.split('\n').filter((line) => line.trim() !== ''),
-          samplesFormat: undefined, // Signifies that the format is unknown.
+          samplesFormat: undefined,
+          logSamples: fileLines,
+          isTruncated,
         };
       }
     }
   }
 
-  if (parsedContent.some((log) => !isPlainObject(log))) {
+  // This seems to be an ND(JSON), so perform additional checks and return jsonSamplesFormat.
+
+  if (parsedJSONContent.some((log) => !isPlainObject(log))) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
-  const logSamples = parsedContent.map((log) => JSON.stringify(log));
-  return { logSamples, samplesFormat };
+  if (parsedJSONContent.length === 0) {
+    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
+  }
+
+  const isTruncated = trimShuffleLogsSample(parsedJSONContent);
+
+  return {
+    samplesFormat: jsonSamplesFormat,
+    logSamples: parsedJSONContent.map((line) => JSON.stringify(line)),
+    isTruncated,
+  };
 };
 
 interface SampleLogsInputProps {
@@ -192,26 +259,17 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           return;
         }
 
-        const result = parseLogsContent(fileContent);
+        const prepareResult = prepareLogsContent(fileContent);
 
-        if ('error' in result) {
-          setSampleFileError(result.error);
+        if ('error' in prepareResult) {
+          setSampleFileError(prepareResult.error);
           return;
         }
 
-        const { logSamples: possiblyLargeLogSamples, samplesFormat } = result;
+        const { samplesFormat, logSamples, isTruncated } = prepareResult;
 
-        if (possiblyLargeLogSamples.length === 0) {
-          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
-          return;
-        }
-
-        let logSamples;
-        if (possiblyLargeLogSamples.length > MaxLogsSampleRows) {
-          logSamples = possiblyLargeLogSamples.slice(0, MaxLogsSampleRows);
+        if (isTruncated) {
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
-        } else {
-          logSamples = possiblyLargeLogSamples;
         }
 
         setIntegrationSettings({

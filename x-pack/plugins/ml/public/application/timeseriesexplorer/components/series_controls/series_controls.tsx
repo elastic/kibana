@@ -101,7 +101,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   const {
     services: {
       mlServices: {
-        mlApiServices: { results: mlResultsService },
+        mlApi: { results: mlResultsService },
       },
     },
   } = useMlKibana();
@@ -240,7 +240,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+  const detectorIndexChangeHandler = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const id = e.target.value;
       if (id !== undefined) {

@@ -51,9 +51,20 @@ image::management/connectors/images/cases-webhook-connector-comments.png[Add cas
 
 {webhook-cm} connectors have the following configuration properties:
 
-Add HTTP header::
-A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
-For example, set `Content-Type` to the appropriate media type for your requests.
+Authentication::
+The authentication type: none, basic, or SSL.
+If you choose basic authentication, you must provide a user name and password.
+If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format.
+You can also optionally provide a passphrase if the files are password-protected.
+
+Certificate authority::
+A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates.
+This option is available for all authentication types.
+You can choose from the following verification modes:
+
+- `Full`: Validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
+- `Certificate`: Validate that the certificate it is signed by a trusted authority. This option does not check the certificate hostname.
+- `None`: Skip certificate validation.
 
 Create case method::
 The REST API HTTP request method to create a case in the third-party system: `post`(default), `put`, or `patch`.
@@ -143,11 +154,9 @@ https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
 NOTE: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
 --
 
-Require authentication::
-If true, a username and password for login type authentication must be provided.
-
-Password::
-The password for HTTP basic authentication.
+HTTP headers::
+A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
+For example, set `Content-Type` to the appropriate media type for your requests.
 
 Update case method::
 The REST API HTTP request method to update the case in the third-party system: `post`, `put`(default), or `patch`.
@@ -184,9 +193,6 @@ For example:
 --
 https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
 --
-
-Username::
-The username for HTTP basic authentication.
 
 [float]
 [[cases-webhook-action-configuration]]

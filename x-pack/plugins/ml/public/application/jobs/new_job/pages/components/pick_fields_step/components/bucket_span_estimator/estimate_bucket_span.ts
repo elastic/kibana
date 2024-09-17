@@ -8,7 +8,7 @@
 import { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
-import { useMlApiContext } from '../../../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
 import {
@@ -27,7 +27,7 @@ export enum ESTIMATE_STATUS {
 
 export function useEstimateBucketSpan() {
   const toastNotificationService = useToastNotificationService();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const dataSourceContext = useDataSource();
 
@@ -78,7 +78,7 @@ export function useEstimateBucketSpan() {
 
   async function estimateBucketSpan() {
     setStatus(ESTIMATE_STATUS.RUNNING);
-    const { name, error, message: text } = await ml.estimateBucketSpan(data);
+    const { name, error, message: text } = await mlApi.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
       const title = i18n.translate(
