@@ -27,8 +27,12 @@ import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsAnalyzerPanelKey,
+} from '../../shared/constants/panel_keys';
+import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock(
@@ -38,6 +42,10 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
+jest.mock('../../shared/hooks/use_which_flyout');
+const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
+const FLYOUT_KEY = 'securitySolution';
+
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
@@ -74,6 +82,7 @@ const renderAnalyzerPreview = (context = panelContextValue) =>
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
@@ -198,6 +207,13 @@ describe('AnalyzerPreviewContainer', () => {
           id: mockContextValue.eventId,
           indexName: mockContextValue.indexName,
           scopeId: mockContextValue.scopeId,
+        },
+      });
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: DocumentDetailsAnalyzerPanelKey,
+        params: {
+          resolverComponentInstanceID: `${FLYOUT_KEY}-${mockContextValue.scopeId}`,
+          banner: ANALYZER_PREVIEW_BANNER,
         },
       });
     });

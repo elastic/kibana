@@ -13,7 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsAnalyzerPanelKey,
+} from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -24,7 +28,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
+import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
 
 const timelineId = 'timeline-1';
 
@@ -35,7 +39,8 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { telemetry } = useKibana().services;
   const { dataAsNestedObject, isPreview, eventId, indexName, scopeId } =
     useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const key = useWhichFlyout() ?? 'memory';
 
   const visualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
     'visualizationInFlyoutEnabled'
@@ -78,12 +83,19 @@ export const AnalyzerPreviewContainer: React.FC = () => {
         scopeId,
       },
     });
+    openPreviewPanel({
+      id: DocumentDetailsAnalyzerPanelKey,
+      params: {
+        resolverComponentInstanceID: `${key}-${scopeId}`,
+        banner: ANALYZER_PREVIEW_BANNER,
+      },
+    });
     telemetry.reportDetailsFlyoutTabClicked({
       location: scopeId,
       panel: 'left',
       tabId: 'visualize',
     });
-  }, [eventId, indexName, openLeftPanel, scopeId, telemetry]);
+  }, [eventId, indexName, openLeftPanel, openPreviewPanel, key, scopeId, telemetry]);
 
   return (
     <ExpandablePanel

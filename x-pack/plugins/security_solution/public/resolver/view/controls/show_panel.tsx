@@ -6,8 +6,16 @@
  */
 
 import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
+
+const showPanelButtonTitle = i18n.translate(
+  'xpack.securitySolution.resolver.graphControls.showPanelButtonTitle',
+  {
+    defaultMessage: 'Show details panel',
+  }
+);
 
 export const ShowPanelButton = memo(({ showPanelOnClick }: { showPanelOnClick: () => void }) => {
   const colorMap = useColors();
@@ -16,8 +24,8 @@ export const ShowPanelButton = memo(({ showPanelOnClick }: { showPanelOnClick: (
     <StyledEuiButtonIcon
       data-test-subj="resolver:graph-controls:show-panel-button"
       size="m"
-      title={'panel'}
-      aria-label={'open panel'}
+      title={showPanelButtonTitle}
+      aria-label={showPanelButtonTitle}
       onClick={showPanelOnClick}
       iconType={'eye'}
       $backgroundColor={colorMap.graphControlsBackground}
