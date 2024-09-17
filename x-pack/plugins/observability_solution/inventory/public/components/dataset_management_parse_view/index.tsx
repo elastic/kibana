@@ -194,7 +194,7 @@ export function DatasetManagementParseView() {
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.inventory.datasetOverview.h3.constantsLabel', {
-              defaultMessage: 'Rerouting configuration',
+              defaultMessage: 'Parsing configuration',
             })}
           </h3>
         </EuiTitle>
