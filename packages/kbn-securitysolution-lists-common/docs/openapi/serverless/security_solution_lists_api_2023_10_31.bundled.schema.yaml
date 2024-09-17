@@ -622,7 +622,7 @@ paths:
         - Security Solution Lists API
   /api/lists/items:
     delete:
-      description: 'Delete a list item using its `id`, or its `list_id` and `value` fields.'
+      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
