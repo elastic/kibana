@@ -16,7 +16,7 @@ import { EXPANDABLE_FLYOUT_LOCAL_STORAGE, PUSH_VS_OVERLAY_LOCAL_STORAGE } from '
  */
 export const savePushVsOverlayToLocalStorageMiddleware =
   (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
-    if (!action.type || !action.type) {
+    if (!action.type) {
       return next(action);
     }
 

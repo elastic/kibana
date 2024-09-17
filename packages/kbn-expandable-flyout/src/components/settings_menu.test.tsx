@@ -117,29 +117,6 @@ describe('SettingsMenu', () => {
     );
   });
 
-  it('should not save to local storage if the option is disabled', () => {
-    const flyoutCustomProps = {
-      hideSettings: false,
-      pushVsOverlay: {
-        disabled: true,
-        tooltip: '',
-      },
-    };
-
-    const { getByTestId } = render(
-      <TestProvider>
-        <SettingsMenu flyoutCustomProps={flyoutCustomProps} />
-      </TestProvider>
-    );
-
-    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
-
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-    getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
-
-    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
-  });
-
   it('should render the the flyout type button group disabled', () => {
     const flyoutCustomProps = {
       hideSettings: false,
@@ -155,8 +132,11 @@ describe('SettingsMenu', () => {
       </TestProvider>
     );
 
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
+
     getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute('disabled');
+
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
 
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID)).toHaveClass(
@@ -165,6 +145,10 @@ describe('SettingsMenu', () => {
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID)).not.toHaveClass(
       'euiButtonGroupButton-isSelected'
     );
+
+    getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+
+    expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
   });
 
   it('should not render the information icon if the tooltip is empty', () => {
