@@ -8,7 +8,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { FlyoutPanelProps } from './types';
+import { FlyoutPanelProps } from '../types';
 
 export enum ActionType {
   openFlyout = 'open_flyout',
