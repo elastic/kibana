@@ -114,7 +114,6 @@ export async function getServiceMetadataDetails({
       track_total_hits: 1,
       size: 1,
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
-      fields: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -168,13 +167,16 @@ export async function getServiceMetadataDetails({
         },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
+      fields: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
     },
   };
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
   const fields = response.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields) as ServiceMetadataDetailsRaw | undefined;
+  const fieldsNorm = (fields ? normalizeFields(fields) : undefined) as
+    | ServiceMetadataDetailsRaw
+    | undefined;
 
   if (!fieldsNorm) {
     return {
