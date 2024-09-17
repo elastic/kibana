@@ -152,3 +152,8 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'

@@ -72,3 +72,6 @@ export const HostEntity = z.object({
     })
     .optional(),
 });
+
+export type Entity = z.infer<typeof Entity>;
+export const Entity = z.union([UserEntity, HostEntity]);

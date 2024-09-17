@@ -62,9 +62,7 @@ paths:
                   records:
                     type: array
                     items:
-                      oneOf:
-                        - $ref: './common.schema.yaml#/components/schemas/UserEntity'
-                        - $ref: './common.schema.yaml#/components/schemas/HostEntity'
+                      $ref: './common.schema.yaml#/components/schemas/Entity'
                   page:
                     type: integer
                     minimum: 1

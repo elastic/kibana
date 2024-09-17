@@ -7,9 +7,10 @@
 
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
+import { getEntityDefinitionId } from './utils/utils';
 
 export const HOST_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.parse({
-  id: 'ea_host_entity_store',
+  id: getEntityDefinitionId('host'),
   name: 'EA Host Store',
   type: 'host',
   indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
@@ -33,9 +34,8 @@ export const HOST_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
 });
 
 export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.parse({
-  id: 'ea_user_entity_store',
+  id: getEntityDefinitionId('user'),
   name: 'EA User Store',
-  type: 'user',
   indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
   identityFields: ['user.name'],
   displayNameTemplate: '{{user.name}}',

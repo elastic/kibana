@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { EntityType, InspectQuery } from '../common.gen';
-import { UserEntity, HostEntity } from './common.gen';
+import { Entity } from './common.gen';
 
 export type ListEntitiesRequestQuery = z.infer<typeof ListEntitiesRequestQuery>;
 export const ListEntitiesRequestQuery = z.object({
@@ -36,7 +36,7 @@ export type ListEntitiesRequestQueryInput = z.input<typeof ListEntitiesRequestQu
 
 export type ListEntitiesResponse = z.infer<typeof ListEntitiesResponse>;
 export const ListEntitiesResponse = z.object({
-  records: z.array(z.union([UserEntity, HostEntity])),
+  records: z.array(Entity),
   page: z.number().int().min(1),
   per_page: z.number().int().min(1).max(1000),
   total: z.number().int().min(0),

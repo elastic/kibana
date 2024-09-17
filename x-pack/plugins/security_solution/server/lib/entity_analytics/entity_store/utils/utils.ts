@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import { ENTITY_LATEST_PREFIX_V1 } from '@kbn/entityManager-plugin/common/constants_entities';
 import type {
   EngineDescriptor,
   EntityType,
@@ -32,6 +33,7 @@ export const getByEntityTypeQuery = (entityType: EntityType) => {
   return `${entityEngineDescriptorTypeName}.attributes.type: ${entityType}`;
 };
 
-export const getEntitiesIndexName = (entityType: EntityType) => {
-  return `.entities.v1.latest.ea_${entityType}_entity_store`;
-};
+export const getEntitiesIndexName = (entityType: EntityType) =>
+  `${ENTITY_LATEST_PREFIX_V1}.${getEntityDefinitionId(entityType)}`;
+
+export const getEntityDefinitionId = (entityType: EntityType) => `ea_${entityType}_entity_store`;
