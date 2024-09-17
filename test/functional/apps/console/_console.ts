@@ -53,8 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(false);
     });
 
-    // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352
-    it.skip('should resize the editor', async () => {
+    it('should resize the editor', async () => {
       const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
       const initialSize = await editor.getSize();
@@ -161,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // Status badge is not yet implented in phase 2
-    describe.skip('with query params', () => {
+    describe('with query params', () => {
       it('should issue a successful request', async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText('GET _cat/aliases?format=json&v=true&pretty=true');

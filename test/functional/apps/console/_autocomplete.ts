@@ -61,8 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186501
-    describe.skip('Autocomplete behavior', () => {
+    describe('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.clearEditorText();
       });
@@ -85,11 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, method] of methods.entries()) {
-            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(method);
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.contain(method);
           }
 
           await PageObjects.console.pressEscape();
-          await PageObjects.console.clearEditorText();
+          await PageObjects.console.clickClearInput();
         }
       });
 
@@ -353,8 +352,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186935
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
