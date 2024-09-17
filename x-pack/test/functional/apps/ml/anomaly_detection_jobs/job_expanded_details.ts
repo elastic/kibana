@@ -113,10 +113,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('multi-selection with one opened job should only present the opened job when job list is filtered by the Opened button', async () => {
       await ml.jobTable.selectAllJobs();
-      await ml.jobExpandedDetails.assertJobListMultiSelectionText('2 jobs selected');
+      await ml.jobTable.assertJobListMultiSelectionText('2 jobs selected');
       await ml.jobTable.filterByState(QuickFilterButtonTypes.Opened);
       await ml.jobTable.assertJobsInTable([jobId]);
-      await ml.jobExpandedDetails.assertJobListMultiSelectionText('1 job selected');
+      await ml.jobTable.assertJobListMultiSelectionText('1 job selected');
     });
 
     it('multi-selection with one closed job should only present the closed job when job list is filtered by the Closed button', async () => {
