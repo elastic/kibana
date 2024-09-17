@@ -107,12 +107,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(testSubject, wrapper);
   }
 
-  async openContextMenuMorePanel(wrapper?: WebElementWrapper) {
-    this.log.debug('openContextMenuMorePanel');
-    await this.openContextMenu(wrapper);
-    await this.clickContextMenuMoreItem();
-  }
-
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
     await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
