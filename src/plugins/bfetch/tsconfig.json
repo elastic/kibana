@@ -13,6 +13,7 @@
     "@kbn/core-http-common",
     "@kbn/bfetch-error",
     "@kbn/ebt-tools",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
