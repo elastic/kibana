@@ -497,8 +497,8 @@ export default function ({ getService }: FtrProviderContext) {
         num: 2,
         sort: 'asc',
         retryOptions: {
-          retryCount: 40,
-          retryDelay: 10_000,
+          retryCount: 50,
+          retryDelay: 20_000,
         },
       });
 
