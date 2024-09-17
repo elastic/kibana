@@ -25,7 +25,7 @@ interface Props {
 
 export const EditSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange }) => {
   const { capabilities, getUrlForApp } = useEditSpaceServices();
-  const canManageRoles = capabilities.management?.security?.roles === true;
+  const canManageRoles = capabilities.roles?.save === true;
 
   if (!features) {
     return null;
@@ -59,8 +59,8 @@ export const EditSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange 
                     </EuiLink>
                   ) : (
                     <FormattedMessage
-                      id="xpack.spaces.management.editSpaceFeatures.manageRolesLinkText"
-                      defaultMessage="manage security roles"
+                      id="xpack.spaces.management.editSpaceFeatures.askAnAdministratorText"
+                      defaultMessage="ask an administrator to manage roles"
                     />
                   ),
                 }}
