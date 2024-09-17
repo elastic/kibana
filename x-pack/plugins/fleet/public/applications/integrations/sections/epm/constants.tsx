@@ -66,10 +66,10 @@ export const AssetTitleMap: Record<
     }
   ),
   'ml-module': i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
-    defaultMessage: 'Anomaly Detection supplied configurations',
+    defaultMessage: 'Anomaly Detection configurations',
   }),
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
-    defaultMessage: 'Anomaly Detection supplied configurations',
+    defaultMessage: 'Anomaly Detection configurations',
   }),
   tag: i18n.translate('xpack.fleet.epm.assetTitles.tag', {
     defaultMessage: 'Tags',
