@@ -35,7 +35,7 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
           return (
             <DescribedFormGroup
               description={configGroup.description}
-              title={<h4>{configGroup.title}</h4>}
+              title={<h3>{configGroup.title}</h3>}
               fullWidth
               key={configGroup.title}
               descriptionFlexItemProps={{ style: { minWidth: 208 } }}

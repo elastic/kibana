@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,7 +17,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  async function runTemplateTest(type: string, template: string) {
+    await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
+    await PageObjects.console.sleepForDebouncePeriod();
+    // Prompt autocomplete for 'settings'
+    await PageObjects.console.monaco.promptAutocomplete('s');
+
+    await retry.waitFor('autocomplete to be visible', () =>
+      PageObjects.console.monaco.isAutocompleteVisible()
+    );
+    await PageObjects.console.monaco.pressEnter();
+    await retry.try(async () => {
+      const request = await PageObjects.console.monaco.getEditorText();
+      log.debug(request);
+      expect(request).to.contain(`${template}`);
+    });
+  }
+
+  // Failing: See https://github.com/elastic/kibana/issues/191808
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -315,45 +333,26 @@ GET _search
       });
     });
 
-    describe('with conditional templates', async () => {
-      const CONDITIONAL_TEMPLATES = [
-        {
-          type: 'fs',
-          template: `"location": "path"`,
-        },
-        {
-          type: 'url',
-          template: `"url": ""`,
-        },
-        { type: 's3', template: `"bucket": ""` },
-        {
-          type: 'azure',
-          template: `"path": ""`,
-        },
-      ];
-
+    describe('with conditional templates', () => {
       beforeEach(async () => {
         await PageObjects.console.monaco.clearEditorText();
         await PageObjects.console.monaco.enterText('POST _snapshot/test_repo\n');
       });
 
-      await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
-        it('should insert different templates depending on the value of type', async () => {
-          await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
-          await PageObjects.console.sleepForDebouncePeriod();
-          // Prompt autocomplete for 'settings'
-          await PageObjects.console.monaco.promptAutocomplete('s');
+      it('should insert fs template', async () => {
+        await runTemplateTest('fs', `"location": "path"`);
+      });
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.monaco.isAutocompleteVisible()
-          );
-          await PageObjects.console.monaco.pressEnter();
-          await retry.try(async () => {
-            const request = await PageObjects.console.monaco.getEditorText();
-            log.debug(request);
-            expect(request).to.contain(`${template}`);
-          });
-        });
+      it('should insert url template', async () => {
+        await runTemplateTest('url', `"url": ""`);
+      });
+
+      it('should insert s3 template', async () => {
+        await runTemplateTest('s3', `"bucket": ""`);
+      });
+
+      it('should insert azure template', async () => {
+        await runTemplateTest('azure', `"path": ""`);
       });
     });
 

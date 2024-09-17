@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,7 +72,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             ),
           }}
         />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
         <EuiText size="s" color="subdued">
           <ol>
             <li>
@@ -102,7 +110,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             <li>
               <FormattedMessage
                 id="xpack.csp.googleCloudShellCredentials.guide.steps.cloudShellButton"
-                defaultMessage="Click the {cloudShellButton} button above and login into your account"
+                defaultMessage="Click the {cloudShellButton} button below and login into your account"
                 values={{
                   cloudShellButton: <strong>Launch Google Cloud Shell</strong>,
                 }}
@@ -186,8 +194,8 @@ export const GcpCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORD_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
-  } && ./deploy_service_account.sh`;
+    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
+  } ./deploy_service_account.sh`;
 
   return (
     <>
@@ -206,11 +214,19 @@ export const GcpCredentialsFormAgentless = ({
       )}
       {showCloudCredentialsButton && (
         <>
-          <GoogleCloudShellCredentialsGuide
-            isOrganization={isOrganization}
-            commandText={commandText}
-          />
           <EuiSpacer size="m" />
+          <EuiAccordion
+            id="cloudShellAccordianInstructions"
+            data-test-subj="launchGoogleCloudShellAccordianInstructions"
+            buttonContent={<EuiLink>Steps to Generate GCP Account Credentials</EuiLink>}
+            paddingSize="l"
+          >
+            <GoogleCloudShellCredentialsGuide
+              isOrganization={isOrganization}
+              commandText={commandText}
+            />
+          </EuiAccordion>
+          <EuiSpacer size="l" />
           <EuiButton
             data-test-subj="launchGoogleCloudShellAgentlessButton"
             target="_blank"
@@ -236,7 +252,7 @@ export const GcpCredentialsFormAgentless = ({
         packageInfo={packageInfo}
       />
       <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
   );

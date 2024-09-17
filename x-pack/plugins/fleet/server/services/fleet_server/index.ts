@@ -35,15 +35,15 @@ export const getFleetServerPolicies = async (
   });
 
   // Extract associated fleet server agent policy IDs
-  const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) =>
-    p.policy_ids?.map((id) => ({ id, spaceId: p.spaceId } ?? []))
-  );
+  const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) => {
+    return p.policy_ids?.map((id) => ({ id, spaceId: p.spaceIds?.[0] ?? DEFAULT_SPACE_ID } ?? []));
+  });
 
   // Retrieve associated agent policies
   const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
     ? await agentPolicyService.getByIDs(
         soClient,
-        uniqBy(fleetServerAgentPolicyIds, (p) => `${p?.spaceId ?? ''}:${p.id}`)
+        uniqBy(fleetServerAgentPolicyIds, (p) => p.id)
       )
     : [];
 
@@ -58,7 +58,7 @@ export const getFleetServerPolicies = async (
 export const hasFleetServersForPolicies = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'space_id'>>,
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'space_ids'>>,
   activeOnly: boolean = false
 ): Promise<boolean> => {
   if (agentPolicies.length > 0) {
@@ -67,10 +67,10 @@ export const hasFleetServersForPolicies = async (
       soClient,
       undefined,
       agentPolicies
-        .map(({ id, space_id: spaceId }) => {
+        .map(({ id, space_ids: spaceIds }) => {
           const space =
-            spaceId && spaceId !== DEFAULT_SPACE_ID
-              ? `namespaces:"${spaceId}"`
+            spaceIds?.[0] && spaceIds?.[0] !== DEFAULT_SPACE_ID
+              ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
           return `(policy_id:${id} and (${space}))`;

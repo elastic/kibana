@@ -23,6 +23,7 @@ import {
   updateModelSnapshotsSchema,
   updateModelSnapshotBodySchema,
   forceQuerySchema,
+  getAnomalyDetectorsResponse,
 } from './schemas/anomaly_detectors_schema';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 
@@ -30,16 +31,6 @@ import { getAuthorizationHeader } from '../lib/request_authorization';
  * Routes for the anomaly detectors
  */
 export function jobRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors Get anomaly detectors data
-   * @apiName GetAnomalyDetectors
-   * @apiDescription Returns the list of anomaly detection jobs.
-   *
-   * @apiSuccess {Number} count
-   * @apiSuccess {Object[]} jobs
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors`,
@@ -47,11 +38,17 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Gets anomaly detectors',
+      description: 'Returns the list of anomaly detection jobs.',
     })
     .addVersion(
       {
         version: '1',
-        validate: false,
+        validate: {
+          response: {
+            200: { body: getAnomalyDetectorsResponse, description: 'Anomaly detectors response' },
+          },
+        },
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
         try {
@@ -65,15 +62,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/:jobId Get anomaly detection data by id
-   * @apiName GetAnomalyDetectorsById
-   * @apiDescription Returns the anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
@@ -81,6 +69,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Gets anomaly detector by ID',
+      description: 'Returns the anomaly detection job by ID',
     })
     .addVersion(
       {
@@ -104,16 +94,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/_stats Get anomaly detection stats
-   * @apiName GetAnomalyDetectorsStats
-   * @apiDescription Returns anomaly detection jobs statistics.
-   *
-   * @apiSuccess {Number} count
-   * @apiSuccess {Object[]} jobs
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_stats`,
@@ -121,6 +101,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Gets anomaly detectors stats',
+      description: 'Returns the anomaly detection jobs statistics.',
     })
     .addVersion(
       {
@@ -139,15 +121,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/:jobId/_stats Get stats for requested anomaly detection job
-   * @apiName GetAnomalyDetectorsStatsById
-   * @apiDescription Returns anomaly detection job statistics.
-   *
-   * @apiSchema (params) jobIdSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_stats`,
@@ -155,6 +128,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Gets anomaly detector stats by ID',
+      description: 'Returns the anomaly detection job statistics by ID',
     })
     .addVersion(
       {
@@ -178,18 +153,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {put} /internal/ml/anomaly_detectors/:jobId Create an anomaly detection job
-   * @apiName CreateAnomalyDetectors
-   * @apiDescription Creates an anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (body) anomalyDetectionJobSchema
-   *
-   * @apiSuccess {Object} job the configuration of the job that has been created.
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
@@ -197,6 +160,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateJob'],
       },
+      summary: 'Creates an anomaly detection job',
+      description: 'Creates an anomaly detection job.',
     })
     .addVersion(
       {
@@ -205,6 +170,12 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           request: {
             params: jobIdSchema,
             body: schema.object(anomalyDetectionJobSchema),
+          },
+          response: {
+            200: {
+              body: () => schema.any(),
+              description: 'The configuration of the job that has been created.',
+            },
           },
         },
       },
@@ -229,16 +200,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/_update Update an anomaly detection job
-   * @apiName UpdateAnomalyDetectors
-   * @apiDescription Updates certain properties of an anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (body) anomalyDetectionUpdateJobSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_update`,
@@ -246,6 +207,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canUpdateJob'],
       },
+      summary: 'Updates an anomaly detection job',
+      description: 'Updates certain properties of an anomaly detection job.',
     })
     .addVersion(
       {
@@ -274,15 +237,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/_open Open specified job
-   * @apiName OpenAnomalyDetectorsJob
-   * @apiDescription Opens an anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_open`,
@@ -290,6 +244,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canOpenJob'],
       },
+      summary: 'Opens an anomaly detection job',
+      description: 'Opens an anomaly detection job.',
     })
     .addVersion(
       {
@@ -313,16 +269,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/_close Close specified job
-   * @apiName CloseAnomalyDetectorsJob
-   * @apiDescription Closes an anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (query) forceQuerySchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_close`,
@@ -330,6 +276,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCloseJob'],
       },
+      summary: 'Closes an anomaly detection job',
+      description: 'Closes an anomaly detection job.',
     })
     .addVersion(
       {
@@ -360,16 +308,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {delete} /internal/ml/anomaly_detectors/:jobId Delete specified job
-   * @apiName DeleteAnomalyDetectorsJob
-   * @apiDescription Deletes specified anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (query) forceQuerySchema
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
@@ -377,6 +315,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canDeleteJob'],
       },
+      summary: 'Deletes an anomaly detection job',
+      description: 'Deletes specified anomaly detection job.',
     })
     .addVersion(
       {
@@ -408,13 +348,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/_validate/detector Validate detector
-   * @apiName ValidateAnomalyDetector
-   * @apiDescription Validates specified detector.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_validate/detector`,
@@ -422,6 +355,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateJob'],
       },
+      summary: 'Validates detector',
+      description: 'Validates specified detector.',
     })
     .addVersion(
       {
@@ -444,16 +379,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/_forecast Create forecast for specified job
-   * @apiName ForecastAnomalyDetector
-   * @apiDescription Creates a forecast for the specified anomaly detection job, predicting the future behavior of a time series by using its historical behavior.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (body) forecastAnomalyDetector
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast`,
@@ -461,6 +386,9 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canForecastJob'],
       },
+      summary: 'Creates forecast for specified job',
+      description:
+        'Creates a forecast for the specified anomaly detection job, predicting the future behavior of a time series by using its historical behavior.',
     })
     .addVersion(
       {
@@ -491,19 +419,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/results/buckets  Obtain bucket scores for the specified job ID
-   * @apiName GetBuckets
-   * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
-   *
-   * @apiSchema (params) getBucketParamsSchema
-   * @apiSchema (body) getBucketsSchema
-   *
-   * @apiSuccess {Number} count
-   * @apiSuccess {Object[]} buckets
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/buckets/{timestamp?}`,
@@ -511,6 +426,9 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Gets bucket scores',
+      description:
+        'The get buckets API presents a chronological view of the records, grouped by bucket.',
     })
     .addVersion(
       {
@@ -519,6 +437,12 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           request: {
             params: getBucketParamsSchema,
             body: getBucketsSchema,
+          },
+          response: {
+            200: {
+              body: () =>
+                schema.object({ count: schema.number(), buckets: schema.arrayOf(schema.any()) }),
+            },
           },
         },
       },
@@ -538,19 +462,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
-   * @apiName GetOverallBuckets
-   * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (body) getOverallBucketsSchema
-   *
-   * @apiSuccess {Number} count
-   * @apiSuccess {Object[]} overall_buckets
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/overall_buckets`,
@@ -558,6 +469,9 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get overall buckets',
+      description:
+        'Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.',
     })
     .addVersion(
       {
@@ -588,15 +502,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job ID and category ID
-   * @apiName GetCategories
-   * @apiDescription Returns the categories results for the specified job ID and category ID.
-   *
-   * @apiSchema (params) getCategoriesSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/categories/{categoryId}`,
@@ -604,6 +509,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get categories',
+      description: 'Retrieves the categories results for the specified job ID and category ID.',
     })
     .addVersion(
       {
@@ -629,15 +536,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/:jobId/model_snapshots Get model snapshots by job ID
-   * @apiName GetModelSnapshots
-   * @apiDescription Returns the model snapshots for the specified job ID
-   *
-   * @apiSchema (params) getModelSnapshotsSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots`,
@@ -645,13 +543,15 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get model snapshots by job ID',
+      description: 'Returns the model snapshots for the specified job ID',
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: {
-            params: getModelSnapshotsSchema,
+            params: jobIdSchema,
           },
         },
       },
@@ -669,15 +569,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {get} /internal/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Get model snapshots by job ID and snapshot ID
-   * @apiName GetModelSnapshotsById
-   * @apiDescription Returns the model snapshots for the specified job ID and snapshot ID
-   *
-   * @apiSchema (params) getModelSnapshotsSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
@@ -685,6 +576,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get model snapshots by id',
+      description: 'Returns the model snapshots for the specified job ID and snapshot ID',
     })
     .addVersion(
       {
@@ -710,16 +603,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update Update model snapshot by snapshot ID
-   * @apiName UpdateModelSnapshotsById
-   * @apiDescription Updates the model snapshot for the specified snapshot ID
-   *
-   * @apiSchema (params) updateModelSnapshotsSchema
-   * @apiSchema (body) updateModelSnapshotBodySchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update`,
@@ -727,6 +610,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateJob'],
       },
+      summary: 'Updates model snapshot by snapshot ID',
+      description: 'Updates the model snapshot for the specified snapshot ID',
     })
     .addVersion(
       {
@@ -754,15 +639,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {delete} /internal/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Delete model snapshots by snapshot ID
-   * @apiName GetModelSnapshotsById
-   * @apiDescription Deletes the model snapshot for the specified snapshot ID
-   *
-   * @apiSchema (params) updateModelSnapshotsSchema
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
@@ -770,6 +646,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateJob'],
       },
+      summary: 'Deletes model snapshots by snapshot ID',
+      description: 'Deletes the model snapshot for the specified snapshot ID',
     })
     .addVersion(
       {

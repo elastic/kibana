@@ -138,7 +138,7 @@ const manageZipFields = async (beat, filePath, beatFields) => {
   try {
     await extract(filePath, { dir: beat.outputDir });
     console.log('building fields', beat.index);
-    const obj = yaml.load(
+    const obj = yaml.safeLoad(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {
         encoding: 'utf-8',
       })
@@ -172,7 +172,7 @@ const manageTarFields = async (beat, filePath, beatFields) =>
           return reject(new Error(err));
         }
         console.log('building fields', beat.index);
-        const obj = yaml.load(
+        const obj = yaml.safeLoad(
           fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' })
         );
         const ebeatFields = convertSchemaToHash(obj, beatFields);

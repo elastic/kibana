@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { SamplesFormatName } from '../../common/api/model/common_attributes';
+
 export const ecsMappingExpectedResults = {
   mapping: {
     mysql_enterprise: {
@@ -63,8 +66,15 @@ export const ecsMappingExpectedResults = {
         },
       },
       {
+        set: {
+          copy_from: 'message',
+          field: 'originalMessage',
+          tag: 'copy_original_message',
+        },
+      },
+      {
         rename: {
-          field: 'message',
+          field: 'originalMessage',
           target_field: 'event.original',
           tag: 'rename_message',
           ignore_missing: true,
@@ -73,10 +83,17 @@ export const ecsMappingExpectedResults = {
       },
       {
         remove: {
+          field: 'originalMessage',
+          if: 'ctx.event?.original != null',
+          ignore_missing: true,
+          tag: 'remove_copied_message',
+        },
+      },
+      {
+        remove: {
           field: 'message',
           ignore_missing: true,
           tag: 'remove_message',
-          if: 'ctx.event?.original != null',
         },
       },
       {
@@ -441,18 +458,25 @@ export const ecsTestState = {
   ecs: 'teststring',
   exAnswer: 'testanswer',
   finalized: false,
+  chunkSize: 30,
   currentPipeline: { test: 'testpipeline' },
   duplicateFields: [],
   missingKeys: [],
   invalidEcsFields: [],
+  finalMapping: { test: 'testmapping' },
+  sampleChunks: [''],
   results: { test: 'testresults' },
-  logFormat: 'testlogformat',
+  samplesFormat: { name: SamplesFormatName.Values.json },
   ecsVersion: 'testversion',
+  chunkMapping: { test1: 'test1' },
+  useFinalMapping: false,
+  hasTriedOnce: false,
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',
   rawSamples: ['{"test1": "test1"}'],
-  samples: ['{ "test1": "test1" }'],
+  prefixedSamples: ['{ "test1": "test1" }'],
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
-  formattedSamples: '{"test1": "test1"}',
+  combinedSamples: '{"test1": "test1"}',
+  additionalProcessors: [],
 };

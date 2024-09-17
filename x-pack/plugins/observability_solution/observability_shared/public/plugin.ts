@@ -19,11 +19,13 @@ import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
+export { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
   HostsLocatorDefinition,
   InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
@@ -38,6 +40,7 @@ import {
   type TopNFunctionsLocator,
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
+  type MetricsExplorerLocator,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
@@ -62,6 +65,7 @@ interface ObservabilitySharedLocators {
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
     inventoryLocator: InventoryLocator;
+    metricsExplorerLocator: MetricsExplorerLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -132,6 +136,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
         inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
+        metricsExplorerLocator: urlService.locators.create(new MetricsExplorerLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),

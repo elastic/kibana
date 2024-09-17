@@ -6,7 +6,6 @@ $controlMinWidth: $euiSize * 14;
 .controlsWrapper {
   display: flex;
   align-items: center;
-  min-height: $euiSize * 4;
 
   .controlGroup--endButtonGroup {
     align-self: end;
@@ -47,7 +46,7 @@ $controlMinWidth: $euiSize * 14;
 
   .controlFrame__draggable {
     cursor: grabbing;
-    height: $euiButtonHeight;
+    height: $euiButtonHeightSmall;
     align-items: center;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;
@@ -90,10 +89,6 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  .controlFrame__labelToolTip {
-    max-width: 40%;
-  }
-
   .controlFrame__formControlLayout {
     width: 100%;
     min-width: $controlMinWidth;
@@ -101,8 +96,7 @@ $controlMinWidth: $euiSize * 14;
 
     .controlFrame__formControlLayoutLabel {
       @include euiTextTruncate;
-      border-radius: $euiBorderRadius;
-      padding-left: 0;
+      padding: 0;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {
@@ -111,12 +105,21 @@ $controlMinWidth: $euiSize * 14;
       }
     }
 
+    // Make sure controls with popover, tooltip, and tour wrappers inherit height correctly
+    [data-euiportal='true'],
+    .euiPopover,
+    .euiToolTipAnchor {
+      height: 100%;
+    }
+
+    .euiFormControlLayout__prepend {
+      padding-left: 0;
+      gap: 0;
+    }
+
     .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
-      background-color: $euiFormBackgroundColor !important;
-
-      @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
     }
 
     .controlFrame--controlLoading {

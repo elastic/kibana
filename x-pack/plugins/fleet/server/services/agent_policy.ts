@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -112,6 +113,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -478,7 +480,10 @@ class AgentPolicyService {
       return {
         ...options,
         id: id.id,
-        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        namespaces:
+          savedObjectType === AGENT_POLICY_SAVED_OBJECT_TYPE && id.spaceId
+            ? [id.spaceId]
+            : undefined,
         type: savedObjectType,
       };
     });
@@ -534,6 +539,7 @@ class AgentPolicyService {
       fields?: string[];
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
+      spaceId?: string;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -551,9 +557,10 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      spaceId,
     } = options;
 
-    const baseFindParams = {
+    const baseFindParams: SavedObjectsFindOptions = {
       type: savedObjectType,
       sortField,
       sortOrder,
@@ -561,6 +568,11 @@ class AgentPolicyService {
       perPage,
       ...(fields ? { fields } : {}),
     };
+
+    if (spaceId) {
+      baseFindParams.namespaces = [spaceId];
+    }
+
     const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
     let agentPoliciesSO;
     try {
@@ -582,33 +594,36 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await pMap(
-      agentPoliciesSO.saved_objects,
-      async (agentPolicySO) => {
-        const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
-        if (withPackagePolicies) {
-          agentPolicy.package_policies =
-            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
-        }
-        if (options.withAgentCount) {
-          await getAgentsByKuery(
-            appContextService.getInternalUserESClient(),
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
-            {
+    const agentPolicies = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
+      const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
+      agentPolicy.agents = 0;
+      return agentPolicy;
+    });
+
+    if (options.withAgentCount || withPackagePolicies) {
+      await pMap(
+        agentPolicies,
+        async (agentPolicy) => {
+          if (withPackagePolicies) {
+            agentPolicy.package_policies =
+              (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
+          }
+          if (options.withAgentCount) {
+            await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
               page: 1,
               kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-            }
-          ).then(({ total }) => (agentPolicy.agents = total));
-        } else {
-          agentPolicy.agents = 0;
-        }
+            }).then(({ total }) => (agentPolicy.agents = total));
+          } else {
+            agentPolicy.agents = 0;
+          }
 
-        return agentPolicy;
-      },
-      { concurrency: 50 }
-    );
+          return agentPolicy;
+        },
+        { concurrency: 50 }
+      );
+    }
 
     for (const agentPolicy of agentPolicies) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -832,24 +847,22 @@ class AgentPolicyService {
 
   /**
    * Remove an output from all agent policies that are using it, and replace the output by the default ones.
-   * @param soClient
    * @param esClient
    * @param outputId
    */
-  public async removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    outputId: string
-  ) {
+  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+          searchFields: ['data_output_id', 'monitoring_output_id'],
+          search: escapeSearchQueryPhrase(outputId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
@@ -862,6 +875,9 @@ class AgentPolicyService {
       await pMap(
         agentPolicies,
         async (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
           const existingAgentPolicy = await this.get(soClient, agentPolicy.id, true);
 
           if (!existingAgentPolicy) {
@@ -881,10 +897,14 @@ class AgentPolicyService {
       );
       await pMap(
         agentPolicies,
-        (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
+        (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
+          return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
-          }),
+          });
+        },
         {
           concurrency: 50,
         }
@@ -896,28 +916,35 @@ class AgentPolicyService {
    * Remove a Fleet Server from all agent policies that are using it, to use the default one instead.
    */
   public async removeFleetServerHostFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     fleetServerHostId: string
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'fleet_server_host_id'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'fleet_server_host_id'],
+          searchFields: ['fleet_server_host_id'],
+          search: escapeSearchQueryPhrase(fleetServerHostId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            fleet_server_host_id: null,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              fleet_server_host_id: null,
+            }
+          ),
         {
           concurrency: 50,
         }
@@ -973,14 +1000,24 @@ class AgentPolicyService {
       }
     );
 
-    await pMap(
-      savedObjectsResults,
-      (policy) =>
-        this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      await scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        savedObjectsResults.map((policy) => ({
+          id: policy.id,
           spaceId: policy.namespaces?.[0],
-        }),
-      { concurrency: 50 }
-    );
+        }))
+      );
+    } else {
+      await pMap(
+        savedObjectsResults,
+        (policy) =>
+          this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+            spaceId: policy.namespaces?.[0],
+          }),
+        { concurrency: 50 }
+      );
+    }
 
     return res;
   }
@@ -1168,7 +1205,9 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
+    await soClient.delete(savedObjectType, id, {
+      force: true, // need to delete through multiple space
+    });
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
@@ -1222,7 +1261,7 @@ class AgentPolicyService {
           agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
         }),
       {
-        concurrency: 50,
+        concurrency: 20,
       }
     );
 
@@ -1245,10 +1284,6 @@ class AgentPolicyService {
         policy_id: fullPolicy.id,
         default_fleet_server: policy.is_default_fleet_server === true,
       };
-
-      if (policy.unenroll_timeout) {
-        fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
-      }
 
       acc.push(fleetServerPolicy);
       return acc;
@@ -1432,35 +1467,36 @@ class AgentPolicyService {
    * @param esClient
    * @param downloadSourceId
    */
-  public async removeDefaultSourceFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    downloadSourceId: string
-  ) {
+  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'download_source_id'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
-        perPage: SO_SEARCH_LIMIT,
-      })
-    ).saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-    }));
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'download_source_id'],
+          searchFields: ['download_source_id'],
+          search: escapeSearchQueryPhrase(downloadSourceId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
+    ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            download_source_id:
-              agentPolicy.download_source_id === downloadSourceId
-                ? null
-                : agentPolicy.download_source_id,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              download_source_id:
+                agentPolicy.download_source_id === downloadSourceId
+                  ? null
+                  : agentPolicy.download_source_id,
+            }
+          ),
         {
           concurrency: 50,
         }
@@ -1519,16 +1555,19 @@ class AgentPolicyService {
     );
   }
 
-  public async getInactivityTimeouts(
-    soClient: SavedObjectsClientContract
-  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+  public async getInactivityTimeouts(): Promise<
+    Array<{ policyIds: string[]; inactivityTimeout: number }>
+  > {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const findRes = await soClient.find<AgentPolicySOAttributes>({
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const findRes = await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
       type: savedObjectType,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       filter: `${savedObjectType}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
+      namespaces: ['*'],
     });
 
     const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
@@ -1595,10 +1634,21 @@ class AgentPolicyService {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
     const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
-    await asyncForEach(
-      chunk(policyIds, batchSize),
-      async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
-    );
+
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      await scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        updatedPoliciesSuccess.map((policy) => ({
+          id: policy.id,
+          spaceId: policy.namespaces?.[0],
+        }))
+      );
+    } else {
+      await asyncForEach(
+        chunk(policyIds, batchSize),
+        async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
+      );
+    }
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
@@ -1617,7 +1667,7 @@ class AgentPolicyService {
 
   public async fetchAllAgentPolicyIds(
     soClient: SavedObjectsClientContract,
-    { perPage = 1000, kuery = undefined }: FetchAllAgentPolicyIdsOptions = {}
+    { perPage = 1000, kuery = undefined, spaceId = undefined }: FetchAllAgentPolicyIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     return createSoFindIterable<{}>({
@@ -1629,6 +1679,7 @@ class AgentPolicyService {
         sortOrder: 'asc',
         fields: ['id'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces: spaceId ? [spaceId] : undefined,
       },
       resultsMapper: (data) => {
         return data.saved_objects.map((agentPolicySO) => {

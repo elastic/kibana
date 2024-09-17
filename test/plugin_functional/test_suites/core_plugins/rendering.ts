@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -123,6 +124,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration?)',
         'data.search.sessions.maxUpdateRetries (number?)',
         'data.search.sessions.notTouchedTimeout (duration?)',
+        'data.query.timefilter.minRefreshInterval (number?)',
         'data_views.scriptedFieldsEnabled (boolean?|never)',
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
@@ -227,6 +229,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
+        'xpack.cloud.csp (string?)',
         'xpack.cloud.deployment_url (string?)',
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
@@ -292,6 +295,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
         'xpack.index_management.enableIndexStats (boolean?|never)',
         'xpack.index_management.enableDataStreamStats (boolean?|never)',
+        'xpack.index_management.enableSizeAndDocCount (boolean?|never)',
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -26,17 +27,19 @@ import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
+import { getReferenceName } from './reference_name_utils';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
+  referenceNameSuffix: string,
   state: DefaultDataControlState,
   /**
    * `This state manager` should only include the state that the data control editor is
    * responsible for managing
    */
   editorStateManager: ControlStateManager<EditorState>,
-  controlGroup: ControlGroupApi,
+  controlGroupApi: ControlGroupApi,
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
@@ -159,22 +162,24 @@ export const initializeDataControl = <EditorState extends object = {}>(
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
               if (!isEqual(mergedStateManager[key].getValue(), newState[key])) {
-                mergedStateManager[key].next(newState[key]);
+                mergedStateManager[key].next(
+                  newState[key] as DefaultDataControlState & EditorState[typeof key]
+                );
               }
             }
           );
         } else {
           // replace the control with a new one of the updated type
-          controlGroup.replacePanel(controlId, { panelType: newType, initialState: newState });
+          controlGroupApi.replacePanel(controlId, { panelType: newType, initialState: newState });
         }
       },
       initialState: {
         ...initialState,
-        controlType,
-        controlId,
-        defaultPanelTitle: defaultPanelTitle.getValue(),
       },
-      controlGroupApi: controlGroup,
+      controlType,
+      controlId,
+      initialDefaultPanelTitle: defaultPanelTitle.getValue(),
+      controlGroupApi,
     });
   };
 
@@ -240,7 +245,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
         },
         references: [
           {
-            name: `controlGroup_${controlId}:${controlType}DataView`,
+            name: getReferenceName(controlId, referenceNameSuffix),
             type: DATA_VIEW_SAVED_OBJECT_TYPE,
             id: dataViewId.getValue(),
           },

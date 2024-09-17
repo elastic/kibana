@@ -27,11 +27,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+    let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
 
     before(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
+      cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
+      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8081
     });
 
     after(async () => {
@@ -58,6 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -83,6 +87,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
 
       const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();
 

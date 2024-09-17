@@ -10,9 +10,9 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import { showErrorToast } from '@kbn/cloud-security-posture';
+import { CDR_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
 
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;
@@ -56,7 +56,7 @@ export type VulnerabilitiesRootGroupingAggregation =
 
 export const getGroupedVulnerabilitiesQuery = (query: GroupingQuery) => ({
   ...query,
-  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: 0,
 });
 

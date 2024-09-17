@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
+  CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCheckbox,
@@ -98,6 +99,10 @@ export const FieldsSelectorTable = ({
     SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED,
     false
   );
+  const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const onTableChange = ({ page: { index } }: CriteriaWithPagination<Field>) => {
+    setPagination({ pageIndex: index });
+  };
   const fields = useMemo<Field[]>(
     () =>
       filterFieldsBySearch(dataView.fields.getAll(), columns, searchQuery, isFilterSelectedEnabled),
@@ -260,10 +265,11 @@ export const FieldsSelectorTable = ({
       items={fields}
       columns={tableColumns}
       search={search}
-      pagination
+      pagination={pagination}
       sorting={defaultSorting}
       error={error}
       childrenBetween={tableHeader}
+      onTableChange={onTableChange}
     />
   );
 };

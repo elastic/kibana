@@ -143,9 +143,9 @@ describe('KibanaVersionMismatchRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
         context: {
-          action: `[View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: 'Verify you have the same version across all instances.',
-          internalFullMessage: `Kibana version mismatch alert is firing for testCluster. Kibana is running 8.0.0, 7.2.1. [View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `Kibana version mismatch alert is firing for testCluster. Kibana is running 8.0.0, 7.2.1. [View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage:
             'Kibana version mismatch alert is firing for testCluster. Verify you have the same version across all instances.',
           versionList: ['8.0.0', '7.2.1'],

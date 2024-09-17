@@ -37,7 +37,8 @@ export const useDeployIntegration = ({
       connector == null ||
       integrationSettings == null ||
       notifications?.toasts == null ||
-      result?.pipeline == null
+      result?.pipeline == null ||
+      result?.samplesFormat == null
     ) {
       return;
     }
@@ -58,8 +59,9 @@ export const useDeployIntegration = ({
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
                 inputTypes: integrationSettings.inputTypes ?? [],
-                rawSamples: integrationSettings.logsSampleParsed ?? [],
+                rawSamples: integrationSettings.logSamples ?? [],
                 docs: result.docs ?? [],
+                samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,
               },
             ],
@@ -116,6 +118,7 @@ export const useDeployIntegration = ({
     notifications?.toasts,
     result?.docs,
     result?.pipeline,
+    result?.samplesFormat,
     telemetry,
   ]);
 

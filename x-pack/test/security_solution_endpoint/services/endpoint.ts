@@ -74,7 +74,7 @@ export class EndpointTestResources extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
 
-  private async stopTransform(transformId: string) {
+  async stopTransform(transformId: string) {
     const stopRequest = {
       transform_id: `${transformId}*`,
       force: true,
@@ -84,7 +84,7 @@ export class EndpointTestResources extends FtrService {
     return this.esClient.transform.stopTransform(stopRequest);
   }
 
-  private async startTransform(transformId: string) {
+  async startTransform(transformId: string) {
     const transformsResponse = await this.esClient.transform.getTransformStats({
       transform_id: `${transformId}*`,
     });

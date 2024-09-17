@@ -59,9 +59,15 @@ export const postCancelActionHandlerBuilder = function (
 ): RequestHandler<TypeOf<typeof PostCancelActionRequestSchema.params>, undefined, undefined> {
   return async (context, request, response) => {
     try {
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const core = await context.core;
+      const esClient = core.elasticsearch.client.asInternalUser;
+      const soClient = core.savedObjects.client;
 
-      const action = await actionsService.cancelAgentAction(esClient, request.params.actionId);
+      const action = await actionsService.cancelAgentAction(
+        esClient,
+        soClient,
+        request.params.actionId
+      );
 
       const body: PostNewAgentActionResponse = {
         item: action,

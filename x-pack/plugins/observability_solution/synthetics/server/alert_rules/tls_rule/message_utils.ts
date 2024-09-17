@@ -9,12 +9,19 @@ import moment from 'moment/moment';
 import { IBasePath } from '@kbn/core-http-server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import {
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  ActionGroupIdsOf,
+} from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
 import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
+import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
 interface TLSContent {
   summary: string;
   status?: string;
@@ -75,35 +82,34 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
   };
 };
 
-type CertSummary = ReturnType<typeof getCertSummary>;
-
 export const setTLSRecoveredAlertsContext = async ({
-  alertFactory,
+  alertsClient,
   basePath,
   defaultStartedAt,
-  getAlertStartedDate,
   spaceId,
   alertsLocator,
-  getAlertUuid,
   latestPings,
 }: {
-  alertFactory: RuleExecutorServices['alertFactory'];
+  alertsClient: PublicAlertsClient<
+    ObservabilityUptimeAlert,
+    AlertState,
+    AlertContext,
+    ActionGroupIdsOf<MonitorStatusActionGroup>
+  >;
   defaultStartedAt: string;
-  getAlertStartedDate: (alertInstanceId: string) => string | null;
   basePath: IBasePath;
   spaceId: string;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  getAlertUuid?: (alertId: string) => string | null;
   latestPings: TLSLatestPing[];
 }) => {
-  const { getRecoveredAlerts } = alertFactory.done();
+  const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-  for await (const alert of getRecoveredAlerts()) {
-    const recoveredAlertId = alert.getId();
-    const alertUuid = getAlertUuid?.(recoveredAlertId) || null;
-    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? defaultStartedAt;
+  for (const recoveredAlert of recoveredAlerts) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
+    const alertUuid = recoveredAlert.alert.getUuid();
+    const indexedStartedAt = recoveredAlert.alert.getStart() ?? defaultStartedAt;
 
-    const state = alert.getState() as CertSummary;
+    const state = recoveredAlert.alert.getState();
     const alertUrl = await getAlertUrl(
       alertUuid,
       spaceId,
@@ -144,12 +150,13 @@ export const setTLSRecoveredAlertsContext = async ({
       newStatus = previousStatus;
     }
 
-    alert.setContext({
+    const context = {
       ...state,
       newStatus,
       previousStatus,
       summary: newSummary,
       [ALERT_DETAILS_URL]: alertUrl,
-    });
+    };
+    alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
 };

@@ -423,30 +423,6 @@ describe('update_agent_tags', () => {
       jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
-    it('should not update tags for agents in another space', async () => {
-      soClient.getCurrentNamespace.mockReturnValue('default');
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'agent1',
-              _source: {
-                tags: ['one', 'two', 'three'],
-                namespaces: ['myspace'],
-              },
-              fields: {
-                status: 'online',
-              },
-            },
-          ],
-        },
-      } as any);
-
-      await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], ['two']);
-
-      expect(esClient.updateByQuery).not.toHaveBeenCalled();
-    });
-
     it('should add namespace filter to kuery in the default space', async () => {
       soClient.getCurrentNamespace.mockReturnValue('default');
 

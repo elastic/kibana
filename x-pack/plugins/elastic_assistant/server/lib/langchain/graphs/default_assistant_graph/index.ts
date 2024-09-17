@@ -18,12 +18,8 @@ import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import {
-  bedrockToolCallingAgentPrompt,
-  geminiToolCallingAgentPrompt,
-  openAIFunctionAgentPrompt,
-  structuredChatAgentPrompt,
-} from './prompts';
+import { formatPrompt, formatPromptStructured, systemPrompts } from './prompts';
+import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -51,6 +47,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
+  systemPrompt,
   traceOptions,
   responseLanguage = 'English',
 }) => {
@@ -125,11 +122,22 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
   );
 
+  // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
+  if (isEnabledKnowledgeBase && dataClients?.kbDataClient?.isV2KnowledgeBaseEnabled) {
+    const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
+      assistantToolParams,
+      esClient,
+    });
+    if (kbTools) {
+      tools.push(...kbTools);
+    }
+  }
+
   const agentRunnable = isOpenAI
     ? await createOpenAIFunctionsAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: openAIFunctionAgentPrompt,
+        prompt: formatPrompt(systemPrompts.openai, systemPrompt),
         streamRunnable: isStream,
       })
     : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
@@ -137,13 +145,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         llm: createLlmInstance(),
         tools,
         prompt:
-          llmType === 'bedrock' ? bedrockToolCallingAgentPrompt : geminiToolCallingAgentPrompt,
+          llmType === 'bedrock'
+            ? formatPrompt(systemPrompts.bedrock, systemPrompt)
+            : formatPrompt(systemPrompts.gemini, systemPrompt),
         streamRunnable: isStream,
       })
     : await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: structuredChatAgentPrompt,
+        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
         streamRunnable: isStream,
       });
 
@@ -151,26 +161,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
-    conversationId,
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
     tools,
-    responseLanguage,
     replacements,
-    llmType,
-    bedrockChatEnabled,
-    isStreaming: isStream,
   });
-  const inputs = { input: latestMessage[0]?.content as string };
+  const inputs: GraphInputs = {
+    bedrockChatEnabled,
+    responseLanguage,
+    conversationId,
+    llmType,
+    isStream,
+    input: latestMessage[0]?.content as string,
+  };
 
   if (isStream) {
     return streamGraph({
       apmTracer,
       assistantGraph,
-      llmType,
-      bedrockChatEnabled,
       inputs,
       logger,
       onLlmResponse,

@@ -13,6 +13,8 @@
     "cypress:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/cypress/serverless_cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/serverless_cli_config",
     "cypress:serverless:open": "yarn cypress:serverless open",
     "cypress:serverless:run": "yarn cypress:serverless run",
+    "cypress:qa:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel_serverless --config-file ../osquery/cypress/serverless_cypress_qa.config.ts --onBeforeHook ../../test/osquery_cypress/runner_qa.ts",
+    "cypress:qa:serverless:run": "yarn cypress:qa:serverless run",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-osquery/cypress/results/mochawesome*.json > ../../../target/kibana-osquery/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-osquery/cypress/results/output.json --reportDir ../../../target/kibana-osquery/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-osquery/cypress/results/*.xml ../../../target/junit/",
     "junit:transform": "node ../security_solution/scripts/junit_transformer --pathPattern '../../../target/kibana-osquery/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Osquery Cypress' --writeInPlace",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CSSProperties, Dispatch } from 'react';
@@ -11,6 +12,7 @@ import { debounce, range } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isQuotaExceededError } from '../../../../services/history';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
@@ -33,13 +35,14 @@ import {
   replaceRequestVariables,
   SELECTED_REQUESTS_CLASSNAME,
   shouldTriggerSuggestions,
-  stringifyRequest,
   trackSentRequests,
+  getRequestFromEditor,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
+import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
@@ -48,6 +51,7 @@ const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
 const INSPECT_TOKENS_LABEL = 'Inspect tokens';
 const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
+const { collapseLiteralStrings } = XJson;
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -173,12 +177,12 @@ export class MonacoEditorActionsProvider {
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
-      const requestEndLineNumber = getRequestEndLineNumber(
+      const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
+        nextRequest: parsedRequests.at(index + 1),
         model,
-        index,
-        parsedRequests
-      );
+        startLineNumber,
+      });
       if (requestStartLineNumber > endLineNumber) {
         // request is past the selection, no need to check further requests
         break;
@@ -197,14 +201,32 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
-  private async getRequests() {
+  public async getRequests() {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+
     const parsedRequests = await this.getSelectedParsedRequests();
-    const stringifiedRequests = parsedRequests.map((parsedRequest) =>
-      stringifyRequest(parsedRequest)
-    );
+    const stringifiedRequests = parsedRequests.map((parsedRequest) => {
+      const { startLineNumber, endLineNumber } = parsedRequest;
+      const requestTextFromEditor = getRequestFromEditor(model, startLineNumber, endLineNumber);
+      if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
+        requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
+          if (containsComments(dataString)) {
+            // parse and stringify to remove comments
+            dataString = indentData(dataString);
+          }
+          return collapseLiteralStrings(dataString);
+        });
+      }
+      return requestTextFromEditor;
+    });
     // get variables values
     const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
-    return stringifiedRequests.map((request) => replaceRequestVariables(request, variables));
+    return stringifiedRequests
+      .filter(Boolean)
+      .map((request) => replaceRequestVariables(request!, variables));
   }
 
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
@@ -385,12 +407,6 @@ export class MonacoEditorActionsProvider {
         return AutocompleteType.PATH;
       }
       // if more than 2 tokens, no suggestions
-      return null;
-    }
-
-    // if the current request doesn't have a method, the request is not valid
-    // and shouldn't have an autocomplete type
-    if (!currentRequest.method) {
       return null;
     }
 

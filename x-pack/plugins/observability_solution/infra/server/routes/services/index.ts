@@ -6,15 +6,14 @@
  */
 
 import {
-  GetServicesRequestQueryRT,
   GetServicesRequestQuery,
+  GetServicesRequestQueryRT,
   ServicesAPIResponseRT,
 } from '../../../common/http_api/host_details';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getServices } from '../../lib/host_details/get_services';
 import { validateStringAssetFilters } from './lib/utils';
-import { createSearchClient } from '../../lib/create_search_client';
 import { buildRouteValidationWithExcess } from '../../utils/route_validation';
+import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
 
 export const initServicesRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -33,18 +32,34 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         },
       },
     },
-    async (requestContext, request, response) => {
-      const [{ savedObjects }] = await libs.getStartServices();
+    async (context, request, response) => {
       const { from, to, size = 10, validatedFilters } = request.query;
 
-      const client = createSearchClient(requestContext, framework, request);
-      const soClient = savedObjects.getScopedClient(request);
-      const apmIndices = await libs.getApmIndices(soClient);
-      const services = await getServices(client, apmIndices, {
-        from,
-        to,
-        size,
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
+
+      if (!hasApmPrivileges) {
+        return response.customError({
+          statusCode: 403,
+          body: {
+            message: 'APM data access service is not available',
+          },
+        });
+      }
+
+      const apmDataAccessServices = await apmDataAccessClient.getServices();
+
+      const apmDocumentSources = await apmDataAccessServices.getDocumentSources({
+        start: from,
+        end: to,
+      });
+
+      const services = await apmDataAccessServices?.getHostServices({
+        documentSources: apmDocumentSources,
+        start: from,
+        end: to,
         filters: validatedFilters!,
+        size,
       });
       return response.ok({
         body: ServicesAPIResponseRT.encode(services),

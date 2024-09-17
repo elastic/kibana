@@ -11,6 +11,7 @@ Object {
       "enabled": false,
       "logs": false,
       "metrics": false,
+      "traces": false,
     },
     "protection": Object {
       "enabled": false,
@@ -180,6 +181,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "default",
     },
     "protection": Object {
@@ -258,6 +260,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {
@@ -336,6 +339,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {
