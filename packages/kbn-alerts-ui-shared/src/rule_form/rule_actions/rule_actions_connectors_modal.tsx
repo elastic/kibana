@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useCallback, useMemo, Suspense } from 'react';
@@ -29,7 +30,6 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { ActionType } from '@kbn/actions-types';
 import { ActionConnector } from '../../common';
 import { useRuleFormState } from '../hooks';
 import {
@@ -45,14 +45,12 @@ import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_ena
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
 export interface RuleActionsConnectorsModalProps {
-  connectors: ActionConnector[];
-  actionTypes: ActionType[];
   onClose: () => void;
   onSelectConnector: (connector: ActionConnector) => void;
 }
 
 export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProps) => {
-  const { connectors, actionTypes, onClose, onSelectConnector } = props;
+  const { onClose, onSelectConnector } = props;
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedConnector, setSelectedConnector] = useState<string>('all');
@@ -64,6 +62,8 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
   const {
     plugins: { actionTypeRegistry },
     formData: { actions },
+    connectors,
+    connectorTypes,
   } = useRuleFormState();
 
   const preconfiguredConnectors = useMemo(() => {
@@ -72,7 +72,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
-      const actionType = actionTypes.find(({ id }) => id === actionTypeId);
+      const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
       const actionTypeModel = actionTypeRegistry.get(actionTypeId);
 
       if (!actionType) {
@@ -95,7 +95,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
       }
       return true;
     });
-  }, [connectors, actionTypes, preconfiguredConnectors, actionTypeRegistry]);
+  }, [connectors, connectorTypes, preconfiguredConnectors, actionTypeRegistry]);
 
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -126,12 +126,12 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         result[actionTypeId] = {
           actionTypeId,
           total: 1,
-          name: actionTypes.find(({ id }) => actionTypeId === id)?.name || '',
+          name: connectorTypes.find(({ id }) => actionTypeId === id)?.name || '',
         };
       }
       return result;
     }, {});
-  }, [availableConnectors, actionTypes]);
+  }, [availableConnectors, connectorTypes]);
 
   const filteredConnectors = useMemo(() => {
     return availableConnectors
@@ -150,7 +150,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           return true;
         }
         const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-        const actionType = actionTypes.find(({ id }) => id === actionTypeId);
+        const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
         const textSearchTargets = [
           name.toLocaleLowerCase(),
           actionTypeModel.selectMessage?.toLocaleLowerCase(),
@@ -159,7 +159,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         ];
         return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
       });
-  }, [availableConnectors, selectedConnector, searchValue, actionTypes, actionTypeRegistry]);
+  }, [availableConnectors, selectedConnector, searchValue, connectorTypes, actionTypeRegistry]);
 
   const connectorFacetButtons = useMemo(() => {
     return (
@@ -224,7 +224,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         {filteredConnectors.map((connector) => {
           const { id, actionTypeId, name } = connector;
           const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-          const actionType = actionTypes.find((item) => item.id === actionTypeId);
+          const actionType = connectorTypes.find((item) => item.id === actionTypeId);
 
           if (!actionType) {
             return null;
@@ -288,7 +288,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
     preconfiguredConnectors,
     filteredConnectors,
     actionTypeRegistry,
-    actionTypes,
+    connectorTypes,
     onSelectConnector,
     onClearFilters,
   ]);

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import React, { Suspense, useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -33,8 +33,8 @@ import {
   RuleActionParam,
 } from '@kbn/alerting-types';
 import { isEmpty, some } from 'lodash';
-import { ActionType } from '@kbn/actions-types';
 import { css } from '@emotion/react';
+import { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {
   ActionConnector,
@@ -92,19 +92,19 @@ interface RuleActionsItemProps {
   action: RuleAction;
   index: number;
   producerId: string;
-  aadTemplateFields: ActionVariable[];
-  connectors: ActionConnector[];
-  actionTypes: ActionType[];
 }
 
 export const RuleActionsItem = (props: RuleActionsItemProps) => {
-  const { action, index, aadTemplateFields, connectors, actionTypes, producerId } = props;
+  const { action, index, producerId } = props;
 
   const {
     plugins: { actionTypeRegistry, http },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
+    connectors,
+    connectorTypes,
+    aadTemplateFields,
   } = useRuleFormState();
 
   const [tab, setTab] = useState<string>('settings');
@@ -126,7 +126,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
-  const actionType = actionTypes.find(({ id }) => id === action.actionTypeId)!;
+  const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId)!;
   const connector = connectors.find(({ id }) => id === action.id)!;
 
   const actionParamsError = actionsParamsErrors[action.uuid!] || {};
@@ -494,12 +494,11 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
             <RuleActionsMessage
               action={action}
               index={index}
-              templateFields={templateFields}
               useDefaultMessage={useDefaultMessage}
               connector={connector}
               producerId={producerId}
               warning={warning}
-              actionTypes={actionTypes}
+              templateFields={templateFields}
               onParamsChange={onParamsChange}
             />
           )}

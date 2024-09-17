@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -273,7 +274,7 @@ describe('ruleActionsSettings', () => {
     expect(screen.queryByText('showMinimumThrottleUnitWarning')).not.toBeInTheDocument();
   });
 
-  test('should call notifyWhen component event handlers with the correct parameters', () => {
+  test('should call notifyWhen component event handlers with the correct parameters', async () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
@@ -286,7 +287,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    userEvent.click(screen.getByText('RuleActionsNotifyWhenOnChange'));
+    await userEvent.click(screen.getByText('RuleActionsNotifyWhenOnChange'));
 
     expect(mockOnNotifyWhenChange).toHaveBeenLastCalledWith({
       notifyWhen: 'onActionGroupChange',
@@ -294,12 +295,12 @@ describe('ruleActionsSettings', () => {
       throttle: '5m',
     });
 
-    userEvent.click(screen.getByText('RuleActionsNotifyWhenOnUseDefaultMessage'));
+    await userEvent.click(screen.getByText('RuleActionsNotifyWhenOnUseDefaultMessage'));
 
     expect(mockOnUseDefaultMessageChange).toHaveBeenCalled();
   });
 
-  test('should allow for selecting of action groups', () => {
+  test('should allow for selecting of action groups', async () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
@@ -312,15 +313,9 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('ruleActionsSettingsSelectActionGroup'));
+    await userEvent.click(screen.getByTestId('ruleActionsSettingsSelectActionGroup'));
 
-    userEvent.click(
-      screen.getByTestId('addNewActionConnectorActionGroup-testActionGroup'),
-      undefined,
-      {
-        skipPointerEventsCheck: true,
-      }
-    );
+    await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-testActionGroup'));
 
     expect(mockOnActionGroupChange).toHaveBeenLastCalledWith('testActionGroup');
   });
@@ -359,7 +354,7 @@ describe('ruleActionsSettings', () => {
     expect(screen.queryByText('RuleActionsAlertsFilterTimeframe')).toBeInTheDocument();
   });
 
-  test('should call filter and filter timeframe onChange', () => {
+  test('should call filter and filter timeframe onChange', async () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         settings: {},
@@ -389,10 +384,10 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    userEvent.click(screen.getByText('RuleActionsAlertsFilterButton'));
+    await userEvent.click(screen.getByText('RuleActionsAlertsFilterButton'));
     expect(mockOnAlertsFilterChange).toHaveBeenLastCalledWith({ filters: [], kql: 'test' });
 
-    userEvent.click(screen.getByText('RuleActionsAlertsFilterTimeframeButton'));
+    await userEvent.click(screen.getByText('RuleActionsAlertsFilterTimeframeButton'));
     expect(mockOnTimeframeChange).toHaveBeenLastCalledWith({
       days: [1],
       hours: { end: 'now', start: 'now' },

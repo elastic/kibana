@@ -19,7 +19,10 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { ActionType } from '@kbn/actions-types';
+import { ActionVariable } from '@kbn/alerting-types';
 import {
+  ActionConnector,
   ActionTypeRegistryContract,
   MinimumScheduleInterval,
   Rule,
@@ -65,6 +68,9 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   id?: string;
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
+  connectors: ActionConnector[];
+  connectorTypes: ActionType[];
+  aadTemplateFields: ActionVariable[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
   actionsErrors?: Record<string, RuleFormActionsErrors>;

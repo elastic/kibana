@@ -75,6 +75,9 @@ const initialState: RuleFormState = {
   selectedRuleType: indexThresholdRuleType,
   selectedRuleTypeModel: indexThresholdRuleTypeModel,
   multiConsumerSelection: 'stackAlerts',
+  connectors: [],
+  connectorTypes: [],
+  aadTemplateFields: [],
 };
 
 describe('ruleFormStateReducer', () => {

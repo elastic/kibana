@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -181,6 +182,9 @@ describe('ruleActionsItem', () => {
           },
         },
       },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
+      aadTemplateFields: [],
       actionsParamsErrors: {},
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
@@ -200,9 +204,6 @@ describe('ruleActionsItem', () => {
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
@@ -211,30 +212,27 @@ describe('ruleActionsItem', () => {
     expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
   });
 
-  test('should allow for toggling between setting and message', () => {
+  test('should allow for toggling between setting and message', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('Settings'));
+    await userEvent.click(screen.getByText('Settings'));
 
     expect(screen.getByText('ruleActionsSettings')).toBeInTheDocument();
     expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Message'));
+    await userEvent.click(screen.getByText('Message'));
 
     expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
     expect(screen.queryByText('ruleActionsSettings')).not.toBeInTheDocument();
   });
 
-  test('should allow notify when to be changed', () => {
+  test('should allow notify when to be changed', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', {
@@ -243,15 +241,12 @@ describe('ruleActionsItem', () => {
         })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('onNotifyWhenChange'));
+    await userEvent.click(screen.getByText('onNotifyWhenChange'));
 
-    expect(mockOnChange).toHaveBeenCalledTimes(2);
+    expect(mockOnChange).toHaveBeenCalledTimes(3);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       payload: { uuid: 'uuid-action-1', value: { recoveredParamKey: 'recoveredParamValue' } },
@@ -267,6 +262,11 @@ describe('ruleActionsItem', () => {
       type: 'setActionProperty',
     });
 
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { errors: {}, uuid: 'uuid-action-1' },
+      type: 'setActionParamsError',
+    });
+
     expect(getAvailableActionVariables).toHaveBeenCalledWith(
       { params: [], state: [] },
       undefined,
@@ -280,19 +280,16 @@ describe('ruleActionsItem', () => {
     );
   });
 
-  test('should allow alerts filter to be changed', () => {
+  test('should allow alerts filter to be changed', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('onAlertsFilterChange'));
+    await userEvent.click(screen.getByText('onAlertsFilterChange'));
 
     expect(mockOnChange).toHaveBeenCalledTimes(2);
 
@@ -310,19 +307,16 @@ describe('ruleActionsItem', () => {
     });
   });
 
-  test('should allow timeframe to be changed', () => {
+  test('should allow timeframe to be changed', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('onTimeframeChange'));
+    await userEvent.click(screen.getByText('onTimeframeChange'));
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
 
@@ -338,43 +332,42 @@ describe('ruleActionsItem', () => {
     });
   });
 
-  test('should allow params to be changed', () => {
+  test('should allow params to be changed', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('Message'));
+    await userEvent.click(screen.getByText('Message'));
 
-    userEvent.click(screen.getByText('onParamsChange'));
+    await userEvent.click(screen.getByText('onParamsChange'));
 
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       payload: { uuid: 'uuid-action-1', value: { paramsKey: { paramsKey: 'paramsValue' } } },
       type: 'setActionParams',
     });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { errors: {}, uuid: 'uuid-action-1' },
+      type: 'setActionParamsError',
+    });
   });
 
-  test('should allow action to be deleted', () => {
+  test('should allow action to be deleted', async () => {
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByTestId('ruleActionsItemDeleteButton'));
+    await userEvent.click(screen.getByTestId('ruleActionsItemDeleteButton'));
 
     expect(mockOnChange).toHaveBeenCalledWith({ payload: 'uuid-action-1', type: 'removeAction' });
   });

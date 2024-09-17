@@ -14,10 +14,11 @@ import { fetchConnectorTypes } from '../apis';
 export interface UseLoadConnectorTypesProps {
   http: HttpStart;
   includeSystemActions?: boolean;
+  enabled?: boolean;
 }
 
 export const useLoadConnectorTypes = (props: UseLoadConnectorTypesProps) => {
-  const { http, includeSystemActions } = props;
+  const { http, includeSystemActions, enabled = true } = props;
 
   const queryFn = () => {
     return fetchConnectorTypes({ http, includeSystemActions });
@@ -27,6 +28,7 @@ export const useLoadConnectorTypes = (props: UseLoadConnectorTypesProps) => {
     queryKey: ['useLoadConnectorTypes', includeSystemActions],
     queryFn,
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   return {

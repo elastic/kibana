@@ -65,12 +65,20 @@ useRuleFormState.mockReturnValue({
   plugins: {
     application: {
       navigateToUrl,
+      capabilities: {
+        actions: {
+          show: true,
+        },
+      },
     },
   },
   baseErrors: {},
   paramsErrors: {},
   multiConsumerSelection: 'logs',
   formData: formDataMock,
+  connectors: [],
+  connectorTypes: [],
+  aadTemplateFields: [],
 });
 
 const onSave = jest.fn();

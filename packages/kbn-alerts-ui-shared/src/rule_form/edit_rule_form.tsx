@@ -17,6 +17,7 @@ import { RulePage } from './rule_page';
 import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
+  RuleFormActionPermissionError,
   RuleFormCircuitBreakerError,
   RuleFormErrorPromptWrapper,
   RuleFormResolveRuleError,
@@ -33,7 +34,7 @@ export interface EditRuleFormProps {
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins, returnUrl } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme } = plugins;
+  const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
@@ -57,13 +58,23 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
-    useLoadDependencies({
-      http,
-      toasts: notifications.toasts,
-      ruleTypeRegistry,
-      id,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    fetchedFormData,
+    connectors,
+    connectorTypes,
+    aadTemplateFields,
+  } = useLoadDependencies({
+    http,
+    toasts: notifications.toasts,
+    capabilities: plugins.application.capabilities,
+    ruleTypeRegistry,
+    id,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -83,10 +94,20 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
+  const canReadConnectors = !!application.capabilities.actions?.show;
+
   if (isInitialLoading) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <EuiLoadingElastic size="xl" />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (!canReadConnectors) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormActionPermissionError />
       </RuleFormErrorPromptWrapper>
     );
   }
@@ -119,6 +140,9 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     <div data-test-subj="editRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
+          connectors,
+          connectorTypes,
+          aadTemplateFields,
           formData: fetchedFormData,
           id,
           plugins,

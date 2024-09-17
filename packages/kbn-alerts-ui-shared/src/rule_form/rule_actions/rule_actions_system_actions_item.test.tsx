@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -110,6 +111,9 @@ describe('ruleActionsSystemActionsItem', () => {
       },
       actionsParamsErrors: {},
       selectedRuleType: ruleType,
+      aadTemplateFields: [],
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     validateParamsForWarnings.mockReturnValue(null);
@@ -125,9 +129,6 @@ describe('ruleActionsSystemActionsItem', () => {
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
@@ -139,40 +140,34 @@ describe('ruleActionsSystemActionsItem', () => {
     expect(screen.getByText('RuleActionsMessage')).toBeInTheDocument();
   });
 
-  test('should be able to hide the accordion content', () => {
+  test('should be able to hide the accordion content', async () => {
     render(
       <RuleActionsSystemActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemAccordionButton'));
+    await userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemAccordionButton'));
 
     expect(screen.getByTestId('ruleActionsSystemActionsItemAccordionContent')).not.toBeVisible();
   });
 
-  test('should be able to delete the action', () => {
+  test('should be able to delete the action', async () => {
     render(
       <RuleActionsSystemActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemDeleteActionButton'));
+    await userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemDeleteActionButton'));
     expect(mockOnChange).toHaveBeenCalledWith({ payload: 'uuid-action-1', type: 'removeAction' });
   });
 
-  test('should render error icon if error exists', () => {
+  test('should render error icon if error exists', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
     useRuleFormState.mockReturnValue({
@@ -190,6 +185,9 @@ describe('ruleActionsSystemActionsItem', () => {
         },
       },
       selectedRuleType: ruleType,
+      aadTemplateFields: [],
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
     });
 
     render(
@@ -197,30 +195,24 @@ describe('ruleActionsSystemActionsItem', () => {
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemAccordionButton'));
+    await userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemAccordionButton'));
 
     expect(screen.getByTestId('action-group-error-icon')).toBeInTheDocument();
   });
 
-  test('should allow params to be changed', () => {
+  test('should allow params to be changed', async () => {
     render(
       <RuleActionsSystemActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('RuleActionsMessageButton'));
+    await userEvent.click(screen.getByText('RuleActionsMessageButton'));
 
     expect(mockOnChange).toHaveBeenCalledWith({
       payload: { uuid: 'uuid-action-1', value: { param: { paramKey: 'someValue' } } },
@@ -229,7 +221,7 @@ describe('ruleActionsSystemActionsItem', () => {
     expect(mockValidate).toHaveBeenCalledWith({ param: { paramKey: 'someValue' } });
   });
 
-  test('should set warning and error if params have errors', () => {
+  test('should set warning and error if params have errors', async () => {
     validateParamsForWarnings.mockReturnValue('warning message!');
 
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -247,16 +239,20 @@ describe('ruleActionsSystemActionsItem', () => {
         action={getAction('1', { actionTypeId: 'actionType-1' })}
         index={0}
         producerId="stackAlerts"
-        aadTemplateFields={[]}
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
       />
     );
 
-    userEvent.click(screen.getByText('RuleActionsMessageButton'));
-    expect(mockOnChange).toHaveBeenLastCalledWith({
+    await userEvent.click(screen.getByText('RuleActionsMessageButton'));
+
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
+    expect(mockOnChange).toHaveBeenCalledWith({
       payload: { uuid: 'uuid-action-1', value: { param: { paramKey: 'someValue' } } },
       type: 'setActionParams',
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { errors: { paramsValue: ['something went wrong!'] }, uuid: 'uuid-action-1' },
+      type: 'setActionParamsError',
     });
 
     expect(screen.getByText('warning message!')).toBeInTheDocument();

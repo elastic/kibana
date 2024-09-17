@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   RuleDefinition,
@@ -33,6 +34,8 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
   RULE_FORM_RETURN_TITLE,
+  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE,
+  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_CREATE_DESCRIPTION,
 } from '../translations';
 
 export interface RulePageProps {
@@ -51,6 +54,8 @@ export const RulePage = (props: RulePageProps) => {
     multiConsumerSelection,
   } = useRuleFormState();
 
+  const canReadConnectors = !!application.capabilities.actions?.show;
+
   const styles = useEuiBackgroundColorCSS().transparent;
 
   const onCancel = useCallback(() => {
@@ -64,6 +69,28 @@ export const RulePage = (props: RulePageProps) => {
     });
   }, [onSave, formData, multiConsumerSelection]);
 
+  const actionComponent = useMemo(() => {
+    if (canReadConnectors) {
+      return (
+        <>
+          <RuleActions />
+          <EuiSpacer />
+          <EuiHorizontalRule margin="none" />
+        </>
+      );
+    }
+
+    return (
+      <EuiCallOut
+        title={RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE}
+        color="warning"
+        iconType="warning"
+      >
+        <p>{RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_CREATE_DESCRIPTION}</p>
+      </EuiCallOut>
+    );
+  }, [canReadConnectors]);
+
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
@@ -72,13 +99,8 @@ export const RulePage = (props: RulePageProps) => {
       },
       {
         title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-        children: (
-          <>
-            <RuleActions />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
+        children: actionComponent,
+        status: canReadConnectors ? undefined : 'disabled',
       },
       {
         title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
@@ -91,7 +113,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, []);
+  }, [actionComponent, canReadConnectors]);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>

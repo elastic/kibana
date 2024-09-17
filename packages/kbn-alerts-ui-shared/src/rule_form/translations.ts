@@ -458,6 +458,28 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleActionsNoPermissionTitle',
+  {
+    defaultMessage: 'Actions and connectors privileges missing',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_CREATE_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleActionsNoPermissionDescription',
+  {
+    defaultMessage:
+      'You must have read access to actions and connectors to add actions to your rules.',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_EDIT_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleActionsNoPermissionDescription',
+  {
+    defaultMessage: 'You must have read access to actions and connectors to edit rules.',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleDetailsTitle',
   {

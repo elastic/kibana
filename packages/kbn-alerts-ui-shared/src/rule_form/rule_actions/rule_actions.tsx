@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleSystemAction } from '@kbn/alerting-types';
 import { ADD_ACTION_TEXT } from '../translations';
@@ -16,8 +16,6 @@ import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import { ActionConnector, RuleAction } from '../../common/types';
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import { useLoadConnectors, useLoadConnectorTypes } from '../../common/hooks';
-import { useLoadRuleTypeAadTemplateField } from '../../common/hooks/use_load_rule_type_aad_template_fields';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 
@@ -25,32 +23,12 @@ export const RuleActions = () => {
   const [isConnectorModalOpen, setIsConnectorModalOpen] = useState<boolean>(false);
 
   const {
-    plugins: { http },
     formData: { actions, consumer },
     selectedRuleType,
+    connectorTypes,
   } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
-
-  const { data: connectors = [], isInitialLoading: isInitialLoadingConnectors } = useLoadConnectors(
-    {
-      http,
-      includeSystemActions: true,
-    }
-  );
-
-  const { data: connectorTypes = [], isInitialLoading: isInitialLoadingConnectorTypes } =
-    useLoadConnectorTypes({
-      http,
-      includeSystemActions: true,
-    });
-
-  const { data: aadTemplateFields, isInitialLoading: isInitialLoadingAadTemplateField } =
-    useLoadRuleTypeAadTemplateField({
-      http,
-      ruleTypeId: selectedRuleType.id,
-      enabled: true,
-    });
 
   const onModalOpen = useCallback(() => {
     setIsConnectorModalOpen(true);
@@ -86,15 +64,6 @@ export const RuleActions = () => {
     return selectedRuleType.producer;
   }, [consumer, selectedRuleType]);
 
-  const isLoading =
-    isInitialLoadingConnectors ||
-    isInitialLoadingConnectorTypes ||
-    isInitialLoadingAadTemplateField;
-
-  if (isLoading) {
-    return <EuiLoadingSpinner />;
-  }
-
   return (
     <>
       <EuiFlexGroup data-test-subj="ruleActions" direction="column">
@@ -110,9 +79,6 @@ export const RuleActions = () => {
                   action={action as RuleSystemAction}
                   index={index}
                   producerId={producerId}
-                  aadTemplateFields={aadTemplateFields}
-                  connectors={connectors}
-                  actionTypes={connectorTypes}
                 />
               )}
               {!isSystemAction && (
@@ -120,9 +86,6 @@ export const RuleActions = () => {
                   action={action as RuleAction}
                   index={index}
                   producerId={producerId}
-                  aadTemplateFields={aadTemplateFields}
-                  connectors={connectors}
-                  actionTypes={connectorTypes}
                 />
               )}
             </EuiFlexItem>
@@ -135,18 +98,11 @@ export const RuleActions = () => {
         iconType="push"
         iconSide="left"
         onClick={onModalOpen}
-        disabled={isLoading}
-        isLoading={isLoading}
       >
         {ADD_ACTION_TEXT}
       </EuiButton>
       {isConnectorModalOpen && (
-        <RuleActionsConnectorsModal
-          onClose={onModalClose}
-          onSelectConnector={onSelectConnector}
-          connectors={connectors}
-          actionTypes={connectorTypes}
-        />
+        <RuleActionsConnectorsModal onClose={onModalClose} onSelectConnector={onSelectConnector} />
       )}
     </>
   );

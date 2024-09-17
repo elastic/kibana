@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -109,7 +110,7 @@ describe('ruleActionsAlertsFilter', () => {
     expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
   });
 
-  test('should allow for toggling on of query', () => {
+  test('should allow for toggling on of query', async () => {
     render(
       <RuleActionsAlertsFilter
         action={getAction('1')}
@@ -119,12 +120,12 @@ describe('ruleActionsAlertsFilter', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('alertsFilterQueryToggle'));
+    await userEvent.click(screen.getByTestId('alertsFilterQueryToggle'));
 
     expect(mockOnChange).toHaveBeenLastCalledWith({ filters: [], kql: '' });
   });
 
-  test('should allow for toggling off of query', () => {
+  test('should allow for toggling off of query', async () => {
     render(
       <RuleActionsAlertsFilter
         action={getAction('1', {
@@ -141,12 +142,12 @@ describe('ruleActionsAlertsFilter', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('alertsFilterQueryToggle'));
+    await userEvent.click(screen.getByTestId('alertsFilterQueryToggle'));
 
     expect(mockOnChange).toHaveBeenLastCalledWith(undefined);
   });
 
-  test('should allow for changing  query', () => {
+  test('should allow for changing  query', async () => {
     render(
       <RuleActionsAlertsFilter
         action={getAction('1', {
@@ -163,14 +164,14 @@ describe('ruleActionsAlertsFilter', () => {
       />
     );
 
-    userEvent.click(screen.getByText('Update Filter'));
+    await userEvent.click(screen.getByText('Update Filter'));
     expect(mockOnChange).toHaveBeenLastCalledWith({
       filters: [{ $state: { store: 'appState' }, meta: {} }],
       kql: 'test',
     });
-    userEvent.click(screen.getByText('Update Query'));
+    await userEvent.click(screen.getByText('Update Query'));
     expect(mockOnChange).toHaveBeenLastCalledWith({ filters: [], kql: 'onQueryChange' });
-    userEvent.click(screen.getByText('Submit Query'));
+    await userEvent.click(screen.getByText('Submit Query'));
     expect(mockOnChange).toHaveBeenLastCalledWith({ filters: [], kql: 'onQuerySubmit' });
   });
 });

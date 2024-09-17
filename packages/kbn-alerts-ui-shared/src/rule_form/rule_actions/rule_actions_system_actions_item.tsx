@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import {
   EuiAccordion,
   EuiBadge,
@@ -24,11 +24,11 @@ import {
   useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
-import { ActionVariable, RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import { SavedObjectAttribute } from '@kbn/core/types';
 import { css } from '@emotion/react';
-import { ActionType } from '@kbn/actions-types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { ActionConnector, RuleFormParamsErrors } from '../../common';
+import { RuleFormParamsErrors } from '../../common';
 import {
   ACTION_ERROR_TOOLTIP,
   ACTION_WARNING_TITLE,
@@ -43,18 +43,18 @@ interface RuleActionsSystemActionsItemProps {
   action: RuleSystemAction;
   index: number;
   producerId: string;
-  aadTemplateFields: ActionVariable[];
-  connectors: ActionConnector[];
-  actionTypes: ActionType[];
 }
 
 export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItemProps) => {
-  const { action, index, aadTemplateFields, connectors, actionTypes, producerId } = props;
+  const { action, index, producerId } = props;
 
   const {
     plugins: { actionTypeRegistry, http },
     actionsParamsErrors = {},
     selectedRuleType,
+    connectorTypes,
+    connectors,
+    aadTemplateFields,
   } = useRuleFormState();
 
   const [isOpen, setIsOpen] = useState(true);
@@ -69,7 +69,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
 
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
-  const actionType = actionTypes.find(({ id }) => id === action.actionTypeId)!;
+  const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId)!;
   const connector = connectors.find(({ id }) => id === action.id)!;
 
   const actionParamsError = actionsParamsErrors[action.uuid!] || {};
@@ -259,12 +259,11 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
           <RuleActionsMessage
             useDefaultMessage
             action={action}
-            actionTypes={actionTypes}
             index={index}
-            templateFields={aadTemplateFields}
             connector={connector}
             producerId={producerId}
             warning={warning}
+            templateFields={aadTemplateFields}
             onParamsChange={onParamsChange}
           />
         </EuiFlexItem>

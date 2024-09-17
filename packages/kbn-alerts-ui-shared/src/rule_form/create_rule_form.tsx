@@ -79,16 +79,25 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
-    useLoadDependencies({
-      http,
-      toasts: notifications.toasts,
-      ruleTypeRegistry,
-      ruleTypeId,
-      consumer,
-      validConsumers,
-      filteredRuleTypes,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    connectors,
+    connectorTypes,
+    aadTemplateFields,
+  } = useLoadDependencies({
+    http,
+    toasts: notifications.toasts,
+    capabilities: plugins.application.capabilities,
+    ruleTypeRegistry,
+    ruleTypeId,
+    consumer,
+    validConsumers,
+    filteredRuleTypes,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -153,6 +162,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             actions: [],
           }),
           plugins,
+          connectors,
+          connectorTypes,
+          aadTemplateFields,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,

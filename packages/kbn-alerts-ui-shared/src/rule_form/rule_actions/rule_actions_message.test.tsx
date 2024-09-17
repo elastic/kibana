@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { lazy } from 'react';
@@ -110,6 +111,9 @@ describe('RuleActionsMessage', () => {
       actionsParamsErrors: {},
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
+      connectors: [getConnector('1')],
+      connectorTypes: [getActionType('1')],
+      aadTemplateFields: [],
     });
   });
 
@@ -126,7 +130,6 @@ describe('RuleActionsMessage', () => {
         useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -148,7 +151,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -170,7 +172,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -199,7 +200,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -224,7 +224,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -237,6 +236,30 @@ describe('RuleActionsMessage', () => {
   });
 
   test('should render default summary message for system actions', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        actionParamsFields: mockedActionParamsFields,
+      })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      actionsParamsErrors: {},
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      connectors: [getConnector('1')],
+      connectorTypes: [
+        getActionType('1', {
+          isSystemActionType: true,
+          id: 'actionTypeModel-1',
+        }),
+      ],
+      aadTemplateFields: [],
+    });
+
     render(
       <RuleActionsMessage
         action={getSystemAction('1', {
@@ -248,12 +271,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[
-          getActionType('1', {
-            isSystemActionType: true,
-            id: 'actionTypeModel-1',
-          }),
-        ]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -283,6 +300,9 @@ describe('RuleActionsMessage', () => {
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
+      connectors: [getConnector('1')],
+      connectorTypes: [getActionType('1')],
+      aadTemplateFields: [],
     });
 
     render(
@@ -294,7 +314,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -316,7 +335,6 @@ describe('RuleActionsMessage', () => {
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
-        actionTypes={[getActionType('1')]}
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -325,7 +343,7 @@ describe('RuleActionsMessage', () => {
       return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('editActionMock'));
+    await userEvent.click(screen.getByTestId('editActionMock'));
     expect(mockOnParamsChange).toHaveBeenLastCalledWith(
       'paramsKey',
       { paramsKey: 'paramsValue' },

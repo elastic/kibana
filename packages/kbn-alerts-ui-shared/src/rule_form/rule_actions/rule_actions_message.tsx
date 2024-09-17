@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Suspense, useMemo } from 'react';
 import { EuiCallOut, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
-import { ActionType } from '@kbn/actions-types';
 import { useRuleFormState } from '../hooks';
 import { ActionConnector, ActionConnectorMode, RuleAction, RuleUiAction } from '../../common';
 import { getSelectedActionGroup } from '../utils';
@@ -20,7 +20,6 @@ export interface RuleActionsMessageProps {
   templateFields: ActionVariable[];
   useDefaultMessage: boolean;
   connector: ActionConnector;
-  actionTypes: ActionType[];
   producerId: string;
   warning?: string | null;
   onParamsChange: (key: string, value: RuleActionParam) => void;
@@ -35,7 +34,6 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     connector,
     producerId,
     warning,
-    actionTypes,
     onParamsChange,
   } = props;
 
@@ -44,6 +42,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
+    connectorTypes,
   } = useRuleFormState();
 
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
@@ -53,10 +52,10 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   const actionsParamsError = actionsParamsErrors[action.uuid!] || {};
 
   const isSystemAction = useMemo(() => {
-    return actionTypes.some((actionType) => {
+    return connectorTypes.some((actionType) => {
       return actionType.id === action.actionTypeId && actionType.isSystemActionType;
     });
-  }, [action, actionTypes]);
+  }, [action, connectorTypes]);
 
   const selectedActionGroup = useMemo(() => {
     if (isSystemAction) {

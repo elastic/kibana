@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -49,6 +50,9 @@ describe('ruleActionsConnectorsModal', () => {
       formData: {
         actions: [],
       },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
+      aadTemplateFields: [],
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
   });
@@ -59,24 +63,14 @@ describe('ruleActionsConnectorsModal', () => {
 
   test('renders correctly', () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
     expect(screen.getByTestId('ruleActionsConnectorsModal'));
   });
 
   test('should render connectors and filters', () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.getByText('connector-1')).toBeInTheDocument();
@@ -91,69 +85,61 @@ describe('ruleActionsConnectorsModal', () => {
     expect(within(filterButtonGroup).getByText('All')).toBeInTheDocument();
   });
 
-  test('should allow for searching of connectors', () => {
+  test('should allow for searching of connectors', async () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
-    userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'connector-1');
+    // Type first connector
+    await userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'connector-1');
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
     expect(screen.getByText('connector-1')).toBeInTheDocument();
 
-    userEvent.clear(screen.getByTestId('ruleActionsConnectorsModalSearch'));
+    // Clear
+    await userEvent.clear(screen.getByTestId('ruleActionsConnectorsModalSearch'));
 
-    userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'actionType: 2');
+    // Type second connector
+    await userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'actionType: 2');
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
     expect(screen.getByText('connector-2')).toBeInTheDocument();
 
-    userEvent.clear(screen.getByTestId('ruleActionsConnectorsModalSearch'));
+    // Clear
+    await userEvent.clear(screen.getByTestId('ruleActionsConnectorsModalSearch'));
 
-    userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'doesntexist');
+    // Type a connector that doesn't exist
+    await userEvent.type(screen.getByTestId('ruleActionsConnectorsModalSearch'), 'doesntexist');
     expect(screen.getByTestId('ruleActionsConnectorsModalEmpty')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('ruleActionsConnectorsModalClearFiltersButton'));
+    // Clear
+    await userEvent.click(screen.getByTestId('ruleActionsConnectorsModalClearFiltersButton'));
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(2);
   });
 
-  test('should allow for filtering of connectors', () => {
+  test('should allow for filtering of connectors', async () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     const filterButtonGroup = screen.getByTestId('ruleActionsConnectorsModalFilterButtonGroup');
-    userEvent.click(within(filterButtonGroup).getByText('actionType: 1'));
+
+    await userEvent.click(within(filterButtonGroup).getByText('actionType: 1'));
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
     expect(screen.getByText('connector-1')).toBeInTheDocument();
 
-    userEvent.click(within(filterButtonGroup).getByText('actionType: 2'));
-    expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
+    await userEvent.click(within(filterButtonGroup).getByText('actionType: 2'));
     expect(screen.getByText('connector-2')).toBeInTheDocument();
+    expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(1);
 
-    userEvent.click(within(filterButtonGroup).getByText('All'));
+    await userEvent.click(within(filterButtonGroup).getByText('All'));
     expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(2);
   });
 
-  test('should call onSelectConnector when connector is clicked', () => {
+  test('should call onSelectConnector when connector is clicked', async () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
-    userEvent.click(screen.getByText('connector-1'));
+    await userEvent.click(screen.getByText('connector-1'));
     expect(mockOnSelectConnector).toHaveBeenLastCalledWith({
       actionTypeId: 'actionType-1',
       config: { config: 'config-1' },
@@ -165,7 +151,7 @@ describe('ruleActionsConnectorsModal', () => {
       secrets: { secret: 'secret' },
     });
 
-    userEvent.click(screen.getByText('connector-2'));
+    await userEvent.click(screen.getByText('connector-2'));
     expect(mockOnSelectConnector).toHaveBeenLastCalledWith({
       actionTypeId: 'actionType-2',
       config: { config: 'config-2' },
@@ -180,12 +166,7 @@ describe('ruleActionsConnectorsModal', () => {
 
   test('should not render connector if action type doesnt exist', () => {
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={[getActionType('1')]}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.queryByText('connector2')).not.toBeInTheDocument();
@@ -203,15 +184,12 @@ describe('ruleActionsConnectorsModal', () => {
       formData: {
         actions: [],
       },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
     });
 
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.queryByText('connector2')).not.toBeInTheDocument();
@@ -234,54 +212,84 @@ describe('ruleActionsConnectorsModal', () => {
       formData: {
         actions: [],
       },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
     });
 
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={mockActionTypes}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.queryByText('connector-2')).not.toBeInTheDocument();
   });
 
   test('should not render connector if the action type is not enabled', () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [getActionType('1'), getActionType('2', { enabledInConfig: false })],
+    });
+
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={[getActionType('1'), getActionType('2', { enabledInConfig: false })]}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.queryByText('connector-2')).not.toBeInTheDocument();
   });
 
   test('should render connector if the action is not enabled but its a preconfigured connector', () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [getConnector('1'), getConnector('2', { isPreconfigured: true })],
+      connectorTypes: [getActionType('1'), getActionType('2', { enabledInConfig: false })],
+    });
+
     render(
-      <RuleActionsConnectorsModal
-        connectors={[getConnector('1'), getConnector('2', { isPreconfigured: true })]}
-        actionTypes={[getActionType('1'), getActionType('2', { enabledInConfig: false })]}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.getByText('connector-2')).toBeInTheDocument();
   });
 
   test('should disable connector if it fails license check', () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [getActionType('1'), getActionType('2', { enabledInLicense: false })],
+    });
+
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={[getActionType('1'), getActionType('2', { enabledInLicense: false })]}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.getByText('connector-2')).toBeDisabled();
@@ -301,14 +309,12 @@ describe('ruleActionsConnectorsModal', () => {
       formData: {
         actions: [{ actionTypeId: 'actionType-2' }],
       },
+      connectors: mockConnectors,
+      connectorTypes: [getActionType('1'), getActionType('2', { isSystemActionType: true })],
     });
+
     render(
-      <RuleActionsConnectorsModal
-        connectors={mockConnectors}
-        actionTypes={[getActionType('1'), getActionType('2', { isSystemActionType: true })]}
-        onClose={mockOnClose}
-        onSelectConnector={mockOnSelectConnector}
-      />
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
     );
 
     expect(screen.getByText('connector-2')).toBeDisabled();
