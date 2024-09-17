@@ -14,6 +14,9 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry } from '../utils/create_entry';
+import { deleteTinyElser, installTinyElser, setupKnowledgeBase } from '../utils/helpers';
+import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
+import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 
 const documentEntry: DocumentEntryCreateFields = {
   name: 'Sample Document Entry',
@@ -40,20 +43,35 @@ const indexEntry: IndexEntryCreateFields = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
-  // TODO: Fill out tests
-  describe.skip('@ess @serverless Basic Security AI Assistant Knowledge Base Entries', () => {
+  describe('@ess @serverless Basic Security AI Assistant Knowledge Base Entries', () => {
+    before(async () => {
+      await installTinyElser(ml);
+      await setupKnowledgeBase(supertest, log);
+    });
+
+    after(async () => {
+      await deleteTinyElser(ml);
+    });
+
     describe('Create Entries', () => {
       it('should create a new document entry', async () => {
         const entry = await createEntry(supertest, log, documentEntry);
 
-        expect(entry).toEqual(documentEntry);
+        expect(removeServerGeneratedProperties(entry)).toEqual(documentEntry);
       });
 
       it('should create a new index entry', async () => {
         const entry = await createEntry(supertest, log, indexEntry);
 
-        expect(entry).toEqual(indexEntry);
+        const expectedIndexEntry = {
+          ...indexEntry,
+          inputSchema: [],
+          outputFields: [],
+        };
+
+        expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
       });
     });
   });
