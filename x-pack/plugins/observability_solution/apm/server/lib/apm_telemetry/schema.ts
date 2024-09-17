@@ -264,6 +264,13 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
         description: 'Total number of services utilizing the otlp agent within the last day',
       },
     },
+    opentelemetry: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry agent within the last day',
+      },
+    },
     'opentelemetry/cpp': {
       type: 'long',
       _meta: {
