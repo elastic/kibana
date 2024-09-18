@@ -63,7 +63,7 @@ describe('useIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitFor(() => null);
+    await waitFor(() => !result.current.isLoading);
 
     // It switches to a success state
     expect(result.current.isLoading).toEqual(false);

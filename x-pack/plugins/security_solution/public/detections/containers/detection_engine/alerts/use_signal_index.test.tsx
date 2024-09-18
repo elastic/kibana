@@ -30,70 +30,62 @@ describe('useSignalIndex', () => {
   });
 
   test('init', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      expect(result.current).toEqual({
-        createDeSignalIndex: null,
-        loading: true,
-        signalIndexExists: null,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+
+    expect(result.current).toEqual({
+      createDeSignalIndex: null,
+      loading: true,
+      signalIndexExists: null,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
     });
   });
 
   test('fetch alerts info', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      expect(result.current).toEqual({
-        createDeSignalIndex: result.current.createDeSignalIndex,
-        loading: false,
-        signalIndexExists: true,
-        signalIndexName: 'mock-signal-index',
-        signalIndexMappingOutdated: false,
-      });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+    await waitFor(() => null);
+    expect(result.current).toEqual({
+      createDeSignalIndex: result.current.createDeSignalIndex,
+      loading: false,
+      signalIndexExists: true,
+      signalIndexName: 'mock-signal-index',
+      signalIndexMappingOutdated: false,
     });
   });
 
   test('make sure that createSignalIndex is giving back the signal info', async () => {
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+    await waitFor(() => null);
     await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
-      }
-      await waitFor(() => null);
-      expect(result.current).toEqual({
-        createDeSignalIndex: result.current.createDeSignalIndex,
-        loading: false,
-        signalIndexExists: true,
-        signalIndexName: 'mock-signal-index',
-        signalIndexMappingOutdated: false,
-      });
+      await result.current.createDeSignalIndex?.();
+    });
+    await waitFor(() => null);
+    expect(result.current).toEqual({
+      createDeSignalIndex: result.current.createDeSignalIndex,
+      loading: false,
+      signalIndexExists: true,
+      signalIndexName: 'mock-signal-index',
+      signalIndexMappingOutdated: false,
     });
   });
 
   test('make sure that createSignalIndex have been called when trying to create signal index', async () => {
     const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
-    await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
-      }
-      await waitFor(() => null);
-      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
     });
+    await waitFor(() => null);
+    await act(async () => {
+      await result.current.createDeSignalIndex?.();
+    });
+    await waitFor(() => null);
+    expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
   });
 
   test('if there is an error during createSignalIndex, we should get back signalIndexExists === false && signalIndexName == null', async () => {
@@ -101,21 +93,19 @@ describe('useSignalIndex', () => {
     spyOnCreateSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+    await waitFor(() => null);
     await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      if (result.current.createDeSignalIndex != null) {
-        await result.current.createDeSignalIndex();
-      }
-      expect(result.current).toEqual({
-        createDeSignalIndex: result.current.createDeSignalIndex,
-        loading: false,
-        signalIndexExists: false,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
+      await result.current.createDeSignalIndex?.();
+    });
+    expect(result.current).toEqual({
+      createDeSignalIndex: result.current.createDeSignalIndex,
+      loading: false,
+      signalIndexExists: false,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
     });
   });
 
@@ -124,18 +114,16 @@ describe('useSignalIndex', () => {
     spyOnGetSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
-    await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      expect(result.current).toEqual({
-        createDeSignalIndex: result.current.createDeSignalIndex,
-        loading: false,
-        signalIndexExists: false,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+    await waitFor(() => null);
+    expect(result.current).toEqual({
+      createDeSignalIndex: result.current.createDeSignalIndex,
+      loading: false,
+      signalIndexExists: false,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
     });
   });
 
@@ -146,19 +134,17 @@ describe('useSignalIndex', () => {
       .mockReturnValue('mock-signal-index-from-sourcerer');
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
 
-    await act(async () => {
-      const { result } = renderHook(() => useSignalIndex(), {
-        wrapper: TestProvidersWithPrivileges,
-      });
-      await waitFor(() => null);
-      expect(spyOnGetSignalIndex).not.toHaveBeenCalled();
-      expect(result.current).toEqual({
-        createDeSignalIndex: result.current.createDeSignalIndex,
-        loading: false,
-        signalIndexExists: true,
-        signalIndexName: 'mock-signal-index-from-sourcerer',
-        signalIndexMappingOutdated: false,
-      });
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+    await waitFor(() => null);
+    expect(spyOnGetSignalIndex).not.toHaveBeenCalled();
+    expect(result.current).toEqual({
+      createDeSignalIndex: result.current.createDeSignalIndex,
+      loading: false,
+      signalIndexExists: true,
+      signalIndexName: 'mock-signal-index-from-sourcerer',
+      signalIndexMappingOutdated: false,
     });
   });
 });

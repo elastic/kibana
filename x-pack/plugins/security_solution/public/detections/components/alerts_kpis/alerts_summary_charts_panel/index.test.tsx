@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
@@ -29,27 +29,23 @@ describe('AlertsSummaryChartsPanel', () => {
   };
 
   test('renders correctly', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsSummaryChartsPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(screen.queryByTestId('alerts-charts-panel')).toBeInTheDocument();
   });
 
   test('it renders the header with the specified `alignHeader` alignment', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
-      ).toContain('flexEnd');
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
+      </TestProviders>
+    );
+    expect(
+      container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
+    ).toContain('flexEnd');
   });
 
   describe('Query', () => {
@@ -75,44 +71,38 @@ describe('AlertsSummaryChartsPanel', () => {
 
   describe('toggleQuery', () => {
     test('toggles', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...defaultProps} />
-          </TestProviders>
-        );
-        const element = container.querySelector('[data-test-subj="query-toggle-header"]');
-        if (element) {
-          fireEvent.click(element);
-        }
-        expect(mockSetIsExpanded).toBeCalledWith(false);
-      });
+      const { container } = render(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...defaultProps} />
+        </TestProviders>
+      );
+      const element = container.querySelector('[data-test-subj="query-toggle-header"]');
+      if (element) {
+        fireEvent.click(element);
+      }
+      expect(mockSetIsExpanded).toBeCalledWith(false);
     });
 
     it('when isExpanded is true, render summary chart', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(
-          container.querySelector('[data-test-subj="alerts-charts-container"]')
-        ).toBeInTheDocument();
-      });
+      const { container } = render(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(
+        container.querySelector('[data-test-subj="alerts-charts-container"]')
+      ).toBeInTheDocument();
     });
 
     it('when isExpanded is false, hide summary chart', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...defaultProps} isExpanded={false} />
-          </TestProviders>
-        );
-        expect(
-          container.querySelector('[data-test-subj="alerts-charts-container"]')
-        ).not.toBeInTheDocument();
-      });
+      const { container } = render(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...defaultProps} isExpanded={false} />
+        </TestProviders>
+      );
+      expect(
+        container.querySelector('[data-test-subj="alerts-charts-container"]')
+      ).not.toBeInTheDocument();
     });
   });
 });

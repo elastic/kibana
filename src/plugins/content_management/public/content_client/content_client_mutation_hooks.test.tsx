@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
@@ -46,7 +46,7 @@ describe('useCreateContentMutation', () => {
     const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' }, version: 2 };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
     await waitFor(() => result.current.isSuccess);
@@ -66,7 +66,7 @@ describe('useUpdateContentMutation', () => {
     };
     const output = { test: 'test' };
     crudClient.update.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
     await waitFor(() => result.current.isSuccess);
@@ -81,7 +81,7 @@ describe('useDeleteContentMutation', () => {
     const input: DeleteIn = { contentTypeId: 'testType', id: 'test', version: 2 };
     const output = { test: 'test' };
     crudClient.delete.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
     await waitFor(() => result.current.isSuccess);

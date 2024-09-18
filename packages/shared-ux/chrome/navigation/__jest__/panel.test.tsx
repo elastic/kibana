@@ -14,6 +14,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
+import { fireEvent } from '@testing-library/react';
 
 import { PanelContentProvider } from '../src/ui';
 import { renderNavigation } from './utils';
@@ -54,7 +55,7 @@ describe('Panel', () => {
 
     expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
     expect(queryByTestId(/sideNavPanel/)).toBeNull();
-    (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
+    fireEvent.click(await findByTestId(/panelOpener-root.group1/));
     expect(queryByTestId(/sideNavPanel/)).toBeVisible();
   });
 
@@ -177,7 +178,7 @@ describe('Panel', () => {
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
       expect(queryByTestId(/customPanelContent/)).toBeNull();
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      fireEvent.click(queryByTestId(/panelOpener-root.group1/)!); // open the panel
 
       expect(queryByTestId(/sideNavPanel/)).not.toBeNull();
       expect(queryByTestId(/customPanelContent/)).not.toBeNull();
@@ -187,7 +188,7 @@ describe('Panel', () => {
       // Test that the active nodes are correclty passed
       expect(queryByTestId(/customPanelActiveNodes/)?.textContent).toBe('activeGroup1activeItem1');
       // Test that handler to close the panel is correctly passed
-      queryByTestId(/customPanelCloseBtn/)?.click(); // close the panel
+      fireEvent.click(queryByTestId(/customPanelCloseBtn/)!); // close the panel
       expect(queryByTestId(/customPanelContent/)).toBeNull();
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
@@ -247,7 +248,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      fireEvent.click(queryByTestId(/panelOpener-root.group1/)); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
       expect(queryByTestId(/panelGroupTitleId-foo/)?.textContent).toBe('Foo');
@@ -313,7 +314,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      fireEvent.click(queryByTestId(/panelOpener-root.group1/)); // open the panel
 
       expect(queryByTestId(/panelGroupTitleId-foo/)).toBeNull(); // No title rendered
 
@@ -379,7 +380,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      fireEvent.click(queryByTestId(/panelOpener-root.group1/)); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
 
@@ -389,7 +390,7 @@ describe('Panel', () => {
       expect(queryByTestId(/panelNavItem-id-item1/)).not.toBeVisible(); // Accordion is collapsed
       expect(queryByTestId(/panelNavItem-id-item3/)).not.toBeVisible(); // Accordion is collapsed
 
-      queryByTestId(/panelAccordionBtnId-foo/)?.click(); // Expand accordion
+      fireEvent.click(queryByTestId(/panelAccordionBtnId-foo/)); // Expand accordion
 
       expect(queryByTestId(/panelNavItem-id-item1/)).toBeVisible();
       expect(queryByTestId(/panelNavItem-id-item3/)).toBeVisible();

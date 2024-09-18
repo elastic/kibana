@@ -584,37 +584,39 @@ describe('ranges', () => {
         act(() => {
           // need another wrapping for this in order to work
           instance.update();
+        });
 
-          expect(instance.find(RangePopover)).toHaveLength(2);
+        expect(instance.find(RangePopover)).toHaveLength(2);
 
-          // edit the range and check
-          instance
-            .find('RangePopover input[type="number"]')
-            .first()
-            .simulate('change', {
-              target: {
-                value: '50',
-              },
-            });
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: 50, to: Infinity, label: '' },
-                  ],
-                },
-              },
+        // edit the range and check
+        instance
+          .find('RangePopover input[type="number"]')
+          .first()
+          .simulate('change', {
+            target: {
+              value: '50',
             },
           });
+
+        act(() => {
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: 50, to: Infinity, label: '' },
+                ],
+              },
+            },
+          },
         });
       });
 
@@ -653,23 +655,23 @@ describe('ranges', () => {
             });
 
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
 
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
-                  ],
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
+                ],
               },
             },
-          });
+          },
         });
       });
 
@@ -703,20 +705,20 @@ describe('ranges', () => {
               },
             });
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
 
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [{ from: 0, to: 50, label: '' }],
-                },
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [{ from: 0, to: 50, label: '' }],
               },
             },
-          });
+          },
         });
       });
 

@@ -65,6 +65,8 @@ describe('useLoadTagsQuery', () => {
       }
     );
 
+    await waitFor(() => null);
+
     rerender();
     await waitFor(() => null);
 
@@ -99,6 +101,7 @@ describe('useLoadTagsQuery', () => {
       }
     );
 
+    await waitFor(() => null);
     rerender();
     await waitFor(() => null);
 
@@ -153,6 +156,7 @@ describe('useLoadTagsQuery', () => {
       }
     );
 
+    await waitFor(() => null);
     rerender();
     await waitFor(() => null);
 

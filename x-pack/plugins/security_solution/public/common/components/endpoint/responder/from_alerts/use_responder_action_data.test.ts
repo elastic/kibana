@@ -170,7 +170,7 @@ describe('use responder action data hooks', () => {
 
       it('should show action enabled if host metadata was retrieved and host is enrolled', async () => {
         const { result } = renderHook();
-        await waitFor(() => result.current.isDisabled);
+        // await waitFor(() => result.current.isDisabled);
 
         expect(result.current).toEqual(getExpectedResponderActionData());
       });

@@ -17,7 +17,7 @@ import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { updateVisualizationState, LensAppState } from '../../../state_management';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { LensInspector } from '../../../lens_inspector_service';
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import faker from 'faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
 
@@ -64,7 +64,9 @@ describe('workspace_panel_wrapper', () => {
 
     const toggleAutoApply = () => {
       const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
-      autoApplyToggle.click();
+      act(() => {
+        autoApplyToggle.click();
+      });
     };
 
     const isAutoApplyOn = () => {
@@ -73,12 +75,14 @@ describe('workspace_panel_wrapper', () => {
     };
 
     const editVisualization = () => {
-      store.dispatch(
-        updateVisualizationState({
-          visualizationId: store.getState().lens.visualization.activeId as string,
-          newState: { something: 'changed' },
-        })
-      );
+      act(() => {
+        store.dispatch(
+          updateVisualizationState({
+            visualizationId: store.getState().lens.visualization.activeId as string,
+            newState: { something: 'changed' },
+          })
+        );
+      });
     };
 
     return {
@@ -142,12 +146,16 @@ describe('workspace_panel_wrapper', () => {
       // make a change
       editVisualization();
       // // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(false));
+      act(() => {
+        store.dispatch(setChangesApplied(false));
+      });
 
       expect(getApplyChangesToolbar()).not.toBeDisabled();
 
       // // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(true));
+      act(() => {
+        store.dispatch(setChangesApplied(true));
+      });
       expect(getApplyChangesToolbar()).toBeDisabled();
     });
 
@@ -157,7 +165,9 @@ describe('workspace_panel_wrapper', () => {
       toggleAutoApply();
       editVisualization();
       // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(false));
+      act(() => {
+        store.dispatch(setChangesApplied(false));
+      });
       expect(getApplyChangesToolbar()).not.toBeDisabled();
       toggleAutoApply();
       expect(getApplyChangesToolbar()).not.toBeInTheDocument();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, reactRenderHook, act } from '@testing-library/react';
+import { waitFor, renderHook as reactRenderHook, act } from '@testing-library/react';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 

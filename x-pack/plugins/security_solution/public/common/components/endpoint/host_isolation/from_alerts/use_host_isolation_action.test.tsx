@@ -16,6 +16,7 @@ import type { ResponseActionsApiCommandNames } from '../../../../../../common/en
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import type React from 'react';
+import { waitFor } from '@testing-library/react';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -87,8 +88,8 @@ describe('useHostIsolationAction', () => {
         });
       }
 
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
+      await waitFor(() => result.current);
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({
@@ -99,8 +100,8 @@ describe('useHostIsolationAction', () => {
   );
 
   it('should call `closePopover` callback when menu item `onClick` is called', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.closePopover).toHaveBeenCalled();
@@ -156,8 +157,8 @@ describe('useHostIsolationAction', () => {
       if (type === 'non-endpoint') {
         hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
       }
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
+      await waitFor(() => result.current);
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({
@@ -170,8 +171,8 @@ describe('useHostIsolationAction', () => {
   );
 
   it('should call isolate API when agent is currently NOT isolated', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
@@ -183,8 +184,8 @@ describe('useHostIsolationAction', () => {
         data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
       })
     );
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');

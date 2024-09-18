@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
@@ -181,6 +181,7 @@ describe('blocklist form', () => {
     await user.click(screen.getByTestId('blocklist-form-name-input'));
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeNull();
     await user.click(screen.getByTestId('blocklist-form-os-select'));
+    await waitFor(() => null);
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeTruthy();
   });
 
@@ -225,6 +226,7 @@ describe('blocklist form', () => {
   it('should allow user to select between 3 OSs', async () => {
     render();
     await user.click(screen.getByTestId('blocklist-form-os-select'));
+    await waitFor(() => null);
     expect(screen.queryAllByRole('option').length).toEqual(3);
     expect(screen.queryByRole('option', { name: 'Windows' })).toBeTruthy();
     expect(screen.queryByRole('option', { name: 'Linux' })).toBeTruthy();

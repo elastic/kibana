@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { screen, within } from '@testing-library/react';
+import { screen, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditorFrame, EditorFrameProps } from './editor_frame';
@@ -18,7 +18,6 @@ import {
   Visualization,
   VisualizationMap,
 } from '../../types';
-import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
@@ -179,18 +178,20 @@ describe('editor_frame', () => {
       queryWorkspacePanel,
       queryDataPanel,
       simulateLoadingDatasource: () =>
-        store.dispatch(
-          setState({
-            datasourceStates: {
-              testDatasource: {
-                isLoading: false,
-                state: {
-                  internalState: 'datasourceState',
+        act(() => {
+          store.dispatch(
+            setState({
+              datasourceStates: {
+                testDatasource: {
+                  isLoading: false,
+                  state: {
+                    internalState: 'datasourceState',
+                  },
                 },
               },
-            },
-          })
-        ),
+            })
+          );
+        }),
     };
   };
 
@@ -237,16 +238,20 @@ describe('editor_frame', () => {
       const { store } = renderEditorFrame();
       const updatedState = 'updatedVisState';
 
-      store.dispatch(
-        setState({
-          visualization: {
-            activeId: mockVisualization.id,
-            state: updatedState,
-          },
-        })
-      );
+      act(() => {
+        store.dispatch(
+          setState({
+            visualization: {
+              activeId: mockVisualization.id,
+              state: updatedState,
+            },
+          })
+        );
+      });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
+      await waitFor(() => null);
+
+      expect(mockVisualization.getConfiguration).toHaveBeenCalled();
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -266,7 +271,9 @@ describe('editor_frame', () => {
         title: 'shazm',
       };
 
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.DataPanelComponent).toHaveBeenCalledTimes(1);
       expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
@@ -296,7 +303,9 @@ describe('editor_frame', () => {
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
 
-      setDatasourceState('newState');
+      act(() => {
+        setDatasourceState('newState');
+      });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(

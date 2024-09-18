@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useReducer } from 'react';
 import { identity } from 'lodash';
-import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor, act } from '@testing-library/react';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsTable } from '../alerts_table';
@@ -815,8 +815,10 @@ describe('AlertsTable.BulkActions', () => {
 
             fireEvent.click(await screen.findByText('Fake Bulk Action'));
 
-            // the callback given to our clients to run when they want to update the loading state
-            mockedFn.mock.calls[0][2](false);
+            act(() => {
+              // the callback given to our clients to run when they want to update the loading state
+              mockedFn.mock.calls[0][2](false);
+            });
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });

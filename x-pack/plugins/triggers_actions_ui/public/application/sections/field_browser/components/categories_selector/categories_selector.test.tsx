@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
@@ -70,7 +70,10 @@ describe('CategoriesSelector', () => {
     result.getByTestId('categories-filter-button').click();
     await waitForEuiPopoverOpen();
 
-    result.getByTestId(`categories-selector-option-base`).click();
+    act(() => {
+      result.getByTestId(`categories-selector-option-base`).click();
+    });
+
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['base']);
   });
 });

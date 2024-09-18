@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 
 describe('settings menu', () => {
   const onCloseMock = jest.fn();
@@ -25,7 +25,9 @@ describe('settings menu', () => {
 
     const toggleAutoApply = () => {
       const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
-      autoApplyToggle.click();
+      act(() => {
+        autoApplyToggle.click();
+      });
     };
 
     const isAutoApplyOn = () => {

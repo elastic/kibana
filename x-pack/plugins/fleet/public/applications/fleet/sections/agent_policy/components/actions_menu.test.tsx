@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../common/types';
 import { useAuthz } from '../../../hooks';
@@ -70,7 +71,7 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).not.toHaveAttribute('disabled');
@@ -104,7 +105,7 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).toHaveAttribute('disabled');
@@ -149,7 +150,7 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).not.toHaveAttribute('disabled');
@@ -171,7 +172,7 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
@@ -220,7 +221,7 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).not.toHaveAttribute('disabled');
@@ -242,7 +243,7 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
@@ -262,7 +263,7 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      fireEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');

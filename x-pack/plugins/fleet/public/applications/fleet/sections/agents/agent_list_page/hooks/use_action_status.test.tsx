@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reactRenderHook, act } from '@testing-library/react';
+import { renderHook as reactRenderHook, act } from '@testing-library/react';
 
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 

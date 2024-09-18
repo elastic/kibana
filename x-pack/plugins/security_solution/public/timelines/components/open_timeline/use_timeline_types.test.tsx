@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, renderHook, act, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, act, waitFor, screen } from '@testing-library/react';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { TestProviders } from '../../../common/mock';
@@ -88,13 +88,16 @@ describe('useTimelineTypes', () => {
           wrapper: TestProviders,
         }
       );
+
       await waitFor(() => null);
 
-      const { container } = render(result.current.timelineTabs);
+      render(result.current.timelineTabs);
+
+      await waitFor(() => null);
 
       act(() => {
         fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-template"]')!,
+          screen.getByTestId('timeline-tab-template'),
           new MouseEvent('click', {
             bubbles: true,
             cancelable: true,
@@ -120,11 +123,11 @@ describe('useTimelineTypes', () => {
       );
       await waitFor(() => null);
 
-      const { container } = render(result.current.timelineTabs);
+      render(result.current.timelineTabs);
 
       act(() => {
         fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-default"]')!,
+          screen.getByTestId('timeline-tab-default'),
           new MouseEvent('click', {
             bubbles: true,
             cancelable: true,

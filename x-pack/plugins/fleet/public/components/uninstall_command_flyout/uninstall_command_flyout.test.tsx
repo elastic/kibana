@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { fireEvent } from '@testing-library/react';
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import type {
@@ -159,7 +159,7 @@ describe('UninstallCommandFlyout', () => {
     it('when user selects Windows, it renders commands for Windows', () => {
       const renderResult = render();
 
-      renderResult.getByTestId('windows').click();
+      fireEvent.click(renderResult.getByText('Windows'));
 
       const uninstallInstructions = renderResult.getByTestId(
         'uninstall-commands-flyout-code-block'

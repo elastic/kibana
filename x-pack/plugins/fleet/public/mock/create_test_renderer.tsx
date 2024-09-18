@@ -15,7 +15,12 @@ import type {
   RenderHookOptions,
   RenderHookResult,
 } from '@testing-library/react';
-import { render as reactRender, act, reactRenderHook, waitFor } from '@testing-library/react';
+import {
+  render as reactRender,
+  act,
+  renderHook as reactRenderHook,
+  waitFor,
+} from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

@@ -135,12 +135,14 @@ describe('useTimelineEvents', () => {
   };
 
   test('init', async () => {
-    const { result } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
+    const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
       (args) => useTimelineEvents(args),
       {
         initialProps: { ...props },
       }
     );
+
+    await waitFor(() => null);
 
     expect(result.current).toEqual([
       DataLoadingState.loaded,
@@ -159,8 +161,8 @@ describe('useTimelineEvents', () => {
 
   test('happy path query', async () => {
     const { result, rerender } = renderHook<
-      UseTimelineEventsProps,
-      [DataLoadingState, TimelineArgs]
+      [DataLoadingState, TimelineArgs],
+      UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
       initialProps: { ...props },
     });
@@ -189,8 +191,8 @@ describe('useTimelineEvents', () => {
 
   test('Mock cache for active timeline when switching page', async () => {
     const { result, rerender } = renderHook<
-      UseTimelineEventsProps,
-      [DataLoadingState, TimelineArgs]
+      [DataLoadingState, TimelineArgs],
+      UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
       initialProps: { ...props },
     });
@@ -272,7 +274,7 @@ describe('useTimelineEvents', () => {
   });
 
   test('should query again when a new field is added', async () => {
-    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
+    const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
       (args) => useTimelineEvents(args),
       {
         initialProps: { ...props },
@@ -301,7 +303,7 @@ describe('useTimelineEvents', () => {
   });
 
   test('should not query again when a field is removed', async () => {
-    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
+    const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
       (args) => useTimelineEvents(args),
       {
         initialProps: { ...props },
@@ -359,7 +361,7 @@ describe('useTimelineEvents', () => {
 
   describe('Fetch Notes', () => {
     test('should call onLoad for notes when events are fetched', async () => {
-      renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
+      renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
         (args) => useTimelineEvents(args),
         {
           initialProps: { ...props },

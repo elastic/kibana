@@ -41,66 +41,59 @@ describe('Alert by grouping', () => {
   });
 
   test('renders correctly', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="alerts-progress-bar-panel"]')
-      ).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(
+      container.querySelector('[data-test-subj="alerts-progress-bar-panel"]')
+    ).toBeInTheDocument();
   });
 
   test('render HeaderSection', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
   });
 
   test('renders inspect button', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
   });
 
   describe('combo box', () => {
     const setGroupBySelection = jest.fn();
 
     test('renders combo box', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(container.querySelector('[data-test-subj="stackByComboBox"]')).toBeInTheDocument();
-      });
+      const { container } = render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(container.querySelector('[data-test-subj="stackByComboBox"]')).toBeInTheDocument();
     });
 
     test('combo box renders corrected options', async () => {
-      await act(async () => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
-        if (comboBox) {
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+
+      if (comboBox) {
+        await act(async () => {
           comboBox.focus(); // display the combo box options
-        }
-      });
+        });
+      }
       const optionsFound = screen.getAllByRole('option').map((option) => option.textContent);
       options.forEach((option, i) => {
         expect(optionsFound[i]).toEqual(option);
@@ -109,17 +102,17 @@ describe('Alert by grouping', () => {
 
     test('it invokes setGroupBySelection when an option is selected', async () => {
       const toBeSelected = 'user.name';
-      await act(async () => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
-        if (comboBox) {
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      if (comboBox) {
+        await act(async () => {
           comboBox.focus(); // display the combo box options
-        }
-      });
+        });
+      }
       const button = await screen.findByText(toBeSelected);
       fireEvent.click(button);
 
