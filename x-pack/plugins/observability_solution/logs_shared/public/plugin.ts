@@ -53,8 +53,15 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
     const { http, settings } = core;
-    const { charts, data, dataViews, discoverShared, logsDataAccess, observabilityAIAssistant } =
-      plugins;
+    const {
+      charts,
+      data,
+      dataViews,
+      discoverShared,
+      logsDataAccess,
+      observabilityAIAssistant,
+      share,
+    } = plugins;
 
     const logViews = this.logViews.start({
       http,
@@ -68,6 +75,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       logsDataAccess,
       search: data.search.search,
       uiSettings: settings,
+      share,
     });
 
     if (!observabilityAIAssistant) {

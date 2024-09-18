@@ -71,7 +71,10 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
     return (
       <LogCategoriesResultContent
         dependencies={dependencies}
+        documentFilters={documentFilters}
         logCategories={categorizeLogsServiceState.context.categories}
+        logsSource={logsSource}
+        timeRange={timeRange}
       />
     );
   } else if (categorizeLogsServiceState.matches('failed')) {

@@ -5,30 +5,56 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LogCategory } from '../../types';
+import { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import {
+  LogCategoriesControlBar,
+  LogCategoriesControlBarDependencies,
+} from './log_categories_control_bar';
 import { LogCategoriesGrid, LogCategoriesGridDependencies } from './log_categories_grid';
 
 export interface LogCategoriesResultContentProps {
   dependencies: LogCategoriesResultContentDependencies;
+  documentFilters?: QueryDslQueryContainer[];
   logCategories: LogCategory[];
+  logsSource: IndexNameLogsSourceConfiguration;
+  timeRange: {
+    start: string;
+    end: string;
+  };
 }
 
-export type LogCategoriesResultContentDependencies = LogCategoriesGridDependencies;
+export type LogCategoriesResultContentDependencies = LogCategoriesControlBarDependencies &
+  LogCategoriesGridDependencies;
 
 export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProps> = ({
   dependencies,
+  documentFilters,
   logCategories,
+  logsSource,
+  timeRange,
 }) => {
   if (logCategories.length === 0) {
     return <LogCategoriesEmptyResultContent />;
   } else {
     return (
-      <div>
-        <LogCategoriesGrid dependencies={dependencies} logCategories={logCategories} />
-      </div>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <LogCategoriesControlBar
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={logsSource}
+            timeRange={timeRange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <LogCategoriesGrid dependencies={dependencies} logCategories={logCategories} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 };
