@@ -7,6 +7,7 @@
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
 import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
@@ -99,7 +100,8 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.recall({ queries, categories });
+    const entries = await client.recall({ queries, categories });
+    return { entries };
   },
 });
 
@@ -107,11 +109,10 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
   params: t.type({
     body: t.type({
-      id: t.string,
+      doc_id: t.string,
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
-      type: t.union([t.literal('user_instruction'), t.literal('contextual')]),
       public: toBooleanRt,
       labels: t.record(t.string, t.string),
     }),
@@ -127,22 +128,21 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
+      doc_id: docId,
       confidence,
-      id,
       is_correction: isCorrection,
-      type,
       text,
       public: isPublic,
       labels,
     } = resources.params.body;
 
+    const id = await client.getUuidFromDocId(docId);
     return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
-        id,
-        doc_id: id,
+        id: id ?? v4(),
+        doc_id: docId,
         is_correction: isCorrection,
-        type,
         text,
         public: isPublic,
         labels,

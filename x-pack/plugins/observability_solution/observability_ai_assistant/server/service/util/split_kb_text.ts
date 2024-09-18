@@ -20,14 +20,14 @@ export function splitKbText({
   return [
     {
       type: KnowledgeBaseEntryOperationType.Delete,
-      doc_id: id,
+      docId: id, // delete all entries with the same docId
       labels: {},
     },
     ...texts.map((text, index) => ({
       type: KnowledgeBaseEntryOperationType.Index,
       document: merge({}, rest, {
         id: [id, index].join('_'),
-        doc_id: id,
+        doc_id: id, // doc_id is used to group entries together.
         labels: {},
         text,
       }),

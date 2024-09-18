@@ -59,12 +59,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.editorUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
         params: {
           query: {
             query: '',
-            sortBy: 'doc_id',
+            sortBy: 'title',
             sortDirection: 'asc',
           },
         },

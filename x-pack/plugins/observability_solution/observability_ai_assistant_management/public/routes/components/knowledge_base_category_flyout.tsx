@@ -104,13 +104,13 @@ export function KnowledgeBaseCategoryFlyout({
   ];
 
   const hasDescription =
-    CATEGORY_MAP[category.categoryName as unknown as keyof typeof CATEGORY_MAP]?.description;
+    CATEGORY_MAP[category.categoryKey as unknown as keyof typeof CATEGORY_MAP]?.description;
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseCategoryFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{capitalize(category.categoryName)}</h2>
+          <h2>{capitalize(category.categoryKey)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
