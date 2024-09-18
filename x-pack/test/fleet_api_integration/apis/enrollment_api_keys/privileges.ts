@@ -99,7 +99,6 @@ export default function (providerContext: FtrProviderContext) {
         },
       },
     ];
-    before(async () => {});
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

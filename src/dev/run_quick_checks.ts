@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { availableParallelism } from 'os';
-import { join, isAbsolute } from 'path';
-import { readdirSync, readFileSync } from 'fs';
+import { isAbsolute, join } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 
 import { run, RunOptions } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -54,7 +55,7 @@ void run(async ({ log, flagsReader }) => {
     targetFile: flagsReader.string('file'),
     targetDir: flagsReader.string('dir'),
     checks: flagsReader.string('checks'),
-  });
+  }).map((script) => (isAbsolute(script) ? script : join(REPO_ROOT, script)));
 
   logger.write(
     `--- Running ${scriptsToRun.length} checks, with parallelism ${MAX_PARALLELISM}...`,
@@ -69,7 +70,7 @@ void run(async ({ log, flagsReader }) => {
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
-    logger.write(`See above for details.`);
+    logger.write(`See the script(s) marked with ❌ above for details.`);
     process.exitCode = 1;
   } else {
     logger.write('--- All checks passed. ✅');
@@ -108,7 +109,7 @@ function collectScriptsToRun(inputOptions: {
   }
 }
 
-async function runAllChecks(scriptsToRun: string[]) {
+async function runAllChecks(scriptsToRun: string[]): Promise<CheckResult[]> {
   const checksRunning: Array<Promise<any>> = [];
   const checksFinished: CheckResult[] = [];
 
@@ -121,10 +122,20 @@ async function runAllChecks(scriptsToRun: string[]) {
 
       const check = runCheckAsync(script);
       checksRunning.push(check);
-      check.then((result) => {
-        checksRunning.splice(checksRunning.indexOf(check), 1);
-        checksFinished.push(result);
-      });
+      check
+        .then((result) => {
+          checksRunning.splice(checksRunning.indexOf(check), 1);
+          checksFinished.push(result);
+        })
+        .catch((error) => {
+          checksRunning.splice(checksRunning.indexOf(check), 1);
+          checksFinished.push({
+            success: false,
+            script,
+            output: error.message,
+            durationMs: 0,
+          });
+        });
     }
 
     await sleep(1000);
@@ -138,9 +149,10 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
   const startTime = Date.now();
 
   return new Promise((resolve) => {
-    const scriptProcess = exec(script);
+    validateScriptPath(script);
+    const scriptProcess = execFile('bash', [script]);
     let output = '';
-    const appendToOutput = (data: string | Buffer) => (output += data);
+    const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
     scriptProcess.stdout?.on('data', appendToOutput);
     scriptProcess.stderr?.on('data', appendToOutput);
@@ -170,9 +182,10 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
   logger.info(`- Total time: ${total}, effective: ${effective}`);
 
   results.forEach((result) => {
-    logger.write(
-      `--- ${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
-    );
+    const resultLabel = result.success ? '✅' : '❌';
+    const scriptPath = stripRoot(result.script);
+    const runtime = humanizeTime(result.durationMs);
+    logger.write(`--- ${resultLabel} ${scriptPath}: ${runtime}`);
     if (result.success) {
       logger.debug(result.output);
     } else {
@@ -193,4 +206,23 @@ function humanizeTime(ms: number) {
   } else {
     return `${minutes}m ${seconds}s`;
   }
+}
+
+function validateScriptPath(scriptPath: string) {
+  if (!isAbsolute(scriptPath)) {
+    logger.error(`Invalid script path: ${scriptPath}`);
+    throw new Error('Invalid script path');
+  } else if (!scriptPath.endsWith('.sh')) {
+    logger.error(`Invalid script extension: ${scriptPath}`);
+    throw new Error('Invalid script extension');
+  } else if (!existsSync(scriptPath)) {
+    logger.error(`Script not found: ${scriptPath}`);
+    throw new Error('Script not found');
+  } else {
+    return;
+  }
+}
+
+function stripRoot(script: string) {
+  return script.replace(REPO_ROOT, '');
 }

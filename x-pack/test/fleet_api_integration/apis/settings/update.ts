@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
 
   // Skipped as the Fleet Server hosts settings values are no longer used as of https://github.com/elastic/kibana/issues/137785
-  describe.skip('Settings - update', async function () {
+  describe.skip('Settings - update', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -35,8 +35,6 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId })
       );
       await Promise.all(deletedPromises);
-    });
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 

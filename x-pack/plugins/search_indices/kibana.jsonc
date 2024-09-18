@@ -18,6 +18,9 @@
       "console",
       "usageCollection",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
   }
 }

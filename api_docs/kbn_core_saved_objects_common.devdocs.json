@@ -1657,19 +1657,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "canvas",
@@ -1912,11 +1912,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2359,6 +2359,34 @@
             "path": "src/plugins/embeddable/common/lib/inject.ts"
           },
           {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/controls_references.ts"
           },
@@ -2435,34 +2463,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
@@ -2481,54 +2481,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
           },
           {
             "plugin": "canvas",
@@ -2649,6 +2601,54 @@
           {
             "plugin": "globalSearchProviders",
             "path": "x-pack/plugins/global_search_providers/server/providers/saved_objects/map_object_to_result.test.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
           },
           {
             "plugin": "expressions",

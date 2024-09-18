@@ -158,12 +158,12 @@ export default ({ getService }: FtrProviderContext) => {
         ecs: {
           version: '1.0.0-beta2',
         },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-audit-configuration',
           category: 'configuration',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
+        'event.kind': 'signal',
         host: {
           architecture: 'x86_64',
           containerized: false,
@@ -300,12 +300,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-audit-configuration',
           category: 'configuration',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
         service: {
           type: 'auditd',
         },
@@ -427,12 +426,11 @@ export default ({ getService }: FtrProviderContext) => {
         },
         cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
         ecs: { version: '1.0.0-beta2' },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-promiscuous-mode-on-device',
           category: 'anomoly',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
         host: {
           architecture: 'x86_64',
           containerized: false,
@@ -746,7 +744,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(2);
     });
 
-    describe('with host risk index', async () => {
+    describe('with host risk index', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
@@ -772,7 +770,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

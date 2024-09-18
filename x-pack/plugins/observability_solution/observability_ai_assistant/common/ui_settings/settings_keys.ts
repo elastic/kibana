@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
+
 // AI Assistant
-export const aiAssistantLogsIndexPattern = 'observability:aiAssistantLogsIndexPattern';
-export const aiAssistantResponseLanguage = 'observability:aiAssistantResponseLanguage';
+export const aiAssistantLogsIndexPattern = OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID;
 export const aiAssistantSimulatedFunctionCalling =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const aiAssistantSearchConnectorIndexPattern =

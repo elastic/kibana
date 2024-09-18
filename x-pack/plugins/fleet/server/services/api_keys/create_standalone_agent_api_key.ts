@@ -7,6 +7,21 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+export const CLUSTER_PRIVILEGES = ['monitor'];
+
+export const INDEX_PRIVILEGES = {
+  names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
+  privileges: ['auto_configure', 'create_doc'],
+};
+
+export async function canCreateStandaloneAgentApiKey(esClient: ElasticsearchClient) {
+  const res = await esClient.security.hasPrivileges({
+    cluster: CLUSTER_PRIVILEGES,
+    index: [INDEX_PRIVILEGES],
+  });
+
+  return res.has_all_requested;
+}
 export function createStandaloneAgentApiKey(esClient: ElasticsearchClient, name: string) {
   // Based on https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
   return esClient.security.createApiKey({
@@ -17,13 +32,8 @@ export function createStandaloneAgentApiKey(esClient: ElasticsearchClient, name:
       },
       role_descriptors: {
         standalone_agent: {
-          cluster: ['monitor'],
-          indices: [
-            {
-              names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
+          cluster: CLUSTER_PRIVILEGES,
+          indices: [INDEX_PRIVILEGES],
         },
       },
     },

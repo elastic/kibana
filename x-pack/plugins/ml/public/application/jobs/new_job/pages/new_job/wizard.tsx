@@ -20,7 +20,7 @@ import type { ChartLoader } from '../../common/chart_loader';
 import type { MapLoader } from '../../common/map_loader';
 import type { ResultsLoader } from '../../common/results_loader';
 import type { JobValidator } from '../../common/job_validator';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
@@ -46,6 +46,7 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
+  const newJobCapsService = useNewJobCapsService();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
   const jobCreatorUpdate = useCallback(() => {
     setJobCreatorUpdate((prev) => prev + 1);

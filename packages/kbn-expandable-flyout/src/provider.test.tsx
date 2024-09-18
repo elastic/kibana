@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
 import { UrlSynchronizer } from './provider';
-import * as actions from './actions';
-import { State } from './state';
+import * as actions from './store/actions';
+import { State } from './store/state';
 import { of } from 'rxjs';
 
 const mockGet = jest.fn();
@@ -27,14 +28,19 @@ describe('UrlSynchronizer', () => {
     const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
 
     const initialState: State = {
-      byId: {
-        [urlKey]: {
-          right: { id: 'key1' },
-          left: { id: 'key11' },
-          preview: undefined,
+      panels: {
+        byId: {
+          [urlKey]: {
+            right: { id: 'key1' },
+            left: { id: 'key11' },
+            preview: undefined,
+          },
         },
+        needsSync: true,
       },
-      needsSync: true,
+      ui: {
+        pushVsOverlay: 'overlay',
+      },
     };
 
     render(
@@ -54,8 +60,13 @@ describe('UrlSynchronizer', () => {
       change$: mockChange$,
     });
     const initialState: State = {
-      byId: {},
-      needsSync: true,
+      panels: {
+        byId: {},
+        needsSync: true,
+      },
+      ui: {
+        pushVsOverlay: 'overlay',
+      },
     };
 
     render(
@@ -80,14 +91,19 @@ describe('UrlSynchronizer', () => {
       change$: mockChange$,
     });
     const initialState: State = {
-      byId: {
-        [urlKey]: {
-          right: { id: 'key1' },
-          left: { id: 'key2' },
-          preview: undefined,
+      panels: {
+        byId: {
+          [urlKey]: {
+            right: { id: 'key1' },
+            left: { id: 'key2' },
+            preview: undefined,
+          },
         },
+        needsSync: true,
       },
-      needsSync: true,
+      ui: {
+        pushVsOverlay: 'overlay',
+      },
     };
 
     render(

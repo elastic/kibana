@@ -1057,6 +1057,23 @@
       }
     }
   },
+  "entity-engine-status": {
+    "dynamic": false,
+    "properties": {
+      "filter": {
+        "type": "keyword"
+      },
+      "indexPattern": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "epm-packages": {
     "properties": {
       "additional_spaces_installed_kibana": {
@@ -1484,7 +1501,17 @@
   },
   "favorites": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "favoriteIds": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "userId": {
+        "type": "keyword"
+      }
+    }
   },
   "file": {
     "dynamic": false,

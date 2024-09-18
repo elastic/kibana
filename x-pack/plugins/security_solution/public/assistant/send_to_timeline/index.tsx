@@ -259,6 +259,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       isDisabled={isDisabled}
       color="text"
       flush="both"
+      data-test-subj="sendToTimelineEmptyButton"
       size="xs"
     >
       <EuiToolTip position="right" content={toolTipText}>
@@ -270,6 +271,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       aria-label={toolTipText}
       isDisabled={isDisabled}
       onClick={configureAndOpenTimeline}
+      data-test-subj="sendToTimelineButton"
       {...rest}
     >
       <EuiToolTip position="right" content={toolTipText}>

@@ -18,6 +18,11 @@ jest.mock('../assistant/use_assistant_overlay', () => ({
   useAssistantOverlay: () => mockUseAssistantOverlay,
 }));
 
+let mockUseAssistantContext = { codeBlockRef: { current: null } };
+jest.mock('../..', () => ({
+  useAssistantContext: () => mockUseAssistantContext,
+}));
+
 const defaultProps: Props = {
   category: 'alert',
   description: 'Test description',
@@ -27,6 +32,9 @@ const defaultProps: Props = {
 };
 
 describe('NewChat', () => {
+  beforeEach(() => {
+    mockUseAssistantContext = { codeBlockRef: { current: null } };
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -79,12 +87,12 @@ describe('NewChat', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     render(<NewChat {...defaultProps} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
   });
@@ -97,25 +105,38 @@ describe('NewChat', () => {
     expect(newChatLink).toBeInTheDocument();
   });
 
-  it('calls onShowOverlay callback on click', () => {
+  it('calls onShowOverlay callback on click', async () => {
     const onShowOverlaySpy = jest.fn();
     render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(onShowOverlaySpy).toHaveBeenCalled();
   });
 
-  it('calls onShowOverlay callback on click for link', () => {
+  it('calls onShowOverlay callback on click for link', async () => {
     const onShowOverlaySpy = jest.fn();
     render(<NewChat {...defaultProps} asLink={true} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatLink = screen.getByTestId('newChatLink');
 
-    userEvent.click(newChatLink);
+    await userEvent.click(newChatLink);
 
     expect(onShowOverlaySpy).toHaveBeenCalled();
+  });
+
+  it('assigns onExportCodeBlock callback to context codeBlock reference', () => {
+    const onExportCodeBlock = jest.fn();
+    render(<NewChat {...defaultProps} onExportCodeBlock={onExportCodeBlock} />);
+
+    expect(mockUseAssistantContext.codeBlockRef.current).toBe(onExportCodeBlock);
+  });
+
+  it('does not change assigns context codeBlock reference if onExportCodeBlock not defined', () => {
+    render(<NewChat {...defaultProps} />);
+
+    expect(mockUseAssistantContext.codeBlockRef.current).toBe(null);
   });
 });

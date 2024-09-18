@@ -30,7 +30,7 @@ import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
-import { getAnalyticsFactory } from '../../services/analytics_service';
+import { useGetAnalytics } from '../../services/analytics_service';
 import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
@@ -127,7 +127,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const disabled = !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
-  const getAnalytics = getAnalyticsFactory(
+  const getAnalytics = useGetAnalytics(
     setAnalytics,
     setAnalyticsStats,
     setErrorMessage,

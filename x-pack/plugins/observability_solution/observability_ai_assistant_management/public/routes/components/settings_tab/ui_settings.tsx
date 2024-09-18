@@ -9,7 +9,6 @@ import React from 'react';
 import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
@@ -18,11 +17,10 @@ import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-
 import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const settingsKeys = [
-  aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
@@ -33,7 +31,7 @@ export function UISettings() {
     docLinks,
     settings,
     notifications,
-    application: { capabilities },
+    application: { capabilities, getUrlForApp },
   } = useKibana().services;
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
@@ -86,6 +84,13 @@ export function UISettings() {
           </FieldRowProvider>
         );
       })}
+
+      <LogSourcesSettingSynchronisationInfo
+        isLoading={false}
+        logSourcesValue={settings.client.get(aiAssistantLogsIndexPattern)}
+        getUrlForApp={getUrlForApp}
+      />
+
       {!isEmpty(unsavedChanges) && (
         <BottomBarActions
           isLoading={isSaving}

@@ -380,6 +380,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     services: {
       charts: chartsService,
       data: { dataViews: dataViewsService },
+      uiSettings,
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
@@ -442,7 +443,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     );
 
   const jobSelectorProps = {
-    dateFormatTz: getDateFormatTz(),
+    dateFormatTz: getDateFormatTz(uiSettings),
   } as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;

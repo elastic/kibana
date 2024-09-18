@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -92,13 +93,14 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
         "entity-definition": "61be3e95966045122b55e181bb39658b1dc9bbe9",
         "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
+        "entity-engine-status": "0738aa1a06d3361911740f8f166071ea43a00927",
         "epm-packages": "8042d4a1522f6c4e6f5486e791b3ffe3a22f88fd",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",
         "exception-list": "4aebc4e61fb5d608cae48eaeb0977e8db21c61a4",
         "exception-list-agnostic": "6d3262d58eee28ac381ec9654f93126a58be6f5d",
-        "favorites": "ef282e9fb5a91df3cc88409a9f86d993fb51a6e9",
+        "favorites": "a68c7c8ae22eaddcca324d8b3bfc80a94e3eec3a",
         "file": "6b65ae5899b60ebe08656fd163ea532e557d3c98",
         "file-upload-usage-collection-telemetry": "06e0a8c04f991e744e09d03ab2bd7f86b2088200",
         "fileShare": "5be52de1747d249a221b5241af2838264e19aaa1",

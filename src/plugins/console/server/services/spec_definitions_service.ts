@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _, { merge } from 'lodash';
@@ -18,6 +19,7 @@ import {
   GENERATED_SUBFOLDER,
   MANUAL_SUBFOLDER,
   OVERRIDES_SUBFOLDER,
+  API_DOCS_LINK,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 
@@ -37,7 +39,11 @@ export class SpecDefinitionsService {
     this.globalRules[parentNode] = rules;
   }
 
-  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
+  public addEndpointDescription(
+    endpoint: string,
+    description: EndpointDescription = {},
+    docsLinkToApiReference: boolean = false
+  ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -62,6 +68,10 @@ export class SpecDefinitionsService {
     if (urlParamsDef) {
       description.url_params = _.assign(description.url_params || {}, copiedDescription.url_params);
       _.defaults(description.url_params, urlParamsDef);
+    }
+
+    if (docsLinkToApiReference) {
+      description.documentation = API_DOCS_LINK;
     }
 
     _.assign(copiedDescription, description);
@@ -156,7 +166,7 @@ export class SpecDefinitionsService {
         (endpointsAvailability === 'stack' && description.availability.stack) ||
         (endpointsAvailability === 'serverless' && description.availability.serverless);
       if (addEndpoint) {
-        this.addEndpointDescription(endpoint, description);
+        this.addEndpointDescription(endpoint, description, endpointsAvailability === 'serverless');
       }
     });
   }

@@ -172,7 +172,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
+      <EuiFormRow fullWidth>
         <Fragment>
           {isManagedPolicy ? (
             <EuiToolTip

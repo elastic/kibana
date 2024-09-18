@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
+import { AssistantScope } from '../../common/types';
 import {
   MessageRole,
   type Message,
@@ -21,7 +22,6 @@ import {
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
-import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -56,6 +56,7 @@ interface UseChatPropsWithoutContext {
   disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
+  scope: AssistantScope;
 }
 
 export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
@@ -71,6 +72,7 @@ function useChatWithoutContext({
   onChatComplete,
   persist,
   disableFunctions,
+  scope,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
   const systemMessage = useMemo(() => {
@@ -87,8 +89,6 @@ function useChatWithoutContext({
   const [pendingMessages, setPendingMessages] = useState<Message[]>();
 
   const abortControllerRef = useRef(new AbortController());
-
-  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -164,7 +164,7 @@ function useChatWithoutContext({
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
-        responseLanguage: getPreferredLanguage(),
+        scope,
       });
 
       function getPendingMessages() {
@@ -263,7 +263,7 @@ function useChatWithoutContext({
       disableFunctions,
       service,
       systemMessage,
-      getPreferredLanguage,
+      scope,
     ]
   );
 

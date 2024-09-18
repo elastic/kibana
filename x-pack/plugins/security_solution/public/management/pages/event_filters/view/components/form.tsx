@@ -583,7 +583,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 tags: exception?.tags ?? [],
                 meta: exception.meta,
               }
-            : exception;
+            : {
+                ...exception,
+                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+              };
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)

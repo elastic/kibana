@@ -53,11 +53,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(false);
   }, []);
 
-  const handleOpenPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const handlePopover = useCallback(() => {
+    setIsPopoverOpen((isOpen) => !isOpen);
   }, []);
 
-  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+  const handleKeyboardOpen = useCallback<NonNullable<EuiFieldTextProps['onKeyDown']>>((event) => {
     if (event.key === keys.ENTER) {
       setIsPopoverOpen(true);
     }
@@ -69,7 +69,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     () => (
       <EuiFieldText
         disabled={isDisabled}
-        onClick={handleOpenPopover}
+        onClick={handlePopover}
         onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon={!isDisabled ? { type: 'arrowDown', side: 'right' } : undefined}
@@ -82,11 +82,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     [
       ariaLabel,
       handleKeyboardOpen,
-      handleOpenPopover,
       isDisabled,
       isPopoverOpen,
       popoverId,
       timelineTitle,
+      handlePopover,
     ]
   );
 
