@@ -73,35 +73,36 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
   });
+
   const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
     [`panelOpener-id-${id}`]: id,
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
+  const togglePanel = useCallback(() => {
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [selectedNode?.id, item, closePanel, openPanel]);
+
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
-        if (selectedNode?.id === item.id) {
-          closePanel();
-        } else {
-          openPanel(item);
-        }
+        togglePanel();
         return;
       }
       e.preventDefault();
       navigateToUrl(href);
       closePanel();
     },
-    [closePanel, href, item, navigateToUrl, openPanel, selectedNode]
+    [closePanel, href, navigateToUrl, togglePanel]
   );
 
   const onIconClick = useCallback(() => {
-    if (selectedNode?.id === item.id) {
-      closePanel();
-    } else {
-      openPanel(item);
-    }
-  }, [openPanel, closePanel, item, selectedNode]);
+    togglePanel();
+  }, [togglePanel]);
 
   const isExpanded = selectedNode?.path === path;
 
