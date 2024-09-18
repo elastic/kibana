@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import {
@@ -23,6 +22,7 @@ import {
   SolutionType,
 } from '../profiles';
 import { ProfilesManager } from '../profiles_manager';
+import { DiscoverEBTContextManager } from '../../services/discover_ebt_context_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 
 export const createContextAwarenessMocks = ({
@@ -151,12 +151,12 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
   }
 
-  const ebtContextMock$ = new BehaviorSubject({ dscProfiles: [] as string[] });
+  const ebtContextManagerMock = new DiscoverEBTContextManager();
   const profilesManagerMock = new ProfilesManager(
     rootProfileServiceMock,
     dataSourceProfileServiceMock,
     documentProfileServiceMock,
-    ebtContextMock$
+    ebtContextManagerMock
   );
 
   const profileProviderServices = createProfileProviderServicesMock();
@@ -172,7 +172,7 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
-    ebtContextMock$,
+    ebtContextManagerMock,
   };
 };
 

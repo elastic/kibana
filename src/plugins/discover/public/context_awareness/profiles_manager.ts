@@ -25,6 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
+import { DiscoverEBTContextManager } from '../services/discover_ebt_context_manager';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -56,7 +57,7 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  private readonly ebtContext$: ProfilesManagerEbtContext | undefined;
+  public readonly ebtContextManager: DiscoverEBTContextManager;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -67,11 +68,11 @@ export class ProfilesManager {
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    ebtContext$: ProfilesManagerEbtContext | undefined
+    ebtContextManager: DiscoverEBTContextManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
-    this.ebtContext$ = ebtContext$;
+    this.ebtContextManager = ebtContextManager;
   }
 
   /**
@@ -207,22 +208,9 @@ export class ProfilesManager {
    * Tracks the active profiles in the EBT context
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
-    if (!this.ebtContext$) {
-      // ebtContext$ was enabled only for Discover pages.
-      // Dashboard panels, Log Explorer, Security Solution pages are excluded from this tracking.
-      // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
-      return;
-    }
-
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
-    if (isEqual(dscProfiles, this.ebtContext$.getValue().dscProfiles)) {
-      return;
-    }
-
-    this.ebtContext$.next({
-      dscProfiles,
-    });
+    this.ebtContextManager.updateProfilesContextWith(dscProfiles);
   }
 }
 
