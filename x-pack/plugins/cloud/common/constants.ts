@@ -12,4 +12,4 @@ export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
  */
 export const CLOUD_SNAPSHOTS_PATH = 'elasticsearch/snapshots/';
 
-export const ELASTICSEARCH_CONFIG_ROUTE = '/api/internal/elasticsearch_config';
+export const ELASTICSEARCH_CONFIG_ROUTE = '/api/internal/cloud/elasticsearch_config';

@@ -19,22 +19,17 @@ export function defineRoutes({
   logger: Logger;
   router: IRouter;
 }) {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: ELASTICSEARCH_CONFIG_ROUTE,
-      validate: {},
-      options: {
-        access: 'internal',
-      },
-    },
-    async (context, request, response) => {
+      access: 'internal',
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const body: ElasticsearchConfigType = {
-        elasticsearch_url: elasticsearchUrl || '',
+        elasticsearch_url: elasticsearchUrl,
       };
       return response.ok({
         body,
-        headers: { 'content-type': 'application/json' },
       });
-    }
-  );
+    });
 }

@@ -12,7 +12,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import { CLOUD_SNAPSHOTS_PATH, ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
@@ -228,7 +228,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       return this.elasticsearchConfig;
     }
     try {
-      const result = await http.get<ElasticsearchConfigType>('/api/internal/elasticsearch_config');
+      const result = await http.get<ElasticsearchConfigType>(ELASTICSEARCH_CONFIG_ROUTE, {
+        version: '1',
+      });
 
       this.elasticsearchConfig = { elasticsearchUrl: result.elasticsearch_url || undefined };
       return this.elasticsearchConfig;
