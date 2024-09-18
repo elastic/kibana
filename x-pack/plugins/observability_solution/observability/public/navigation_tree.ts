@@ -218,6 +218,9 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   {
                     link: 'ml:settings',
                   },
+                  {
+                    link: 'ml:suppliedConfigurations',
+                  }
                 ],
               },
               {
