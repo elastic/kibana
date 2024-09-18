@@ -45,14 +45,27 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
   </>
 );
 
+const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
+  defaultMessage: 'Entity name',
+});
+const entityTypeLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
+  defaultMessage: 'Type',
+});
+const entityLastSeenLabel = i18n.translate(
+  'xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel',
+  {
+    defaultMessage: 'Last seen',
+  }
+);
+
 const columns: EuiDataGridColumn[] = [
   {
     id: ENTITY_DISPLAY_NAME,
+    // keep it for accessibility purposes
+    displayAsText: entityNameLabel,
     display: (
       <CustomHeaderCell
-        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
-          defaultMessage: 'Entity name',
-        })}
+        title={entityNameLabel}
         tooltipContent="Name of the entity (entity.displayName)"
       />
     ),
@@ -60,23 +73,20 @@ const columns: EuiDataGridColumn[] = [
   },
   {
     id: ENTITY_TYPE,
+    // keep it for accessibility purposes
+    displayAsText: entityTypeLabel,
     display: (
-      <CustomHeaderCell
-        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
-          defaultMessage: 'Type',
-        })}
-        tooltipContent="Type of entity (entity.type)"
-      />
+      <CustomHeaderCell title={entityTypeLabel} tooltipContent="Type of entity (entity.type)" />
     ),
     isSortable: true,
   },
   {
     id: ENTITY_LAST_SEEN,
+    // keep it for accessibility purposes
+    displayAsText: entityLastSeenLabel,
     display: (
       <CustomHeaderCell
-        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel', {
-          defaultMessage: 'Last seen',
-        })}
+        title={entityLastSeenLabel}
         tooltipContent="Timestamp of last received data for entity (entity.lastSeenTimestamp)"
       />
     ),
