@@ -4,19 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { notFound } from '@hapi/boom';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import * as t from 'io-ts';
 import type {
   Entity,
   InventoryEntityDefinition,
   VirtualEntityDefinition,
 } from '../../../common/entities';
-import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
-import { toEntity } from '../../../common/utils/to_entity';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
+import { toEntity } from '../../../common/utils/to_entity';
+import { createInventoryServerRoute } from '../create_inventory_server_route';
+import { InventoryRouteHandlerResources } from '../types';
+import { eemToInventoryDefinition } from './eem_to_inventory_definition';
+import { getDataStreamsForFilter } from './get_data_streams_for_filter';
+import { getLatestEntities } from './get_latest_entities';
+
+async function fetchEntityDefinitions({
+  plugins,
+  request,
+}: Pick<InventoryRouteHandlerResources, 'plugins' | 'request'>) {
+  const entityManagerStart = await plugins.entityManager.start();
+  const client = await entityManagerStart.getScopedClient({ request });
+
+  return await client.getEntityDefinitions({
+    page: 1,
+    perPage: 10000,
+  });
+}
 
 const listInventoryDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/definition/inventory',
@@ -24,50 +40,10 @@ const listInventoryDefinitionsRoute = createInventoryServerRoute({
     tags: ['access:inventory'],
   },
   handler: async ({ plugins, request }): Promise<{ definitions: InventoryEntityDefinition[] }> => {
-    async function fetchEntityDefinitions() {
-      const entityManagerStart = await plugins.entityManager.start();
-      const client = await entityManagerStart.getScopedClient({ request });
-
-      return await client.getEntityDefinitions({
-        page: 1,
-        perPage: 10000,
-      });
-    }
-
-    const { definitions } = await fetchEntityDefinitions();
+    const { definitions } = await fetchEntityDefinitions({ plugins, request });
 
     return {
-      definitions: definitions.map((definition): InventoryEntityDefinition => {
-        return {
-          id: definition.id,
-          type: definition.type,
-          identityFields: definition.identityFields,
-          definitionType: 'inventory',
-          displayNameTemplate: definition.displayNameTemplate,
-          label: definition.name,
-          managed: definition.managed,
-          metadata:
-            definition.metadata?.map(({ source, destination }) => {
-              return {
-                source,
-                destination,
-              };
-            }) ?? [],
-          sources: [
-            {
-              indexPatterns: definition.indexPatterns,
-            },
-          ],
-          extractionDefinitions: [
-            {
-              source: {
-                indexPatterns: definition.indexPatterns,
-              },
-              metadata: definition.metadata?.map((option) => ({ ...option, limit: 10 })) ?? [],
-            },
-          ],
-        };
-      }),
+      definitions: definitions.map(eemToInventoryDefinition),
     };
   },
 });
@@ -75,20 +51,55 @@ const listInventoryDefinitionsRoute = createInventoryServerRoute({
 const listInventoryEntitiesRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/entities/inventory',
   params: t.type({
-    body: t.type({
-      kuery: t.string,
-      start: t.number,
-      end: t.number,
-      type: t.union([t.literal('all'), t.string]),
-    }),
+    body: t.intersection([
+      t.type({
+        kuery: t.string,
+        start: t.number,
+        end: t.number,
+        type: t.union([t.literal('all'), t.string]),
+      }),
+      t.partial({
+        fromSourceIfEmpty: t.boolean,
+      }),
+    ]),
   }),
   options: {
     tags: ['access:inventory'],
   },
-  handler: async (): Promise<{ entities: Entity[]; total: number }> => {
+  handler: async ({
+    context,
+    logger,
+    params,
+    plugins,
+    request,
+  }): Promise<{ entities: Entity[] }> => {
+    const esClient = createObservabilityEsClient({
+      client: (await context.core).elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: 'inventory',
+    });
+
+    const {
+      body: { start, end, kuery, type, fromSourceIfEmpty },
+    } = params;
+
+    const { definitions } = fromSourceIfEmpty
+      ? await fetchEntityDefinitions({ plugins, request })
+      : { definitions: [] };
+
     return {
-      entities: [],
-      total: 0,
+      entities: await getLatestEntities({
+        esClient,
+        start,
+        end,
+        kuery,
+        fromSourceIfEmpty,
+        typeDefinitions: (type === 'all'
+          ? definitions
+          : definitions.filter((definition) => definition.type === type)
+        ).map(eemToInventoryDefinition),
+        logger,
+      }),
     };
   },
 });

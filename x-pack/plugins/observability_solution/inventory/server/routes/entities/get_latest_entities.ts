@@ -5,23 +5,83 @@
  * 2.0.
  */
 
-import { LatestEntity } from '../../../common/entities';
-import { EntitiesESClient } from '../../lib/create_es_client/create_entities_es_client';
-
-const MAX_NUMBER_OF_ENTITIES = 500;
+import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { uniq } from 'lodash';
+import pLimit from 'p-limit';
+import { Logger } from '@kbn/logging';
+import { InventoryEntityDefinition } from '../../../common/entities';
+import { getEntitiesFromSource } from './get_entities_from_source';
+import { lookupEntitiesById } from './lookup_entities_by_id';
+import { searchLatestEntitiesIndex } from './search_latest_entities_index';
+import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
 
 export async function getLatestEntities({
-  entitiesESClient,
+  esClient,
+  kuery,
+  start,
+  end,
+  fromSourceIfEmpty,
+  typeDefinitions,
+  logger,
 }: {
-  entitiesESClient: EntitiesESClient;
+  esClient: ObservabilityElasticsearchClient;
+  kuery: string;
+  start: number;
+  end: number;
+  fromSourceIfEmpty?: boolean;
+  typeDefinitions?: InventoryEntityDefinition[];
+  logger: Logger;
 }) {
-  const response = (
-    await entitiesESClient.searchLatest<LatestEntity>('get_latest_entities', {
-      body: {
-        size: MAX_NUMBER_OF_ENTITIES,
-      },
-    })
-  ).hits.hits.map((hit) => hit._source);
+  const response = await searchLatestEntitiesIndex({
+    esClient,
+    start,
+    end,
+    kuery,
+    dslFilter: typeDefinitions?.length
+      ? [
+          {
+            terms: {
+              'entity.type': typeDefinitions.map((definition) => definition.type),
+            },
+          },
+        ]
+      : [],
+  });
 
-  return response;
+  if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
+    return esqlResponseToEntities(response);
+  }
+
+  const indexPatterns = uniq(
+    typeDefinitions?.flatMap((definition) =>
+      definition.sources.flatMap((source) => source.indexPatterns)
+    )
+  );
+
+  const limiter = pLimit(10);
+
+  const entitiesFromSourceResults = await Promise.all(
+    typeDefinitions.map((definition) => {
+      return limiter(() => {
+        return getEntitiesFromSource({
+          esClient,
+          start,
+          end,
+          kuery,
+          indexPatterns,
+          definition,
+          logger,
+        });
+      });
+    })
+  );
+
+  return esqlResponseToEntities(
+    await lookupEntitiesById({
+      esClient,
+      start,
+      end,
+      entities: entitiesFromSourceResults.flat(),
+    })
+  );
 }

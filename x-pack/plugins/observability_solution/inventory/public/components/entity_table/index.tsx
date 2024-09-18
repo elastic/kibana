@@ -5,15 +5,13 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import React, { useMemo, useState } from 'react';
 import { keyBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
-import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
-import { toEntity } from '../../../common/utils/to_entity';
 
 export function EntityTable({
   type,
@@ -52,59 +50,48 @@ export function EntityTable({
 
   const [selectedType, setSelectedType] = useState(type);
 
-  const queryParams = useMemo(() => {
-    return {
-      query,
-      kuery: persistedKqlFilter,
-      dslFilter: [
-        ...(dslFilter ?? []),
-        {
-          range: {
-            'entity.lastSeenTimestamp': {
-              gte: start,
-            },
-          },
-        },
-        {
-          range: {
-            'entity.firstSeenTimestamp': {
-              lte: end,
-            },
-          },
-        },
-      ],
-    };
-  }, [query, persistedKqlFilter, start, end, dslFilter]);
-
   const queryFetch = useAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('POST /internal/inventory/esql', {
+      return inventoryAPIClient.fetch('POST /internal/inventory/entities/inventory', {
         signal,
         params: {
           body: {
-            operationName: 'list_entities',
-            ...queryParams,
-            dslFilter: [
-              ...queryParams.dslFilter,
-              ...(selectedType !== 'all'
-                ? [
-                    {
-                      term: {
-                        'entity.type': selectedType,
-                      },
-                    },
-                  ]
-                : []),
-            ],
+            start,
+            end,
+            kuery: persistedKqlFilter,
+            type: selectedType,
+            fromSourceIfEmpty: true,
           },
         },
       });
     },
-    [queryParams, inventoryAPIClient, selectedType]
+    [inventoryAPIClient, selectedType, persistedKqlFilter, start, end]
   );
 
   const availableTypesFetch = useAbortableAsync(
     ({ signal }) => {
+      const queryParams = {
+        query,
+        kuery: persistedKqlFilter,
+        dslFilter: [
+          ...(dslFilter ?? []),
+          {
+            range: {
+              'entity.lastSeenTimestamp': {
+                gte: start,
+              },
+            },
+          },
+          {
+            range: {
+              'entity.firstSeenTimestamp': {
+                lte: end,
+              },
+            },
+          },
+        ],
+      };
+
       return inventoryAPIClient
         .fetch('POST /internal/inventory/esql', {
           signal,
@@ -122,7 +109,7 @@ export function EntityTable({
           });
         });
     },
-    [queryParams, inventoryAPIClient]
+    [inventoryAPIClient, start, end, dslFilter, persistedKqlFilter, query]
   );
 
   const typeDefinitionsFetch = useAbortableAsync(
@@ -134,15 +121,6 @@ export function EntityTable({
     [inventoryAPIClient]
   );
 
-  const entityRows = useMemo(() => {
-    if (!queryFetch.value) {
-      return [];
-    }
-
-    return esqlResultToPlainObjects(queryFetch.value).map((row) => {
-      return toEntity(row);
-    });
-  }, [queryFetch.value]);
   const [pagination, setPagination] = useState<{ pageSize: number; pageIndex: number }>({
     pageSize: 10,
     pageIndex: 0,
@@ -194,13 +172,17 @@ export function EntityTable({
     ];
   }, [availableTypesFetch.value, typeDefinitionsFetch.value]);
 
+  const entities = useMemo(() => {
+    return queryFetch.value?.entities ?? [];
+  }, [queryFetch.value]);
+
   return (
     <ControlledEntityTable
       timeRange={timeRange}
       onTimeRangeChange={(nextTimeRange) => {
         setTimeRange(nextTimeRange);
       }}
-      rows={entityRows}
+      rows={entities}
       loading={queryFetch.loading}
       kqlFilter={displayedKqlFilter}
       onKqlFilterChange={(next) => {
@@ -213,7 +195,7 @@ export function EntityTable({
         setPagination(next);
       }}
       pagination={pagination}
-      totalItemCount={entityRows.length}
+      totalItemCount={entities.length}
       columns={[]}
       dataViews={dataViewsFetch.value}
       showTypeSelect={type === 'all'}

@@ -51,18 +51,16 @@ export interface VirtualEntityDefinition extends EntityDefinitionBase {
   parentEntityId?: string;
 }
 
-export interface EntityMetricDefinition {
+export type EntityMetricDefinition = {
   id: string;
   displayName: string;
-  expression: string;
   properties: Record<string, unknown>;
-}
+} & ({ filter: string } | { expression: string });
 
 export type EntityDefinition = InventoryEntityDefinition | EntityDefinitionBase;
 
 export interface Entity {
   type: string;
-  id: string;
   displayName: string;
   properties: Record<string, unknown>;
 }
