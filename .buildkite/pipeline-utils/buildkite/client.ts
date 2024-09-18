@@ -239,6 +239,17 @@ export class BuildkiteClient {
     );
   };
 
+  getLastBuild = async (pipelineSlug: string, branch: string, buildState: string) => {
+    const link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?branch=${branch}&state=${buildState}&per_page=1`;
+    const resp = await this.http.get(link);
+    const builds = resp.data as Build[];
+    if (builds.length === 0) {
+      throw new Error(`No ${buildState} builds for ${pipelineSlug} pipeline and ${branch} found`);
+    }
+    // return the latest build
+    return builds[0];
+  };
+
   getJobStatus = (build: Build, job: Job): { success: boolean; state: JobState } => {
     if (job.retried) {
       const retriedJob = build.jobs.find((j) => j.id === job.retried_in_job_id);

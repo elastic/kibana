@@ -9,18 +9,20 @@ steps:
 
   - wait
 
-  - label: '🧑‍🏭 Build Kibana Distribution and Plugins'
-    command: .buildkite/scripts/steps/build_kibana.sh
+  - label: '🧑‍🏭 Fetch The Latest Existing Kibana Distribution and Plugins'
+    command: .buildkite/scripts/steps/performance/get_kibana_build.sh
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: '💪 Performance Tests with Playwright config'
-    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    commands:
+      - export COMMIT_HASH=$(buildkite-agent meta-data get "commit-hash")
+      - git checkout $COMMIT_HASH
+      - .buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
