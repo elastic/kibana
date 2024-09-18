@@ -15,8 +15,14 @@ describe('autocomplete.suggest', () => {
       test('suggests command on first character', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort /', [...getFieldNamesByType('any')]);
-        await assertSuggestions('from a | sort column, /', [...getFieldNamesByType('any')]);
+        await assertSuggestions(
+          'from a | sort /',
+          [...getFieldNamesByType('any')].map((field) => `${field} `)
+        );
+        await assertSuggestions(
+          'from a | sort column, /',
+          [...getFieldNamesByType('any')].map((field) => `${field} `)
+        );
       });
     });
 
