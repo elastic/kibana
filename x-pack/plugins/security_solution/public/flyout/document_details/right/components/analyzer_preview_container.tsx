@@ -12,7 +12,8 @@ import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import {
   DocumentDetailsLeftPanelKey,
@@ -37,13 +38,13 @@ const timelineId = 'timeline-1';
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
   const { telemetry } = useKibana().services;
-  const { dataAsNestedObject, isPreview, eventId, indexName, scopeId } =
+  const { dataAsNestedObject, isPreview, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
   const key = useWhichFlyout() ?? 'memory';
 
-  const visualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'visualizationInFlyoutEnabled'
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
   // decide whether to show the analyzer preview or not
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
@@ -108,7 +109,8 @@ export const AnalyzerPreviewContainer: React.FC = () => {
         ),
         iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline',
         ...(isEnabled &&
-          !isPreview && {
+          !isPreview &&
+          !isPreviewMode && {
             link: {
               callback: visualizationInFlyoutEnabled ? gotoVisualizationTab : goToAnalyzerTab,
               tooltip: visualizationInFlyoutEnabled ? (

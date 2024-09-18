@@ -72,26 +72,26 @@ export const VisualizeTab = memo(() => {
       setActiveVisualizationId(optionId);
       if (optionId === ANALYZE_GRAPH_ID) {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
+        openLeftPanel({
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelVisualizeTab,
+            subTab: optionId,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+          },
+        });
+        openPreviewPanel({
+          id: DocumentDetailsAnalyzerPanelKey,
+          params: {
+            resolverComponentInstanceID: `${key}-${scopeId}`,
+            banner: ANALYZER_PREVIEW_BANNER,
+          },
+        });
       }
-      openLeftPanel({
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelVisualizeTab,
-          subTab: optionId,
-        },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId,
-        },
-      });
-      openPreviewPanel({
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${key}-${scopeId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      });
     },
     [startTransaction, eventId, indexName, scopeId, openLeftPanel, openPreviewPanel, key]
   );

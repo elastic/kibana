@@ -12,6 +12,10 @@ import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { ExpandablePanel } from '@kbn/security-solution-common';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
@@ -22,6 +26,8 @@ import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
+import { SESSION_VIEW_ID } from '../../left/components/session_view';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const timelineId = 'timeline-1';
 
@@ -29,8 +35,21 @@ const timelineId = 'timeline-1';
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
 export const SessionPreviewContainer: FC = () => {
-  const { dataAsNestedObject, getFieldsData, isPreview, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
+  const { telemetry } = useKibana().services;
+  const {
+    eventId,
+    indexName,
+    scopeId,
+    dataAsNestedObject,
+    getFieldsData,
+    isPreview,
+    isPreviewMode,
+    dataFormattedForFieldBrowser,
+  } = useDocumentDetailsContext();
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
 
   // decide whether to show the session view or not
   const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
@@ -63,6 +82,29 @@ export const SessionPreviewContainer: FC = () => {
     sessionViewConfig,
     startTransaction,
   ]);
+
+  const { openLeftPanel } = useExpandableFlyoutApi();
+
+  const gotoVisualizationTab = useCallback(() => {
+    openLeftPanel({
+      id: DocumentDetailsLeftPanelKey,
+      path: {
+        tab: 'visualize',
+        subTab: SESSION_VIEW_ID,
+      },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+
+    telemetry.reportDetailsFlyoutTabClicked({
+      location: scopeId,
+      panel: 'left',
+      tabId: 'visualize',
+    });
+  }, [eventId, indexName, openLeftPanel, scopeId, telemetry]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -122,11 +164,12 @@ export const SessionPreviewContainer: FC = () => {
             defaultMessage="Session viewer preview"
           />
         ),
-        iconType: 'timeline',
+        iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline',
         ...(isEnabled &&
-          !isPreview && {
+          !isPreview &&
+          !isPreviewMode && {
             link: {
-              callback: goToSessionViewTab,
+              callback: visualizationInFlyoutEnabled ? gotoVisualizationTab : goToSessionViewTab,
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
