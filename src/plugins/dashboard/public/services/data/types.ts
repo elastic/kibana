@@ -11,7 +11,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface DashboardDataService {
   dataViews: DataPublicPluginStart['dataViews'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
   query: DataPublicPluginStart['query'];
   search: DataPublicPluginStart['search'];
 }

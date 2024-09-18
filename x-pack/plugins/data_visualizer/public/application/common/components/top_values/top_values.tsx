@@ -65,9 +65,7 @@ export const TopValues: FC<Props> = ({
   showSampledValues = false,
 }) => {
   const {
-    services: {
-      data: { fieldFormats },
-    },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
