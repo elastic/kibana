@@ -32,6 +32,8 @@
     "@kbn/index-management-shared-types",
     "@kbn/try-in-console",
     "@kbn/cloud-plugin",
+    "@kbn/search-index-documents",
+    "@kbn/es-types",
   ],
   "exclude": [
     "target/**/*",

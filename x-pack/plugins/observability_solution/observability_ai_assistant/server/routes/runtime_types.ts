@@ -73,6 +73,12 @@ export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   public: toBooleanRt,
 });
 
+export const assistantScopeType = t.union([
+  t.literal('observability'),
+  t.literal('search'),
+  t.literal('all'),
+]);
+
 export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
   baseConversationRt,
   t.type({

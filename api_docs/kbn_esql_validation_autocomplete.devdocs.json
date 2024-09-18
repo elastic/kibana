@@ -1536,7 +1536,9 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => () => Promise<{ name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }[]>"
+          " | undefined) => () => Promise<",
+          "ESQLSourceResult",
+          "[]>"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
@@ -3054,7 +3056,9 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }> | undefined"
+              "CallbackFn<{}, ",
+              "ESQLSourceResult",
+              "> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
@@ -3111,6 +3115,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getFieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "getFieldsMetadata",
+            "description": [],
+            "signature": [
+              "Promise<",
+              "PartialFieldsMetadataClient",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3210,6 +3230,20 @@
             "description": [],
             "signature": [
               "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\""
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLRealField.isEcs",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEcs",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
