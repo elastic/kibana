@@ -496,7 +496,7 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 2,
         sort: 'asc',
-        timeout: 240_000,
+        timeout: 180_000,
       });
 
       const resp2 = await alertingApi.helpers.waitForAlertInIndex({
