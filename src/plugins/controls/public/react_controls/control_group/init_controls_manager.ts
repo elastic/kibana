@@ -7,23 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as generateId } from 'uuid';
 import fastIsEqual from 'fast-deep-equal';
-import {
+import { omit } from 'lodash';
+import { v4 as generateId } from 'uuid';
+
+import type { Reference } from '@kbn/content-management-utils';
+import type {
   HasSerializedChildState,
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import type { Reference } from '@kbn/content-management-utils';
-import { BehaviorSubject, first, merge } from 'rxjs';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlGroupApi, ControlPanelsState, ControlPanelState } from './types';
-import { DefaultControlApi, DefaultControlState } from '../controls/types';
-import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
-import { DefaultDataControlState } from '../controls/data_controls/types';
-import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject, first, merge } from 'rxjs';
+import type {
+  ControlPanelState,
+  ControlPanelsState,
+  ControlWidth,
+  DefaultControlState,
+  DefaultDataControlState,
+} from '../../../common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
+import type { DefaultControlApi } from '../controls/types';
+import type { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
+import type { ControlGroupApi } from './types';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -264,9 +271,7 @@ export function initControlsManager(
 
 export function getLastUsedDataViewId(
   controlsInOrder: ControlsInOrder,
-  initialControlPanelsState: ControlPanelsState<
-    ControlPanelState & Partial<DefaultDataControlState>
-  >
+  initialControlPanelsState: ControlPanelsState<Partial<DefaultDataControlState>>
 ) {
   let dataViewId: string | undefined;
   for (let i = controlsInOrder.length - 1; i >= 0; i--) {

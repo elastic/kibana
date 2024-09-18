@@ -298,6 +298,98 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.resultMetaData",
+        "type": "Function",
+        "tags": [],
+        "label": "resultMetaData",
+        "description": [],
+        "signature": [
+          "(result: ",
+          "SearchHit",
+          "<unknown>) => ",
+          "MetaDataProps"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultMetaData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.resultToField",
+        "type": "Function",
+        "tags": [],
+        "label": "resultToField",
+        "description": [],
+        "signature": [
+          "(result: ",
+          "SearchHit",
+          "<unknown>, mappings?: Record<string, ",
+          "MappingProperty",
+          "> | undefined) => { fieldName: string; fieldType: \"boolean\" | \"object\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"date_nanos\" | \"completion\" | \"version\" | \"murmur3\" | \"token_count\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"alias\" | \"join\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"aggregate_metric_double\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"icu_collation_keyword\" | \"{dynamic_type}\" | \"point\" | \"unsigned_long\"; fieldValue: string; }[]"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToField.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "MappingProperty",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

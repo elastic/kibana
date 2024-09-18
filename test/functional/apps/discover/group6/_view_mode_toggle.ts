@@ -68,10 +68,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await documentsTab.getAttribute('aria-selected')).to.be('true');
         });
 
-        it('should show Document Explorer info callout', async () => {
-          await testSubjects.existOrFail(
-            useLegacyTable ? 'dscDocumentExplorerLegacyCallout' : 'dscDocumentExplorerTourCallout'
-          );
+        it('should show legacy Document Explorer info callout', async () => {
+          if (useLegacyTable) {
+            await testSubjects.existOrFail('dscDocumentExplorerLegacyCallout');
+          } else {
+            await testSubjects.missingOrFail('dscDocumentExplorerLegacyCallout');
+          }
         });
 
         it('should show an error callout', async () => {
@@ -88,11 +90,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
 
-        it('should not show Patterns tab (basic license)', async () => {
-          await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
-          await retry.try(async () => {
-            const documentTab = await testSubjects.find('dscViewModeDocumentButton');
-            expect(await documentTab.getAttribute('aria-selected')).to.be('true');
+        describe('Patterns tab (basic license)', function () {
+          this.tags('skipFIPS');
+
+          it('should not show', async function () {
+            await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
+            await retry.try(async () => {
+              const documentTab = await testSubjects.find('dscViewModeDocumentButton');
+              expect(await documentTab.getAttribute('aria-selected')).to.be('true');
+            });
           });
         });
 

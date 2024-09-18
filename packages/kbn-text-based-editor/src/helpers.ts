@@ -77,12 +77,14 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
           }
-          // extract the length of the "expression" within the message
-          // and try to guess the correct size for the editor marker to highlight
-          if (/\[.*\]/.test(warningMessage)) {
-            const [_, wordWithError] = warningMessage.split('[');
-            if (wordWithError) {
-              errorLength = wordWithError.length;
+          const openingSquareBracketIndex = warningMessage.indexOf('[');
+          if (openingSquareBracketIndex !== -1) {
+            const closingSquareBracketIndex = warningMessage.indexOf(
+              ']',
+              openingSquareBracketIndex
+            );
+            if (closingSquareBracketIndex !== -1) {
+              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
             }
           }
         }
@@ -170,11 +172,11 @@ export const getDocumentationSections = async (language: string) => {
       sourceCommands,
       processingCommands,
       initialSection,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators,
-    } = await import('./esql_documentation_sections');
+    } = await import('./inline_documentation/esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ES|QL',
@@ -184,7 +186,7 @@ export const getDocumentationSections = async (language: string) => {
     groups.push(
       sourceCommands,
       processingCommands,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators
@@ -249,20 +251,22 @@ const getIntegrations = async (core: CoreStart) => {
   // and this needs to be done in various places in the codebase which use the editor
   // https://github.com/elastic/kibana/issues/186061
   const response = (await core.http
-    .get(INTEGRATIONS_API, { query: undefined, version: API_VERSION })
+    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch integrations', error);
     })) as IntegrationsResponse;
 
   return (
-    response?.items?.map((source) => ({
-      name: source.name,
-      hidden: false,
-      title: source.title,
-      dataStreams: source.dataStreams,
-      type: 'Integration',
-    })) ?? []
+    response?.items
+      ?.filter(({ dataStreams }) => dataStreams.length)
+      .map((source) => ({
+        name: source.name,
+        hidden: false,
+        title: source.title,
+        dataStreams: source.dataStreams,
+        type: 'Integration',
+      })) ?? []
   );
 };
 

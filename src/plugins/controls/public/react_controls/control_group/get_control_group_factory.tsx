@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
+
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,31 +21,30 @@ import {
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataViews,
   PublishesDataViews,
+  apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
-import {
+
+import type {
   ControlGroupChainingSystem,
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_STYLE,
-} from '../../../common';
-import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
-import { initControlsManager } from './init_controls_manager';
-import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup } from './serialization_utils';
-import {
-  ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelsState,
-} from './types';
-import { ControlGroup } from './components/control_group';
-import { initSelectionsManager } from './selections_manager';
-import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+  ControlStyle,
+  ParentIgnoreSettings,
+} from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_STYLE } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { ControlGroup } from './components/control_group';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+import { initControlsManager } from './init_controls_manager';
+import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
+import { initSelectionsManager } from './selections_manager';
+import type { ControlGroupApi } from './types';
+import { deserializeControlGroup } from './utils/serialization_utils';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
@@ -98,6 +98,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -131,9 +132,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
+        disabledActionIds: disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -150,8 +149,13 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
         allowExpensiveQueries$,
         snapshotRuntimeState: () => {
-          // TODO: Remove this if it ends up being unnecessary
-          return {} as unknown as ControlGroupRuntimeState;
+          return {
+            chainingSystem: chainingSystem$.getValue(),
+            labelPosition: labelPosition$.getValue(),
+            autoApplySelections: autoApplySelections$.getValue(),
+            ignoreParentSettings: ignoreParentSettings$.getValue(),
+            initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
+          };
         },
         dataLoading: dataLoading$,
         onEdit: async () => {
@@ -167,15 +171,12 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
         },
         isEditingEnabled: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('controls.controlGroup.displayName', {
-            defaultMessage: 'Controls',
-          }),
-        openAddDataControlFlyout: (options) => {
+        openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
             ? parentApi.dataViews.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
+
           openDataControlEditor({
             initialState: {
               ...newControlState,
@@ -185,14 +186,11 @@ export const getControlGroupEmbeddableFactory = (services: {
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: options?.controlInputTransform
-                  ? options.controlInputTransform(
-                      initialState as Partial<ControlGroupSerializedState>,
-                      controlType
-                    )
+                initialState: settings?.controlStateTransform
+                  ? settings.controlStateTransform(initialState, controlType)
                   : initialState,
               });
-              options?.onSave?.();
+              settings?.onSave?.();
             },
             controlGroupApi: api,
             services,
@@ -217,6 +215,20 @@ export const getControlGroupEmbeddableFactory = (services: {
           ? parentApi.saveNotification$
           : undefined,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
+
+        /** Public getters */
+        getTypeDisplayName: () =>
+          i18n.translate('controls.controlGroup.displayName', {
+            defaultMessage: 'Controls',
+          }),
+        getEditorConfig: () => initialRuntimeState.editorConfig,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
+        },
+
+        /** Public setters */
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
+        setChainingSystem: (newChainingSystem) => chainingSystem$.next(newChainingSystem),
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
