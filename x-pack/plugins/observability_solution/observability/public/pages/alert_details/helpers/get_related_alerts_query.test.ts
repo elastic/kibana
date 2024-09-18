@@ -13,9 +13,9 @@ describe('getGroupQueries', () => {
     { field: 'group1Field', value: 'group1Value' },
     { field: 'group2Field', value: 'group2Value' },
   ];
-  const tagsKuery = 'tags: tag1 or tags: tag2';
+  const tagsKuery = '(tags: tag1 or tags: tag2)';
   const groupsKuery =
-    'group1Field: group1Value or kibana.alert.group.value: group1Value or group2Field: group2Value or kibana.alert.group.value: group2Value';
+    '(group1Field: group1Value or kibana.alert.group.value: group1Value) or (group2Field: group2Value or kibana.alert.group.value: group2Value)';
 
   it('should generate correct query with no tags or groups', () => {
     expect(getGroupQueries()).toBeUndefined();

@@ -7,7 +7,7 @@
 
 import React, { useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import {
   AlertSearchBarContainerState,
@@ -45,6 +45,7 @@ interface Props {
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
+const DEFAULT_FILTERS: Filter[] = [];
 
 export function InternalRelatedAlerts({ groups, tags }: Props) {
   const kibanaServices = useKibana().services;
@@ -71,17 +72,20 @@ export function InternalRelatedAlerts({ groups, tags }: Props) {
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
           defaultSearchQueries={relatedAlertQuery.current}
-          defaultState={defaultState}
+          defaultState={{
+            ...defaultState,
+            kuery: getGroupQueries(tags, groups)?.[0].query ?? '',
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         {esQuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
             featureIds={observabilityAlertFeatureIds}
-            defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? []}
+            defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}
-            globalFilters={alertSearchBarStateProps.filters ?? []}
+            globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
             globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
             groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
             defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}

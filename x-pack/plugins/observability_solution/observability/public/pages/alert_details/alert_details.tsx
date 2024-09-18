@@ -236,7 +236,7 @@ export function AlertDetails() {
     {
       id: RELATED_ALERTS_TAB_ID,
       name: i18n.translate('xpack.observability.alertDetails.tab.relatedAlertsLabel', {
-        defaultMessage: 'Related alerts',
+        defaultMessage: 'Related Alerts',
       }),
       'data-test-subj': 'relatedAlertsTab',
       content: (

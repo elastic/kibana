@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -52,6 +52,7 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+const DEFAULT_FILTERS: Filter[] = [];
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -255,10 +256,12 @@ function InternalAlertsPage() {
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 featureIds={observabilityAlertFeatureIds}
-                defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? []}
+                defaultFilters={
+                  ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
+                }
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={alertSearchBarStateProps.filters ?? []}
+                globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}

@@ -136,7 +136,8 @@ function useUrlStateSyncEffect(
     start();
 
     return stop;
-  }, [defaultState, stateContainer, history, timefilterService, urlStorageKey, replace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stateContainer, history, timefilterService, urlStorageKey, replace]);
 }
 
 function setupUrlStateSync(

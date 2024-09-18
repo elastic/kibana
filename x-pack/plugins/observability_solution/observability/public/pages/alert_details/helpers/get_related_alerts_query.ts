@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { type Query } from '@kbn/es-query';
 import type { Group } from '../../../../common/typings';
+
+export interface Query {
+  query: string;
+  language: string;
+}
 
 export const getGroupQueries = (tags?: string[], groups?: Group[]): Query[] | undefined => {
   const tagKueries: string[] =
@@ -16,11 +20,13 @@ export const getGroupQueries = (tags?: string[], groups?: Group[]): Query[] | un
   const groupKueries =
     (groups &&
       groups.map(({ field, value }) => {
-        return `${[field]}: ${value} or kibana.alert.group.value: ${value}`;
+        return `(${[field]}: ${value} or kibana.alert.group.value: ${value})`;
       })) ??
     [];
 
-  const kueries = [...tagKueries, ...groupKueries];
+  const tagKueriesStr = tagKueries.length > 0 ? [`(${tagKueries.join(' or ')})`] : [];
+  const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
+  const kueries = [...tagKueriesStr, ...groupKueriesStr];
 
   return kueries.length
     ? [
