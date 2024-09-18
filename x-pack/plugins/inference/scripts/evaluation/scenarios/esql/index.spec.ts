@@ -8,11 +8,10 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { mapValues, pick } from 'lodash';
 import { firstValueFrom, lastValueFrom, filter } from 'rxjs';
 import { naturalLanguageToEsql } from '../../../../server/tasks/nl_to_esql';
 import { chatClient, evaluationClient, logger } from '../../services';
-import { loadDocuments } from '../../../../server/tasks/nl_to_esql/load_documents';
+import { EsqlDocumentBase } from '../../../../server/tasks/nl_to_esql/doc_base';
 import { isOutputCompleteEvent } from '../../../../common';
 
 interface TestCase {
@@ -113,13 +112,9 @@ const retrieveUsedCommands = async ({
 
   const output = commandsListOutput.output;
 
-  const keywords = [
-    ...(output.commands ?? []),
-    ...(output.functions ?? []),
-    'SYNTAX',
-    'OVERVIEW',
-    'OPERATORS',
-  ].map((keyword) => keyword.toUpperCase());
+  const keywords = [...(output.commands ?? []), ...(output.functions ?? [])].map((keyword) =>
+    keyword.toUpperCase()
+  );
 
   return keywords;
 };
@@ -140,15 +135,15 @@ async function evaluateEsqlQuery({
 
   logger.debug(`Received response: ${answer}`);
 
-  const [systemMessage, esqlDocs] = await loadDocuments();
+  const docBase = await EsqlDocumentBase.load();
 
   const usedCommands = await retrieveUsedCommands({
     question,
     answer,
-    esqlDescription: systemMessage,
+    esqlDescription: docBase.getSystemMessage(),
   });
 
-  const requestedDocumentation = mapValues(pick(esqlDocs, usedCommands), ({ data }) => data);
+  const requestedDocumentation = docBase.getDocumentation(usedCommands);
 
   const evaluation = await evaluationClient.evaluate({
     input: `
@@ -192,7 +187,7 @@ const buildTestDefinitions = (): Section[] => {
         {
           title: 'Generates a query to show employees filtered by name and grouped by hire_date',
           question: `From the employees index, I want to see how many employees with a "B" in their first name
-      where hired each month over the past 2 years.
+      were hired each month over the past 2 years.
       Assume the following fields:
       - hire_date
       - first_name
@@ -208,10 +203,10 @@ const buildTestDefinitions = (): Section[] => {
          (which can be read the same backward and forward), and then return their last name and first name
       - last_name
       - first_name`,
-          expected: `FROM employees
-      | EVAL reversed_last_name = REVERSE(last_name)
-      | WHERE TO_LOWER(last_name) == TO_LOWER(reversed_last_name)
-      | KEEP last_name, first_name`,
+          criteria: [
+            `The assistant should not provide an ES|QL query, and explicitly mention that there is no
+            way to check for palindromes using ES|QL.`,
+          ],
         },
         {
           title: 'Generates a query to show the top 10 domains by doc count',

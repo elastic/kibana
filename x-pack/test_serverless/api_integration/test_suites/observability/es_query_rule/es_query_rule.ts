@@ -12,7 +12,6 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createEsQueryRule } from '../../common/alerting/helpers/alerting_api_helper';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,7 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
@@ -58,10 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: ALERT_ACTION_INDEX,
         });
 
-        const createdRule = await createEsQueryRule({
-          supertestWithoutAuth,
+        const createdRule = await alertingApi.helpers.createEsQueryRule({
           roleAuthc,
-          internalReqHeader,
           consumer: 'observability',
           name: 'always fire',
           ruleTypeId: RULE_TYPE_ID,

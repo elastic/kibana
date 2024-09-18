@@ -7,12 +7,49 @@
 
 import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { TrendRequest, TrendTable } from '../../../common/types';
+import type { TrendRequest, TrendTable } from '../../../common/types';
 import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsEsClient } from '../../lib';
 
 export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;
+
+export async function fetchTrends(
+  esClient: SyntheticsEsClient,
+  configs: Record<
+    string,
+    {
+      locations: string[];
+      interval: number;
+    }
+  >
+): Promise<TrendTable> {
+  const requests = Object.keys(configs).map(
+    (key) => getFetchTrendsQuery(key, configs[key].locations, configs[key].interval).body
+  );
+  const results = await esClient.msearch<TrendsQuery>(requests);
+
+  return results.responses.reduce((table, res): TrendTable => {
+    res.aggregations?.byId.buckets.map(({ key, byLocation }) => {
+      const nTable: TrendTable = {};
+      for (const location of byLocation.buckets) {
+        nTable[String(key) + String(location.key)] = {
+          configId: String(key),
+          locationId: String(location.key),
+          data: location.last50.buckets.map((durationBucket, x) => ({
+            x,
+            y: durationBucket.max.value!,
+          })),
+          ...location.stats,
+          median: location.median.values['50.0']!,
+        };
+      }
+      table = { ...table, ...nTable };
+    });
+    return table;
+  }, {});
+}
 
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -45,30 +82,6 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       {}
     );
 
-    const requests = Object.keys(configs).map(
-      (key) => getFetchTrendsQuery(key, configs[key].locations, configs[key].interval).body
-    );
-    const results = await esClient.msearch<TrendsQuery>(requests);
-
-    let main = {};
-    for (const res of results.responses) {
-      res.aggregations?.byId.buckets.map(({ key, byLocation }) => {
-        const ret: Record<string, any> = {};
-        for (const location of byLocation.buckets) {
-          ret[String(key) + String(location.key)] = {
-            configId: key,
-            locationId: location.key,
-            data: location.last50.buckets.map((durationBucket, x) => ({
-              x,
-              y: durationBucket.max.value,
-            })),
-            ...location.stats,
-            median: location.median.values['50.0'],
-          };
-        }
-        main = { ...main, ...ret };
-      });
-    }
-    return main;
+    return fetchTrends(esClient, configs);
   },
 });

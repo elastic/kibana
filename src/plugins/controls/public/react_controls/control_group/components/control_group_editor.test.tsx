@@ -9,15 +9,18 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+
 import { render } from '@testing-library/react';
-import { ControlGroupEditor } from './control_group_editor';
-import { ControlGroupApi, ControlStyle } from '../../..';
+
+import { ControlGroupApi } from '../../..';
 import {
   ControlGroupChainingSystem,
+  ControlStyle,
   DEFAULT_CONTROL_STYLE,
   ParentIgnoreSettings,
 } from '../../../../common';
 import { DefaultControlApi } from '../../controls/types';
+import { ControlGroupEditor } from './control_group_editor';
 
 describe('render', () => {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
