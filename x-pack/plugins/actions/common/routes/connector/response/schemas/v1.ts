@@ -42,7 +42,8 @@ export const connectorResponseSchema = schema.object({
 export const allConnectorsResponseSchema = connectorResponseSchema.extends({
   referenced_by_count: schema.number({
     meta: {
-      description: ' The number of rules that are currently using the connector.',
+      description:
+        'The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.',
     },
   }),
 });
