@@ -103,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrasturcture Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 
