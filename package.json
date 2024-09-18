@@ -1469,7 +1469,7 @@
     "@types/enzyme": "^3.10.12",
     "@types/eslint": "^8.44.2",
     "@types/event-stream": "^4.0.5",
-    "@types/express": "^4.17.13",
+    "@types/express": "^4.17.21",
     "@types/extract-zip": "^1.6.2",
     "@types/faker": "^5.1.5",
     "@types/fetch-mock": "^7.3.1",
