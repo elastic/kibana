@@ -145,6 +145,7 @@ export function registerChangesFunction({
           },
         },
       };
-    }
+    },
+    ['observability']
   );
 }
