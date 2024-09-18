@@ -16,28 +16,32 @@ import SummaryColumn, { SummaryColumnFactoryDeps, SummaryColumnProps } from './s
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '../../../../../common/data_types/logs/constants';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 const renderSummary = (
   record: DataTableRecord,
   opts: Partial<SummaryColumnProps & SummaryColumnFactoryDeps> = {}
 ) => {
   render(
-    <SummaryColumn
-      rowIndex={0}
-      colIndex={0}
-      columnId="_source"
-      isExpandable={true}
-      isExpanded={false}
-      isDetails={false}
-      row={record}
-      dataView={dataViewMock}
-      fieldFormats={fieldFormatsMock}
-      setCellProps={() => {}}
-      closePopover={() => {}}
-      data={dataPluginMock.createStartContract()}
-      params={{ density: DataGridDensity.COMPACT, rowHeight: ROWS_HEIGHT_OPTIONS.single }}
-      {...opts}
-    />
+    <KibanaContextProvider services={discoverServiceMock}>
+      <SummaryColumn
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isExpandable={true}
+        isExpanded={false}
+        isDetails={false}
+        row={record}
+        dataView={dataViewMock}
+        fieldFormats={fieldFormatsMock}
+        setCellProps={() => {}}
+        closePopover={() => {}}
+        data={dataPluginMock.createStartContract()}
+        params={{ density: DataGridDensity.COMPACT, rowHeight: ROWS_HEIGHT_OPTIONS.single }}
+        {...opts}
+      />
+    </KibanaContextProvider>
   );
 };
 
