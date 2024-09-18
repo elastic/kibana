@@ -162,7 +162,10 @@ export class FeatureTable extends Component<Props, State> {
             )}
             <EuiFlexGroup direction="column" gutterSize="s">
               {featuresInCategory.map((feature) => (
-                <EuiFlexItem key={feature.id}>
+                <EuiFlexItem
+                  key={feature.id}
+                  data-test-subj={`featureCategory_${category.id}_${feature.id}`}
+                >
                   {this.renderPrivilegeControlsForFeature(feature)}
                 </EuiFlexItem>
               ))}
