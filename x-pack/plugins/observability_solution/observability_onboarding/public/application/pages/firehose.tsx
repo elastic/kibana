@@ -29,6 +29,7 @@ export const FirehosePage = () => (
               'This installation is tailored for setting up Firehose in your Observability project with minimal configuration.',
           }
         )}
+        isTechnicalPreview={true}
       />
     }
   >
