@@ -112,9 +112,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       name: 'Test Monitor',
       location: 'North America - US Central',
       status: 'down',
-      numberOfChecks: 1,
-      downThreshold: 1,
-      locationsThreshold: 1,
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -179,9 +176,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       name,
       location: 'North America - US Central',
       status: 'down',
-      numberOfChecks: 1,
-      downThreshold: 1,
-      locationsThreshold: 1,
       checks: {
         downWithinXChecks: 1,
         down: 1,
