@@ -36,7 +36,6 @@ const configSchema = schema.object({
     ),
     schema.maybe(launchDarklySchema)
   ),
-  flag_overrides: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   metadata_refresh_interval: schema.duration({ defaultValue: '1h' }),
 });
 
@@ -48,7 +47,6 @@ export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
       client_id: true,
       client_log_level: true,
     },
-    flag_overrides: true,
     metadata_refresh_interval: true,
   },
   schema: configSchema,

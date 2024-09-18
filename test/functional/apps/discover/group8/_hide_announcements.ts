@@ -23,7 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'doc_table:legacy': true,
+      });
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
     });
@@ -32,17 +35,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should display take tour button', async function () {
+    it('should display callout', async function () {
       await discover.selectIndexPattern('logstash-*');
-      const tourButtonExists = await testSubjects.exists('discoverTakeTourButton');
-      expect(tourButtonExists).to.be(true);
+      const calloutExists = await testSubjects.exists('dscDocumentExplorerLegacyCallout');
+      expect(calloutExists).to.be(true);
     });
 
-    it('should not display take tour button', async function () {
+    it('should not display callout', async function () {
       await kibanaServer.uiSettings.update({ hideAnnouncements: true });
       await browser.refresh();
-      const tourButtonExists = await testSubjects.exists('discoverTakeTourButton');
-      expect(tourButtonExists).to.be(false);
+      const calloutExists = await testSubjects.exists('dscDocumentExplorerLegacyCallout');
+      expect(calloutExists).to.be(false);
     });
   });
 }
