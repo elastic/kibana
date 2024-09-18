@@ -104,6 +104,8 @@ function createChangelog(packageDir: string): void {
 
 function createReadme(packageDir: string, integration: Integration) {
   const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
+  const mainReadmeDirPath = joinPath(packageDir, 'docs/');
+  ensureDirSync(mainReadmeDirPath);
   ensureDirSync(readmeDirPath);
   const readmeTemplate = nunjucks.render('package_readme.md.njk', {
     package_name: integration.name,
@@ -111,6 +113,7 @@ function createReadme(packageDir: string, integration: Integration) {
   });
 
   createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
+  createSync(joinPath(mainReadmeDirPath, 'README.md'), readmeTemplate);
 }
 
 async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {

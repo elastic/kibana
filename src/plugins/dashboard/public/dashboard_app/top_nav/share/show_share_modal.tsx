@@ -17,11 +17,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import {
-  convertPanelMapToSavedPanels,
-  DashboardContainerInput,
-  DashboardPanelMap,
-} from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';
@@ -35,7 +31,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
-  getDashboardState: () => DashboardContainerInput;
+  getPanelsState: () => DashboardPanelMap;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -51,7 +47,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
-  getDashboardState,
+  getPanelsState,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -140,7 +136,7 @@ export function ShowShareModal({
       return;
     }
 
-    const latestPanels = getDashboardState().panels;
+    const latestPanels = getPanelsState();
     // apply modifications to panels.
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
