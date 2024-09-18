@@ -21,6 +21,7 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
+import { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 
@@ -30,8 +31,8 @@ export const createContextAwarenessMocks = ({
   const rootProfileProviderMock: RootProfileProvider = {
     profileId: 'root-profile',
     profile: {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         rootProfile: () => <>root-profile</>,
       })),
       getAdditionalCellActions: jest.fn((prev) => () => [
@@ -58,8 +59,8 @@ export const createContextAwarenessMocks = ({
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
     profile: {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         rootProfile: () => <>data-source-profile</>,
       })),
       getDefaultAppState: jest.fn(() => () => ({
@@ -175,5 +176,5 @@ export const createContextAwarenessMocks = ({
 const createProfileProviderServicesMock = () => {
   return {
     logsContextService: createLogsContextServiceMock(),
-  };
+  } as ProfileProviderServices;
 };

@@ -28,7 +28,12 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  DataGridDensity,
+  DataLoadingState,
+  ROWS_HEIGHT_OPTIONS,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
@@ -173,7 +178,10 @@ export function ContextAppContent({
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers();
+    return getCellRenderers({
+      density: DataGridDensity.COMPACT,
+      rowHeight: ROWS_HEIGHT_OPTIONS.single,
+    });
   }, [getCellRenderersAccessor]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);

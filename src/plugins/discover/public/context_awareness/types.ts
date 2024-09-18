@@ -8,7 +8,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  DataGridDensity,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
@@ -94,6 +98,14 @@ export interface DefaultAppStateExtension {
    * * 1-20: number of lines to display
    */
   rowHeight?: number;
+}
+
+/**
+ * Parameters passed to the cell renderers extension
+ */
+export interface CellRenderersExtensionParams {
+  density: DataGridDensity | undefined;
+  rowHeight: number | undefined;
 }
 
 /**
@@ -216,7 +228,7 @@ export interface Profile {
    * Gets a map of column names to custom cell renderers to use in the data grid
    * @returns The custom cell renderers to use in the data grid
    */
-  getCellRenderers: () => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
 
   /**
    * Gets a row indicator provider, allowing rows in the data grid to be given coloured highlights

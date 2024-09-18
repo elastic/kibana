@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { useVirtualColumnServiceContext } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+import { useDataGridCellServicesContext } from '../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { actionFilterForText, filterForText } from './translations';
 
 export const FilterInButton = ({ property, value }: { property: string; value: string }) => {
+  const { data, dataView } = useDataGridCellServicesContext();
+  const { filterManager } = data.query;
+
   const ariaFilterForText = actionFilterForText(value);
-  const serviceContext = useVirtualColumnServiceContext();
-  const filterManager = serviceContext?.data.query.filterManager;
-  const dataView = serviceContext.dataView;
 
   const onFilterForAction = () => {
     if (filterManager != null) {
@@ -27,16 +27,15 @@ export const FilterInButton = ({ property, value }: { property: string; value: s
   };
 
   return (
-    <EuiFlexItem key="addToFilterAction">
-      <EuiButtonEmpty
-        size="s"
-        iconType="plusInCircle"
-        aria-label={ariaFilterForText}
-        onClick={onFilterForAction}
-        data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
-      >
-        {filterForText}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+    <EuiButtonEmpty
+      key="addToFilterAction"
+      size="s"
+      iconType="plusInCircle"
+      aria-label={ariaFilterForText}
+      onClick={onFilterForAction}
+      data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
+    >
+      {filterForText}
+    </EuiButtonEmpty>
   );
 };

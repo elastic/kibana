@@ -183,7 +183,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager({ plugins: discoverStartPlugins }),
+          profilesManager: await this.createProfilesManager(coreStart, discoverStartPlugins),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -302,40 +302,46 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices = once(async ({ plugins }: { plugins: DiscoverStartPlugins }) => {
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+  private createProfileServices() {
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
+
+    return { rootProfileService, dataSourceProfileService, documentProfileService };
+  }
+
+  private createProfilesManager = once(async (core: CoreStart, plugins: DiscoverStartPlugins) => {
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+    const { rootProfileService, dataSourceProfileService, documentProfileService } =
+      this.createProfileServices();
+
     const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
+    const profilesManager = new ProfilesManager(
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService
+    );
+
     await registerProfileProviders({
-      plugins,
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds,
+      services: this.getDiscoverServices(core, plugins, profilesManager),
     });
 
-    return { rootProfileService, dataSourceProfileService, documentProfileService };
+    return profilesManager;
   });
 
-  private async createProfilesManager({ plugins }: { plugins: DiscoverStartPlugins }) {
+  private createEmptyProfilesManager() {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      await this.createProfileServices({ plugins });
+      this.createProfileServices();
 
     return new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
       documentProfileService
-    );
-  }
-
-  private createEmptyProfilesManager() {
-    return new ProfilesManager(
-      new RootProfileService(),
-      new DataSourceProfileService(),
-      new DocumentProfileService()
     );
   }
 
@@ -368,7 +374,7 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const profilesManager = await this.createProfilesManager({ plugins: deps });
+      const profilesManager = await this.createProfilesManager(coreStart, deps);
       return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 

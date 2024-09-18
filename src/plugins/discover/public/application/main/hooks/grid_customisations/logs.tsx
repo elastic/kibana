@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
-import { renderCell } from '../../../../components/discover_grid/virtual_columns/logs/cell_renderer';
-import { renderColumn } from '../../../../components/discover_grid/virtual_columns/logs/column';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { SummaryColumnFactoryDeps } from '../../../../components/data_types/logs/summary_column/summary_column';
+import { getSummaryColumn } from '../../../../components/data_types/logs/summary_column';
 
-export const getLogsVirtualColumnsConfiguration = (data: DataPublicPluginStart) => {
+export type DataGridColumnsDeps = CustomCellRendererDeps;
+
+export const getDataGridColumnsConfiguration = ({ data, params }: DataGridColumnsDeps) => {
   return {
-    customCellRenderer: createCustomCellRenderer({ data }),
+    customCellRenderer: createCustomCellRenderer({ data, params }),
     customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
   };
 };
 
-export const createCustomCellRenderer = ({ data }: { data: DataPublicPluginStart }) => {
+type CustomCellRendererDeps = SummaryColumnFactoryDeps;
+
+export const createCustomCellRenderer = (deps: CustomCellRendererDeps) => {
   return {
-    [CONTENT_FIELD]: renderCell(CONTENT_FIELD, { data }),
-    [RESOURCE_FIELD]: renderCell(RESOURCE_FIELD, { data }),
+    [SOURCE_COLUMN]: getSummaryColumn(deps),
   };
 };
 
-export const createCustomGridColumnsConfiguration = () => ({
-  [CONTENT_FIELD]: renderColumn(CONTENT_FIELD),
-  [RESOURCE_FIELD]: renderColumn(RESOURCE_FIELD),
-});
+export const createCustomGridColumnsConfiguration = () => ({});
