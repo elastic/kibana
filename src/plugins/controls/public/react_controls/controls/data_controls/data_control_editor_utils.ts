@@ -9,10 +9,9 @@
 
 import { memoize } from 'lodash';
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataControlFieldRegistry } from '../../../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import { isDataControlFactory } from './types';
+import { isDataControlFactory, type DataControlFieldRegistry } from './types';
 
 /** TODO: This funciton is duplicated from the controls plugin to avoid exporting it */
 export const getDataControlFieldRegistry = memoize(
