@@ -146,9 +146,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await security.testUser.setRoles(['kibana_admin']);
-      await addESDebugLoggingSettings();
       await es.indices.refresh({ index: '.kibana_security_session*' });
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await addESDebugLoggingSettings();
       await supertest
         .post('/api/security/session/_invalidate')
         .set('kbn-xsrf', 'xxx')
