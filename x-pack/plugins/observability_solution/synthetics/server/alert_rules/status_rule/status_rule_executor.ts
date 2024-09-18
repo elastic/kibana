@@ -10,7 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
@@ -174,6 +174,18 @@ export class StatusRuleExecutor {
         Object.keys(upConfigs).length
       } up configs`
     );
+
+    const downConfigsById = getConfigsByIds(downConfigs);
+    const upConfigsById = getConfigsByIds(upConfigs);
+
+    uniq([...downConfigsById.keys(), ...upConfigsById.keys()]).forEach((configId) => {
+      const downCount = downConfigsById.get(configId)?.length ?? 0;
+      const upCount = upConfigsById.get(configId)?.length ?? 0;
+      const name = this.monitors.find((m) => m.id === configId)?.attributes.name ?? configId;
+      this.debug(
+        `Monitor: ${name} with id ${configId} has ${downCount} down check and ${upCount} up check`
+      );
+    });
 
     Object.keys(prevDownConfigs).forEach((locId) => {
       if (!downConfigs[locId] && !upConfigs[locId]) {
