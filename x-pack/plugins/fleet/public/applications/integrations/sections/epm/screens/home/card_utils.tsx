@@ -27,6 +27,7 @@ import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
+  EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
   PackageSpecIcon,
@@ -58,7 +59,9 @@ export interface IntegrationCardItem {
   onCardClick?: () => void;
   isCollectionCard?: boolean;
   showInstallationStatus?: boolean;
-  isInstalled: boolean;
+  installStatus: EpmPackageInstallStatus | null | undefined;
+  lineClamp?: number;
+  fixedCardHeight?: number;
 }
 
 export const mapToCard = ({
@@ -128,10 +131,7 @@ export const mapToCard = ({
     isUnverified,
     isUpdateAvailable,
     extraLabelsBadges,
-    isInstalled:
-      item.type === 'integration' &&
-      (item?.installationInfo?.install_status === installationStatuses.Installed ||
-        item?.installationInfo?.install_status === installationStatuses.InstallFailed),
+    installStatus: item.type === 'integration' ? item.installationInfo?.install_status : null,
   };
 };
 

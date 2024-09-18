@@ -66,7 +66,6 @@ function getOnboardingPath(basePath?: string): string | null {
 function addSecuritySpecificProps({
   basePath,
   card,
-  installedIntegrationList,
 }: {
   basePath?: string;
   card: IntegrationCardItem;
@@ -75,6 +74,8 @@ function addSecuritySpecificProps({
   const onboardingLink = getOnboardingPath(basePath);
   return {
     ...card,
+    lineClamp: 3,
+    fixedCardHeight: 127,
     showInstallationStatus: true,
     url:
       card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink

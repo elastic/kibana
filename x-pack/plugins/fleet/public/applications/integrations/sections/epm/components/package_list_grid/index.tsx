@@ -69,6 +69,7 @@ export interface PackageListGridProps {
   showMissingIntegrationMessage?: boolean;
   showControls?: boolean;
   showSearchTools?: boolean;
+  spacer?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -91,6 +92,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   showCardLabels = true,
   showControls = true,
   showSearchTools = true,
+  spacer = true,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -267,7 +269,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        <EuiSpacer size="s" />
+        {spacer && <EuiSpacer size="s" />}
         <EuiFlexItem>
           <GridColumn
             isLoading={!!isLoading}

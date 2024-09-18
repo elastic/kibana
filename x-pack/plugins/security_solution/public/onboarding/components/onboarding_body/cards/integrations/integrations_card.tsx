@@ -112,7 +112,6 @@ const PackageListGridWrapper = ({ useAvailablePackages, onLoaded }: WrapperProps
 
   const {
     filteredCards,
-    installedIntegrationList,
     isLoading,
     searchTerm: searchQuery,
     setCategory,
@@ -139,7 +138,6 @@ const PackageListGridWrapper = ({ useAvailablePackages, onLoaded }: WrapperProps
   const list: IntegrationCardItem[] = useIntegrationCardList({
     integrationsList: filteredCards,
     customCards,
-    installedIntegrationList,
   });
 
   useEffect(() => {
@@ -162,26 +160,30 @@ const PackageListGridWrapper = ({ useAvailablePackages, onLoaded }: WrapperProps
           buttonSize="compressed"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={`
+          height: 457px;
+        `}
+      >
         <Suspense fallback={<Loading />}>
-          <div>
-            <PackageList
-              list={list}
-              searchTerm={searchQuery ?? ''}
-              showControls={false}
-              showSearchTools
-              // we either don't need these properties (yet) or handle them upstream, but
-              // they are marked as required in the original API.
-              selectedCategory={selectedCategory}
-              selectedSubCategory={selectedSubCategory}
-              setSearchTerm={setSearchTerm}
-              setCategory={setCategory}
-              categories={categories} // We do not want to show categories and subcategories as the search bar filter
-              setUrlandReplaceHistory={noop}
-              setUrlandPushHistory={noop}
-              showCardLabels={false}
-            />
-          </div>
+          <PackageList
+            list={list}
+            searchTerm={searchQuery ?? ''}
+            showControls={false}
+            showSearchTools
+            // we either don't need these properties (yet) or handle them upstream, but
+            // they are marked as required in the original API.
+            selectedCategory={selectedCategory}
+            selectedSubCategory={selectedSubCategory}
+            setSearchTerm={setSearchTerm}
+            setCategory={setCategory}
+            categories={categories} // We do not want to show categories and subcategories as the search bar filter
+            setUrlandReplaceHistory={noop}
+            setUrlandPushHistory={noop}
+            showCardLabels={false}
+            spacer={false}
+          />
         </Suspense>
       </EuiFlexItem>
     </EuiFlexGroup>
