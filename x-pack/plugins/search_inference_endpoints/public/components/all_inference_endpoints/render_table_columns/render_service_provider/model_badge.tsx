@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 
 interface ModelBadgeProps {
   model?: string;
@@ -17,5 +17,11 @@ export const ModelBadge: React.FC<ModelBadgeProps> = ({ model }) => {
 
   if (!model) return null;
 
-  return <EuiBadge color={euiTheme.colors.body}>{model}</EuiBadge>;
+  return (
+    <EuiBadge color={euiTheme.colors.body}>
+      <EuiText size="s" color="subdued">
+        {model}
+      </EuiText>
+    </EuiBadge>
+  );
 };
