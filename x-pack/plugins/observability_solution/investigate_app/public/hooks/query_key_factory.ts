@@ -9,6 +9,8 @@
 
 export const investigationKeys = {
   all: ['investigations'] as const,
+  userProfiles: (profileIds: Set<string>) =>
+    [...investigationKeys.all, 'userProfiles', ...profileIds] as const,
   tags: () => [...investigationKeys.all, 'tags'] as const,
   lists: () => [...investigationKeys.all, 'list'] as const,
   list: (params: { page: number; perPage: number; search?: string; filter?: string }) =>
