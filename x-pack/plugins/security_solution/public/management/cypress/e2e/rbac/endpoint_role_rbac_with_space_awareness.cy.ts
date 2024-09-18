@@ -26,18 +26,18 @@ import {
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
-    // TODO:PT determine if Roles are supported in @serverless tag
     // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`
-    tags: ['@ess', '@serverless', '@skipInServerless', '@serverlessMKI', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless', '@serverlessMKI', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
-        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+        productTypes: [
+          { product_line: 'security', product_tier: 'complete' },
+          { product_line: 'endpoint', product_tier: 'complete' },
+        ],
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointManagementSpaceAwarenessEnabled',
           ])}`,
-          // Enable spaces for serverless
-          `--xpack.spaces.maxSpaces=10`,
         ],
       },
     },
@@ -97,7 +97,9 @@ describe(
 
           return features;
         })
-        .should('deep.equal', [
+        // Using `include.members` here because in serverless, an additional privilege shows
+        // up in this list - `Endpoint exceptions`.
+        .should('include.members', [
           'Endpoint ListAll',
           'Trusted ApplicationsNone',
           'Host Isolation ExceptionsNone',
@@ -113,8 +115,8 @@ describe(
         ]);
     });
 
-    ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
-      it(`should NOT display the privilege tooltip for ${subFeaturePrivilegeId}`, () => {
+    it('should not display the privilege tooltip', () => {
+      ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
         cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
           'not.exist'
         );
