@@ -22,7 +22,7 @@
     "patterns": [
       "_ingest/geoip/database/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/TODO.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-geoip-database-api.html",
     "availability": {
       "stack": true,
       "serverless": false
