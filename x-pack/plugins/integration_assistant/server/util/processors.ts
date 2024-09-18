@@ -57,7 +57,7 @@ export function createGrokProcessor(grokPatterns: string[]): ESProcessorItem {
   });
   const template = env.getTemplate('grok.yml.njk');
   const renderedTemplate = template.render({ grokPatterns });
-  const grokProcessor = safeLoad(renderedTemplate) as ESProcessorItem;
+  const grokProcessor = load(renderedTemplate) as ESProcessorItem;
   return grokProcessor;
 }
 
@@ -74,6 +74,6 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
   });
-  const kvProcessor = safeLoad(renderedTemplate) as ESProcessorItem;
+  const kvProcessor = load(renderedTemplate) as ESProcessorItem;
   return kvProcessor;
 }
