@@ -105,6 +105,11 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
   panel?: EuiContextMenuPanelDescriptor;
 }
 
+export interface ScreenshotExportOpts {
+  optimizedForPrinting?: boolean;
+  intl: InjectedIntl;
+}
+
 export interface ShareMenuItemV2 extends ShareMenuItemBase {
   // extended props to support share modal
   label: 'PDF' | 'CSV' | 'PNG';
@@ -113,13 +118,15 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateExportButton?: ReactElement;
-  generateExport: (args: {
-    intl: InjectedIntl;
-    optimizedForPrinting?: boolean;
-  }) => Promise<unknown>;
-  generateExportUrl:
-    | ((args: { intl: InjectedIntl; optimizedForPrinting?: boolean }) => string | undefined)
-    | null; // for exports that do not call a remote API, set this field to `null`
+  /**
+   * Function to trigger an export
+   */
+  generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
+  /**
+   * Function to generate a URL to be used for automating export
+   * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
+   */
+  generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
   theme?: ThemeServiceSetup;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';
