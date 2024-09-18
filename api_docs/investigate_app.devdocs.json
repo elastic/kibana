@@ -74,6 +74,18 @@
           "InvestigateAppRouteHandlerResources",
           ", { count: Partial<Record<\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\", number>>; total: number; }, ",
           "InvestigateAppRouteCreateOptions",
+          ">; \"GET /api/observability/events 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/events 2023-10-31\", Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ rangeFrom: Zod.ZodOptional<Zod.ZodString>; rangeTo: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }>, ",
+          "InvestigateAppRouteHandlerResources",
+          ", ({ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }))[], ",
+          "InvestigateAppRouteCreateOptions",
           ">; \"GET /api/observability/investigations/{investigationId}/items 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",

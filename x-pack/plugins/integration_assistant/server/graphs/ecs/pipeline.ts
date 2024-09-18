@@ -8,10 +8,9 @@
 import { safeLoad } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { Pipeline } from '../../../common/api/model/common_attributes';
+import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
-import { ESProcessorItem } from '../../../common/api/model/processor_attributes';
 import { deepCopy } from '../../util/util';
 
 interface IngestPipeline {

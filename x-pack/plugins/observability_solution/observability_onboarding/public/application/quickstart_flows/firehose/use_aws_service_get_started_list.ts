@@ -98,7 +98,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
 
   const generateMetricsDiscoverActionLink = useCallback(
     (namespace: string, name: string) => ({
-      id: `logs-explorer-${namespace}`,
+      id: `discover-${namespace}`,
       title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataTitle', {
         defaultMessage: 'See {name} metrics data in Discover',
         values: { name },

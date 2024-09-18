@@ -21,6 +21,7 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export function createInternalCoreStartMock() {
   const startDeps = {
@@ -28,6 +29,7 @@ export function createInternalCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
     http: httpServiceMock.createInternalStartContract(),
     metrics: metricsServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),

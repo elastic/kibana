@@ -55,6 +55,7 @@ const mockService: MockedService = {
     predefinedConversation$: new Observable(),
   },
   navigate: jest.fn().mockReturnValue(of()),
+  scope: 'all',
 };
 
 const mockChatService = createMockChatService();
