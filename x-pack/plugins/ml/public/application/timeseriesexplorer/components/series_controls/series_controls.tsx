@@ -59,13 +59,13 @@ export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 const getFilterBy = (
   currentEntity: Entity,
   entities: Entity[]
-): Pick<UiPartitionFieldConfig, 'filterBy'> | undefined => {
+): Pick<UiPartitionFieldConfig, 'filterBy'> | null => {
   if (currentEntity.fieldType !== 'by_field') {
-    return;
+    return null;
   }
   const query = entities.find((e) => e.fieldType === 'partition_field')?.fieldValue;
 
-  if (!query) return;
+  if (!query) return null;
 
   return {
     filterBy: {
