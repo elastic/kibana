@@ -8,7 +8,7 @@
 import type { AssistantTool } from '@kbn/elastic-assistant-plugin/server';
 
 import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base/esql_language_knowledge_base_tool';
-import { NL_TO_ESQL_TOOL } from './esql_language_knowledge_base/esql_language_tool';
+import { NL_TO_ESQL_TOOL } from './esql_language_knowledge_base/nl_to_esql_tool';
 import { ALERT_COUNTS_TOOL } from './alert_counts/alert_counts_tool';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts/open_and_acknowledged_alerts_tool';
 import { ATTACK_DISCOVERY_TOOL } from './attack_discovery/attack_discovery_tool';

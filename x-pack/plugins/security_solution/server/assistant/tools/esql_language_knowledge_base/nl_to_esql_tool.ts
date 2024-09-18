@@ -20,7 +20,6 @@ const toolDetails = {
   id: 'nl-to-esql-tool',
   name: TOOL_NAME,
   description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
-  - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
   - convert queries from another language to ES|QL
@@ -28,8 +27,6 @@ const toolDetails = {
 
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
   DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${TOOL_NAME}" function for this.
-
-  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
 
   Even if the "${TOOL_NAME}" function was used before that, follow it up with the "${TOOL_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${TOOL_NAME}" function,
   even if it has been called before.`,
