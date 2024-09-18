@@ -10,6 +10,7 @@ import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
 import { MAX_NUMBER_OF_ENTITIES, type EntityType } from '../../../common/entities';
 import {
+  ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
@@ -20,6 +21,10 @@ const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
   dataset: ENTITY_LATEST,
 });
+
+const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
+const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
+const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
 
 export interface LatestEntity {
   [ENTITY_LAST_SEEN]: string;
@@ -41,8 +46,14 @@ export async function getLatestEntities({
 }) {
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | WHERE entity.type IN (${entityTypes.map((entityType) => `"${entityType}"`).join()}) 
-     | WHERE entity.definitionId IN ("builtin_services_from_ecs_data", "builtin_hosts_from_ecs_data", "builtin_containers_from_ecs_data")
+     | WHERE ${ENTITY_TYPE} IN (${entityTypes.map((entityType) => `"${entityType}"`).join()}) 
+     | WHERE ${ENTITY_DEFINITION_ID} IN (${[
+      BUILTIN_SERVICES_FROM_ECS_DATA,
+      BUILTIN_HOSTS_FROM_ECS_DATA,
+      BUILTIN_CONTAINERS_FROM_ECS_DATA,
+    ]
+      .map((buildin) => `"${buildin}"`)
+      .join()})
      | SORT ${sortField} ${sortDirection}
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
      | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}

@@ -126,7 +126,9 @@ export function EntitiesGrid({
       case ENTITY_DISPLAY_NAME:
         return (
           // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
-          <EuiLink data-test-subj="inventoryCellValueLink">{entity[columnEntityTableId]}</EuiLink>
+          <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
+            {entity[columnEntityTableId]}
+          </EuiLink>
         );
       default:
         return entity[columnId as EntityColumnIds] || '';
