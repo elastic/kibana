@@ -7,6 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import { formatLatestUserMessage } from '../prompts';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
@@ -37,6 +38,8 @@ export async function runAgent({
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
+      // prepend any user prompt (gemini)
+      input: formatLatestUserMessage(state.input, state.llmType),
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
     },
     config
