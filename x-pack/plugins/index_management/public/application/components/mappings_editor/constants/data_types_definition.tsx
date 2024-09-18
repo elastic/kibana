@@ -572,14 +572,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Passthrough',
     }),
     value: 'passthrough',
-    description: () => (
-      <p>
-        <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.dataType.passthroughDescription"
-          defaultMessage="Passthrough fields are not indexed and are stored as-is."
-        />
-      </p>
-    ),
   },
   dense_vector: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.denseVectorDescription', {
