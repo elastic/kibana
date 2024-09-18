@@ -8,13 +8,12 @@
 import type { Story, DecoratorFn } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 
 interface Args {
   agentName: string;
@@ -30,13 +29,6 @@ export default {
     (StoryComponent, { args }) => {
       const { agentName, canShowDashboard, environment, serviceName } = args;
 
-      const KibanaContext = createKibanaReactContext({
-        application: {
-          capabilities: { dashboard: { show: canShowDashboard } },
-        },
-        http: { basePath: { get: () => '' } },
-      } as unknown as Partial<CoreStart>);
-
       return (
         <MemoryRouter
           initialEntries={[
@@ -45,7 +37,18 @@ export default {
             }&kuery=`,
           ]}
         >
-          <MockApmPluginContextWrapper>
+          <MockApmPluginContextWrapper
+            value={
+              {
+                core: {
+                  application: {
+                    capabilities: { dashboard: { show: canShowDashboard } },
+                  },
+                  http: { basePath: { get: () => '' } },
+                },
+              } as unknown as ApmPluginContextValue
+            }
+          >
             <APMServiceContext.Provider
               value={{
                 agentName,
@@ -57,9 +60,7 @@ export default {
                 serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
               }}
             >
-              <KibanaContext.Provider>
-                <StoryComponent />
-              </KibanaContext.Provider>
+              <StoryComponent />
             </APMServiceContext.Provider>
           </MockApmPluginContextWrapper>
         </MemoryRouter>

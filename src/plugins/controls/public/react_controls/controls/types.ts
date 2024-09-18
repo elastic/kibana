@@ -23,9 +23,10 @@ import {
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { CanClearSelections, ControlWidth } from '../../types';
 
+import { ControlWidth, DefaultControlState } from '../../../common/types';
 import { ControlGroupApi } from '../control_group/types';
+import { CanClearSelections } from '../../types';
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
@@ -49,11 +50,6 @@ export type DefaultControlApi = PublishesDataLoading &
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
   };
-
-export interface DefaultControlState {
-  grow?: boolean;
-  width?: ControlWidth;
-}
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,

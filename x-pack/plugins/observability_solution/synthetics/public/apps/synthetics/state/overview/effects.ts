@@ -23,11 +23,11 @@ export function* fetchTrendEffect(
       const chunk = action.payload.slice(Math.max(i - TRENDS_CHUNK_SIZE, 0), i);
       if (chunk.length > 0) {
         const trendStats = yield call(trendsApi, chunk);
-        yield put(trendStatsBatch.success(trendStats));
+        yield put(trendStatsBatch.success({ trendStats, batch: chunk }));
       }
     }
   } catch (e: any) {
-    yield put(trendStatsBatch.fail(e));
+    yield put(trendStatsBatch.fail(action.payload));
   }
 }
 
@@ -41,7 +41,6 @@ export function* refreshTrends(): Generator<unknown, void, any> {
 
   const monitorConfigs = Object.values(allConfigs ?? {});
 
-  let acc = {};
   const keys = Object.keys(existingTrends);
   while (keys.length) {
     const chunk = keys
@@ -49,21 +48,24 @@ export function* refreshTrends(): Generator<unknown, void, any> {
       .filter(
         (key: string) =>
           existingTrends[key] !== null &&
-          monitorConfigs.some(({ configId }) => configId === existingTrends[key]!.configId)
+          existingTrends[key] !== 'loading' &&
+          overviewState.data.monitors.some(
+            ({ configId }) => configId === (existingTrends[key] as OverviewTrend)!.configId
+          )
       )
-      .map((key: string) => ({
-        configId: existingTrends[key]!.configId,
-        locationId: existingTrends[key]!.locationId,
-        schedule: monitorConfigs.find(({ configId }) => configId === existingTrends[key]!.configId)!
-          .schedule,
-      }));
+      .map((key: string) => {
+        const trend = existingTrends[key] as OverviewTrend;
+        return {
+          configId: trend.configId,
+          locationId: trend.locationId,
+          schedule: overviewState.data.monitors.find(({ configId }) => configId === trend.configId)!
+            .schedule,
+        };
+      });
     if (chunk.length) {
-      const res = yield call(trendsApi, chunk);
-      acc = { ...acc, ...res };
+      const trendStats = yield call(trendsApi, chunk);
+      yield put(trendStatsBatch.success({ trendStats, batch: chunk }));
     }
-  }
-  if (Object.keys(acc).length) {
-    yield put(trendStatsBatch.success(acc));
   }
 }
 

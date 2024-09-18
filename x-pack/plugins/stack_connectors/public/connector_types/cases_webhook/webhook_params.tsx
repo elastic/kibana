@@ -107,7 +107,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="title-row"
         fullWidth
-        error={errors['subActionParams.incident.title']}
+        error={errors['subActionParams.incident.title'] as string[]}
         isInvalid={
           errors['subActionParams.incident.title'] !== undefined &&
           Number(errors['subActionParams.incident.title'].length) > 0 &&
@@ -204,7 +204,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="id-row"
         fullWidth
-        error={errors['subActionParams.incident.id']}
+        error={errors['subActionParams.incident.id'] as string}
         isInvalid={
           errors['subActionParams.incident.id'] !== undefined &&
           Number(errors['subActionParams.incident.id'].length) > 0 &&

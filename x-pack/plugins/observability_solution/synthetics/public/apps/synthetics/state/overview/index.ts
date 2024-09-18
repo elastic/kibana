@@ -52,13 +52,25 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(trendStatsBatch.get, (state, action) => {
       for (const { configId, locationId } of action.payload) {
         if (!state.trendStats[configId + locationId]) {
+          state.trendStats[configId + locationId] = 'loading';
+        }
+      }
+    })
+    .addCase(trendStatsBatch.fail, (state, action) => {
+      for (const { configId, locationId } of action.payload) {
+        if (state.trendStats[configId + locationId] === 'loading') {
           state.trendStats[configId + locationId] = null;
         }
       }
     })
     .addCase(trendStatsBatch.success, (state, action) => {
-      for (const key of Object.keys(action.payload)) {
-        state.trendStats[key] = action.payload[key];
+      for (const key of Object.keys(action.payload.trendStats)) {
+        state.trendStats[key] = action.payload.trendStats[key];
+      }
+      for (const { configId, locationId } of action.payload.batch) {
+        if (!action.payload.trendStats[configId + locationId]) {
+          state.trendStats[configId + locationId] = null;
+        }
       }
     });
 });

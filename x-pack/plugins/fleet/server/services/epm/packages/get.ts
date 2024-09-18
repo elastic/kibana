@@ -7,12 +7,17 @@
 
 import { safeLoad } from 'js-yaml';
 import pMap from 'p-map';
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import minimatch from 'minimatch';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
 
@@ -50,6 +55,7 @@ import {
   PackageInvalidArchiveError,
 } from '../../../errors';
 import { appContextService } from '../..';
+import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
@@ -180,20 +186,22 @@ export async function getPackages(
 
 interface GetInstalledPackagesOptions {
   savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
   dataStreamType?: PackageDataStreamTypes;
   nameQuery?: string;
   searchAfter?: SortResults;
   perPage: number;
   sortOrder: 'asc' | 'desc';
+  showOnlyActiveDataStreams?: boolean;
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
-  const { savedObjectsClient, ...otherOptions } = options;
+  const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const packageSavedObjects = await getInstalledPackageSavedObjects(
-    savedObjectsClient,
-    otherOptions
-  );
+  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
+    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
+    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
+  ]);
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -203,7 +211,11 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       es_index_patterns: esIndexPatterns,
     } = integrationSavedObject.attributes;
 
-    const dataStreams = getInstalledPackageSavedObjectDataStreams(esIndexPatterns, dataStreamType);
+    const dataStreams = getInstalledPackageSavedObjectDataStreams(
+      esIndexPatterns,
+      dataStreamType,
+      allFleetDataStreams
+    );
 
     return {
       name,
@@ -296,7 +308,7 @@ export async function getPackageSavedObjects(
 
 async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
-  options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient'>
+  options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
   const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
 
@@ -385,8 +397,13 @@ export async function getInstalledPackageManifests(
 
 function getInstalledPackageSavedObjectDataStreams(
   indexPatterns: Record<string, string>,
-  dataStreamType?: string
+  dataStreamType?: string,
+  filterActiveDatastreams?: IndicesDataStream[]
 ) {
+  const filterActiveDatastreamsName = filterActiveDatastreams
+    ? filterActiveDatastreams.map((ds) => ds.name)
+    : undefined;
+
   return Object.entries(indexPatterns)
     .map(([key, value]) => {
       return {
@@ -395,11 +412,22 @@ function getInstalledPackageSavedObjectDataStreams(
       };
     })
     .filter((stream) => {
-      if (!dataStreamType) {
-        return true;
-      } else {
-        return stream.name.startsWith(`${dataStreamType}-`);
+      if (dataStreamType && !stream.name.startsWith(`${dataStreamType}-`)) {
+        return false;
       }
+
+      if (filterActiveDatastreamsName) {
+        const patternRegex = new minimatch.Minimatch(stream.name, {
+          noglobstar: true,
+          nonegate: true,
+        }).makeRe();
+
+        return filterActiveDatastreamsName.some((dataStreamName) =>
+          dataStreamName.match(patternRegex)
+        );
+      }
+
+      return true;
     });
 }
 
