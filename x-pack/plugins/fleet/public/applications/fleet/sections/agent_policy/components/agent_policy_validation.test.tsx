@@ -63,6 +63,17 @@ describe('Agent Policy form validation', () => {
     ).toEqual({});
 
     expect(
+      agentPolicyFormValidation({
+        namespace: 'default',
+        name: 'policy',
+        monitoring_http: {
+          enabled: false,
+          host: '',
+        },
+      })
+    ).toEqual({});
+
+    expect(
       Object.keys(
         agentPolicyFormValidation({
           namespace: 'default',
@@ -88,5 +99,47 @@ describe('Agent Policy form validation', () => {
         })
       )
     ).toEqual(['monitoring_http.host', 'monitoring_http.port']);
+  });
+
+  it('should return error when agentPolicy has invalid diagnostics options', () => {
+    expect(
+      Object.keys(
+        agentPolicyFormValidation({
+          namespace: 'default',
+          name: 'policy',
+          monitoring_diagnostics: {
+            limit: {
+              burst: 0,
+            },
+            uploader: {
+              max_retries: -1,
+            },
+          },
+        })
+      )
+    ).toEqual([
+      'monitoring_diagnostics.limit.burst',
+      'monitoring_diagnostics.uploader.max_retries',
+    ]);
+
+    expect(
+      Object.keys(
+        agentPolicyFormValidation({
+          namespace: 'default',
+          name: 'policy',
+          monitoring_diagnostics: {
+            limit: {
+              burst: -1,
+            },
+            uploader: {
+              max_retries: 0,
+            },
+          },
+        })
+      )
+    ).toEqual([
+      'monitoring_diagnostics.limit.burst',
+      'monitoring_diagnostics.uploader.max_retries',
+    ]);
   });
 });

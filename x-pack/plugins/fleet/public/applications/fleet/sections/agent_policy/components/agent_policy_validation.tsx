@@ -42,7 +42,7 @@ export const agentPolicyFormValidation = (
     errors.unenroll_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
-        defaultMessage="Unenroll timeout must be an integer greater than zero."
+        defaultMessage="Unenroll timeout must be an integer greater than zero"
       />,
     ];
   }
@@ -51,7 +51,7 @@ export const agentPolicyFormValidation = (
     errors.inactivity_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
-        defaultMessage="Inactivity timeout must be an integer greater than zero."
+        defaultMessage="Inactivity timeout must be an integer greater than zero"
       />,
     ];
   }
@@ -77,6 +77,30 @@ export const agentPolicyFormValidation = (
         />,
       ];
     }
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.limit?.burst !== undefined &&
+    agentPolicy.monitoring_diagnostics?.limit?.burst <= 0
+  ) {
+    errors['monitoring_diagnostics.limit.burst'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Burst must be an integer greater than zero"
+      />,
+    ];
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries !== undefined &&
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries <= 0
+  ) {
+    errors['monitoring_diagnostics.uploader.max_retries'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Max retries must be an integer greater than zero"
+      />,
+    ];
   }
 
   return errors;
