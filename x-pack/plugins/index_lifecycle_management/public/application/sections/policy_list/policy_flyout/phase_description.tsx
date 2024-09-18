@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiDescriptionList } from '@elastic/eui';
 import { PhaseIndicator } from './phase_indicator';
 import { ActionComponentProps } from './components/types';
 import { i18nTexts } from '../../edit_policy/i18n_texts';
@@ -32,9 +32,11 @@ export const PhaseDescription = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      {components.map((Component, index) => (
-        <Component phase={phase} phases={phases} key={index} />
-      ))}
+      <EuiDescriptionList>
+        {components.map((Component, index) => (
+          <Component phase={phase} phases={phases} key={index} />
+        ))}
+      </EuiDescriptionList>
       <EuiSpacer size="l" />
     </>
   );
