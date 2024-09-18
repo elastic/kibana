@@ -7,6 +7,7 @@
 
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
 
 export interface ILensRequestPerformance {
   requestTimeTotal: number;
@@ -19,12 +20,10 @@ export function getSuccessfulRequestTimings(
   const requests = inspectorAdapters.requests?.getRequests() || [];
 
   let totalTookTime = 0;
-  let allValid = true;
   let totalTime = 0;
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
     if (request.status !== RequestStatus.OK) {
-      allValid = false;
       return null;
     }
     totalTookTime +=
