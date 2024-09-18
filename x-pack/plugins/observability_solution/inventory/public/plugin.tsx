@@ -89,15 +89,17 @@ export class InventoryPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: isEntityCentricExperienceSettingEnabled ? ['sideNav', 'globalSearch'] : [],
       order: 8004,
-      deepLinks: [
-        {
-          id: 'inventory',
-          title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-            defaultMessage: 'Inventory',
-          }),
-          path: '/',
-        },
-      ],
+      deepLinks: isEntityCentricExperienceSettingEnabled
+        ? [
+            {
+              id: 'inventory',
+              title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
+                defaultMessage: 'Inventory',
+              }),
+              path: '/',
+            },
+          ]
+        : [],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
