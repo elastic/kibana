@@ -331,6 +331,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         visibleRowData,
         visibleColumns,
         setCustomGridBodyProps,
+        headerRow,
+        footerRow,
       }: EuiDataGridCustomBodyProps) => (
         <CustomTimelineDataGridBody
           rows={tableRows}
@@ -341,6 +343,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           enabledRowRenderers={enabledRowRenderers}
           rowHeight={rowHeight}
           refetch={refetch}
+          headerRow={headerRow}
+          footerRow={footerRow}
         />
       ),
       [tableRows, enabledRowRenderers, rowHeight, refetch]

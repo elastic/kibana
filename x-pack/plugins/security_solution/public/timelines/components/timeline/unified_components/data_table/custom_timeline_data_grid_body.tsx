@@ -10,9 +10,10 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { CellMeasurer, List, AutoSizer, CellMeasurerCache } from 'react-virtualized';
+import { AutoSizer, CellMeasurerCache } from 'react-virtualized';
+import { VariableSizeList } from 'react-window';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
@@ -48,37 +49,89 @@ const DEFAULT_UDT_ROW_HEIGHT = 34;
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const { Cell, visibleColumns, visibleRowData, rows, rowHeight, enabledRowRenderers, refetch } =
-      props;
+    const {
+      Cell,
+      visibleColumns,
+      visibleRowData,
+      rows,
+      rowHeight,
+      enabledRowRenderers,
+      refetch,
+      setCustomGridBodyProps,
+      headerRow,
+      footerRow,
+    } = props;
+
+    // Set custom props onto the grid body wrapper
+    const bodyRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      setCustomGridBodyProps({
+        ref: bodyRef,
+        onScroll: () => console.debug('scrollTop:', bodyRef.current?.scrollTop),
+      });
+    }, [setCustomGridBodyProps]);
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
 
+    const headerRowRef = useRef<HTMLDivElement | null>(null);
+    const [gridWidth, setGridWidth] = useState<number | undefined>(undefined);
+
+    useEffect(() => {
+      if (headerRowRef.current) {
+        setGridWidth(headerRowRef.current.clientWidth);
+      }
+    }, [headerRow]);
+
+    const listRef = useRef(null);
+
+    const rowHeights = useRef<number[]>([]);
+
+    const setRowHeight = useCallback((index: number, height: number) => {
+      listRef.current?.resetAfterIndex(index);
+
+      rowHeights.current[index] = height;
+    }, []);
+
+    const getRowHeight = useCallback((index: number) => {
+      return rowHeights.current[index] ?? 100;
+    }, []);
+
     return (
-      <AutoSizer>
-        {({ width, height }) => {
-          console.log({ width, height });
-          return (
-            <List
-              width={width}
-              height={height}
-              rowHeight={cache.rowHeight}
-              deferredMeasurementCache={cache}
-              rowCount={visibleRows.length}
-              overscanRowCount={10}
-              rowRenderer={({ index, key, style, parent }) => (
-                <CellMeasurer
-                  cache={cache}
-                  columnIndex={0}
-                  key={key}
-                  parent={parent}
-                  rowIndex={index}
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <AutoSizer className="autosizer">
+          {({ height, width }) => {
+            return (
+              <>
+                <div ref={headerRowRef} style={{ width: 'fit-content' }}>
+                  {headerRow}
+                  {footerRow}
+                </div>
+                <VariableSizeList
+                  width={(gridWidth ?? width) + 22}
+                  data-grid-width={gridWidth}
+                  height={height - 26}
+                  itemCount={visibleRows.length}
+                  itemSize={getRowHeight} // dummy. Will not be used
+                  overscanCount={10}
+                  ref={listRef}
                 >
-                  {({ measure, registerChild }) => {
+                  {({ index, style }) => {
                     return (
-                      <div ref={registerChild} key={key} style={style}>
+                      <div
+                        style={{
+                          ...style,
+                          width: 'fit-content',
+                        }}
+                        key={index}
+                      >
                         <CustomDataGridSingleRow
                           rowData={visibleRows[index]}
                           rowIndex={index}
@@ -86,18 +139,17 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                           Cell={Cell}
                           enabledRowRenderers={enabledRowRenderers}
                           refetch={refetch}
-                          measure={measure}
-                          registerChild={registerChild}
+                          setRowHeight={setRowHeight}
                         />
                       </div>
                     );
                   }}
-                </CellMeasurer>
-              )}
-            />
-          );
-        }}
-      </AutoSizer>
+                </VariableSizeList>
+              </>
+            );
+          }}
+        </AutoSizer>
+      </div>
     );
   }
 );
@@ -161,8 +213,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
-  measure: () => void;
-  registerChild?: (element?: Element) => void;
+  setRowHeight: (index: number, height: number) => void;
 } & Pick<
   CustomTimelineDataGridBodyProps,
   'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
@@ -193,24 +244,23 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     visibleColumns,
     Cell,
     rowHeight: rowHeightMultiple = 0,
-    measure,
-    registerChild,
+    setRowHeight,
   } = props;
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
 
+  const rowRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (cache.has(rowIndex, visibleColumns.length - 1)) {
-      cache.clear(rowIndex, visibleColumns.length - 1);
+    if (rowRef.current) {
+      console.log(`Setting Row Height for row ${rowIndex}`);
+      setRowHeight(rowIndex, rowRef.current.offsetHeight);
     }
-    console.log('measuring');
-    measure();
-  }, [Cell, measure, rowIndex, visibleColumns.length]);
+  }, [rowIndex, setRowHeight]);
 
   const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
-  console.log({ cssRowHeight });
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -227,14 +277,14 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   );
   const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
 
-  const [rowHeight, setRowHeight] = useState<number>(0);
+  const [rowHeight, _] = useState<number>(0);
 
   return (
     <CustomGridRow
       className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
       $cssRowHeight={cssRowHeight}
       key={rowIndex}
-      ref={registerChild}
+      ref={rowRef}
     >
       <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {

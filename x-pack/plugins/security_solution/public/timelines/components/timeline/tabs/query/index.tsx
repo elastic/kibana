@@ -521,7 +521,7 @@ const makeMapStateToProps = () => {
       eventIdToNoteIds,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
-      itemsPerPageOptions,
+      itemsPerPageOptions: [10, 100, 1000],
       kqlMode,
       kqlQueryExpression,
       kqlQueryLanguage,
