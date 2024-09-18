@@ -24,7 +24,6 @@ import {
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
 import { APIReturnType } from '../../api';
-import { MAX_NUMBER_OF_ENTITIES } from '../../../common/entities';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
@@ -33,17 +32,23 @@ type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | ty
 const columns: EuiDataGridColumn[] = [
   {
     id: ENTITY_DISPLAY_NAME,
-    displayAsText: 'Entity name',
+    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
+      defaultMessage: 'Entity name',
+    }),
     isSortable: true,
   },
   {
     id: ENTITY_TYPE,
-    displayAsText: 'Type',
+    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
+      defaultMessage: 'type',
+    }),
     isSortable: true,
   },
   {
     id: ENTITY_LAST_SEEN,
-    displayAsText: 'Last seen',
+    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel', {
+      defaultMessage: 'Last seen',
+    }),
     defaultSortDirection: 'desc',
     isSortable: true,
     schema: 'datetime',
@@ -163,7 +168,7 @@ export function EntitiesGrid({
                         {pageIndex * PAGE_SIZE + 1}-{PAGE_SIZE * currentPage}
                       </strong>
                     ),
-                    total: MAX_NUMBER_OF_ENTITIES,
+                    total: entities.length,
                     boldEntites: (
                       <strong>
                         {i18n.translate(
