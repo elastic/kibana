@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -67,6 +67,8 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
+const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
+type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
 export function AlertDetails() {
   const {
@@ -80,6 +82,8 @@ export function AlertDetails() {
     uiSettings,
   } = useKibana().services;
 
+  const { search } = useLocation();
+  const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
@@ -93,6 +97,27 @@ export function AlertDetails() {
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
+
+  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
+    const searchParams = new URLSearchParams(search);
+    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
+
+    return urlTabId && [OVERVIEW_TAB_ID, METADATA_TAB_ID, RELATED_ALERTS_TAB_ID].includes(urlTabId)
+      ? (urlTabId as TabId)
+      : OVERVIEW_TAB_ID;
+  });
+  const handleSetTabId = async (tabId: TabId) => {
+    setActiveTabId(tabId);
+
+    let searchParams = new URLSearchParams(search);
+    if (tabId === RELATED_ALERTS_TAB_ID) {
+      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+    } else {
+      searchParams = new URLSearchParams();
+      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+    }
+    history.replace({ search: searchParams.toString() });
+  };
 
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
@@ -283,7 +308,12 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <HeaderMenu />
-      <EuiTabbedContent data-test-subj="alertDetailsTabbedContent" tabs={tabs} />
+      <EuiTabbedContent
+        data-test-subj="alertDetailsTabbedContent"
+        tabs={tabs}
+        selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+        onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
+      />
     </ObservabilityPageTemplate>
   );
 }
