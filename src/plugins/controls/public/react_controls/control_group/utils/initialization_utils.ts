@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_CONTROL_STYLE } from '../../../../common';
-import { ControlGroupRuntimeState } from '../types';
+import { type ControlGroupRuntimeState, DEFAULT_CONTROL_STYLE } from '../../../../common';
 
 export const getDefaultControlGroupRuntimeState = (): ControlGroupRuntimeState => ({
   initialChildControlState: {},
