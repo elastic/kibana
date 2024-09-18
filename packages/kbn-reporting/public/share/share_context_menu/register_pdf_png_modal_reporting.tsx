@@ -10,23 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  ShareContext,
-  ShareMenuItemLegacy,
-  ShareMenuItemV2,
-  ShareMenuProvider,
-} from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItemV2, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { ScreenshotExportOpts } from '@kbn/share-plugin/public/types';
-import {
-  ExportModalShareOpts,
-  ExportPanelShareOpts,
-  JobParamsProviderOptions,
-  ReportingSharingData,
-} from '.';
+import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
-import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
   const {
@@ -38,16 +27,9 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
   const el = document.querySelector('[data-shared-items-container]');
   const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
   const dimensions = { height, width };
-  const layout = {
-    id: optimizedForPrinting ? ('print' as const) : ('preserve_layout' as const),
-    dimensions,
-  };
-
-  const baseParams = {
-    objectType,
-    layout,
-    title,
-  };
+  const layoutId = optimizedForPrinting ? ('print' as const) : ('preserve_layout' as const);
+  const layout = { id: layoutId, dimensions };
+  const baseParams = { objectType, layout, title };
 
   if (type === 'printablePdfV2') {
     // multi locator for PDF V2
@@ -55,120 +37,6 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
   }
   // single locator for PNG V2
   return { ...baseParams, locatorParams };
-};
-
-/**
- * This is used by Canvas app (sharing menu)
- */
-export const reportingScreenshotShareProvider = ({
-  apiClient,
-  license,
-  application,
-  usesUiCapabilities,
-  startServices$,
-}: ExportPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItemsLegacy = ({
-    objectType,
-    objectId,
-    isDirty,
-    onClose,
-    shareableUrl,
-    shareableUrlForSavedObject,
-    ...shareOpts
-  }: ShareContext) => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    const licenseToolTipContent = message;
-    const licenseHasScreenshotReporting = showLinks;
-    const licenseDisabled = !enableLinks;
-
-    let capabilityHasDashboardScreenshotReporting = false;
-    let capabilityHasVisualizeScreenshotReporting = false;
-    if (usesUiCapabilities) {
-      capabilityHasDashboardScreenshotReporting =
-        application.capabilities.dashboard?.generateScreenshot === true;
-      capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize?.generateScreenshot === true;
-    } else {
-      // deprecated
-      capabilityHasDashboardScreenshotReporting = true;
-      capabilityHasVisualizeScreenshotReporting = true;
-    }
-
-    if (!licenseHasScreenshotReporting) {
-      return [];
-    }
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
-
-    if (!isSupportedType) {
-      return [];
-    }
-
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return [];
-    }
-
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
-      return [];
-    }
-
-    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions: ShareMenuItemLegacy[] = [];
-
-    const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
-      objectType,
-      sharingData,
-    };
-    const isJobV2Params = ({ sharingData: _sharingData }: { sharingData: ReportingSharingData }) =>
-      _sharingData.locatorParams != null;
-
-    const isV2Job = isJobV2Params(jobProviderOptions);
-    const requiresSavedState = !isV2Job;
-
-    const pdfPanelTitle = i18n.translate('reporting.share.contextMenu.pdfReportsButtonLabel', {
-      defaultMessage: 'PDF Reports',
-    });
-
-    const panelPdf = {
-      shareMenuItem: {
-        name: pdfPanelTitle,
-        icon: 'document',
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PDFReports',
-        sortOrder: 10,
-      },
-      panel: {
-        id: 'reportingPdfPanel',
-        title: pdfPanelTitle,
-        content: (
-          <ScreenCapturePanelContent
-            apiClient={apiClient}
-            startServices$={startServices$}
-            reportType={'printablePdfV2'}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            layoutOption={'canvas'}
-            getJobParams={getJobParams(jobProviderOptions, 'printablePdfV2')} // FIXME: is canvas layout broken?
-            isDirty={isDirty}
-            onClose={onClose}
-          />
-        ),
-      },
-    };
-
-    shareActions.push(panelPdf);
-    return shareActions;
-  };
-
-  return {
-    id: 'screenCaptureReports',
-    getShareMenuItemsLegacy,
-  };
 };
 
 /**
