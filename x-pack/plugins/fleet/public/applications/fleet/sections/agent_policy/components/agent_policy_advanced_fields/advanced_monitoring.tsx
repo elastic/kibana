@@ -70,6 +70,8 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
       isDisabled={disabled === true}
     >
       <EuiSpacer size="s" />
+
+      {/* HTTP monitoring endpoint */}
       <PushedDescribedFormGroup
         fullWidth
         title={
@@ -97,6 +99,8 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
           />
         }
       >
+        <EuiSpacer size="l" />
+
         {/* Enable base HTTP monitoring endpoint */}
         <EuiCheckbox
           id="httpMonitoringEnabled"
@@ -136,7 +140,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               fullWidth
               label={
                 <FormattedMessage
-                  id="xpack.fleet.monitoringHttp.hostFieldLabel"
+                  id="xpack.fleet.agentPolicyForm.monitoringHttp.hostFieldLabel"
                   defaultMessage="Host"
                 />
               }
@@ -175,7 +179,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               fullWidth
               label={
                 <FormattedMessage
-                  id="xpack.fleet.monitoringHttp.portFieldLabel"
+                  id="xpack.fleet.agentPolicyForm.monitoringHttp.portFieldLabel"
                   defaultMessage="Port"
                 />
               }
@@ -277,6 +281,296 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
             });
           }}
         />
+      </PushedDescribedFormGroup>
+
+      {/* Diagnostics rate limiting */}
+      <PushedDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.diagnosticsRateLimitLabel"
+              defaultMessage="Diagnostics rate limiting"
+            />
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription"
+            defaultMessage="Rate limit for the request diagnostics action handler. Does not affect diagnostics collected through the CLI. {learnMoreLink}."
+            values={{
+              learnMoreLink: (
+                <EuiLink href={docLinks.links.fleet.httpMonitoring} target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription.learnMoreLinkLabel"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.diagnosticsRateLimit.intervalFieldLabel"
+                  defaultMessage="Interval"
+                />
+              }
+              isDisabled={disabled}
+              error={
+                touchedFields['monitoring_diagnostics.limit.interval'] &&
+                validation['monitoring_diagnostics.limit.interval']
+                  ? validation['monitoring_diagnostics.limit.interval']
+                  : null
+              }
+              isInvalid={Boolean(
+                touchedFields['monitoring_diagnostics.limit.interval'] &&
+                  validation['monitoring_diagnostics.limit.interval']
+              )}
+            >
+              <EuiFieldText
+                disabled={disabled}
+                placeholder="1m"
+                value={agentPolicy.monitoring_diagnostics?.limit?.interval}
+                onChange={(e) => {
+                  updateAgentPolicy({
+                    monitoring_diagnostics: {
+                      ...agentPolicy.monitoring_diagnostics,
+                      limit: {
+                        ...agentPolicy.monitoring_diagnostics?.limit,
+                        interval: e.target.value ? e.target.value : undefined,
+                      },
+                    },
+                  });
+                }}
+                onBlur={() =>
+                  updateTouchedFields({ 'monitoring_diagnostics.limit.interval': true })
+                }
+                isInvalid={Boolean(
+                  touchedFields['monitoring_diagnostics.limit.interval'] &&
+                    validation['monitoring_diagnostics.limit.interval']
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.diagnosticsRateLimit.burstFieldLabel"
+                  defaultMessage="Burst"
+                />
+              }
+              isDisabled={disabled}
+              error={
+                touchedFields['monitoring_diagnostics.limit.burst'] &&
+                validation['monitoring_diagnostics.limit.burst']
+                  ? validation['monitoring_diagnostics.limit.burst']
+                  : null
+              }
+              isInvalid={Boolean(
+                touchedFields['monitoring_diagnostics.limit.burst'] &&
+                  validation['monitoring_diagnostics.limit.burst']
+              )}
+            >
+              <EuiFieldNumber
+                disabled={disabled}
+                placeholder="1"
+                min={1}
+                value={agentPolicy.monitoring_diagnostics?.limit?.burst}
+                onChange={(e) => {
+                  updateAgentPolicy({
+                    monitoring_diagnostics: {
+                      ...agentPolicy.monitoring_diagnostics,
+                      limit: {
+                        ...agentPolicy.monitoring_diagnostics?.limit,
+                        burst: e.target.value ? Number(e.target.value) : undefined,
+                      },
+                    },
+                  });
+                }}
+                onBlur={() => updateTouchedFields({ 'monitoring_diagnostics.limit.burst': true })}
+                isInvalid={Boolean(
+                  touchedFields['monitoring_diagnostics.limit.burst'] &&
+                    validation['monitoring_diagnostics.limit.burst']
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>{/* Empty to match colums with upload fields below */}</EuiFlexItem>
+        </EuiFlexGroup>
+      </PushedDescribedFormGroup>
+
+      {/* Diagnostics file upload */}
+      <PushedDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.diagnosticsFileUploadLabel"
+              defaultMessage="Diagnostics file upload"
+            />
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.diagnosticsFileUploadDescription"
+            defaultMessage="Retry configuration for the file upload client. Client may retry failed requests with exponential backoff. {learnMoreLink}."
+            values={{
+              learnMoreLink: (
+                <EuiLink href={docLinks.links.fleet.httpMonitoring} target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.diagnosticsFileUploadDescription.learnMoreLinkLabel"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.diagnosticsFileUpload.maxRetriesFieldLabel"
+                  defaultMessage="Max retries"
+                />
+              }
+              isDisabled={disabled}
+              error={
+                touchedFields['monitoring_diagnostics.uploader.max_retries'] &&
+                validation['monitoring_diagnostics.uploader.max_retries']
+                  ? validation['monitoring_diagnostics.uploader.max_retries']
+                  : null
+              }
+              isInvalid={Boolean(
+                touchedFields['monitoring_diagnostics.uploader.max_retries'] &&
+                  validation['monitoring_diagnostics.uploader.max_retries']
+              )}
+            >
+              <EuiFieldNumber
+                disabled={disabled}
+                placeholder="10"
+                min={1}
+                value={agentPolicy.monitoring_diagnostics?.uploader?.max_retries}
+                onChange={(e) => {
+                  updateAgentPolicy({
+                    monitoring_diagnostics: {
+                      ...agentPolicy.monitoring_diagnostics,
+                      uploader: {
+                        ...agentPolicy.monitoring_diagnostics?.uploader,
+                        max_retries: e.target.value ? Number(e.target.value) : undefined,
+                      },
+                    },
+                  });
+                }}
+                onBlur={() =>
+                  updateTouchedFields({ 'monitoring_diagnostics.uploader.max_retries': true })
+                }
+                isInvalid={Boolean(
+                  touchedFields['monitoring_diagnostics.uploader.max_retries'] &&
+                    validation['monitoring_diagnostics.uploader.max_retries']
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.diagnosticsFileUpload.initialDurationFieldLabel"
+                  defaultMessage="Initial duration"
+                />
+              }
+              isDisabled={disabled}
+              error={
+                touchedFields['monitoring_diagnostics.uploader.init_dur'] &&
+                validation['monitoring_diagnostics.uploader.init_dur']
+                  ? validation['monitoring_diagnostics.uploader.init_dur']
+                  : null
+              }
+              isInvalid={Boolean(
+                touchedFields['monitoring_diagnostics.uploader.init_dur'] &&
+                  validation['monitoring_diagnostics.uploader.init_dur']
+              )}
+            >
+              <EuiFieldText
+                disabled={disabled}
+                placeholder="1s"
+                value={agentPolicy.monitoring_diagnostics?.uploader?.init_dur}
+                onChange={(e) => {
+                  updateAgentPolicy({
+                    monitoring_diagnostics: {
+                      ...agentPolicy.monitoring_diagnostics,
+                      uploader: {
+                        ...agentPolicy.monitoring_diagnostics?.uploader,
+                        init_dur: e.target.value ? e.target.value : undefined,
+                      },
+                    },
+                  });
+                }}
+                onBlur={() =>
+                  updateTouchedFields({ 'monitoring_diagnostics.uploader.init_dur': true })
+                }
+                isInvalid={Boolean(
+                  touchedFields['monitoring_diagnostics.uploader.init_dur'] &&
+                    validation['monitoring_diagnostics.uploader.init_dur']
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.diagnosticsFileUpload.maxDurationFieldLabel"
+                  defaultMessage="Backoff duration"
+                />
+              }
+              isDisabled={disabled}
+              error={
+                touchedFields['monitoring_diagnostics.uploader.max_dur'] &&
+                validation['monitoring_diagnostics.uploader.max_dur']
+                  ? validation['monitoring_diagnostics.uploader.max_dur']
+                  : null
+              }
+              isInvalid={Boolean(
+                touchedFields['monitoring_diagnostics.uploader.max_dur'] &&
+                  validation['monitoring_diagnostics.uploader.max_dur']
+              )}
+            >
+              <EuiFieldText
+                disabled={disabled}
+                placeholder="1m"
+                value={agentPolicy.monitoring_diagnostics?.uploader?.max_dur}
+                onChange={(e) => {
+                  updateAgentPolicy({
+                    monitoring_diagnostics: {
+                      ...agentPolicy.monitoring_diagnostics,
+                      uploader: {
+                        ...agentPolicy.monitoring_diagnostics?.uploader,
+                        max_dur: e.target.value ? e.target.value : undefined,
+                      },
+                    },
+                  });
+                }}
+                onBlur={() =>
+                  updateTouchedFields({ 'monitoring_diagnostics.uploader.max_dur': true })
+                }
+                isInvalid={Boolean(
+                  touchedFields['monitoring_diagnostics.uploader.max_dur'] &&
+                    validation['monitoring_diagnostics.uploader.max_dur']
+                )}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </PushedDescribedFormGroup>
     </StyledEuiAccordion>
   );
