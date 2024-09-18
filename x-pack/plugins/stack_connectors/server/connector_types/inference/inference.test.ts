@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AIConnector } from './inference';
+import { InferenceConnector } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
   DEFAULT_OPENAI_MODEL,
@@ -43,7 +43,7 @@ jest.mock('openai', () => ({
   })),
 }));
 
-describe('AIConnector', () => {
+describe('InferenceConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
@@ -85,20 +85,22 @@ describe('AIConnector', () => {
     });
   });
 
-  describe('OpenAI', () => {
-    const connector = new AIConnector({
+  describe('InferenceConnector', () => {
+    const connector = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
-        headers: {
-          'X-My-Custom-Header': 'foo',
-          Authorization: 'override',
+        provider: 'openai',
+        providerConfig: {
+          url: 'https://api.openai.com/v1/chat/completions',
+          modelId: DEFAULT_OPENAI_MODEL,
         },
+        taskType: 'completion',
+        inferenceId: '',
+        providerSchema: [],
+        taskTypeConfig: {},
       },
-      secrets: { apiKey: '123' },
+      secrets: { providerSecrets: { apiKey: '123' } },
       logger,
       services: actionsMock.createServices(),
     });
@@ -713,7 +715,7 @@ describe('AIConnector', () => {
   });
 
   describe('AzureAI', () => {
-    const connector = new OpenAIConnector({
+    const connector = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -914,7 +916,7 @@ describe('AIConnector', () => {
   });
 
   describe('Token dashboard', () => {
-    const connector = new OpenAIConnector({
+    const connector = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },

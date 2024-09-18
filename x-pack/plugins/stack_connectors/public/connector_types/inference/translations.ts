@@ -60,6 +60,10 @@ export const INPUT = i18n.translate(
   }
 );
 
+export const QUERY = i18n.translate('xpack.stackConnectors.components.inference.rerankQueryLabel', {
+  defaultMessage: 'Query',
+});
+
 export const BODY_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.inference.bodyCodeEditorAriaLabel',
   {

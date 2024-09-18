@@ -12,16 +12,6 @@ import { Config, Secrets } from '../../../common/inference/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from '../../../common/inference/constants';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
-  return {
-    ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
-  };
-});
-
 let connectorType: SubActionConnectorType<Config, Secrets>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
@@ -30,9 +20,9 @@ describe('AI Connector', () => {
     configurationUtilities = actionsConfigMock.create();
     connectorType = getConnectorType();
   });
-  test('exposes the connector as `OpenAI` with id `.gen-ai`', () => {
-    expect(connectorType.id).toEqual('.gen-ai');
-    expect(connectorType.name).toEqual('OpenAI');
+  test('exposes the connector as `AI Connector` with id `.inference`', () => {
+    expect(connectorType.id).toEqual('.inference');
+    expect(connectorType.name).toEqual('AI Connector');
   });
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {

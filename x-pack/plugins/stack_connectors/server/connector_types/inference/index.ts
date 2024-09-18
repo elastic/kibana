@@ -23,7 +23,6 @@ import {
 import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
 import { Config, Secrets } from '../../../common/inference/types';
 import { InferenceConnector } from './inference';
-import { renderParameterTemplates } from './render';
 import { unflattenObject } from '../lib/unflatten_object';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
@@ -41,7 +40,6 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForObservabilityConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
-  renderParameterTemplates,
   preSaveEventHandler: async ({ config, secrets, logger, scopedClusterClient, isUpdate }) => {
     const esClient = scopedClusterClient?.asCurrentUser;
     try {
@@ -70,7 +68,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           `Inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId} was successfuly deleted`
         );
       }
-      const res = await esClient?.transport.request({
+      await esClient?.transport.request({
         path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
         method: 'PUT',
         body: settings,

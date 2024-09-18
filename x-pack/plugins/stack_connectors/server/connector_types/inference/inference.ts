@@ -6,14 +6,12 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
 
 import { PassThrough, Stream } from 'stream';
 import { IncomingMessage } from 'http';
 
 import { RequestBody } from '@elastic/elasticsearch';
 import { AxiosError } from 'axios';
-import { i18n } from '@kbn/i18n';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -34,23 +32,6 @@ import {
   TextEmbeddingResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
-
-interface MessagePart {
-  text: string;
-}
-
-interface MessageContent {
-  role: string;
-  parts: MessagePart[];
-}
-
-interface Payload {
-  contents: MessageContent[];
-  generation_config: {
-    temperature: number;
-    maxOutputTokens: number;
-  };
-}
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -155,17 +136,18 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   private async performInferenceApi(body: RequestBody, isStream?: boolean): Promise<unknown> {
     try {
       const response = await this.esClient?.transport.request({
-        path: `/_inference/${this.taskType}/${this.config?.inferenceId}`,
+        path: `/_inference/${this.taskType}/${this.inferenceId}`,
         method: 'POST',
         body,
       });
       this.logger.info(
-        `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.config?.inferenceId}`
+        `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
       );
       // TODO: const usageMetadata = response?.data?.usageMetadata;
       return response;
     } catch (err) {
-      return wrapErr(err.message, this.connector.id, this.logger);
+      this.logger.error(`error perform inference endpoint API: ${err}`);
+      throw err;
     }
   }
 
@@ -189,19 +171,3 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     return res;
   }
 }
-
-const wrapErr = (errMessage: string, connectorId: string, logger: Logger) => {
-  const message = i18n.translate(
-    'xpack.stackConnectors.inference.errorPerformInferenceErrorMessage',
-    {
-      defaultMessage: 'error perform inference endpoint API',
-    }
-  );
-  logger.error(`error perform inference endpoint API: ${errMessage}`);
-  return {
-    status: 'error',
-    connectorId,
-    message,
-    serviceMessage: errMessage,
-  };
-};

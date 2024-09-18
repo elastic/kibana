@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { faker } from '@faker-js/faker';
 import { css } from '@emotion/react';
 import {
   EuiFormRow,
@@ -75,7 +75,7 @@ const generateInferenceEndpointId = (
   setFieldValue: (fieldName: string, value: unknown) => void
 ) => {
   const taskTypeSuffix = config.taskType ? `${config.taskType}-` : '';
-  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${uuidv4()}`;
+  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${faker.string.nanoid(10)}`;
   config.inferenceId = inferenceEndpointId;
   setFieldValue('config.inferenceId', inferenceEndpointId);
 };
