@@ -50,13 +50,13 @@ function createAppendProcessors(processors: SimplifiedProcessors): ESProcessorIt
 
 // The kv graph returns a simplified grok processor for header
 // This function takes in the grok pattern string and creates the grok processor
-export function createGrokProcessor(grokPattern: string): ESProcessorItem {
+export function createGrokProcessor(grokPatterns: string[]): ESProcessorItem {
   const templatesPath = joinPath(__dirname, '../templates/processors');
   const env = new Environment(new FileSystemLoader(templatesPath), {
     autoescape: false,
   });
   const template = env.getTemplate('grok.yml.njk');
-  const renderedTemplate = template.render({ grokPattern });
+  const renderedTemplate = template.render({ grokPatterns });
   const grokProcessor = safeLoad(renderedTemplate) as ESProcessorItem;
   return grokProcessor;
 }

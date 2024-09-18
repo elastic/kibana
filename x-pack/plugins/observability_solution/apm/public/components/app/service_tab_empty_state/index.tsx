@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -19,6 +22,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EmptyStateClickParams, EntityInventoryAddDataParams } from '../../../services/telemetry';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
@@ -44,9 +50,17 @@ const learnMoreLink = {
 };
 
 const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
+const defaultAddDataTelemetryParams: EntityInventoryAddDataParams = {
+  view: 'add_apm_cta',
+};
+
+const defaultClickTelemetryParams: EmptyStateClickParams = {
+  view: 'add_apm_cta',
+};
 
 export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { core } = useApmPluginContext();
 
   const imgFolder = `${baseImgFolder}/${
@@ -56,6 +70,18 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   const imgSrc = useKibanaUrl(
     `${imgFolder}/${imgName ? imgName : 'service_tab_empty_state_overview.png'}`
   );
+
+  function handleAddAPMClick() {
+    services.telemetry.reportEntityInventoryAddData(defaultAddDataTelemetryParams);
+  }
+
+  function handleTryItClick() {
+    services.telemetry.reportTryItClick(defaultClickTelemetryParams);
+  }
+
+  function handleLearnMoreClick() {
+    services.telemetry.reportLearnMoreClick(defaultClickTelemetryParams);
+  }
 
   return (
     <>
@@ -70,7 +96,12 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <AddApmData data-test-subj="ServiceTabEmptyStateAddApmButton" size="m" fill />
+                <AddApmData
+                  data-test-subj="ServiceTabEmptyStateAddApmButton"
+                  size="m"
+                  fill
+                  onClick={handleAddAPMClick}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -78,6 +109,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
                   iconType="launch"
                   iconSide="right"
                   href={tryItNowButton.href}
+                  onClick={handleTryItClick}
                   target="_blank"
                 >
                   {tryItNowButton.label}
@@ -86,6 +118,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
               <EuiFlexItem grow={false}>
                 <EuiLink
                   href={learnMoreLink.href}
+                  onClick={handleLearnMoreClick}
                   target="_blank"
                   data-test-subj="ServiceTabEmptyStateLearnMoreButton"
                   external

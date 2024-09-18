@@ -22,7 +22,6 @@ export const storybookAliases = {
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
-  controls: 'src/plugins/controls/storybook',
   custom_icons: 'packages/kbn-custom-icons/.storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
