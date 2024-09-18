@@ -226,11 +226,13 @@ export const esqlExecutor = async ({
           break;
         }
       }
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        signalsCount: result.createdSignalsCount,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
+      if (scheduleNotificationResponseActionsService) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
 
       // no more results will be found
       if (response.values.length < size) {

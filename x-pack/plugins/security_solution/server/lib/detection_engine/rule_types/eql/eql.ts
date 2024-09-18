@@ -191,11 +191,13 @@ export const eqlExecutor = async ({
         result.warningMessages.push(maxSignalsWarning);
       }
 
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        signalsCount: result.createdSignalsCount,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
+      if (scheduleNotificationResponseActionsService) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
 
       return result;
     } catch (error) {
