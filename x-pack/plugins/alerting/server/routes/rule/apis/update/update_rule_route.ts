@@ -6,7 +6,6 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import type {
   UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
@@ -47,12 +46,17 @@ export const updateRuleRoute = (
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
           404: {
             description: 'Indicates a rule with the given ID does not exist.',
+          },
+          409: {
+            description: 'Indicates that the rule has already been updated by another user.',
           },
         },
       },

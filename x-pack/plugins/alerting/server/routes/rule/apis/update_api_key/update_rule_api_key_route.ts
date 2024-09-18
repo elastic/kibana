@@ -10,7 +10,6 @@ import {
   UpdateApiKeyParamsV1,
   updateApiKeyParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update_api_key';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
@@ -35,12 +34,17 @@ export const updateRuleApiKeyRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
           404: {
             description: 'Indicates a rule with the given ID does not exist.',
+          },
+          409: {
+            description: 'Indicates that the rule has already been updated by another user.',
           },
         },
       },

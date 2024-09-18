@@ -15,7 +15,6 @@ import {
   createBodySchemaV1,
   createParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/create';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
@@ -48,12 +47,14 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
-          400: {
-            description: 'Indicates that the requested rule type is not registered.',
+          409: {
+            description: 'Indicates that the rule id is already in use.',
           },
         },
       },

@@ -9,7 +9,6 @@ import { transformRequestParamsToApplicationV1 } from './transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import {
   muteAlertParamsSchemaV1,
   MuteAlertRequestParamsV1,
@@ -35,8 +34,10 @@ export const muteAlertRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
           404: {

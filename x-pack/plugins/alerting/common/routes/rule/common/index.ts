@@ -36,7 +36,3 @@ export type {
   RuleExecutionStatusErrorReason as RuleExecutionStatusErrorReasonV1,
   RuleExecutionStatusWarningReason as RuleExecutionStatusWarningReasonV1,
 } from './constants/v1';
-
-export { forbiddenErrorSchema } from './schemas/latest';
-
-export { forbiddenErrorSchema as forbiddenErrorSchemaV1 } from './schemas/v1';

@@ -10,7 +10,6 @@ import {
   UnmuteAlertRequestParamsV1,
   unmuteAlertParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/unmute_alert';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
@@ -36,8 +35,10 @@ export const unmuteAlertRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
           404: {

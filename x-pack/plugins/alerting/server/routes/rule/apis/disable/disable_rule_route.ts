@@ -12,7 +12,6 @@ import {
   disableRuleRequestBodySchemaV1,
   disableRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/disable';
-import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
@@ -38,8 +37,10 @@ export const disableRuleRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema.',
+          },
           403: {
-            body: () => forbiddenErrorSchemaV1,
             description: 'Indicates that this call is forbidden.',
           },
           404: {
