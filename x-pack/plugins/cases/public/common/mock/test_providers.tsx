@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { act, render as reactRender, waitFor } from '@testing-library/react';
@@ -156,7 +157,7 @@ export const createAppMockRenderer = ({
 
   const getFilesClient = mockGetFilesClient();
 
-  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
@@ -177,7 +178,7 @@ export const createAppMockRenderer = ({
         </MemoryRouter>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
-  );
+  ));
 
   AppWrapper.displayName = 'AppWrapper';
 
