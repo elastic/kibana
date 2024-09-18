@@ -14,6 +14,8 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -69,6 +71,7 @@ export const TopValues: FC<Props> = ({
       data: { fieldFormats },
     },
   } = useDataVisualizerKibana();
+  const euiTheme = useEuiTheme();
 
   if (stats === undefined || !stats.topValues) return null;
   const { fieldName, sampleCount, approximate } = stats;
@@ -168,8 +171,11 @@ export const TopValues: FC<Props> = ({
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
-      css={css({ width: '95%', overflow: 'hidden' })}
-      className={classNames('dvPanel--uniform', compressed ? 'dvPanel--compressed' : undefined)}
+      className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
+      css={css`
+        overflow-x: auto;
+        ${euiScrollBarStyles(euiTheme)}
+      `}
     >
       <ExpandedRowFieldHeader>
         {showSampledValues ? (
@@ -216,6 +222,7 @@ export const TopValues: FC<Props> = ({
                   onAddFilter !== undefined ? (
                     <div
                       css={css`
+                        position: static;
                         width: 48px;
                       `}
                     >
