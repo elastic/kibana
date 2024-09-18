@@ -40,10 +40,6 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
-export type ProfilesManagerEbtContext = BehaviorSubject<{
-  dscProfiles: string[];
-}>;
-
 /**
  * Options for the `getProfiles` method
  */
