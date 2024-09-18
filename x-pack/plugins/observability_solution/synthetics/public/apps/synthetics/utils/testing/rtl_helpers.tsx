@@ -388,9 +388,6 @@ const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): b
   return false;
 };
 
-export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
-export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
-
 export const makeUptimePermissionsCore = (
   permissions: Partial<{
     'alerting:save': boolean;
