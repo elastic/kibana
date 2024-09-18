@@ -40,20 +40,23 @@ export const ActionsLogUsersFilter = memo(
       [setSearchValue, isFlyout, setUrlUsersFilters, onChangeUsersFilter]
     );
 
-    const onSearch = useCallback(() => {
-      if (!searchValue) return;
+    const onSearch = useCallback(
+      (onSearchValue: string) => {
+        if (!onSearchValue) return;
 
-      const userIds = searchValue.split(',').reduce<string[]>((acc, curr) => {
-        if (curr.trim() !== '') {
-          acc.push(curr.trim());
+        const userIds = searchValue.split(',').reduce<string[]>((acc, curr) => {
+          if (curr.trim() !== '') {
+            acc.push(curr.trim());
+          }
+          return acc;
+        }, []);
+        onChangeUsersFilter(userIds);
+        if (!isFlyout) {
+          setUrlUsersFilters(userIds.join(','));
         }
-        return acc;
-      }, []);
-      onChangeUsersFilter(userIds);
-      if (!isFlyout) {
-        setUrlUsersFilters(userIds.join(','));
-      }
-    }, [isFlyout, onChangeUsersFilter, searchValue, setUrlUsersFilters]);
+      },
+      [isFlyout, onChangeUsersFilter, searchValue, setUrlUsersFilters]
+    );
 
     // on load with users in urlParams, set the search value
     useEffect(() => {
