@@ -8,9 +8,10 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createFailError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { join as joinPath } from 'path';
 import { existsSync, readFileSync } from 'fs';
+import { run } from '@kbn/dev-cli-runner';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -65,4 +66,25 @@ export function getCodeOwnersForFile(
   const match = pathsWithOwners.find((p) => p.ignorePattern.test(filePath).ignored);
 
   return match?.teams;
+}
+
+export async function runGetOwnersForFileCli() {
+  run(
+    async ({ flags, log }) => {
+      const targetFile = flags.file as string;
+      if (!targetFile) throw createFlagError(`Missing --flag argument`);
+      const result = getCodeOwnersForFile(targetFile);
+      if (result) log.success(result);
+      else log.error(`Ownership of file [${targetFile}] is UNKNOWN`);
+    },
+    {
+      description: 'Report file ownership from GitHub CODEOWNERS file.',
+      flags: {
+        string: ['file'],
+        help: `
+      --file             Required, path to the file to report owners for.
+              `,
+      },
+    }
+  );
 }
