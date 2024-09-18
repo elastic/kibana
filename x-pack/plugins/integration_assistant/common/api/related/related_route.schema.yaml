@@ -7,7 +7,7 @@ paths:
     post:
       summary: Builds related.* fields for integration with the given input samples
       operationId: Related
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Add Related mappings for the given samples.
       tags:
         - Related API
