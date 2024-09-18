@@ -53,6 +53,11 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
+   * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
+   */
+  automatedResponseActionsForMoreRulesEnabled: false,
+
+  /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
    * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
    * response actions in Response Console.
