@@ -33,7 +33,7 @@ export async function handleKVError({
 
   return {
     kvProcessor,
-    lastExecutedChain: 'kv_error',
+    lastExecutedChain: 'kvError',
   };
 }
 

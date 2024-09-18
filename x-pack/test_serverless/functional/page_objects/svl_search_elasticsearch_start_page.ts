@@ -20,9 +20,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     },
     async expectToBeOnIndexDetailsPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        expect(await browser.getCurrentUrl()).contain(
-          '/app/management/data/index_management/indices/index_details'
-        );
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
       });
     },
     async expectToBeOnIndexListPage() {

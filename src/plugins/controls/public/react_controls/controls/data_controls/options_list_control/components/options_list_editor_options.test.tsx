@@ -8,17 +8,18 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import userEvent from '@testing-library/user-event';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
+import type { DefaultDataControlState } from '../../../../../../common';
+import type { OptionsListControlState } from '../../../../../../common/options_list';
+import type { ControlGroupApi } from '../../../../control_group/types';
 import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
-import { CustomOptionsComponentProps, DefaultDataControlState } from '../../types';
-import { OptionsListControlState } from '../types';
+import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
-import { ControlGroupApi } from '../../../../control_group/types';
-import { BehaviorSubject } from 'rxjs';
 
 describe('Options list sorting button', () => {
   const getMockedState = <State extends DefaultDataControlState = DefaultDataControlState>(
