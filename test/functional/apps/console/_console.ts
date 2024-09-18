@@ -203,8 +203,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.getOutputText();
           log.debug(response);
-          expect(response).to.contain('# 2: PUT test-index 200');
-          expect(response).to.contain('# 3: DELETE test-index 200');
+          expect(response).to.contain('# 2: PUT test-index [200 OK]');
+          expect(response).to.contain('# 3: DELETE test-index [200 OK]');
         });
       });
 
