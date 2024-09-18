@@ -11,7 +11,6 @@ import * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
@@ -47,13 +46,22 @@ export interface ExportPanelShareOpts {
 
 export interface ReportingSharingData {
   title: string;
-  layout: LayoutParams;
   reportingDisabled?: boolean;
-  [key: string]: unknown;
+  locatorParams: {
+    id: string;
+    params: unknown;
+  };
 }
 
 export interface JobParamsProviderOptions {
   sharingData: ReportingSharingData;
   shareableUrl?: string;
   objectType: string;
+}
+
+export interface JobParamsProviderLayoutOptions {
+  layout: {
+    id: 'print' | 'preserve_layout' | 'canvas';
+    dimensions?: { width: number; height: number };
+  };
 }

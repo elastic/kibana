@@ -21,17 +21,23 @@ import { firstValueFrom } from 'rxjs';
 import {
   ExportModalShareOpts,
   ExportPanelShareOpts,
+  JobParamsProviderLayoutOptions,
   JobParamsProviderOptions,
   ReportingSharingData,
 } from '.';
 import { checkLicense } from '../../license_check';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
-  const {
-    objectType,
-    sharingData: { title, layout, locatorParams },
-  } = opts;
+const getJobParams =
+  (
+    opts: JobParamsProviderOptions & JobParamsProviderLayoutOptions,
+    type: 'pngV2' | 'printablePdfV2'
+  ) =>
+  () => {
+    const {
+      objectType,
+      sharingData: { title, locatorParams },
+    } = opts;
 
   const baseParams = {
     objectType,
