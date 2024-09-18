@@ -26,7 +26,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ApplicationStart } from '@kbn/core/public';
-import { Index, IndexDetailsTab } from '@kbn/index-management';
+import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
