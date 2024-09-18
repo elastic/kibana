@@ -1033,7 +1033,6 @@ export const MAIN_TYPES: MainType[] = [
   'numeric',
   'object',
   'other',
-  'passthrough',
   'percolator',
   'point',
   'range',
