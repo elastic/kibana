@@ -715,35 +715,21 @@ describe('AllCasesListGeneric', () => {
         [CaseSeverity.HIGH],
         [CaseSeverity.CRITICAL],
       ])('Bulk update severity: %s', async (severity) => {
-        const t0 = performance.now();
         appMockRenderer.render(<AllCasesList />);
-        const t1 = performance.now();
-        console.log(`1.1 Call to render took ${t1 - t0} milliseconds`);
 
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-        const t2 = performance.now();
-        console.log(`1.2 Call to click took ${t2 - t1} milliseconds`);
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
-        const t3 = performance.now();
-        console.log(`1.3 Call to click took ${t3 - t2} milliseconds`);
         await userEvent.click(await screen.findByText('Bulk actions'));
-        const t4 = performance.now();
-        console.log(`1.4 Call to click took ${t4 - t3} milliseconds`);
         await userEvent.click(await screen.findByTestId('case-bulk-action-severity'), {
           pointerEventsCheck: 0,
         });
-        const t5 = performance.now();
-        console.log(`1.5 Call to click took ${t5 - t4} milliseconds`);
+
         expect(
           await screen.findByTestId(`cases-bulk-action-severity-${severity}`)
         ).toBeInTheDocument();
-        const t6 = performance.now();
-        console.log(`1.6 Call to click took ${t6 - t5} milliseconds`);
+
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
-        const t7 = performance.now();
-        console.log(`1.7 Call to click took ${t7 - t6} milliseconds`);
-        let t8;
         await waitFor(() => {
           expect(updateCasesSpy).toBeCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
@@ -752,45 +738,24 @@ describe('AllCasesListGeneric', () => {
               severity,
             })),
           });
-          t8 = performance.now();
-          console.log(`1.8 Call to click took ${t8 - t7} milliseconds`);
         });
       });
 
       // https://github.com/elastic/kibana/issues/148486
       it('Bulk delete', async () => {
-        const t0 = performance.now();
         appMockRenderer.render(<AllCasesList />);
 
-        const t1 = performance.now();
-        console.log(`1.9 Call to render took ${t1 - t0} milliseconds`);
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-        const t2 = performance.now();
-        console.log(`1.10 Call to click took ${t2 - t1} milliseconds`);
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
-
-        const t3 = performance.now();
-        console.log(`1.11 Call to click took ${t3 - t2} milliseconds`);
         await userEvent.click(await screen.findByText('Bulk actions'));
-
-        const t4 = performance.now();
-        console.log(`1.12 Call to click took ${t4 - t3} milliseconds`);
         await userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), {
           pointerEventsCheck: 0,
         });
 
-        const t5 = performance.now();
-        console.log(`1.13 Call to click took ${t5 - t4} milliseconds`);
         expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
-        const t6 = performance.now();
-        console.log(`1.14 Call to click took ${t6 - t5} milliseconds`);
         await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-
-        const t7 = performance.now();
-        console.log(`1.15 Call to click took ${t7 - t6} milliseconds`);
-        let t8;
         await waitFor(() => {
           expect(deleteCasesSpy).toHaveBeenCalledWith({
             caseIds: [
@@ -804,8 +769,6 @@ describe('AllCasesListGeneric', () => {
               'case-with-registered-attachment',
             ],
           });
-          t8 = performance.now();
-          console.log(`1.16 Call to click took ${t8 - t7} milliseconds`);
         });
       });
 

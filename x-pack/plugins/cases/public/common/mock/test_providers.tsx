@@ -10,7 +10,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { act, render as reactRender, waitFor } from '@testing-library/react';
+import { render as reactRender, waitFor } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -80,7 +80,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     defaultOptions: {
       queries: {
         retry: false,
-        staleTime: 0,
       },
     },
     logger: {
@@ -145,7 +144,6 @@ export const createAppMockRenderer = ({
     defaultOptions: {
       queries: {
         retry: false,
-        staleTime: 0,
       },
     },
     logger: {
@@ -183,18 +181,10 @@ export const createAppMockRenderer = ({
   AppWrapper.displayName = 'AppWrapper';
 
   const render: UiRender = (ui, options) => {
-    let result: RenderResult | undefined;
-    // ensures that all the effects and state updates are processed before the function completes
-    act(() => {
-      result = reactRender(ui, {
-        wrapper: AppWrapper,
-        ...options,
-      });
+    return reactRender(ui, {
+      wrapper: AppWrapper,
+      ...options,
     });
-    if (!result) {
-      throw new Error('Render result is undefined');
-    }
-    return result;
   };
 
   const clearQueryCache = async () => {
