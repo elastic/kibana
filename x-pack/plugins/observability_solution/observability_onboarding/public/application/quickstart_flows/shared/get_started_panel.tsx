@@ -27,7 +27,7 @@ export function GetStartedPanel({
   newTab,
   isLoading,
 }: {
-  integration: string;
+  integration?: string;
   newTab: boolean;
   actionLinks: Array<{
     id: string;
@@ -81,30 +81,33 @@ export function GetStartedPanel({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
-
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
-          defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
-          values={{
-            viewAllAssetsLink: (
-              <EuiLink
-                target="_blank"
-                data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
-                href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
-                  {
-                    defaultMessage: 'View all assets',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
+      {integration && (
+        <>
+          <EuiSpacer />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
+              defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
+              values={{
+                viewAllAssetsLink: (
+                  <EuiLink
+                    target="_blank"
+                    data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
+                    href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
+                      {
+                        defaultMessage: 'View all assets',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
     </>
   );
 }
