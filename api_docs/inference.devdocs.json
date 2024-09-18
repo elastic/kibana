@@ -208,35 +208,15 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}: { client: Pick<",
-          {
-            "pluginId": "inference",
-            "scope": "server",
-            "docId": "kibInferencePluginApi",
-            "section": "def-server.InferenceClient",
-            "text": "InferenceClient"
-          },
-          ", \"output\" | \"chatComplete\">; connectorId: string; logger: Pick<",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          ", \"debug\">; } & TToolOptions & ({ input: string; } | { messages: ",
-          {
-            "pluginId": "inference",
-            "scope": "common",
-            "docId": "kibInferencePluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "[]; })) => ",
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}: ",
+          "NlToEsqlTaskParams",
+          "<TToolOptions>) => ",
           "Observable",
-          "<NlToEsqlTaskEvent<TToolOptions>>"
+          "<",
+          "NlToEsqlTaskEvent",
+          "<TToolOptions>>"
         ],
-        "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/index.ts",
+        "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -248,33 +228,10 @@
             "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "{ client: Pick<",
-              {
-                "pluginId": "inference",
-                "scope": "server",
-                "docId": "kibInferencePluginApi",
-                "section": "def-server.InferenceClient",
-                "text": "InferenceClient"
-              },
-              ", \"output\" | \"chatComplete\">; connectorId: string; logger: Pick<",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              },
-              ", \"debug\">; } & TToolOptions & ({ input: string; } | { messages: ",
-              {
-                "pluginId": "inference",
-                "scope": "common",
-                "docId": "kibInferencePluginApi",
-                "section": "def-common.Message",
-                "text": "Message"
-              },
-              "[]; })"
+              "NlToEsqlTaskParams",
+              "<TToolOptions>"
             ],
-            "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/index.ts",
+            "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/task.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

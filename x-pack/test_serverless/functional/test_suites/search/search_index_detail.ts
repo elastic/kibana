@@ -61,8 +61,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+      });
+
+      it('should show code examples for adding documents', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+      });
+
+      it('should have index documents', async () => {
+        await es.index({
+          index: indexName,
+          body: {
+            my_field: [1, 0, 1],
+          },
+        });
+
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
       });
 
       it('back to indices button should redirect to list page', async () => {
