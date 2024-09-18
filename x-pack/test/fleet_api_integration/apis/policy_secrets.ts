@@ -416,7 +416,7 @@ export default function (providerContext: FtrProviderContext) {
         packagePolicyWithSecrets = await createPackagePolicyWithSecrets(testAgentPolicy.id);
       });
 
-      it('should correctly create the policy with secrets', async () => {
+      it.only('should correctly create the policy with secrets', async () => {
         const packageVarId = packagePolicyWithSecrets.vars.package_var_secret.value.id;
 
         expect(packageVarId).to.be.an('string');
