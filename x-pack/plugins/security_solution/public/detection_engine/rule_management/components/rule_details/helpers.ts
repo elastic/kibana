@@ -77,16 +77,10 @@ export function getQueryLanguageLabel(language: string) {
 }
 
 /**
- * Assigns type `Filter` to items that have a `meta` property. Removes any other items.
+ * Assigns type `Filter[]` to an array if every item in has a `meta` property.
  */
-export function typeCheckFilters(filters: unknown[]): Filter[] {
-  return filters.filter((f) => {
-    if (typeof f === 'object' && f !== null && 'meta' in f) {
-      return true;
-    }
-
-    return false;
-  }) as Filter[];
+export function isFilters(maybeFilters: unknown[]): maybeFilters is Filter[] {
+  return maybeFilters.every((f) => typeof f === 'object' && f !== null && 'meta' in f);
 }
 
 type DataSourceProps =

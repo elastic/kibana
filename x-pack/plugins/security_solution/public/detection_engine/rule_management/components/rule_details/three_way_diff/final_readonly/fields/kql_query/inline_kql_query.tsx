@@ -15,7 +15,7 @@ import type {
 import { Query, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import { getDataSourceProps, getQueryLanguageLabel, typeCheckFilters } from '../../../../helpers';
+import { getDataSourceProps, getQueryLanguageLabel, isFilters } from '../../../../helpers';
 
 const defaultI18nLabels = {
   query: descriptionStepI18n.QUERY_LABEL,
@@ -49,14 +49,12 @@ export function InlineKqlQueryReadOnly({
     },
   ];
 
-  const filters = typeCheckFilters(kqlQuery.filters);
-
-  if (filters.length > 0) {
+  if (isFilters(kqlQuery.filters) && kqlQuery.filters.length > 0) {
     const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: i18nLabels.filters,
-      description: <Filters filters={filters} {...dataSourceProps} />,
+      description: <Filters filters={kqlQuery.filters} {...dataSourceProps} />,
     });
   }
 

@@ -14,7 +14,7 @@ import type {
 } from '../../../../../../../../../common/api/detection_engine';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
-import { getDataSourceProps, typeCheckFilters } from '../../../../helpers';
+import { getDataSourceProps, isFilters } from '../../../../helpers';
 
 interface EqlQueryReadOnlyProps {
   eqlQuery: RuleEqlQuery;
@@ -29,14 +29,12 @@ export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps
     },
   ];
 
-  const filters = typeCheckFilters(eqlQuery.filters);
-
-  if (filters.length > 0) {
+  if (isFilters(eqlQuery.filters) && eqlQuery.filters.length > 0) {
     const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: descriptionStepI18n.FILTERS_LABEL,
-      description: <Filters filters={filters} {...dataSourceProps} />,
+      description: <Filters filters={eqlQuery.filters} {...dataSourceProps} />,
     });
   }
 
