@@ -532,6 +532,95 @@ export default function (providerContext: FtrProviderContext) {
           });
         }
       });
+
+      it('should create policy with advanced monitoring options', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'advanced monitoring test',
+            namespace: 'default',
+            monitoring_pprof_enabled: true,
+            monitoring_http: {
+              host: 'localhost',
+              port: 6791,
+              enabled: true,
+              buffer: {
+                enabled: true,
+              },
+            },
+            monitoring_diagnostics: {
+              limit: {
+                interval: '1m',
+                burst: 1,
+              },
+              uploader: {
+                max_retries: 10,
+                init_dur: '1s',
+                max_dur: '10m',
+              },
+            },
+          })
+          .expect(200);
+
+        const policyResponse = await supertest
+          .get(`/api/fleet/agent_policies/${createdPolicy.id}`)
+          .expect(200);
+        expect(policyResponse.body.item.monitoring_pprof_enabled).to.eql(true);
+        expect(policyResponse.body.item.monitoring_http).to.eql({
+          host: 'localhost',
+          port: 6791,
+          enabled: true,
+          buffer: {
+            enabled: true,
+          },
+        });
+        expect(policyResponse.body.item.monitoring_diagnostics).to.eql({
+          limit: {
+            interval: '1m',
+            burst: 1,
+          },
+          uploader: {
+            max_retries: 10,
+            init_dur: '1s',
+            max_dur: '10m',
+          },
+        });
+
+        const fullPolicyResponse = await supertest
+          .get(`/api/fleet/agent_policies/${createdPolicy.id}/full`)
+          .expect(200);
+        expect(fullPolicyResponse.body.item.agent.monitoring).to.eql({
+          enabled: true,
+          logs: false,
+          metrics: false,
+          traces: false,
+          pprof: {
+            enabled: true,
+          },
+          http: {
+            enabled: true,
+            host: 'localhost',
+            port: 6791,
+            buffer: {
+              enabled: true,
+            },
+          },
+          diagnostics: {
+            limit: {
+              interval: '1m',
+              burst: 1,
+            },
+            uploader: {
+              max_retries: 10,
+              init_dur: '1s',
+              max_dur: '10m',
+            },
+          },
+        });
+      });
     });
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
@@ -977,6 +1066,71 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(newPolicy.global_data_tags).to.eql([{ name: 'testName', value: 'testValue' }]);
+      });
+
+      it('should copy advanced monitoring options', async () => {
+        const {
+          body: { item: policyWithAdvancedMonitoring },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'advanced monitoring test',
+            namespace: 'default',
+            monitoring_pprof_enabled: true,
+            monitoring_http: {
+              host: 'localhost',
+              port: 6791,
+              enabled: true,
+              buffer: {
+                enabled: true,
+              },
+            },
+            monitoring_diagnostics: {
+              limit: {
+                interval: '1m',
+                burst: 1,
+              },
+              uploader: {
+                max_retries: 10,
+                init_dur: '1s',
+                max_dur: '10m',
+              },
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithAdvancedMonitoring.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'advanced monitoring test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.monitoring_pprof_enabled).to.eql(true);
+        expect(newPolicy.monitoring_http).to.eql({
+          host: 'localhost',
+          port: 6791,
+          enabled: true,
+          buffer: {
+            enabled: true,
+          },
+        });
+        expect(newPolicy.monitoring_diagnostics).to.eql({
+          limit: {
+            interval: '1m',
+            burst: 1,
+          },
+          uploader: {
+            max_retries: 10,
+            init_dur: '1s',
+            max_dur: '10m',
+          },
+        });
       });
     });
 
