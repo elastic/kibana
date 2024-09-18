@@ -74,7 +74,7 @@ describe('createReadme', () => {
     );
   });
 
-  it('Should render a table per datastream with mapping fields in package readme', async () => {
+  it('Should render a table per datastream with fields mapping in package readme', async () => {
     const fields = [
       {
         datastream: 'data_stream_1',
