@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { State } from './state';
+import { State } from './store/state';
 
 export default {
   component: ExpandableFlyout,
@@ -102,14 +103,19 @@ const registeredPanels = [
 
 export const Right: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
         },
-        left: undefined,
-        preview: undefined,
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -125,16 +131,21 @@ export const Right: Story<void> = () => {
 
 export const Left: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -150,20 +161,25 @@ export const Left: Story<void> = () => {
 
 export const Preview: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
-        },
-        left: {
-          id: 'left',
-        },
-        preview: [
-          {
-            id: 'preview1',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
           },
-        ],
+          left: {
+            id: 'left',
+          },
+          preview: [
+            {
+              id: 'preview1',
+            },
+          ],
+        },
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -179,23 +195,28 @@ export const Preview: Story<void> = () => {
 
 export const MultiplePreviews: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
-        },
-        left: {
-          id: 'left',
-        },
-        preview: [
-          {
-            id: 'preview1',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
           },
-          {
-            id: 'preview2',
+          left: {
+            id: 'left',
           },
-        ],
+          preview: [
+            {
+              id: 'preview1',
+            },
+            {
+              id: 'preview2',
+            },
+          ],
+        },
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -211,14 +232,19 @@ export const MultiplePreviews: Story<void> = () => {
 
 export const CollapsedPushVsOverlay: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
         },
-        left: undefined,
-        preview: undefined,
       },
+    },
+    ui: {
+      pushVsOverlay: 'push',
     },
   };
 
@@ -231,16 +257,21 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
 
 export const ExpandedPushVsOverlay: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
+    },
+    ui: {
+      pushVsOverlay: 'push',
     },
   };
 
@@ -253,16 +284,21 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
 
 export const DisableTypeSelection: Story<void> = () => {
   const state: State = {
-    byId: {
-      memory: {
-        right: {
-          id: 'right',
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
         },
-        left: {
-          id: 'left',
-        },
-        preview: undefined,
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 

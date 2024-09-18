@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ import {
   SETTINGS_MENU_BUTTON_TEST_ID,
   RIGHT_SECTION_TEST_ID,
 } from './components/test_ids';
-import { type State } from './state';
+import { type State } from './store/state';
 import { TestProvider } from './test/provider';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
 
@@ -32,7 +33,12 @@ const registeredPanels: Panel[] = [
 describe('ExpandableFlyout', () => {
   it(`shouldn't render flyout if no panels`, () => {
     const state: State = {
-      byId: {},
+      panels: {
+        byId: {},
+      },
+      ui: {
+        pushVsOverlay: 'overlay',
+      },
     };
 
     const result = render(
@@ -46,14 +52,19 @@ describe('ExpandableFlyout', () => {
 
   it('should render right section', () => {
     const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key',
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key',
+            },
+            left: undefined,
+            preview: undefined,
           },
-          left: undefined,
-          preview: undefined,
         },
+      },
+      ui: {
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -68,14 +79,19 @@ describe('ExpandableFlyout', () => {
 
   it('should render left section', () => {
     const state = {
-      byId: {
-        [id]: {
-          right: undefined,
-          left: {
-            id: 'key',
+      panels: {
+        byId: {
+          [id]: {
+            right: undefined,
+            left: {
+              id: 'key',
+            },
+            preview: undefined,
           },
-          preview: undefined,
         },
+      },
+      ui: {
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -90,16 +106,21 @@ describe('ExpandableFlyout', () => {
 
   it('should render preview section', () => {
     const state = {
-      byId: {
-        [id]: {
-          right: undefined,
-          left: undefined,
-          preview: [
-            {
-              id: 'key',
-            },
-          ],
+      panels: {
+        byId: {
+          [id]: {
+            right: undefined,
+            left: undefined,
+            preview: [
+              {
+                id: 'key',
+              },
+            ],
+          },
         },
+      },
+      ui: {
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -114,14 +135,19 @@ describe('ExpandableFlyout', () => {
 
   it('should not render flyout when right has value but does not matches registered panels', () => {
     const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key1',
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key1',
+            },
+            left: undefined,
+            preview: undefined,
           },
-          left: undefined,
-          preview: undefined,
         },
+      },
+      ui: {
+        pushVsOverlay: 'overlay' as const,
       },
     };
 
@@ -137,14 +163,19 @@ describe('ExpandableFlyout', () => {
 
   it('should render the menu to change display options', () => {
     const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key',
+      panels: {
+        byId: {
+          [id]: {
+            right: {
+              id: 'key',
+            },
+            left: undefined,
+            preview: undefined,
           },
-          left: undefined,
-          preview: undefined,
         },
+      },
+      ui: {
+        pushVsOverlay: 'overlay' as const,
       },
     };
 

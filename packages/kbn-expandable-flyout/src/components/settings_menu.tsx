@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -21,6 +22,7 @@ import {
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { changePushVsOverlayAction } from '../store/actions';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID,
@@ -29,6 +31,7 @@ import {
   SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID,
 } from './test_ids';
+import { selectPushVsOverlay, useDispatch, useSelector } from '../store/redux';
 
 const SETTINGS_MENU_ICON_BUTTON = i18n.translate('expandableFlyout.settingsMenu.popoverButton', {
   defaultMessage: 'Open flyout settings menu',
@@ -58,28 +61,31 @@ const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate('expandableFlyout.settingsMenu.p
   defaultMessage: 'Displays the flyout next to the page',
 });
 
-interface SettingsMenuProps {
+export interface FlyoutCustomProps {
   /**
-   * Current flyout type
+   * Hide the gear icon and settings menu if true
    */
-  flyoutTypeProps: {
+  hideSettings?: boolean;
+  /**
+   * Control if the option to render in overlay or push mode is enabled or not
+   */
+  pushVsOverlay?: {
     /**
-     * 'push' or 'overlay'
-     */
-    type: EuiFlyoutProps['type'];
-    /**
-     * Callback to change the flyout type
-     */
-    onChange: (type: EuiFlyoutProps['type']) => void;
-    /**
-     * Disables the button group for flyout where the option shouldn't be available
+     * Disables the option
      */
     disabled: boolean;
     /**
-     * Allows to show a tooltip to explain why the option is disabled
+     * Tooltip to display
      */
     tooltip: string;
   };
+}
+
+export interface SettingsMenuProps {
+  /**
+   * Custom props to populate the content of the settings meny
+   */
+  flyoutCustomProps?: FlyoutCustomProps;
 }
 
 /**
@@ -88,7 +94,13 @@ interface SettingsMenuProps {
  * - Flyout type: overlay or push
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ flyoutTypeProps }: SettingsMenuProps) => {
+  ({ flyoutCustomProps }: SettingsMenuProps) => {
+    const dispatch = useDispatch();
+
+    // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
+    const type = useSelector(selectPushVsOverlay);
+    const flyoutType = flyoutCustomProps?.pushVsOverlay?.disabled ? 'overlay' : type;
+
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = () => {
       setPopover(!isPopoverOpen);
@@ -96,10 +108,15 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
 
     const pushVsOverlayOnChange = useCallback(
       (id: string) => {
-        flyoutTypeProps.onChange(id as EuiFlyoutProps['type']);
+        dispatch(
+          changePushVsOverlayAction({
+            type: id as EuiFlyoutProps['type'] as 'overlay' | 'push',
+            savedToLocalStorage: !flyoutCustomProps?.pushVsOverlay?.disabled,
+          })
+        );
         setPopover(false);
       },
-      [flyoutTypeProps]
+      [dispatch, flyoutCustomProps?.pushVsOverlay?.disabled]
     );
 
     const panels = [
@@ -111,8 +128,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             <EuiTitle size="xxs" data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID}>
               <h3>
                 {FLYOUT_TYPE_TITLE}{' '}
-                {flyoutTypeProps.tooltip && (
-                  <EuiToolTip position="top" content={flyoutTypeProps.tooltip}>
+                {flyoutCustomProps?.pushVsOverlay?.tooltip && (
+                  <EuiToolTip position="top" content={flyoutCustomProps?.pushVsOverlay?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
                       type="iInCircle"
@@ -141,9 +158,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   toolTipContent: FLYOUT_TYPE_PUSH_TOOLTIP,
                 },
               ]}
-              idSelected={flyoutTypeProps.type as string}
+              idSelected={flyoutType}
               onChange={pushVsOverlayOnChange}
-              isDisabled={flyoutTypeProps.disabled}
+              isDisabled={flyoutCustomProps?.pushVsOverlay?.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
             />
           </EuiPanel>

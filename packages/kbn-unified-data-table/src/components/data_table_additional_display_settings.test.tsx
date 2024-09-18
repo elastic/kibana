@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -271,7 +272,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(screen.queryByLabelText('Cell row height')).not.toBeInTheDocument();
     });
 
-    it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', () => {
+    it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
       const onChangeRowHeight = jest.fn();
       const onChangeRowHeightLines = jest.fn();
       renderDisplaySettings({
@@ -281,7 +282,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       });
       fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 5 } });
       expect(onChangeRowHeightLines).toHaveBeenCalledWith(5);
-      userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
   });
@@ -300,7 +301,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(screen.queryByLabelText('Header row height')).not.toBeInTheDocument();
     });
 
-    it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', () => {
+    it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
       const onChangeHeaderRowHeight = jest.fn();
       const onChangeHeaderRowHeightLines = jest.fn();
       renderDisplaySettings({
@@ -310,7 +311,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       });
       fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 3 } });
       expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3);
-      userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });
