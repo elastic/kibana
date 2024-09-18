@@ -55,6 +55,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'telegraf*', patternName: 'telegraf' },
   { pattern: 'prometheusbeat*', patternName: 'prometheusbeat' },
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
+  { pattern: 'fluent-bit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
   { pattern: '*logs*', patternName: 'generic-logs' },
