@@ -20,6 +20,7 @@ export interface ESQLVariable {
 export interface ESQLRealField {
   name: string;
   type: FieldType;
+  isEcs?: boolean;
   metadata?: {
     description?: string;
   };

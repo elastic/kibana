@@ -164,7 +164,7 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
@@ -302,6 +302,7 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
                 connectorId,
                 scope: this.dependencies.scope,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),
