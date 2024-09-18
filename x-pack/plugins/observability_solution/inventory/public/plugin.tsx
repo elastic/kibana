@@ -69,6 +69,7 @@ export class InventoryPlugin
                     }),
                     app: INVENTORY_APP_ID,
                     path: '/',
+                    isTechnicalPreview: true,
                   },
                 ],
               },
