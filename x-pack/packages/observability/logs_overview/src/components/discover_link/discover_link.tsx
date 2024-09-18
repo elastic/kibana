@@ -34,6 +34,8 @@ export const DiscoverLink = React.memo(
     const discoverLocatorParams = useMemo<DiscoverAppLocatorParams>(
       () => ({
         dataViewSpec: {
+          id: logsSource.indexName,
+          name: logsSource.indexName,
           title: logsSource.indexName,
           timeFieldName: logsSource.timestampField,
         },
