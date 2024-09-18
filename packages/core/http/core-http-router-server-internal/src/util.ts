@@ -11,10 +11,10 @@ import { once } from 'lodash';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
-  type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
+import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
@@ -45,8 +45,8 @@ function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
 
 // Integration tested in ./routes.test.ts
 export function prepareRouteConfigValidation<P, Q, B>(
-  config: RouteConfig<P, Q, B, RouteMethod>
-): RouteConfig<P, Q, B, RouteMethod> {
+  config: InternalRouteConfig<P, Q, B, RouteMethod>
+): InternalRouteConfig<P, Q, B, RouteMethod> {
   // Calculating schema validation can be expensive so when it is provided lazily
   // we only want to instantiate it once. This also provides idempotency guarantees
   if (typeof config.validate === 'function') {

@@ -26,10 +26,12 @@ import type {
   RequestHandler,
   VersionedRouter,
   RouteRegistrar,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
+import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -40,6 +42,7 @@ import { Method } from './versioned_router/types';
 import { prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
+import { InternalRouteConfig } from './route';
 
 export type ContextEnhancer<
   P,
@@ -63,7 +66,7 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * undefined.
  */
 function routeSchemasFromRouteConfig<P, Q, B>(
-  route: RouteConfig<P, Q, B, typeof routeMethod>,
+  route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
   routeMethod: RouteMethod
 ) {
   // The type doesn't allow `validate` to be undefined, but it can still
@@ -95,7 +98,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
  */
 function validOptions(
   method: RouteMethod,
-  routeConfig: RouteConfig<unknown, unknown, unknown, typeof method>
+  routeConfig: InternalRouteConfig<unknown, unknown, unknown, typeof method>
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
@@ -156,7 +159,7 @@ export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
 
 /** @internal */
 export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
-  route: RouteConfig<P, Q, B, M> | VersionedRouteConfig<P, Q, B, M>,
+  route: InternalRouteConfig<P, Q, B, M>,
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
@@ -195,11 +198,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
-        route: RouteConfig<P, Q, B, Method> | VersionedRouteConfig<P, Q, B, Method>,
+        route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
-        route = prepareRouteConfigValidation(route as RouteConfig<P, Q, B, Method>);
+        route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
@@ -216,7 +219,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           // For the versioned route security is validated in the versioned router
           security: internalOptions.isVersioned
             ? route.security
-            : validRouteSecurity(route.security),
+            : validRouteSecurity(route.security as DeepPartial<RouteSecurity>),
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,
