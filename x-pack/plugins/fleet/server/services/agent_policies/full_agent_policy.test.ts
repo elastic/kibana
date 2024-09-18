@@ -1031,13 +1031,38 @@ describe('getFullMonitoringSettings', () => {
     );
 
     expect(monitoringSettings).toEqual({
-      enabled: false,
+      enabled: true,
       logs: false,
       metrics: false,
       traces: false,
       http: {
         enabled: true,
       },
+    });
+  });
+
+  it('should disable monitoring if beats and http monitoring are disabled', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: [],
+        monitoring_http: {
+          enabled: false,
+        },
+        monitoring_diagnostics: {},
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: false,
+      logs: false,
+      metrics: false,
+      traces: false,
     });
   });
 });

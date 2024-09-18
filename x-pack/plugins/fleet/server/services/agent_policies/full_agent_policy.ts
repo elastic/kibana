@@ -536,6 +536,7 @@ export function getFullMonitoringSettings(
   const monitoring: FullAgentPolicyMonitoring = {
     enabled: Boolean(
       (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) ||
+        agentPolicy.monitoring_http?.enabled ||
         agentPolicy.keep_monitoring_alive
     ),
     logs: false,
