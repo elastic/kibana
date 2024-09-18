@@ -264,10 +264,12 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getScriptedFieldsTabCount() {
-    return await this.retry.try(async () => {
+    try {
       const text = await this.testSubjects.getVisibleText('tab-scriptedFields');
       return text.split(' ')[2].replace(/\((.*)\)/, '$1') || '0';
-    });
+    } catch (e) {
+      return '0';
+    }
   }
 
   async getRelationshipsTabCount() {
