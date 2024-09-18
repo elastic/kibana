@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/mapbox-gl",
-  "owner": "@elastic/kibana-gis"
+  "owner": "@elastic/kibana-presentation"
 }

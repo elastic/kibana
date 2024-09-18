@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-plugin/common';
+import {
+  correctCommonEsqlMistakes,
+  isChatCompletionChunkEvent,
+  isOutputEvent,
+} from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
   FunctionVisibility,
@@ -74,9 +78,11 @@ export function registerQueryFunction({
       } as const,
     },
     async ({ arguments: { query } }) => {
+      const correctedQuery = correctCommonEsqlMistakes(query).output;
+
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
       const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
-        query,
+        query: correctedQuery,
         client,
       });
 
@@ -108,7 +114,7 @@ export function registerQueryFunction({
       function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, connectorId }, signal) => {
+    async ({ messages, connectorId, useSimulatedFunctionCalling }, signal) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
@@ -132,6 +138,7 @@ export function registerQueryFunction({
             .concat(esqlFunctions)
             .map((fn) => [fn.name, { description: fn.description, schema: fn.parameters }])
         ),
+        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
       });
 
       const chatMessageId = v4();
