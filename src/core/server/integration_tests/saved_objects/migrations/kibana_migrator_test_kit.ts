@@ -49,7 +49,6 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
-import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
 import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 
@@ -346,7 +345,7 @@ export const deleteSavedObjectIndices = async (
 export const getAggregatedTypesCount = async (
   client: ElasticsearchClient,
   index: string
-): Promise<Record<string, number> | undefined> => {
+): Promise<Record<string, number>> => {
   try {
     await client.indices.refresh({ index });
     const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
@@ -383,7 +382,7 @@ export const getAggregatedTypesCount = async (
     );
   } catch (error) {
     if (error.meta?.statusCode === 404) {
-      return undefined;
+      return {};
     }
     throw error;
   }
@@ -408,157 +407,6 @@ const registerTypes = (
   types?: Array<SavedObjectsType<any>>
 ) => {
   (types || []).forEach((type) => typeRegistry.registerType(type));
-};
-
-export const createBaseline = async () => {
-  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-    kibanaIndex: defaultKibanaIndex,
-    types: baselineTypes,
-  });
-
-  // remove the testing index (current and next minor)
-  await client.indices.delete({
-    index: [
-      defaultKibanaIndex,
-      `${defaultKibanaIndex}_${currentVersion}_001`,
-      `${defaultKibanaIndex}_${nextMinor}_001`,
-    ],
-    ignore_unavailable: true,
-  });
-
-  await runMigrations();
-
-  await savedObjectsRepository.bulkCreate(baselineDocuments, {
-    refresh: 'wait_for',
-  });
-
-  return client;
-};
-
-interface GetMutatedMigratorParams {
-  logFilePath?: string;
-  kibanaVersion?: string;
-  settings?: Record<string, any>;
-}
-
-export const getIdenticalMappingsMigrator = async ({
-  logFilePath = defaultLogFilePath,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types: baselineTypes,
-    kibanaVersion,
-    settings,
-  });
-};
-
-export const getNonDeprecatedMappingsMigrator = async ({
-  logFilePath = defaultLogFilePath,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types: baselineTypes.filter((type) => type.name !== 'deprecated'),
-    kibanaVersion,
-    settings,
-  });
-};
-
-export const getCompatibleMappingsMigrator = async ({
-  logFilePath = defaultLogFilePath,
-  filterDeprecated = false,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams & {
-  filterDeprecated?: boolean;
-} = {}) => {
-  const types = baselineTypes
-    .filter((type) => !filterDeprecated || type.name !== 'deprecated')
-    .map<SavedObjectsType>((type) => {
-      if (type.name === 'complex') {
-        return {
-          ...type,
-          mappings: {
-            properties: {
-              ...type.mappings.properties,
-              createdAt: { type: 'date' },
-            },
-          },
-          modelVersions: {
-            ...type.modelVersions,
-            2: {
-              changes: [
-                {
-                  type: 'mappings_addition',
-                  addedMappings: {
-                    createdAt: { type: 'date' },
-                  },
-                },
-              ],
-            },
-          },
-        };
-      } else {
-        return type;
-      }
-    });
-
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types,
-    kibanaVersion,
-    settings,
-  });
-};
-
-export const getIncompatibleMappingsMigrator = async ({
-  logFilePath = defaultLogFilePath,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  const types = baselineTypes.map<SavedObjectsType>((type) => {
-    if (type.name === 'complex') {
-      return {
-        ...type,
-        mappings: {
-          properties: {
-            ...type.mappings.properties,
-            value: { type: 'text' }, // we're forcing an incompatible udpate (number => text)
-            createdAt: { type: 'date' },
-          },
-        },
-        modelVersions: {
-          ...type.modelVersions,
-          2: {
-            changes: [
-              {
-                type: 'data_removal', // not true (we're testing reindex migrations, and modelVersions do not support breaking changes)
-                removedAttributePaths: ['complex.properties.value'],
-              },
-              {
-                type: 'mappings_addition',
-                addedMappings: {
-                  createdAt: { type: 'date' },
-                },
-              },
-            ],
-          },
-        },
-      };
-    } else {
-      return type;
-    }
-  });
-
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types,
-    kibanaVersion,
-    settings,
-  });
 };
 
 export const getCurrentVersionTypeRegistry = async ({

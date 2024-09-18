@@ -14,15 +14,18 @@ import {
   readLog,
   clearLog,
   nextMinor,
-  createBaseline,
   currentVersion,
   defaultKibanaIndex,
   startElasticsearch,
-  getCompatibleMappingsMigrator,
-  getIdenticalMappingsMigrator,
-  getIncompatibleMappingsMigrator,
-  getNonDeprecatedMappingsMigrator,
 } from '../kibana_migrator_test_kit';
+
+import {
+  createBaseline,
+  getCompatibleMigratorTestKit,
+  getUpToDateMigratorTestKit,
+  getReindexingMigratorTestKit,
+  baselineTypes,
+} from '../kibana_migrator_test_kit.fixtures';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -45,7 +48,8 @@ describe('when upgrading to a new stack version', () => {
 
         await clearLog();
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
-        const { client, runMigrations } = await getNonDeprecatedMappingsMigrator({
+        const { client, runMigrations } = await getUpToDateMigratorTestKit({
+          types: baselineTypes.filter((type) => type.name !== 'deprecated'),
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -140,7 +144,9 @@ describe('when upgrading to a new stack version', () => {
 
       it('fails if unknown documents exist', async () => {
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
-        const { runMigrations } = await getNonDeprecatedMappingsMigrator();
+        const { runMigrations } = await getUpToDateMigratorTestKit({
+          types: baselineTypes.filter((type) => type.name !== 'deprecated'),
+        });
 
         try {
           await runMigrations();
@@ -163,7 +169,7 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('proceeds if there are no unknown documents', async () => {
-        const { client, runMigrations } = await getIdenticalMappingsMigrator();
+        const { client, runMigrations } = await getUpToDateMigratorTestKit();
 
         await runMigrations();
 
@@ -196,7 +202,7 @@ describe('when upgrading to a new stack version', () => {
         esClient = await createBaseline();
 
         await clearLog();
-        const { client, runMigrations } = await getCompatibleMappingsMigrator({
+        const { client, runMigrations } = await getCompatibleMigratorTestKit({
           filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
           settings: {
             migrations: {
@@ -294,7 +300,7 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('fails if unknown documents exist', async () => {
-        const { runMigrations } = await getCompatibleMappingsMigrator({
+        const { runMigrations } = await getCompatibleMigratorTestKit({
           filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
         });
 
@@ -319,7 +325,7 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('proceeds if there are no unknown documents', async () => {
-        const { client, runMigrations } = await getCompatibleMappingsMigrator();
+        const { client, runMigrations } = await getCompatibleMigratorTestKit();
 
         await runMigrations();
 
@@ -358,7 +364,7 @@ describe('when upgrading to a new stack version', () => {
     });
 
     it('the migrator does not skip reindexing', async () => {
-      const { client, runMigrations } = await getIncompatibleMappingsMigrator();
+      const { client, runMigrations } = await getReindexingMigratorTestKit();
 
       await runMigrations();
 
