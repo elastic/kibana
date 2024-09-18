@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { stripNonEcsFields } from './strip_non_ecs_fields';
+import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 
-describe('stripNonEcsFields', () => {
+describe('traverseAndMutateDoc', () => {
   it('should not strip ECS compliant fields', () => {
     const document = {
       client: {
@@ -19,14 +19,14 @@ describe('stripNonEcsFields', () => {
       },
     };
 
-    const { result, removed } = stripNonEcsFields(document);
+    const { result, removed } = traverseAndMutateDoc(document);
 
     expect(result).toEqual(document);
     expect(removed).toEqual([]);
   });
 
   it('should strip source object field if ECS mapping is not object', () => {
-    const { result, removed } = stripNonEcsFields({
+    const { result, removed } = traverseAndMutateDoc({
       agent: {
         name: {
           first: 'test-1',
@@ -54,7 +54,7 @@ describe('stripNonEcsFields', () => {
   });
 
   it('should strip source keyword field if ECS mapping is object', () => {
-    const { result, removed } = stripNonEcsFields({
+    const { result, removed } = traverseAndMutateDoc({
       agent: 'test',
       message: 'test message',
     });
@@ -74,7 +74,7 @@ describe('stripNonEcsFields', () => {
   // https://github.com/elastic/sdh-security-team/issues/736
   describe('fields that exists in the alerts mapping but not in local ECS(ruleRegistry) definition', () => {
     it('should strip object type "device" field if it is supplied as a keyword', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         device: 'test',
         message: 'test message',
       });
@@ -94,7 +94,7 @@ describe('stripNonEcsFields', () => {
 
   describe('array fields', () => {
     it('should not strip arrays of objects when an object is expected', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         agent: [{ name: 'agent-1' }, { name: 'agent-2' }],
         message: 'test message',
       });
@@ -107,7 +107,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip conflicting fields in array of objects', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         agent: [
           {
             name: 'agent-1',
@@ -135,7 +135,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip conflicting array of keyword fields', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         agent: ['agent-1', 'agent-2'],
         message: 'test message',
       });
@@ -156,7 +156,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip conflicting array of object fields', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         agent: { name: [{ conflict: 'agent-1' }, { conflict: 'agent-2' }], type: 'filebeat' },
         message: 'test message',
       });
@@ -176,11 +176,29 @@ describe('stripNonEcsFields', () => {
         },
       ]);
     });
+
+    it('should entirely strip objects that end up empty in arrays', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        agent: [{ name: { conflict: 'agent-1' } }, { name: 'test' }],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        agent: [{ name: 'test' }],
+        message: 'test message',
+      });
+      expect(removed).toEqual([
+        {
+          key: 'agent.name',
+          value: { conflict: 'agent-1' },
+        },
+      ]);
+    });
   });
 
   describe('dot notation', () => {
     it('should strip conflicting fields that use dot notation', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.conflict': 'some-value',
         message: 'test message',
       });
@@ -198,7 +216,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip conflicting fields that use dot notation and is an array', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.text': ['1'],
         message: 'test message',
       });
@@ -215,8 +233,8 @@ describe('stripNonEcsFields', () => {
       ]);
     });
 
-    it('should strip conflicting fields that use dot notation and is an empty array', () => {
-      const { result, removed } = stripNonEcsFields({
+    it('should strip conflicting fields that use dot notation and is an empty array but not report the empty array as removed', () => {
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name.text': [],
         message: 'test message',
       });
@@ -225,16 +243,11 @@ describe('stripNonEcsFields', () => {
         message: 'test message',
       });
 
-      expect(removed).toEqual([
-        {
-          key: 'agent.name.text',
-          value: [],
-        },
-      ]);
+      expect(removed).toEqual([]);
     });
 
     it('should not strip valid ECS fields that use dot notation', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'agent.name': 'some name',
         'agent.build.original': 'v10',
         message: 'test message',
@@ -253,7 +266,7 @@ describe('stripNonEcsFields', () => {
   describe('non-ECS fields', () => {
     it('should not strip non-ECS fields that don`t conflict', () => {
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           non_ecs_object: {
             field1: 'value1',
           },
@@ -272,7 +285,7 @@ describe('stripNonEcsFields', () => {
 
     it('should not strip non-ECS fields that don`t conflict even when nested inside ECS fieldsets', () => {
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           agent: {
             non_ecs_object: {
               field1: 'value1',
@@ -298,7 +311,7 @@ describe('stripNonEcsFields', () => {
 
   describe('ip field', () => {
     it('should not strip valid CIDR', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         source: {
           ip: '192.168.0.0',
           name: 'test source',
@@ -315,7 +328,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip invalid ip', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         source: {
           ip: 'invalid-ip',
           name: 'test source',
@@ -336,7 +349,7 @@ describe('stripNonEcsFields', () => {
 
   describe('nested field', () => {
     it('should strip invalid nested', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         threat: {
           enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
           'indicator.port': 443,
@@ -361,7 +374,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip valid values', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         threat: {
           enrichments: [
             {
@@ -386,7 +399,7 @@ describe('stripNonEcsFields', () => {
 
   describe('date field', () => {
     it('should strip invalid date', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         event: {
           created: true,
           category: 'start',
@@ -397,6 +410,7 @@ describe('stripNonEcsFields', () => {
         event: {
           category: 'start',
         },
+        'kibana.alert.original_event.category': 'start',
       });
       expect(removed).toEqual([
         {
@@ -407,7 +421,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip string or number date field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         event: {
           created: '2020-12-12',
           end: [2345562, '2022-10-12'],
@@ -419,6 +433,8 @@ describe('stripNonEcsFields', () => {
           created: '2020-12-12',
           end: [2345562, '2022-10-12'],
         },
+        'kibana.alert.original_event.created': '2020-12-12',
+        'kibana.alert.original_event.end': [2345562, '2022-10-12'],
       });
       expect(removed).toEqual([]);
     });
@@ -426,13 +442,13 @@ describe('stripNonEcsFields', () => {
 
   describe('long field', () => {
     it('should strip invalid long field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         client: {
           bytes: 'non-valid',
         },
       });
 
-      expect(result).toEqual({ client: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'client.bytes',
@@ -442,13 +458,13 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip invalid long field with space in it', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         client: {
           bytes: '24 ',
         },
       });
 
-      expect(result).toEqual({ client: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'client.bytes',
@@ -459,7 +475,7 @@ describe('stripNonEcsFields', () => {
   });
   describe('numeric field', () => {
     it('should strip invalid float field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': 'non-valid',
       });
 
@@ -473,13 +489,13 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip invalid scaled_float field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         host: {
           'cpu.usage': 'non-valid',
         },
       });
 
-      expect(result).toEqual({ host: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'host.cpu.usage',
@@ -489,7 +505,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip string float field with space', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': '24 ',
       });
 
@@ -500,7 +516,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip string scaled_float field with space', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'host.cpu.usage': '24 ',
       });
 
@@ -511,7 +527,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip valid number in string field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         host: {
           'cpu.usage': '1234',
         },
@@ -526,7 +542,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip array of valid numeric fields', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'user.risk.calculated_score': [458.3333, '45.3', 10, 0, -667.23],
       });
 
@@ -539,7 +555,7 @@ describe('stripNonEcsFields', () => {
 
   describe('boolean field', () => {
     it('should strip invalid boolean fields', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': ['conflict', 'true', 5, 'False', 'ee', 'True'],
       });
 
@@ -571,7 +587,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should strip invalid boolean True', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': 'True',
       });
 
@@ -585,7 +601,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip valid boolean fields', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': ['true', 'false', true, false, ''],
       });
 
@@ -596,7 +612,7 @@ describe('stripNonEcsFields', () => {
     });
 
     it('should not strip valid boolean fields nested in array', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'dll.code_signature.trusted': [[true, false], ''],
       });
 
@@ -610,7 +626,7 @@ describe('stripNonEcsFields', () => {
   // geo_point is too complex so we going to skip its validation
   describe('geo_point field', () => {
     it('should not strip invalid geo_point field', () => {
-      const { result, removed } = stripNonEcsFields({
+      const { result, removed } = traverseAndMutateDoc({
         'client.location.geo': 'invalid geo_point',
       });
 
@@ -622,7 +638,7 @@ describe('stripNonEcsFields', () => {
 
     it('should not strip valid geo_point fields', () => {
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           'client.geo.location': [0, 90],
         }).result
       ).toEqual({
@@ -630,7 +646,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           'client.geo.location': {
             type: 'Point',
             coordinates: [-88.34, 20.12],
@@ -644,7 +660,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           'client.geo.location': 'POINT (-71.34 41.12)',
         }).result
       ).toEqual({
@@ -652,7 +668,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(
-        stripNonEcsFields({
+        traverseAndMutateDoc({
           client: {
             geo: {
               location: {
@@ -672,6 +688,154 @@ describe('stripNonEcsFields', () => {
           },
         },
       });
+    });
+  });
+
+  describe('globally ignored fields', () => {
+    it('should strip out globally ignored top level fields', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        kibana: 'test-value',
+        non_ecs_field: 'value',
+      });
+
+      expect(result).toEqual({
+        non_ecs_field: 'value',
+      });
+      expect(removed).toEqual([
+        {
+          key: 'kibana',
+          value: 'test-value',
+        },
+      ]);
+    });
+
+    it('should strip out globally ignored nested fields', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        'kibana.test': 'test-value',
+        non_ecs_field: 'value',
+      });
+
+      expect(result).toEqual({
+        non_ecs_field: 'value',
+      });
+      expect(removed).toEqual([
+        {
+          key: 'kibana.test',
+          value: 'test-value',
+        },
+      ]);
+    });
+
+    it('should not strip out fields that use ignored field names as a prefix', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        kibana_test_prefix: 'test-value',
+        non_ecs_field: 'value',
+      });
+
+      expect(result).toEqual({
+        kibana_test_prefix: 'test-value',
+        non_ecs_field: 'value',
+      });
+      expect(removed).toEqual([]);
+    });
+  });
+
+  describe('fieldsToAdd', () => {
+    it('should extract a nested event field to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({ event: { action: 'test' } });
+      expect(result).toEqual({
+        event: { action: 'test' },
+        'kibana.alert.original_event.action': 'test',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should extract multiple nested event fields to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        event: { action: 'test', field2: 'test2' },
+      });
+      expect(result).toEqual({
+        event: { action: 'test', field2: 'test2' },
+        'kibana.alert.original_event.action': 'test',
+        'kibana.alert.original_event.field2': 'test2',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should extract a dot notation event field to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({ 'event.action': 'test' });
+      expect(result).toEqual({
+        'event.action': 'test',
+        'kibana.alert.original_event.action': 'test',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should extract multiple dot notation event fields to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        'event.action': 'test',
+        'event.field2': 'test2',
+      });
+      expect(result).toEqual({
+        'event.action': 'test',
+        'event.field2': 'test2',
+        'kibana.alert.original_event.action': 'test',
+        'kibana.alert.original_event.field2': 'test2',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should extract mixed notation fields to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        event: { 'field.subfield': 'test', 'field2.subfield': 'test2' },
+      });
+      expect(result).toEqual({
+        event: { 'field.subfield': 'test', 'field2.subfield': 'test2' },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field2.subfield': 'test2',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should extract mixed notation with dot notation first to kibana.alert.original_event', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        'event.field': { subfield: 'test', subfield2: 'test2' },
+      });
+      expect(result).toEqual({
+        'event.field': { subfield: 'test', subfield2: 'test2' },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field.subfield2': 'test2',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not extract original event fields if they are not top level', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        'top_field.event.action': 'test',
+      });
+      expect(result).toEqual({ 'top_field.event.action': 'test' });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not duplicate added fields', () => {
+      const { result, removed } = traverseAndMutateDoc({ event: { event: 'test' } });
+      expect(result).toEqual({
+        event: { event: 'test' },
+        'kibana.alert.original_event.event': 'test',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should work on multiple levels of nesting', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        event: { field: { subfield: 'test', subfield2: 'test2' } },
+      });
+      expect(result).toEqual({
+        event: { field: { subfield: 'test', subfield2: 'test2' } },
+        'kibana.alert.original_event.field.subfield': 'test',
+        'kibana.alert.original_event.field.subfield2': 'test2',
+      });
+      expect(removed).toEqual([]);
     });
   });
 });
