@@ -1067,6 +1067,32 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
+  priority: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.priorityFieldLabel', {
+        defaultMessage: 'Priority',
+      }),
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.priorityHelpTextDescription', {
+        defaultMessage: 'The priority of the field.',
+      }),
+      formatters: [toInt],
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.priorityIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a priority.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
   reference_field: {
     fieldConfig: {
       defaultValue: '',

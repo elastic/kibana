@@ -567,6 +567,20 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  passthrough: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.passthroughDescription', {
+      defaultMessage: 'Passthrough',
+    }),
+    value: 'passthrough',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.passthroughDescription"
+          defaultMessage="Passthrough fields are not indexed and are stored as-is."
+        />
+      </p>
+    ),
+  },
   dense_vector: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.denseVectorDescription', {
       defaultMessage: 'Dense vector',
@@ -998,7 +1012,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     ),
   },
 };
-
 export const MAIN_TYPES: MainType[] = [
   'alias',
   'binary',
@@ -1011,28 +1024,29 @@ export const MAIN_TYPES: MainType[] = [
   'flattened',
   'geo_point',
   'geo_shape',
+  'histogram',
   'ip',
   'join',
   'keyword',
+  'match_only_text',
   'nested',
   'numeric',
-  'match_only_text',
   'object',
+  'other',
+  'passthrough',
   'percolator',
+  'point',
   'range',
   'rank_feature',
   'rank_features',
   'search_as_you_type',
-  'shape',
   'semantic_text',
+  'shape',
   'sparse_vector',
   'text',
   'token_count',
-  'histogram',
-  'wildcard',
-  'point',
   'version',
-  'other',
+  'wildcard',
 ];
 
 export const MAIN_DATA_TYPE_DEFINITION: {

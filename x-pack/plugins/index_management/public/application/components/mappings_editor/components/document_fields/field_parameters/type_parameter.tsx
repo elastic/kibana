@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
@@ -79,7 +79,7 @@ export const TypeParameter = ({
                     )}
                   </EuiLink>
                 </EuiText>
-              ) : null
+              ) : <EuiSpacer size="m" />
             }
           >
             <EuiComboBox
