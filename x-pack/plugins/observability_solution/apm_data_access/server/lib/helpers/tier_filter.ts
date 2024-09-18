@@ -23,22 +23,22 @@ export function getExcludedDataTiersFilter(
   };
 }
 
-export function getIndexFilter({
-  indexFilter,
+export function getDataTierFilterCombined({
+  filter,
   excludedDataTiers,
 }: {
-  indexFilter?: QueryDslQueryContainer;
+  filter?: QueryDslQueryContainer;
   excludedDataTiers?: IndexLifeCycleDataTier[];
 }): QueryDslQueryContainer | undefined {
-  if (!indexFilter) {
+  if (!filter) {
     return excludedDataTiers ? getExcludedDataTiersFilter(excludedDataTiers) : undefined;
   }
 
   return !excludedDataTiers
-    ? indexFilter
+    ? filter
     : {
         bool: {
-          must: [indexFilter, getExcludedDataTiersFilter(excludedDataTiers)],
+          must: [filter, getExcludedDataTiersFilter(excludedDataTiers)],
         },
       };
 }

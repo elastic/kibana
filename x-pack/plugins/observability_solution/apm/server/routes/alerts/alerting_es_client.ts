@@ -9,8 +9,7 @@ import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { IUiSettingsClient } from '@kbn/core/server';
 import { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
-import { getExcludedDataTiersFilter } from '@kbn/apm-data-access-plugin/server/utils';
-import { compact } from 'lodash';
+import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 
 export type APMEventESSearchRequestParams = ESSearchRequest & {
@@ -30,18 +29,14 @@ export async function alertingEsClient<TParams extends APMEventESSearchRequestPa
     searchExcludedDataTiers
   );
 
-  const filter = excludedDataTiers ? getExcludedDataTiersFilter(excludedDataTiers) : undefined;
-
   const response = await scopedClusterClient.asCurrentUser.search({
     ...params,
     body: {
       ...params.body,
-      query: {
-        bool: {
-          filter,
-          must: compact([params.body.query]),
-        },
-      },
+      query: getDataTierFilterCombined({
+        filter: params.body.query,
+        excludedDataTiers,
+      }),
     },
     ignore_unavailable: true,
   });

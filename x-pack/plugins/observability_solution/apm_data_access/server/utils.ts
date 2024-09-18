@@ -12,6 +12,7 @@ export {
   getDebugBody,
   getDebugTitle,
   getExcludedDataTiersFilter,
+  getDataTierFilterCombined,
 } from './lib/helpers';
 
 export { withApmSpan } from './utils/with_apm_span';

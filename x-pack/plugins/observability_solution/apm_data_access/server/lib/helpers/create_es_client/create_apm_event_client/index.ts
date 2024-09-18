@@ -30,7 +30,7 @@ import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_w
 import type { ProcessorEventOfDocumentType } from '../document_type';
 import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
-import { getExcludedDataTiersFilter, getIndexFilter } from '../../tier_filter';
+import { getExcludedDataTiersFilter, getDataTierFilterCombined } from '../../tier_filter';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -318,8 +318,8 @@ export class APMEventClient {
     const requestParams: Omit<APMEventFieldCapsRequest, 'apm'> & { index: string[] } = {
       ...omit(params, 'apm'),
       index,
-      index_filter: getIndexFilter({
-        indexFilter: params.index_filter,
+      index_filter: getDataTierFilterCombined({
+        filter: params.index_filter,
         excludedDataTiers: this.excludedDataTiers,
       }),
     };
@@ -341,8 +341,8 @@ export class APMEventClient {
     const requestParams: Omit<APMEventTermsEnumRequest, 'apm'> & { index: string } = {
       ...omit(params, 'apm'),
       index: index.join(','),
-      index_filter: getIndexFilter({
-        indexFilter: params.index_filter,
+      index_filter: getDataTierFilterCombined({
+        filter: params.index_filter,
         excludedDataTiers: this.excludedDataTiers,
       }),
     };
