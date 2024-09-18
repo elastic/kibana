@@ -72,11 +72,11 @@ interface AuthorProps {
   author: string[];
 }
 
-const Author = ({ author }: AuthorProps) => (
+export const Author = ({ author }: AuthorProps) => (
   <BadgeList badges={author} data-test-subj="authorPropertyValue" />
 );
 
-const BuildingBlock = () => (
+export const BuildingBlock = () => (
   <EuiText size="s" data-test-subj="buildingBlockPropertyValue">
     {i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}
   </EuiText>
@@ -124,7 +124,7 @@ interface RiskScoreProps {
   riskScore: number;
 }
 
-const RiskScore = ({ riskScore }: RiskScoreProps) => (
+export const RiskScore = ({ riskScore }: RiskScoreProps) => (
   <EuiText size="s" data-test-subj="riskScorePropertyValue">
     {riskScore}
   </EuiText>
@@ -157,7 +157,7 @@ interface ReferencesProps {
   references: string[];
 }
 
-const References = ({ references }: ReferencesProps) => (
+export const References = ({ references }: ReferencesProps) => (
   <EuiText size="s">
     <ul>
       {references
@@ -173,7 +173,7 @@ const References = ({ references }: ReferencesProps) => (
   </EuiText>
 );
 
-const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
+export const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
   <EuiText size="s">
     <ul>
       {falsePositives.map((falsePositivesItem) => (
@@ -192,7 +192,7 @@ interface InvestigationFieldsProps {
   investigationFields: string[];
 }
 
-const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
+export const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
   <BadgeList badges={investigationFields} data-test-subj="investigationFieldsPropertyValue" />
 );
 
@@ -200,7 +200,7 @@ interface LicenseProps {
   license: string;
 }
 
-const License = ({ license }: LicenseProps) => (
+export const License = ({ license }: LicenseProps) => (
   <EuiText size="s" data-test-subj="licensePropertyValue">
     {license}
   </EuiText>
@@ -210,7 +210,7 @@ interface RuleNameOverrideProps {
   ruleNameOverride: string;
 }
 
-const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
+export const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
   <EuiText size="s" data-test-subj="ruleNameOverridePropertyValue">
     {ruleNameOverride}
   </EuiText>
@@ -236,7 +236,7 @@ interface TimestampOverrideProps {
   timestampOverride: string;
 }
 
-const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
+export const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
   <EuiText size="s" data-test-subj="timestampOverridePropertyValue">
     {timestampOverride}
   </EuiText>
@@ -246,7 +246,7 @@ interface MaxSignalsProps {
   maxSignals: number;
 }
 
-const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
+export const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
   <EuiText size="s" data-test-subj="maxSignalsPropertyValue">
     {maxSignals}
   </EuiText>

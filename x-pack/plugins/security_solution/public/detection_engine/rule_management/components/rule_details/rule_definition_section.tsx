@@ -298,7 +298,7 @@ interface TimelineTitleProps {
   timelineTitle: string;
 }
 
-const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => (
+export const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => (
   <EuiText size="s" data-test-subj="timelineTemplatePropertyValue">
     {timelineTitle}
   </EuiText>
