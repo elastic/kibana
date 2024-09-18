@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
+import type { TimelineModel } from '../model';
+import { saveTimeline, updateTimeline } from '../actions';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { selectTimelineById } from '../selectors';
 
 /**
  * Refreshes all timelines, so changes are propagated to everywhere on the page
@@ -18,4 +23,42 @@ export function refreshTimelines(state: State) {
   if (allTimelineQuery.refetch != null) {
     (allTimelineQuery.refetch as inputsModel.Refetch)();
   }
+}
+
+/**
+ * Given a timeline model, it will return that model when the timeline has been saved before,
+ * or save a draft version of that timeline.
+ * This is a usefull check for when you're working with timeline-associated saved objects
+ * which require the exitence of a timeline's `savedObjectId`.
+ */
+export async function ensureTimelineIsSaved({
+  localTimelineId,
+  timeline,
+  store,
+}: {
+  localTimelineId: string;
+  timeline: TimelineModel;
+  store: MiddlewareAPI<Dispatch<AnyAction>, State>;
+}) {
+  // In case `savedObjectId` exists, the timeline has been saved before.
+  if (timeline.savedObjectId) {
+    return timeline;
+  }
+
+  // The timeline hasn't been saved, so let's create make it a draft.
+  await store.dispatch(
+    updateTimeline({
+      id: localTimelineId,
+      timeline: {
+        ...timeline,
+        status: TimelineStatusEnum.draft,
+      },
+    })
+  );
+
+  // The draft needs to be persisted
+  await store.dispatch(saveTimeline({ id: localTimelineId, saveAsNew: false }));
+
+  // Make sure we're returning the most updated version of the timeline
+  return selectTimelineById(store.getState(), localTimelineId);
 }

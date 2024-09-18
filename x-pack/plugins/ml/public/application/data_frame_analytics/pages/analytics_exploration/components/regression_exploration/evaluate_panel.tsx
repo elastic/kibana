@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -26,10 +27,11 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
-import { getValuesFromResponse, loadEvalData, loadDocsCount, Eval } from '../../../../common';
+import type { Eval } from '../../../../common';
+import { getValuesFromResponse, loadEvalData, loadDocsCount } from '../../../../common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
@@ -63,6 +65,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const {
     services: { docLinks },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const docLink = docLinks.links.ml.regressionEvaluation;
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
@@ -82,6 +85,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoadingGeneralization(true);
 
     const genErrorEval = await loadEvalData({
+      mlApi,
       isTraining: false,
       index,
       dependentVariable,
@@ -120,6 +124,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoadingTraining(true);
 
     const trainingErrorEval = await loadEvalData({
+      mlApi,
       isTraining: true,
       index,
       dependentVariable,
@@ -157,6 +162,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const loadData = async () => {
     loadGeneralizationData(false);
     const genDocsCountResp = await loadDocsCount({
+      mlApi,
       ignoreDefaultQuery: false,
       isTraining: false,
       searchQuery,
@@ -171,6 +177,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     loadTrainingData(false);
     const trainDocsCountResp = await loadDocsCount({
+      mlApi,
       ignoreDefaultQuery: false,
       isTraining: true,
       searchQuery,

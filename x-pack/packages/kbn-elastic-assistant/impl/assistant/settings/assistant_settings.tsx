@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,8 +23,9 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { Conversation, Prompt, QuickPrompt } from '../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { AIConnector } from '../../connectorland/connector_selector';
+import { Conversation, useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -37,35 +38,32 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+import {
+  ANONYMIZATION_TAB,
+  CONVERSATIONS_TAB,
+  EVALUATION_TAB,
+  KNOWLEDGE_BASE_TAB,
+  QUICK_PROMPTS_TAB,
+  SYSTEM_PROMPTS_TAB,
+} from './const';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
   height: 575px;
 `;
 
-export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
-export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
-export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
-export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
-export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
-
-export type SettingsTabs =
-  | typeof CONVERSATIONS_TAB
-  | typeof QUICK_PROMPTS_TAB
-  | typeof SYSTEM_PROMPTS_TAB
-  | typeof ANONYMIZATION_TAB
-  | typeof KNOWLEDGE_BASE_TAB
-  | typeof EVALUATION_TAB;
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  onSave: () => void;
-  selectedConversation: Conversation;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onSave: (success: boolean) => Promise<void>;
+  selectedConversationId?: string;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
 }
 
 /**
@@ -74,64 +72,94 @@ interface Props {
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     onClose,
     onSave,
-    selectedConversation: defaultSelectedConversation,
-    setSelectedConversationId,
+    selectedConversationId: defaultSelectedConversationId,
+    onConversationSelected,
+    conversations,
+    conversationsLoaded,
   }) => {
-    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
-      useAssistantContext();
+    const {
+      assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
+      http,
+      toasts,
+      selectedSettingsTab,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
+
+    useEffect(() => {
+      if (selectedSettingsTab == null) {
+        setSelectedSettingsTab(CONVERSATIONS_TAB);
+      }
+    }, [selectedSettingsTab, setSelectedSettingsTab]);
+
+    const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
+      useFetchAnonymizationFields();
+    const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
+
+    const { data: connectors } = useLoadConnectors({
+      http,
+    });
 
     const {
       conversationSettings,
-      defaultAllow,
-      defaultAllowReplacement,
+      setConversationSettings,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
-      setUpdatedConversationSettings,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
+      assistantStreamingEnabled,
+      setUpdatedAssistantStreamingEnabled,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
-      setUpdatedSystemPromptSettings,
+      promptsBulkActions,
       saveSettings,
-    } = useSettingsUpdater();
+      conversationsSettingsBulkActions,
+      updatedAnonymizationData,
+      setConversationsSettingsBulkActions,
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
+      setPromptsBulkActions,
+      setUpdatedSystemPromptSettings,
+    } = useSettingsUpdater(
+      conversations,
+      allPrompts,
+      conversationsLoaded,
+      promptsLoaded,
+      anonymizationFields
+    );
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      () => {
-        return conversationSettings[defaultSelectedConversation.id];
-      }
+    const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(
+      defaultSelectedConversationId
     );
     const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
-      setSelectedConversation(conversation);
+      setSelectedConversationId(conversation?.id);
     }, []);
-    useEffect(() => {
-      if (selectedConversation != null) {
-        setSelectedConversation(conversationSettings[selectedConversation.id]);
-      }
-    }, [conversationSettings, selectedConversation]);
+
+    const selectedConversation = useMemo(
+      () => (selectedConversationId ? conversationSettings[selectedConversationId] : undefined),
+      [conversationSettings, selectedConversationId]
+    );
 
     // Quick Prompt Selection State
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
-    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
       setSelectedQuickPrompt(quickPrompt);
     }, []);
     useEffect(() => {
       if (selectedQuickPrompt != null) {
         setSelectedQuickPrompt(
-          quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+          quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name)
         );
       }
     }, [quickPromptSettings, selectedQuickPrompt]);
 
     // System Prompt Selection State
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
-    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
       setSelectedSystemPrompt(systemPrompt);
     }, []);
     useEffect(() => {
@@ -140,22 +168,44 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       }
     }, [selectedSystemPrompt, systemPromptSettings]);
 
-    const handleSave = useCallback(() => {
+    const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.id] == null;
-      const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
-      if (isSelectedConversationDeleted && newSelectedConversationId != null) {
-        setSelectedConversationId(conversationSettings[newSelectedConversationId].id);
+        defaultSelectedConversationId &&
+        // sometimes the key is a title, so do not rely on conversationSettings[defaultSelectedConversationId]
+        !Object.values(conversationSettings).some(({ id }) => id === defaultSelectedConversationId);
+
+      const newSelectedConversation: Conversation | undefined =
+        Object.values(conversationSettings)[0];
+
+      if (isSelectedConversationDeleted && newSelectedConversation != null) {
+        onConversationSelected({
+          cId: newSelectedConversation.id,
+          cTitle: newSelectedConversation.title,
+        });
       }
-      saveSettings();
-      onSave();
+      const saveResult = await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      if (
+        (anonymizationFieldsBulkActions?.create?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.update?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.delete?.ids?.length ?? 0) > 0
+      ) {
+        await refetchAnonymizationFieldsResults();
+      }
+      await onSave(saveResult);
     }, [
+      anonymizationFieldsBulkActions,
       conversationSettings,
-      defaultSelectedConversation.id,
+      defaultSelectedConversationId,
+      onConversationSelected,
       onSave,
+      refetchAnonymizationFieldsResults,
       saveSettings,
-      setSelectedConversationId,
+      toasts,
     ]);
 
     return (
@@ -172,7 +222,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={CONVERSATIONS_TAB}
                 label={i18n.CONVERSATIONS_MENU_ITEM}
-                isSelected={selectedSettingsTab === CONVERSATIONS_TAB}
+                isSelected={!selectedSettingsTab || selectedSettingsTab === CONVERSATIONS_TAB}
                 onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
                 data-test-subj={`${CONVERSATIONS_TAB}-button`}
               >
@@ -273,48 +323,61 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 className="eui-scrollBar"
                 grow={true}
                 css={css`
-                  max-height: 550px;
+                  max-height: 519px;
                   overflow-y: scroll;
                 `}
               >
-                {selectedSettingsTab === CONVERSATIONS_TAB && (
-                  <ConversationSettings
-                    defaultConnectorId={defaultConnectorId}
-                    defaultProvider={defaultProvider}
-                    conversationSettings={conversationSettings}
-                    setUpdatedConversationSettings={setUpdatedConversationSettings}
-                    allSystemPrompts={systemPromptSettings}
-                    selectedConversation={selectedConversation}
-                    isDisabled={selectedConversation == null}
-                    onSelectedConversationChange={onHandleSelectedConversationChange}
-                    http={http}
-                  />
-                )}
+                {!selectedSettingsTab ||
+                  (selectedSettingsTab === CONVERSATIONS_TAB && (
+                    <ConversationSettings
+                      connectors={connectors}
+                      defaultConnector={defaultConnector}
+                      conversationSettings={conversationSettings}
+                      setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+                      conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+                      setConversationSettings={setConversationSettings}
+                      allSystemPrompts={systemPromptSettings}
+                      selectedConversation={selectedConversation}
+                      isDisabled={selectedConversation == null}
+                      assistantStreamingEnabled={assistantStreamingEnabled}
+                      setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
+                      onSelectedConversationChange={onHandleSelectedConversationChange}
+                      http={http}
+                    />
+                  ))}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (
                   <QuickPromptSettings
                     quickPromptSettings={quickPromptSettings}
                     onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
                     selectedQuickPrompt={selectedQuickPrompt}
                     setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
                   <SystemPromptSettings
+                    connectors={connectors}
                     conversationSettings={conversationSettings}
+                    defaultConnector={defaultConnector}
                     systemPromptSettings={systemPromptSettings}
                     onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
                     selectedSystemPrompt={selectedSystemPrompt}
-                    setUpdatedConversationSettings={setUpdatedConversationSettings}
+                    setConversationSettings={setConversationSettings}
+                    setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+                    conversationsSettingsBulkActions={conversationsSettingsBulkActions}
                     setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultAllow={defaultAllow}
-                    defaultAllowReplacement={defaultAllowReplacement}
-                    pageSize={5}
-                    setUpdatedDefaultAllow={setUpdatedDefaultAllow}
-                    setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
+                    defaultPageSize={5}
+                    anonymizationFields={updatedAnonymizationData}
+                    anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
+                    setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+                    setUpdatedAnonymizationData={setUpdatedAnonymizationData}
                   />
                 )}
                 {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

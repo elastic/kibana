@@ -32,6 +32,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
+      await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createNewPipeline');
 
@@ -56,7 +57,11 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async getPipelinesList() {
+    async getPipelinesList(options?: { searchFor?: string }) {
+      if (options?.searchFor) {
+        await this.searchPipelineList(options.searchFor);
+      }
+
       const pipelines = await testSubjects.findAll('pipelineTableRow');
 
       const getPipelineName = async (pipeline: WebElementWrapper) => {
@@ -67,12 +72,18 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
+    async searchPipelineList(searchTerm: string) {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('pipelineTableSearch', searchTerm);
+    },
+
     async clickPipelineLink(index: number) {
       const links = await testSubjects.findAll('pipelineDetailsLink');
       await links.at(index)?.click();
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
+      await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createPipelineFromCsv');
 

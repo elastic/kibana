@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 42;
+const NUMBER_OF_CAPABILITIES = 43;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -91,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
           isADEnabled: true,
@@ -140,6 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: true,
+          canCreateInferenceEndpoint: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
           isADEnabled: true,

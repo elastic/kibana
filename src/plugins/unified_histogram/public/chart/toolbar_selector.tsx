@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, ReactElement, useState, useMemo } from 'react';
@@ -35,6 +36,7 @@ export interface ToolbarSelectorProps {
   options: SelectableEntry[];
   searchable: boolean;
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
+  optionMatcher?: EuiSelectableProps['optionMatcher'];
 }
 
 export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
@@ -45,6 +47,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   options,
   searchable,
   onChange,
+  optionMatcher,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -58,9 +61,11 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     []
   );
 
-  const onSelectionChange = useCallback(
+  const onSelectionChange = useCallback<
+    NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
+  >(
     (newOptions) => {
-      const chosenOption = newOptions.find(({ checked }: SelectableEntry) => checked === 'on');
+      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
 
       onChange?.(
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
@@ -110,7 +115,11 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       }}
       panelPaddingSize="none"
       button={
-        <EuiToolTip content={labelPopoverDisabled ? undefined : buttonLabel} delay="long">
+        <EuiToolTip
+          content={labelPopoverDisabled ? undefined : buttonLabel}
+          delay="long"
+          display="block"
+        >
           <ToolbarButton
             size="s"
             css={css`
@@ -133,13 +142,14 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
-      <EuiSelectable
+      <EuiSelectable<SelectableEntry>
         id={`${dataTestSubj}Selectable`}
         singleSelection
         aria-label={popoverTitle}
         data-test-subj={`${dataTestSubj}Selectable`}
         options={options}
         onChange={onSelectionChange}
+        optionMatcher={optionMatcher}
         listProps={{
           truncationProps: { truncation: 'middle' },
           isVirtualized: searchable,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,6 +15,8 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
+import type { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
+
 import {
   clearLog,
   startElasticsearch,
@@ -25,7 +28,6 @@ import {
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 import '../jest_matchers';
-import { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
 // mock clone_index from packages/core
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
@@ -51,7 +53,7 @@ const RELOCATE_TYPES: Record<string, string> = {
   visualization: '.kibana_slow_clone_1',
   'canvas-workpad': '.kibana_slow_clone_1',
   search: '.kibana_slow_clone_2',
-  task: '.kibana_task_manager',
+  task: '.kibana_task_manager_new', // force reindex
   'epm-packages-assets': '.kibana_slow_clone_1',
   // the remaining types will be forced to go to '.kibana',
   // overriding `indexPattern: foo` defined in the registry
@@ -59,7 +61,7 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-// Failing: See https://github.com/elastic/kibana/issues/163253
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe.skip('when splitting .kibana into multiple indices and one clone fails', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
@@ -132,14 +134,14 @@ describe.skip('when splitting .kibana into multiple indices and one clone fails'
     });
 
     // cause a failure when cloning .kibana_slow_clone_* indices
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
 
     await expect(runMigrationsWhichFailsWhenCloning()).rejects.toThrowError(
       /cluster_shard_limit_exceeded/
     );
 
     // remove the failure
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 150 } });
 
     const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
     await runMigrations2ndTime();

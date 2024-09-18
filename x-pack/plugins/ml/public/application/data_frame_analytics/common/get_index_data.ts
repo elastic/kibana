@@ -8,23 +8,22 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import {
-  EsSorting,
-  UseDataGridReturnType,
-  getProcessedFields,
-  INDEX_STATUS,
-} from '@kbn/ml-data-grid';
+import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';
+import { getProcessedFields, INDEX_STATUS } from '@kbn/ml-data-grid';
 
-import { ml } from '../../services/ml_api_service';
-import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { mlJobCapsServiceAnalyticsFactory } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import type { MlApi } from '../../services/ml_api_service';
 
 export const getIndexData = async (
+  mlApi: MlApi,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
   searchQuery: estypes.QueryDslQueryContainer,
   options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {
+    const newJobCapsServiceAnalytics = mlJobCapsServiceAnalyticsFactory(mlApi);
+
     const {
       pagination,
       setErrorMessage,
@@ -51,7 +50,7 @@ export const getIndexData = async (
 
       const { pageIndex, pageSize } = pagination;
       // TODO: remove results_field from `fields` when possible
-      const resp: estypes.SearchResponse = await ml.esSearch({
+      const resp: estypes.SearchResponse = await mlApi.esSearch({
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],

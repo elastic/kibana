@@ -5,16 +5,25 @@
  * 2.0.
  */
 
+import type { EuiFlyoutHeader } from '@elastic/eui';
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { FlyoutHeader, FlyoutHeaderTabs } from '@kbn/security-solution-common';
 import type { RightPanelPaths } from '.';
-import type { RightPanelTabsType } from './tabs';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
-import { HeaderTitle } from './components/header_title';
+import type { RightPanelTabType } from './tabs';
+import { AlertHeaderTitle } from './components/alert_header_title';
+import { EventHeaderTitle } from './components/event_header_title';
+import { useDocumentDetailsContext } from '../shared/context';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
+import {
+  AlertsCasesTourSteps,
+  getTourAnchor,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 
-export interface PanelHeaderProps {
+export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   /**
    * Id of the tab selected in the parent component to display its content
    */
@@ -27,26 +36,60 @@ export interface PanelHeaderProps {
   /**
    * Tabs to display in the header
    */
-  tabs: RightPanelTabsType;
+  tabs: RightPanelTabType[];
 }
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, tabs }) => {
+  ({ selectedTabId, setSelectedTabId, tabs, ...flyoutHeaderProps }) => {
+    const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+    const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
-    const renderTabs = tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+
+    const tourAnchor = useMemo(
+      () =>
+        isAlert
+          ? {
+              'tour-step': getTourAnchor(
+                AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+                SecurityStepId.alertsCases
+              ),
+            }
+          : {},
+      [isAlert]
+    );
+
+    const renderTabs = tabs.map((tab, index) =>
+      isAlert && tab.id === 'overview' ? (
+        <GuidedOnboardingTourStep
+          isTourAnchor={isAlert}
+          step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
+          tourId={SecurityStepId.alertsCases}
+        >
+          <EuiTab
+            onClick={() => onSelectedTabChanged(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+            data-test-subj={tab['data-test-subj']}
+            {...tourAnchor}
+          >
+            {tab.name}
+          </EuiTab>
+        </GuidedOnboardingTourStep>
+      ) : (
+        <EuiTab
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          data-test-subj={tab['data-test-subj']}
+        >
+          {tab.name}
+        </EuiTab>
+      )
+    );
 
     return (
-      <FlyoutHeader>
-        <HeaderTitle />
+      <FlyoutHeader {...flyoutHeaderProps}>
+        {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
         <EuiSpacer size="m" />
         <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
       </FlyoutHeader>

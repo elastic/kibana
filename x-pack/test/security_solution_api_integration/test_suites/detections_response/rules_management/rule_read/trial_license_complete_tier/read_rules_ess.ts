@@ -13,10 +13,6 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -27,15 +23,19 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess read_rules - ESS specific logic', () => {
     describe('reading rules', () => {
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+          const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
           const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
             ...expectedRule,

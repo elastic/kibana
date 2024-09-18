@@ -8,16 +8,18 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  PivotAggsConfigBase,
+  PivotAggsConfigWithUiBase,
+} from '../../../../../../common/pivot_aggs';
 import {
   isPivotAggsConfigWithUiBase,
   isSpecialSortField,
   isValidSortDirection,
   isValidSortMode,
   isValidSortNumericType,
-  PivotAggsConfigBase,
-  PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
-import { PivotAggsConfigTopMetrics } from './types';
+import type { PivotAggsConfigTopMetrics } from './types';
 import { TopMetricsAggForm } from './components/top_metrics_agg_form';
 
 /**

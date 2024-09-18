@@ -87,7 +87,7 @@ const errors = {
     ),
   getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
     i18n.translate('xpack.canvas.errors.useImportWorkpad.fileUploadFileWithFileNameErrorMessage', {
-      defaultMessage: `Couldn't upload '{fileName}'`,
+      defaultMessage: `Couldn't upload ''{fileName}''`,
       values: {
         fileName,
       },

@@ -51,9 +51,10 @@
       "stackConnectors",
       "discover",
       "notifications",
-      "savedObjects",
       "savedSearch",
       "unifiedDocViewer",
+      "charts",
+      "entityManager"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -65,11 +66,13 @@
       "usageCollection",
       "lists",
       "home",
+      "management",
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "integrationAssistant"
     ],
     "requiredBundles": [
       "esUiShared",

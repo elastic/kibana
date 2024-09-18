@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
@@ -18,7 +18,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -34,7 +34,7 @@ export async function showCategorizeFlyout(
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter
 ): Promise<void> {
-  const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
+  const { overlays, application, i18n } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -44,14 +44,10 @@ export async function showCategorizeFlyout(
       };
 
       const appDependencies: AiopsAppDependencies = {
-        notifications,
-        uiSettings,
-        http,
-        theme,
-        application,
-        i18n,
+        ...coreStart,
         ...plugins,
       };
+      const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
       const datePickerDeps: DatePickerDependencies = {
         ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
         i18n,
@@ -80,7 +76,7 @@ export async function showCategorizeFlyout(
               </DatePickerContextProvider>
             </AiopsAppContext.Provider>
           </KibanaContextProvider>,
-          { theme, i18n }
+          startServices
         ),
         {
           'data-test-subj': 'aiopsCategorizeFlyout',

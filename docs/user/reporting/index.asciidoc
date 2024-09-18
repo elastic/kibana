@@ -15,7 +15,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *CSV Reports* &mdash; Generate and download CSV files of saved searches. <<csv-limitations,Certain limitations apply>>.
+* *CSV Reports* &mdash; Generate CSV reports of saved searches. <<csv-limitations,Certain limitations apply>>.
 
 * *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 
@@ -67,16 +67,21 @@ NOTE: When you create a dashboard report that includes a data table or saved sea
 
 . To view and manage reports, open the main menu, then click *Stack Management > Reporting*.
 
-NOTE: Reports are stored in {es} and managed by the `kibana-reporting` {ilm}
-({ilm-init}) policy. By default, the policy stores reports forever. To learn
-more about {ilm-init} policies, refer to the {es}
-{ref}/index-lifecycle-management.html[{ilm-init} documentation].
+NOTE: In "stateful" deployments, reports are stored in {es} and managed by the `kibana-reporting` {ilm}
+({ilm-init}) policy. By default, the policy stores reports forever. To learn more about {ilm-init} policies, refer
+to the {es} {ref}/index-lifecycle-management.html[{ilm-init} documentation].
 
 [float]
 [[csv-limitations]]
-=== CSV reports limitations
+=== CSV report limitations
 
 include::reporting-csv-limitations.asciidoc[]
+
+[float]
+[[pdf-limitations]]
+=== PNG/PDF report limitations
+
+include::reporting-pdf-limitations.asciidoc[]
 
 [float]
 [[share-a-direct-link]]
@@ -172,3 +177,5 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
+include::reporting-csv-troubleshooting.asciidoc[leveloffset=+1]
+include::reporting-pdf-troubleshooting.asciidoc[leveloffset=+1]

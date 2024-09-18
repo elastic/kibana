@@ -6,32 +6,28 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useSendMessages } from '../use_send_messages';
+import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
-import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { useAssistantContext } from '../../..';
 
-jest.mock('../use_send_messages');
+jest.mock('../use_send_message');
 jest.mock('../use_conversation');
+jest.mock('../../..');
 
-const setEditingSystemPromptId = jest.fn();
-const setPromptTextPreview = jest.fn();
 const setSelectedPromptContexts = jest.fn();
-const setUserPrompt = jest.fn();
-const sendMessages = jest.fn();
-const appendMessage = jest.fn();
+const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
-const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
+const setCurrentConversation = jest.fn();
 
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
-  allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
-  currentConversation: emptyWelcomeConvo,
+  currentConversation: { ...emptyWelcomeConvo, id: 'an-id' },
   http: {
     basePath: {
       basePath: '/mfg',
@@ -40,98 +36,113 @@ export const testProps: UseChatSendProps = {
     anonymousPaths: {},
     externalUrl: {},
   } as unknown as HttpSetup,
-  editingSystemPromptId: defaultSystemPrompt.id,
-  setEditingSystemPromptId,
-  setPromptTextPreview,
   setSelectedPromptContexts,
-  setUserPrompt,
+  setCurrentConversation,
+  refetchCurrentUserConversations: jest.fn(),
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };
+const reportAssistantMessageSent = jest.fn();
 describe('use chat send', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSendMessages as jest.Mock).mockReturnValue({
+    (useSendMessage as jest.Mock).mockReturnValue({
       isLoading: false,
-      sendMessages: sendMessages.mockReturnValue(robotMessage),
+      sendMessage: sendMessage.mockReturnValue(robotMessage),
     });
     (useConversation as jest.Mock).mockReturnValue({
-      appendMessage,
-      appendReplacements,
       removeLastMessage,
       clearConversation,
     });
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      assistantTelemetry: {
+        reportAssistantMessageSent,
+      },
+    });
   });
-  it('handleOnChatCleared clears the conversation', () => {
-    const { result } = renderHook(() => useChatSend(testProps), {
+  it('handleOnChatCleared clears the conversation', async () => {
+    (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleOnChatCleared();
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleOnChatCleared();
+    });
     expect(clearConversation).toHaveBeenCalled();
-    expect(setPromptTextPreview).toHaveBeenCalledWith('');
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    expect(result.current.userPrompt).toEqual('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
-    expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
-    expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
-  });
-  it('handlePromptChange updates prompt successfully', () => {
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handlePromptChange('new prompt');
-    expect(setPromptTextPreview).toHaveBeenCalledWith('new prompt');
-    expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
-  });
-  it('handleButtonSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
-    const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handleButtonSendMessage(promptText);
-    expect(setUserPrompt).toHaveBeenCalledWith('');
-
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
-      const appendMessageSend = appendMessage.mock.calls[0][0];
-      const appendMessageResponse = appendMessage.mock.calls[1][0];
-      expect(appendMessageSend.message.content).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
-      );
-      expect(appendMessageSend.message.role).toEqual('user');
-      expect(appendMessageResponse.message.content).toEqual(robotMessage.response);
-      expect(appendMessageResponse.message.role).toEqual('assistant');
+      expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);
+      expect(setCurrentConversation).toHaveBeenCalled();
     });
   });
-  it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
+
+  it('handleChatSend sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(
-      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
         wrapper: TestProviders,
       }
     );
 
-    result.current.handleButtonSendMessage(promptText);
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    result.current.handleChatSend(promptText);
 
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
-      expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
+      expect(sendMessage).toHaveBeenCalled();
+      const messages = setCurrentConversation.mock.calls[0][0].messages;
+      expect(messages[messages.length - 1].content).toEqual(promptText);
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result } = renderHook(
-      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
         wrapper: TestProviders,
       }
     );
 
-    result.current.handleRegenerateResponse();
-    expect(removeLastMessage).toHaveBeenCalledWith('Welcome');
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleRegenerateResponse();
+    });
+    expect(removeLastMessage).toHaveBeenCalledWith('welcome-id');
 
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
-      expect(appendMessage.mock.calls[0][0].message.content).toEqual(robotMessage.response);
+      expect(sendMessage).toHaveBeenCalled();
+      const messages = setCurrentConversation.mock.calls[1][0].messages;
+      expect(messages[messages.length - 1].content).toEqual(robotMessage.response);
+    });
+  });
+  it('sends telemetry events for both user and assistant', async () => {
+    const promptText = 'prompt text';
+    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
+      wrapper: TestProviders,
+    });
+    await waitForNextUpdate();
+    act(() => {
+      result.current.handleChatSend(promptText);
+    });
+
+    await waitFor(() => {
+      expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
+        conversationId: testProps.currentConversation?.title,
+        role: 'user',
+        actionTypeId: '.gen-ai',
+        model: undefined,
+        provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
+      });
+      expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
+        conversationId: testProps.currentConversation?.title,
+        role: 'assistant',
+        actionTypeId: '.gen-ai',
+        model: undefined,
+        provider: 'OpenAI',
+        isEnabledKnowledgeBase: false,
+      });
     });
   });
 });

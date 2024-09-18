@@ -15,6 +15,8 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -42,7 +44,7 @@ describe('GET /spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -54,7 +56,7 @@ describe('GET /spaces/space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -67,6 +69,7 @@ describe('GET /spaces/space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     return {
@@ -99,7 +102,8 @@ describe('GET /spaces/space', () => {
           if (routeConfig.validate === false) {
             throw new Error('Test setup failure. Expected route validation');
           }
-          const queryParamsValidation = routeConfig.validate.query! as ObjectType<any>;
+          const queryParamsValidation = getRequestValidation(routeConfig.validate)
+            .query! as ObjectType<any>;
 
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 

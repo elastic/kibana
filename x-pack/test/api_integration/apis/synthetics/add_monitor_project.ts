@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
+    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
@@ -67,15 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
+
         const { monitors } = response.body;
         if (monitors[0]?.config_id) {
-          await supertest
-            .delete(
-              `/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitors[0].config_id}`
-            )
-            .set('kbn-xsrf', 'true')
-            .send(projectMonitors)
-            .expect(200);
+          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -84,13 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
@@ -625,10 +621,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 geo: {
-                  lat: '',
-                  lon: '',
+                  lat: 0,
+                  lon: 0,
                 },
                 id: testPolicyId,
+                agentPolicyId: testPolicyId,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -1230,20 +1227,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { monitors } = response.body;
 
-        // add urls and ports to mimic hydration
-        const updates = {
-          [ConfigKey.URLS]: 'https://modified-host.com',
-          [ConfigKey.PORT]: 443,
-        };
-
-        const modifiedMonitor = { ...monitors[0], ...updates };
-
-        await supertest
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)
-          .set('kbn-xsrf', 'true')
-          .send(modifiedMonitor)
-          .expect(200);
-
         // update project monitor via push api
         const { body } = await supertest
           .put(
@@ -1747,6 +1730,7 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: [
               {
                 ...projectMonitors.monitors[0],
+                namespace: 'custom_namespace',
                 privateLocations: ['Test private location 0'],
                 enabled: false,
               },
@@ -1775,6 +1759,7 @@ export default function ({ getService }: FtrProviderContext) {
             projectId: project,
             locationId: testPolicyId,
             locationName: 'Test private location 0',
+            namespace: 'custom_namespace',
           })
         );
       } finally {
@@ -1822,10 +1807,11 @@ export default function ({ getService }: FtrProviderContext) {
             {
               label: 'Test private location 0',
               isServiceManaged: false,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
-                lat: '',
-                lon: '',
+                lat: 0,
+                lon: 0,
               },
             },
           ]);
@@ -2026,7 +2012,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'Invalid location: "does not exist". Remove it or replace it with a valid location.',
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2104,8 +2090,7 @@ export default function ({ getService }: FtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details:
-                'Invalid private location: "does not exist". Remove it or replace it with a valid private location.',
+              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location 0'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

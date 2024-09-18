@@ -151,6 +151,13 @@ export const EventSchema = schema.maybe(
                     uuid: ecsString(),
                     status: ecsString(),
                     status_order: ecsStringOrNumber(),
+                    backfill: schema.maybe(
+                      schema.object({
+                        id: ecsString(),
+                        start: ecsDate(),
+                        interval: ecsString(),
+                      })
+                    ),
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsStringOrNumber(),
@@ -162,6 +169,7 @@ export const EventSchema = schema.maybe(
                             recovered: ecsStringOrNumber(),
                           })
                         ),
+                        number_of_delayed_alerts: ecsStringOrNumber(),
                         number_of_searches: ecsStringOrNumber(),
                         total_indexing_duration_ms: ecsStringOrNumber(),
                         es_search_duration_ms: ecsStringOrNumber(),
@@ -204,6 +212,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             name: ecsString(),
             id: ecsString(),
+            type_id: ecsString(),
             execution: schema.maybe(
               schema.object({
                 source: ecsString(),
@@ -217,6 +226,11 @@ export const EventSchema = schema.maybe(
                         total_tokens: ecsStringOrNumber(),
                       })
                     ),
+                  })
+                ),
+                usage: schema.maybe(
+                  schema.object({
+                    request_body_bytes: ecsStringOrNumber(),
                   })
                 ),
               })

@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { getStartEndParams } from '@kbn/esql-utils';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { getESQLWithSafeLimit, appendToESQLQuery } from '@kbn/esql-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { ESQL_SAFE_LIMIT } from '@kbn/unified-field-list/src/constants';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import type { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
   DocumentCountStats,
@@ -22,14 +26,8 @@ import type {
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import {
-  getSafeESQLLimitSize,
-  getSafeESQLName,
-  isESQLQuery,
-} from '../../search_strategy/requests/esql_utils';
+import { getSafeESQLName, isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { NonAggregatableField } from '../../types/overall_stats';
-import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
 import {
@@ -37,13 +35,19 @@ import {
   type HandleErrorCallback,
 } from '../../search_strategy/esql_requests/handle_error';
 
-export interface Column {
+interface ESQLColumn {
   type: string;
   name: string;
+}
+interface ESQLResponse {
+  rawResponse: { columns: ESQLColumn[]; all_columns: ESQLColumn[]; values: unknown[][] };
+}
+export interface Column extends ESQLColumn {
   secondaryType: string;
 }
 
 interface Data {
+  totalFields?: number;
   timeFieldName?: string;
   columns?: Column[];
   totalCount?: number;
@@ -56,6 +60,7 @@ interface Data {
     nonAggregatableExistsFields: NonAggregatableField[];
     nonAggregatableNotExistsFields: NonAggregatableField[];
   };
+  exampleDocs: Array<{ fieldName: string; examples: string[] }> | undefined;
 }
 
 const getESQLDocumentCountStats = async (
@@ -65,8 +70,9 @@ const getESQLDocumentCountStats = async (
   timeFieldName?: string,
   intervalMs?: number,
   searchOptions?: ISearchOptions,
-  onError?: HandleErrorCallback
-): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
+  onError?: HandleErrorCallback,
+  timeRange?: TimeRange
+): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number; request?: object }> => {
   if (!isESQLQuery(query)) {
     throw Error(
       i18n.translate('xpack.dataVisualizer.esql.noQueryProvided', {
@@ -77,22 +83,29 @@ const getESQLDocumentCountStats = async (
   const esqlBaseQuery = query.esql;
   let earliestMs = Infinity;
   let latestMs = -Infinity;
+  const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
 
   if (timeFieldName) {
-    const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
-      timeFieldName
-    )}))
-    | stats rows = count(*) by _timestamp_
-    | LIMIT 10000`;
+    const aggQuery = appendToESQLQuery(
+      esqlBaseQuery,
+      ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
+        timeFieldName
+      )}))
+    | stats rows = count(*) by _timestamp_`
+    );
 
     const request = {
       params: {
-        query: esqlBaseQuery + aggQuery,
+        query: aggQuery,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
-      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      const esqlResults = await runRequest(request, {
+        ...(searchOptions ?? {}),
+        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+      });
       let totalCount = 0;
       const _buckets: Record<string, number> = {};
       // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
@@ -116,7 +129,7 @@ const getESQLDocumentCountStats = async (
         buckets: _buckets,
         totalCount,
       };
-      return { documentCountStats: result, totalCount };
+      return { documentCountStats: result, totalCount, request };
     } catch (error) {
       handleError({
         request,
@@ -132,13 +145,18 @@ const getESQLDocumentCountStats = async (
     //  If not time field, get the total count
     const request = {
       params: {
-        query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
+        query: appendToESQLQuery(esqlBaseQuery, ' | STATS _count_ = COUNT(*)  | LIMIT 1'),
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
-      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      const esqlResults = await runRequest(request, {
+        ...(searchOptions ?? {}),
+        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+      });
       return {
+        request,
         documentCountStats: undefined,
         totalCount: esqlResults?.rawResponse.values[0][0],
       };
@@ -146,7 +164,6 @@ const getESQLDocumentCountStats = async (
       handleError({
         request,
         error,
-        onError,
         title: i18n.translate('xpack.dataVisualizer.esql.docCountNoneTimeseriesError', {
           defaultMessage: `Error getting total count for ES|QL data:`,
         }),
@@ -160,6 +177,8 @@ export const getInitialData = (): Data => ({
   timeFieldName: undefined,
   columns: undefined,
   totalCount: undefined,
+  exampleDocs: undefined,
+  totalFields: undefined,
 });
 
 const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
@@ -178,6 +197,7 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
+        id?: string;
         earliest: number | undefined;
         latest: number | undefined;
         aggInterval: TimeBucketsInterval;
@@ -186,8 +206,10 @@ export const useESQLOverallStatsData = (
         indexPattern: string | undefined;
         timeFieldName: string | undefined;
         lastRefresh: number;
+        limit: number;
         filter?: QueryDslQueryContainer;
-        limitSize?: ESQLDefaultLimitSizeOption;
+        totalCount?: number;
+        timeRange?: TimeRange;
       }
     | undefined
 ) => {
@@ -198,37 +220,67 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousExecutionTs = useRef<number | undefined>(undefined);
+  const previousDocCountRequest = useRef('');
+  const previousError = useRef<Error | undefined>();
+
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
+  const [queryHistoryStatus, setQueryHistoryStatus] = useState<boolean | undefined>(false);
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
   );
   const onError = useCallback(
-    (error, title?: string) =>
+    (error: Error, title?: string) => {
+      // If a previous error already occured, no need to show the toast again
+      if (previousError.current) {
+        return;
+      }
+      previousError.current = error;
       toasts.addError(error, {
         title: title ?? fieldStatsErrorTitle,
-      }),
+      });
+    },
     [toasts]
   );
 
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        cancelRequest();
-
-        if (!fieldStatsRequest) {
+        if (!fieldStatsRequest || fieldStatsRequest.lastRefresh === 0) {
           return;
         }
+
+        // Prevent requests from being called again when user clicks refresh consecutively too fast
+        // or when Discover forces a refresh right after query or filter changes
+        if (
+          fieldStatsRequest.id === undefined &&
+          previousExecutionTs.current !== undefined &&
+          (fieldStatsRequest.lastRefresh === previousExecutionTs.current ||
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 800)
+        ) {
+          return;
+        }
+        previousExecutionTs.current = fieldStatsRequest.lastRefresh;
+
+        cancelRequest();
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
           error: undefined,
         });
-        setTableData({ totalCount: undefined, documentCountStats: undefined });
-
-        const { searchQuery, intervalMs, filter, limitSize } = fieldStatsRequest;
+        previousError.current = undefined;
+        const {
+          searchQuery,
+          intervalMs,
+          filter: filter,
+          limit,
+          totalCount: knownTotalCount,
+          timeRange,
+        } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
           return;
@@ -239,22 +291,37 @@ export const useESQLOverallStatsData = (
         // For doc count chart, we want the full base query without any limit
         const esqlBaseQuery = searchQuery.esql;
 
-        const columnsResp = await runRequest(
+        setQueryHistoryStatus(true);
+
+        // Note: dropNullColumns will return empty [] for all_columns if limit size is 0
+        // So we are making a query with default limit
+        // And use this one query to
+        // 1) identify populated/empty fields
+        // 2) gather examples for populated text fields
+        const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
+        const columnsResp = (await runRequest(
           {
             params: {
-              query: esqlBaseQuery + '| LIMIT 0',
+              // Doing this to match with the default limit
+              query: getESQLWithSafeLimit(esqlBaseQuery, ESQL_SAFE_LIMIT),
               ...(filter ? { filter } : {}),
+              ...(namedParams.length ? { params: namedParams } : {}),
+              dropNullColumns: true,
             },
           },
-          { strategy: ESQL_SEARCH_STRATEGY }
-        );
-        const columns = columnsResp?.rawResponse
-          ? // @ts-expect-error ES types need to be updated with columns for ESQL queries
-            (columnsResp.rawResponse.columns.map((c) => ({
-              ...c,
-              secondaryType: getSupportedFieldType(c.type),
-            })) as Column[])
+          { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+        )) as ESQLResponse | undefined;
+        setQueryHistoryStatus(false);
+
+        const columnInfo = columnsResp?.rawResponse
+          ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];
+
+        const populatedColumns = new Set(columnsResp?.rawResponse.columns.map((c) => c.name));
+        const columns = columnInfo.map((c) => ({
+          ...c,
+          secondaryType: getSupportedFieldType(c.type),
+        })) as Column[];
 
         const timeFields = columns.filter((d) => d.type === 'date');
 
@@ -276,34 +343,53 @@ export const useESQLOverallStatsData = (
 
         setTableData({ columns, timeFieldName });
 
-        const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
-          runRequest,
+        // We don't need to fetch the doc count stats again if only the limit size is changed
+        // so return the previous totalCount, documentCountStats if available
+        const hashedDocCountParams = JSON.stringify({
           searchQuery,
           filter,
           timeFieldName,
           intervalInMs,
-          undefined,
-          onError
-        );
+        });
+        let { totalCount, documentCountStats } = tableData;
+        if (knownTotalCount !== undefined) {
+          totalCount = knownTotalCount;
+        }
+        if (
+          knownTotalCount === undefined &&
+          (totalCount === undefined ||
+            documentCountStats === undefined ||
+            hashedDocCountParams !== previousDocCountRequest.current)
+        ) {
+          setTableData({ totalCount: undefined, documentCountStats: undefined });
 
-        setTableData({ totalCount, documentCountStats });
+          previousDocCountRequest.current = hashedDocCountParams;
+          const results = await getESQLDocumentCountStats(
+            runRequest,
+            searchQuery,
+            filter,
+            timeFieldName,
+            intervalInMs,
+            undefined,
+            onError,
+            timeRange
+          );
+
+          totalCount = results.totalCount;
+          documentCountStats = results.documentCountStats;
+          setTableData({ totalCount, documentCountStats });
+        }
+
+        if (totalCount === undefined) {
+          totalCount = 0;
+        }
         setOverallStatsProgress({
           loaded: 50,
         });
-        const aggregatableFields: Array<{
-          fieldName: string;
-          name: string;
-          type: string;
-          supportedAggs: Set<string>;
-          secondaryType: string;
-          aggregatable: boolean;
-        }> = [];
-        const nonAggregatableFields: Array<{
-          fieldName: string;
-          name: string;
-          type: string;
-          secondaryType: string;
-        }> = [];
+        const aggregatableNotExistsFields: AggregatableField[] = [];
+
+        const nonAggregatableNotExistsFields: NonAggregatableField[] = [];
+
         const fields = columns
           // Some field types are not supported by ESQL yet
           // Also, temporarily removing null columns because it causes problems with some aggs
@@ -312,36 +398,47 @@ export const useESQLOverallStatsData = (
           .map((field) => {
             return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
           });
-
+        const populatedFields = fields.filter((field) => populatedColumns.has(field.name));
         fields?.forEach((field) => {
           const fieldName = field.name;
+
           if (!OMIT_FIELDS.includes(fieldName)) {
             if (!field.aggregatable) {
-              nonAggregatableFields.push({
-                ...field,
-                fieldName: field.name,
-                secondaryType: getSupportedFieldType(field.type),
-              });
+              if (!populatedColumns.has(fieldName)) {
+                nonAggregatableNotExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  secondaryType: getSupportedFieldType(field.type),
+                  existsInDocs: false,
+                });
+              }
             } else {
-              aggregatableFields.push({
-                ...field,
-                fieldName: field.name,
-                secondaryType: getSupportedFieldType(field.type),
-                supportedAggs: getESQLSupportedAggs(field, true),
-                aggregatable: true,
-              });
+              if (!populatedColumns.has(fieldName)) {
+                aggregatableNotExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  aggregatable: true,
+                  existsInDocs: false,
+                });
+              }
             }
           }
         });
 
-        setTableData({ aggregatableFields, nonAggregatableFields });
-
         // COUNT + CARDINALITY
         // For % count & cardinality, we want the full base query WITH specified limit
         // to safeguard against huge datasets
-        const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+        const esqlBaseQueryWithLimit = getESQLWithSafeLimit(searchQuery.esql, limit);
 
         if (totalCount === 0) {
+          setTableData({
+            aggregatableFields: undefined,
+            nonAggregatableFields: undefined,
+            overallStats: undefined,
+            columns: undefined,
+            timeFieldName: undefined,
+          });
+
           setOverallStatsProgress({
             loaded: 100,
             isRunning: false,
@@ -352,35 +449,62 @@ export const useESQLOverallStatsData = (
         if (totalCount > 0 && fields.length > 0) {
           const stats = await getESQLOverallStats({
             runRequest,
-            fields,
+            // Only need to fetch stats for fields we know are populated
+            fields: populatedFields,
             esqlBaseQueryWithLimit,
             filter,
-            limitSize,
+            limitSize: limit,
             totalCount,
             onError,
+            timeRange,
           });
+          if (!stats) return;
+          stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
+          stats.nonAggregatableNotExistsFields = nonAggregatableNotExistsFields;
 
-          setTableData({ overallStats: stats });
+          setTableData({ overallStats: stats, totalFields: columns.length });
           setOverallStatsProgress({
             loaded: 100,
             isRunning: false,
             error: undefined,
           });
+
+          const columnsWithExamples = columnInfo.reduce((hashmap, curr, idx) => {
+            if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
+              hashmap[curr.name] = idx;
+            }
+            return hashmap;
+          }, {} as Record<string, number>);
+
+          const exampleDocs = Object.entries(columnsWithExamples).map(([fieldName, idx]) => {
+            const examples = [...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx]))]
+              .filter(isDefined)
+              .slice(0, 10);
+            return { fieldName, examples: examples as string[] };
+          });
+
+          setTableData({ exampleDocs });
         }
       } catch (error) {
+        setOverallStatsProgress({
+          loaded: 100,
+          isRunning: false,
+          error,
+        });
+        setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {
           toasts.addError(error, {
             title: fieldStatsErrorTitle,
           });
-          // Log error to console for better debugging
-          // eslint-disable-next-line no-console
-          console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
         }
+        // Log error to console for better debugging
+        // eslint-disable-next-line no-console
+        console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runRequest, toasts, JSON.stringify({ fieldStatsRequest }), onError]
+    [JSON.stringify({ fieldStatsRequest })]
   );
 
   // auto-update
@@ -389,7 +513,12 @@ export const useESQLOverallStatsData = (
   }, [startFetch]);
 
   return useMemo(
-    () => ({ ...tableData, overallStatsProgress, cancelOverallStatsRequest: cancelRequest }),
-    [tableData, overallStatsProgress, cancelRequest]
+    () => ({
+      ...tableData,
+      overallStatsProgress,
+      cancelOverallStatsRequest: cancelRequest,
+      queryHistoryStatus,
+    }),
+    [tableData, overallStatsProgress, cancelRequest, queryHistoryStatus]
   );
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,6 +31,7 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -130,7 +132,6 @@ describe('XYChart component', () => {
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       setChartSize: jest.fn(),
-      shouldUseVeil: false,
     };
   });
 
@@ -732,18 +733,24 @@ describe('XYChart component', () => {
     });
   });
 
-  test('disabled legend extra by default', () => {
+  test('disabled legend values by default', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} />);
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('ignores legend extra for ordinal chart', () => {
     const { args } = sampleArgs();
     const component = shallow(
-      <XYChart {...defaultProps} args={{ ...args, valuesInLegend: true }} />
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendStats: [LegendValue.CurrentAndLastValue] },
+        }}
+      />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('shows legend extra for histogram chart', () => {
@@ -753,12 +760,17 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
+          legend: {
+            ...args.legend,
+            legendStats: [LegendValue.CurrentAndLastValue],
+          },
           layers: [dateHistogramLayer],
-          valuesInLegend: true,
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([
+      LegendValue.CurrentAndLastValue,
+    ]);
   });
 
   test('applies the mark size ratio', () => {
@@ -3187,7 +3199,7 @@ describe('XYChart component', () => {
       // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
-      const marker = mount(<div>{groupedAnnotation.prop('marker')}</div>);
+      const marker = mount(<div>{groupedAnnotation.prop('marker') as React.ReactNode}</div>);
       const numberIcon = marker.find('NumberIcon');
       expect(numberIcon.length).toEqual(1);
       expect(numberIcon.text()).toEqual('3');

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Server } from '@hapi/hapi';
@@ -87,8 +88,12 @@ const createInternalStaticAssetsMock = (
   basePath: BasePathMocked,
   cdnUrl: undefined | string = undefined
 ): InternalStaticAssetsMocked => ({
-  getHrefBase: jest.fn(() => cdnUrl ?? basePath.serverBasePath),
+  isUsingCdn: jest.fn().mockReturnValue(!!cdnUrl),
+  getHrefBase: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
   getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
+  getPluginServerPath: jest.fn((v, _) => v),
+  prependServerPath: jest.fn((v) => v),
+  prependPublicUrl: jest.fn((v) => v),
 });
 
 const createAuthMock = () => {
@@ -212,6 +217,7 @@ const createSetupContractMock = <
     getServerInfo: internalMock.getServerInfo,
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+      prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 
@@ -227,6 +233,7 @@ const createStartContractMock = () => {
     getServerInfo: jest.fn(),
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+      prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 

@@ -17,14 +17,16 @@ export type {
 } from './controller';
 export type {
   LogsExplorerCustomizations,
-  LogsExplorerFlyoutContentProps,
+  LogsExplorerCustomizationEvents,
 } from './customizations/types';
 export type { LogsExplorerControllerContext } from './state_machines/logs_explorer_controller';
+export { DEFAULT_ALL_SELECTION } from './state_machines/logs_explorer_controller/src/default_all_selection';
 export type { LogsExplorerPluginSetup, LogsExplorerPluginStart } from './types';
 export {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverGridFromDisplayOptions,
   getDiscoverFiltersFromState,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
 } from './utils/convert_discover_app_state';
 
 export function plugin(context: PluginInitializerContext<LogsExplorerConfig>) {

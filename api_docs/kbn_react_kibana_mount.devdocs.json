@@ -29,7 +29,7 @@
           "\nUtility component to portal a part of a react application into the provided `MountPoint`."
         ],
         "signature": [
-          "({ children, setMountPoint }: React.PropsWithChildren<",
+          "({ children, setMountPoint, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-mount",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.MountPointPortalProps",
             "text": "MountPointPortalProps"
           },
-          ">) => React.ReactPortal | null"
+          ">>) => React.ReactPortal | null"
         ],
         "path": "packages/react/kibana_mount/mount_point_portal.tsx",
         "deprecated": false,
@@ -48,10 +48,10 @@
             "id": "def-common.MountPointPortal.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, setMountPoint }",
+            "label": "{\n  children,\n  setMountPoint,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-mount",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.MountPointPortalProps",
                 "text": "MountPointPortalProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -91,9 +91,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement>"
@@ -152,7 +152,7 @@
         "label": "useIfMounted",
         "description": [],
         "signature": [
-          "() => (func: any) => void"
+          "() => (func?: (() => void) | undefined) => void"
         ],
         "path": "packages/react/kibana_mount/utils.ts",
         "deprecated": false,
@@ -185,9 +185,9 @@
               "(mountPoint: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement> | undefined) => void"
@@ -206,9 +206,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement> | undefined"
@@ -220,6 +220,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.MountPointPortalProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -238,25 +252,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
-          "; analytics?: ",
+          "; analytics?: Pick<",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
-          " | undefined; theme: ",
+          ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.ThemeServiceStart",
+            "section": "def-public.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           "; }"

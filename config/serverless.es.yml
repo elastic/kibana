@@ -11,6 +11,23 @@ xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
+xpack.observabilityAIAssistant.enabled: false
+xpack.osquery.enabled: false
+
+## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Dashboards feature is moved from Analytics category to the Search one.
+  dashboard.category: "enterpriseSearch"
+  ### Dev Tools feature is moved from Analytics category to the Search one.
+  dev_tools.category: "enterpriseSearch"
+  ### Discover feature is moved from Analytics category to the Search one.
+  discover.category: "enterpriseSearch"
+  ### Machine Learning feature is moved from Analytics category to the Management one.
+  ml.category: "management"
+  ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
+  stackAlerts:
+    name: "Alerts"
+    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -27,17 +44,34 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
-# Alerts config
-xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+# Alerts and LLM config
+xpack.actions.enabledActionTypes:
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
 
 # Disable Dev tools
-xpack.grokdebugger.enabled: false
 xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'search'
+
+data_visualizer.resultLinks.fileBeat.enabled: false
+
+# Search Playground
+xpack.searchPlayground.ui.enabled: true
+
+# Search InferenceEndpoints
+xpack.searchInferenceEndpoints.ui.enabled: false
+
+# Search Notebooks
+xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
+
+# Search Homepage
+xpack.search.homepage.ui.enabled: true
+
+# Semantic text UI
+xpack.index_management.dev.enableSemanticText: false

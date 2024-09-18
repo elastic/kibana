@@ -11,17 +11,19 @@ import { isEqual } from 'lodash';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
   esql: string;
   onESQLChange: ({
+    adhocDataViewId,
     columns,
     dateFields,
     geoFields,
     esql,
   }: {
+    adhocDataViewId: string;
     columns: ESQLColumn[];
     dateFields: string[];
     geoFields: string[];
@@ -81,23 +83,12 @@ export function ESQLEditor(props: Props) {
               return;
             }
             setError(err);
-            props.onESQLChange({
-              columns: [],
-              dateFields: [],
-              geoFields: [],
-              esql: '',
-            });
           }
 
           setIsLoading(false);
         }}
         errors={error ? [error] : undefined}
         warning={warning}
-        expandCodeEditor={(status: boolean) => {
-          // never called because hideMinimizeButton hides UI
-        }}
-        isCodeEditorExpanded
-        hideMinimizeButton
         editorIsInline
         hideRunQueryText
         isLoading={isLoading}

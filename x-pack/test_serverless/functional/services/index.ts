@@ -7,7 +7,6 @@
 
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
-
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
 import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
@@ -15,8 +14,9 @@ import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 import { SvlCommonScreenshotsProvider } from './svl_common_screenshots';
 import { SvlCasesServiceProvider } from '../../api_integration/services/svl_cases';
 import { MachineLearningProvider } from './ml';
-import { SvlReportingServiceProvider } from './svl_reporting';
 import { LogsSynthtraceProvider } from './log';
+import { UISettingsServiceProvider } from './ui_settings';
+import { services as SvlApiIntegrationSvcs } from '../../api_integration/services';
 
 export const services = {
   // deployment agnostic FTR services
@@ -31,8 +31,8 @@ export const services = {
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
   svlCases: SvlCasesServiceProvider,
   svlMl: MachineLearningProvider,
-  svlReportingApi: SvlReportingServiceProvider,
-
+  uiSettings: UISettingsServiceProvider,
   // log services
   svlLogsSynthtraceClient: LogsSynthtraceProvider,
+  alertingApi: SvlApiIntegrationSvcs.alertingApi,
 };

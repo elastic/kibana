@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SyntheticEvent } from 'react';
+import type { SyntheticEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiButtonIcon,
@@ -29,10 +29,10 @@ export interface ReputationLinkSetting {
   url_template: string;
 }
 export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
+  PropsWithChildren<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>>
 > = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
-export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
+export const LinkAnchor: React.FC<PropsWithChildren<EuiLinkProps>> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
@@ -82,7 +82,7 @@ export const PortContainer = styled.div`
   }
 `;
 
-interface ReputationLinkOverflowProps {
+export interface ReputationLinkOverflowProps {
   rowItems: ReputationLinkSetting[];
   render?: (item: ReputationLinkSetting) => React.ReactNode;
   overflowIndexStart?: number;

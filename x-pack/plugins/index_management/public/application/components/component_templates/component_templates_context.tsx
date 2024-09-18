@@ -15,6 +15,7 @@ import {
   CoreStart,
   ExecutionContextStart,
 } from '@kbn/core/public';
+import { IndexManagementStartServices } from '../../../types';
 import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
@@ -27,7 +28,7 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
-  overlays: CoreStart['overlays'];
+  startServices: IndexManagementStartServices;
 }
 
 interface Context {
@@ -37,9 +38,9 @@ interface Context {
   documentation: ReturnType<typeof getDocumentation>;
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
-  overlays: CoreStart['overlays'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
+  startServices: IndexManagementStartServices;
 }
 
 export const ComponentTemplatesProvider = ({
@@ -50,7 +51,6 @@ export const ComponentTemplatesProvider = ({
   children: React.ReactNode;
 }) => {
   const {
-    overlays,
     httpClient,
     apiBasePath,
     trackMetric,
@@ -58,6 +58,7 @@ export const ComponentTemplatesProvider = ({
     toasts,
     getUrlForApp,
     executionContext,
+    startServices,
   } = value;
 
   const useRequest = getUseRequest(httpClient);
@@ -69,7 +70,6 @@ export const ComponentTemplatesProvider = ({
   return (
     <ComponentTemplatesContext.Provider
       value={{
-        overlays,
         api,
         documentation,
         trackMetric,
@@ -78,6 +78,7 @@ export const ComponentTemplatesProvider = ({
         apiBasePath,
         getUrlForApp,
         executionContext,
+        startServices,
       }}
     >
       {children}

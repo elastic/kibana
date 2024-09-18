@@ -6,7 +6,7 @@
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 describe('DashboardService', () => {
   const dashboard: DashboardStart = {
@@ -35,8 +35,8 @@ describe('DashboardService', () => {
     });
     expect(resp).toEqual([]);
   });
-  test('should generate edit url to the dashboard', () => {
-    dashboardService.getDashboardEditUrl('test-id');
+  test('should generate url to the dashboard', () => {
+    dashboardService.getDashboardUrl('test-id');
     expect(dashboard.locator?.getUrl).toHaveBeenCalledWith({
       dashboardId: 'test-id',
       useHash: false,

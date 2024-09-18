@@ -44,20 +44,11 @@ const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 const rule = getNewThreatIndicatorRule();
 
+// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless'],
-    // alertSuppressionForIndicatorMatchRuleEnabled feature flag is also enabled in a global config
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForIndicatorMatchRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -66,7 +57,9 @@ describe(
       login();
       deleteAlertsAndRules();
     });
-    describe('without suppression', () => {
+
+    // https://github.com/elastic/kibana/issues/187621
+    describe('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });

@@ -6,6 +6,7 @@
  */
 
 import { euiLightVars } from '@kbn/ui-theme';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Subject } from 'rxjs';
@@ -16,11 +17,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { CASES_FEATURE_ID } from '../../../common';
-import type { StartServices } from '../../types';
 import { ReactQueryClientProvider } from '../containers/query_client/query_client_provider';
-import { createMockStore } from './test_providers';
-
-export const kibanaMock = {} as unknown as StartServices;
+import { createMockStore } from './create_store';
 
 const uiSettings = {
   get: (setting: string) => {
@@ -65,6 +63,7 @@ const coreMock = {
   settings: {
     client: {
       get: () => {},
+      get$: () => new Subject(),
       set: () => {},
     },
   },
@@ -95,7 +94,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  * It is a simplified version of TestProvidersComponent.
  * To reuse TestProvidersComponent here, we need to remove all references to jest from mocks.
  */
-export const StorybookProviders: React.FC = ({ children }) => {
+export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const store = createMockStore();
 
   return (

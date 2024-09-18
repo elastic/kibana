@@ -14,12 +14,14 @@ export interface DeleteListItemOptions {
   id: Id;
   esClient: ElasticsearchClient;
   listItemIndex: string;
+  refresh?: boolean;
 }
 
 export const deleteListItem = async ({
   id,
   esClient,
   listItemIndex,
+  refresh = false,
 }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
   const listItem = await getListItem({ esClient, id, listItemIndex });
   if (listItem == null) {
@@ -32,7 +34,7 @@ export const deleteListItem = async ({
           values: [id],
         },
       },
-      refresh: false,
+      refresh,
     });
   }
   return listItem;

@@ -23,7 +23,21 @@ export const GET_STARTED_PAGE_SUBTITLE = i18n.translate(
 export const GET_STARTED_PAGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.description',
   {
-    defaultMessage: `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`,
+    defaultMessage: `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`,
+  }
+);
+
+export const GET_STARTED_DATA_INGESTION_HUB_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.subTitle',
+  {
+    defaultMessage: `Welcome to Elastic Security`,
+  }
+);
+
+export const GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.description',
+  {
+    defaultMessage: `Follow these steps to set up your workspace.`,
   }
 );
 
@@ -113,7 +127,7 @@ export const WATCH_VIDEO_DESCRIPTION2 = i18n.translate(
 export const ADD_INTEGRATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.step.addIntegrations.title',
   {
-    defaultMessage: 'Add integrations',
+    defaultMessage: 'Add data with integrations',
   }
 );
 
@@ -121,7 +135,7 @@ export const ADD_INTEGRATIONS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.step.addIntegrations.description',
   {
     defaultMessage:
-      'Use third-party integrations to import data from common sources and help you gather relevant information in one place. To find integrations for your use case, search for tools and data providers on the Add integrations page.',
+      'Use integrations to import data from common sources and help you gather relevant information in one place.',
   }
 );
 
@@ -269,16 +283,8 @@ export const ALL_DONE_TEXT = i18n.translate(
   }
 );
 
-export const COLLAPSE_STEP_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.onboarding.togglePanel.collapseStepButton.label',
-  {
-    defaultMessage: 'Collapse',
-  }
-);
-
-export const EXPAND_STEP_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.onboarding.togglePanel.expandStepButton.label',
-  {
-    defaultMessage: 'Expand',
-  }
-);
+export const EXPAND_STEP_BUTTON_LABEL = (title: string) =>
+  i18n.translate('xpack.securitySolution.onboarding.togglePanel.expandStepButton.ariaLabel', {
+    defaultMessage: 'Expand "{title}"',
+    values: { title },
+  });

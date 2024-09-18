@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const GENERAL_CATEGORY = 'general';
@@ -22,6 +23,7 @@ export const SECURITY_SOLUTION_CATEGORY = 'securitySolution';
 export const TIMELION_CATEGORY = 'timelion';
 export const VISUALIZATION_CATEGORY = 'visualization';
 export const ENTERPRISE_SEARCH_CATEGORY = 'enterpriseSearch';
+export const DEV_TOOLS_CATEGORY = 'devTools';
 
 export const CATEGORY_ORDER = [
   GENERAL_CATEGORY,
@@ -39,4 +41,5 @@ export const CATEGORY_ORDER = [
   SECURITY_SOLUTION_CATEGORY,
   TIMELION_CATEGORY,
   VISUALIZATION_CATEGORY,
+  DEV_TOOLS_CATEGORY,
 ];

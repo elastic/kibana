@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -14,7 +15,8 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  FunctionComponent,
+  FC,
+  PropsWithChildren,
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -64,10 +66,11 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
-  controller,
-  children,
-}) => {
+export const FieldPreviewProvider: FC<
+  PropsWithChildren<{
+    controller: PreviewController;
+  }>
+> = ({ controller, children }) => {
   const {
     dataView,
     services: {
@@ -287,8 +290,12 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       ...prev,
       fields: fields.map((field) => {
         const nextValue =
-          script === null && Boolean(document)
-            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+          // if its a concrete field, read from the fields
+          controller.getInternalFieldType() === 'concrete'
+            ? get(document?.fields, name ?? '')
+            : // if its a runtime field, look at source or the returned value
+            script === null && Boolean(document)
+            ? get(document?._source, name ?? '')
             : field?.value;
 
         const formattedValue = controller.valueFormatter({ value: nextValue, type, format });

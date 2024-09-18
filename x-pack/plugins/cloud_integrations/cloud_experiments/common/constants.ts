@@ -22,13 +22,6 @@ export enum FEATURE_FLAG_NAMES {
    */
   'security-solutions.add-integrations-url' = 'security-solutions.add-integrations-url',
   /**
-   * Used in the Security Solutions guided onboarding tour.
-   * Returns JSON corresponding to the tour guide  config as
-   * defined by type { GuideConfig } from '@kbn/guided-onboarding';
-   */
-  'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
-
-  /**
    * Used in cloud chat plugin to enable/disable the chat.
    * The expectation that the chat is enabled by default and the flag is used as a runtime kill switch.
    */
@@ -38,6 +31,11 @@ export enum FEATURE_FLAG_NAMES {
    * Options are: 'header' (the chat button appears as part of the kibana header) and 'bubble' (floating chat button at the bottom of the screen).
    */
   'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
+  /**
+   * Used in observability onboarding plugin to enable/disable the experimental onboarding flow.
+   * Options are: `true` and `false`.
+   */
+  'observability_onboarding.experimental_onboarding_flow_enabled' = 'observability_onboarding.experimental_onboarding_flow_enabled',
 }
 
 /**

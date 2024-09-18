@@ -36,7 +36,7 @@ Object {
     "dateHistogramSubAggs": undefined,
     "derivative": true,
     "derivativeNormalizedUnits": true,
-    "description": "HTTP Requests received by agent configuration managemen",
+    "description": "HTTP Requests received by agent configuration management",
     "docType": undefined,
     "field": "beats_stats.metrics.apm-server.acm.request.count",
     "fieldSource": undefined,

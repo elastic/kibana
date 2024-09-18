@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -54,7 +52,9 @@ export const createThreatSignal = async ({
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
-  licensing,
+  sortOrder = 'desc',
+  isAlertSuppressionActive,
+  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -62,9 +62,6 @@ export const createThreatSignal = async ({
     entryKey: 'value',
     allowedFieldsForTermsQuery,
   });
-
-  const license = await firstValueFrom(licensing.license$);
-  const hasPlatinumLicense = license.hasAtLeast('platinum');
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
@@ -107,10 +104,6 @@ export const createThreatSignal = async ({
       threatIndexFields,
     });
 
-    const isAlertSuppressionEnabled = Boolean(
-      completeRule.ruleParams.alertSuppression?.groupBy?.length
-    );
-
     let result: SearchAfterAndBulkCreateReturnType;
     const searchAfterBulkCreateParams = {
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
@@ -124,7 +117,7 @@ export const createThreatSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc' as const,
+      sortOrder,
       trackTotalHits: false,
       tuple,
       wrapHits,
@@ -133,17 +126,14 @@ export const createThreatSignal = async ({
       secondaryTimestamp,
     };
 
-    if (
-      isAlertSuppressionEnabled &&
-      runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled &&
-      hasPlatinumLicense
-    ) {
+    if (isAlertSuppressionActive) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
         alertTimestampOverride: runOpts.alertTimestampOverride,
         alertWithSuppression: runOpts.alertWithSuppression,
         alertSuppression: completeRule.ruleParams.alertSuppression,
+        experimentalFeatures,
       });
     } else {
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

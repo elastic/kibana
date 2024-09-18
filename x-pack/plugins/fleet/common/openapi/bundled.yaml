@@ -1,5 +1,21 @@
 openapi: 3.0.0
-tags: []
+tags:
+  - name: Data streams
+  - name: Elastic Agents
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
+  - name: Elastic Package Manager (EPM)
+  - name: Fleet enrollment API keys
+  - name: Fleet internals
+  - name: Fleet Server hosts
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
@@ -10,10 +26,9 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601/api/fleet
-    description: local
+  - url: http://KIBANA_HOST:5601
 paths:
-  /health_check:
+  /api/fleet/health_check:
     post:
       summary: Fleet Server health check
       tags:
@@ -26,12 +41,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  name:
-                    type: string
                   status:
                     type: string
+                  id:
+                    type: string
+                    description: Fleet Server host id
                   host:
                     type: string
+                    deprecated: true
         '400':
           $ref: '#/components/responses/error'
       operationId: fleet-server-health-check
@@ -44,9 +61,14 @@ paths:
             schema:
               type: object
               properties:
+                id:
+                  type: string
                 host:
                   type: string
-  /setup:
+                  deprecated: true
+              required:
+                - id
+  /api/fleet/setup:
     post:
       summary: Initiate Fleet setup
       tags:
@@ -72,7 +94,7 @@ paths:
       operationId: setup
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /settings:
+  /api/fleet/settings:
     get:
       summary: Get settings
       tags:
@@ -116,11 +138,11 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: update-settings
-  /service-tokens:
+  /api/fleet/service-tokens:
     post:
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
       responses:
         '200':
           description: OK
@@ -139,11 +161,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
-  /service_tokens:
+  /api/fleet/service_tokens:
     post:
       summary: Create service token
       tags:
-        - Service tokens
+        - Fleet service tokens
       responses:
         '200':
           description: OK
@@ -161,7 +183,7 @@ paths:
       operationId: generate-service-token
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /epm/verification_key_id:
+  /api/fleet/epm/verification_key_id:
     get:
       summary: Get package signature verification key ID
       tags:
@@ -191,7 +213,7 @@ paths:
           $ref: '#/components/responses/error'
       operationId: packages-get-verification-key-id
     parameters: []
-  /epm/bulk_assets:
+  /api/fleet/epm/bulk_assets:
     post:
       summary: Bulk get assets
       tags:
@@ -224,7 +246,7 @@ paths:
                   description: list of items necessary to fetch assets
               required:
                 - assetIds
-  /epm/categories:
+  /api/fleet/epm/categories:
     get:
       summary: List package categories
       tags:
@@ -259,7 +281,7 @@ paths:
         schema:
           type: boolean
           default: false
-  /epm/packages/limited:
+  /api/fleet/epm/packages/limited:
     get:
       summary: Get limited package list
       tags:
@@ -280,7 +302,7 @@ paths:
           $ref: '#/components/responses/error'
       operationId: list-limited-packages
     parameters: []
-  /epm/packages:
+  /api/fleet/epm/packages:
     get:
       summary: List packages
       tags:
@@ -364,6 +386,8 @@ paths:
                   - items
         '400':
           $ref: '#/components/responses/error'
+        '429':
+          $ref: '#/components/responses/error'
       operationId: install-package-by-upload
       description: ''
       parameters:
@@ -380,7 +404,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -392,7 +416,7 @@ paths:
             schema:
               type: string
               format: binary
-  /epm/packages/_bulk:
+  /api/fleet/epm/packages/_bulk:
     post:
       summary: Bulk install packages
       tags:
@@ -442,7 +466,7 @@ paths:
                   description: force install to ignore package verification errors
               required:
                 - packages
-  /epm/packages/{pkgkey}:
+  /api/fleet/epm/packages/{pkgkey}:
     get:
       summary: Get package
       tags:
@@ -542,7 +566,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -600,7 +624,7 @@ paths:
                 force:
                   type: boolean
       deprecated: true
-  /epm/packages/{pkgName}/{pkgVersion}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     get:
       summary: Get package
       tags:
@@ -729,7 +753,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -828,7 +852,73 @@ paths:
               properties:
                 force:
                   type: boolean
-  /epm/packages/{pkgName}/{pkgVersion}/{filePath}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
+    post:
+      summary: Authorize transforms
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transformId:
+                          type: string
+                        success:
+                          type: boolean
+                        error:
+                          type: string
+                      required:
+                        - transformId
+                        - error
+                required:
+                  - items
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: reauthorize-transforms
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          name: pkgName
+          in: path
+          required: true
+        - schema:
+            type: string
+          name: pkgVersion
+          in: path
+          required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to include prerelease packages in categories count (e.g.
+            beta, rc, preview)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transforms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      transformId:
+                        type: string
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       summary: Get package file
       tags:
@@ -866,7 +956,7 @@ paths:
         name: filePath
         in: path
         required: true
-  /epm/packages/{pkgName}/stats:
+  /api/fleet/epm/packages/{pkgName}/stats:
     get:
       summary: Get package stats
       tags:
@@ -894,12 +984,14 @@ paths:
         name: pkgName
         in: path
         required: true
-  /epm/templates/{pkgName}/{pkgVersion}/inputs:
+  /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
       summary: Get inputs template
       tags:
         - Elastic Package Manager (EPM)
       responses:
+        '200':
+          description: OK
         '400':
           $ref: '#/components/responses/error'
       operationId: get-inputs-template
@@ -930,11 +1022,16 @@ paths:
         name: prerelease
         description: Specify if version is prerelease
         in: query
-  /agents/setup:
+      - schema:
+          type: boolean
+        name: ignoreUnverified
+        description: Ignore if the package is fails signature verification
+        in: query
+  /api/fleet/agents/setup:
     get:
       summary: Get agent setup info
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -950,7 +1047,7 @@ paths:
     post:
       summary: Initiate agent setup
       tags:
-        - Agents
+        - Elastic Agents
       operationId: setup-agents
       responses:
         '200':
@@ -976,11 +1073,11 @@ paths:
                 - admin_password
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agent-status:
+  /api/fleet/agent-status:
     get:
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1024,11 +1121,11 @@ paths:
           in: query
           required: false
       deprecated: true
-  /agent_status:
+  /api/fleet/agent_status:
     get:
       summary: Get agent status summary
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1086,11 +1183,11 @@ paths:
           in: query
           required: false
           deprecated: true
-  /agent_status/data:
+  /api/fleet/agent_status/data:
     get:
       summary: Get incoming agent data
       tags:
-        - Agent status
+        - Elastic Agent status
       responses:
         '200':
           description: OK
@@ -1119,11 +1216,11 @@ paths:
           name: agentsIds
           in: query
           required: true
-  /agents:
+  /api/fleet/agents:
     get:
       summary: List agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1153,7 +1250,7 @@ paths:
     post:
       summary: List agents by action ids
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1179,11 +1276,11 @@ paths:
                     type: string
               required:
                 - policy_id
-  /agents/bulk_upgrade:
+  /api/fleet/agents/bulk_upgrade:
     post:
       summary: Bulk upgrade agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1213,11 +1310,11 @@ paths:
                 - agent1
                 - agent2
               start_time: '2022-08-03T14:00:00.000Z'
-  /agents/action_status:
+  /api/fleet/agents/action_status:
     get:
       summary: Get agent action status
       tags:
-        - Agent actions
+        - Elastic Agent actions
       parameters:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
@@ -1328,7 +1425,7 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: agents-action-status
-  /agents/{agentId}:
+  /api/fleet/agents/{agentId}:
     parameters:
       - schema:
           type: string
@@ -1338,7 +1435,7 @@ paths:
     get:
       summary: Get agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1359,7 +1456,7 @@ paths:
     put:
       summary: Update agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1393,7 +1490,7 @@ paths:
     delete:
       summary: Delete agent by ID
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1413,7 +1510,7 @@ paths:
       operationId: delete-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/{agentId}/actions:
+  /api/fleet/agents/{agentId}/actions:
     parameters:
       - schema:
           type: string
@@ -1423,7 +1520,7 @@ paths:
     post:
       summary: Create agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
       responses:
         '200':
           description: OK
@@ -1454,13 +1551,8 @@ paths:
               properties:
                 action:
                   $ref: '#/components/schemas/agent_action'
-  /agents/{agentId}/actions/{actionId}/cancel:
+  /api/fleet/agents/actions/{actionId}/cancel:
     parameters:
-      - schema:
-          type: string
-        name: agentId
-        in: path
-        required: true
       - schema:
           type: string
         name: actionId
@@ -1469,7 +1561,7 @@ paths:
     post:
       summary: Cancel agent action
       tags:
-        - Agent actions
+        - Elastic Agent actions
       responses:
         '200':
           description: OK
@@ -1485,7 +1577,7 @@ paths:
       operationId: agent-action-cancel
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/files@{fileId}@{fileName}:
+  /api/fleet/agents/files/{fileId}/{fileName}:
     parameters:
       - schema:
           type: string
@@ -1500,7 +1592,7 @@ paths:
     get:
       summary: Get file uploaded by agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1520,7 +1612,36 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-upload-file
-  /agents/{agentId}/reassign:
+  /api/fleet/agents/files/{fileId}:
+    parameters:
+      - schema:
+          type: string
+        name: fileId
+        in: path
+        required: true
+    delete:
+      summary: Delete file uploaded by agent
+      tags:
+        - Elastic Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      deleted:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: delete-agent-upload-file
+  /api/fleet/agents/{agentId}/reassign:
     parameters:
       - schema:
           type: string
@@ -1530,7 +1651,7 @@ paths:
     post:
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1557,7 +1678,7 @@ paths:
     put:
       summary: Reassign agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1582,7 +1703,7 @@ paths:
               required:
                 - policy_id
       deprecated: true
-  /agents/{agentId}/unenroll:
+  /api/fleet/agents/{agentId}/unenroll:
     parameters:
       - schema:
           type: string
@@ -1592,7 +1713,7 @@ paths:
     post:
       summary: Unenroll agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1628,7 +1749,7 @@ paths:
                   type: boolean
                 force:
                   type: boolean
-  /agents/{agentId}/upgrade:
+  /api/fleet/agents/{agentId}/upgrade:
     parameters:
       - schema:
           type: string
@@ -1638,7 +1759,7 @@ paths:
     post:
       summary: Upgrade agent
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1657,7 +1778,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/upgrade_agent'
-  /agents/{agentId}/uploads:
+  /api/fleet/agents/{agentId}/uploads:
     parameters:
       - schema:
           type: string
@@ -1667,7 +1788,7 @@ paths:
     get:
       summary: List agent uploads
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1686,11 +1807,11 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: list-agent-uploads
-  /agents/bulk_reassign:
+  /api/fleet/agents/bulk_reassign:
     post:
       summary: Bulk reassign agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1729,11 +1850,11 @@ paths:
             example:
               policy_id: policy_id
               agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'
-  /agents/bulk_unenroll:
+  /api/fleet/agents/bulk_unenroll:
     post:
       summary: Bulk unenroll agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1782,11 +1903,11 @@ paths:
               agents:
                 - agent1
                 - agent2
-  /agents/bulk_update_agent_tags:
+  /api/fleet/agents/bulk_update_agent_tags:
     post:
       summary: Bulk update agent tags
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1836,11 +1957,11 @@ paths:
                 - newTag
               tagsToRemove:
                 - existingTag
-  /agents/tags:
+  /api/fleet/agents/tags:
     get:
       summary: List agent tags
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1851,7 +1972,7 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-tags
-  /agents/{agentId}/request_diagnostics:
+  /api/fleet/agents/{agentId}/request_diagnostics:
     parameters:
       - schema:
           type: string
@@ -1861,7 +1982,20 @@ paths:
     post:
       summary: Request agent diagnostics
       tags:
-        - Agents
+        - Elastic Agents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
       responses:
         '200':
           description: OK
@@ -1877,11 +2011,11 @@ paths:
       operationId: request-diagnostics-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/bulk_request_diagnostics:
+  /api/fleet/agents/bulk_request_diagnostics:
     post:
       summary: Bulk request diagnostics from agents
       tags:
-        - Agents
+        - Elastic Agents
       responses:
         '200':
           description: OK
@@ -1913,15 +2047,22 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
               required:
                 - agents
             example:
               agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'
-  /agent_policies:
+  /api/fleet/agent_policies:
     get:
       summary: List agent policies
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -1952,6 +2093,7 @@ paths:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
         - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/format'
         - schema:
             type: boolean
           in: query
@@ -1972,7 +2114,7 @@ paths:
     post:
       summary: Create agent policy
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -1994,17 +2136,18 @@ paths:
       security: []
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agent_policies/{agentPolicyId}:
+  /api/fleet/agent_policies/{agentPolicyId}:
     parameters:
       - schema:
           type: string
         name: agentPolicyId
         in: path
         required: true
+      - $ref: '#/components/parameters/format'
     get:
       summary: Get agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2025,7 +2168,7 @@ paths:
     put:
       summary: Update agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       responses:
         '200':
           description: OK
@@ -2048,17 +2191,18 @@ paths:
               $ref: '#/components/schemas/agent_policy_update_request'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agent_policies/{agentPolicyId}/copy:
+  /api/fleet/agent_policies/{agentPolicyId}/copy:
     parameters:
       - schema:
           type: string
         name: agentPolicyId
         in: path
         required: true
+      - $ref: '#/components/parameters/format'
     post:
       summary: Copy agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-copy
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -2089,11 +2233,11 @@ paths:
               required:
                 - name
         description: ''
-  /agent_policies/{agentPolicyId}/full:
+  /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
       summary: Get full agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-full
       responses:
         '200':
@@ -2130,11 +2274,11 @@ paths:
         name: kubernetes
         in: query
         required: false
-  /agent_policies/{agentPolicyId}/download:
+  /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
       summary: Download agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: agent-policy-download
       responses:
         '200':
@@ -2169,11 +2313,11 @@ paths:
         name: kubernetes
         in: query
         required: false
-  /agent_policies/_bulk_get:
+  /api/fleet/agent_policies/_bulk_get:
     post:
       summary: Bulk get agent policies
       tags:
-        - Agent policies
+        - Elastic Agent policies
       requestBody:
         content:
           application/json:
@@ -2210,12 +2354,13 @@ paths:
           $ref: '#/components/responses/error'
       operationId: bulk-get-agent-policies
       security: []
-      parameters: []
-  /agent_policies/delete:
+      parameters:
+        - $ref: '#/components/parameters/format'
+  /api/fleet/agent_policies/delete:
     post:
       summary: Delete agent policy by ID
       tags:
-        - Agent policies
+        - Elastic Agent policies
       operationId: delete-agent-policy
       responses:
         '200':
@@ -2242,12 +2387,17 @@ paths:
               properties:
                 agentPolicyId:
                   type: string
+                force:
+                  type: boolean
+                  description: >-
+                    bypass validation checks that can prevent agent policy
+                    deletion
               required:
                 - agentPolicyId
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
-  /data_streams:
+  /api/fleet/data_streams:
     get:
       summary: List data streams
       tags:
@@ -2268,11 +2418,11 @@ paths:
           $ref: '#/components/responses/error'
       operationId: data-streams-list
     parameters: []
-  /enrollment-api-keys:
+  /api/fleet/enrollment-api-keys:
     get:
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2309,7 +2459,7 @@ paths:
     post:
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2330,7 +2480,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
-  /enrollment-api-keys/{keyId}:
+  /api/fleet/enrollment-api-keys/{keyId}:
     parameters:
       - schema:
           type: string
@@ -2340,7 +2490,7 @@ paths:
     get:
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2360,7 +2510,7 @@ paths:
     delete:
       summary: Delete enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2381,11 +2531,15 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
-  /enrollment_api_keys:
+  /api/fleet/enrollment_api_keys:
     get:
       summary: List enrollment API keys
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
       responses:
         '200':
           description: OK
@@ -2417,11 +2571,10 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-enrollment-api-keys
-      parameters: []
     post:
       summary: Create enrollment API key
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2438,10 +2591,26 @@ paths:
                       - created
         '400':
           $ref: '#/components/responses/error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the enrollment API key. Must be unique.
+                policy_id:
+                  type: string
+                  description: >-
+                    The ID of the agent policy the Elastic Agent will be
+                    enrolled in.
+              required:
+                - policy_id
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /enrollment_api_keys/{keyId}:
+  /api/fleet/enrollment_api_keys/{keyId}:
     parameters:
       - schema:
           type: string
@@ -2451,7 +2620,7 @@ paths:
     get:
       summary: Get enrollment API key by ID
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2468,9 +2637,9 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-enrollment-api-key
     delete:
-      summary: Delete enrollment API key by ID
+      summary: Revoke enrollment API key by ID by marking it as inactive
       tags:
-        - Enrollment API keys
+        - Fleet enrollment API keys
       responses:
         '200':
           description: OK
@@ -2490,11 +2659,11 @@ paths:
       operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /package_policies:
+  /api/fleet/package_policies:
     get:
       summary: List package policies
       tags:
-        - Package policies
+        - Fleet package policies
       responses:
         '200':
           description: OK
@@ -2528,7 +2697,7 @@ paths:
     post:
       summary: Create package policy
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: create-package-policy
       responses:
         '200':
@@ -2557,11 +2726,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/format'
-  /package_policies/_bulk_get:
+  /api/fleet/package_policies/_bulk_get:
     post:
       summary: Bulk get package policies
       tags:
-        - Package policies
+        - Fleet package policies
       requestBody:
         content:
           application/json:
@@ -2597,11 +2766,11 @@ paths:
       security: []
       parameters:
         - $ref: '#/components/parameters/format'
-  /package_policies/delete:
+  /api/fleet/package_policies/delete:
     post:
       summary: Delete package policy
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: post-delete-package-policy
       requestBody:
         content:
@@ -2640,11 +2809,11 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /package_policies/upgrade:
+  /api/fleet/package_policies/upgrade:
     post:
       summary: Upgrade package policy to a newer package version
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: upgrade-package-policy
       requestBody:
         content:
@@ -2681,11 +2850,11 @@ paths:
           $ref: '#/components/responses/error'
         '409':
           $ref: '#/components/responses/error'
-  /package_policies/upgrade/dryrun:
+  /api/fleet/package_policies/upgrade/dryrun:
     post:
       summary: Dry run package policy upgrade
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: upgrade-package-policy-dry-run
       requestBody:
         content:
@@ -2721,7 +2890,7 @@ paths:
                     - hasErrors
         '400':
           $ref: '#/components/responses/error'
-  /package_policies/{packagePolicyId}:
+  /api/fleet/package_policies/{packagePolicyId}:
     parameters:
       - schema:
           type: string
@@ -2731,7 +2900,7 @@ paths:
     get:
       summary: Get package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       responses:
         '200':
           description: OK
@@ -2752,7 +2921,7 @@ paths:
     put:
       summary: Update package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: update-package-policy
       requestBody:
         content:
@@ -2782,7 +2951,7 @@ paths:
     delete:
       summary: Delete package policy by ID
       tags:
-        - Package policies
+        - Fleet package policies
       operationId: delete-package-policy
       responses:
         '200':
@@ -2803,11 +2972,11 @@ paths:
             type: boolean
           name: force
           in: query
-  /outputs:
+  /api/fleet/outputs:
     get:
       summary: List outputs
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -2832,7 +3001,7 @@ paths:
     post:
       summary: Create output
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -2852,11 +3021,11 @@ paths:
             schema:
               $ref: '#/components/schemas/output_create_request'
       operationId: post-outputs
-  /outputs/{outputId}:
+  /api/fleet/outputs/{outputId}:
     get:
       summary: Get output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -2879,7 +3048,7 @@ paths:
     delete:
       summary: Delete output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       operationId: delete-output
       responses:
         '200':
@@ -2900,7 +3069,7 @@ paths:
     put:
       summary: Update output by ID
       tags:
-        - Outputs
+        - Fleet outputs
       operationId: update-output
       requestBody:
         content:
@@ -2921,11 +3090,11 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /outputs/{outputId}/health:
+  /api/fleet/outputs/{outputId}/health:
     get:
       summary: Get latest output health
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -2952,11 +3121,11 @@ paths:
         name: outputId
         in: path
         required: true
-  /logstash_api_keys:
+  /api/fleet/logstash_api_keys:
     post:
       summary: Generate Logstash API key
       tags:
-        - Outputs
+        - Fleet outputs
       responses:
         '200':
           description: OK
@@ -2972,11 +3141,11 @@ paths:
       operationId: generate-logstash-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agent_download_sources:
+  /api/fleet/agent_download_sources:
     get:
       summary: List agent binary download sources
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3001,7 +3170,7 @@ paths:
     post:
       summary: Create agent binary download source
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3033,11 +3202,11 @@ paths:
                 - host
                 - is_default
       operationId: post-download-sources
-  /agent_download_sources/{sourceId}:
+  /api/fleet/agent_download_sources/{sourceId}:
     get:
       summary: Get agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       responses:
         '200':
           description: OK
@@ -3062,7 +3231,7 @@ paths:
     delete:
       summary: Delete agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       operationId: delete-download-source
       responses:
         '200':
@@ -3083,7 +3252,7 @@ paths:
     put:
       summary: Update agent binary download source by ID
       tags:
-        - Agent binary download sources
+        - Elastic Agent binary download sources
       operationId: update-download-source
       requestBody:
         content:
@@ -3117,7 +3286,7 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /fleet_server_hosts:
+  /api/fleet/fleet_server_hosts:
     get:
       summary: List Fleet Server hosts
       tags:
@@ -3173,6 +3342,11 @@ paths:
                   type: boolean
                 is_internal:
                   type: boolean
+                proxy_id:
+                  description: >-
+                    The ID of the proxy to use for this fleet server host. See
+                    the proxies API for more information.
+                  type: string
                 host_urls:
                   type: array
                   items:
@@ -3181,7 +3355,7 @@ paths:
                 - name
                 - host_urls
       operationId: post-fleet-server-hosts
-  /fleet_server_hosts/{itemId}:
+  /api/fleet/fleet_server_hosts/{itemId}:
     get:
       summary: Get Fleet Server host by ID
       tags:
@@ -3245,6 +3419,12 @@ paths:
                   type: boolean
                 is_internal:
                   type: boolean
+                proxy_id:
+                  description: >-
+                    The ID of the proxy to use for this fleet server host. See
+                    the proxies API for more information.
+                  type: string
+                  nullable: true
                 host_urls:
                   type: array
                   items:
@@ -3265,11 +3445,11 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /proxies:
+  /api/fleet/proxies:
     get:
       summary: List proxies
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3294,7 +3474,7 @@ paths:
     post:
       summary: Create proxy
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3331,11 +3511,11 @@ paths:
                 - name
                 - url
       operationId: post-fleet-proxies
-  /proxies/{itemId}:
+  /api/fleet/proxies/{itemId}:
     get:
       summary: Get proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       responses:
         '200':
           description: OK
@@ -3360,7 +3540,7 @@ paths:
     delete:
       summary: Delete proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       operationId: delete-fleet-proxies
       responses:
         '200':
@@ -3381,7 +3561,7 @@ paths:
     put:
       summary: Update proxy by ID
       tags:
-        - Proxies
+        - Fleet proxies
       operationId: update-fleet-proxies
       requestBody:
         content:
@@ -3417,11 +3597,11 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /kubernetes:
+  /api/fleet/kubernetes:
     get:
       summary: Get full K8s agent manifest
       tags:
-        - Kubernetes
+        - Fleet Kubernetes
       responses:
         '200':
           description: OK
@@ -3451,11 +3631,11 @@ paths:
           name: enrolToken
           in: query
           required: false
-  /uninstall_tokens:
+  /api/fleet/uninstall_tokens:
     get:
       summary: List metadata for latest uninstall tokens per agent policy
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
       responses:
         '200':
           description: OK
@@ -3509,11 +3689,11 @@ paths:
           required: false
           schema:
             type: string
-  /uninstall_tokens/{uninstallTokenId}:
+  /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
       summary: Get one decrypted uninstall token by its ID
       tags:
-        - Uninstall tokens
+        - Fleet uninstall tokens
       responses:
         '200':
           description: OK
@@ -3732,26 +3912,26 @@ components:
       type: object
       deprecated: true
       properties:
-        response:
+        items:
           type: array
           items:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                type:
-                  $ref: '#/components/schemas/saved_object_type'
-                updatedAt:
-                  type: string
-                attributes:
-                  type: object
-                  properties:
-                    title:
-                      type: string
-                    description:
-                      type: string
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                $ref: '#/components/schemas/saved_object_type'
+              updatedAt:
+                type: string
+              attributes:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+              appLink:
+                type: string
       required:
         - items
     get_categories_response:
@@ -3883,6 +4063,28 @@ components:
                     type: string
                   stack:
                     type: string
+        latest_executed_state:
+          description: Latest successfully executed state in package install state machine
+          type: object
+          properties:
+            name:
+              type: string
+              enum:
+                - create_restart_installation
+                - install_kibana_assets
+                - install_ilm_policies
+                - install_ml_model
+                - install_index_template_pipelines
+                - remove_legacy_templates
+                - update_current_write_indices
+                - install_transforms
+                - delete_previous_pipelines
+                - save_archive_entries_from_assets_map
+                - update_so
+            started_at:
+              type: string
+            error:
+              type: string
         verification_status:
           type: string
           enum:
@@ -4195,7 +4397,7 @@ components:
       type: object
     agent_status:
       type: string
-      title: Agent status
+      title: Elastic Agent status
       enum:
         - offline
         - error
@@ -4385,6 +4587,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - agents
         - version
@@ -4410,6 +4615,7 @@ components:
               properties:
                 log_level:
                   type: string
+                  nullable: true
                   enum:
                     - debug
                     - info
@@ -4426,6 +4632,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - version
     agent_diagnostics:
@@ -4479,6 +4688,8 @@ components:
               type: string
             title:
               type: string
+            requires_root:
+              type: boolean
           required:
             - name
             - version
@@ -4486,7 +4697,6 @@ components:
           type: string
         output_id:
           type: string
-          deprecated: true
         inputs:
           type: array
           items:
@@ -4512,10 +4722,18 @@ components:
               - enabled
         policy_id:
           type: string
+          nullable: true
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
         name:
           type: string
         description:
           type: string
+        overrides:
+          type: object
       required:
         - inputs
         - name
@@ -4595,6 +4813,8 @@ components:
           type: number
         agents:
           type: number
+        unprivileged_agents:
+          type: number
         agent_features:
           type: array
           items:
@@ -4619,6 +4839,28 @@ components:
             settings cannot be overridden. The override option should be used
             only in unusual circumstances and not as a routine procedure.
           nullable: true
+        advanced_settings:
+          type: object
+          description: >-
+            Advanced settings stored in the agent policy, e.g.
+            agent_limits_go_max_procs
+          nullable: true
+        supports_agentless:
+          type: boolean
+          description: >-
+            Indicates whether the agent policy supports agentless integrations.
+            Only allowed in a serverless environment.
+        global_data_tags:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
       required:
         - id
         - status
@@ -4673,6 +4915,20 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
+        global_data_tags:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
       required:
         - name
         - namespace
@@ -4723,6 +4979,9 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
       required:
         - name
         - namespace
@@ -4903,14 +5162,21 @@ components:
           type: string
         api_key_id:
           type: string
+          description: The ID of the API key in the Security API.
         api_key:
           type: string
+          description: The enrollment API key (token) used for enrolling Elastic Agents.
         name:
           type: string
+          description: The name of the enrollment API key.
         active:
           type: boolean
+          description: >-
+            When false, the enrollment API key is revoked and cannot be used for
+            enrolling Elastic Agents.
         policy_id:
           type: string
+          description: The ID of the agent policy the Elastic Agent will be enrolled in.
         created_at:
           type: string
       required:
@@ -4940,10 +5206,24 @@ components:
             The package policy namespace. Leave blank to inherit the agent
             policy's namespace.
           example: customnamespace
+        output_id:
+          type: string
+          description: Output ID to send package data to
+          example: output-id
+          nullable: true
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added
           example: agent-policy-id
+          deprecated: true
+          nullable: true
+        policy_ids:
+          type: array
+          items:
+            type: string
+          description: Agent policy IDs where that package policy will be added
+          example:
+            - agent-policy-id
         package:
           type: object
           properties:
@@ -5008,6 +5288,16 @@ components:
                       description: >-
                         Stream level variable (see integration documentation for
                         more information)
+        overrides:
+          type: object
+          properties:
+            inputs:
+              type: object
+          description: >-
+            Override settings that are defined in the package policy. The
+            override option should be used only in unusual circumstances and not
+            as a routine procedure.
+          nullable: true
         force:
           type: boolean
           description: >-
@@ -5015,7 +5305,6 @@ components:
             the agent policy is managed.
       required:
         - name
-        - policy_id
         - package
     upgrade_diff:
       title: Package policy Upgrade dryrun
@@ -5290,7 +5579,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5298,6 +5591,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5629,7 +5926,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5637,6 +5938,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5770,6 +6075,8 @@ components:
           type: boolean
         is_preconfigured:
           type: boolean
+        proxy_id:
+          type: string
         host_urls:
           type: array
           items:

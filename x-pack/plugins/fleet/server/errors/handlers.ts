@@ -43,6 +43,7 @@ import {
   PackagePolicyRequestError,
   FleetNotFoundError,
   PackageSavedObjectConflictError,
+  FleetTooManyRequestsError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -113,6 +114,10 @@ const getHTTPResponseCode = (error: FleetError): number => {
   // Unsupported Media Type
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415;
+  }
+  // Too many requests
+  if (error instanceof FleetTooManyRequestsError) {
+    return 429;
   }
   // Internal Server Error
   if (error instanceof UninstallTokenError) {

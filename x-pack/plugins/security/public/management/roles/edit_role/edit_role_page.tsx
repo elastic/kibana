@@ -18,11 +18,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
   DocLinksStart,
@@ -38,8 +41,10 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -48,6 +53,7 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
+import type { StartServices } from '../../..';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
@@ -64,14 +70,13 @@ import {
   prepareRoleClone,
 } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
-import type { CheckRoleMappingFeaturesResponse } from '../../role_mappings/role_mappings_api_client';
+import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
-import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
-interface Props {
+export interface Props extends StartServices {
   action: 'edit' | 'clone';
   roleName?: string;
   dataViews?: DataViewsContract;
@@ -88,29 +93,52 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+  buildFlavor: BuildFlavor;
+  cloudOrgUrl?: string;
 }
 
 function useRemoteClusters(http: HttpStart) {
   return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
-function useFeatureCheck(http: HttpStart) {
-  return useAsync(() =>
-    http.get<CheckRoleMappingFeaturesResponse>('/internal/security/_check_role_mapping_features')
-  );
+interface CheckSecurityFeaturesResponseWhenServerless {
+  value: boolean;
+}
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: 'serverless'
+): AsyncState<CheckSecurityFeaturesResponseWhenServerless>;
+
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: BuildFlavor
+): AsyncState<CheckSecurityFeaturesResponse>;
+
+function useFeatureCheck(http: HttpStart, buildFlavor?: BuildFlavor) {
+  return useAsync(async () => {
+    if (buildFlavor !== 'serverless') {
+      return http.get<CheckSecurityFeaturesResponse>('/internal/security/_check_security_features');
+    }
+    return { value: true };
+  }, [http, buildFlavor]);
 }
 
 function useRunAsUsers(
   userAPIClient: PublicMethodsOf<UserAPIClient>,
-  fatalErrors: FatalErrorsSetup
+  fatalErrors: FatalErrorsSetup,
+  buildFlavor: BuildFlavor
 ) {
   const [userNames, setUserNames] = useState<string[] | null>(null);
   useEffect(() => {
-    userAPIClient.getUsers().then(
-      (users) => setUserNames(users.map((user) => user.username)),
-      (err) => fatalErrors.add(err)
-    );
-  }, [fatalErrors, userAPIClient]);
+    if (buildFlavor !== 'serverless') {
+      userAPIClient.getUsers().then(
+        (users) => setUserNames(users.map((user) => user.username)),
+        (err) => fatalErrors.add(err)
+      );
+    } else {
+      setUserNames([]);
+    }
+  }, [fatalErrors, userAPIClient, buildFlavor]);
 
   return userNames;
 }
@@ -177,11 +205,13 @@ function useRole(
   roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
+
   useEffect(() => {
     const rolePromise = roleName
       ? rolesAPIClient.getRole(roleName)
       : Promise.resolve({
           name: '',
+          description: '',
           elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _unrecognized_applications: [],
@@ -279,7 +309,7 @@ function useFeatures(
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
-        setFeatures(retrievedFeatures);
+        setFeatures(retrievedFeatures?.filter((feature) => !feature.hidden) ?? null);
       });
   }, [fatalErrors, getFeatures]);
 
@@ -303,6 +333,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   notifications,
   history,
   spacesApiUi,
+  buildFlavor,
+  cloudOrgUrl,
+  ...startServices
 }) => {
   const isDarkMode = useDarkMode();
 
@@ -318,16 +351,16 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
-  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
+  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false, buildFlavor }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const [previousName, setPreviousName] = useState<string>('');
-  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
+  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors, buildFlavor);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
-  const featureCheckState = useFeatureCheck(http);
+  const featureCheckState = useFeatureCheck(http, buildFlavor);
   const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
@@ -366,7 +399,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
 
   const getFormTitle = () => {
-    let titleText;
+    let titleText: JSX.Element;
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
@@ -407,7 +440,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     if (isEditingExistingRole && !isRoleReadOnly) {
       return (
         <EuiFlexItem grow={false}>
-          <DeleteRoleButton canDelete={true} onDelete={handleDeleteRole} />
+          <DeleteRoleButton
+            roleName={role.name}
+            canDelete={true}
+            onDelete={handleDeleteRole}
+            buildFlavor={buildFlavor}
+          />
         </EuiFlexItem>
       );
     }
@@ -415,40 +453,82 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return null;
   };
 
-  const getRoleName = () => {
+  const getRoleNameAndDescription = () => {
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
-        <EuiFormRow
-          data-test-subj={'roleNameFormRow'}
-          label={
-            <FormattedMessage
-              id="xpack.security.management.editRole.roleNameFormRowTitle"
-              defaultMessage="Role name"
-            />
-          }
-          helpText={
-            !isRoleReserved && isEditingExistingRole ? (
-              <FormattedMessage
-                id="xpack.security.management.editRole.roleNameFormRowHelpText"
-                defaultMessage="A role's name cannot be changed once it has been created."
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj={'roleNameFormRow'}
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.roleNameFormRowTitle"
+                  defaultMessage="Role name"
+                />
+              }
+              helpText={
+                !isEditingExistingRole ? (
+                  <FormattedMessage
+                    id="xpack.security.management.createRole.roleNameFormRowHelpText"
+                    defaultMessage="Once the role is created you can no longer edit its name."
+                  />
+                ) : !isRoleReserved ? (
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.roleNameFormRowHelpText"
+                    defaultMessage="A role's name cannot be changed once it has been created."
+                  />
+                ) : undefined
+              }
+              {...validator.validateRoleName(role)}
+              {...(creatingRoleAlreadyExists
+                ? { error: 'A role with this name already exists.', isInvalid: true }
+                : {})}
+            >
+              <EuiFieldText
+                name={'name'}
+                value={role.name || ''}
+                onChange={onNameChange}
+                onBlur={onNameBlur}
+                data-test-subj={'roleFormNameInput'}
+                disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
+                isInvalid={creatingRoleAlreadyExists}
               />
-            ) : undefined
-          }
-          {...validator.validateRoleName(role)}
-          {...(creatingRoleAlreadyExists
-            ? { error: 'A role with this name already exists.', isInvalid: true }
-            : {})}
-        >
-          <EuiFieldText
-            name={'name'}
-            value={role.name || ''}
-            onChange={onNameChange}
-            onBlur={onNameBlur}
-            data-test-subj={'roleFormNameInput'}
-            disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
-            isInvalid={creatingRoleAlreadyExists}
-          />
-        </EuiFormRow>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="roleDescriptionFormRow"
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.roleDescriptionFormRowTitle"
+                  defaultMessage="Role description"
+                />
+              }
+            >
+              {isRoleReserved || isRoleReadOnly ? (
+                <EuiToolTip
+                  content={role.description}
+                  display="block"
+                  data-test-subj="roleFormDescriptionTooltip"
+                >
+                  <EuiFieldText
+                    name="description"
+                    value={role.description ?? ''}
+                    data-test-subj="roleFormDescriptionInput"
+                    disabled
+                  />
+                </EuiToolTip>
+              ) : (
+                <EuiFieldText
+                  name="description"
+                  value={role.description ?? ''}
+                  onChange={onDescriptionChange}
+                  data-test-subj="roleFormDescriptionInput"
+                />
+              )}
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     );
   };
@@ -459,7 +539,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       name: e.target.value,
     });
 
-  const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
+  const onNameBlur = (_e: FocusEvent<HTMLInputElement>) => {
     if (!isEditingExistingRole && previousName !== role.name) {
       setPreviousName(role.name);
       doesRoleExist().then((roleExists) => {
@@ -467,6 +547,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       });
     }
   };
+
+  const onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setRole({
+      ...role,
+      description: e.target.value.trim().length ? e.target.value : undefined,
+    });
 
   const getElasticsearchPrivileges = () => {
     return (
@@ -484,8 +570,14 @@ export const EditRolePage: FunctionComponent<Props> = ({
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
-          canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
+          canUseRemoteIndices={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
+          }
+          canUseRemoteClusters={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
+          }
           isDarkMode={isDarkMode}
+          buildFlavor={buildFlavor}
         />
       </div>
     );
@@ -605,12 +697,39 @@ export const EditRolePage: FunctionComponent<Props> = ({
         return;
       }
 
-      notifications.toasts.addSuccess(
-        i18n.translate(
-          'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
-          { defaultMessage: 'Saved role' }
-        )
-      );
+      if (buildFlavor === 'serverless') {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
+            { defaultMessage: 'Custom role saved' }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.customRoleSuccessfullySavedNotificationText"
+                  defaultMessage="You can now assign this role to users of this project from your Organization page."
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" href={cloudOrgUrl}>
+                    Assign role
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>,
+            startServices
+          ),
+        });
+      } else {
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
+            { defaultMessage: 'Saved role' }
+          )
+        );
+      }
 
       backToRoleList();
     }
@@ -638,12 +757,43 @@ export const EditRolePage: FunctionComponent<Props> = ({
       return;
     }
 
-    notifications.toasts.addSuccess(
-      i18n.translate(
-        'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
-        { defaultMessage: 'Deleted role' }
-      )
-    );
+    if (buildFlavor === 'serverless') {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
+          defaultMessage:
+            '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
+          values: { numberOfCustomRoles: 1 },
+        }),
+        text: toMountPoint(
+          <>
+            <p>
+              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                  Management and on the User Profile for those that don't have admin access.`,
+              })}
+            </p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={cloudOrgUrl}>
+                  {i18n.translate('xpack.security.management.roles.manageRoleUsers', {
+                    defaultMessage: 'Manage Members',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          startServices
+        ),
+      });
+    } else {
+      notifications.toasts.addSuccess(
+        i18n.translate(
+          'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
+          { defaultMessage: 'Deleted role' }
+        )
+      );
+    }
 
     backToRoleList();
   };
@@ -656,7 +806,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Project spaces."
           />
         </EuiText>
         {isRoleReserved && (
@@ -683,7 +833,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           </Fragment>
         )}
         <EuiSpacer />
-        {getRoleName()}
+        {getRoleNameAndDescription()}
         {getElasticsearchPrivileges()}
         {getKibanaPrivileges()}
         <EuiSpacer />

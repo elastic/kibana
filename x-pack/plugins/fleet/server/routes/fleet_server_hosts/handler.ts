@@ -14,6 +14,7 @@ import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
+
 import {
   createFleetServerHost,
   deleteFleetServerHost,
@@ -36,25 +37,16 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
-  if (
-    defaultFleetServerHost === undefined ||
-    !isEqual(hostUrls, defaultFleetServerHost.host_urls)
-  ) {
+  // Fleet Server hosts must have the default host URL in serverless.
+  const serverlessDefaultFleetServerHost = await getFleetServerHost(
+    soClient,
+    SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+  );
+  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
     throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL in serverless${
-        defaultFleetServerHost ? ': ' + defaultFleetServerHost.host_urls : ''
-      }`
+      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
     );
   }
-}
-
-async function getDefaultFleetServerHost(soClient: SavedObjectsClientContract) {
-  const res = await listFleetServerHosts(soClient);
-  const fleetServerHosts = res.items;
-  return fleetServerHosts.find(
-    (fleetServerHost) => fleetServerHost.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
-  );
 }
 
 export const postFleetServerHost: RequestHandler<
@@ -77,7 +69,7 @@ export const postFleetServerHost: RequestHandler<
       { id }
     );
     if (FleetServerHost.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     }
 
     const body = {
@@ -158,9 +150,9 @@ export const putFleetServerHostHandler: RequestHandler<
     };
 
     if (item.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
-      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(soClient, esClient, item.id);
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, item.id);
     }
 
     return response.ok({ body });
@@ -175,11 +167,7 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler<
-  TypeOf<typeof PutFleetServerHostRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PutFleetServerHostRequestSchema.body>
-> = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
     const res = await listFleetServerHosts(soClient);

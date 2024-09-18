@@ -54,22 +54,48 @@ export type RuleFieldsDiff = CommonFieldsDiff &
     | NewTermsFieldsDiff
   );
 
+interface BaseRuleDiff {
+  num_fields_with_updates: number;
+  num_fields_with_conflicts: number;
+  num_fields_with_non_solvable_conflicts: number;
+}
 /**
  * Full rule diff contains diffs for all the top-level rule fields.
  * Even if there's no change at all to a given field, its diff will be included in this object.
  * This diff can be useful for internal server-side calculations or debugging.
  * Note that this is a pretty large object so returning it from the API might be undesirable.
  */
-export interface FullRuleDiff {
+export interface FullRuleDiff extends BaseRuleDiff {
   fields: RuleFieldsDiff;
-  has_conflict: boolean;
 }
 
 /**
  * Partial rule diff contains diffs only for those rule fields that have some changes to them.
  * This diff can be useful for returning info from REST API endpoints because its size is tolerable.
  */
-export interface PartialRuleDiff {
+export interface PartialRuleDiff extends BaseRuleDiff {
   fields: Partial<RuleFieldsDiff>;
-  has_conflict: boolean;
 }
+
+export type RuleFieldsDiffWithDataSource =
+  | CustomQueryFieldsDiff
+  | SavedQueryFieldsDiff
+  | EqlFieldsDiff
+  | ThreatMatchFieldsDiff
+  | ThresholdFieldsDiff
+  | NewTermsFieldsDiff;
+
+export type RuleFieldsDiffWithKqlQuery =
+  | CustomQueryFieldsDiff
+  | SavedQueryFieldsDiff
+  | ThreatMatchFieldsDiff
+  | ThresholdFieldsDiff
+  | NewTermsFieldsDiff;
+
+export type RuleFieldsDiffWithEqlQuery = EqlFieldsDiff;
+
+export type RuleFieldsDiffWithEsqlQuery = EsqlFieldsDiff;
+
+export type RuleFieldsDiffWithThreatQuery = ThreatMatchFieldsDiff;
+
+export type RuleFieldsDiffWithThreshold = ThresholdFieldsDiff;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import {
   EuiTitle,
@@ -18,20 +19,20 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import type { CategorizationAdditionalFilter } from '../../../common/api/log_categorization/create_category_request';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { Category } from '../../../common/api/log_categorization/types';
-
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -45,12 +46,13 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
+import { TableHeader } from './category_table/table_header';
+import { useActions } from './category_table/use_actions';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -80,7 +82,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const {
     notifications: { toasts },
     data: {
-      query: { getState, filterManager },
+      query: { getState },
     },
     uiSettings,
   } = useAiopsAppContext();
@@ -91,31 +93,32 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
-  const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
+    displayExamples: boolean;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
   const [showTabs, setShowTabs] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
+  const tableState = useTableState<Category>([], 'key');
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -134,7 +137,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
-    { dataView, savedSearch: selectedSavedSearch },
+    { dataView, savedSearch },
     stateFromUrl,
     true
   );
@@ -147,6 +150,16 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     undefined,
     undefined,
     BAR_TARGET
+  );
+
+  const { getActions, openInDiscover } = useActions(
+    dataView.id!,
+    selectedField,
+    selectedCategories,
+    stateFromUrl,
+    timefilter,
+    undefined,
+    undefined
   );
 
   const loadCategories = useCallback(async () => {
@@ -173,17 +186,28 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       to: latest,
     };
 
+    const runtimeMappings = dataView.getRuntimeMappings();
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
-          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
-        }),
+        runValidateFieldRequest(
+          index,
+          selectedField.name,
+          timeField,
+          timeRange,
+          searchQuery,
+          runtimeMappings,
+          {
+            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+          }
+        ),
         runCategorizeRequest(
           index,
           selectedField.name,
           timeField,
           timeRange,
           searchQuery,
+          runtimeMappings,
           intervalMs,
           additionalFilter
         ),
@@ -191,7 +215,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
       if (mounted.current === true) {
         setFieldValidationResult(validationResult);
-        const { categories } = categorizationResult;
+        const { categories, hasExamples } = categorizationResult;
 
         const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
         let categoriesInBucket: any | null = null;
@@ -210,6 +234,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         setData({
           categories,
           categoriesInBucket,
+          displayExamples: hasExamples,
         });
 
         setShowTabs(hasBucketCategories);
@@ -241,18 +266,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     toasts,
   ]);
 
-  const onAddFilter = useCallback(
-    (values: Filter, alias?: string) => {
-      const filter = buildEmptyFilter(false, dataView.id);
-      if (alias) {
-        filter.meta.alias = alias;
-      }
-      filter.query = values.query;
-      filterManager.addFilters([filter]);
-    },
-    [dataView, filterManager]
-  );
-
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
       randomSampler.setDocCount(documentStats.totalCount);
@@ -276,6 +289,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const actions = getActions(true);
   const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
@@ -292,9 +306,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 />
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
@@ -313,12 +324,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           />
         ) : null}
         <FieldValidationCallout validationResults={fieldValidationResult} />
-        {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
+        {loading === true ? <LoadingCategorization onCancel={onClose} /> : null}
         <InformationText
           loading={loading}
           categoriesLength={data?.categories?.length ?? null}
           eventRateLength={eventRate.length}
-          fieldSelected={selectedField !== null}
         />
         {loading === false && data !== null && data.categories.length > 0 ? (
           <>
@@ -388,30 +398,28 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 <EuiSpacer size="s" />
               </>
             ) : null}
+
+            <TableHeader
+              categoriesCount={data.categories.length}
+              selectedCategoriesCount={selectedCategories.length}
+              openInDiscover={openInDiscover}
+            />
+
+            <EuiSpacer size="xs" />
+            <EuiHorizontalRule margin="none" />
+
             <CategoryTable
               categories={
                 selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
                   ? data.categoriesInBucket
                   : data.categories
               }
-              aiopsListState={stateFromUrl}
-              dataViewId={dataView.id!}
               eventRate={eventRate}
-              selectedField={selectedField}
-              pinnedCategory={pinnedCategory}
-              setPinnedCategory={setPinnedCategory}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              timefilter={timefilter}
-              onAddFilter={onAddFilter}
-              onClose={onClose}
               enableRowActions={false}
-              additionalFilter={
-                selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
-                  ? additionalFilter
-                  : undefined
-              }
-              navigateToDiscover={additionalFilter !== undefined}
+              displayExamples={data.displayExamples}
+              setSelectedCategories={setSelectedCategories}
+              tableState={tableState}
+              actions={actions}
             />
           </>
         ) : null}

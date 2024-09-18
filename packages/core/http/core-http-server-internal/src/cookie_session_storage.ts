@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, Server } from '@hapi/hapi';
+import { Request, Server, ServerStateCookieOptions } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -16,9 +17,10 @@ import type {
   SessionStorage,
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
+
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
-class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
+class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
   constructor(
     private readonly log: Logger,
     private readonly server: Server,
@@ -72,10 +74,11 @@ function validateOptions(options: SessionStorageCookieOptions<any>) {
  * @param server - hapi server to create SessionStorage for
  * @param cookieOptions - cookies configuration
  */
-export async function createCookieSessionStorageFactory<T>(
+export async function createCookieSessionStorageFactory<T extends object>(
   log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,
+  disableEmbedding: boolean,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
   validateOptions(cookieOptions);
@@ -101,6 +104,22 @@ export async function createCookieSessionStorageFactory<T>(
       clearInvalid: false,
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite ?? false,
+      contextualize: (
+        definition: Omit<ServerStateCookieOptions, 'isSameSite'> & { isSameSite: string }
+      ) => {
+        /**
+         * This is a temporary solution to support the Partitioned attribute.
+         * Statehood performs validation for the params, but only before the contextualize function call.
+         * Since value for the isSameSite is used directly when making segment,
+         * we can leverage that to append the Partitioned attribute to the cookie.
+         *
+         * Once statehood is updated to support the Partitioned attribute, we can remove this.
+         * Issue: https://github.com/elastic/kibana/issues/188720
+         */
+        if (definition.isSameSite === 'None' && definition.isSecure && !disableEmbedding) {
+          definition.isSameSite = 'None;Partitioned';
+        }
+      },
     },
     validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);

@@ -16,6 +16,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initPutSpacesApi } from './put';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -42,7 +43,7 @@ describe('PUT /api/spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -52,9 +53,13 @@ describe('PUT /api/spaces/space', () => {
       basePath: httpService.basePath,
     });
 
+    const featuresPluginMockStart = featuresPluginMock.createStart();
+
+    featuresPluginMockStart.getKibanaFeatures.mockReturnValue([]);
+
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMockStart);
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -67,6 +72,7 @@ describe('PUT /api/spaces/space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];

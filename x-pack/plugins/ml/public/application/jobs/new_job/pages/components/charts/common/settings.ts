@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
-import {
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-  JobCreatorType,
-} from '../../../../common/job_creator';
-import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
+import type { JobCreatorType } from '../../../../common/job_creator';
+import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
   const { euiTheme } = useCurrentThemeVars();
@@ -59,7 +58,11 @@ export const seriesStyle = {
   },
 };
 
-export function getChartSettings(jobCreator: JobCreatorType, chartInterval: TimeBuckets) {
+export function getChartSettings(
+  uiSettings: IUiSettingsClient,
+  jobCreator: JobCreatorType,
+  chartInterval: TimeBuckets
+) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
@@ -70,7 +73,7 @@ export function getChartSettings(jobCreator: JobCreatorType, chartInterval: Time
     // the calculation from TimeBuckets, but without the
     // bar target and max bars which have been set for the
     // general chartInterval
-    const interval = getTimeBucketsFromCache();
+    const interval = getTimeBucketsFromCache(uiSettings);
     interval.setInterval('auto');
     interval.setBounds(chartInterval.getBounds());
     cs.intervalMs = interval.getInterval().asMilliseconds();

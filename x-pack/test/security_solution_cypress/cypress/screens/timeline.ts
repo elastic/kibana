@@ -61,6 +61,10 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
 
+export const ADD_NOTE_CONTAINER = '[data-test-subj="add-note-container"]';
+
+export const RESOLVER_GRAPH_CONTAINER = '[data-test-subj="resolver:graph"]';
+
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
@@ -102,7 +106,13 @@ export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
+export const ANALYZER_GRAPH_TAB_BUTTON = getDataTestSubjectSelector('timelineTabs-graph');
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const EQL_EVENT_COUNT = '[data-test-subj="eql-events-count"]';
+
+export const QUERY_EVENT_COUNT = '[data-test-subj="query-events-count"]';
 
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
@@ -263,8 +273,7 @@ export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name
 
 export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.alert.severity"]';
 
-export const ALERT_TABLE_FILE_NAME_VALUES =
-  '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
+export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[data-test-subj="dataGridRowCell"]`; // empty column for the test data
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
@@ -280,16 +289,12 @@ export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
-  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
-  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
-  COPY: '[data-test-subj="hover-actions-copy-button"]',
-  SHOW_TOP: '[data-test-subj=show-top-field]',
+  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
 };
-
-export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
-
-export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
 
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 
@@ -303,8 +308,6 @@ export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
   'timeline-date-picker-container'
 );
 
-export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
-
 export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
   'timeline-modal-new-timeline-dropdown-button'
 );
@@ -317,3 +320,5 @@ export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
 );
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
+
+export const EXPAND_ALERT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');

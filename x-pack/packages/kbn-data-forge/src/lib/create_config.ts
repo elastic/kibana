@@ -14,7 +14,7 @@ import { DEFAULTS } from '../constants';
 
 export async function readConfig(filePath: string): Promise<PartialConfig> {
   const data = await promises.readFile(filePath);
-  const decodedPartialConfig = PartialConfigRT.decode(yaml.load(data.toString()));
+  const decodedPartialConfig = PartialConfigRT.decode(yaml.safeLoad(data.toString()));
   if (isLeft(decodedPartialConfig)) {
     throw new Error(
       `Could not validate config: ${PathReporter.report(decodedPartialConfig).join('\n')}`
@@ -62,7 +62,8 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       concurrency: DEFAULTS.CONCURRENCY,
       reduceWeekendTrafficBy: DEFAULTS.REDUCE_WEEKEND_TRAFFIC_BY,
       ephemeralProjectIds: DEFAULTS.EPHEMERAL_PROJECT_IDS,
-      alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL === 1,
+      alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
+      artificialIndexDelay: 0,
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],

@@ -131,8 +131,8 @@ export const buildDnsQuery = ({
           format: 'strict_date_optional_time',
         },
       ],
+      size: 0,
     },
-    size: 0,
     track_total_hits: false,
   };
 

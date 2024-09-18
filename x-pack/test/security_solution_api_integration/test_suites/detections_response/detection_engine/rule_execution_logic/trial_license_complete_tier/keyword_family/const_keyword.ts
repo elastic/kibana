@@ -6,24 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 import {
   EqlRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
+import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getRuleForAlertTesting,
   getAlertsById,
-  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless Rule detects against a keyword of event.dataset', () => {
+  describe('@ess @serverless @serverlessQA Rule detects against a keyword of event.dataset', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/const_keyword');
     });
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
-        const hits = alertsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
+        const hits = alertsOpen.hits.hits.map((hit) => get(hit, '_source.event.dataset')).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
-        const hits = alertsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
+        const hits = alertsOpen.hits.hits.map((hit) => get(hit, '_source.event.dataset')).sort();
         expect(hits).to.eql([
           'dataset_name_1',
           'dataset_name_1',
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"threshold" rule type', async () => {
+    describe('"threshold" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['const_keyword']),

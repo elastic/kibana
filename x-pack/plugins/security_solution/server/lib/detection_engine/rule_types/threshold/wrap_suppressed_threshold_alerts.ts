@@ -25,7 +25,7 @@ import type {
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import type { ThresholdBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
@@ -82,31 +82,26 @@ export const wrapSuppressedThresholdALerts = ({
 
     const suppressedValues = sortBy(Object.entries(bucket.key).map(([_, value]) => value));
 
-    const id = objectHash([
-      hit._index,
-      hit._id,
-      `${spaceId}:${completeRule.alertId}`,
-      suppressedValues,
-    ]);
+    const id = objectHash([hit._index, hit._id, `${spaceId}:${completeRule.alertId}`]);
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      hit,
+      doc: hit,
       mergeStrategy,
-      [],
-      true,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
-    // suppression start/end equals to alert timestamp, since we suppress alerts for threshold rule type, not documents as for query rule type
-    const suppressionTime = new Date(baseAlert[TIMESTAMP]);
+      alertUuid: id,
+      publicBaseUrl,
+    });
+
     return {
       _id: id,
       _index: '',
@@ -116,8 +111,12 @@ export const wrapSuppressedThresholdALerts = ({
           field,
           value,
         })),
-        [ALERT_SUPPRESSION_START]: suppressionTime,
-        [ALERT_SUPPRESSION_END]: suppressionTime,
+        [ALERT_SUPPRESSION_START]: bucket.min_timestamp.value
+          ? new Date(bucket.min_timestamp.value)
+          : new Date(baseAlert[TIMESTAMP]),
+        [ALERT_SUPPRESSION_END]: bucket.max_timestamp.value
+          ? new Date(bucket.max_timestamp.value)
+          : new Date(baseAlert[TIMESTAMP]),
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         [ALERT_INSTANCE_ID]: instanceId,
       },

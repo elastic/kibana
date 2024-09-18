@@ -86,6 +86,7 @@ describe('Policy details artifacts flyout', () => {
             apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             onClose={onCloseMock}
             searchableFields={[...SEARCHABLE_FIELDS]}
+            CardDecorator={undefined}
           />
         );
         await waitFor(mockedApi.responseProvider.eventFiltersList);
@@ -123,7 +124,7 @@ describe('Policy details artifacts flyout', () => {
     mockedApi.responseProvider.eventFiltersList.mockImplementationOnce(() => getEmptyList());
 
     // do a search
-    userEvent.type(renderResult.getByTestId('searchField'), 'no results with this{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'no results with this{enter}');
 
     await waitFor(() => {
       expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalledWith(
@@ -163,7 +164,7 @@ describe('Policy details artifacts flyout', () => {
     expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
 
     // click the first item
-    userEvent.click(renderResult.getByTestId(`${firstOneName}_checkbox`));
+    await userEvent.click(renderResult.getByTestId(`${firstOneName}_checkbox`));
 
     expect(renderResult.getByTestId('artifacts-assign-confirm-button')).toBeEnabled();
   });
@@ -213,9 +214,9 @@ describe('Policy details artifacts flyout', () => {
     it('should submit the exception when submit is pressed (1 exception), display a toast and close the flyout', async () => {
       mockedApi.responseProvider.eventFiltersUpdateOne.mockImplementation(() => exceptions.data[0]);
       // click the first item
-      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      await userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
       // submit the form
-      userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
+      await userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
 
       // verify the request with the new tag
       await waitFor(() => {
@@ -239,10 +240,10 @@ describe('Policy details artifacts flyout', () => {
 
     it('should submit the exception when submit is pressed (2 exceptions), display a toast and close the flyout', async () => {
       // click the first  two items
-      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
-      userEvent.click(renderResult.getByTestId(`${SECOND_ONE_NAME}_checkbox`));
+      await userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      await userEvent.click(renderResult.getByTestId(`${SECOND_ONE_NAME}_checkbox`));
       // submit the form
-      userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
+      await userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
 
       // verify the request with the new tag
       await waitFor(() => {
@@ -278,9 +279,9 @@ describe('Policy details artifacts flyout', () => {
         throw new Error('the server is too far away');
       });
       // click first item
-      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      await userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
       // submit the form
-      userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
+      await userEvent.click(renderResult.getByTestId('artifacts-assign-confirm-button'));
 
       await waitFor(() => {
         expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(

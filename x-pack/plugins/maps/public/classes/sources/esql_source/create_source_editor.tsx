@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { ESQLColumn } from '@kbn/es-types';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   EuiFormRow,
   EuiPanel,
@@ -32,6 +33,7 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [adhocDataViewId, setAdhocDataViewId] = useState<string | undefined>();
   const [columns, setColumns] = useState<ESQLColumn[]>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
@@ -52,17 +54,23 @@ export function CreateSourceEditor(props: Props) {
     }
 
     getDataView()
-      .then((dataView) => {
+      .then(async (dataView) => {
+        const adhocDataView = dataView
+          ? await getESQLAdHocDataview(
+              `from ${dataView.getIndexPattern()}`,
+              getIndexPatternService()
+            )
+          : undefined;
         if (ignore) {
           return;
         }
 
-        if (dataView) {
+        if (adhocDataView) {
           let initialGeoField: DataViewField | undefined;
           const initialDateFields: string[] = [];
           const initialGeoFields: string[] = [];
-          for (let i = 0; i < dataView.fields.length; i++) {
-            const field = dataView.fields[i];
+          for (let i = 0; i < adhocDataView.fields.length; i++) {
+            const field = adhocDataView.fields[i];
             if (
               [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(
                 field.type as ES_GEO_FIELD_TYPE
@@ -77,12 +85,13 @@ export function CreateSourceEditor(props: Props) {
 
           if (initialGeoField) {
             let initialDateField: string | undefined;
-            if (dataView.timeFieldName) {
+            // get default time field from default data view instead of adhoc data view
+            if (dataView?.timeFieldName) {
               initialDateField = dataView.timeFieldName;
             } else if (initialDateFields.length) {
               initialDateField = initialDateFields[0];
             }
-            const initialEsql = `from ${dataView.getIndexPattern()} | keep ${
+            const initialEsql = `from ${adhocDataView.getIndexPattern()} | keep ${
               initialGeoField.name
             } | limit 10000`;
             setColumns([
@@ -94,6 +103,7 @@ export function CreateSourceEditor(props: Props) {
                     : ESQL_GEO_POINT_TYPE,
               },
             ]);
+            setAdhocDataViewId(adhocDataView.id);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(initialGeoField.name);
@@ -123,9 +133,10 @@ export function CreateSourceEditor(props: Props) {
   useDebounce(
     () => {
       const sourceConfig =
-        esql && esql.length
+        esql && esql.length && adhocDataViewId
           ? {
               columns,
+              dataViewId: adhocDataViewId,
               dateField,
               geoField,
               esql,
@@ -138,6 +149,7 @@ export function CreateSourceEditor(props: Props) {
     },
     0,
     [
+      adhocDataViewId,
       columns,
       dateField,
       geoField,
@@ -154,6 +166,7 @@ export function CreateSourceEditor(props: Props) {
         <ESQLEditor
           esql={esql}
           onESQLChange={(change) => {
+            setAdhocDataViewId(change.adhocDataViewId);
             setColumns(change.columns);
             setEsql(change.esql);
             setDateFields(change.dateFields);
@@ -203,7 +216,7 @@ export function CreateSourceEditor(props: Props) {
             <EuiFormRow>
               <EuiSwitch
                 label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
-                  defaultMessage: `Narrow ES|QL statement by global search`,
+                  defaultMessage: `Apply global search to ES|QL statement`,
                 })}
                 checked={narrowByGlobalSearch}
                 onChange={(event: EuiSwitchEvent) => {

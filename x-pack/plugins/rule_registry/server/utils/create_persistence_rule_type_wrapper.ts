@@ -24,6 +24,8 @@ import {
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import type { IRuleDataClient } from '..';
@@ -54,19 +56,27 @@ const augmentAlerts = <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
+  intendedTimestamp,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  const currentDate = new Date();
+  const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
   return alerts.map((alert) => {
     return {
       ...alert,
       _source: {
-        [ALERT_START]: currentTimeOverride ?? new Date(),
-        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
+        [ALERT_START]: timestampOverrideOrCurrent,
+        [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
+        [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
+          ? intendedTimestamp
+          : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
         ...(options?.maintenanceWindowIds?.length
           ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
@@ -249,6 +259,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
             ...options.services,
             alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
+
               logger.debug(`Found ${numAlerts} alerts.`);
 
               const ruleDataClientWriter = await ruleDataClient.getWriter({
@@ -295,11 +306,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
+                let intendedTimestamp;
+                if (options.startedAtOverridden) {
+                  intendedTimestamp = options.startedAt;
+                }
+
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
+                  intendedTimestamp,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -361,7 +378,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               suppressionWindow,
               enrichAlerts,
               currentTimeOverride,
-              isRuleExecutionOnly
+              isRuleExecutionOnly,
+              maxAlerts
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -375,6 +393,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
               const writeAlerts =
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              let alertsWereTruncated = false;
+
+              let intendedTimestamp;
+              if (options.startedAtOverridden) {
+                intendedTimestamp = options.startedAt;
+              }
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -392,7 +417,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (filteredDuplicates.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const suppressionAlertSearchRequest = {
@@ -473,7 +503,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (nonSuppressedAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
@@ -535,11 +570,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   }
                 }
 
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
+                  alertsWereTruncated = true;
+                }
+
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  intendedTimestamp,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
@@ -548,7 +589,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (bulkResponse == null) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated: false,
+                  };
                 }
 
                 const createdAlerts = augmentedAlerts
@@ -594,10 +640,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   createdAlerts,
                   suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
                   errors: errorAggregator(bulkResponse.body, [409]),
+                  alertsWereTruncated,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                return {
+                  createdAlerts: [],
+                  errors: {},
+                  suppressedAlerts: [],
+                  alertsWereTruncated: false,
+                };
               }
             },
           },

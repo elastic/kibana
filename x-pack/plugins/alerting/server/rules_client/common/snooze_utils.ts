@@ -28,12 +28,12 @@ export function getSnoozeAttributes(
       snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     };
   }
+
   return {
     snoozeSchedule: (snoozeId
       ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
       : clearUnscheduledSnoozeAttributes(attributes)
     ).concat(snoozeSchedule),
-    muteAll: false,
   };
 }
 
@@ -117,7 +117,7 @@ export function clearUnscheduledSnooze<Params extends RuleParams>(rule: RuleDoma
 
 export function clearScheduledSnoozesAttributesById(attributes: RuleAttributes, ids: string[]) {
   return attributes.snoozeSchedule
-    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    ? attributes.snoozeSchedule.filter((s) => !(s.id && ids.includes(s.id)))
     : [];
 }
 
@@ -132,6 +132,7 @@ export function clearCurrentActiveSnoozeAttributes(attributes: RuleAttributes) {
   // First attempt to cancel a simple (unscheduled) snooze
   const clearedUnscheduledSnoozes = clearUnscheduledSnoozeAttributes(attributes);
   // Now clear any scheduled snoozes that are currently active and never recur
+  // @ts-expect-error upgrade typescript v5.1.6
   const activeSnoozes = getActiveScheduledSnoozes(attributes);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
   const recurringSnoozesToSkip: string[] = [];
@@ -159,6 +160,7 @@ export function clearCurrentActiveSnooze<Params extends RuleParams>(rule: RuleDo
   // First attempt to cancel a simple (unscheduled) snooze
   const clearedUnscheduledSnoozes = clearUnscheduledSnooze(rule);
   // Now clear any scheduled snoozes that are currently active and never recur
+  // @ts-expect-error upgrade typescript v5.1.6
   const activeSnoozes = getActiveScheduledSnoozes(rule);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
   const recurringSnoozesToSkip: string[] = [];

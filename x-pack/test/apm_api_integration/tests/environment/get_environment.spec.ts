@@ -17,18 +17,18 @@ const end = new Date(endNumber).toISOString();
 export default function environmentsAPITests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('environments when data is loaded', { config: 'basic', archives: [] }, async () => {
-    before(async () => {
-      await generateData({
-        synthtraceEsClient,
+    before(async () =>
+      generateData({
+        apmSynthtraceEsClient,
         start: startNumber,
         end: endNumber,
-      });
-    });
+      })
+    );
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('get environments', () => {
       describe('when service name is not specified', () => {

@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
+import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import type { VisSavedObject } from '../../types';
+import type { StartServices } from '../../types';
 import { visualizationsClient } from '../../content_management';
 import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
+import { VisualizeOutputState } from '../../embeddable/types';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
@@ -30,11 +32,10 @@ import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '..
  */
 export async function saveWithConfirmation(
   source: VisualizationSavedObjectAttributes,
-  savedObject: Pick<VisSavedObject, 'title' | 'getEsType' | 'displayName'>,
+  savedObject: Pick<VisualizeOutputState, 'title' | 'displayName'>,
   options: SavedObjectsCreateOptions,
-  services: { overlays: OverlayStart }
+  services: StartServices
 ): Promise<{ item: VisualizationSavedObject }> {
-  const { overlays } = services;
   try {
     return await visualizationsClient.create({ data: source, options });
   } catch (err) {
@@ -56,7 +57,7 @@ export async function saveWithConfirmation(
         defaultMessage: 'Overwrite',
       });
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, services)
         .then(() =>
           visualizationsClient.create({
             data: source,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { captureErrorMock } from './versioned_router.test.mocks';
@@ -14,7 +15,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
+import { createHttpService, createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
@@ -29,7 +30,7 @@ interface AdditionalOptions {
 
 describe('Routing versioned requests', () => {
   let router: IRouter;
-  let supertest: Supertest.SuperTest<Supertest.Test>;
+  let supertest: Supertest.Agent;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
@@ -42,7 +43,7 @@ describe('Routing versioned requests', () => {
           options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
-    server = createHttpServer({
+    server = createHttpService({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({
@@ -199,14 +200,16 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'forbid' }) } },
+          },
           version: '2',
         },
         async (ctx, req, res) => {
@@ -215,7 +218,9 @@ describe('Routing versioned requests', () => {
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'allow' }) } },
+          },
           version: '3',
         },
         async (ctx, req, res) => {
@@ -271,7 +276,7 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
@@ -294,11 +299,11 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { version: '1', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       )
       .addVersion(
-        { version: '2', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       );
     await server.start();

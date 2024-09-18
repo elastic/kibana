@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -56,43 +55,37 @@ export const NodeEventsInCategory = memo(function ({
   return (
     <>
       {isLoading ? (
-        <StyledPanel hasBorder>
-          <PanelLoading id={id} />
-        </StyledPanel>
-      ) : (
-        <StyledPanel hasBorder data-test-subj="resolver:panel:events-in-category">
-          {hasError || !node ? (
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
-                {
-                  defaultMessage: 'Unable to load events.',
-                }
-              )}
-              color="danger"
-              iconType="warning"
-              data-test-subj="resolver:nodeEventsInCategory:error"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
-                  defaultMessage="An error occurred when fetching the events."
-                />
-              </p>
-            </EuiCallOut>
-          ) : (
-            <>
-              <NodeEventsInCategoryBreadcrumbs
-                id={id}
-                nodeName={node.name}
-                eventCategory={eventCategory}
-                nodeID={nodeID}
-              />
-              <EuiSpacer size="l" />
-              <NodeEventList id={id} eventCategory={eventCategory} nodeID={nodeID} />
-            </>
+        <PanelLoading id={id} />
+      ) : hasError || !node ? (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
+            {
+              defaultMessage: 'Unable to load events.',
+            }
           )}
-        </StyledPanel>
+          color="danger"
+          iconType="warning"
+          data-test-subj="resolver:nodeEventsInCategory:error"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
+              defaultMessage="An error occurred when fetching the events."
+            />
+          </p>
+        </EuiCallOut>
+      ) : (
+        <div data-test-subj="resolver:panel:events-in-category">
+          <NodeEventsInCategoryBreadcrumbs
+            id={id}
+            nodeName={node.name}
+            eventCategory={eventCategory}
+            nodeID={nodeID}
+          />
+          <EuiSpacer size="l" />
+          <NodeEventList id={id} eventCategory={eventCategory} nodeID={nodeID} />
+        </div>
       )}
     </>
   );

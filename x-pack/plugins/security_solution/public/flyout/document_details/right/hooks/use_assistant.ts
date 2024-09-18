@@ -8,6 +8,7 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getRawData } from '../../../../assistant/helpers';
 import {
@@ -17,13 +18,16 @@ import {
   EVENT_SUMMARY_CONTEXT_DESCRIPTION,
   EVENT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-  SUMMARY_VIEW,
 } from '../../../../common/components/event_details/translations';
 import {
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
   PROMPT_CONTEXTS,
 } from '../../../../assistant/content/prompt_contexts';
+
+const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
+  defaultMessage: 'summary',
+});
 
 const useAssistantNoop = () => ({ promptContextId: undefined });
 
@@ -56,7 +60,7 @@ export const useAssistant = ({
   dataFormattedForFieldBrowser,
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
@@ -73,7 +77,8 @@ export const useAssistant = ({
     isAlert
       ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
       : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
-    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+    isAssistantEnabled
   );
 
   return {

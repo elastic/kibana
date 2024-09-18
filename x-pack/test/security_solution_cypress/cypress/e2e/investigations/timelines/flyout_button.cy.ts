@@ -18,7 +18,8 @@ import {
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe('timeline flyout button', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/183085
+describe.skip('timeline flyout button', () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

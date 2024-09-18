@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './visualize_listing.scss';
@@ -64,6 +65,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
   return {
     id: savedObject.id as string,
     updatedAt: savedObject.updatedAt as string,
+    managed: savedObject.managed as boolean,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
     icon: savedObject.icon as string,
@@ -90,7 +92,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'itemIsEditable'
+  | 'rowItemActions'
 >;
 
 const useTableListViewProps = (
@@ -103,10 +105,10 @@ const useTableListViewProps = (
       history,
       savedObjects,
       savedObjectsTagging,
-      overlays,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      ...startServices
     },
   } = useKibana<VisualizeServices>();
 
@@ -181,15 +183,15 @@ const useTableListViewProps = (
             tags: args.tags,
           },
           {
-            overlays,
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            ...startServices,
           }
         );
       }
     },
-    [overlays, savedObjectsTagging, contentManagement]
+    [savedObjectsTagging, contentManagement, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -212,7 +214,7 @@ const useTableListViewProps = (
                     false,
                     false,
                     () => {},
-                    { overlays }
+                    startServices
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -231,7 +233,7 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [overlays]
+    [startServices]
   );
 
   const deleteItems = useCallback(
@@ -260,7 +262,23 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
+    rowItemActions: ({ managed, attributes: { readOnly } }) =>
+      !visualizeCapabilities.save || readOnly
+        ? {
+            edit: {
+              enabled: false,
+              reason: managed
+                ? i18n.translate('visualizations.managedLegacyVisMessage', {
+                    defaultMessage:
+                      'Elastic manages this visualisation. Changing it is not possible.',
+                  })
+                : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
+                    defaultMessage:
+                      "These details can't be edited because this visualization is no longer supported.",
+                  }),
+            },
+          }
+        : undefined,
   };
 
   return props;
@@ -386,9 +404,9 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            onClickTitle={(item) => {
-              tableViewProps.editItem?.(item);
-            }}
+            getOnClickTitle={(item) =>
+              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
+            }
             getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
               readOnly || (editor && 'onEdit' in editor)
                 ? undefined

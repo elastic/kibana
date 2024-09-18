@@ -20,13 +20,14 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,
       }
     );
 
-    const tabElement = queryByText('Risk Inputs');
+    const tabElement = queryByText('Risk contributions');
 
     expect(tabElement).toBeInTheDocument();
   });
@@ -39,6 +40,7 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist={false}
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,

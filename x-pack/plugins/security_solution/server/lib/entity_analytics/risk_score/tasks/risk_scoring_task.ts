@@ -7,23 +7,20 @@
 
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import {
-  type Logger,
-  SavedObjectsErrorHelpers,
-  type StartServicesAccessor,
-} from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
   RiskScoreEntity,
 } from '../../../../../common/entity_analytics/risk_engine';
-import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
@@ -35,7 +32,6 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import type { ExperimentalFeatures } from '../../../../../common';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -45,6 +41,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
+import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -58,19 +55,21 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
 
 export const registerRiskScoringTask = ({
-  experimentalFeatures,
   getStartServices,
   kibanaVersion,
   logger,
+  auditLogger,
   taskManager,
   telemetry,
+  entityAnalyticsConfig,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
-  getStartServices: StartServicesAccessor<StartPlugins>;
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
+  auditLogger: AuditLogger | undefined;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -85,11 +84,13 @@ export const registerRiskScoringTask = ({
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
         logger,
+        auditLogger,
         namespace,
       });
+
       const assetCriticalityService = assetCriticalityServiceFactory({
         assetCriticalityDataClient,
-        experimentalFeatures,
+        uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       });
 
       const riskEngineDataClient = new RiskEngineDataClient({
@@ -98,6 +99,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
@@ -105,6 +107,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
 
       return riskScoreServiceFactory({
@@ -122,9 +125,37 @@ export const registerRiskScoringTask = ({
       title: 'Entity Analytics Risk Engine - Risk Scoring Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
-      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService, telemetry }),
+      createTaskRunner: createTaskRunnerFactory({
+        logger,
+        getRiskScoreService,
+        telemetry,
+        entityAnalyticsConfig,
+      }),
     },
   });
+};
+
+export interface RiskScoringTaskStatus {
+  status: TaskStatus;
+  runAt: string; // next schedule run
+  startedAt: string | undefined; // only available if task is running
+}
+
+export const getRiskScoringTaskStatus = async ({
+  namespace,
+  taskManager,
+}: {
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}): Promise<RiskScoringTaskStatus> => {
+  const taskId = getTaskId(namespace);
+  const task = await taskManager.get(taskId);
+
+  return {
+    status: task.status,
+    runAt: task.runAt.toISOString(),
+    startedAt: task.startedAt?.toISOString(),
+  };
 };
 
 export const startRiskScoringTask = async ({
@@ -186,12 +217,14 @@ export const runTask = async ({
   logger,
   taskInstance,
   telemetry,
+  entityAnalyticsConfig,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -221,7 +254,9 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const configuration = await riskScoreService.getConfiguration();
+    const configuration = await riskScoreService.getConfigurationWithDefaults(
+      entityAnalyticsConfig
+    );
     if (configuration == null) {
       log(
         'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
@@ -236,6 +271,7 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
+      alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -250,10 +286,17 @@ export const runTask = async ({
       ? [configuredIdentifierType]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
+    const runs: Array<{
+      identifierType: IdentifierType;
+      scoresWritten: number;
+      tookMs: number;
+    }> = [];
+
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
       while (!isWorkComplete) {
+        const now = Date.now();
         const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           index,
@@ -263,6 +306,14 @@ export const runTask = async ({
           range,
           runtimeMappings,
           weights: [],
+          alertSampleSizePerShard,
+        });
+        const tookMs = Date.now() - now;
+
+        runs.push({
+          identifierType,
+          scoresWritten: result.scores_written,
+          tookMs,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
@@ -279,23 +330,49 @@ export const runTask = async ({
       scoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
+      alertSampleSizePerShard,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
-
-    riskScoreService.scheduleLatestTransformNow();
 
     if (isCancelled()) {
       log('task was cancelled');
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
+    if (scoresWritten > 0) {
+      log('refreshing risk score index and scheduling transform');
+      await riskScoreService.refreshRiskScoreIndex();
+      await riskScoreService.scheduleLatestTransformNow();
+    }
+
     log('task run completed');
-    log(JSON.stringify(telemetryEvent));
+    log(JSON.stringify({ ...telemetryEvent, runs }));
+
     return {
       state: updatedState,
     };
   } catch (e) {
     telemetry.reportEvent(RISK_SCORE_EXECUTION_ERROR_EVENT.eventType, {});
+    throw e;
+  }
+};
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+  const log = logFactory(logger, taskId);
+
+  log('attempting to schedule task to run now');
+  try {
+    await taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };
@@ -305,17 +382,26 @@ const createTaskRunnerFactory =
     logger,
     getRiskScoreService,
     telemetry,
+    entityAnalyticsConfig,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
     telemetry: AnalyticsServiceSetup;
+    entityAnalyticsConfig: EntityAnalyticsConfig;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
       run: async () =>
-        runTask({ getRiskScoreService, isCancelled, logger, taskInstance, telemetry }),
+        runTask({
+          getRiskScoreService,
+          isCancelled,
+          logger,
+          taskInstance,
+          telemetry,
+          entityAnalyticsConfig,
+        }),
       cancel: async () => {
         cancelled = true;
       },

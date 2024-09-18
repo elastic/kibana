@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { Suggestion } from '@kbn/lens-plugin/public';
 
 export const currentSuggestionMock = {
@@ -131,6 +133,91 @@ export const currentSuggestionMock = {
   datasourceId: 'textBased',
   columns: 2,
   changeType: 'initial',
+} as Suggestion;
+
+export const histogramESQLSuggestionMock = {
+  title: 'Bar',
+  score: 0.16666666666666666,
+  hide: false,
+  incomplete: false,
+  visualizationId: 'lnsXY',
+  visualizationState: {
+    legend: {
+      isVisible: true,
+      position: 'right',
+    },
+    valueLabels: 'hide',
+    fittingFunction: 'None',
+    axisTitlesVisibilitySettings: {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
+    tickLabelsVisibilitySettings: {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
+    labelsOrientation: {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
+    },
+    gridlinesVisibilitySettings: {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
+    preferredSeriesType: 'bar_stacked',
+    layers: [
+      {
+        layerId: '662552df-2cdc-4539-bf3b-73b9f827252c',
+        seriesType: 'bar_stacked',
+        xAccessor: '@timestamp every 30 second',
+        accessors: ['results'],
+        layerType: 'data',
+      },
+    ],
+  },
+  keptLayerIds: ['662552df-2cdc-4539-bf3b-73b9f827252c'],
+  datasourceState: {
+    layers: {
+      '662552df-2cdc-4539-bf3b-73b9f827252c': {
+        index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        query: {
+          esql: 'from kibana_sample_data_logs | limit 10 | EVAL timestamp=DATE_TRUNC(30 second, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 second`',
+        },
+        columns: [
+          {
+            columnId: '@timestamp every 30 second',
+            fieldName: '@timestamp every 30 second',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            columnId: 'results',
+            fieldName: 'results',
+            meta: {
+              type: 'number',
+            },
+            inMetricDimension: true,
+          },
+        ],
+        timeField: '@timestamp',
+      },
+    },
+    indexPatternRefs: [
+      {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeField: '@timestamp',
+      },
+    ],
+  },
+  datasourceId: 'textBased',
+  columns: 2,
+  changeType: 'unchanged',
 } as Suggestion;
 
 export const allSuggestionsMock = [

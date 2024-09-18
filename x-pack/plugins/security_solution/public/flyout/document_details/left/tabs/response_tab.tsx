@@ -14,7 +14,7 @@ import { RESPONSE_TAB_CONTENT_TEST_ID } from './test_ids';
 /**
  * Response view displayed in the document details expandable flyout left section
  */
-export const ResponseTab: React.FC = memo(() => {
+export const ResponseTab = memo(() => {
   return (
     <EuiPanel data-test-subj={RESPONSE_TAB_CONTENT_TEST_ID} hasShadow={false}>
       <ResponseDetails />

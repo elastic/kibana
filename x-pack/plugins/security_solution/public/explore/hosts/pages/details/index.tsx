@@ -19,13 +19,23 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -36,7 +46,10 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import { HostOverview } from '../../../../overview/components/host_overview';
+import {
+  HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+  HostOverview,
+} from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -61,12 +74,12 @@ import {
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
+import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -101,7 +114,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -154,8 +167,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
@@ -166,6 +177,28 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     }),
     [detailName]
   );
+
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
+  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+
+  const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.host,
+    detailName,
+    { onSuccess: refetchRiskScore }
+  );
+
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: canReadAssetCriticality,
+    onChange: calculateEntityRiskScore,
+  });
 
   return (
     <>
@@ -194,12 +227,20 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 rightSideItems={[
                   hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
-                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentType="endpoint"
                     />
                   ),
                 ]}
               />
-
+              {canReadAssetCriticality && (
+                <>
+                  <AssetCriticalityTitle />
+                  <EuiSpacer size="s" />
+                  <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                  <EuiHorizontalRule margin="m" />
+                </>
+              )}
               <AnomalyTableProvider
                 criteriaFields={hostToCriteria(hostOverview)}
                 startDate={from}
@@ -236,14 +277,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
-                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                        additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
-                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                        additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -254,7 +295,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <TabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   hostName: detailName,
                   isEnterprise: isEnterprisePlus,
                 })}
@@ -280,7 +320,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

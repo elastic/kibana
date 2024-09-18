@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
@@ -19,7 +20,7 @@ const LogRateAnalysisContentWrapperLazy = React.lazy(
   () => import('./components/log_rate_analysis/log_rate_analysis_content')
 );
 
-const LazyWrapper: FC = ({ children }) => (
+const LazyWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiSkeletonText lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>

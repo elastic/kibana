@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,14 +17,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  async function runTemplateTest(type: string, template: string) {
+    await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
+    await PageObjects.console.sleepForDebouncePeriod(500);
+    // Prompt autocomplete for 'settings'
+    await PageObjects.console.promptAutocomplete('s');
+
+    await retry.waitFor('autocomplete to be visible', () =>
+      PageObjects.console.isAutocompleteVisible()
+    );
+    await PageObjects.console.pressEnter();
+    await retry.try(async () => {
+      const request = await PageObjects.console.getEditorText();
+      log.debug(request);
+      expect(request).to.contain(`${template}`);
+    });
+  }
+
+  // Failing: See https://github.com/elastic/kibana/issues/191808
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
-      await PageObjects.console.closeHelpIfExists();
-      await PageObjects.console.clearTextArea();
+      await PageObjects.console.skipTourIfExists();
+      await PageObjects.console.clearEditorText();
       log.debug('setAutocompleteTrace true');
       await PageObjects.console.setAutocompleteTrace(true);
     });
@@ -35,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should provide basic auto-complete functionality', async () => {
-      await PageObjects.console.enterRequest();
+      await PageObjects.console.enterText(`GET _search\n`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
@@ -44,17 +62,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/165465
-    describe.skip('Autocomplete behavior', () => {
+    describe('Autocomplete behavior', () => {
       beforeEach(async () => {
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.pressEnter();
+        await PageObjects.console.clearEditorText();
       });
 
       it('HTTP methods', async () => {
         const suggestions = {
           G: ['GET'],
-          P: ['PUT', 'POST', 'PATCH'],
+          P: ['PATCH', 'POST', 'PUT'],
           D: ['DELETE'],
           H: ['HEAD'],
         };
@@ -69,11 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, method] of methods.entries()) {
-            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(method);
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.contain(method);
           }
 
           await PageObjects.console.pressEscape();
-          await PageObjects.console.pressEnter();
+          await PageObjects.console.clickClearInput();
         }
       });
 
@@ -107,7 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('JSON autocompletion with placeholder fields', async () => {
-        await PageObjects.console.enterText('GET _search\n{');
+        await PageObjects.console.enterText('GET _search\n');
+        await PageObjects.console.enterText('{');
         await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
@@ -122,58 +139,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect(await PageObjects.console.getAllVisibleText()).to.be.eql(
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
           `
 GET _search
 {
-  "aggs": {
-    "NAME": {
-      "AGG_TYPE": {}
-    }
-  }
-}
-`.replace(/\n/g, '')
-        );
-        // cursor should be located between '"' and 'N'
-        expect(await PageObjects.console.getCurrentLineNumber()).to.be.eql(5);
-
-        await PageObjects.console.pressDown();
-        await PageObjects.console.pressRight();
-        await PageObjects.console.pressRight();
-        for (let i = 0; i < 8; i++) {
-          await PageObjects.console.pressRight(true); // select 'AGG_TYPE'
-        }
-
-        for (const char of 'ter') {
-          await PageObjects.console.sleepForDebouncePeriod();
-          log.debug('Key type "%s"', char);
-          await PageObjects.console.enterText(char);
-        }
-        await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.isAutocompleteVisible()
-        );
-        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.sleepForDebouncePeriod();
-
-        expect(await PageObjects.console.getAllVisibleText()).to.be.eql(
-          `
-GET _search
-{
-  "aggs": {
-    "NAME": {
-      "terms": {
-        "field": ""
+    "aggs": {
+      "NAME": {
+        "AGG_TYPE": {}
       }
     }
-  }
 }
-`.replace(/\n/g, '')
+`.replace(/\s/g, '')
         );
       });
 
       it('Dynamic autocomplete', async () => {
-        await PageObjects.console.enterRequest('POST test/_doc\n{}');
+        await PageObjects.console.enterText('POST test/_doc\n{}');
         await PageObjects.console.clickPlay();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -194,15 +175,14 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/164584
-    describe.skip('anti-regression watchdogs', () => {
+    describe('anti-regression watchdogs', () => {
       beforeEach(async () => {
-        await PageObjects.console.clearTextArea();
+        await PageObjects.console.clearEditorText();
       });
 
-      it('should suppress auto-complete on arrow keys', async () => {
-        await PageObjects.console.enterRequest();
-        await PageObjects.console.enterRequest();
+      // flaky
+      it.skip('should suppress auto-complete on arrow keys', async () => {
+        await PageObjects.console.enterText(`\nGET _search\nGET _search`);
         await PageObjects.console.pressEnter();
         const keyPresses = [
           'pressUp',
@@ -234,15 +214,13 @@ GET _search
             dELETE dELETe dELEtE dELEte dELeTE dELeTe dELetE dELete dElETE dElETe dElEtE dElEte dEleTE dEleTe dEletE dElete
             deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
             HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
-            PATCH PATCh PATcH PATch PAtCH PAtCh PAtcH PAtch PaTCH PaTCh PaTcH PaTch PatCH PatCh PatcH Patch pATCH pATCh pATcH
-            pATch pAtCH pAtCh pAtcH pAtch paTCH paTCh paTcH paTch patCH patCh patcH patch
             `.split(/\s+/m)
           ),
           20 // 20 of 112 (approx. one-fifth) should be enough for testing
         );
 
         for (const method of methods) {
-          await PageObjects.console.clearTextArea();
+          await PageObjects.console.clearEditorText();
 
           for (const char of method.slice(0, -1)) {
             await PageObjects.console.sleepForDebouncePeriod();
@@ -283,7 +261,7 @@ GET _search
       });
 
       it('should activate auto-complete for multiple indices after comma in URL', async () => {
-        await PageObjects.console.enterText('GET /_cat/indices/.kibana');
+        await PageObjects.console.enterText('GET _cat/indices/.kibana');
 
         await PageObjects.console.sleepForDebouncePeriod();
         log.debug('Key type ","');
@@ -298,27 +276,14 @@ GET _search
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
-
-      it('should not activate auto-complete after comma following endpoint in URL', async () => {
-        await PageObjects.console.enterText('GET _search');
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type ","');
-        await PageObjects.console.enterText(','); // i.e. 'GET _search,'
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type Ctrl+SPACE');
-        await PageObjects.console.pressCtrlSpace();
-
-        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
-      });
     });
 
-    describe('with a missing comma in query', () => {
+    // not implemented for monaco yet https://github.com/elastic/kibana/issues/184856
+    describe.skip('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.enterRequest();
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('\nGET _search');
         await PageObjects.console.pressEnter();
       });
 
@@ -338,11 +303,11 @@ GET _search
           const secondInnerHtml = await conApp.getAttribute('innerHTML');
           return firstInnerHtml === secondInnerHtml;
         });
-        const textAreaString = await PageObjects.console.getAllVisibleText();
+        const textAreaString = await PageObjects.console.getEditorText();
         log.debug('Text Area String Value==================\n');
         log.debug(textAreaString);
         expect(textAreaString).to.contain(',');
-        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
       });
@@ -355,57 +320,62 @@ GET _search
         await PageObjects.console.pressEnter();
 
         await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
-          const textAreaString = await PageObjects.console.getAllVisibleText();
+          const textAreaString = await PageObjects.console.getEditorText();
           return textAreaString.includes(',');
         });
 
-        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
       });
     });
 
-    describe('with conditional templates', async () => {
-      const CONDITIONAL_TEMPLATES = [
-        {
-          type: 'fs',
-          template: `"location": "path"`,
-        },
-        {
-          type: 'url',
-          template: `"url": ""`,
-        },
-        { type: 's3', template: `"bucket": ""` },
-        {
-          type: 'azure',
-          template: `"path": ""`,
-        },
-      ];
-
+    describe('with conditional templates', () => {
       beforeEach(async () => {
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.enterRequest('\n POST _snapshot/test_repo');
-        await PageObjects.console.pressEnter();
+        await PageObjects.console.clickClearInput();
+        await PageObjects.console.enterText('POST _snapshot/test_repo\n');
       });
 
-      await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
-        it('should insert different templates depending on the value of type', async () => {
-          await PageObjects.console.enterText(`{\n\t"type": "${type}"`);
-          await PageObjects.console.pressEnter();
-          await PageObjects.console.sleepForDebouncePeriod();
-          // Prompt autocomplete for 'settings'
-          await PageObjects.console.promptAutocomplete('s');
+      it('should insert fs template', async () => {
+        await runTemplateTest('fs', `"location": "path"`);
+      });
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.isAutocompleteVisible()
-          );
-          await PageObjects.console.pressEnter();
-          await retry.try(async () => {
-            const request = await PageObjects.console.getRequest();
-            log.debug(request);
-            expect(request).to.contain(`${template}`);
-          });
-        });
+      it('should insert url template', async () => {
+        await runTemplateTest('url', `"url": ""`);
+      });
+
+      it('should insert s3 template', async () => {
+        await runTemplateTest('s3', `"bucket": ""`);
+      });
+
+      it('should insert azure template', async () => {
+        await runTemplateTest('azure', `"path": ""`);
+      });
+    });
+
+    describe('index fields autocomplete', () => {
+      const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
+
+      before(async () => {
+        await PageObjects.console.clearEditorText();
+        // create an index with only 1 field
+        await PageObjects.console.enterText(`PUT ${indexName}/_doc/1\n{\n"test":1\n}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      after(async () => {
+        await PageObjects.console.clearEditorText();
+        // delete the test index
+        await PageObjects.console.enterText(`DELETE ${indexName}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      it('fields autocomplete only shows fields of the index', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+
+        expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
+        expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
   });

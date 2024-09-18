@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ import {
   EuiSkeletonText,
   EuiFormControlLayout,
   EuiErrorBoundary,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
@@ -56,8 +58,11 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props) => {
-  const { width, height, options, fullWidth, useDarkTheme } = props;
+  const { width, height, options, fullWidth, useDarkTheme: useDarkThemeProp } = props;
+  const { colorMode } = useEuiTheme();
+  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
   const theme = useDarkTheme ? darkTheme : lightTheme;
+
   const style = {
     width,
     height,

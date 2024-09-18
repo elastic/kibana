@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 
-import { createAlertsIndex, deleteAllRules, deleteAllAlerts, getStats } from '../../../utils';
+import { getStats } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
+
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -18,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('@ess @serverless @skipInQA Detection rule telemetry', async () => {
+  describe('@ess @serverless @skipInServerlessMKI Detection rule telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });

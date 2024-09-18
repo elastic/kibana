@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
@@ -553,9 +554,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
                 ).to.be.greaterThan(0);
                 expect(
+                  // @ts-expect-error upgrade typescript v5.1.6
                   event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms! >= 0
                 ).to.be(true);
                 expect(
+                  // @ts-expect-error upgrade typescript v5.1.6
                   event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms! >= 0
                 ).to.be(true);
                 expect(
@@ -1239,7 +1242,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             )
             .map((event) => event?.kibana?.alert?.flapping);
           const result = [false, false, false, false, false].concat(
-            new Array(7).fill(true),
+            new Array(9).fill(true),
             false,
             false,
             false
@@ -1347,7 +1350,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             )
             .map((event) => event?.kibana?.alert?.flapping);
           const result = [false, false, false, false, false].concat(
-            new Array(7).fill(true),
+            new Array(9).fill(true),
             false,
             false,
             false
@@ -1442,7 +1445,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
+          expect(flapping).to.eql(
+            [false, false, false, false, false].concat(new Array(8).fill(true))
+          );
         });
 
         it('should generate expected events for flapping alerts that settle on recovered where the action notifyWhen is NOT set to "on status change"', async () => {
@@ -1543,7 +1548,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
+          expect(flapping).to.eql(
+            [false, false, false, false, false].concat(new Array(8).fill(true))
+          );
         });
 
         it('should generate expected uuids for events for flapping alerts that go active while flapping and eventually recover', async () => {
@@ -1849,7 +1856,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(hasActions).eql(false);
         });
 
-        it('should generate expected events with a notificationDelay', async () => {
+        it('should generate expected events with a alertDelay', async () => {
+          const ACTIVE_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.active';
+          const NEW_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.new';
+          const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';
+          const ACTION_PATH = 'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
+          const DELAYED_PATH = 'kibana.alert.rule.execution.metrics.number_of_delayed_alerts';
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1863,7 +1876,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // pattern of when the alert should fire
           const pattern = {
-            instance: [true, true, true, false, true],
+            instance: [true, true, true, true, false, true],
           };
 
           const response = await supertest
@@ -1874,6 +1887,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '1s' },
                 throttle: null,
+                notify_when: null,
                 params: {
                   pattern,
                 },
@@ -1882,9 +1896,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     id: createdAction.id,
                     group: 'default',
                     params: {},
+                    frequency: {
+                      summary: false,
+                      throttle: null,
+                      notify_when: RuleNotifyWhen.CHANGE,
+                    },
                   },
                 ],
-                notification_delay: {
+                alert_delay: {
                   active: 3,
                 },
               })
@@ -1904,101 +1923,53 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 5 }],
-                ['execute', { gte: 5 }],
-                ['new-instance', { equal: 2 }],
-                ['active-instance', { gte: 1 }],
+                ['execute-start', { equal: 6 }],
+                ['execute', { equal: 6 }],
+                ['new-instance', { equal: 1 }],
+                ['active-instance', { equal: 2 }],
                 ['recovered-instance', { equal: 1 }],
               ]),
             });
           });
 
-          const actualTriggeredActions = events
-            .filter((event) => event?.event?.action === 'execute')
-            .reduce(
-              (acc, event) =>
-                acc +
-                (event?.kibana?.alert?.rule?.execution?.metrics
-                  ?.number_of_triggered_actions as number),
-              0
-            );
-          expect(actualTriggeredActions).to.eql(1);
-        });
+          const executeEvents = events.filter((event) => event?.event?.action === 'execute');
 
-        it('should generate expected events with a notificationDelay with AAD', async () => {
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'MY action',
-              connector_type_id: 'test.noop',
-              config: {},
-              secrets: {},
-            })
-            .expect(200);
-
-          // pattern of when the alert should fire
-          const pattern = {
-            instance: [true, true, true, false, true],
-          };
-
-          const response = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.patternFiringAad',
-                schedule: { interval: '1s' },
-                throttle: null,
-                params: {
-                  pattern,
-                },
-                actions: [
-                  {
-                    id: createdAction.id,
-                    group: 'default',
-                    params: {},
-                  },
-                ],
-                notification_delay: {
-                  active: 3,
-                },
-              })
-            );
-
-          expect(response.status).to.eql(200);
-          const alertId = response.body.id;
-          objectRemover.add(space.id, alertId, 'rule', 'alerting');
-
-          // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 5 }],
-                ['execute', { gte: 5 }],
-                ['new-instance', { equal: 2 }],
-                ['active-instance', { gte: 1 }],
-                ['recovered-instance', { equal: 1 }],
-              ]),
-            });
+          // first two executions do not create the active alert
+          executeEvents.slice(0, 1).forEach((event) => {
+            expect(get(event, ACTIVE_PATH)).to.be(0);
+            expect(get(event, NEW_PATH)).to.be(0);
+            expect(get(event, RECOVERED_PATH)).to.be(0);
+            expect(get(event, ACTION_PATH)).to.be(0);
+            expect(get(event, DELAYED_PATH)).to.be(1);
           });
 
-          const actualTriggeredActions = events
-            .filter((event) => event?.event?.action === 'execute')
-            .reduce(
-              (acc, event) =>
-                acc +
-                (event?.kibana?.alert?.rule?.execution?.metrics
-                  ?.number_of_triggered_actions as number),
-              0
-            );
-          expect(actualTriggeredActions).to.eql(1);
+          // third executions creates the delayed active alert and triggers actions
+          expect(get(executeEvents[2], ACTIVE_PATH)).to.be(1);
+          expect(get(executeEvents[2], NEW_PATH)).to.be(1);
+          expect(get(executeEvents[2], RECOVERED_PATH)).to.be(0);
+          expect(get(executeEvents[2], ACTION_PATH)).to.be(1);
+          expect(get(executeEvents[2], DELAYED_PATH)).to.be(0);
+
+          // fourth execution
+          expect(get(executeEvents[3], ACTIVE_PATH)).to.be(1);
+          expect(get(executeEvents[3], NEW_PATH)).to.be(0);
+          expect(get(executeEvents[3], RECOVERED_PATH)).to.be(0);
+          expect(get(executeEvents[3], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[3], DELAYED_PATH)).to.be(0);
+
+          // fifth recovered execution
+          expect(get(executeEvents[4], ACTIVE_PATH)).to.be(0);
+          expect(get(executeEvents[4], NEW_PATH)).to.be(0);
+          expect(get(executeEvents[4], RECOVERED_PATH)).to.be(1);
+          expect(get(executeEvents[4], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[4], DELAYED_PATH)).to.be(0);
+
+          // sixth execution does not create the active alert
+          expect(get(executeEvents[5], ACTIVE_PATH)).to.be(0);
+          expect(get(executeEvents[5], NEW_PATH)).to.be(0);
+          expect(get(executeEvents[5], RECOVERED_PATH)).to.be(0);
+          expect(get(executeEvents[5], ACTION_PATH)).to.be(0);
+          expect(get(executeEvents[5], DELAYED_PATH)).to.be(1);
         });
       });
     }

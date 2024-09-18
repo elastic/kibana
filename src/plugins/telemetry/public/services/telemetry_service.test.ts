@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
@@ -13,6 +14,7 @@ import { mockTelemetryService } from '../mocks';
 import {
   FetchSnapshotTelemetry,
   INTERNAL_VERSION,
+  LastReportedRoute,
   OptInRoute,
   UserHasSeenNoticeRoute,
 } from '../../common/routes';
@@ -275,8 +277,8 @@ describe('TelemetryService', () => {
   });
 
   describe('reportOptInStatus', () => {
-    let originalFetch: typeof window['fetch'];
-    let mockFetch: jest.Mock<typeof window['fetch']>;
+    let originalFetch: (typeof window)['fetch'];
+    let mockFetch: jest.Mock<(typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -352,6 +354,19 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.canSendTelemetry()).toBe(true);
+    });
+  });
+
+  describe('updateLastReported', () => {
+    let telemetryService: ReturnType<typeof mockTelemetryService>;
+
+    beforeEach(() => {
+      telemetryService = mockTelemetryService();
+    });
+
+    it('calls expected URL with expected headers', async () => {
+      await telemetryService.updateLastReported();
+      expect(telemetryService['http'].put).toBeCalledWith(LastReportedRoute, INTERNAL_VERSION);
     });
   });
 });

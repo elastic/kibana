@@ -49,7 +49,7 @@ const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
   type: AttachmentType.user as const,
 };
-const appId = 'testAppId';
+const appId = 'securitySolution';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
 describe('AddComment ', () => {
@@ -103,9 +103,9 @@ describe('AddComment ', () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-    userEvent.type(markdown, sampleData.comment);
+    await userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    await userEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>
@@ -131,7 +131,8 @@ describe('AddComment ', () => {
 
     appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
 
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(sampleData.comment);
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
@@ -173,8 +174,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, 'test');
-      userEvent.clear(markdown);
+      await userEvent.type(markdown, 'test');
+      await userEvent.clear(markdown);
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -187,8 +188,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(markdown);
-      userEvent.type(markdown, '  ');
+      await userEvent.clear(markdown);
+      await userEvent.type(markdown, '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -203,7 +204,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.click(markdown);
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(

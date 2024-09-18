@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,17 +18,16 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
-  let history: () => History;
+  let history: History;
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
     spaces.ui.components.getLegacyUrlConflict = jest.fn().mockReturnValue('callout');
-    history = () =>
-      ({
-        location: {
-          search: '?_g=foo',
-        },
-      } as History);
+    history = {
+      location: {
+        search: '?_g=foo',
+      },
+    } as History;
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {

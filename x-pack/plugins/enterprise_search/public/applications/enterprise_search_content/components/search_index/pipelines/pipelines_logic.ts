@@ -227,16 +227,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as mlInferencePipelineProcessors'],
     ],
   },
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.fetchDefaultPipeline(undefined);
-      actions.setPipelineState(
-        isConnectorIndex(values.index) || isCrawlerIndex(values.index)
-          ? values.index.connector?.pipeline ?? values.defaultPipelineValues
-          : values.defaultPipelineValues
-      );
-    },
-  }),
   listeners: ({ actions, values }) => ({
     apiSuccess: ({ pipeline }) => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
@@ -365,6 +355,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setPipelineState: (_, { pipeline }) => pipeline,
       },
     ],

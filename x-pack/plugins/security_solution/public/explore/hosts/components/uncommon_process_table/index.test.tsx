@@ -10,15 +10,12 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
-import '../../../../common/mock/match_media';
 import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
-import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
+import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
-import { HostsType } from '../../store/model';
-import * as i18n from './translations';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -66,8 +63,8 @@ describe('Uncommon Process Table Component', () => {
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
-      expect(wrapper.find('.euiTableRow').at(0).find('.euiTableRowCell').at(3).text()).toBe(
-        `Host names${getEmptyValue()}`
+      expect(wrapper.find('tr.euiTableRow').at(0).find('td.euiTableRowCell').at(3).text()).toBe(
+        `${getEmptyValue()}`
       );
     });
 
@@ -78,8 +75,8 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('.euiTableRow').at(1).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world '
+      expect(wrapper.find('tr.euiTableRow').at(1).find('td.euiTableRowCell').at(3).text()).toBe(
+        'hello-world '
       );
     });
 
@@ -91,7 +88,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(
-        wrapper.find('.euiTableRow').at(1).find('.euiTableRowCell').at(3).find('a').length
+        wrapper.find('tr.euiTableRow').at(1).find('td.euiTableRowCell').at(3).find('a').length
       ).toBe(1);
     });
 
@@ -102,8 +99,8 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-worldhello-world-2 '
+      expect(wrapper.find('tr.euiTableRow').at(2).find('td.euiTableRowCell').at(3).text()).toBe(
+        'hello-worldhello-world-2 '
       );
     });
 
@@ -115,7 +112,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(
-        wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).find('a').length
+        wrapper.find('tr.euiTableRow').at(2).find('td.euiTableRowCell').at(3).find('a').length
       ).toBe(2);
     });
 
@@ -125,8 +122,8 @@ describe('Uncommon Process Table Component', () => {
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
-      expect(wrapper.find('.euiTableRow').at(3).find('.euiTableRowCell').at(3).text()).toBe(
-        `Host names${getEmptyValue()}`
+      expect(wrapper.find('tr.euiTableRow').at(3).find('td.euiTableRowCell').at(3).text()).toBe(
+        `${getEmptyValue()}`
       );
     });
 
@@ -137,7 +134,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(
-        wrapper.find('.euiTableRow').at(3).find('.euiTableRowCell').at(3).find('a').length
+        wrapper.find('tr.euiTableRow').at(3).find('td.euiTableRowCell').at(3).find('a').length
       ).toBe(0);
     });
 
@@ -147,60 +144,9 @@ describe('Uncommon Process Table Component', () => {
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
-      expect(wrapper.find('.euiTableRow').at(4).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-worldhello-world-2 '
+      expect(wrapper.find('tr.euiTableRow').at(4).find('td.euiTableRowCell').at(3).text()).toBe(
+        'hello-worldhello-world-2 '
       );
-    });
-  });
-
-  describe('#getArgs', () => {
-    test('it works with string array', () => {
-      const args = ['1', '2', '3'];
-      expect(getArgs(args)).toEqual('1 2 3');
-    });
-
-    test('it returns null if empty array', () => {
-      const args: string[] = [];
-      expect(getArgs(args)).toEqual(null);
-    });
-
-    test('it returns null if given null', () => {
-      expect(getArgs(null)).toEqual(null);
-    });
-
-    test('it returns null if given undefined', () => {
-      expect(getArgs(undefined)).toEqual(null);
-    });
-  });
-
-  describe('#getUncommonColumnsCurated', () => {
-    test('on hosts page, we expect to get all columns', () => {
-      expect(getUncommonColumnsCurated(HostsType.page).length).toEqual(6);
-    });
-
-    test('on host details page, we expect to remove two columns', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.length).toEqual(4);
-    });
-
-    test('on host page, we should have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(true);
-    });
-
-    test('on host page, we should have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
-    });
-
-    test('on host details page, we should not have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(false);
-    });
-
-    test('on host details page, we should not have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });
 });

@@ -29,7 +29,7 @@ client = Elasticsearch(
   },
   iconType: 'python.svg',
   id: Languages.PYTHON,
-  ingestData: `documents = [
+  ingestData: ({ ingestPipeline }) => `documents = [
   { "index": { "_index": "books", "_id": "9780553351927"}},
   {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470},
   { "index": { "_index": "books", "_id": "9780441017225"}},
@@ -44,11 +44,12 @@ client = Elasticsearch(
   {"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311},
 ]
 
-client.bulk(operations=documents)`,
+client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline}"` : ''})`,
   ingestDataIndex: ({
     apiKey,
     url,
     indexName,
+    ingestPipeline,
   }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
@@ -61,7 +62,7 @@ documents = [
   {"name": "foo", "title": "bar"},
 ]
 
-client.bulk(operations=documents)
+client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline}"` : ''})
 `,
   installClient: `python -m pip install elasticsearch-serverless
 

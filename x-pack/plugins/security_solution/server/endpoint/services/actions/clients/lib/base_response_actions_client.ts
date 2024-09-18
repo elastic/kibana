@@ -9,54 +9,104 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import { i18n } from '@kbn/i18n';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { NotFoundError } from '../../../../errors';
+import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
+import { SimpleMemCache } from './simple_mem_cache';
+import {
+  fetchActionResponses,
+  fetchEndpointActionResponses,
+} from '../../utils/fetch_action_responses';
+import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
+import {
+  getActionCompletionInfo,
+  getActionRequestExpiration,
+  mapResponsesByActionId,
+  mapToNormalizedActionRequest,
+} from '../../utils';
+import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
-  addRuleInfoToAction,
-  getActionParameters,
-  getActionRequestExpiration,
-} from '../../create/write_action_to_indices';
-import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionsClient } from './types';
+import type {
+  CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
+  ProcessPendingActionsMethodOptions,
+  ResponseActionsClient,
+} from './types';
 import type {
   ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  LogsEndpointAction,
-  EndpointActionDataParameterTypes,
-  LogsEndpointActionResponse,
-  EndpointActionResponseDataOutput,
+  UploadedFileInfo,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
-import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
+import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
+import { EMPTY_COMMENT } from '../../../../utils/translations';
+
+const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username: string = 'system',
+  command: ResponseActionsApiCommandNames,
+  responseActionId: string
+): string => {
+  return i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, command, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user [{username}] for action [{command} (action id: {responseActionId})]`,
+  });
+};
+
+const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.licenseTooLow',
+  {
+    defaultMessage: 'At least Enterprise license is required to use Response Actions.',
+  }
+);
+
+export const HOST_NOT_ENROLLED = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.hostNotEnrolled',
+  {
+    defaultMessage: 'The host does not have Elastic Defend integration installed',
+  }
+);
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -64,6 +114,12 @@ export interface ResponseActionsClientOptions {
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
+  /**
+   * Is the instance of the client being used for automated response actions.
+   * When set to `true`, additional checks will be performed and the Endpoint response action
+   * request will (almost) always be created, even if there certain errors occur along the way
+   */
+  isAutomated?: boolean;
 }
 
 export interface ResponseActionsClientUpdateCasesOptions {
@@ -79,25 +135,63 @@ export interface ResponseActionsClientUpdateCasesOptions {
   alertIds?: string[];
   /** Comment to include in the Case attachment */
   comment?: string;
+  /** The id of the action that was taken */
+  actionId: string;
 }
 
-export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
-  ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> = ResponseActionsRequestBody &
+  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+  Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
+    command: ResponseActionsApiCommandNames;
+    actionId?: string;
+  };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
-} & Pick<LogsEndpointActionResponse, 'error'> &
+} & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
+export type ResponseActionsClientValidateRequestResponse =
+  | {
+      isValid: true;
+      error: undefined;
+    }
+  | {
+      isValid: false;
+      error: ResponseActionsClientError;
+    };
+
+export interface FetchActionResponseEsDocsResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
+
+export interface ResponseActionsClientPendingAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  action: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+  pendingAgentIds: string[];
+}
 
 /**
  * Base class for a Response Actions client
  */
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected readonly cache = new SimpleMemCache();
 
   protected abstract readonly agentType: ResponseActionAgentType;
 
@@ -119,14 +213,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     caseIds = [],
     alertIds = [],
     comment = '',
+    actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
-      this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
+      this.log.debug(`No updates to Cases needed. 'caseIds' and 'alertIds' are empty`);
       return;
     }
 
     if (hosts.length === 0) {
-      this.log.debug(`Nothing to do. 'hosts' is empty`);
+      this.log.debug(`No updates to Cases needed. 'hosts' is empty`);
       return;
     }
 
@@ -160,41 +255,64 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
 
     if (allCases.length === 0) {
-      this.log.debug(`Nothing to do. Alert IDs are not tied to Cases`);
+      this.log.debug(`No updates to Cases needed. Alert IDs are not tied to Cases`);
       return;
     }
 
-    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
+    this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
-    // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments = allCases.map(() => ({
-      type: AttachmentType.actions,
-      comment,
-      actions: {
-        targets: hosts.map(({ hostId: endpointId, hostname }) => ({ endpointId, hostname })),
-        type: command,
+    const attachments: CaseAttachments = [
+      {
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        externalReferenceMetadata: {
+          targets: hosts.map(({ hostId: endpointId, hostname }) => {
+            return {
+              endpointId,
+              hostname,
+              agentType: this.agentType,
+            };
+          }),
+          command,
+          comment: comment || EMPTY_COMMENT,
+        },
+        owner: APP_ID,
       },
-      owner: APP_ID,
-    })) as BulkCreateArgs['attachments'];
+    ];
 
     const casesUpdateResponse = await Promise.all(
-      allCases.map((caseId) =>
-        casesClient.attachments
-          .bulkCreate({
+      allCases.map(async (caseId) => {
+        try {
+          return await casesClient.attachments.bulkCreate({
             caseId,
             attachments,
-          })
-          .catch((err) => {
-            // Log any error, BUT: do not fail execution
-            this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
-            );
-            return null;
-          })
-      )
+          });
+        } catch (err) {
+          this.log.warn(
+            `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
+          );
+          return null;
+        }
+      })
     );
 
-    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+    this.log.debug(() => `Update to cases done:\n${stringify(casesUpdateResponse)}`);
+  }
+
+  protected getMethodOptions<
+    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+  >(options: Partial<T> = {}): WithAllKeys<CommonResponseActionMethodOptions> {
+    return {
+      hosts: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
+      error: undefined,
+      ...options,
+    };
   }
 
   /**
@@ -213,21 +331,149 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Fetches the Action request ES document for a given action id
+   * @param actionId
+   * @protected
+   */
+  protected async fetchActionRequestEsDoc<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
+    const cachedResponse =
+      this.cache.get<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(cacheKey);
+
+    if (cachedResponse) {
+      this.log.debug(
+        `fetchActionRequestEsDoc(): returning cached response for action id ${actionId}`
+      );
+      return cachedResponse;
+    }
+
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
+  }
+
+  /**
+   * Fetches the Response Action ES response documents for a given action id
+   * @param actionId
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchActionResponseEsDocs<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionId: string,
+    /** Specific Agent IDs to retrieve. default is to retrieve all */
+    agentIds?: string[]
+  ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
+    const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
+      esClient: this.options.esClient,
+      actionIds: [actionId],
+      agentIds,
+    });
+
+    return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
+      (acc, response) => {
+        const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+
+        acc[agentId] = response;
+
+        return acc;
+      },
+      {}
+    );
+  }
+
+  /**
+   * Provides validations against a response action request and returns the result.
+   * Checks made should be generic to all response actions and not specific to any one action.
+   *
+   * @param actionRequest
+   * @protected
+   */
+  protected async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Validation for Automated Response actions
+    if (this.options.isAutomated) {
+      // Automated response actions is an Enterprise level feature
+      if (!this.options.endpointService.getLicenseService().isEnterprise()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(ENTERPRISE_LICENSE_REQUIRED_MSG, 403),
+        };
+      }
+    }
+
+    if (actionRequest.endpoint_ids.length === 0) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(HOST_NOT_ENROLLED, 400),
+      };
+    }
+
+    if (
+      !isActionSupportedByAgentType(
+        this.agentType,
+        actionRequest.command,
+        this.options.isAutomated ? 'automated' : 'manual'
+      )
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsNotSupportedError(actionRequest.command),
+      };
+    }
+
+    return { isValid: true, error: undefined };
+  }
+
+  /**
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    let errorMsg = String(actionRequest.error ?? '').trim();
+
+    if (!errorMsg) {
+      const validation = await this.validateRequest(actionRequest);
+
+      if (!validation.isValid) {
+        if (this.options.isAutomated) {
+          errorMsg = validation.error.message;
+        } else {
+          throw validation.error;
+        }
+      }
+    }
+
     this.notifyUsage(actionRequest.command);
 
-    const doc: LogsEndpointAction = {
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
       },
       EndpointActions: {
-        action_id: uuidv4(),
+        action_id: actionRequest.actionId || uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,
@@ -236,13 +482,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: getActionParameters(actionRequest) as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
         id: this.options.username,
       },
-      ...addRuleInfoToAction(actionRequest),
+      meta: actionRequest.meta,
+      ...(errorMsg ? { error: { message: errorMsg } } : {}),
+      ...(actionRequest.ruleId && actionRequest.ruleName
+        ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
+        : {}),
     };
 
     try {
@@ -277,24 +527,22 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  /**
-   * Writes a Response Action response document to the Endpoint index
-   * @param options
-   * @protected
-   */
-  protected async writeActionResponseToEndpointIndex<
+  protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TMeta extends {} = {}
   >({
     actionId,
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): Promise<
-    LogsEndpointActionResponse<TOutputContent>
-  > {
+    meta,
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+    TOutputContent,
+    TMeta
+  >): LogsEndpointActionResponse<TOutputContent, TMeta> {
     const timestamp = new Date().toISOString();
-    const doc: LogsEndpointActionResponse<TOutputContent> = {
+    const doc: LogsEndpointActionResponse<TOutputContent, TMeta> = {
       '@timestamp': timestamp,
       agent: {
         id: agentId,
@@ -307,9 +555,26 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         data,
       },
       error,
+      meta,
     };
 
-    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
+    return doc;
+  }
+
+  /**
+   * Writes a Response Action response document to the Endpoint index
+   * @param options
+   * @protected
+   */
+  protected async writeActionResponseToEndpointIndex<
+    // Default type purposely set to empty object in order to ensure proper types are used when calling the method
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >(
+    options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
+  ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    const doc = this.buildActionResponseEsDoc(options);
+
+    this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
       .index<LogsEndpointActionResponse<TOutputContent>>({
@@ -342,51 +607,187 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
-  public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  /**
+   * Builds a comment for use in response action requests sent to external EDR systems
+   * @protected
+   */
+  protected buildExternalComment(
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): string {
+    const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
+
+    // If the action request index options does not yet have an actionId assigned to it, then do it now.
+    // Need to ensure we have an action id for cross-reference.
+    if (!actionRequestIndexOptions.actionId) {
+      actionRequestIndexOptions.actionId = actionId;
+    }
+
+    return (
+      ELASTIC_RESPONSE_ACTION_MESSAGE(this.options.username, command, actionId) +
+      (comment ? `: ${comment}` : '')
+    );
+  }
+
+  protected async ensureValidActionId(actionId: string): Promise<void> {
+    const actionRequest = await this.fetchActionRequestEsDoc(actionId);
+
+    if (actionRequest.EndpointActions.input_type !== this.agentType) {
+      throw new NotFoundError(
+        `Action id [${actionId}] with agent type of [${this.agentType}] not found`
+      );
+    }
+  }
+
+  protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
+    const esClient = this.options.esClient;
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: {
+          // Only actions for this agent type
+          term: { 'EndpointActions.input_type': this.agentType },
+        },
+        must_not: {
+          // No action requests that have an `error` property defined
+          exists: { field: 'error' },
+        },
+        filter: [
+          // We only want actions requests whose expiration date is greater than now
+          { range: { 'EndpointActions.expiration': { gte: 'now' } } },
+        ],
+      },
+    };
+
+    return createEsSearchIterable<LogsEndpointAction>({
+      esClient,
+      searchRequest: {
+        index: ENDPOINT_ACTIONS_INDEX,
+        sort: '@timestamp',
+        query,
+      },
+      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
+        const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
+        const pendingRequests: ResponseActionsClientPendingAction[] = [];
+
+        if (actionRequests.length > 0) {
+          const actionResults = await fetchActionResponses({
+            esClient,
+            actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
+          });
+          const responsesByActionId = mapResponsesByActionId(actionResults);
+
+          // Determine what actions are still pending
+          for (const actionRequest of actionRequests) {
+            const actionCompleteInfo = getActionCompletionInfo(
+              mapToNormalizedActionRequest(actionRequest),
+              responsesByActionId[actionRequest.EndpointActions.action_id] ?? {
+                endpointResponses: [],
+                fleetResponses: [],
+              }
+            );
+
+            // If not completed, add action to the pending list and calculate the list of agent IDs
+            // whose response we are still waiting on
+            if (!actionCompleteInfo.isCompleted) {
+              const pendingActionData: ResponseActionsClientPendingAction = {
+                action: actionRequest,
+                pendingAgentIds: [],
+              };
+
+              for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
+                if (!agentIdState.isCompleted) {
+                  pendingActionData.pendingAgentIds.push(agentId);
+                }
+              }
+
+              pendingRequests.push(pendingActionData);
+            }
+          }
+        }
+
+        return pendingRequests;
+      },
+    });
+  }
+
+  public async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('isolate');
   }
 
-  public async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async release(
+    actionRequest: UnisolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('kill-process');
   }
 
   public async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: SuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('suspend-process');
   }
 
   public async runningProcesses(
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     throw new ResponseActionsNotSupportedError('running-processes');
   }
 
   public async getFile(
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     throw new ResponseActionsNotSupportedError('get-file');
   }
 
   public async execute(
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     throw new ResponseActionsNotSupportedError('execute');
   }
 
   public async upload(
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
+  }
+
+  public async scan(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
+    throw new ResponseActionsNotSupportedError('scan');
+  }
+
+  public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
+    this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
+  }
+
+  public async getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<GetFileDownloadMethodResponse> {
+    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+  }
+
+  public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
+    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }

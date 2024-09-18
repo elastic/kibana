@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -68,16 +69,18 @@ const createStartContractMock = () => {
     getBodyClasses$: jest.fn(),
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
+    getActiveSolutionNavId$: jest.fn(),
     project: {
       setHome: jest.fn(),
-      setProjectsUrl: jest.fn(),
-      setProjectUrl: jest.fn(),
+      setCloudUrls: jest.fn(),
       setProjectName: jest.fn(),
       initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
       getNavigationTreeUi$: jest.fn(),
+      changeActiveSolutionNavigation: jest.fn(),
+      updateSolutionNavigations: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);

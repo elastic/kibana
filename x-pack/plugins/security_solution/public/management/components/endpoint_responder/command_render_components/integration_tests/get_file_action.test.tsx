@@ -14,10 +14,12 @@ import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
+import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { GET_FILE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type {
@@ -33,9 +35,9 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using get-file action from response actions console', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -45,12 +47,31 @@ describe('When using get-file action from response actions console', () => {
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
   let endpointPrivileges: EndpointPrivileges;
+  let getConsoleCommandsOptions: GetEndpointConsoleCommandsOptions;
+  let mockedContext: AppContextTestRender;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
+
+    getConsoleCommandsOptions = {
+      agentType: 'endpoint',
+      endpointAgentId: 'a.b.c',
+      endpointCapabilities: [...ENDPOINT_CAPABILITIES],
+      endpointPrivileges,
+    };
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
@@ -60,10 +81,8 @@ describe('When using get-file action from response actions console', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
-                  agentType: 'endpoint',
-                  endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...capabilities],
-                  endpointPrivileges,
+                  ...getConsoleCommandsOptions,
+                  endpointCapabilities: capabilities,
                 }),
               },
             };
@@ -71,7 +90,10 @@ describe('When using get-file action from response actions console', () => {
         />
       );
 
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -82,7 +104,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if the `get_file` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'get-file')
@@ -92,7 +114,7 @@ describe('When using get-file action from response actions console', () => {
   it('should show an error if the `get-file` is not authorized', async () => {
     endpointPrivileges.canWriteFileOperations = false;
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -101,7 +123,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if `get-file` is entered without `--path` argument', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file');
+    await enterConsoleCommand(renderResult, user, 'get-file');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --path'
@@ -110,7 +132,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show error if `--path` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path=""');
+    await enterConsoleCommand(renderResult, user, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --path. Argument cannot be empty'
@@ -119,11 +141,11 @@ describe('When using get-file action from response actions console', () => {
 
   it('should call the `get_file` api with the expected payload', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
-        body: '{"endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+        body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
         path: GET_FILE_ROUTE,
         version: '2023-10-31',
       });
@@ -132,7 +154,11 @@ describe('When using get-file action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two" --comment "one" --comment "two"');
+    await enterConsoleCommand(
+      renderResult,
+      user,
+      'get-file --path="one/two" --comment "one" --comment "two"'
+    );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -154,7 +180,7 @@ describe('When using get-file action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -182,11 +208,20 @@ describe('When using get-file action from response actions console', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
+
+    pendingDetailResponse.data.command = 'get-file';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['not found'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.outputs = {
-      'a.b.c': {
+      'agent-a': {
         type: 'json',
         content: {
           code: outputCode,
@@ -195,13 +230,66 @@ describe('When using get-file action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path one');
+    await enterConsoleCommand(renderResult, user, 'get-file --path one');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFile-actionFailure').textContent).toMatch(
         // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
+    });
+  });
+
+  describe('And agent type is SentinelOne', () => {
+    beforeEach(() => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneGetFileEnabled: true,
+      });
+    });
+
+    it('should display error if feature flag is not enabled', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneGetFileEnabled: false,
+      });
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
+      );
+    });
+
+    it('should call API with `agent_type` set to `sentinel_one`', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"sentinel_one","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not look at `capabilities` to determine compatibility', async () => {
+      await render([]);
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalled();
+      });
+      expect(renderResult.queryByTestId('test-validationError-message')).toBeNull();
+    });
+
+    it('should display pending message', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('getFile-pending'));
+      });
     });
   });
 });

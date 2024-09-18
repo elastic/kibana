@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/175905
+  // FLAKY: https://github.com/elastic/kibana/issues/178413
   describe.skip('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
@@ -72,20 +72,79 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175614
-    describe.skip('Rules Page - Bulk Action buttons', () => {
-      it('It should disable both Enable and Disable options when there are no rules selected', async () => {
-        await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(true);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(true);
+    describe('Rules Page - Rules Counters', () => {
+      it('Shows posture score when there are findings', async () => {
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(false);
+
+        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        expect((await postureScoreCounter.getVisibleText()).includes('33%')).to.be(true);
       });
 
+      it('Clicking the posture score button leads to the dashboard', async () => {
+        await rule.rulePage.clickPostureScoreButton();
+        await pageObjects.common.waitUntilUrlIncludes('cloud_security_posture/dashboard');
+      });
+
+      it('Shows integrations count when there are findings', async () => {
+        const integrationsCounter = await rule.rulePage.getIntegrationsEvaluatedCounter();
+        expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
+      });
+
+      it('Clicking the integrations counter button leads to the integration page', async () => {
+        await rule.rulePage.clickIntegrationsEvaluatedButton();
+        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+      });
+
+      it('Shows the failed findings counter when there are findings', async () => {
+        const failedFindingsCounter = await rule.rulePage.getFailedFindingsCounter();
+        expect((await failedFindingsCounter.getVisibleText()).includes('2')).to.be(true);
+      });
+
+      it('Clicking the failed findings button leads to the findings page', async () => {
+        await rule.rulePage.clickFailedFindingsButton();
+        await pageObjects.common.waitUntilUrlIncludes(
+          'cloud_security_posture/findings/configurations'
+        );
+      });
+
+      it('Shows the disabled rules count', async () => {
+        const disabledRulesCounter = await rule.rulePage.getDisabledRulesCounter();
+        expect((await disabledRulesCounter.getVisibleText()).includes('0')).to.be(true);
+
+        // disable rule 1.1.1 (k8s findings mock contains a findings from that rule)
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await disabledRulesCounter.getVisibleText()).includes('1')).to.be(true);
+
+        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        expect((await postureScoreCounter.getVisibleText()).includes('0%')).to.be(true);
+
+        // enable rule back
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+      });
+
+      it('Clicking the disabled rules button shows enables the disabled filter', async () => {
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await rule.rulePage.clickDisabledRulesButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      });
+
+      it('Shows empty state when there are no findings', async () => {
+        // Ensure there are no findings initially
+        await findings.index.remove();
+        await rule.navigateToRulePage('cis_k8s', '1.0.1');
+
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(true);
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+      });
+    });
+
+    describe('Rules Page - Bulk Action buttons', () => {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
@@ -97,6 +156,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
             'true'
         ).to.be(false);
+      });
+
+      it('It should disable both Enable and Disable options when there are no rules selected', async () => {
+        await rule.rulePage.toggleBulkActionButton();
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+            'true'
+        ).to.be(true);
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+            'true'
+        ).to.be(true);
       });
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
@@ -178,6 +249,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
       });
+      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {
+        await rule.rulePage.clickRulesNames(0);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          (await rule.rulePage.doesElementExist(
+            'csp:findings-flyout-create-detection-rule-link'
+          )) === false
+        ).to.be(true);
+      });
       it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
         await rule.rulePage.clickRulesNames(0);
         await rule.rulePage.clickTakeActionButton();
@@ -185,78 +265,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
       });
-    });
-
-    describe('Rules Page - Rules Counters', () => {
-      it('Shows posture score when there are findings', async () => {
-        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
-        expect(isEmptyStateVisible).to.be(false);
-
-        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
-        expect((await postureScoreCounter.getVisibleText()).includes('33%')).to.be(true);
-      });
-
-      it('Clicking the posture score button leads to the dashboard', async () => {
-        await rule.rulePage.clickPostureScoreButton();
-        await pageObjects.common.waitUntilUrlIncludes('cloud_security_posture/dashboard');
-      });
-
-      it('Shows integrations count when there are findings', async () => {
-        const integrationsCounter = await rule.rulePage.getIntegrationsEvaluatedCounter();
-        expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
-      });
-
-      it('Clicking the integrations counter button leads to the integration page', async () => {
-        await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await pageObjects.common.waitUntilUrlIncludes(
-          'cloud_security_posture/add-integration/kspm'
-        );
-      });
-
-      it('Shows the failed findings counter when there are findings', async () => {
-        const failedFindingsCounter = await rule.rulePage.getFailedFindingsCounter();
-        expect((await failedFindingsCounter.getVisibleText()).includes('2')).to.be(true);
-      });
-
-      it('Clicking the failed findings button leads to the findings page', async () => {
-        await rule.rulePage.clickFailedFindingsButton();
-        await pageObjects.common.waitUntilUrlIncludes(
-          'cloud_security_posture/findings/configurations'
-        );
-      });
-
-      it('Shows the disabled rules count', async () => {
-        const disabledRulesCounter = await rule.rulePage.getDisabledRulesCounter();
-        expect((await disabledRulesCounter.getVisibleText()).includes('0')).to.be(true);
-
-        // disable rule 1.1.1 (k8s findings mock contains a findings from that rule)
-        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {
+        await rule.rulePage.clickRulesNames(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await disabledRulesCounter.getVisibleText()).includes('1')).to.be(true);
-
-        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
-        expect((await postureScoreCounter.getVisibleText()).includes('0%')).to.be(true);
-
-        // enable rule back
-        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
-      });
-
-      it('Clicking the disabled rules button shows enables the disabled filter', async () => {
-        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        await rule.rulePage.clickDisabledRulesButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
-      });
-
-      it('Shows empty state when there are no findings', async () => {
-        // Ensure there are no findings initially
-        await findings.index.remove();
-        await rule.navigateToRulePage('cis_k8s', '1.0.1');
-
-        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
-        expect(isEmptyStateVisible).to.be(true);
+        expect(
+          (await rule.rulePage.doesElementExist(
+            'csp:findings-flyout-create-detection-rule-link'
+          )) === true
+        ).to.be(true);
       });
     });
   });

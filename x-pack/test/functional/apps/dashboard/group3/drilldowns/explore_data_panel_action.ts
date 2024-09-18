@@ -29,26 +29,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
         await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
       }
     );
 
-    before('start on Dashboard landing page', async () => {
-      await dashboard.navigateToApp();
-      await dashboard.preserveCrossAppState();
-    });
-
-    after('set back default index pattern', async () => {
+    after('set back default index pattern and clean-up custom time range on panel', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-    });
-
-    after('clean-up custom time range on panel', async () => {
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.disableCustomTimeRange();
       await dashboardCustomizePanel.clickSaveButton();
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
     });
 
     it('action exists in panel context menu', async () => {
@@ -85,7 +82,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
       await dashboardCustomizePanel.clickSaveButton();
 
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
 
       await panelActions.openContextMenu();
       await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);

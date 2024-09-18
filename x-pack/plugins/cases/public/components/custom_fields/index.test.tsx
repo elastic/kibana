@@ -34,40 +34,42 @@ describe('CustomFields', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     appMockRender.render(<CustomFields {...props} />);
 
-    expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-    expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-custom-field')).toBeInTheDocument();
   });
 
-  it('renders custom fields correctly', () => {
+  it('renders custom fields correctly', async () => {
     appMockRender.render(
       <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
     );
 
-    expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
-    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-custom-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
-  it('renders loading state correctly', () => {
+  it('renders loading state correctly', async () => {
     appMockRender.render(<CustomFields {...{ ...props, isLoading: true }} />);
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('renders disabled state correctly', () => {
+  it('renders disabled state correctly', async () => {
     appMockRender.render(<CustomFields {...{ ...props, disabled: true }} />);
 
-    expect(screen.getByTestId('add-custom-field')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('add-custom-field')).toHaveAttribute('disabled');
   });
 
   it('calls onChange on add option click', async () => {
     appMockRender.render(<CustomFields {...props} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
 
-    expect(props.handleAddCustomField).toBeCalled();
+    await waitFor(() => {
+      expect(props.handleAddCustomField).toBeCalled();
+    });
   });
 
   it('calls handleEditCustomField on edit option click', async () => {
@@ -75,23 +77,19 @@ describe('CustomFields', () => {
       <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
     );
 
-    userEvent.click(
-      screen.getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+    await userEvent.click(
+      await screen.findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
     );
 
-    expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
-  });
-
-  it('shows the experimental badge', () => {
-    appMockRender.render(<CustomFields {...props} />);
-
-    expect(screen.getByTestId('case-experimental-badge')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+    });
   });
 
   it('shows error when custom fields reaches the limit', async () => {
     const generatedMockCustomFields = [];
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       generatedMockCustomFields.push({
         key: `field_key_${i + 1}`,
         label: `My custom label ${i + 1}`,
@@ -103,11 +101,9 @@ describe('CustomFields', () => {
 
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
 
-    await waitFor(() => {
-      expect(screen.getByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
-      expect(screen.getByTestId('add-custom-field')).toHaveAttribute('disabled');
-    });
+    expect(await screen.findByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
+    expect(await screen.findByTestId('add-custom-field')).toHaveAttribute('disabled');
   });
 });

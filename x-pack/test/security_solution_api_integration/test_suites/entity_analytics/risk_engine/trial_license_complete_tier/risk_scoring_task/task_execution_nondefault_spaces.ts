@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../../detections_response/utils';
+import { dataGeneratorFactory } from '../../../../detections_response/utils';
+import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -23,7 +20,7 @@ import {
   deleteRiskScoreIndices,
 } from '../../../utils';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');

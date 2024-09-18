@@ -5,62 +5,41 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
+import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { EuiCommentProps } from '@elastic/eui';
+import { UserAvatar } from '.';
 
 export interface MessagePresentation {
   delay?: number;
   stream?: boolean;
 }
-export interface Message {
-  role: ConversationRole;
+
+// The ClientMessage is different from the Message in that it content
+// can be undefined and reader is the correct type which is unavailable in Zod
+export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Record<string, string>;
   content?: string;
-  timestamp: string;
-  isError?: boolean;
   presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
 }
-
-export interface ConversationTheme {
-  title?: JSX.Element | string;
-  titleIcon?: string;
-  user?: {
-    name?: string;
-    icon?: string;
-  };
-  assistant?: {
-    name?: string;
-    icon?: string;
-  };
-  system?: {
-    name?: string;
-    icon?: string;
-  };
-}
-
 /**
  * Complete state to reconstruct a conversation instance.
  * Includes all messages, connector configured, and relevant UI state.
  *
  */
 export interface Conversation {
-  apiConfig: {
-    connectorId?: string;
-    connectorTypeTitle?: string;
-    defaultSystemPromptId?: string;
-    provider?: OpenAiProviderType;
-    model?: string;
+  '@timestamp'?: string;
+  apiConfig?: ApiConfig;
+  user?: {
+    id?: string;
+    name?: string;
   };
+  category: string;
   id: string;
-  messages: Message[];
-  replacements?: Record<string, string>;
-  theme?: ConversationTheme;
+  title: string;
+  messages: ClientMessage[];
+  updatedAt?: Date;
+  createdAt?: Date;
+  replacements: Replacements;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -70,14 +49,13 @@ export interface AssistantTelemetry {
   reportAssistantMessageSent: (params: {
     conversationId: string;
     role: string;
+    actionTypeId: string;
+    model?: string;
+    provider?: string;
     isEnabledKnowledgeBase: boolean;
-    isEnabledRAGAlerts: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: {
-    isEnabledKnowledgeBase?: boolean;
-    isEnabledRAGAlerts?: boolean;
-  }) => void;
+  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
 }
 
 export interface AssistantAvailability {
@@ -89,4 +67,18 @@ export interface AssistantAvailability {
   hasConnectorsAllPrivilege: boolean;
   // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
   hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
 }
+
+export type GetAssistantMessages = (commentArgs: {
+  abortStream: () => void;
+  currentConversation?: Conversation;
+  isFetchingResponse: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
+  regenerateMessage: (conversationId: string) => void;
+  showAnonymizedValues: boolean;
+  currentUserAvatar?: UserAvatar;
+  setIsStreaming: (isStreaming: boolean) => void;
+  systemPromptContent?: string;
+}) => EuiCommentProps[];

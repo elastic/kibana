@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
 
@@ -44,12 +45,3 @@ export const apiPublishesWritableViewMode = (
     typeof (unknownApi as PublishesWritableViewMode).setViewMode === 'function'
   );
 };
-
-/**
- * A hook that gets this API's view mode as a reactive variable which will cause re-renders on change.
- */
-export const useViewMode = <
-  ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
->(
-  api: ApiType | undefined
-) => useStateFromPublishingSubject(api?.viewMode);

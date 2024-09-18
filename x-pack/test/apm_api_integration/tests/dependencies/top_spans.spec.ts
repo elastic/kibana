@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -66,6 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177135
   registry.when(
     'Top dependency spans when data is loaded',
     { config: 'basic', archives: [] },
@@ -79,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .instance('instance-a');
 
       before(async () => {
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -156,7 +157,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(javaSpans.length + goSpans.length).to.eql(spans.length);
 
           expect(omit(javaSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
-            '@timestamp': 1609459200000,
+            '@timestamp': 1609460040000,
             agentName: 'java',
             duration: 100000,
             serviceName: 'java',
@@ -167,7 +168,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(omit(goSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
-            '@timestamp': 1609459200000,
+            '@timestamp': 1609460040000,
             agentName: 'go',
             duration: 50000,
             serviceName: 'go',
@@ -238,7 +239,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
     }
   );
 }

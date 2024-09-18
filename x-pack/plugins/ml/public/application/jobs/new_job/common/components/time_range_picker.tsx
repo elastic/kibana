@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
-import moment, { Moment } from 'moment';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import { useMlKibana } from '../../../../contexts/kibana';
@@ -67,6 +69,9 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
           fullWidth={true}
           startDateControl={
             <EuiDatePicker
+              popperProps={{
+                'data-test-subj': 'mlJobWizardDatePickerRangeStartDate',
+              }}
               selected={startMoment}
               onChange={handleChangeStart}
               startDate={startMoment}
@@ -84,6 +89,9 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
           }
           endDateControl={
             <EuiDatePicker
+              popperProps={{
+                'data-test-subj': 'mlJobWizardDatePickerRangeEndDate',
+              }}
               selected={endMoment}
               onChange={handleChangeEnd}
               startDate={startMoment}

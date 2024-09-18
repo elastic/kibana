@@ -6,7 +6,7 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
 import type { SharedServices } from '../shared_services';
@@ -17,12 +17,6 @@ export function alertingRoutes(
 ) {
   /**
    * @apiGroup Alerting
-   *
-   * @api {post} /internal/ml/alerting/preview Preview alerting condition
-   * @apiName PreviewAlert
-   * @apiDescription Returns a preview of the alerting condition
-   *
-   * @apiSchema (body) mlAnomalyDetectionAlertPreviewRequest
    */
   router.versioned
     .post({
@@ -31,6 +25,8 @@ export function alertingRoutes(
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Previews an alerting condition',
+      description: 'Returns a preview of the alerting condition',
     })
     .addVersion(
       {

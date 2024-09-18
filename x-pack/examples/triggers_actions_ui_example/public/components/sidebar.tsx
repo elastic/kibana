@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
-export const Sidebar = () => {
-  const history = useHistory();
+export const Sidebar = ({ history }: { history: ScopedHistory }) => {
   return (
     <EuiPageSidebar>
       <EuiSideNav
@@ -73,6 +72,32 @@ export const Sidebar = () => {
                 id: 'rules settings link',
                 name: 'Rules Settings Link',
                 onClick: () => history.push('/rules_settings_link'),
+              },
+            ],
+          },
+          {
+            name: 'Rule Form Components',
+            id: 'rule-form-components',
+            items: [
+              {
+                id: 'rule-create',
+                name: 'Rule Create',
+                onClick: () => history.push('/rule/create/.es-query'),
+              },
+              {
+                id: 'rule-edit',
+                name: 'Rule Edit',
+                onClick: () => history.push('/rule/edit/test'),
+              },
+              {
+                id: 'rule-actions',
+                name: 'Rule Actions',
+                onClick: () => history.push('/rule_actions'),
+              },
+              {
+                id: 'rule-details',
+                name: 'Rule Details',
+                onClick: () => history.push('/rule_details'),
               },
             ],
           },

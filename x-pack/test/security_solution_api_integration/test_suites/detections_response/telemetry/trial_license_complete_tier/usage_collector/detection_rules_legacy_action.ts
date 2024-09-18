@@ -17,13 +17,8 @@ import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detec
 import {
   createLegacyRuleAction,
   createWebHookRuleAction,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getEqlRuleForAlertTesting,
   fetchRule,
-  getRuleForAlertTesting,
   getRuleWithWebHookAction,
   getSimpleMlRule,
   getSimpleRule,
@@ -31,11 +26,18 @@ import {
   getStats,
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -46,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('@ess Detection rule legacy actions telemetry', async () => {
+  describe('@ess Detection rule legacy actions telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -401,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"pre-packaged"/"immutable" rules', async () => {
+    describe('"pre-packaged"/"immutable" rules', () => {
       it('should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
@@ -436,6 +438,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: false,
             has_legacy_notification: true,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -489,6 +495,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: false,
             has_legacy_notification: true,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled

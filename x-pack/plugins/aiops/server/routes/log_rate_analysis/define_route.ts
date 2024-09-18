@@ -9,10 +9,9 @@ import type { CoreStart, IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
-import { aiopsLogRateAnalysisSchemaV1 } from '../../../common/api/log_rate_analysis/schema_v1';
-import { aiopsLogRateAnalysisSchemaV2 } from '../../../common/api/log_rate_analysis/schema_v2';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
+import { aiopsLogRateAnalysisSchemaV2 } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import { aiopsLogRateAnalysisSchemaV3 } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import type { AiopsLicense } from '../../types';
 
@@ -20,7 +19,7 @@ import { routeHandlerFactory } from './route_handler_factory';
 
 /**
  * `defineRoute` is called in the root `plugin.ts` to set up the API route
- * for log pattern analysis. Its purpose is to take care of the route setup
+ * for log rate analysis. Its purpose is to take care of the route setup
  * and versioning only. `routeHandlerFactory` is used to take care of
  * the actual route logic.
  */
@@ -38,17 +37,6 @@ export const defineRoute = (
     })
     .addVersion(
       {
-        version: '1',
-        validate: {
-          request: {
-            body: aiopsLogRateAnalysisSchemaV1,
-          },
-        },
-      },
-      routeHandlerFactory('1', license, logger, coreStart, usageCounter)
-    )
-    .addVersion(
-      {
         version: '2',
         validate: {
           request: {
@@ -57,5 +45,16 @@ export const defineRoute = (
         },
       },
       routeHandlerFactory('2', license, logger, coreStart, usageCounter)
+    )
+    .addVersion(
+      {
+        version: '3',
+        validate: {
+          request: {
+            body: aiopsLogRateAnalysisSchemaV3,
+          },
+        },
+      },
+      routeHandlerFactory('3', license, logger, coreStart, usageCounter)
     );
 };

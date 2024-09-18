@@ -13,6 +13,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
+
   - [Package installation](#package-installation)
     - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
     - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
@@ -63,6 +64,14 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
     - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
     - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [Rule upgrade workflow: viewing rule changes in per-field diff view](#rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
+    - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
+    - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
+    - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
+    - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
+  - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
   - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
     - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
   - [Error handling](#error-handling)
@@ -189,6 +198,9 @@ Examples:
 │ New Terms         │ Custom query                      │ Overview            │ Definition          │
 │ New Terms         │ Filters                           │ Overview            │ Definition          │
 │ ESQL              │ ESQL query                        │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts by                │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts for               │ Overview            │ Definition          │
+│ ESQL              │ If a suppression field is missing │ Overview            │ Definition          │
 ```
 
 ## Scenarios
@@ -619,13 +631,9 @@ Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules of all types available to install
 When user opens the Add Rules page
 Then all X rules available for installation should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
-And all properties of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+When user opens a rule preview for any rule
+Then the preview should appear
+And all properties of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before installing**
@@ -771,15 +779,11 @@ And for all of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then all X rules available for upgrade should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
+When user opens a rule preview for any rule
+Then the preview should appear
 And the "Updates" tab should be active
 When user selects the "Overview" tab
-Then all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+Then all properties of the new version of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before upgrading**
@@ -948,6 +952,130 @@ And visible properties should be sorted alphabetically
 When a user expands all hidden sections
 Then all properties of the rule should be sorted alphabetically
 ```
+
+### Rule upgrade workflow: viewing rule changes in per-field diff view
+
+#### **Scenario: User can see changes in a side-by-side per-field diff view**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of these rules new versions are available
+When user opens the Rule Updates table and selects a rule
+Then the per-field upgrade preview should open
+And rule changes should be displayed in a two-column diff view with each field in its own accordion component
+And all field diff accordions should be open by default
+And correct rule version numbers should be displayed in their respective columns
+When the user selects another rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: User can see changes when updated rule is a different rule type**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available that changes the rule type
+When user opens the upgrade preview
+Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
+# When tooltip enhancement is added, this step needs to be added to the corresponding test scenario
+And a tooltip is displayed with information about changing rule types
+```
+
+#### **Scenario: Field groupings should be rendered together in the same accordion panel**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule contains one or more <field> values
+When user opens the upgrade preview
+The <field> diff accordion panel should display its grouped rule properties
+And each property should have its name displayed inside the panel above its value
+
+Examples:
+| field              |
+| data_source        |
+| kql_query          |
+| eql_query          |
+| esql_query         |
+| threat_query       |
+| rule_schedule      |
+| rule_name_override |
+| timestamp_override |
+| timeline_template  |
+| building_block     |
+| threshold          |
+```
+
+#### **Scenario: Undefined values are displayed with empty diffs**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has field in the <version_one> version that didn't exist in the <version_two> version
+When a user opens the upgrade preview
+Then the preview should open
+And the old/new field should render an empty panel
+
+Examples:
+| version_one | version_two |
+| target      | current     |
+| current     | target      |
+```
+
+#### **Scenario: Field diff components have the same grouping and order as in rule details overview**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has multiple fields that are different between the current and target version
+When a user opens the upgrade preview
+Then the multiple field diff accordions should be sorted in the same order as on the rule details overview tab
+And the field diff accordions should be grouped inside its corresponding <section> accordion
+And any <section> accordion that doesn't have fields inside it shouldn't be displayed
+
+Examples:
+| section     |
+| About       |
+| Definition  |
+| Schedule    |
+| Setup Guide |
+```
+
+### Rule upgrade workflow: preserving rule bound data
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has the same rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has a different rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
 
 ### Rule upgrade workflow: misc cases
 

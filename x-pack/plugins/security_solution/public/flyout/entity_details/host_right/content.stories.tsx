@@ -10,7 +10,7 @@ import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { mockRiskScoreState } from '../../shared/mocks';
 import { HostPanelContent } from './content';
 import { mockObservedHostData } from '../mocks';
 
@@ -35,6 +35,8 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
     />
   ))
   .add('no observed data', () => (
@@ -58,6 +60,8 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
     />
   ))
   .add('loading', () => (
@@ -81,5 +85,7 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
     />
   ));

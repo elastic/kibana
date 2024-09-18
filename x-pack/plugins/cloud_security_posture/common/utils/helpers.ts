@@ -6,6 +6,7 @@
  */
 
 import { Truthy } from 'lodash';
+import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -14,6 +15,8 @@ import {
   PackagePolicyInput,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { BenchmarkRuleSelectParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV4 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
@@ -25,14 +28,11 @@ import {
 import type {
   BenchmarkId,
   Score,
-  BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
-import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
-import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
 
 /**
  * @example
@@ -43,13 +43,6 @@ export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
 export const truthy = <T>(value: T): value is Truthy<T> => !!value;
-
-export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'): string => {
-  if (e instanceof Error) return e.message;
-  if (typeof e === 'string') return e;
-
-  return defaultMessage; // TODO: i18n
-};
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
@@ -196,6 +189,15 @@ const CLOUD_PROVIDER_NAMES = {
   GCP: 'Google Cloud Platform',
 };
 
+export const CLOUD_PROVIDERS = {
+  AWS: 'aws',
+  AZURE: 'azure',
+  GCP: 'gcp',
+};
+
+/**
+ * Returns the cloud provider name or benchmark applicable name for the given benchmark id
+ */
 export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
@@ -205,7 +207,7 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
     case 'cis_aws':
       return CLOUD_PROVIDER_NAMES.AWS;
     case 'cis_eks':
-      return 'Amazon Elastic Kubernetes Service';
+      return 'Amazon Elastic Kubernetes Service (EKS)';
     case 'cis_gcp':
       return CLOUD_PROVIDER_NAMES.GCP;
   }
@@ -227,7 +229,7 @@ export const getCloudProviderNameFromAbbreviation = (cloudProvider: string) => {
 export const getBenchmarkFilterQuery = (
   benchmarkId: BenchmarkId,
   benchmarkVersion?: string,
-  selectParams?: BenchmarkRuleSelectParamsV1
+  selectParams?: BenchmarkRuleSelectParamsV4
 ): string => {
   const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
   const sectionQuery = selectParams?.section

@@ -18,22 +18,24 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detect
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccess,
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
   removeUUIDFromActions,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -43,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @brokenInServerless @skipInQA create_rules_bulk', () => {
+  describe('@ess @skipInServerless create_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);

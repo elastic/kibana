@@ -28,6 +28,8 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
+import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -78,6 +80,10 @@ const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | '
     defaultOrder: 'desc',
   },
 ];
+
+const ExceptionsTable = styled(EuiFlexGroup)`
+  padding: ${euiThemeVars.euiSizeL} 0;
+`;
 
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
@@ -587,24 +593,25 @@ export const SharedLists = React.memo(() => {
               sortFields={SORT_FIELDS}
             />
             {exceptionListsWithRuleRefs.length > 0 && (
-              <div data-test-subj="exceptionsTable">
+              <ExceptionsTable data-test-subj="exceptionsTable" direction="column">
                 {exceptionListsWithRuleRefs.map((excList) => (
-                  <ExceptionsListCard
-                    key={excList.list_id}
-                    data-test-subj="exceptionsListCard"
-                    readOnly={isReadOnly}
-                    exceptionsList={excList}
-                    handleDelete={handleDelete}
-                    handleExport={handleExport}
-                    handleDuplicate={handleDuplicate}
-                  />
+                  <EuiFlexItem key={excList.list_id}>
+                    <ExceptionsListCard
+                      data-test-subj="exceptionsListCard"
+                      readOnly={isReadOnly}
+                      exceptionsList={excList}
+                      handleDelete={handleDelete}
+                      handleExport={handleExport}
+                      handleDuplicate={handleDuplicate}
+                    />
+                  </EuiFlexItem>
                 ))}
-              </div>
+              </ExceptionsTable>
             )}
           </>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem style={{ flex: '1 1 auto' }}>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="flexStart">
               <EuiFlexItem>
                 <EuiPopover

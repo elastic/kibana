@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { escapeKuery } from '@kbn/es-query';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
-
-import type { GroupTableItem } from './types';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 export const getTableItemAsKQL = (tableItem: GroupTableItem | SignificantItem) => {
   if (isSignificantItem(tableItem)) {
-    return `${escapeKuery(tableItem.fieldName)}:${escapeKuery(String(tableItem.fieldValue))}`;
+    return `${escapeKuery(tableItem.fieldName)}:"${escapeQuotes(String(tableItem.fieldValue))}"`;
   }
 
   return [
     ...tableItem.groupItemsSortedByUniqueness.map(
-      ({ fieldName, fieldValue }) => `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
+      ({ fieldName, fieldValue }) =>
+        `${escapeKuery(fieldName)}:"${escapeQuotes(String(fieldValue))}"`
     ),
   ].join(' AND ');
 };

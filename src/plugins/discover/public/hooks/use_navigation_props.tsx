@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useCallback, useEffect, useMemo, useState, MouseEventHandler, MouseEvent } from 'react';
@@ -15,8 +16,8 @@ import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {
   dataView: DataView;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   savedSearchId?: string;
   // provided by embeddable only
@@ -95,6 +96,9 @@ export const useNavigationProps = ({
   );
 
   useEffect(() => {
+    if (!rowIndex || !rowId) {
+      return;
+    }
     const dataViewId = typeof index === 'object' ? index.id : index;
     services.locator
       .getUrl({ dataViewId, ...buildParams() })
@@ -113,6 +117,9 @@ export const useNavigationProps = ({
   ]);
 
   useEffect(() => {
+    if (!rowIndex || !rowId) {
+      return;
+    }
     const params = buildParams();
     const dataViewId = typeof index === 'object' ? index.id : index;
     services.locator
@@ -139,7 +146,7 @@ export const useNavigationProps = ({
 
   const onOpenSingleDoc: MouseEventHandler = useCallback(
     (event) => {
-      if (isModifiedEvent(event)) {
+      if (isModifiedEvent(event) || !rowIndex || !rowId) {
         return;
       }
       event.preventDefault();
@@ -155,11 +162,11 @@ export const useNavigationProps = ({
 
   const onOpenContextView: MouseEventHandler = useCallback(
     (event) => {
-      const params = buildParams();
-      if (isModifiedEvent(event)) {
+      if (isModifiedEvent(event) || !rowId) {
         return;
       }
       event.preventDefault();
+      const params = buildParams();
       const dataViewId = typeof index === 'object' ? index.id : index;
       services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
         services.contextLocator.navigate({

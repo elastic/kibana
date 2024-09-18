@@ -14,33 +14,30 @@ import {
   createMlRuleRequest,
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-
-jest.mock('../../../../../machine_learning/authz');
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRuleRoute(server.router, ml);
+    createRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -73,10 +70,8 @@ describe('Create rule route', () => {
     });
 
     test('returns a 403 if ML Authz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
 
       const response = await server.inject(
@@ -107,7 +102,7 @@ describe('Create rule route', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesClient.create.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
@@ -177,15 +172,12 @@ describe('Create rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
-    const getResponseAction = (command: string = 'isolate') => ({
+    const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {
         command,
         comment: '',
+        ...(config ? { config } : {}),
       },
     });
     const defaultAction = getResponseAction();
@@ -224,8 +216,22 @@ describe('Create rule route', () => {
         'User is not authorized to change isolate response actions'
       );
     });
+    test('pass when provided with process action', async () => {
+      const processAction = getResponseAction('kill-process', { overwrite: true, field: '' });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [processAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).not.toHaveBeenCalled();
+    });
     test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+      const wrongAction = getResponseAction('execute');
 
       const request = requestMock.create({
         method: 'post',
@@ -237,7 +243,23 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'response_actions.0.action_type_id: Invalid literal value, expected ".osquery", response_actions.0.params.command: Invalid literal value, expected "isolate"'
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+      );
+    });
+    test('fails when provided with payload missing data', async () => {
+      const wrongAction = getResponseAction('kill-process', { overwrite: true });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
       );
     });
   });

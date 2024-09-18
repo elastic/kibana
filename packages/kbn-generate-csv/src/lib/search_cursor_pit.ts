@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
-import {
-  ES_SEARCH_STRATEGY,
-  type ISearchSource,
-  type SearchRequest,
-} from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -24,9 +21,10 @@ export class SearchCursorPit extends SearchCursor {
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
+    abortController: AbortController,
     logger: Logger
   ) {
-    super(indexPatternTitle, settings, clients, logger);
+    super(indexPatternTitle, settings, clients, abortController, logger);
   }
 
   /**
@@ -36,8 +34,8 @@ export class SearchCursorPit extends SearchCursor {
     this.cursorId = await this.openPointInTime();
   }
 
-  private async openPointInTime() {
-    const { includeFrozen, maxConcurrentShardRequests, scroll } = this.settings;
+  protected async openPointInTime() {
+    const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
     let pitId: string | undefined;
 
@@ -47,13 +45,14 @@ export class SearchCursorPit extends SearchCursor {
       const response = await this.clients.es.asCurrentUser.openPointInTime(
         {
           index: this.indexPatternTitle,
-          keep_alive: scroll.duration,
+          keep_alive: scroll.duration(taskInstanceFields),
           ignore_unavailable: true,
           // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
           ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
-          requestTimeout: scroll.duration,
+          signal: this.abortController.signal,
+          requestTimeout: scroll.duration(taskInstanceFields),
           maxRetries: 0,
           maxConcurrentShardRequests,
         }
@@ -72,35 +71,42 @@ export class SearchCursorPit extends SearchCursor {
     return pitId;
   }
 
-  private async searchWithPit(searchBody: SearchRequest) {
-    const { maxConcurrentShardRequests, scroll } = this.settings;
+  protected async searchWithPit(searchBody: estypes.SearchRequest) {
+    const { maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 
     const searchParamsPit = {
       params: {
         body: searchBody,
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 
     return await lastValueFrom(
       this.clients.data.search(searchParamsPit, {
         strategy: ES_SEARCH_STRATEGY,
+        abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-          requestTimeout: scroll.duration,
+          requestTimeout: scroll.duration(taskInstanceFields),
         },
       })
     );
   }
 
   public async getPage(searchSource: ISearchSource) {
+    const { scroll, taskInstanceFields } = this.settings;
+
     if (!this.cursorId) {
       throw new Error(`No access to valid PIT ID!`);
     }
 
     searchSource.setField('pit', {
       id: this.cursorId,
-      keep_alive: this.settings.scroll.duration,
+      keep_alive: scroll.duration(taskInstanceFields),
     });
 
     const searchAfter = this.getSearchAfter();
@@ -141,14 +147,14 @@ export class SearchCursorPit extends SearchCursor {
     this.setSearchAfter(hits); // for pit only
   }
 
-  private getSearchAfter() {
+  protected getSearchAfter() {
     return this.searchAfter;
   }
 
   /**
    * For managing the search_after parameter, needed for paging using point-in-time
    */
-  private setSearchAfter(hits: Array<estypes.SearchHit<unknown>>) {
+  protected setSearchAfter(hits: Array<estypes.SearchHit<unknown>>) {
     // Update last sort results for next query. PIT is used, so the sort results
     // automatically include _shard_doc as a tiebreaker
     this.searchAfter = hits[hits.length - 1]?.sort as estypes.SortResults | undefined;

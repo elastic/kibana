@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -34,6 +34,7 @@ import type {
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestBodySchema,
 } from '../../types';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -47,7 +48,12 @@ import {
   PackagePolicyNotFoundError,
   PackagePolicyRequestError,
 } from '../../errors';
-import { getInstallations, getPackageInfo } from '../../services/epm/packages';
+import {
+  getInstallation,
+  getInstallations,
+  getPackageInfo,
+  removeInstallation,
+} from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
@@ -55,6 +61,13 @@ import {
 } from '../../../common/services/simplified_package_policy_helper';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+
+import {
+  isSimplifiedCreatePackagePolicyRequest,
+  removeFieldsFromInputSchema,
+  renameAgentlessAgentPolicy,
+  alignInputsAndStreams,
+} from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -197,7 +210,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
     );
     usedPackages.forEach(({ attributes: { name } }) => {
       packagePoliciesByPackage[name].forEach((packagePolicy) => {
-        if (!agentPoliciesById[packagePolicy.policy_id]) {
+        if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
           orphanedPackagePolicies.push(packagePolicy);
         }
       });
@@ -214,17 +227,6 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
   }
 };
 
-function isSimplifiedCreatePackagePolicyRequest(
-  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
-): body is SimplifiedPackagePolicy {
-  // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
-  if (body.inputs && Array.isArray(body.inputs)) {
-    return false;
-  }
-
-  return true;
-}
-
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.query>,
@@ -234,14 +236,11 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
     let newPackagePolicy: NewPackagePolicy;
@@ -265,6 +264,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
+
+    const installation = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: pkg!.name,
+    });
+    wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
@@ -290,6 +296,27 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    appContextService
+      .getLogger()
+      .error(`Error while creating package policy due to error: ${error.message}`);
+    if (!wasPackageAlreadyInstalled) {
+      const installation = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: pkg!.name,
+      });
+      if (installation) {
+        appContextService
+          .getLogger()
+          .info(`rollback ${pkg!.name}-${pkg!.version} package installation after error`);
+        await removeInstallation({
+          savedObjectsClient: soClient,
+          pkgName: pkg!.name,
+          pkgVersion: pkg!.version,
+          esClient,
+        });
+      }
+    }
+
     if (error.statusCode) {
       return response.customError({
         statusCode: error.statusCode,
@@ -310,7 +337,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -328,11 +355,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -353,32 +375,49 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
     } else {
-      // removed fields not recognized by schema
-      const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-        const newInput = {
-          ...input,
-          streams: input.streams.map((stream) => {
-            const newStream = { ...stream };
-            delete newStream.compiled_stream;
-            return newStream;
-          }),
-        };
-        delete newInput.compiled_input;
-        return newInput;
-      });
+      const { overrides, ...restOfBody } = body as TypeOf<
+        typeof UpdatePackagePolicyRequestBodySchema
+      >;
+      const packagePolicyInputs = removeFieldsFromInputSchema(packagePolicy.inputs);
+
       // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
       newData = {
-        ...body,
-        name: body.name ?? packagePolicy.name,
-        description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy?.namespace,
-        policy_id: body.policy_id ?? packagePolicy.policy_id,
-        enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+        ...restOfBody,
+        name: restOfBody.name ?? packagePolicy.name,
+        description: restOfBody.description ?? packagePolicy.description,
+        namespace: restOfBody.namespace ?? packagePolicy?.namespace,
+        policy_id:
+          restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
+        enabled:
+          'enabled' in restOfBody
+            ? restOfBody.enabled ?? packagePolicy.enabled
+            : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
-        inputs: body.inputs ?? packagePolicyInputs,
-        vars: body.vars ?? packagePolicy.vars,
+        inputs: restOfBody.inputs ?? packagePolicyInputs,
+        vars: restOfBody.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
+
+      if (overrides) {
+        newData.overrides = overrides;
+      }
     }
+    newData.inputs = alignInputsAndStreams(newData.inputs);
+
+    if (
+      newData.policy_ids &&
+      !isEmpty(packagePolicy.policy_ids) &&
+      !isEqual(newData.policy_ids, packagePolicy.policy_ids)
+    ) {
+      const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_ids[0]);
+      if (agentPolicy?.supports_agentless) {
+        throw new PackagePolicyRequestError(
+          'Cannot change agent policies of an agentless integration'
+        );
+      }
+    }
+
+    await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
+
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -414,7 +453,7 @@ export const deletePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
@@ -442,7 +481,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const res = await packagePolicyService.delete(
@@ -481,7 +520,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
       soClient,

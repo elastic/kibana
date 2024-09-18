@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type {
+  DiscoverAppState,
+  DiscoverStateContainer,
+  DataDocumentsMsg,
+} from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
-import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
+import type {
+  AllDatasetSelection,
+  DatasetSelection,
+  DataSourceSelection,
+  DataViewSelection,
+} from '../../../../common/data_source_selection';
 
-export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection;
+export interface WithDataSourceSelection {
+  dataSourceSelection: DataSourceSelection;
 }
 
+export interface WithAllSelection {
+  allSelection: AllDatasetSelection;
+}
 export interface WithControlPanelGroupAPI {
-  controlGroupAPI: ControlGroupAPI;
+  controlGroupAPI: ControlGroupRendererApi;
 }
 
 export interface WithControlPanels {
@@ -32,97 +45,136 @@ export interface WithDiscoverStateContainer {
   discoverStateContainer: DiscoverStateContainer;
 }
 
-export type DefaultLogsExplorerControllerState = WithDatasetSelection &
+export interface WithDataTableRecord {
+  rows: DataTableRecord[];
+}
+
+export type DefaultLogsExplorerControllerState = WithDataSourceSelection &
+  WithAllSelection &
   WithQueryState &
-  WithDisplayOptions;
+  WithDisplayOptions &
+  WithDataTableRecord;
 
 export type LogsExplorerControllerTypeState =
   | {
       value: 'uninitialized';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions;
+    }
+  | {
+      value: 'initializingSelection';
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDataTableRecord &
+        WithDiscoverStateContainer;
+    }
+  | {
+      value: 'initializingDataset';
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
     }
   | {
       value: 'initializingDataView';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
     }
   | {
       value: 'initializingControlPanels';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initializingStateContainer';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
     }
   | {
       value: 'initialized';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.validatingSelection';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.idle';
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.idle';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.changingDataView';
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.updatingDataView';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.creatingAdHocDataView';
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.updatingStateContainer';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
       value: 'initialized.controlGroups.uninitialized';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
       value: 'initialized.controlGroups.idle';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
       value: 'initialized.controlGroups.updatingControlPanels';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     };
 
 export type LogsExplorerControllerContext = LogsExplorerControllerTypeState['context'];
-
-export type LogsExplorerControllerStateValue = LogsExplorerControllerTypeState['value'];
 
 export type LogsExplorerControllerEvent =
   | {
@@ -130,18 +182,23 @@ export type LogsExplorerControllerEvent =
       discoverStateContainer: DiscoverStateContainer;
     }
   | {
-      type: 'LISTEN_TO_CHANGES';
-    }
-  | {
-      type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection;
-    }
-  | {
       type: 'DATASET_SELECTION_RESTORE_FAILURE';
     }
   | {
+      type: 'INITIALIZE_DATA_VIEW';
+      data?: DataViewSelection;
+    }
+  | {
+      type: 'INITIALIZE_DATASET';
+      data?: DatasetSelection;
+    }
+  | {
+      type: 'UPDATE_DATA_SOURCE_SELECTION';
+      data: DataSourceSelection;
+    }
+  | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
-      controlGroupAPI: ControlGroupAPI | undefined;
+      controlGroupAPI: ControlGroupRendererApi | undefined;
     }
   | {
       type: 'UPDATE_CONTROL_PANELS';
@@ -152,6 +209,10 @@ export type LogsExplorerControllerEvent =
       appState: DiscoverAppState;
     }
   | {
+      type: 'RECEIVE_DISCOVER_DATA_STATE';
+      dataState: DataDocumentsMsg['result'];
+    }
+  | {
       type: 'RECEIVE_TIMEFILTER_TIME';
       time: TimeRange;
     }
@@ -159,8 +220,7 @@ export type LogsExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection>
+  | DoneInvokeEvent<DataSourceSelection>
   | DoneInvokeEvent<ControlPanels>
-  | DoneInvokeEvent<ControlGroupAPI>
-  | DoneInvokeEvent<DatasetEncodingError>
+  | DoneInvokeEvent<ControlGroupRendererApi>
   | DoneInvokeEvent<Error>;

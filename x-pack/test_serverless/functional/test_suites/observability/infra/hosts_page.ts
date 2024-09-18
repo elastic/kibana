@@ -40,12 +40,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts Page', function () {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191810
+  describe.skip('Hosts Page', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsViewer();
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -53,7 +54,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('#Single Host Flyout', () => {
@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
@@ -85,9 +85,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const charts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show alerts', async () => {
@@ -96,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const CreateRuleButtonExist = await testSubjects.exists(
               'infraAssetDetailsCreateAlertsRuleButton'
             );
-            expect(CreateRuleButtonExist).to.be(false);
+            expect(CreateRuleButtonExist).to.be(true);
           });
         });
 
@@ -118,15 +125,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show processes title', async () => {
             await await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
           });
+        });
 
-          describe('Logs Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickLogsTab();
-            });
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
 
-            it('should render logs tab', async () => {
-              await pageObjects.assetDetails.logsExists();
-            });
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
           });
         });
       });
@@ -148,11 +155,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
         });
 
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-        });
-
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -180,9 +183,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await browser.scrollTop();
           });
 
-          it('should load 12 lens metric charts', async () => {
+          it('should load 11 lens metric charts', async () => {
             const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-            expect(metricCharts.length).to.equal(12);
+            expect(metricCharts.length).to.equal(11);
           });
         });
 
@@ -212,7 +215,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

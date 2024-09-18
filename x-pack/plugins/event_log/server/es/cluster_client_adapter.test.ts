@@ -23,7 +23,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
-type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
+type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 let logger: MockedLogger;
 let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -447,7 +447,7 @@ describe('setIndexAliasToHidden', () => {
   });
 });
 
-export const GetDataStreamsResponse = {
+export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
   data_streams: [
     {
       name: 'foo',
@@ -457,6 +457,8 @@ export const GetDataStreamsResponse = {
       indices: [],
       template: '',
       hidden: true,
+      prefer_ilm: false,
+      next_generation_managed_by: 'Index Lifecycle Management',
     },
   ],
 };

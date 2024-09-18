@@ -423,6 +423,22 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.editorWillUnmount",
+            "type": "Function",
+            "tags": [],
+            "label": "editorWillUnmount",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.useDarkTheme",
             "type": "CompoundType",
             "tags": [],
@@ -536,6 +552,68 @@
             "description": [
               "\nAlternate text to display, when an attempt is made to edit read only content. (Defaults to \"Cannot edit in read-only editor\")"
             ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.fitToContent",
+            "type": "Object",
+            "tags": [],
+            "label": "fitToContent",
+            "description": [
+              "\nEnables the editor to grow vertically to fit its content.\nThis option overrides the `height` option."
+            ],
+            "signature": [
+              "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.accessibilityOverlayEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessibilityOverlayEnabled",
+            "description": [
+              "\nEnables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.enableFindAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableFindAction",
+            "description": [
+              "\nEnables the Search bar functionality in the editor. Disabled by default."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
             "signature": [
               "string | undefined"
             ],

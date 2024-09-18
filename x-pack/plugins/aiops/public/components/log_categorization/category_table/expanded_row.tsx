@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import type { Category } from '../../../../common/api/log_categorization/types';
+
+import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../format_category';
 
 interface ExpandedRowProps {
   category: Category;
+  displayExamples?: boolean;
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
+export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = true }) => {
   const { euiTheme } = useEuiTheme();
   const cssExpandedRow = css({
     marginRight: euiTheme.size.xxl,
@@ -44,18 +48,20 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
         <FormattedRegex category={category} />
       </Section>
 
-      <Section
-        title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.examples', {
-          defaultMessage: 'Examples',
-        })}
-      >
-        <FormattedPatternExamples category={category} />
-      </Section>
+      {displayExamples ? (
+        <Section
+          title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.examples', {
+            defaultMessage: 'Examples',
+          })}
+        >
+          <FormattedPatternExamples category={category} />
+        </Section>
+      ) : null}
     </div>
   );
 };
 
-const Section: FC<{ title: string }> = ({ title, children }) => {
+const Section: FC<PropsWithChildren<{ title: string }>> = ({ title, children }) => {
   return (
     <>
       <EuiText size="s">

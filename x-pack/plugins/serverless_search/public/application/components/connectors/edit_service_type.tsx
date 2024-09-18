@@ -27,12 +27,12 @@ interface EditServiceTypeProps {
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
   const { http } = useKibanaServices();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
   const options =
-    connectorTypes?.connectors.map((connectorType) => ({
+    connectorTypes.map((connectorType) => ({
       inputDisplay: (
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem
@@ -76,6 +76,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        // We only want to allow people to set the service type once to avoid weird conflicts
+        disabled={Boolean(connector.service_type)}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}

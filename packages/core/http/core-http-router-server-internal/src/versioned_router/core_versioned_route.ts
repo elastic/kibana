@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -23,7 +25,7 @@ import type {
   RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { Method } from './types';
+import type { Method, VersionedRouterRoute } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
@@ -37,6 +39,7 @@ import {
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
+import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -46,6 +49,12 @@ export const passThroughValidation = {
   params: schema.nullable(schema.any()),
   query: schema.nullable(schema.any()),
 };
+
+function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
+  if (handler.options.validate === false) return undefined;
+  if (typeof handler.options.validate === 'function') return handler.options.validate();
+  return handler.options.validate;
+}
 
 export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
@@ -86,9 +95,11 @@ export class CoreVersionedRoute implements VersionedRoute {
       {
         path: this.path,
         validate: passThroughValidation,
+        // @ts-expect-error upgrade typescript v5.1.6
         options: this.getRouteConfigOptions(),
       },
-      this.requestHandler
+      this.requestHandler,
+      { isVersioned: true }
     );
   }
 
@@ -101,7 +112,10 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): undefined | ApiVersion {
-    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
+    return resolvers[this.router.defaultHandlerResolutionStrategy](
+      [...this.handlers.keys()],
+      this.options.access
+    );
   }
 
   private versionsToString(): string {
@@ -156,13 +170,13 @@ export class CoreVersionedRoute implements VersionedRoute {
         }]. Available versions are: ${this.versionsToString()}`,
       });
     }
-    const validation = handler.options.validate || undefined;
+    const validation = extractValidationSchemaFromHandler(handler);
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
       try {
-        const { body, params, query } = validate(req, validation.request, handler.options.version);
+        const { body, params, query } = validate(req, validation.request);
         req.body = body;
         req.params = params;
         req.query = query;
@@ -180,13 +194,15 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, req, res);
 
-    if (this.router.isDev && validation?.response?.[response.status]) {
-      const responseValidation = validation.response[response.status];
+    if (this.router.isDev && validation?.response?.[response.status]?.body) {
+      const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         validate(
           { body: response.payload },
-          { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
-          handler.options.version
+          {
+            body: unwrapVersionedResponseBodyValidation(responseValidation.body!),
+            unsafe: { body: unsafe?.body },
+          }
         );
       } catch (e) {
         return res.custom({
@@ -230,7 +246,11 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    this.handlers.set(options.version, { fn: handler, options });
+    options = prepareVersionedRouteValidation(options);
+    this.handlers.set(options.version, {
+      fn: handler,
+      options,
+    });
     return this;
   }
 

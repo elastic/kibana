@@ -1,33 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
 } from '../common/async_utils';
+import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../../../common';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
+
+// `drop_null_columns` is going to change the response
+// now we get `all_columns` and `columns`
+// `columns` contain only columns with data
+// `all_columns` contain everything
+type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest['body'];
 
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IKibanaSearchRequest<SqlQueryRequest['body']>,
+  IKibanaSearchRequest<ESQLQueryRequest>,
   IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -46,12 +55,12 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IKibanaSearchRequest<SqlQueryRequest['body']>,
+    { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-
+    const { dropNullColumns, ...requestParams } = request.params ?? {};
     const search = async () => {
       const params = id
         ? {
@@ -63,14 +72,14 @@ export const esqlAsyncSearchStrategyProvider = (
           }
         : {
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
-            ...request.params,
+            ...requestParams,
           };
       const { body, headers, meta } = id
         ? await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'GET',
               path: `/_query/async/${id}`,
-              querystring: { ...params },
+              querystring: { ...params, drop_null_columns: dropNullColumns },
             },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
@@ -79,7 +88,7 @@ export const esqlAsyncSearchStrategyProvider = (
               method: 'POST',
               path: `/_query/async`,
               body: params,
-              querystring: 'drop_null_columns',
+              querystring: dropNullColumns ? 'drop_null_columns' : '',
             },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
@@ -126,7 +135,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request) || request.id}`);
+      logger.debug(() => `search ${JSON.stringify(request) || request.id}`);
 
       return asyncSearch(request, options, deps);
     },

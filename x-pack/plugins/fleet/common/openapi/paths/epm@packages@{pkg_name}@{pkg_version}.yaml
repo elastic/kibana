@@ -122,7 +122,7 @@ post:
       schema:
         type: boolean
         default: false
-      description: skip data stream rollover during index template mapping or settings update
+      description: Skip data stream rollover during index template mapping or settings update
   requestBody:
     content:
       application/json:

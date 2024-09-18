@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -46,7 +45,6 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
-  shouldUseSizeTransitionVeil?: boolean;
   abortController?: AbortController;
 }
 
@@ -73,47 +71,45 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  shouldUseSizeTransitionVeil,
   abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
-    <I18nProvider>
-      <div className={classNames('lnsExpressionRenderer', className)} style={style}>
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer__component"
-          padding={noPadding ? undefined : 's'}
-          variables={variables}
-          expression={expression}
-          interactive={interactive}
-          searchContext={searchContext}
-          searchSessionId={searchSessionId}
-          onData$={onData$}
-          onRender$={onRender$}
-          inspectorAdapters={lensInspector.adapters}
-          renderMode={renderMode}
-          syncColors={syncColors}
-          syncTooltips={syncTooltips}
-          syncCursor={syncCursor}
-          executionContext={executionContext}
-          abortController={abortController}
-          shouldUseSizeTransitionVeil={shouldUseSizeTransitionVeil ?? true}
-          renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null);
-            addUserMessages(messages);
-            if (error?.original) {
-              onRuntimeError(error.original);
-            } else {
-              onRuntimeError(new Error(errorMessage ? errorMessage : ''));
-            }
+    <div className={classNames('lnsExpressionRenderer', className)} style={style}>
+      <ExpressionRendererComponent
+        className="lnsExpressionRenderer__component"
+        padding={noPadding ? undefined : 's'}
+        variables={variables}
+        allowCache={true}
+        expression={expression}
+        interactive={interactive}
+        searchContext={searchContext}
+        searchSessionId={searchSessionId}
+        // @ts-expect-error upgrade typescript v4.9.5
+        onData$={onData$}
+        onRender$={onRender$}
+        inspectorAdapters={lensInspector.adapters}
+        renderMode={renderMode}
+        syncColors={syncColors}
+        syncTooltips={syncTooltips}
+        syncCursor={syncCursor}
+        executionContext={executionContext}
+        abortController={abortController}
+        renderError={(errorMessage, error) => {
+          const messages = getOriginalRequestErrorMessages(error || null);
+          addUserMessages(messages);
+          if (error?.original) {
+            onRuntimeError(error.original);
+          } else {
+            onRuntimeError(new Error(errorMessage ? errorMessage : ''));
+          }
 
-            return <></>; // the embeddable will take care of displaying the messages
-          }}
-          onEvent={handleEvent}
-          hasCompatibleActions={hasCompatibleActions}
-          getCompatibleCellValueActions={getCompatibleCellValueActions}
-        />
-      </div>
-    </I18nProvider>
+          return <></>; // the embeddable will take care of displaying the messages
+        }}
+        onEvent={handleEvent}
+        hasCompatibleActions={hasCompatibleActions}
+        getCompatibleCellValueActions={getCompatibleCellValueActions}
+      />
+    </div>
   );
 }

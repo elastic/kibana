@@ -101,6 +101,9 @@ describe('<ComponentTemplateList />', () => {
         table.getMetaData('componentTemplatesTable');
       const descUsageCountValues = descTableCellsValues.map((row) => row[2]);
       expect(descUsageCountValues).toEqual(['1', 'Not in use']);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      await actions.clickTableColumnSortButton(0);
     });
 
     test('Hides deprecated component templates by default', async () => {
@@ -170,6 +173,24 @@ describe('<ComponentTemplateList />', () => {
         `${API_BASE_PATH}/component_templates/${componentTemplateName}`,
         expect.anything()
       );
+    });
+  });
+
+  describe('if filter is set, component templates are filtered', () => {
+    test('search value is set if url param is set', async () => {
+      const filter = 'usedBy=(test_index_template_1)';
+      await act(async () => {
+        testBed = await setup(httpSetup, { filter });
+      });
+
+      testBed.component.update();
+
+      const { table } = testBed;
+      const search = testBed.actions.getSearchValue();
+      expect(search).toBe(filter);
+
+      const { rows } = table.getMetaData('componentTemplatesTable');
+      expect(rows.length).toBe(1);
     });
   });
 

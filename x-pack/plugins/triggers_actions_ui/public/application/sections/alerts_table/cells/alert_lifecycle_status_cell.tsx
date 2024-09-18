@@ -28,10 +28,10 @@ const AlertLifecycleStatusCellComponent: React.FC<CellComponentProps> = (props) 
     return null;
   }
 
-  const alertStatus = alert[ALERT_STATUS] ?? [];
+  const alertStatus = (alert && alert[ALERT_STATUS]) ?? [];
 
   if (Array.isArray(alertStatus) && alertStatus.length) {
-    const flapping = alert[ALERT_FLAPPING] ?? [];
+    const flapping = (alert && alert[ALERT_FLAPPING]) ?? [];
 
     return (
       <EuiFlexGroup gutterSize="s">

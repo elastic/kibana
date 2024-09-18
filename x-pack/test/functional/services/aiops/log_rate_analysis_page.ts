@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { decode } from '@kbn/rison';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,6 +25,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   return {
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('aiopsTimeRangeSelectorSection');
+    },
+
+    async assertUrlState(expectedGlogalState: object, expectedAppState: object) {
+      const currentUrl = await browser.getCurrentUrl();
+      const parsedUrl = new URL(currentUrl);
+
+      const stateG = decode(parsedUrl.searchParams.get('_g') ?? '');
+      const stateA = decode(parsedUrl.searchParams.get('_a') ?? '');
+
+      expect(stateG).to.eql(expectedGlogalState);
+      expect(stateA).to.eql(expectedAppState);
     },
 
     async assertTotalDocumentCount(expectedFormattedTotalDocCount: string) {
@@ -96,6 +108,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(`aiopsSearchPanel`);
     },
 
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
+    },
+
     async assertNoWindowParametersEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
@@ -115,6 +131,16 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         .perform();
 
       await this.assertHistogramBrushesExist();
+    },
+
+    async clickNoAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
+      });
     },
 
     async clickRerunAnalysisButton(shouldRerun: boolean) {
@@ -158,9 +184,9 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async assertFieldFilterPopoverButtonExists(isOpen: boolean) {
+    async assertFilterPopoverButtonExists(selector: string, isOpen: boolean) {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('aiopsFieldFilterButton');
+        await testSubjects.existOrFail(selector);
 
         if (isOpen) {
           await testSubjects.existOrFail('aiopsFieldSelectorSearch');
@@ -170,11 +196,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async clickFieldFilterPopoverButton(expectPopoverToBeOpen: boolean) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterButton');
+    async clickFilterPopoverButton(selector: string, expectPopoverToBeOpen: boolean) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(selector);
 
       await retry.tryForTime(30 * 1000, async () => {
-        await this.assertFieldFilterPopoverButtonExists(expectPopoverToBeOpen);
+        await this.assertFilterPopoverButtonExists(selector, expectPopoverToBeOpen);
       });
     },
 
@@ -220,11 +246,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async clickFieldFilterApplyButton() {
+    async clickFieldFilterApplyButton(selector: string) {
       await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterApplyButton');
 
       await retry.tryForTime(30 * 1000, async () => {
-        await this.assertFieldFilterPopoverButtonExists(false);
+        await this.assertFilterPopoverButtonExists(selector, false);
+      });
+    },
+
+    async clickFieldSelectorListItem(selector: string) {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click(selector);
       });
     },
 
@@ -232,6 +264,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );
+    },
+
+    async assertNoAutoRunButtonExists() {
+      await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },
 
     async assertProgressTitle(expectedProgressTitle: string) {

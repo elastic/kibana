@@ -7,9 +7,10 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
-import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
+import type { Calendar, FormCalendar } from '../models/calendar';
+import { CalendarManager } from '../models/calendar';
 import type { MlClient } from '../lib/ml_client';
 
 function getAllCalendars(mlClient: MlClient) {
@@ -43,13 +44,6 @@ function getCalendarsByIds(mlClient: MlClient, calendarIds: string[]) {
 }
 
 export function calendars({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {get} /internal/ml/calendars Gets calendars
-   * @apiName GetCalendars
-   * @apiDescription Gets calendars - size limit has been explicitly set to 1000
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
@@ -57,6 +51,8 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetCalendars'],
       },
+      summary: 'Gets calendars',
+      description: 'Gets calendars - size limit has been explicitly set to 10000',
     })
     .addVersion(
       {
@@ -76,15 +72,6 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {get} /internal/ml/calendars/:calendarIds Gets a calendar
-   * @apiName GetCalendarById
-   * @apiDescription Gets calendar by id
-   *
-   * @apiSchema (params) calendarIdsSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarIds}`,
@@ -92,6 +79,8 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetCalendars'],
       },
+      summary: 'Gets a calendar',
+      description: 'Gets a calendar by id',
     })
     .addVersion(
       {
@@ -122,15 +111,6 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {put} /internal/ml/calendars Creates a calendar
-   * @apiName PutCalendars
-   * @apiDescription Creates a calendar
-   *
-   * @apiSchema (body) calendarSchema
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
@@ -138,6 +118,8 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
+      summary: 'Creates a calendar',
+      description: 'Creates a calendar',
     })
     .addVersion(
       {
@@ -163,16 +145,6 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {put} /internal/ml/calendars/:calendarId Updates a calendar
-   * @apiName UpdateCalendarById
-   * @apiDescription Updates a calendar
-   *
-   * @apiSchema (params) calendarIdSchema
-   * @apiSchema (body) calendarSchema
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
@@ -180,6 +152,8 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
+      summary: 'Updates a calendar',
+      description: 'Updates a calendar',
     })
     .addVersion(
       {
@@ -207,15 +181,6 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {delete} /internal/ml/calendars/:calendarId Deletes a calendar
-   * @apiName DeleteCalendarById
-   * @apiDescription Deletes a calendar
-   *
-   * @apiSchema (params) calendarIdSchema
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
@@ -223,6 +188,8 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canDeleteCalendar'],
       },
+      summary: 'Deletes a calendar',
+      description: 'Deletes a calendar',
     })
     .addVersion(
       {

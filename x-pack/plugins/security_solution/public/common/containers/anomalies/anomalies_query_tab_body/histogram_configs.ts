@@ -10,7 +10,6 @@ import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
@@ -24,9 +23,7 @@ const DEFAULT_STACK_BY = i18n.ANOMALIES_STACK_BY_JOB_ID;
 export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     anomaliesStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? anomaliesStackByOptions[0],
-  errorMessage: i18n.ERROR_FETCHING_ANOMALIES_DATA,
   hideHistogramIfEmpty: true,
-  histogramType: MatrixHistogramType.anomalies,
   stackByOptions: anomaliesStackByOptions,
   subtitle: undefined,
   title: i18n.ANOMALIES_TITLE,

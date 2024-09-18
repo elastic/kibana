@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { ScheduleNowTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/schedule_now_transforms';
+import { ScheduleNowTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/schedule_now_transforms';
 
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -42,7 +42,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await transform.api.stopTransform(transformId);
         await transform.api.cleanTransformIndices();
         await transform.api.deleteIndices(destinationIndex);
       });
@@ -113,9 +112,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await transform.api.stopTransform(id);
-        });
         await transform.api.cleanTransformIndices();
         await asyncForEach(destinationIndices, async (destinationIndex: string) => {
           await transform.api.deleteIndices(destinationIndex);

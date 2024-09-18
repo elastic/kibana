@@ -221,7 +221,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when selectedTable changes', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+      expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: mockDataView,
         sessionId: undefined,
       });
@@ -229,10 +229,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when timeRange changes', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+      expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: mockDataView,
         sessionId: undefined,
       });
@@ -240,10 +240,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when searchSessionId changes', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionToolbarLogic.actions.setSearchSessionId('1234');
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+      expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: mockDataView,
         sessionId: '1234',
       });
@@ -251,10 +251,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when onTableChange called', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.onTableChange({});
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+      expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: mockDataView,
         sessionId: undefined,
       });
@@ -263,13 +263,13 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     it('should fetch items when search changes', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
       jest.advanceTimersByTime(200);
       await nextTick();
 
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+      expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: mockDataView,
         sessionId: undefined,
       });

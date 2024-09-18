@@ -7,28 +7,29 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const dockerServers = getService('dockerServers');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const mappingsPackage = 'overrides';
   const mappingsPackageVersion = '0.1.0';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
-  describe('installs packages that include settings and mappings overrides', async () => {
+  describe('installs packages that include settings and mappings overrides', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     after(async () => {
-      if (server.enabled) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
@@ -57,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
+        `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
         `${templateName}@custom`,
@@ -127,7 +129,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               mapping: {
                 total_fields: {
-                  limit: '10000',
+                  limit: '1000',
                 },
               },
               number_of_shards: '3',

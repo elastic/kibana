@@ -6,6 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
+import { createUsersAndRoles } from '../common/users/create_users_and_roles';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
@@ -17,6 +18,11 @@ export default function observabilityAIAssistantApiIntegrationTests({
   describe('Observability AI Assistant API tests', function () {
     const filePattern = '**/*.spec.ts';
     const tests = globby.sync(filePattern, { cwd });
+
+    // Creates roles and users before running tests
+    before(async () => {
+      await createUsersAndRoles(getService);
+    });
 
     tests.forEach((testName) => {
       describe(testName, () => {

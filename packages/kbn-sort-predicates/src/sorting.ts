@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import versionCompare from 'compare-versions';
 import valid from 'semver/functions/valid';
 import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import moment from 'moment';
 
 type CompareFn<T extends unknown> = (
   v1: T | undefined,
@@ -18,18 +20,47 @@ type CompareFn<T extends unknown> = (
   formatter: FieldFormat
 ) => number;
 
-const numberCompare: CompareFn<number> = (v1, v2) => (v1 ?? -Infinity) - (v2 ?? -Infinity);
+// Catches null, undefined and NaN
+const isInvalidValue = (value: unknown): value is null | undefined =>
+  value == null || (typeof value === 'number' && Number.isNaN(value));
+
+const handleInvalidValues = (v1: unknown, v2: unknown) => {
+  if (isInvalidValue(v1)) {
+    if (isInvalidValue(v2)) {
+      return 0;
+    }
+    return -1;
+  }
+  if (isInvalidValue(v2)) {
+    return 1;
+  }
+  return undefined;
+};
+
+const numberCompare: CompareFn<number> = (v1, v2) => handleInvalidValues(v1, v2) ?? v1! - v2!;
+
+const dateCompare: CompareFn<number | string> = (v1, v2) => {
+  const mV1 = moment(v1);
+  const mV2 = moment(v2);
+  if (!mV1.isValid() || isInvalidValue(v1)) {
+    if (!mV2.isValid() || isInvalidValue(v2)) {
+      return 0;
+    }
+    return -1;
+  }
+  if (!mV2.isValid() || isInvalidValue(v2)) {
+    return 1;
+  }
+  if (mV1.isSame(mV2)) {
+    return 0;
+  }
+  return mV1.isBefore(mV2) ? -1 : 1;
+};
 
 const stringComparison: CompareFn<string> = (v1, v2, _, formatter) => {
   const aString = formatter.convert(v1);
   const bString = formatter.convert(v2);
-  if (v1 == null) {
-    return -1;
-  }
-  if (v2 == null) {
-    return 1;
-  }
-  return aString.localeCompare(bString);
+  return handleInvalidValues(v1, v2) ?? aString.localeCompare(bString);
 };
 
 // The maximum length of a IP is 39 chars for a IPv6
@@ -89,7 +120,7 @@ function isIPv6Address(ip: IPv4 | IPv6): ip is IPv6 {
 }
 
 function getSafeIpAddress(ip: string | undefined, directionFactor: number) {
-  if (ip == null || !ipaddr.isValid(ip)) {
+  if (isInvalidValue(ip) || !ipaddr.isValid(ip)) {
     // if ip is null, then it's a part of an array ip value
     // therefore the comparison might be between a single value [ipA, undefined] vs multiple values ip [ipA, ipB]
     // set in this case -1 for the undefined of the former to force it to be always before
@@ -103,11 +134,17 @@ function getSafeIpAddress(ip: string | undefined, directionFactor: number) {
 }
 
 const versionComparison: CompareFn<string> = (v1, v2, direction) => {
-  const valueA = String(v1 ?? '');
-  const valueB = String(v2 ?? '');
+  const valueA = String(v1 == null ? '' : v1);
+  const valueB = String(v2 == null ? '' : v2);
   const aInvalid = !valueA || !valid(valueA);
   const bInvalid = !valueB || !valid(valueB);
   if (aInvalid && bInvalid) {
+    if (v1 == null && v1 !== v2) {
+      return direction * -1;
+    }
+    if (v2 == null && v1 !== v2) {
+      return direction * 1;
+    }
     return 0;
   }
   // need to fight the direction multiplication of the parent function
@@ -134,30 +171,32 @@ const rangeComparison: CompareFn<Omit<Range, 'type'>> = (v1, v2) => {
 function createArrayValuesHandler(sortBy: string, formatter: FieldFormat) {
   return function <T>(criteriaFn: CompareFn<T>) {
     return (
-      rowA: Record<string, unknown>,
-      rowB: Record<string, unknown>,
+      rowA: Record<string, unknown> | undefined | null,
+      rowB: Record<string, unknown> | undefined | null,
       direction: 'asc' | 'desc'
     ) => {
       // handle the direction with a multiply factor.
       const directionFactor = direction === 'asc' ? 1 : -1;
+      // make it handle null/undefined values
+      // this masks null/undefined rows into null/undefined values so it can benefit from shared invalid logic
+      // and enable custom sorting for invalid values (like for version type)
+      const valueA = rowA == null ? rowA : rowA[sortBy];
+      const valueB = rowB == null ? rowB : rowB[sortBy];
       // if either side of the comparison is an array, make it also the other one become one
       // then perform an array comparison
-      if (Array.isArray(rowA[sortBy]) || Array.isArray(rowB[sortBy])) {
+      if (Array.isArray(valueA) || Array.isArray(valueB)) {
         return (
           directionFactor *
           compareArrays(
-            (Array.isArray(rowA[sortBy]) ? rowA[sortBy] : [rowA[sortBy]]) as T[],
-            (Array.isArray(rowB[sortBy]) ? rowB[sortBy] : [rowB[sortBy]]) as T[],
+            (Array.isArray(valueA) ? valueA : [valueA]) as T[],
+            (Array.isArray(valueB) ? valueB : [valueB]) as T[],
             directionFactor,
             formatter,
             criteriaFn
           )
         );
       }
-      return (
-        directionFactor *
-        criteriaFn(rowA[sortBy] as T, rowB[sortBy] as T, directionFactor, formatter)
-      );
+      return directionFactor * criteriaFn(valueA as T, valueB as T, directionFactor, formatter);
     };
   };
 }
@@ -171,23 +210,24 @@ function getUndefinedHandler(
   ) => number
 ) {
   return (
-    rowA: Record<string, unknown>,
-    rowB: Record<string, unknown>,
+    rowA: Record<string, unknown> | undefined | null,
+    rowB: Record<string, unknown> | undefined | null,
     direction: 'asc' | 'desc'
   ) => {
-    const valueA = rowA[sortBy];
-    const valueB = rowB[sortBy];
-    if (valueA != null && valueB != null && !Number.isNaN(valueA) && !Number.isNaN(valueB)) {
-      return sortingCriteria(rowA, rowB, direction);
-    }
+    const valueA = rowA?.[sortBy];
+    const valueB = rowB?.[sortBy];
+    // do not use the utility above as null at root level is handled differently
+    // than null/undefined within an array type
     if (valueA == null || Number.isNaN(valueA)) {
+      if (valueB == null || Number.isNaN(valueB)) {
+        return 0;
+      }
       return 1;
     }
     if (valueB == null || Number.isNaN(valueB)) {
       return -1;
     }
-
-    return 0;
+    return sortingCriteria(rowA!, rowB!, direction);
   };
 }
 
@@ -195,10 +235,17 @@ export function getSortingCriteria(
   type: string | undefined,
   sortBy: string,
   formatter: FieldFormat
-) {
+): (
+  rowA: Record<string, unknown> | undefined | null,
+  rowB: Record<string, unknown> | undefined | null,
+  direction: 'asc' | 'desc'
+) => number {
   const arrayValueHandler = createArrayValuesHandler(sortBy, formatter);
 
-  if (['number', 'date'].includes(type || '')) {
+  if (type === 'date') {
+    return getUndefinedHandler(sortBy, arrayValueHandler(dateCompare));
+  }
+  if (type === 'number') {
     return getUndefinedHandler(sortBy, arrayValueHandler(numberCompare));
   }
   // this is a custom type, and can safely assume the gte and lt fields are all numbers or undefined

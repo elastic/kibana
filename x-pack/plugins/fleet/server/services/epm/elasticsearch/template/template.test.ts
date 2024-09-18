@@ -14,6 +14,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
@@ -23,6 +25,7 @@ import {
   FLEET_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
 } from '../../../../constants';
 
 import {
@@ -81,7 +84,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
@@ -126,7 +130,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -146,7 +151,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
@@ -338,6 +344,26 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithIndexFalseMapping);
+  });
+
+  it('tests processing text field with store true', () => {
+    const textWithStoreTrueYml = `
+- name: someTextId
+  type: text
+  store: true
+`;
+    const textWithStoreTrueMapping = {
+      properties: {
+        someTextId: {
+          type: 'text',
+          store: true,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithStoreTrueYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(textWithStoreTrueMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -894,6 +920,106 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
+  it('tests processing nested field with subobject, nested field first', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+  - name: a.b
+    type: group
+    fields:
+      - name: c
+        type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              properties: {
+                c: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing nested field with subfields', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+    fields:
+    - name: b
+      type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing nested field with subobjects', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+    fields:
+    - name: b
+      type: group
+      fields:
+      - name: c
+        type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              properties: {
+                c: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('tests processing nested leaf field with properties', () => {
     const nestedYaml = `
   - name: a
@@ -1314,6 +1440,103 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing store true in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: messages.*
+  type: text
+  store: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        messages: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'messages.*': {
+            match_mapping_type: 'string',
+            path_match: 'messages.*',
+            mapping: {
+              type: 'text',
+              store: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template object', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template field', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
   it('tests processing scaled_float fields in a dynamic template', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: numeric_labels
@@ -1644,6 +1867,110 @@ describe('EPM template', () => {
         },
       });
     });
+
+    it('should fill constant keywords from previous mappings', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+                value: 'some_value',
+              },
+            },
+          },
+        },
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+              value: 'some_value',
+            },
+          },
+        },
+        write_index_only: true,
+      });
+    });
+
+    it('should not error when previous mappings are not found', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {},
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {},
+        write_index_only: true,
+      });
+    });
+
     it('should rollover on expected error', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -1673,7 +2000,67 @@ describe('EPM template', () => {
         },
       ]);
 
-      expect(esClient.indices.rollover).toHaveBeenCalled();
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should rollover on expected error when field subobjects in mappings changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { subobjects: false },
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
+        throw new errors.ResponseError({
+          body: {
+            error: {
+              message:
+                'mapper_exception\n' +
+                '\tRoot causes:\n' +
+                "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
+            },
+          },
+        } as any);
+      });
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -1772,6 +2159,102 @@ describe('EPM template', () => {
       );
 
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
+
+    it('should rollover on dynamic dimension mappings changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should not rollover on dynamic dimension mappings not changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
   });
 });

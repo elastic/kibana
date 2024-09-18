@@ -28,7 +28,7 @@ import * as i18n from './json_diff/translations';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 /* Inclding these properties in diff display might be confusing to users. */
-const HIDDEN_PROPERTIES = [
+const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   /*
     By default, prebuilt rules don't have any actions or exception lists. So if a user has defined actions or exception lists for a rule, it'll show up as diff. This looks confusing as the user might think that their actions and exceptions lists will get removed after the upgrade, which is not the case - they will be preserved.
   */
@@ -44,10 +44,19 @@ const HIDDEN_PROPERTIES = [
   'revision',
 
   /*
-    "updated_at" value is regenerated on every '/upgrade/_review' endpoint run 
+    "updated_at" value is regenerated on every '/upgrade/_review' endpoint run
     and will therefore always show a diff. It adds no value to display it to the user.
   */
   'updated_at',
+
+  /*
+    These values make sense only for installed prebuilt rules.
+    They are not present in the prebuilt rule package.
+    So, showing them in the diff doesn't add value.
+  */
+  'updated_by',
+  'created_at',
+  'created_by',
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
@@ -67,11 +76,11 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   const rule = { ...originalRule };
 
   /*
-    Convert the "from" property value to a humanized duration string, like 'now-1m' or 'now-2h'. 
-    Conversion is needed to skip showing the diff for the "from" property when the same 
-    duration is represented in different time units. For instance, 'now-1h' and 'now-3600s' 
+    Convert the "from" property value to a humanized duration string, like 'now-1m' or 'now-2h'.
+    Conversion is needed to skip showing the diff for the "from" property when the same
+    duration is represented in different time units. For instance, 'now-1h' and 'now-3600s'
     indicate a one-hour duration.
-    The same helper is used in the rule editing UI to format "from" before submitting the edits. 
+    The same helper is used in the rule editing UI to format "from" before submitting the edits.
     So, after the rule is saved, the "from" property unit/value might differ from what's in the package.
   */
   rule.from = formatScheduleStepData({
@@ -82,8 +91,8 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 
   /*
     Default "note" to an empty string if it's not present.
-    Sometimes, in a new version of a rule, the "note" value equals an empty string, while 
-    in the old version, it wasn't specified at all (undefined becomes ''). In this case, 
+    Sometimes, in a new version of a rule, the "note" value equals an empty string, while
+    in the old version, it wasn't specified at all (undefined becomes ''). In this case,
     it doesn't make sense to show diff, so we default falsy values to ''.
   */
   rule.note = rule.note ?? '';
@@ -95,9 +104,9 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   rule.threat = filterEmptyThreats(rule.threat);
 
   /*
-    The "machine_learning_job_id" property is converted from the legacy string format 
-    to the new array format during installation and upgrade. Thus, all installed rules 
-    use the new format. For correct comparison, we must ensure that the rule update is 
+    The "machine_learning_job_id" property is converted from the legacy string format
+    to the new array format during installation and upgrade. Thus, all installed rules
+    use the new format. For correct comparison, we must ensure that the rule update is
     also in the new format before showing the diff.
   */
   if ('machine_learning_job_id' in rule) {
@@ -106,7 +115,7 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 
   /*
     Default the "alias" property to null for all threat filters that don't have it.
-    Setting a default is needed to match the behavior of the rule editing UI, 
+    Setting a default is needed to match the behavior of the rule editing UI,
     which also defaults the "alias" property to null.
   */
   if (rule.type === 'threat_match' && Array.isArray(rule.threat_filters)) {
@@ -150,13 +159,13 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiIconTip
               color="subdued"
-              content={i18n.BASE_VERSION_DESCRIPTION}
+              content={i18n.CURRENT_VERSION_DESCRIPTION}
               type="iInCircle"
               size="m"
               display="block"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.BASE_VERSION}</h6>
+              <h6>{i18n.CURRENT_RULE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
@@ -167,7 +176,7 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
               size="m"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.UPDATED_VERSION}</h6>
+              <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>

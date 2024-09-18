@@ -9,9 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
-import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
@@ -21,8 +20,8 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../../common/components/landing_page');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../common/components/empty_prompt');
+jest.mock('../../../sourcerer/containers');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -94,6 +93,9 @@ jest.mock('../../../common/lib/kibana', () => {
         cases: {
           ...mockCasesContract(),
         },
+        maps: {
+          Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -127,7 +129,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {

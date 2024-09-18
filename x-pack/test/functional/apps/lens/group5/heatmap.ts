@@ -9,36 +9,36 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   describe('lens heatmap', () => {
     before(async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
     });
 
     it('should render heatmap chart with the temperature palette', async () => {
-      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      await lens.switchToVisualization('heatmap', 'heat');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert axes
       expect(debugState?.axes!.x[0].labels).to.eql([
@@ -65,16 +65,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect stop colors change on the chart', async () => {
-      await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
-      await PageObjects.lens.openPalettePanel('lnsHeatmap');
-      await PageObjects.common.sleep(1000);
+      await lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
+      await lens.openPalettePanel();
+      await common.sleep(1000);
       await retry.try(async () => {
         await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {
           clearWithKeyboard: true,
           typeCharByChar: true,
         });
       });
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from percentage to number', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         clearWithKeyboard: true,
       });
 
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '5722.7747', {
         clearWithKeyboard: true,
       });
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has a rounded value
       expect(debugState?.legend!.items).to.eql([
@@ -144,9 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset stop numbers when changing palette', async () => {
-      await PageObjects.lens.changePaletteTo('status');
+      await lens.changePaletteTo('status');
 
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not change when passing from number to percent', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
 
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has not changed
       expect(debugState?.legend!.items).to.eql([
@@ -175,12 +175,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Skip for now as EC is not reporting title
     it.skip('should display axis values when setting axis title mode to Auto', async () => {
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.toggleToolbarPopover('lnsLeftAxisButton');
       await testSubjects.selectValue('lnsLeftAxisTitle-select', 'Auto');
 
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       expect(debugState?.axes?.y?.[0].title).to.eql('Average of bytes');
     });

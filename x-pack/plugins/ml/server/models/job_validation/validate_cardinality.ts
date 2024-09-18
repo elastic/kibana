@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { Detector } from '../../../common/types/anomaly_detection_jobs';
-import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
@@ -98,13 +98,13 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           aggregatableFieldNames = uniqueFieldNames.filter((field) => {
             if (
               typeof datafeedConfig?.script_fields === 'object' &&
-              datafeedConfig?.script_fields.hasOwnProperty(field)
+              Object.hasOwn(datafeedConfig?.script_fields ?? {}, field)
             ) {
               return true;
             }
             if (
               typeof datafeedConfig?.runtime_mappings === 'object' &&
-              datafeedConfig?.runtime_mappings.hasOwnProperty(field)
+              Object.hasOwn(datafeedConfig?.runtime_mappings ?? {}, field)
             ) {
               return true;
             }

@@ -17,5 +17,5 @@ export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams, isServ
   if (!isServerless) {
     registerGeoContainment(params);
   }
-  registerEsQuery(params);
+  registerEsQuery(params, isServerless);
 }

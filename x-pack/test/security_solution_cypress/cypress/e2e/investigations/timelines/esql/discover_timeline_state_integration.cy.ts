@@ -58,23 +58,23 @@ const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 const handleIntercepts = () => {
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId === null) {
       req.alias = TIMELINE_PATCH_REQ;
     }
   });
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId !== null) {
       req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
     }
   });
 };
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/180755
+describe.skip(
   'Discover Timeline State Integration',
   {
-    tags: ['@ess', '@brokenInServerless'],
+    tags: ['@ess', '@skipInServerless'],
   },
-
   () => {
     beforeEach(() => {
       login();
@@ -114,17 +114,16 @@ describe(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId).then(() => {
-              cy.get(LOADING_INDICATOR).should('not.exist');
-              goToEsqlTab();
-              verifyDiscoverEsqlQuery(esqlQuery);
-              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-              cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-                'have.text',
-                INITIAL_START_DATE
-              );
-            });
+            openTimelineById(timelineId);
+            goToEsqlTab();
+            cy.get(LOADING_INDICATOR).should('not.exist');
+            verifyDiscoverEsqlQuery(esqlQuery);
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+              'have.text',
+              INITIAL_START_DATE
+            );
           });
       });
       it('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {

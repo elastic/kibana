@@ -57,6 +57,7 @@ import {
   getDataLayers,
   getReferenceLayers,
   getAnnotationsLayers,
+  isTimeChart,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import {
@@ -292,6 +293,7 @@ export const buildXYExpression = (
       : state.legend.legendSize
       ? state.legend.legendSize
       : undefined,
+    layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment
@@ -307,6 +309,9 @@ export const buildXYExpression = (
         ? Math.min(5, state.legend.floatingColumns)
         : [],
     maxLines: state.legend.maxLines,
+    legendStats: state.legend.legendStats,
+    title: state.legend.title,
+    isTitleVisible: state.legend.isTitleVisible,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
@@ -338,8 +343,8 @@ export const buildXYExpression = (
     fillOpacity: state.fillOpacity ?? 0.3,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
-    addTimeMarker: state.showCurrentTimeMarker ?? false,
-    valuesInLegend: state.valuesInLegend ?? false,
+    addTimeMarker:
+      (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],

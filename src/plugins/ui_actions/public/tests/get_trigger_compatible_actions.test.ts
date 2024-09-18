@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from './test_samples';
 import { ActionDefinition } from '../actions';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
-import { OverlayStart } from '@kbn/core/public';
 
+const coreStart = coreMock.createStart();
 let action: ActionDefinition<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 beforeEach(() => {
@@ -32,14 +34,14 @@ beforeEach(() => {
 
 test('can register action', async () => {
   const { setup } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+  const helloWorldAction = createHelloWorldAction(coreStart);
 
   setup.registerAction(helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+  const helloWorldAction = createHelloWorldAction(coreStart);
 
   setup.registerAction(helloWorldAction);
 

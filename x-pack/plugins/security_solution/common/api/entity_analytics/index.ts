@@ -6,4 +6,6 @@
  */
 
 export * from './asset_criticality';
+export * from './risk_engine';
 export * from './risk_score';
+export { EntityAnalyticsPrivileges } from './common';

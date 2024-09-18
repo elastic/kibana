@@ -22,10 +22,8 @@ import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -95,17 +93,16 @@ const PreviewHistogramComponent = ({
   );
 
   const license = useLicense();
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
-  const { responses: visualizationResponse } = useVisualizationResponse({
+  const { responses: visualizationResponses } = useVisualizationResponse({
     visualizationId: previewEmbeddableId,
   });
 
-  const totalCount = visualizationResponse?.[0]?.hits?.total ?? 0;
+  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -202,13 +199,6 @@ const PreviewHistogramComponent = ({
           bulkActions={false}
         />
       </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        isFlyoutView
-        runtimeMappings={runtimeMappings}
-        scopeId={TableId.rulePreview}
-        isReadOnly
-      />
     </>
   );
 };

@@ -13,6 +13,8 @@ import {
   alertComment,
   basicCase,
   connectorsMock,
+  customFieldsConfigurationMock,
+  customFieldsMock,
   getCaseUsersMockResponse,
   getUserAction,
 } from '../../../containers/mock';
@@ -40,6 +42,7 @@ import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -56,6 +59,7 @@ jest.mock('../../../containers/use_get_categories');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
+jest.mock('../../../containers/use_replace_custom_field');
 jest.mock('../use_on_update_field');
 jest.mock('../../../common/use_cases_features');
 jest.mock('../../../containers/configure/use_get_case_configuration');
@@ -130,6 +134,8 @@ const useGetCasesFeaturesRes = {
   isSyncAlertsEnabled: true,
 };
 
+const replaceCustomField = jest.fn();
+
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
@@ -139,6 +145,7 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   let appMockRender: AppMockRenderer;
@@ -169,6 +176,11 @@ describe('Case View Page activity tab', () => {
       isLoading: false,
       useOnUpdateField: jest.fn,
     });
+    useReplaceCustomFieldMock.mockImplementation(() => ({
+      isUpdatingCustomField: false,
+      isError: false,
+      mutate: replaceCustomField,
+    }));
 
     Object.defineProperty(window, 'getComputedStyle', {
       value: (el: HTMLElement) => {
@@ -348,6 +360,36 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
+  it('should call useReplaceCustomField correctly', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+      },
+    });
+    appMockRender.render(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    await userEvent.click(await screen.findByRole('switch'));
+
+    await waitFor(() => {
+      expect(replaceCustomField).toHaveBeenCalledWith({
+        caseId: caseData.id,
+        caseVersion: caseData.version,
+        customFieldId: customFieldsMock[1].key,
+        customFieldValue: false,
+      });
+    });
+
+    expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
+  });
+
   describe('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -364,7 +406,7 @@ describe('Case View Page activity tab', () => {
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
+      await userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -388,7 +430,9 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalComments / userActivityQueryParams.perPage
       );
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
+      await userEvent.click(
+        await screen.findByTestId('user-actions-filter-activity-button-comments')
+      );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -410,7 +454,9 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
       );
 
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
+      await userEvent.click(
+        await screen.findByTestId('user-actions-filter-activity-button-history')
+      );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(

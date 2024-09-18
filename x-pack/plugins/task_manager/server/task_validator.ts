@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { max, memoize } from 'lodash';
+import { max, memoize, omit } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { isErr, tryAsResult } from './lib/result_type';
 
 interface TaskValidatorOpts {
   allowReadingInvalidState: boolean;
@@ -55,13 +57,14 @@ export class TaskValidator {
       return task;
     }
 
+    const taskTypeDef = this.definitions.get(task.taskType);
+
     // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
-    if (!this.definitions.has(task.taskType)) {
+    if (!taskTypeDef) {
       return task;
     }
 
-    const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.
@@ -98,32 +101,65 @@ export class TaskValidator {
     task: T,
     options: { validate: boolean } = { validate: true }
   ): T {
+    const taskWithValidatedTimeout = this.validateTimeoutOverride(task);
+
     if (!options.validate) {
-      return task;
+      return taskWithValidatedTimeout;
     }
+
+    const taskTypeDef = this.definitions.get(taskWithValidatedTimeout.taskType);
 
     // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
-    if (!this.definitions.has(task.taskType)) {
-      return task;
+    if (!taskTypeDef) {
+      return taskWithValidatedTimeout;
     }
-
-    const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.
     // https://github.com/elastic/kibana/issues/159347
     // Otherwise, failures on read / write would occur. (don't forget to unskip test)
     if (!latestStateSchema) {
-      return task;
+      return taskWithValidatedTimeout;
     }
 
     // We are doing a write operation which must validate against the latest state schema
     return {
-      ...task,
-      state: this.getValidatedStateSchema(task.state, task.taskType, latestStateSchema, 'forbid'),
+      ...taskWithValidatedTimeout,
+      state: this.getValidatedStateSchema(
+        taskWithValidatedTimeout.state,
+        taskWithValidatedTimeout.taskType,
+        latestStateSchema,
+        'forbid'
+      ),
       stateVersion: latestStateSchema?.version,
     };
+  }
+
+  public validateTimeoutOverride<T extends TaskInstance>(task: T): T {
+    if (task.timeoutOverride) {
+      if (
+        !isInterval(task.timeoutOverride) ||
+        isErr(tryAsResult(() => parseIntervalAsMillisecond(task.timeoutOverride!)))
+      ) {
+        this.logger.warn(
+          `[TaskValidator] Invalid timeout override "${task.timeoutOverride}". Timeout must be of the form "{number}{cadence}" where number is an integer. Example: 5m. This timeout override will be ignored.`
+        );
+
+        return omit(task, 'timeoutOverride') as T;
+      }
+    }
+
+    // Only allow timeoutOverride if schedule is not defined
+    if (!!task.timeoutOverride && !!task.schedule) {
+      this.logger.warn(
+        `[TaskValidator] cannot specify timeout override ${task.timeoutOverride} when scheduling a recurring task`
+      );
+
+      return omit(task, 'timeoutOverride') as T;
+    }
+
+    return task;
   }
 
   private migrateTaskState(

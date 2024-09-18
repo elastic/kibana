@@ -6,8 +6,8 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DynamicTool } from 'langchain/tools';
-
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from '@kbn/zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getAlertsCountQuery } from './get_alert_counts_query';
@@ -17,7 +17,7 @@ export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
 }
 export const ALERT_COUNTS_TOOL_DESCRIPTION =
-  'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status.';
+  'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question.';
 
 export const ALERT_COUNTS_TOOL: AssistantTool = {
   id: 'alert-counts-tool',
@@ -31,12 +31,12 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
     const { alertsIndexPattern, esClient } = params as AlertCountsToolParams;
-    return new DynamicTool({
+    return new DynamicStructuredTool({
       name: 'AlertCountsTool',
       description: ALERT_COUNTS_TOOL_DESCRIPTION,
+      schema: z.object({}),
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
-
         const result = await esClient.search<SearchResponse>(query);
 
         return JSON.stringify(result);

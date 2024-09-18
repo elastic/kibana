@@ -11,22 +11,22 @@ import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ml } from '../../../../../services/ml_api_service';
-import {
+import { useMlApi } from '../../../../../contexts/kibana';
+import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
 import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
+import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 import {
   DATA_FRAME_MODE,
-  DataFrameAnalyticsListRow,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
-import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -106,7 +106,7 @@ export function getAnalyticsJobsStats(
   return resultStats;
 }
 
-export const getAnalyticsFactory = (
+export const useGetAnalytics = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
   setAnalyticsStats: (update: AnalyticStatsBarStats | undefined) => void,
   setErrorMessage: React.Dispatch<
@@ -116,6 +116,8 @@ export const getAnalyticsFactory = (
   setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
   blockRefresh: boolean
 ): GetAnalytics => {
+  const mlApi = useMlApi();
+
   let concurrentLoads = 0;
 
   const getAnalytics = async (forceRefresh = false) => {
@@ -128,8 +130,8 @@ export const getAnalyticsFactory = (
       }
 
       try {
-        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics();
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats();
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)

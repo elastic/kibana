@@ -39,7 +39,7 @@ export function removeOrphanedSourcesAndLayers(
   });
 
   for (const mbSourceId in mbStyle.sources) {
-    if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
+    if (Object.hasOwn(mbStyle.sources, mbSourceId)) {
       // ignore mapbox sources from spatial filter layer
       if (spatialFilterLayer.ownsMbSourceId(mbSourceId)) {
         continue;

@@ -6,18 +6,20 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { tlog, getPreviousDiagTaskTimestamp, createTaskMetric } from '../helpers';
+import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryEvent } from '../types';
+import { TelemetryChannel, type TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryDiagnosticsTaskConfig() {
+  const taskName = 'Security Solution Telemetry Diagnostics task';
+  const taskType = 'security:endpoint-diagnostics';
   return {
-    type: 'security:endpoint-diagnostics',
-    title: 'Security Solution Telemetry Diagnostics task',
+    type: taskType,
+    title: taskName,
     interval: '5m',
     timeout: '4m',
     version: '1.1.0',
@@ -27,10 +29,15 @@ export function createTelemetryDiagnosticsTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
-      const taskName = 'Security Solution Telemetry Diagnostics task';
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('diagnostic'), mdc);
+      const trace = taskMetricsService.start(taskType);
+
+      log.l('Running telemetry task');
+
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
@@ -48,27 +55,22 @@ export function createTelemetryDiagnosticsTaskConfig() {
           );
 
           if (alerts.length === 0) {
-            tlog(logger, 'no diagnostic alerts retrieved');
-            await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-              createTaskMetric(taskName, true, startTime),
-            ]);
+            log.debug('no diagnostic alerts retrieved');
+            await taskMetricsService.end(trace);
             return alertCount;
           }
 
           alertCount += alerts.length;
-          tlog(logger, `Sending ${alerts.length} diagnostic alerts`);
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
+          log.l('Sending diagnostic alerts', {
+            alerts_count: alerts.length,
+          });
+          sender.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, processedAlerts);
         }
 
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
-
+        await taskMetricsService.end(trace);
         return alertCount;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

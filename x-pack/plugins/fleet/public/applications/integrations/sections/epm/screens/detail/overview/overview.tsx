@@ -20,6 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
+
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -34,6 +38,9 @@ import {
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { SideBarColumn } from '../../../components/side_bar_column';
+
+import type { FleetStartServices } from '../../../../../../../plugin';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -59,13 +66,12 @@ interface HeadingWithPosition {
   position: number;
 }
 
-const SideBar = styled(EuiFlexItem)`
+const SideBar = styled(SideBarColumn)`
   position: sticky;
   top: 70px;
   padding-top: 50px;
   padding-left: 10px;
   text-overflow: ellipsis;
-  max-width: 180px;
   max-height: 500px;
 `;
 const StyledSideNav = styled(EuiSideNav)`
@@ -159,9 +165,11 @@ export const OverviewPage: React.FC<Props> = memo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
+    const { storage } = useKibana<FleetStartServices>().services;
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
+    const isElasticDefend = packageInfo.name === 'endpoint';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -214,6 +222,8 @@ export const OverviewPage: React.FC<Props> = memo(
           isSelected: selectedItemId === id,
           onClick: () => selectItem(id),
           ...options,
+          // skip rendering empty items while preserving the header hierarchy
+          renderItem: name === '' ? () => null : undefined,
         };
       },
       [selectedItemId]
@@ -281,6 +291,14 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
+    const [showAVCBanner, setShowAVCBanner] = useState(
+      storage.get('securitySolution.showAvcBanner') ?? true
+    );
+    const onBannerDismiss = useCallback(() => {
+      setShowAVCBanner(false);
+      storage.set('securitySolution.showAvcBanner', false);
+    }, [storage]);
+
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
         <SideBar grow={2}>
@@ -295,6 +313,12 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
+          {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
+            <>
+              <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}

@@ -70,7 +70,7 @@
             "label": "reporter",
             "description": [],
             "signature": [
-              "\"raw\" | \"v2\" | \"v1\" | \"raw-env\" | \"no-passes\""
+              "\"raw\" | \"v2\" | \"v1\" | \"rawEnv\" | \"no-passes\""
             ],
             "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,

@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -529,10 +529,11 @@ export function getQueryBodyWithAuthFilter(
     dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }
@@ -691,10 +692,11 @@ export function getQueryBody(
     dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }

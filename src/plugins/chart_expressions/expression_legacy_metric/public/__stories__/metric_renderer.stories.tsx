@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumn, TextAlignment } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getFormatService } from '../__mocks__/format_service';
@@ -209,7 +210,11 @@ storiesOf('renderers/visMetric', module)
               },
               labels: {
                 show: false,
-                style: { spec: { fontSize: '60px', align: 'left' }, type: 'style', css: '' },
+                style: {
+                  spec: { fontSize: '60px', textAlign: TextAlignment.LEFT },
+                  type: 'style',
+                  css: '',
+                },
                 position: LabelPosition.TOP,
               },
             },

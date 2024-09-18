@@ -27,6 +27,9 @@ export function beatsListingRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const config = server.config;
       const ccs = req.payload.ccs;

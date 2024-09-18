@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { createApiLogic } from '../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../shared/http';

@@ -11,6 +11,8 @@ import { errors } from '@elastic/elasticsearch';
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import { set } from '@kbn/safer-lodash-set';
+
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
@@ -33,12 +35,14 @@ import {
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
+  fetchAllArtifacts,
   generateArtifactContentHash,
   getArtifact,
   listArtifacts,
 } from './artifacts';
 
 import type { NewArtifact } from './types';
+import type { FetchAllArtifactsOptions } from './types';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
@@ -324,14 +328,34 @@ describe('When using the artifacts services', () => {
         newArtifact,
       ]);
 
-      expect(responseErrors).toEqual([new Error('error')]);
-      expect(artifacts).toBeUndefined();
+      expect(responseErrors).toEqual([
+        new Error(
+          'Create of artifact id [undefined] returned: result [undefined], status [400], reason [{"reason":"error"}]'
+        ),
+      ]);
+      expect(artifacts).toEqual([
+        {
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          compressionAlgorithm: 'zlib',
+          created: expect.any(String),
+          decodedSha256: 'd801aa1fb',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          encryptionAlgorithm: 'none',
+          id: 'endpoint:trustlist-v1-d801aa1fb',
+          identifier: 'trustlist-v1',
+          packageName: 'endpoint',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          type: 'trustlist',
+        },
+      ]);
     });
   });
 
   describe('and calling `deleteArtifact()`', () => {
     it('should delete the artifact', async () => {
-      deleteArtifact(esClientMock, '123');
+      await deleteArtifact(esClientMock, '123');
 
       expect(esClientMock.delete).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
@@ -351,7 +375,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `bulkDeleteArtifacts()`', () => {
     it('should delete single artifact', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123']);
+      await bulkDeleteArtifacts(esClientMock, ['123']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
@@ -367,7 +391,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should delete all the artifacts', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123', '231']);
+      await bulkDeleteArtifacts(esClientMock, ['123', '231']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
@@ -486,6 +510,115 @@ describe('When using the artifacts services', () => {
         encodedSha256: 'b411ccf0a7bf4e015d849ee82e3512683d72c5a3c9bd233db9c885b229b8adf4',
         encodedSize: 24,
       });
+    });
+  });
+
+  describe('and calling `fetchAll()`', () => {
+    beforeEach(() => {
+      esClientMock.search
+        .mockResolvedValueOnce(generateArtifactEsSearchResultHitsMock())
+        .mockResolvedValueOnce(generateArtifactEsSearchResultHitsMock())
+        .mockResolvedValueOnce(set(generateArtifactEsSearchResultHitsMock(), 'hits.hits', []));
+    });
+
+    it('should return an iterator', async () => {
+      expect(fetchAllArtifacts(esClientMock)).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide artifacts on each iteration', async () => {
+      for await (const artifacts of fetchAllArtifacts(esClientMock)) {
+        expect(artifacts[0]).toEqual({
+          body: expect.anything(),
+          compressionAlgorithm: expect.anything(),
+          created: expect.anything(),
+          decodedSha256: expect.anything(),
+          decodedSize: expect.anything(),
+          encodedSha256: expect.anything(),
+          encodedSize: expect.anything(),
+          encryptionAlgorithm: expect.anything(),
+          id: expect.anything(),
+          identifier: expect.anything(),
+          packageName: expect.anything(),
+          relative_url: expect.anything(),
+          type: expect.anything(),
+        });
+      }
+
+      expect(esClientMock.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should use defaults if no `options` were provided', async () => {
+      for await (const artifacts of fetchAllArtifacts(esClientMock)) {
+        expect(artifacts.length).toBeGreaterThan(0);
+      }
+
+      expect(esClientMock.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          q: '',
+          size: 1000,
+          sort: [{ created: { order: 'asc' } }],
+          _source_excludes: undefined,
+        })
+      );
+    });
+
+    it('should use custom options when provided', async () => {
+      const options: FetchAllArtifactsOptions = {
+        kuery: 'foo: something',
+        sortOrder: 'desc',
+        perPage: 500,
+        sortField: 'someField',
+        includeArtifactBody: false,
+      };
+
+      for await (const artifacts of fetchAllArtifacts(esClientMock, options)) {
+        expect(artifacts.length).toBeGreaterThan(0);
+      }
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          q: options.kuery,
+          size: options.perPage,
+          sort: [{ [options.sortField!]: { order: options.sortOrder } }],
+          _source_excludes: 'body',
+        })
+      );
+    });
+
+    it('should set `done` to true if loop `break`s out', async () => {
+      const iterator = fetchAllArtifacts(esClientMock);
+
+      for await (const _ of iterator) {
+        break;
+      }
+
+      await expect(iterator[Symbol.asyncIterator]().next()).resolves.toEqual({
+        done: true,
+        value: expect.any(Array),
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle throwing in loop by setting `done` to `true`', async () => {
+      const iterator = fetchAllArtifacts(esClientMock);
+
+      try {
+        for await (const _ of iterator) {
+          throw new Error('test');
+        }
+      } catch (e) {
+        expect(e); // just to silence eslint
+      }
+
+      await expect(iterator[Symbol.asyncIterator]().next()).resolves.toEqual({
+        done: true,
+        value: expect.any(Array),
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledTimes(1);
     });
   });
 });

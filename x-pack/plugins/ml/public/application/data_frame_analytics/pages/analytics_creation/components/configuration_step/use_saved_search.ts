@@ -6,13 +6,12 @@
  */
 
 import { useState, useEffect } from 'react';
+import type { Filter, Query } from '@kbn/es-query';
 import {
   buildEsQuery,
   buildQueryFromFilters,
   decorateQuery,
-  Filter,
   fromKueryExpression,
-  Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';

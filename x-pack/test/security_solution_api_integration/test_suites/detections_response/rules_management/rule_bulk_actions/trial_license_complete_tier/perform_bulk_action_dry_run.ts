@@ -4,52 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-
 import expect from 'expect';
 import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import moment from 'moment';
+import {
+  getCustomQueryRuleParams,
+  getSimpleMlRule,
+  getSimpleRule,
+  installMockPrebuiltRules,
+} from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getSimpleMlRule,
-  getSimpleRule,
-  installMockPrebuiltRules,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
 
-  const postDryRunBulkAction = () =>
-    supertest
-      .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31')
-      .query({ dry_run: true });
-
-  const fetchRule = (ruleId: string) =>
-    supertest
-      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
-
-  const findRules = () =>
-    supertest
-      .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
-
-  describe('@ess @serverless @skipInQA perform_bulk_action dry_run', () => {
+  describe('@ess @serverless @skipInServerlessMKI perform_bulk_action dry_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
     });
@@ -62,8 +43,11 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should not support export action', async () => {
       await createRule(supertest, log, getSimpleRule());
 
-      const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionTypeEnum.export })
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: { dry_run: true },
+          body: { action: BulkActionTypeEnum.export },
+        })
         .expect(400);
 
       expect(body).toEqual({
@@ -77,8 +61,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const testRule = getSimpleRule(ruleId);
       await createRule(supertest, log, testRule);
 
-      const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionTypeEnum.delete })
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: { dry_run: true },
+          body: { action: BulkActionTypeEnum.delete },
+        })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -91,15 +78,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that rule wasn't deleted
-      await fetchRule(ruleId).expect(200);
+      await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(200);
     });
 
     it('should handle enable action', async () => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionTypeEnum.enable })
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: { dry_run: true },
+          body: { action: BulkActionTypeEnum.enable },
+        })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -112,7 +102,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
+      const { body: ruleBody } = await securitySolutionApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
       expect(ruleBody.enabled).toBe(false);
     });
 
@@ -120,8 +112,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-      const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionTypeEnum.disable })
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: { dry_run: true },
+          body: { action: BulkActionTypeEnum.disable },
+        })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -134,7 +129,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
+      const { body: ruleBody } = await securitySolutionApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
       expect(ruleBody.enabled).toBe(true);
     });
 
@@ -143,8 +140,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleToDuplicate = getSimpleRule(ruleId);
       await createRule(supertest, log, ruleToDuplicate);
 
-      const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionTypeEnum.disable })
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          query: { dry_run: true },
+          body: { action: BulkActionTypeEnum.disable },
+        })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -157,7 +157,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the rule wasn't duplicated
-      const { body: rulesResponse } = await findRules().expect(200);
+      const { body: rulesResponse } = await securitySolutionApi
+        .findRules({ query: {} })
+        .expect(200);
 
       expect(rulesResponse.total).toBe(1);
     });
@@ -168,15 +170,18 @@ export default ({ getService }: FtrProviderContext): void => {
         const tags = ['tag1', 'tag2'];
         await createRule(supertest, log, { ...getSimpleRule(ruleId), tags });
 
-        const { body } = await postDryRunBulkAction()
-          .send({
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_tags,
-                value: ['reset-tag'],
-              },
-            ],
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_tags,
+                  value: ['reset-tag'],
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -190,29 +195,30 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have not been persisted
-        const { body: ruleBody } = await fetchRule(ruleId).expect(200);
+        const { body: ruleBody } = await securitySolutionApi
+          .readRule({ query: { rule_id: ruleId } })
+          .expect(200);
         expect(ruleBody.tags).toEqual(tags);
       });
 
       it('should validate immutable rule edit', async () => {
         await installMockPrebuiltRules(supertest, es);
-        const { body: findBody } = await findRules()
-          .query({ per_page: 1, filter: 'alert.attributes.params.immutable: true' })
-          .send()
+        const { body: findBody } = await securitySolutionApi
+          .findRules({ query: { per_page: 1, filter: 'alert.attributes.params.immutable: true' } })
           .expect(200);
 
         const immutableRule = findBody.data[0];
 
-        const { body } = await postDryRunBulkAction()
-          .send({
-            ids: [immutableRule.id],
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_tags,
-                value: ['reset-tag'],
-              },
-            ],
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [immutableRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                { type: BulkActionEditTypeEnum.set_tags, value: ['reset-tag'] },
+              ],
+            },
           })
           .expect(500);
 
@@ -249,16 +255,14 @@ export default ({ getService }: FtrProviderContext): void => {
           it(`should return error if ${editAction} action is applied to machine learning rule`, async () => {
             const mlRule = await createRule(supertest, log, getSimpleMlRule());
 
-            const { body } = await postDryRunBulkAction()
-              .send({
-                ids: [mlRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type: editAction,
-                    value: [],
-                  },
-                ],
+            const { body } = await securitySolutionApi
+              .performRulesBulkAction({
+                query: { dry_run: true },
+                body: {
+                  ids: [mlRule.id],
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [{ type: editAction, value: [] }],
+                },
               })
               .expect(500);
 
@@ -288,6 +292,165 @@ export default ({ getService }: FtrProviderContext): void => {
               ],
             });
           });
+        });
+      });
+    });
+
+    describe('@skipInServerless @skipInServerlessMKI schedule manual rule run action', () => {
+      it('should return all existing and enabled rules as succeeded', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 2,
+          total: 2,
+        });
+        expect(body.attributes.errors).toBeUndefined();
+      });
+
+      it('should return 500 error if some rules do not exist', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule1.id, 'rule-2'],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 1,
+          skipped: 0,
+          succeeded: 1,
+          total: 2,
+        });
+
+        expect(body.attributes.errors).toHaveLength(1);
+        expect(body.attributes.errors[0]).toEqual({
+          message: 'Rule not found',
+          status_code: 500,
+          rules: [
+            {
+              id: 'rule-2',
+            },
+          ],
+        });
+      });
+
+      it('should return 500 error if some rules are disabled', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: false,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 1,
+          skipped: 0,
+          succeeded: 1,
+          total: 2,
+        });
+
+        expect(body.attributes.errors).toHaveLength(1);
+        expect(body.attributes.errors[0]).toEqual({
+          err_code: 'MANUAL_RULE_RUN_DISABLED_RULE',
+          message: 'Cannot schedule manual rule run for a disabled rule',
+          status_code: 500,
+          rules: [
+            {
+              id: createdRule1.id,
+              name: createdRule1.name,
+            },
+          ],
         });
       });
     });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,15 +14,15 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
-import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
 import { AdditionalSection } from './additional_section';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -41,6 +42,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   const canCreateDataView = useCanCreateDataView();
   const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({
@@ -88,7 +90,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedIndexCheck = debounce(async () => {
     try {
-      const resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
+      const resp = await mlApi.checkIndicesExists({ indices: [destinationIndex] });
       setFormState({ destinationIndexNameExists: resp[destinationIndex].exists });
     } catch (e) {
       notifications.toasts.addDanger(
@@ -104,7 +106,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     () =>
       debounce(async () => {
         try {
-          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          const results = await mlApi.dataFrameAnalytics.jobsExist([jobId], true);
           setFormState({ jobIdExists: results[jobId].exists });
         } catch (e) {
           notifications.toasts.addDanger(
@@ -158,6 +160,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   return (
     <Fragment>
+      <IndexPermissionsCallout indexName={destinationIndex} docsType="start" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {

@@ -25,6 +25,12 @@ import { LabelField } from './label_field';
 import { OsqueryNotAvailablePrompt } from './not_available_prompt';
 import { useKibana } from '../../../../lib/kibana';
 
+interface FormData {
+  label: string;
+  query: string;
+  ecs_mapping: Record<string, unknown>;
+}
+
 const OsqueryEditorComponent = ({
   node,
   onSave,
@@ -43,11 +49,7 @@ const OsqueryEditorComponent = ({
       capabilities: { osquery: osqueryPermissions },
     },
   } = useKibana().services;
-  const formMethods = useForm<{
-    label: string;
-    query: string;
-    ecs_mapping: Record<string, unknown>;
-  }>({
+  const formMethods = useForm<FormData>({
     defaultValues: {
       label: node?.configuration?.label,
       query: node?.configuration?.query,
@@ -56,7 +58,7 @@ const OsqueryEditorComponent = ({
   });
 
   const onSubmit = useCallback(
-    (data) => {
+    (data: FormData) => {
       onSave(
         `!{osquery${JSON.stringify(
           pickBy(
@@ -156,19 +158,26 @@ const OsqueryEditorComponent = ({
 
 const OsqueryEditor = React.memo(OsqueryEditorComponent);
 
-export const plugin = {
-  name: 'osquery',
-  button: {
-    label: 'Osquery',
-    iconType: 'logoOsquery',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {'!{osquery{options}}'}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: OsqueryEditor,
+export const plugin = ({
+  interactionsUpsellingMessage,
+}: {
+  interactionsUpsellingMessage: string | null;
+}) => {
+  return {
+    name: 'osquery',
+    button: {
+      label: interactionsUpsellingMessage ?? 'Osquery',
+      iconType: 'logoOsquery',
+      isDisabled: !!interactionsUpsellingMessage,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {'!{osquery{options}}'}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: OsqueryEditor,
+  };
 };

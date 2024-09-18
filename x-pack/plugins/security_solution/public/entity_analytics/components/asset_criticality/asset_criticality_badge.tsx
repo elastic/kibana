@@ -5,76 +5,38 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './translations';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import { CRITICALITY_LEVEL_TITLE } from './translations';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 
-const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
-  very_important: '#E7664C',
-  important: '#D6BF57',
-  normal: '#54B399',
-  not_important: euiLightVars.euiColorMediumShade,
+export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, string> = {
+  extreme_impact: '#E7664C',
+  high_impact: '#DA8B45',
+  medium_impact: 'D6BF57',
+  low_impact: '#54B399',
+  unassigned: euiLightVars.euiColorMediumShade,
 };
 
 export const AssetCriticalityBadge: React.FC<{
-  criticalityLevel: CriticalityLevel;
-  withDescription?: boolean;
+  criticalityLevel?: CriticalityLevelWithUnassigned;
   style?: React.CSSProperties;
+  className?: string;
   dataTestSubj?: string;
 }> = ({
-  criticalityLevel,
+  criticalityLevel = 'unassigned',
   style,
   dataTestSubj = 'asset-criticality-badge',
-  withDescription = false,
+  className,
 }) => {
-  const showDescription = withDescription ?? false;
-  const badgeContent = showDescription ? (
-    <>
-      <strong>{CRITICALITY_LEVEL_TITLE[criticalityLevel]}</strong>
-      <EuiText size="s" color="subdued">
-        <p>{CRITICALITY_LEVEL_DESCRIPTION[criticalityLevel]}</p>
-      </EuiText>
-    </>
-  ) : (
-    CRITICALITY_LEVEL_TITLE[criticalityLevel]
-  );
-
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
       color={CRITICALITY_LEVEL_COLOR[criticalityLevel]}
       style={style}
+      className={className}
     >
-      {badgeContent}
-    </EuiHealth>
-  );
-};
-
-export const AssetCriticalityBadgeAllowMissing: React.FC<{
-  criticalityLevel?: CriticalityLevel;
-  withDescription?: boolean;
-  style?: React.CSSProperties;
-  dataTestSubj?: string;
-}> = ({ criticalityLevel, style, dataTestSubj, withDescription }) => {
-  if (criticalityLevel) {
-    return (
-      <AssetCriticalityBadge
-        criticalityLevel={criticalityLevel}
-        dataTestSubj={dataTestSubj}
-        withDescription={withDescription}
-        style={style}
-      />
-    );
-  }
-
-  return (
-    <EuiHealth color="subdued" data-test-subj={dataTestSubj}>
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-        defaultMessage="No criticality assigned"
-      />
+      {CRITICALITY_LEVEL_TITLE[criticalityLevel]}
     </EuiHealth>
   );
 };

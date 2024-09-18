@@ -23,7 +23,7 @@ export interface TrainedModelRowData {
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
 export function TrainedModelsTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   trainedModelsActions: TrainedModelsActions
 ) {
@@ -31,6 +31,7 @@ export function TrainedModelsTableProvider(
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
+  const headerPage = getPageObject('header');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -194,6 +195,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
+      await headerPage.waitUntilLoadingHasFinished();
       return await testSubjects.exists(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
     }
 
@@ -582,6 +584,7 @@ export function TrainedModelsTableProvider(
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {
@@ -667,6 +670,12 @@ export function TrainedModelsTableProvider(
       await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.clickWhenNotDisabled('analyzeDataDriftWithoutSavingButton');
         await testSubjects.existOrFail('mlDataDriftTable');
+      });
+    }
+
+    public async assertSpaceAwareWarningMessage(): Promise<void> {
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay', {
+        timeout: 3_000,
       });
     }
   })();

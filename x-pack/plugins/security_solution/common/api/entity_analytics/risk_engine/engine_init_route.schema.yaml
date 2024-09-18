@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths:
+  /internal/risk_score/engine/init:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: InitRiskEngine
+      summary: Initialize the Risk Engine
+      description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - result
+                properties:
+                  result:
+                    $ref: '#/components/schemas/InitRiskEngineResult'
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitRiskEngineErrorResponse'
+
+components:
+  schemas:
+    InitRiskEngineResult:
+      type: object
+      required:
+        - risk_engine_enabled
+        - risk_engine_resources_installed
+        - risk_engine_configuration_created
+        - legacy_risk_engine_disabled
+        - errors
+      properties:
+        risk_engine_enabled:
+          type: boolean
+        risk_engine_resources_installed:
+          type: boolean
+        risk_engine_configuration_created:
+          type: boolean
+        legacy_risk_engine_disabled:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    InitRiskEngineErrorResponse:
+      type: object
+      required:
+        - message
+        - full_error
+      properties:
+        message:
+          type: string
+        full_error:
+          type: string

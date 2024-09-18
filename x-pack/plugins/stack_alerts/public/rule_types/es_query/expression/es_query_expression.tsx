@@ -29,9 +29,9 @@ import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
-import { DEFAULT_VALUES } from '../constants';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
@@ -40,6 +40,9 @@ const { useXJsonMode } = XJson;
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+  const services = useTriggerUiActionServices();
+  const { http, docLinks, isServerless } = services;
+
   const {
     index,
     timeField,
@@ -65,7 +68,7 @@ export const EsQueryExpression: React.FC<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? DEFAULT_VALUES.SIZE,
+      size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -87,9 +90,6 @@ export const EsQueryExpression: React.FC<
     },
     [setRuleParams]
   );
-
-  const services = useTriggerUiActionServices();
-  const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
@@ -134,7 +134,7 @@ export const EsQueryExpression: React.FC<
     const isGroupAgg = isGroupAggregation(termField);
     const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasExpressionValidationErrors(currentRuleParams)) {
+    if (hasExpressionValidationErrors(currentRuleParams, isServerless)) {
       return {
         testResults: { results: [], truncated: false },
         isGrouped: isGroupAgg,
@@ -191,6 +191,7 @@ export const EsQueryExpression: React.FC<
     termSize,
     threshold,
     thresholdComparator,
+    isServerless,
   ]);
 
   return (
@@ -243,8 +244,9 @@ export const EsQueryExpression: React.FC<
         id="queryEditor"
         data-test-subj="queryJsonEditor"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.esQuery.length > 0}
-        error={errors.esQuery}
+        error={errors.esQuery as string[]}
         helpText={
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage
@@ -308,11 +310,12 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSelectedGroupBy={useCallback(
-          (selectedGroupBy) => setParam('groupBy', selectedGroupBy),
+          (selectedGroupBy: string | undefined) => setParam('groupBy', selectedGroupBy),
           [setParam]
         )}
         onChangeSelectedTermField={useCallback(
-          (selectedTermField) => setParam('termField', selectedTermField),
+          (selectedTermField: string | string[] | undefined) =>
+            setParam('termField', selectedTermField),
           [setParam]
         )}
         onChangeSelectedTermSize={useCallback(
@@ -320,11 +323,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeThreshold={useCallback(
-          (selectedThresholds) => setParam('threshold', selectedThresholds),
+          (selectedThresholds: number[] | undefined) => setParam('threshold', selectedThresholds),
           [setParam]
         )}
         onChangeThresholdComparator={useCallback(
-          (selectedThresholdComparator) =>
+          (selectedThresholdComparator: string | undefined) =>
             setParam('thresholdComparator', selectedThresholdComparator),
           [setParam]
         )}
@@ -338,20 +341,22 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSizeValue={useCallback(
-          (updatedValue) => setParam('size', updatedValue),
+          (updatedValue: number) => setParam('size', updatedValue),
           [setParam]
         )}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         onTestFetch={onTestQuery}
-        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        excludeHitsFromPreviousRun={
+          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS
+        }
         onChangeExcludeHitsFromPreviousRun={useCallback(
-          (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
+          (exclude: boolean) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
         onChangeSourceFields={useCallback(
-          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
+          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
           [setParam]
         )}
         sourceFields={sourceFields}

@@ -17,13 +17,8 @@ import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detec
 import {
   createLegacyRuleAction,
   createWebHookRuleAction,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getEqlRuleForAlertTesting,
   fetchRule,
-  getRuleForAlertTesting,
   getRuleWithWebHookAction,
   getSimpleMlRule,
   getSimpleRule,
@@ -31,14 +26,21 @@ import {
   getStats,
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   createRuleThroughAlertingEndpoint,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -49,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('@ess @serverless Detection rule telemetry', async () => {
+  describe('@ess @serverless Detection rule telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -160,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
         const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
@@ -189,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -215,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -244,7 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless legacy investigation fields', () => {
+      describe('@skipInServerless legacy investigation fields', () => {
         beforeEach(async () => {
           await deleteAllRules(supertest, log);
           await createRuleThroughAlertingEndpoint(
@@ -409,7 +411,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -434,7 +436,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -607,7 +609,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['telemetry'], 'rule-1', false),
           threshold: {
@@ -638,7 +640,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['telemetry']),
           threshold: {
@@ -786,7 +788,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleMlRule();
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -811,7 +813,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getSimpleMlRule('rule-1', true);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -986,7 +988,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleThreatMatch();
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1011,7 +1013,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),
           index: ['telemetry'],
@@ -1056,8 +1058,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"pre-packaged"/"immutable" rules', async () => {
-      it('@skipInQA should show stats for totals for in-active pre-packaged rules', async () => {
+    describe('"pre-packaged"/"immutable" rules', () => {
+      it('@skipInServerless should show stats for totals for in-active pre-packaged rules', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1086,11 +1088,20 @@ export default ({ getService }: FtrProviderContext) => {
             notifications_enabled: 0,
             notifications_disabled: 0,
             legacy_investigation_fields: 0,
+            alert_suppression: {
+              enabled: 0,
+              disabled: 0,
+              suppressed_per_time_period: 0,
+              suppressed_per_rule_execution: 0,
+              suppressed_fields_count: { one: 0, two: 0, three: 0 },
+              suppresses_missing_fields: 0,
+              does_not_suppress_missing_fields: 0,
+            },
           });
         });
       });
 
-      it('@skipInQA should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
+      it('@skipInServerlessMKI should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1117,11 +1128,15 @@ export default ({ getService }: FtrProviderContext) => {
             has_legacy_notification: false,
             has_notification: false,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
         });
       });
 
-      it('@skipInQA should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerlessMKI should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1155,6 +1170,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: true,
             has_legacy_notification: false,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1174,7 +1193,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInQA should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerlessMKI should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1208,6 +1227,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: true,
             has_legacy_notification: false,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1227,7 +1250,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1261,6 +1284,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: false,
             has_legacy_notification: true,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1280,7 +1307,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerless should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1314,6 +1341,10 @@ export default ({ getService }: FtrProviderContext) => {
             has_notification: false,
             has_legacy_notification: true,
             has_legacy_investigation_field: false,
+            has_alert_suppression_per_rule_execution: false,
+            has_alert_suppression_per_time_period: false,
+            has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+            alert_suppression_fields_count: 0,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled

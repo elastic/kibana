@@ -48,11 +48,10 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
+        mount: async ({ element, setBreadcrumbs, history }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
-            i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
             executionContext,
@@ -73,7 +72,6 @@ export class RemoteClustersUIPlugin
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
-            i18nContext,
             {
               isCloudEnabled,
               cloudBaseUrl,
@@ -81,7 +79,7 @@ export class RemoteClustersUIPlugin
               canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel,
             },
             history,
-            theme$
+            core
           );
 
           return () => {

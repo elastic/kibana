@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-fatal-errors-browser",
-        "id": "def-common.FatalErrorInfo",
+        "id": "def-public.FatalErrorInfo",
         "type": "Interface",
         "tags": [],
         "label": "FatalErrorInfo",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
-            "id": "def-common.FatalErrorInfo.message",
+            "id": "def-public.FatalErrorInfo.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -46,7 +30,7 @@
           },
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
-            "id": "def-common.FatalErrorInfo.stack",
+            "id": "def-public.FatalErrorInfo.stack",
             "type": "string",
             "tags": [],
             "label": "stack",
@@ -63,7 +47,7 @@
       },
       {
         "parentPluginId": "@kbn/core-fatal-errors-browser",
-        "id": "def-common.FatalErrorsSetup",
+        "id": "def-public.FatalErrorsSetup",
         "type": "Interface",
         "tags": [],
         "label": "FatalErrorsSetup",
@@ -76,7 +60,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
-            "id": "def-common.FatalErrorsSetup.add",
+            "id": "def-public.FatalErrorsSetup.add",
             "type": "Function",
             "tags": [],
             "label": "add",
@@ -92,7 +76,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-fatal-errors-browser",
-                "id": "def-common.FatalErrorsSetup.add.$1",
+                "id": "def-public.FatalErrorsSetup.add.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -109,7 +93,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-fatal-errors-browser",
-                "id": "def-common.FatalErrorsSetup.add.$2",
+                "id": "def-public.FatalErrorsSetup.add.$2",
                 "type": "string",
                 "tags": [],
                 "label": "source",
@@ -129,7 +113,7 @@
           },
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
-            "id": "def-common.FatalErrorsSetup.get$",
+            "id": "def-public.FatalErrorsSetup.get$",
             "type": "Function",
             "tags": [],
             "label": "get$",
@@ -142,9 +126,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorInfo",
+                "section": "def-public.FatalErrorInfo",
                 "text": "FatalErrorInfo"
               },
               ">"
@@ -163,7 +147,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-fatal-errors-browser",
-        "id": "def-common.FatalErrorsStart",
+        "id": "def-public.FatalErrorsStart",
         "type": "Type",
         "tags": [],
         "label": "FatalErrorsStart",
@@ -173,9 +157,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           }
         ],
@@ -185,6 +169,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

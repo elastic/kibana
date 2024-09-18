@@ -57,7 +57,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     { http, getStartServices }: CoreSetup,
     { features, licensing, indexManagement, remoteClusters }: SetupDependencies
   ) {
-    firstValueFrom(this.config$).then((config) => {
+    void firstValueFrom(this.config$).then((config) => {
       // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
       // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
       // the Remote Clusters UI is disabled we can't show the CCR UI.

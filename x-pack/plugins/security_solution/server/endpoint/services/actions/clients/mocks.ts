@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { DeepPartial } from 'utility-types';
@@ -17,10 +18,17 @@ import { merge } from 'lodash';
 import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
+import type { ResponseActionsClient } from '../..';
+import { NormalizedExternalConnectorClient } from '../..';
+import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
+  createHapiReadableStreamMock,
 } from '../mocks';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -32,14 +40,38 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../../mocks';
-import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
 import { ACTION_RESPONSE_INDICES } from '../constants';
+import type {
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+  ScanActionRequestBody,
+} from '../../../../../common/api/endpoint';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;
   casesClient?: CasesClientMock;
 }
+
+const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> => {
+  return {
+    suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
+    upload: jest.fn().mockReturnValue(Promise.resolve()),
+    getFile: jest.fn().mockReturnValue(Promise.resolve()),
+    execute: jest.fn().mockReturnValue(Promise.resolve()),
+    killProcess: jest.fn().mockReturnValue(Promise.resolve()),
+    isolate: jest.fn().mockReturnValue(Promise.resolve()),
+    release: jest.fn().mockReturnValue(Promise.resolve()),
+    runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+    processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
+    scan: jest.fn().mockReturnValue(Promise.resolve()),
+  };
+};
 
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -81,6 +113,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     casesClient,
     endpointService,
     username: 'foo',
+    isAutomated: false,
   };
 };
 
@@ -124,7 +157,7 @@ const createEsIndexTransportResponseMock = (
   return merge(responseDoc, overrides);
 };
 
-const createIsolateOptionsMock = (
+const createNoParamsResponseActionOptionsMock = (
   overrides: Partial<IsolationRouteRequestBody> = {}
 ): DeepMutable<IsolationRouteRequestBody> => {
   const isolateOptions: IsolationRouteRequestBody = {
@@ -134,6 +167,74 @@ const createIsolateOptionsMock = (
   };
 
   return merge(isolateOptions, overrides);
+};
+
+const createKillOrSuspendProcessOptionsMock = (
+  overrides: Partial<KillOrSuspendProcessRequestBody> = {}
+): KillOrSuspendProcessRequestBody => {
+  const parameters = overrides.parameters ?? { pid: 999 };
+  const options: KillOrSuspendProcessRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters,
+  };
+  return merge(options, overrides);
+};
+
+const createRunningProcessesOptionsMock = (
+  overrides: Partial<GetProcessesRequestBody> = {}
+): GetProcessesRequestBody => {
+  return createNoParamsResponseActionOptionsMock(overrides);
+};
+
+const createGetFileOptionsMock = (
+  overrides: Partial<ResponseActionGetFileRequestBody> = {}
+): ResponseActionGetFileRequestBody => {
+  const options: ResponseActionGetFileRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      path: '/some/file',
+    },
+  };
+  return merge(options, overrides);
+};
+
+const createExecuteOptionsMock = (
+  overrides: Partial<ExecuteActionRequestBody> = {}
+): ExecuteActionRequestBody => {
+  const options: ExecuteActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      command: 'ls -ltr',
+    },
+  };
+
+  return merge(options, overrides);
+};
+
+const createUploadOptionsMock = (
+  overrides: Partial<UploadActionApiRequestBody> = {}
+): UploadActionApiRequestBody => {
+  const options: UploadActionApiRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      overwrite: true,
+    },
+    file: createHapiReadableStreamMock(),
+  };
+
+  return merge(options, overrides);
+};
+
+const createScanOptionsMock = (
+  overrides: Partial<ScanActionRequestBody> = {}
+): ScanActionRequestBody => {
+  const options: ScanActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      path: '/scan/folder',
+    },
+  };
+  return merge(options, overrides);
 };
 
 const createConnectorMock = (
@@ -167,20 +268,59 @@ const createConnectorActionExecuteResponseMock = <TData>(
     status: 'ok',
   };
 
+  // @ts-expect-error upgrade typescript v4.9.5
   return merge(result, overrides);
 };
 
-export const responseActionsClientMock = Object.freeze({
-  createConstructorOptions: createConstructorOptionsMock,
-  createIsolateOptions: createIsolateOptionsMock,
-  createReleaseOptions: createIsolateOptionsMock,
+const createConnectorActionsClientMock = ({
+  getAllResponse,
+}: {
+  getAllResponse?: ConnectorWithExtraFindData[];
+} = {}): ActionsClientMock => {
+  const client = actionsClientMock.create();
 
-  // TODO:PT add more methods to get option mocks for other class methods
+  (client.getAll as jest.Mock).mockImplementation(async () => {
+    return getAllResponse ?? [];
+  });
+
+  return client;
+};
+
+const createNormalizedExternalConnectorClientMock = (
+  connectorActionsClientMock: ActionsClientMock = createConnectorActionsClientMock()
+): DeeplyMockedKeys<NormalizedExternalConnectorClient> => {
+  const normalizedClient = new NormalizedExternalConnectorClient(
+    connectorActionsClientMock,
+    loggingSystemMock.createLogger()
+  );
+
+  jest.spyOn(normalizedClient, 'execute');
+  jest.spyOn(normalizedClient, 'setup');
+
+  return normalizedClient as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
+};
+
+export const responseActionsClientMock = Object.freeze({
+  create: createResponseActionClientMock,
+  createConstructorOptions: createConstructorOptionsMock,
+
+  createIsolateOptions: createNoParamsResponseActionOptionsMock,
+  createReleaseOptions: createNoParamsResponseActionOptionsMock,
+  createKillProcessOptions: createKillOrSuspendProcessOptionsMock,
+  createSuspendProcessOptions: createKillOrSuspendProcessOptionsMock,
+  createRunningProcessesOptions: createRunningProcessesOptionsMock,
+  createGetFileOptions: createGetFileOptionsMock,
+  createExecuteOptions: createExecuteOptionsMock,
+  createUploadOptions: createUploadOptionsMock,
+  createScanOptions: createScanOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 
-  // Some common mocks when working with connector actions
-  createConnectorActionsClient: actionsClientMock.create,
+  createNormalizedExternalConnectorClient: createNormalizedExternalConnectorClientMock,
+
+  // Some common mocks when working with connector actions client (actions plugin)
+  createConnectorActionsClient: createConnectorActionsClientMock,
+  /** Create a mock connector instance */
   createConnector: createConnectorMock,
   createConnectorActionExecuteResponse: createConnectorActionExecuteResponseMock,
 });

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kibana-operations
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: 'elastic/kibana-operations'
           ref: main
@@ -23,6 +23,7 @@ jobs:
         working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER}}
         run: |
-          npm install
+          npm ci --omit=dev
           node failed-test-label ${{github.event.issue.number}} || true

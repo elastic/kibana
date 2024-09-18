@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: Import exception list API endpoint
+  version: '2023-10-31'
+paths:
+  /api/exception_lists/_import:
+    post:
+      x-labels: [serverless, ess]
+      operationId: ImportExceptionList
+      x-codegen-enabled: true
+      summary: Imports an exception list
+      description: Imports an exception list and associated items
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: A `.ndjson` file containing the exception list
+      parameters:
+        - name: overwrite
+          in: query
+          required: false
+          description: |
+            Determines whether existing exception lists with the same `list_id` are overwritten.
+            If any exception items have the same `item_id`, those are also overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_exceptions
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_action_connectors
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: as_new_list
+          in: query
+          required: false
+          description: |
+            Determines whether the list being imported will have a new `list_id` generated.
+            Additional `item_id`'s are generated for each exception item. Both the exception
+            list and its items are overwritten.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    $ref: '#/components/schemas/ExceptionListsImportBulkErrorArray'
+                  success:
+                    type: boolean
+                  success_count:
+                    type: integer
+                    minimum: 0
+                  success_exception_lists:
+                    type: boolean
+                  success_count_exception_lists:
+                    type: integer
+                    minimum: 0
+                  success_exception_list_items:
+                    type: boolean
+                  success_count_exception_list_items:
+                    type: integer
+                    minimum: 0
+                required:
+                  - errors
+                  - success
+                  - success_count
+                  - success_exception_lists
+                  - success_count_exception_lists
+                  - success_exception_list_items
+                  - success_count_exception_list_items
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    ExceptionListsImportBulkError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            status_code:
+              type: integer
+            message:
+              type: string
+          required: [status_code, message]
+        id:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+        list_id:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+        item_id:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+      required: [error]
+
+    ExceptionListsImportBulkErrorArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExceptionListsImportBulkError'

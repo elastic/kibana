@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { DocView, DocViewFactory } from './types';
 
 export enum ElasticRequestState {
@@ -15,6 +17,10 @@ export enum ElasticRequestState {
   NotFoundDataView,
 }
 
+const defaultDocViewConfig = {
+  enabled: true,
+};
+
 export class DocViewsRegistry {
   private docViews: Map<string, DocView>;
 
@@ -22,7 +28,9 @@ export class DocViewsRegistry {
     if (initialValue instanceof DocViewsRegistry) {
       this.docViews = new Map(initialValue.docViews);
     } else if (Array.isArray(initialValue)) {
-      this.docViews = new Map(initialValue.map((docView) => [docView.id, docView]));
+      this.docViews = new Map(
+        initialValue.map((docView) => [docView.id, this.createDocView(docView)])
+      );
     } else {
       this.docViews = new Map();
     }
@@ -41,7 +49,7 @@ export class DocViewsRegistry {
       );
     }
 
-    this.docViews.set(docView.id, docView);
+    this.docViews.set(docView.id, this.createDocView(docView));
     // Sort the doc views at insertion time to perform this operation once and not on every retrieval.
     this.sortDocViews();
   }
@@ -50,8 +58,30 @@ export class DocViewsRegistry {
     this.docViews.delete(id);
   }
 
+  enableById(id: string) {
+    const docView = this.docViews.get(id);
+    if (docView) {
+      docView.enabled = true;
+    } else {
+      throw new Error(
+        `DocViewsRegistry#enableById: there is no DocView registered with id "${id}".`
+      );
+    }
+  }
+
+  disableById(id: string) {
+    const docView = this.docViews.get(id);
+    if (docView) {
+      docView.enabled = false;
+    } else {
+      throw new Error(
+        `DocViewsRegistry#disableById: there is no DocView registered with id "${id}".`
+      );
+    }
+  }
+
   clone() {
-    return new DocViewsRegistry(this);
+    return new DocViewsRegistry(this.getAll());
   }
 
   private sortDocViews() {
@@ -60,5 +90,9 @@ export class DocViewsRegistry {
     );
 
     this.docViews = new Map(sortedEntries);
+  }
+
+  private createDocView(docView: DocView) {
+    return { ...defaultDocViewConfig, ...docView };
   }
 }

@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import {
-  isReferenceOrValueEmbeddable,
-  PanelNotFoundError,
-  reactEmbeddableRegistryHasKey,
-} from '@kbn/embeddable-plugin/public';
-import { apiPublishesPanelTitle } from '@kbn/presentation-publishing';
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiPublishesPanelTitle,
+  getPanelTitle,
+  stateHasTitles,
+} from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardPanelState } from '../../../../common';
+import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
 import { pluginServices } from '../../../services/plugin_services';
-import { placeClonePanel } from '../../component/panel_placement';
+import { placeClonePanel } from '../../panel_placement';
 import { DashboardContainer } from '../dashboard_container';
 
 const duplicateLegacyInput = async (
@@ -56,34 +60,62 @@ const duplicateReactEmbeddableInput = async (
   panelToClone: DashboardPanelState,
   idToDuplicate: string
 ) => {
-  const child = dashboard.reactEmbeddableChildren.value[idToDuplicate];
-  if (!child) throw new PanelNotFoundError();
-
-  const lastTitle = apiPublishesPanelTitle(child)
-    ? child.panelTitle.value ?? child.defaultPanelTitle?.value ?? ''
-    : '';
-  const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
-  const serializedState = await child.serializeState();
+  const child = dashboard.children$.value[idToDuplicate];
+  const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
+  const newTitle = await incrementPanelTitle(dashboard, lastTitle);
+
+  /**
+   * For react embeddables that have library transforms, we need to ensure
+   * to clone them with serialized state and references.
+   *
+   * TODO: remove this section once all by reference capable react embeddables
+   * use in-place library transforms
+   */
+  if (apiHasLibraryTransforms(child)) {
+    const byValueSerializedState = await child.getByValueState();
+    if (panelToClone.references) {
+      dashboard.savedObjectReferences.push(
+        ...prefixReferencesFromPanel(id, panelToClone.references)
+      );
+    }
+    return {
+      type: panelToClone.type,
+      explicitInput: {
+        ...byValueSerializedState,
+        title: newTitle,
+        id,
+      },
+    };
+  }
+
+  const runtimeSnapshot = (() => {
+    if (apiHasInPlaceLibraryTransforms(child)) return child.getByValueRuntimeSnapshot();
+    return apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
+  })();
+  if (stateHasTitles(runtimeSnapshot)) runtimeSnapshot.title = newTitle;
+
+  dashboard.setRuntimeStateForChild(id, runtimeSnapshot);
   return {
     type: panelToClone.type,
     explicitInput: {
-      ...panelToClone.explicitInput,
-      ...serializedState.rawState,
-      title: newTitle,
       id,
     },
   };
 };
 
 export async function duplicateDashboardPanel(this: DashboardContainer, idToDuplicate: string) {
-  const panelToClone = this.getInput().panels[idToDuplicate] as DashboardPanelState;
+  const {
+    notifications: { toasts },
+    embeddable: { reactEmbeddableRegistryHasKey },
+  } = pluginServices.getServices();
+  const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
 
   const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
     : await duplicateLegacyInput(this, panelToClone, idToDuplicate);
 
-  pluginServices.getServices().notifications.toasts.addSuccess({
+  toasts.addSuccess({
     title: dashboardClonePanelActionStrings.getSuccessMessage(),
     'data-test-subj': 'addObjectToContainerSuccess',
   });

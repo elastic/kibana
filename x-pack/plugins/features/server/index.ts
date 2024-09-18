@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { ConfigSchema } from './config';
 
 // These exports are part of public Features plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change. Ideally we should
@@ -20,8 +22,9 @@ export type {
   FeatureElasticsearchPrivileges,
 } from '../common';
 export { KibanaFeature, ElasticsearchFeature } from '../common';
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
+export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = { schema: ConfigSchema };
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { FeaturesPlugin } = await import('./plugin');
   return new FeaturesPlugin(initializerContext);

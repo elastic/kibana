@@ -1,0 +1,74 @@
+{
+  "id": "@kbn/rollup",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/rollup",
+        "id": "def-common.RollupDeprecationTooltip",
+        "type": "Function",
+        "tags": [],
+        "label": "RollupDeprecationTooltip",
+        "description": [],
+        "signature": [
+          "({ children }: RollupDeprecationTooltipProps) => JSX.Element"
+        ],
+        "path": "x-pack/packages/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rollup",
+            "id": "def-common.RollupDeprecationTooltip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "RollupDeprecationTooltipProps"
+            ],
+            "path": "x-pack/packages/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/rollup",
+        "id": "def-common.ROLLUP_DEPRECATION_BADGE_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "ROLLUP_DEPRECATION_BADGE_LABEL",
+        "description": [],
+        "path": "x-pack/packages/rollup/src/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -11,9 +11,9 @@ import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { JobId } from './anomaly_detection_jobs/job';
-import type { ListingPageUrlState } from './common';
-import { ML_PAGES } from '../constants/locator';
+import type { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
 
@@ -72,7 +72,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT
-  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION
+  | typeof ML_PAGES.SUPPLIED_CONFIGURATIONS,
   MlGenericUrlPageState | undefined
 >;
 export interface AnomalyDetectionQueryState {
@@ -124,6 +125,7 @@ export interface ExplorerAppState {
   query?: any;
   mlShowCharts?: boolean;
 }
+
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
   time?: TimeRange;
@@ -279,7 +281,8 @@ export type MlLocatorState =
   | MlGenericUrlState
   | NotificationsUrlState
   | TrainedModelsUrlState
-  | MemoryUsageUrlState;
+  | MemoryUsageUrlState
+  | ChangePointDetectionUrlState;
 
 export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
@@ -302,4 +305,19 @@ export interface NotificationsQueryState {
 export type NotificationsUrlState = MLPageState<
   typeof ML_PAGES.NOTIFICATIONS,
   NotificationsQueryState | undefined
+>;
+
+export interface ChangePointDetectionQueryState {
+  index: string;
+  timeRange?: TimeRange;
+  fieldConfigs: Array<{
+    fn: string;
+    splitField?: string;
+    metricField: string;
+  }>;
+}
+
+export type ChangePointDetectionUrlState = MLPageState<
+  typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+  ChangePointDetectionQueryState
 >;

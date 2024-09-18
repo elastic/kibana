@@ -36,7 +36,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointRuleAlert> = {}): EndpointRuleAlert {
     const endpointMetadataGenerator = new EndpointMetadataGenerator();
     const endpointMetadata = endpointMetadataGenerator.generate({
-      agent: { version: kibanaPackageJson.version },
+      agent: { version: overrides?.agent?.version ?? kibanaPackageJson.version },
       host: { hostname: overrides?.host?.hostname },
       Endpoint: { state: { isolation: overrides?.Endpoint?.state?.isolation } },
     });
@@ -50,7 +50,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
         agent: {
           id: endpointAgentId,
           type: 'endpoint',
-          version: kibanaPackageJson.version,
+          version: endpointMetadata.agent.version,
         },
         elastic: endpointMetadata.elastic,
         host: endpointMetadata.host,
@@ -286,6 +286,28 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
                 command: 'isolate',
                 comment: 'test',
               },
+            },
+            {
+              params: {
+                command: 'suspend-process',
+                comment: 'Suspend host',
+                config: {
+                  field: 'entity_id',
+                  overwrite: false,
+                },
+              },
+              action_type_id: '.endpoint',
+            },
+            {
+              params: {
+                command: 'kill-process',
+                comment: 'Kill host',
+                config: {
+                  field: '',
+                  overwrite: true,
+                },
+              },
+              action_type_id: '.endpoint',
             },
           ],
           rule_id: ELASTIC_SECURITY_RULE_ID,

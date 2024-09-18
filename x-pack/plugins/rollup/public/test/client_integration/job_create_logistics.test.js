@@ -58,6 +58,10 @@ describe('Create Rollup Job, step 1: Logistics', () => {
     expect(exists('rollupJobCreateLogisticsDocsButton')).toBe(true);
   });
 
+  test('should have a deprecation callout', () => {
+    expect(exists('rollupDeprecationCallout')).toBe(true);
+  });
+
   it('should only have the "next" button visible', () => {
     expect(exists('rollupJobBackButton')).toBe(false);
     expect(exists('rollupJobNextButton')).toBe(true);

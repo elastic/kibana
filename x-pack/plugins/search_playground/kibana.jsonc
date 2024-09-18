@@ -1,0 +1,33 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-playground",
+  "owner": "@elastic/search-kibana",
+  "plugin": {
+    "id": "searchPlayground",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchPlayground"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "encryptedSavedObjects",
+      "navigation",
+      "share",
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "unifiedDocViewer"
+    ]
+  }
+}

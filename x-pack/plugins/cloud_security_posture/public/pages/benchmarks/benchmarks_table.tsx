@@ -15,13 +15,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
+import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
+import type { BenchmarkScore, Benchmark } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
@@ -29,8 +32,15 @@ import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { benchmarksNavigation } from '../../common/navigation/constants';
+import {
+  GetBenchmarkDynamicValues,
+  useBenchmarkDynamicValues,
+} from '../../common/hooks/use_benchmark_dynamic_values';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
+export const EMPTY_EVALUATION_TEST_SUBJECT = 'benchmark-not-evaluated-account';
+export const EMPTY_SCORE_TEST_SUBJECT = 'benchmark-score-no-findings';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -60,51 +70,6 @@ const BenchmarkButtonLink = ({
       {getBenchmarkCisName(benchmarkId)}
     </EuiLink>
   );
-};
-
-export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
-  switch (benchmarkId) {
-    case 'cis_k8s':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkK8sAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_azure':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAzureAccountPlural"
-          defaultMessage="{accountCount, plural, one {# subscription} other {# subscriptions}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_aws':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAwsAccountPlural"
-          defaultMessage="{accountCount, plural, one {# account} other {# accounts}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_eks':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkEksAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_gcp':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkGcpAccountPlural"
-          defaultMessage="{accountCount, plural, one {# project} other {# projects}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-  }
 };
 
 const ErrorMessageComponent = (error: { error: unknown }) => (
@@ -140,7 +105,10 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
   </FullSizeCenteredPage>
 );
 
-const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
+const getBenchmarkTableColumns = (
+  getBenchmarkDynamicValues: GetBenchmarkDynamicValues,
+  navToFindings: any
+): Array<EuiBasicTableColumn<Benchmark>> => [
   {
     field: 'id',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
@@ -198,7 +166,45 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
-      return getBenchmarkPlurals(benchmark.id, benchmarkEvaluation);
+      const { resourceCountLabel, integrationLink } = getBenchmarkDynamicValues(
+        benchmark.id,
+        benchmarkEvaluation
+      );
+
+      if (benchmarkEvaluation === 0) {
+        return (
+          <EuiButtonEmpty
+            data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
+            href={integrationLink}
+            iconType="plusInCircle"
+            flush="left"
+          >
+            {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
+              defaultMessage: 'Add {resourceCountLabel}',
+              values: { resourceCountLabel },
+            })}
+          </EuiButtonEmpty>
+        );
+      }
+
+      const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
+      const groupByField = isKspmBenchmark
+        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME
+        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME;
+
+      return (
+        <EuiButtonEmpty
+          flush="left"
+          onClick={() => {
+            navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
+          }}
+        >
+          {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
+            defaultMessage: '{benchmarkEvaluation} {resourceCountLabel}',
+            values: { benchmarkEvaluation, resourceCountLabel },
+          })}
+        </EuiButtonEmpty>
+      );
     },
   },
   {
@@ -215,11 +221,14 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
         return (
           <ComplianceScoreBar totalPassed={data?.totalPassed} totalFailed={data?.totalFailed} />
         );
+
       return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
-          defaultMessage="No Findings"
-        />
+        <span data-test-subj={EMPTY_SCORE_TEST_SUBJECT}>
+          <FormattedMessage
+            id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
+            defaultMessage="No Findings"
+          />
+        </span>
       );
     },
   },
@@ -237,6 +246,9 @@ export const BenchmarksTable = ({
   sorting,
   ...rest
 }: BenchmarksTableProps) => {
+  const { getBenchmarkDynamicValues } = useBenchmarkDynamicValues();
+  const navToFindings = useNavigateFindings();
+
   const pagination: Pagination = {
     pageIndex: Math.max(pageIndex - 1, 0),
     pageSize,
@@ -261,7 +273,7 @@ export const BenchmarksTable = ({
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
       items={benchmarksSorted}
-      columns={BENCHMARKS_TABLE_COLUMNS}
+      columns={getBenchmarkTableColumns(getBenchmarkDynamicValues, navToFindings)}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}

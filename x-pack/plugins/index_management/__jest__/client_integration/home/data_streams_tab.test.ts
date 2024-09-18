@@ -13,7 +13,7 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
@@ -156,6 +156,10 @@ describe('Data Streams tab', () => {
         name: 'dataStream1',
         storageSize: '5b',
         storageSizeBytes: 5,
+        // metering API mock
+        meteringStorageSize: '156kb',
+        meteringStorageSizeBytes: 156000,
+        meteringDocsCount: 10000,
       });
 
       setLoadDataStreamsResponse([
@@ -164,6 +168,16 @@ describe('Data Streams tab', () => {
           name: 'dataStream2',
           storageSize: '1kb',
           storageSizeBytes: 1000,
+          // metering API mock
+          meteringStorageSize: '156kb',
+          meteringStorageSizeBytes: 156000,
+          meteringDocsCount: 10000,
+          lifecycle: {
+            enabled: true,
+            data_retention: '7d',
+            effective_retention: '5d',
+            retention_determined_by: MAX_DATA_RETENTION,
+          },
         }),
       ]);
 
@@ -192,8 +206,14 @@ describe('Data Streams tab', () => {
 
       expect(tableCellsValues).toEqual([
         ['', 'dataStream1', 'green', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '1', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '1', '5 days ', 'Delete'],
       ]);
+    });
+
+    test('highlights datastreams who are using max retention', async () => {
+      const { exists } = testBed;
+
+      expect(exists('usingMaxRetention')).toBe(true);
     });
 
     test('has a button to reload the data streams', async () => {
@@ -212,15 +232,12 @@ describe('Data Streams tab', () => {
     });
 
     test('has a switch that will reload the data streams with additional stats when clicked', async () => {
-      const { exists, actions, table, component } = testBed;
+      const { exists, actions, table } = testBed;
 
       expect(exists('includeStatsSwitch')).toBe(true);
 
       // Changing the switch will automatically reload the data streams.
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
+      await actions.clickIncludeStatsSwitch();
 
       expect(httpSetup.get).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/data_streams`,
@@ -247,7 +264,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          '7 days',
+          '5 days ',
           'Delete',
         ],
       ]);
@@ -255,12 +272,9 @@ describe('Data Streams tab', () => {
 
     test('sorting on stats sorts by bytes value instead of human readable value', async () => {
       // Guards against regression of #86122.
-      const { actions, table, component } = testBed;
+      const { actions, table } = testBed;
 
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
+      await actions.clickIncludeStatsSwitch();
 
       actions.sortTableOnStorageSize();
 
@@ -285,16 +299,38 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          '7 days',
+          '5 days ',
           'Delete',
         ],
       ]);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      actions.sortTableOnName();
     });
 
-    test('hides Storage size column from stats if enableDataStreamsStorageColumn===false', async () => {
+    test(`doesn't hide stats toggle if enableDataStreamStats===false`, async () => {
       testBed = await setup(httpSetup, {
         config: {
-          enableDataStreamsStorageColumn: false,
+          enableDataStreamStats: false,
+        },
+      });
+
+      const { actions, component, exists } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      expect(exists('includeStatsSwitch')).toBeTruthy();
+    });
+
+    test('shows storage size and documents count if enableSizeAndDocCount===true, enableDataStreamStats==false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableSizeAndDocCount: true,
+          enableDataStreamStats: false,
         },
       });
 
@@ -306,17 +342,55 @@ describe('Data Streams tab', () => {
 
       component.update();
 
-      // Switching the stats on
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
+      await actions.clickIncludeStatsSwitch();
 
-      // The table renders with the stats columns except the Storage size column
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7 days', 'Delete'],
+        ['', 'dataStream1', 'green', '156kb', '10000', '1', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '156kb', '10000', '1', '5 days ', 'Delete'],
+      ]);
+    });
+
+    test('shows last updated and storage size if enableDataStreamStats===true, enableSizeAndDocCount===false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableDataStreamStats: true,
+          enableSizeAndDocCount: false,
+        },
+      });
+
+      const { actions, component, table } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      await actions.clickIncludeStatsSwitch();
+
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        [
+          '',
+          'dataStream1',
+          'green',
+          'December 31st, 1969 7:00:00 PM',
+          '5b',
+          '1',
+          '7 days',
+          'Delete',
+        ],
+        [
+          '',
+          'dataStream2',
+          'green',
+          'December 31st, 1969 7:00:00 PM',
+          '1kb',
+          '1',
+          '5 days ',
+          'Delete',
+        ],
       ]);
     });
 
@@ -324,7 +398,7 @@ describe('Data Streams tab', () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', 'data-stream-index', '', '', '', '', '', '', 'dataStream1'],
+        ['', 'data-stream-index', '', '', '', '', '0', '', 'dataStream1'],
       ]);
     });
 
@@ -703,7 +777,7 @@ describe('Data Streams tab', () => {
         const { table, actions } = testBed;
         await actions.clickIndicesAt(0);
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', 'data-stream-index', '', '', '', '', '', '', '%dataStream'],
+          ['', 'data-stream-index', '', '', '', '', '0', '', '%dataStream'],
         ]);
       });
     });

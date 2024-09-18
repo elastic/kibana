@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { filter, firstValueFrom } from 'rxjs';
-import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -37,9 +37,10 @@ import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
+import { SecurityService } from '@kbn/core-security-browser-internal';
+import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-
 import {
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
@@ -105,6 +106,8 @@ export class CoreSystem {
   private readonly coreContext: CoreContext;
   private readonly executionContext: ExecutionContextService;
   private readonly customBranding: CustomBrandingService;
+  private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -112,8 +115,7 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
-    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
+    this.loggingSystem = new BrowserLoggingSystem(injectedMetadata.logging);
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -130,6 +132,8 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.security = new SecurityService(this.coreContext);
+    this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -237,6 +241,8 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      const security = this.security.setup();
+      const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
@@ -258,6 +264,8 @@ export class CoreSystem {
         settings,
         executionContext,
         customBranding,
+        security,
+        userProfile,
       };
 
       // Services that do not expose contracts at setup
@@ -282,14 +290,16 @@ export class CoreSystem {
   public async start() {
     try {
       const analytics = this.analytics.start();
-      const injectedMetadata = await this.injectedMetadata.start();
-      const uiSettings = await this.uiSettings.start();
-      const settings = await this.settings.start();
+      const security = this.security.start();
+      const userProfile = this.userProfile.start();
+      const injectedMetadata = this.injectedMetadata.start();
+      const uiSettings = this.uiSettings.start();
+      const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start();
+      const http = this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
-      const i18n = await this.i18n.start();
-      const fatalErrors = await this.fatalErrors.start();
+      const i18n = this.i18n.start();
+      const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
@@ -336,7 +346,16 @@ export class CoreSystem {
       });
       const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
+      this.coreApp.start({
+        application,
+        docLinks,
+        http,
+        notifications,
+        uiSettings,
+        analytics,
+        i18n,
+        theme,
+      });
 
       const core: InternalCoreStart = {
         analytics,
@@ -356,6 +375,8 @@ export class CoreSystem {
         fatalErrors,
         deprecations,
         customBranding,
+        security,
+        userProfile,
       };
 
       await this.plugins.start(core);
@@ -418,6 +439,8 @@ export class CoreSystem {
     this.deprecations.stop();
     this.theme.stop();
     this.analytics.stop();
+    this.security.stop();
+    this.userProfile.stop();
     this.rootDomElement.textContent = '';
   }
 

@@ -7,7 +7,6 @@
 
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { resolve } from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -26,7 +25,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
-      require.resolve('./reporting_examples'),
       require.resolve('./screenshotting'),
       require.resolve('./triggers_actions_ui_examples'),
     ],

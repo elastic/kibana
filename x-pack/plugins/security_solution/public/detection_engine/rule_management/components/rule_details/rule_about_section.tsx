@@ -43,10 +43,10 @@ const OverrideColumn = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
-const OverrideValueColumn = styled(EuiFlexItem)`
-  width: 30px;
-  max-width: 30px;
+const OverrideValueColumn = styled.div`
+  width: 50px;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 `;
 
@@ -86,7 +86,7 @@ interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
 }
 
-const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
+export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -96,16 +96,18 @@ const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) 
         <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
-    <OverrideValueColumn>
+    <EuiFlexItem grow={false}>
       <EuiToolTip
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        <span data-test-subj="severityOverrideValue">
-          {defaultToEmptyTag(severityMappingItem.value)}
-        </span>
+        <OverrideValueColumn>
+          <span data-test-subj="severityOverrideValue">
+            {defaultToEmptyTag(severityMappingItem.value)}
+          </span>
+        </OverrideValueColumn>
       </EuiToolTip>
-    </OverrideValueColumn>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiIcon type={'sortRight'} />
     </EuiFlexItem>
@@ -132,7 +134,7 @@ interface RiskScoreMappingItemProps {
   riskScoreMappingItem: RiskScoreMappingItemType;
 }
 
-const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
+export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -218,7 +220,7 @@ interface ThreatProps {
   threat: Threats;
 }
 
-const Threat = ({ threat }: ThreatProps) => (
+export const Threat = ({ threat }: ThreatProps) => (
   <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} data-test-subj="threatPropertyValue" />
 );
 
@@ -226,7 +228,7 @@ interface ThreatIndicatorPathProps {
   threatIndicatorPath: string;
 }
 
-const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
+export const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
   <EuiText size="s">{threatIndicatorPath}</EuiText>
 );
 
@@ -237,6 +239,16 @@ interface TimestampOverrideProps {
 const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
   <EuiText size="s" data-test-subj="timestampOverridePropertyValue">
     {timestampOverride}
+  </EuiText>
+);
+
+interface MaxSignalsProps {
+  maxSignals: number;
+}
+
+const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
+  <EuiText size="s" data-test-subj="maxSignalsPropertyValue">
+    {maxSignals}
   </EuiText>
 );
 
@@ -411,6 +423,13 @@ const prepareAboutSectionListItems = (
         </span>
       ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
+    });
+  }
+
+  if (rule.max_signals) {
+    aboutSectionListItems.push({
+      title: <span data-test-subj="maxSignalsPropertyTitle">{i18n.MAX_SIGNALS_FIELD_LABEL}</span>,
+      description: <MaxSignals maxSignals={rule.max_signals} />,
     });
   }
 

@@ -16,6 +16,7 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 
 const rule = {
   id: uuidv4(),
+  name: '',
   activeSnoozes: [],
   isSnoozedUntil: undefined,
   muteAll: false,

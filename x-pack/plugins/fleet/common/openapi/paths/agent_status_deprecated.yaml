@@ -1,7 +1,7 @@
 get:
   summary: Get agent status summary
   tags:
-    - Agent status
+    - Elastic Agent status
   responses:
     '200':
       description: OK

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import * as api from '../../../../lib/rule_api/mute_alert';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useMuteAlert } from './use_mute_alert';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('../../../../lib/rule_api/mute_alert');
 jest.mock('../../../../../common/lib/kibana');
@@ -25,19 +25,17 @@ describe('useMuteAlert', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
+    appMockRender = createAppMockRenderer(AlertsQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
 
-    const { waitForNextUpdate, result } = renderHook(() => useMuteAlert(), {
+    const { result } = renderHook(() => useMuteAlert(), {
       wrapper: appMockRender.AppWrapper,
     });
 
     result.current.mutate(params);
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith({

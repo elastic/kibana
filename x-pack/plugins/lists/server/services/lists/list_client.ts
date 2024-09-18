@@ -37,6 +37,7 @@ import type {
 
 import type { ConfigType } from '../../config';
 import {
+  BufferLines,
   createListItem,
   deleteListItem,
   deleteListItemByValue,
@@ -69,6 +70,7 @@ import type {
   FindAllListItemsOptions,
   FindListItemOptions,
   FindListOptions,
+  GetImportFilename,
   GetListItemByValueOptions,
   GetListItemOptions,
   GetListItemsByValueOptions,
@@ -644,10 +646,13 @@ export class ListClient {
    * Given a list item id, this will delete the single list item
    * @returns The list item if found, otherwise null
    */
-  public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
+  public deleteListItem = async ({
+    id,
+    refresh,
+  }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
-    return deleteListItem({ esClient, id, listItemIndex: listItemName });
+    return deleteListItem({ esClient, id, listItemIndex: listItemName, refresh });
   };
 
   /**
@@ -662,6 +667,7 @@ export class ListClient {
     listId,
     value,
     type,
+    refresh,
   }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
@@ -669,6 +675,7 @@ export class ListClient {
       esClient,
       listId,
       listItemIndex: listItemName,
+      refresh,
       type,
       value,
     });
@@ -716,6 +723,33 @@ export class ListClient {
   };
 
   /**
+   * Gets the filename of the imported file
+   * @param options
+   * @param options.stream The stream to pull the import from
+   * @returns
+   */
+  public getImportFilename = ({ stream }: GetImportFilename): Promise<string | undefined> => {
+    return new Promise<string | undefined>((resolve, reject) => {
+      const { config } = this;
+      const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
+      let fileName: string | undefined;
+      readBuffer.on('fileName', async (fileNameEmitted: string) => {
+        try {
+          readBuffer.pause();
+          fileName = decodeURIComponent(fileNameEmitted);
+          readBuffer.resume();
+        } catch (err) {
+          reject(err);
+        }
+      });
+
+      readBuffer.on('close', () => {
+        resolve(fileName);
+      });
+    });
+  };
+
+  /**
    * Imports list items to a stream. If the list already exists, this will append the list items to the existing list.
    * If the list does not exist, this will auto-create the list and then add the items to that list.
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
@@ -727,6 +761,7 @@ export class ListClient {
    * @param options.stream The stream to pull the import from
    * @param options.meta Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" for no meta values.
    * @param options.version Version number of the list, typically this should be 1 unless you are re-creating a list you deleted or something unusual.
+   * @param options.refresh If true, then refresh the index after importing the list items.
    */
   public importListItemsToStream = async ({
     deserializer,
@@ -736,6 +771,7 @@ export class ListClient {
     stream,
     meta,
     version,
+    refresh,
   }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
     const { esClient, user, config } = this;
     const listItemName = this.getListItemName();
@@ -748,6 +784,7 @@ export class ListClient {
       listIndex: listName,
       listItemIndex: listItemName,
       meta,
+      refresh,
       serializer,
       stream,
       type,
@@ -802,6 +839,7 @@ export class ListClient {
     value,
     type,
     meta,
+    refresh,
   }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
     const listItemName = this.getListItemName();
@@ -812,6 +850,7 @@ export class ListClient {
       listId,
       listItemIndex: listItemName,
       meta,
+      refresh,
       serializer,
       type,
       user,
@@ -864,6 +903,7 @@ export class ListClient {
     id,
     value,
     meta,
+    refresh,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
     const listItemName = this.getListItemName();
@@ -874,6 +914,7 @@ export class ListClient {
       isPatch: true,
       listItemIndex: listItemName,
       meta,
+      refresh,
       user,
       value,
     });

@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -85,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns a flattened version of the fields in es', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'basic_index', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200, {
           fields: testFields,
@@ -96,6 +100,22 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns a single field as requested', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'basic_index',
+          fields: ['bar'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('returns a single field as requested with json encoding', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'basic_index',
           fields: JSON.stringify(['bar']),
@@ -110,9 +130,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'basic_index',
-          meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
+          meta_fields: ['_id', '_source', 'crazy_meta_field'],
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(200, {
@@ -200,9 +221,40 @@ export default function ({ getService }: FtrProviderContext) {
         .then(ensureFieldsAreSorted);
     });
 
+    it('can request fields by type', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'basic_index',
+          field_types: 'boolean',
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('can request fields by multiple types', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'basic_index',
+          field_types: ['boolean', 'text'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0], testFields[1]],
+          indices: ['basic_index'],
+        });
+    });
+
     it('returns fields when one pattern exists and the other does not', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'bad_index,basic_index', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200, {
           fields: testFields,
@@ -213,6 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns 404 when neither exists', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'bad_index,bad_index_2', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(404);
     });
@@ -220,11 +273,31 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns 404 when no patterns exist', async () => {
       await supertest
         .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'bad_index',
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(404);
+    });
+
+    it('returns empty set when no fields even if meta fields are supplied', async () => {
+      await esClient.indices.create({ index: 'fields-route-000001' });
+
+      await supertest
+        .get(FIELDS_PATH)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({
+          pattern: 'fields-route-000001',
+          meta_fields: ['_id', '_index'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [],
+          indices: ['fields-route-000001'],
+        });
+
+      await esClient.indices.delete({ index: 'fields-route-000001' });
     });
   });
 }

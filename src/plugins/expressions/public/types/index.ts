@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -40,7 +41,6 @@ export interface IExpressionLoaderParams {
   variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
-  disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
   uiState?: unknown;
@@ -52,10 +52,6 @@ export interface IExpressionLoaderParams {
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;
-  // if this is set to true, a veil will be shown when resizing visualizations in response
-  // to a chart resize event (see src/plugins/chart_expressions/common/chart_size_transition_veil.tsx).
-  // This should be only set to true if the client will be responding to the resize events
-  shouldUseSizeTransitionVeil?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
@@ -71,6 +67,8 @@ export interface IExpressionLoaderParams {
    * By default, it equals 1000.
    */
   throttle?: number;
+
+  allowCache?: boolean;
 }
 
 export interface ExpressionRenderError extends Error {

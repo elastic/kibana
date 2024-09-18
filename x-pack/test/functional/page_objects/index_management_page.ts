@@ -129,6 +129,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
         });
       },
+      async expectIndexDetailsPageIsLoaded() {
+        await testSubjects.existOrFail('indexDetailsTab-overview');
+        await testSubjects.existOrFail('indexDetailsContent');
+        await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -141,7 +146,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickCreateIndexSaveButton() {
       await testSubjects.click('createIndexSaveButton');
       // Wait for modal to close
-      await testSubjects.missingOrFail('createIndexSaveButton');
+      await testSubjects.missingOrFail('createIndexSaveButton', {
+        timeout: 30_000,
+      });
     },
     async expectIndexToExist(indexName: string) {
       const table = await find.byCssSelector('table');
@@ -152,6 +159,43 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         })
       );
       expect(indexNames.some((i) => i === indexName)).to.be(true);
+    },
+
+    async selectIndex(indexName: string) {
+      const id = `checkboxSelectIndex-${indexName}`;
+      const checkbox = await find.byCssSelector(`input[id="${id}"]`);
+      if (!(await checkbox.isSelected())) {
+        await find.clickByCssSelector(`input[id="${id}"]`);
+      }
+    },
+    async clickManageButton() {
+      await testSubjects.existOrFail('indexActionsContextMenuButton');
+      await testSubjects.click('indexActionsContextMenuButton');
+    },
+    async contextMenuIsVisible() {
+      await testSubjects.existOrFail('indexContextMenu');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
+      await testSubjects.click('deleteIndexMenuButton');
+    },
+    async confirmDeleteModalIsVisible() {
+      await testSubjects.existOrFail('confirmModalTitleText');
+      const modalText: string = await testSubjects.getVisibleText('confirmModalTitleText');
+      expect(modalText).to.be('Delete index');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      // wait for index to be deleted
+      await testSubjects.missingOrFail('confirmModalConfirmButton');
+    },
+
+    async expectIndexIsDeleted(indexName: string) {
+      const table = await find.byCssSelector('table');
+      const rows = await table.findAllByTestSubject('indexTableRow');
+      const indexNames: string[] = await Promise.all(
+        rows.map(async (row) => {
+          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
+        })
+      );
+      expect(indexNames.includes(indexName)).to.be(false);
     },
   };
 }

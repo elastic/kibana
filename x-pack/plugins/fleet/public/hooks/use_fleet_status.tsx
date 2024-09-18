@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
+import { useStartServices } from './use_core';
 import { useConfig } from './use_config';
-import { sendGetFleetStatus } from './use_request';
+import { useGetFleetStatusQuery } from './use_request';
 
 export interface FleetStatusProviderProps {
   enabled: boolean;
@@ -19,10 +20,13 @@ export interface FleetStatusProviderProps {
   error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
+  isSecretsStorageEnabled?: GetFleetStatusResponse['is_secrets_storage_enabled'];
+  isSpaceAwarenessEnabled?: GetFleetStatusResponse['is_space_awareness_enabled'];
+  spaceId?: string;
 }
 
 interface FleetStatus extends FleetStatusProviderProps {
-  refresh: () => Promise<void>;
+  refetch: () => Promise<unknown>;
 
   // This flag allows us to opt into displaying the Fleet Server enrollment instructions even if
   // a healthy Fleet Server has been detected, so we can delay removing the enrollment UI until
@@ -34,54 +38,45 @@ interface FleetStatus extends FleetStatusProviderProps {
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
 export const FleetStatusProvider: React.FC<{
+  children: React.ReactNode;
   defaultFleetStatus?: FleetStatusProviderProps;
 }> = ({ defaultFleetStatus, children }) => {
   const config = useConfig();
+  const { spaces } = useStartServices();
+  const [spaceId, setSpaceId] = useState<string | undefined>();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 
-  const [state, setState] = useState<FleetStatusProviderProps>(
-    defaultFleetStatus ?? {
-      enabled: config.agents.enabled,
-      isLoading: false,
-      isReady: false,
-    }
-  );
-
-  // TODO: Refactor to use react-query
-  const sendGetStatus = useCallback(
-    async function sendGetStatus() {
-      try {
-        setState((s) => ({ ...s, isLoading: true }));
-        const res = await sendGetFleetStatus();
-        if (res.error) {
-          throw res.error;
-        }
-
-        setState((s) => ({
-          ...s,
-          isLoading: false,
-          isReady: res.data?.isReady ?? false,
-          missingRequirements: res.data?.missing_requirements,
-          missingOptionalFeatures: res.data?.missing_optional_features,
-        }));
-      } catch (error) {
-        setState((s) => ({ ...s, isLoading: false, error }));
-      }
-    },
-    [setState]
-  );
-
+  const { data, isLoading, refetch } = useGetFleetStatusQuery();
   useEffect(() => {
-    if (!defaultFleetStatus) {
-      sendGetStatus();
-    }
-  }, [sendGetStatus, defaultFleetStatus]);
+    const getSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setSpaceId(space.id);
+      }
+    };
+    getSpace();
+  }, [spaces]);
 
-  const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
+  const state = {
+    ...defaultFleetStatus,
+    enabled: config.agents.enabled,
+    isLoading,
+    isReady: (!isLoading && data?.isReady) ?? defaultFleetStatus?.isReady ?? false,
+    missingRequirements: data?.missing_requirements,
+    missingOptionalFeatures: data?.missing_optional_features,
+    isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
+    isSpaceAwarenessEnabled: data?.is_space_awareness_enabled,
+    spaceId,
+  };
 
   return (
     <FleetStatusContext.Provider
-      value={{ ...state, refresh, forceDisplayInstructions, setForceDisplayInstructions }}
+      value={{
+        ...state,
+        refetch,
+        forceDisplayInstructions,
+        setForceDisplayInstructions,
+      }}
     >
       {children}
     </FleetStatusContext.Provider>

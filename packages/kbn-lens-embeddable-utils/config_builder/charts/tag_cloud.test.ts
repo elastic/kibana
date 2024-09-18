@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -107,6 +108,7 @@ test('generates tag cloud chart config', async () => {
                 "query": Object {
                   "esql": "from test | count=count() by category",
                 },
+                "timeField": undefined,
               },
             },
           },
@@ -123,8 +125,8 @@ test('generates tag cloud chart config', async () => {
           "minFontSize": 12,
           "orientation": "single",
           "showLabel": true,
-          "tagAccessor": "category",
-          "valueAccessor": "count",
+          "tagAccessor": "metric_formula_accessor_breakdown",
+          "valueAccessor": "metric_formula_accessor",
         },
       },
       "title": "test",

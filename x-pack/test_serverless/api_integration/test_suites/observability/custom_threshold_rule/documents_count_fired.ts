@@ -6,14 +6,18 @@
  */
 
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
+import { omit } from 'lodash';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { kbnTestConfig } from '@kbn/test';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -22,23 +26,31 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
-    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
+    const DATA_VIEW_NAME = 'data-view-name';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
 
     before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
+            start: 'now-10m',
             end: 'now+5m',
             metrics: [
               { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
@@ -55,23 +67,20 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 60 });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 45,
+      });
       await dataViewApi.create({
-        name: DATA_VIEW,
+        name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
       });
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -87,17 +96,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175499
-    describe.skip('Rule creation', () => {
+    describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
         const createdRule = await alertingApi.createRule({
+          roleAuthc,
           tags: ['observability'],
           consumer: 'observability',
           name: 'Threshold rule',
@@ -105,18 +116,18 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.OUTSIDE_RANGE,
+                comparator: COMPARATORS.NOT_BETWEEN,
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: {
               query: {
-                query: '',
+                query: 'host.name:*',
                 language: 'kuery',
               },
               index: DATA_VIEW_ID,
@@ -130,6 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -147,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -154,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(ruleId);
+        const match = await alertingApi.findRule(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be('observability');
       });
@@ -164,10 +180,11 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -191,23 +208,59 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.evaluation.threshold');
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
             criteria: [
               {
-                comparator: Comparator.OUTSIDE_RANGE,
+                comparator: COMPARATORS.NOT_BETWEEN,
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: 'count' }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: 'data-view-id',
+              query: { query: 'host.name:*', language: 'kuery' },
+            },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
+          indexName: ALERT_ACTION_INDEX,
+          docCountTarget: 1,
+        });
+
+        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
+        );
+
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATA_VIEW_NAME})`
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('3');
+
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: 'host.name:* and container.id:*', language: 'kuery' },
+          filters: [],
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

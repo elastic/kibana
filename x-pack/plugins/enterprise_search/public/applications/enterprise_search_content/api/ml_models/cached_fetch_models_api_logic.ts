@@ -18,6 +18,8 @@ import { FetchModelsApiLogic, FetchModelsApiResponse } from './fetch_models_api_
 const FETCH_MODELS_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_MODELS_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
+export type { FetchModelsApiResponse } from './fetch_models_api_logic';
+
 export interface CachedFetchModlesApiLogicActions {
   apiError: Actions<{}, FetchModelsApiResponse>['apiError'];
   apiReset: Actions<{}, FetchModelsApiResponse>['apiReset'];
@@ -101,6 +103,7 @@ export const CachedFetchModelsApiLogic = kea<
       null,
       {
         apiReset: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (currentState, newState) =>
           isEqual(currentState, newState) ? currentState : newState,
       },
@@ -109,6 +112,7 @@ export const CachedFetchModelsApiLogic = kea<
       null,
       {
         clearPollTimeout: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         setTimeoutId: (_, { id }) => id,
       },
     ],

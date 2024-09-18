@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../../detections_response/utils';
+import { dataGeneratorFactory } from '../../../../detections_response/utils';
+import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -39,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless Risk Scoring Task Execution', () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -96,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await riskEngineRoutes.init();
           });
 
-          it('@skipInQA calculates and persists risk scores for alert documents', async () => {
+          it('@skipInServerlessMKI calculates and persists risk scores for alert documents', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const scores = await readRiskScores(es);
@@ -107,17 +104,24 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('@skipInQA starts the latest transform', async () => {
+          it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({
               transform_id: 'risk_score_latest_transform_default',
             });
 
-            expect(transformStats.transforms[0].state).to.eql('started');
+            expect(transformStats.transforms.length).to.eql(1);
+            const latestTransform = transformStats.transforms[0];
+            if (latestTransform.state !== 'started') {
+              log.error('Transform state is not started, logging the transform');
+              log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
+            }
+
+            expect(latestTransform.state).to.eql('started');
           });
 
-          describe('@skipInQA disabling and re-enabling the risk engine', () => {
+          describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
               await riskEngineRoutes.disable();
@@ -139,7 +143,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          describe('@skipInQA disabling the risk engine', () => {
+          describe('@skipInServerlessMKI disabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
             });
@@ -216,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('@skipInQA calculates and persists risk scores for both types of entities', async () => {
+        it('@skipInServerlessMKI calculates and persists risk scores for both types of entities', async () => {
           await riskEngineRoutes.init();
           await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
           const riskScores = await readRiskScores(es);
@@ -236,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await assetCriticalityRoutes.upsert({
               id_field: 'host.name',
               id_value: 'host-1',
-              criticality_level: 'very_important',
+              criticality_level: 'extreme_impact',
             });
           });
 
@@ -258,7 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
               (riskScore) => riskScore.host?.risk.criticality_modifier
             );
 
-            expect(assetCriticalityLevels).to.contain('very_important');
+            expect(assetCriticalityLevels).to.contain('extreme_impact');
             expect(assetCriticalityModifiers).to.contain(2);
 
             const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-1');
@@ -266,13 +270,13 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id_field: 'host.name',
                 id_value: 'host-1',
-                criticality_level: 'very_important',
+                criticality_level: 'extreme_impact',
                 criticality_modifier: 2,
                 calculated_level: 'Moderate',
                 calculated_score: 79.81345973382406,
-                calculated_score_norm: 46.809565696393314,
+                calculated_score_norm: 47.08016240063269,
                 category_1_count: 10,
-                category_1_score: 30.55645472198471,
+                category_1_score: 30.787478681462762,
               },
             ]);
           });

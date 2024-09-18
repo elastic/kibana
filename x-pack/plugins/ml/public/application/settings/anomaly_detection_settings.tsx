@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
@@ -21,13 +22,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useMlApi } from '../contexts/kibana';
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
-import { ml } from '../services/ml_api_service';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
 export const AnomalyDetectionSettings: FC = () => {
+  const mlApi = useMlApi();
+
   const [calendarsCount, setCalendarsCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 
@@ -50,7 +53,7 @@ export const AnomalyDetectionSettings: FC = () => {
     // Obtain the counts of calendars and filter lists.
     if (canGetCalendars === true) {
       try {
-        const calendars = await ml.calendars();
+        const calendars = await mlApi.calendars();
         setCalendarsCount(calendars.length);
       } catch (e) {
         displayErrorToast(
@@ -64,7 +67,7 @@ export const AnomalyDetectionSettings: FC = () => {
 
     if (canGetFilters === true) {
       try {
-        const filterLists = await ml.filters.filtersStats();
+        const filterLists = await mlApi.filters.filtersStats();
         setFilterListsCount(filterLists.length);
       } catch (e) {
         displayErrorToast(

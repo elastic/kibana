@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
@@ -18,7 +18,9 @@ import {
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
-  SELECT_AGGREGATION_CHART,
+  ALERT_CHARTS_TOGGLE_BUTTON,
+  SELECT_COUNTS_TABLE,
+  SELECT_TREEMAP,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
   CLOSE_FLYOUT,
@@ -60,14 +62,10 @@ import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
-  THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
-  CELL_EXPANSION_POPOVER,
-  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
-  CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
@@ -76,7 +74,6 @@ import {
   OPTION_LIST_VALUES,
   OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
-  CONTROL_GROUP,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
@@ -158,8 +155,6 @@ export const hideMessageTooltip = () => {
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
-export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
-
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
@@ -174,7 +169,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 
 export const refreshAlertPageFilter = () => {
   // Currently, system keeps the cache of option List for 1 minute so as to avoid
-  // lot of unncessary traffic. Cypress is too fast and we cannot wait for a minute
+  // lot of unnecessary traffic. Cypress is too fast and we cannot wait for a minute
   // to trigger a reload of Page Filters.
   // It is faster to refresh the page which will reload the Page Filter values
   // cy.reload();
@@ -200,15 +195,8 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
-  cy.get(CONTROL_GROUP).scrollIntoView();
-  recurse(
-    () => {
-      cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
-      return cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex);
-    },
-    ($el) => $el.is(':visible')
-  );
-  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).should('be.visible').trigger('click');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
@@ -216,7 +204,7 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
   values.forEach((value) => {
-    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click();
   });
   closePageFilterPopover(filterIndex);
   waitForAlerts();
@@ -278,12 +266,20 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
-export const selectCountTable = () => {
-  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+export const toggleKPICharts = () => {
+  cy.get(ALERT_CHARTS_TOGGLE_BUTTON).click();
+};
+
+export const selectAlertsCountTable = () => {
+  cy.get(SELECT_COUNTS_TABLE).click();
 };
 
 export const selectAlertsHistogram = () => {
   cy.get(SELECT_HISTOGRAM).click();
+};
+
+export const selectAlertsTreemap = () => {
+  cy.get(SELECT_TREEMAP).click();
 };
 
 export const goToAcknowledgedAlerts = () => {
@@ -321,8 +317,8 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
-    cy.get('@checkbox').should('have.attr', 'checked');
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
+    cy.get('@checkbox').should('be.checked');
   }
 };
 
@@ -421,10 +417,6 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   });
 };
 
-export const openUserDetailsFlyout = () => {
-  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
-};
-
 export const waitForPageFilters = () => {
   cy.log('Waiting for Page Filters');
   cy.url().then((urlString) => {
@@ -470,8 +462,9 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };
 
 export const selectAllAlerts = () => {
@@ -479,7 +472,7 @@ export const selectAllAlerts = () => {
   cy.get(SELECT_ALL_ALERTS).click();
 };
 
-export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
+export const visitAlertsPageWithCustomFilters = (pageFilters: FilterControlConfig[]) => {
   const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
   visitWithTimeRange(newURL);
@@ -503,7 +496,7 @@ export const updateAlertTags = () => {
 };
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
-  cy.get(fieldSelector).first().trigger('mouseover');
+  cy.get(fieldSelector).first().realHover();
   cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
 };
 

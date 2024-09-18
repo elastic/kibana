@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep } from 'lodash';
@@ -61,6 +62,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.data_enhanced.search.sessions\\" has been replaced by \\"data.search.sessions\\"",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });
@@ -101,6 +103,7 @@ describe('Config Deprecations', () => {
         "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
         "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
         "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });
@@ -144,6 +147,7 @@ describe('Config Deprecations', () => {
         "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
         "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
         "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+        "Configuring \\"data.search.sessions.enabled\\" is deprecated and will be removed in 9.0.0.",
       ]
     `);
   });

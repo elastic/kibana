@@ -1,0 +1,711 @@
+{
+  "id": "@kbn/ml-time-buckets",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.TimeBuckets",
+        "type": "Class",
+        "tags": [],
+        "label": "TimeBuckets",
+        "description": [
+          "\nRepresents a configurable utility class for working with time buckets."
+        ],
+        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreates an instance of TimeBuckets."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timeBucketsConfig",
+                "description": [
+                  "- Configuration for the TimeBuckets instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-time-buckets",
+                    "scope": "common",
+                    "docId": "kibKbnMlTimeBucketsPluginApi",
+                    "section": "def-common.TimeBucketsConfig",
+                    "text": "TimeBucketsConfig"
+                  }
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.setBarTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "setBarTarget",
+            "description": [
+              "\nSets the target number of bars for the histogram."
+            ],
+            "signature": [
+              "(barTarget: number) => void"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.setBarTarget.$1",
+                "type": "number",
+                "tags": [],
+                "label": "barTarget",
+                "description": [
+                  "- The target bar count."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.setMaxBars",
+            "type": "Function",
+            "tags": [],
+            "label": "setMaxBars",
+            "description": [
+              "\nSets the maximum number of bars for the histogram."
+            ],
+            "signature": [
+              "(maxBars: number) => void"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.setMaxBars.$1",
+                "type": "number",
+                "tags": [],
+                "label": "maxBars",
+                "description": [
+                  "- The maximum bar count."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.setInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "setInterval",
+            "description": [
+              "\nSets the interval for the time buckets."
+            ],
+            "signature": [
+              "(interval: string) => void"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.setInterval.$1",
+                "type": "string",
+                "tags": [],
+                "label": "interval",
+                "description": [
+                  "- The interval expression, e.g., \"1h\" for one hour."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.setBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "setBounds",
+            "description": [
+              "\nSets the bounds of the time range for the buckets."
+            ],
+            "signature": [
+              "(bounds: ",
+              {
+                "pluginId": "@kbn/ml-time-buckets",
+                "scope": "common",
+                "docId": "kibKbnMlTimeBucketsPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.setBounds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "bounds",
+                "description": [
+                  "- The minimum and maximum time bounds."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-time-buckets",
+                    "scope": "common",
+                    "docId": "kibKbnMlTimeBucketsPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  }
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.getBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "getBounds",
+            "description": [
+              "\nGets the current bounds of the time range."
+            ],
+            "signature": [
+              "() => { min: moment.Moment; max: moment.Moment; }"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "The current time range bounds."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.getInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "getInterval",
+            "description": [
+              "\nRetrieves the configured interval for the buckets."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ml-time-buckets",
+                "scope": "common",
+                "docId": "kibKbnMlTimeBucketsPluginApi",
+                "section": "def-common.TimeBucketsInterval",
+                "text": "TimeBucketsInterval"
+              }
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "The current interval settings for the buckets."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.getIntervalToNearestMultiple",
+            "type": "Function",
+            "tags": [],
+            "label": "getIntervalToNearestMultiple",
+            "description": [
+              "\nCalculates the nearest interval that is a multiple of a specified divisor."
+            ],
+            "signature": [
+              "(divisorSecs: number) => ",
+              {
+                "pluginId": "@kbn/ml-time-buckets",
+                "scope": "common",
+                "docId": "kibKbnMlTimeBucketsPluginApi",
+                "section": "def-common.TimeBucketsInterval",
+                "text": "TimeBucketsInterval"
+              }
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-time-buckets",
+                "id": "def-common.TimeBuckets.getIntervalToNearestMultiple.$1",
+                "type": "number",
+                "tags": [],
+                "label": "divisorSecs",
+                "description": [
+                  "- The divisor in seconds."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The nearest interval as a multiple of the divisor."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBuckets.getScaledDateFormat",
+            "type": "Function",
+            "tags": [],
+            "label": "getScaledDateFormat",
+            "description": [
+              "\nRetrieves the date format that should be used for scaled intervals."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "The scaled date format string."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.getBoundsRoundedToInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "getBoundsRoundedToInterval",
+        "description": [
+          "\nAdjusts the given time range bounds to align with the specified interval."
+        ],
+        "signature": [
+          "(bounds: ",
+          {
+            "pluginId": "@kbn/ml-time-buckets",
+            "scope": "common",
+            "docId": "kibKbnMlTimeBucketsPluginApi",
+            "section": "def-common.TimeRangeBounds",
+            "text": "TimeRangeBounds"
+          },
+          ", interval: ",
+          {
+            "pluginId": "@kbn/ml-time-buckets",
+            "scope": "common",
+            "docId": "kibKbnMlTimeBucketsPluginApi",
+            "section": "def-common.TimeBucketsInterval",
+            "text": "TimeBucketsInterval"
+          },
+          ", inclusiveEnd: boolean | undefined) => Required<",
+          {
+            "pluginId": "@kbn/ml-time-buckets",
+            "scope": "common",
+            "docId": "kibKbnMlTimeBucketsPluginApi",
+            "section": "def-common.TimeRangeBounds",
+            "text": "TimeRangeBounds"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.getBoundsRoundedToInterval.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "bounds",
+            "description": [
+              "The current time range bounds."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-time-buckets",
+                "scope": "common",
+                "docId": "kibKbnMlTimeBucketsPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              }
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.getBoundsRoundedToInterval.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "The interval to align the time range bounds with."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-time-buckets",
+                "scope": "common",
+                "docId": "kibKbnMlTimeBucketsPluginApi",
+                "section": "def-common.TimeBucketsInterval",
+                "text": "TimeBucketsInterval"
+              }
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.getBoundsRoundedToInterval.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inclusiveEnd",
+            "description": [
+              "Whether the end of the range should be inclusive."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The adjusted time range bounds."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.useTimeBuckets",
+        "type": "Function",
+        "tags": [],
+        "label": "useTimeBuckets",
+        "description": [
+          "\nCustom hook to get `TimeBuckets` configured with settings from the `IUiSettingsClient`.\n"
+        ],
+        "signature": [
+          "(uiSettings: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/ml-time-buckets",
+            "scope": "common",
+            "docId": "kibKbnMlTimeBucketsPluginApi",
+            "section": "def-common.TimeBuckets",
+            "text": "TimeBuckets"
+          }
+        ],
+        "path": "x-pack/packages/ml/time_buckets/use_time_buckets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.useTimeBuckets.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "The UI settings client instance used to retrieve UI settings."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/packages/ml/time_buckets/use_time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A memoized `TimeBuckets` instance configured with relevant UI settings."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.TimeBucketsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeBucketsConfig",
+        "description": [
+          "\nConfiguration options for initializing TimeBuckets."
+        ],
+        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsConfig.histogrammaxBars",
+            "type": "number",
+            "tags": [],
+            "label": "'histogram:maxBars'",
+            "description": [
+              "\nThe maximum number of bars to display on the histogram."
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsConfig.histogrambarTarget",
+            "type": "number",
+            "tags": [],
+            "label": "'histogram:barTarget'",
+            "description": [
+              "\nThe targeted number of bars for the histogram."
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsConfig.dateFormat",
+            "type": "string",
+            "tags": [],
+            "label": "dateFormat",
+            "description": [
+              "\nThe date format string."
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsConfig.dateFormatscaled",
+            "type": "Array",
+            "tags": [],
+            "label": "'dateFormat:scaled'",
+            "description": [
+              "\nThe scaled date format strings."
+            ],
+            "signature": [
+              "string[][]"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.TimeBucketsInterval",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeBucketsInterval",
+        "description": [
+          "\nDefines the structure for time intervals used within TimeBuckets."
+        ],
+        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsInterval.asMilliseconds",
+            "type": "Function",
+            "tags": [],
+            "label": "asMilliseconds",
+            "description": [
+              "\nReturns the interval in milliseconds."
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsInterval.asSeconds",
+            "type": "Function",
+            "tags": [],
+            "label": "asSeconds",
+            "description": [
+              "\nReturns the interval in seconds."
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeBucketsInterval.expression",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [
+              "\nThe string expression representing the interval."
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-time-buckets",
+        "id": "def-common.TimeRangeBounds",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeRangeBounds",
+        "description": [
+          "\nRepresents the minimum and maximum time bounds for a time range."
+        ],
+        "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeRangeBounds.min",
+            "type": "Object",
+            "tags": [],
+            "label": "min",
+            "description": [
+              "\nThe minimum bound of the time range (optional)."
+            ],
+            "signature": [
+              "moment.Moment | undefined"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-time-buckets",
+            "id": "def-common.TimeRangeBounds.max",
+            "type": "Object",
+            "tags": [],
+            "label": "max",
+            "description": [
+              "\nThe maximum bound of the time range (optional)."
+            ],
+            "signature": [
+              "moment.Moment | undefined"
+            ],
+            "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

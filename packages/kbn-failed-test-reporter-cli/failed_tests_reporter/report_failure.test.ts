@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dedent from 'dedent';
@@ -27,7 +28,8 @@ describe('createFailureIssue()', () => {
         likelyIrrelevant: false,
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.createIssue).toMatchInlineSnapshot(`
@@ -41,7 +43,7 @@ describe('createFailureIssue()', () => {
       this is the failure text
       \`\`\`
 
-      First failure: [CI Build - main](https://build-url)
+      First failure: [kibana-on-merge - main](https://build-url)
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
             Array [
@@ -81,7 +83,8 @@ describe('updateFailureIssue()', () => {
         },
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.editIssueBodyAndEnsureOpen).toMatchInlineSnapshot(`
@@ -107,7 +110,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             1234,
-            "New failure: [CI Build - main](https://build-url)",
+            "New failure: [kibana-on-merge - main](https://build-url)",
           ],
         ],
         "results": Array [

@@ -108,7 +108,7 @@
         "tags": [],
         "label": "Index",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -119,7 +119,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -133,7 +133,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -147,7 +147,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,7 +158,7 @@
             "tags": [],
             "label": "isFrozen",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -169,7 +169,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,7 +183,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,7 +197,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,7 +211,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +226,7 @@
               "IlmExplainLifecycleLifecycleExplain",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,7 +240,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,7 +255,7 @@
               "HealthStatus",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,7 +270,7 @@
               "IndicesStatsIndexMetadataState",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,7 +284,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,7 +298,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,7 +312,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +326,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,7 +340,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -349,68 +349,47 @@
       },
       {
         "parentPluginId": "indexManagement",
-        "id": "def-public.IndexManagementPluginSetup",
+        "id": "def-public.IndexMappingProps",
         "type": "Interface",
         "tags": [],
-        "label": "IndexManagementPluginSetup",
+        "label": "IndexMappingProps",
         "description": [],
-        "path": "x-pack/plugins/index_management/public/types.ts",
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "indexManagement",
-            "id": "def-public.IndexManagementPluginSetup.apiService",
+            "id": "def-public.IndexMappingProps.index",
             "type": "Object",
             "tags": [],
-            "label": "apiService",
+            "label": "index",
             "description": [],
             "signature": [
-              "PublicApiServiceSetup"
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.Index",
+                "text": "Index"
+              },
+              " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/public/types.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "indexManagement",
-            "id": "def-public.IndexManagementPluginSetup.extensionsService",
-            "type": "Object",
+            "id": "def-public.IndexMappingProps.showAboutMappings",
+            "type": "CompoundType",
             "tags": [],
-            "label": "extensionsService",
+            "label": "showAboutMappings",
             "description": [],
             "signature": [
-              "ExtensionsSetup"
+              "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "indexManagement",
-        "id": "def-public.IndexManagementPluginStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexManagementPluginStart",
-        "description": [],
-        "path": "x-pack/plugins/index_management/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-public.IndexManagementPluginStart.extensionsService",
-            "type": "Object",
-            "tags": [],
-            "label": "extensionsService",
-            "description": [],
-            "signature": [
-              "ExtensionsSetup"
-            ],
-            "path": "x-pack/plugins/index_management/public/types.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,7 +399,164 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "indexManagement",
+      "id": "def-public.IndexManagementPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexManagementPluginSetup",
+      "description": [],
+      "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginSetup.apiService",
+          "type": "Object",
+          "tags": [],
+          "label": "apiService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.PublicApiServiceSetup",
+              "text": "PublicApiServiceSetup"
+            }
+          ],
+          "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginSetup.extensionsService",
+          "type": "Object",
+          "tags": [],
+          "label": "extensionsService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.ExtensionsSetup",
+              "text": "ExtensionsSetup"
+            }
+          ],
+          "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "indexManagement",
+      "id": "def-public.IndexManagementPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexManagementPluginStart",
+      "description": [],
+      "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginStart.extensionsService",
+          "type": "Object",
+          "tags": [],
+          "label": "extensionsService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.ExtensionsSetup",
+              "text": "ExtensionsSetup"
+            }
+          ],
+          "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginStart.getIndexMappingComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "getIndexMappingComponent",
+          "description": [],
+          "signature": [
+            "(deps: { history: ",
+            {
+              "pluginId": "@kbn/core-application-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreApplicationBrowserPluginApi",
+              "section": "def-public.ScopedHistory",
+              "text": "ScopedHistory"
+            },
+            "<unknown>; }) => React.FC<",
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.IndexMappingProps",
+              "text": "IndexMappingProps"
+            },
+            ">"
+          ],
+          "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "indexManagement",
+              "id": "def-public.IndexManagementPluginStart.getIndexMappingComponent.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "deps",
+              "description": [],
+              "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "indexManagement",
+                  "id": "def-public.IndexManagementPluginStart.getIndexMappingComponent.$1.history",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "history",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "@kbn/core-application-browser",
+                      "scope": "public",
+                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                      "section": "def-public.ScopedHistory",
+                      "text": "ScopedHistory"
+                    },
+                    "<unknown>"
+                  ],
+                  "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -489,8 +625,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/index_management/server/types.ts",
@@ -507,7 +643,7 @@
         "tags": [],
         "label": "Index",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -518,7 +654,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -532,7 +668,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,7 +682,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -557,7 +693,7 @@
             "tags": [],
             "label": "isFrozen",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -568,7 +704,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -582,7 +718,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -596,7 +732,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -610,7 +746,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -625,7 +761,7 @@
               "IlmExplainLifecycleLifecycleExplain",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -639,7 +775,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -654,7 +790,7 @@
               "HealthStatus",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,7 +805,7 @@
               "IndicesStatsIndexMetadataState",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -683,7 +819,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -697,7 +833,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,7 +847,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -725,7 +861,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -739,7 +875,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -831,6 +967,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-server.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "tags": [],
@@ -878,7 +1028,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; }>; readonly enableIndexStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableDataStreamsStorageColumn: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -1018,7 +1168,7 @@
         "signature": [
           "(field: string) => { size: string; unit: string; }"
         ],
-        "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+        "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1032,7 +1182,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+            "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1279,6 +1429,70 @@
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateMeta",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed_by",
+            "type": "string",
+            "tags": [],
+            "label": "managed_by",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.package",
+            "type": "Object",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "signature": [
+              "{ name: string; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1327,8 +1541,8 @@
                 "text": "Mappings"
               },
               " | undefined; lifecycle?: (",
-              "IndicesDataLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; }) | undefined; }"
+              "IndicesDataStreamLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -1343,6 +1557,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -1605,6 +1833,48 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringStorageSizeBytes",
+            "type": "number",
+            "tags": [],
+            "label": "meteringStorageSizeBytes",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringStorageSize",
+            "type": "string",
+            "tags": [],
+            "label": "meteringStorageSize",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringDocsCount",
+            "type": "number",
+            "tags": [],
+            "label": "meteringDocsCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.DataStream._meta",
             "type": "Object",
             "tags": [],
@@ -1663,8 +1933,8 @@
             "description": [],
             "signature": [
               "(",
-              "IndicesDataLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; }) | undefined"
+              "IndicesDataStreamLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -1798,14 +2068,13 @@
           },
           {
             "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.indices",
-            "type": "Array",
+            "id": "def-common.EnhancedDataStreamFromEs.metering_size_in_bytes",
+            "type": "number",
             "tags": [],
-            "label": "indices",
+            "label": "metering_size_in_bytes",
             "description": [],
             "signature": [
-              "DataStreamIndexFromEs",
-              "[]"
+              "number | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -1813,11 +2082,29 @@
           },
           {
             "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.next_generation_managed_by",
-            "type": "string",
+            "id": "def-common.EnhancedDataStreamFromEs.metering_doc_count",
+            "type": "number",
             "tags": [],
-            "label": "next_generation_managed_by",
+            "label": "metering_doc_count",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "IndicesDataStreamIndex",
+              "[]"
+            ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1949,7 +2236,7 @@
         "tags": [],
         "label": "Index",
         "description": [],
-        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1960,7 +2247,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,7 +2261,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1988,7 +2275,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1999,7 +2286,7 @@
             "tags": [],
             "label": "isFrozen",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,7 +2297,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,7 +2311,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2038,7 +2325,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2052,7 +2339,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2067,7 +2354,7 @@
               "IlmExplainLifecycleLifecycleExplain",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2081,7 +2368,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2096,7 +2383,7 @@
               "HealthStatus",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2111,7 +2398,7 @@
               "IndicesStatsIndexMetadataState",
               " | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2125,7 +2412,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2139,7 +2426,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2153,7 +2440,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2167,7 +2454,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2180,6 +2467,145 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.IndexModule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexModule",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.number_of_shards",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "number_of_shards",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.codec",
+            "type": "string",
+            "tags": [],
+            "label": "codec",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.routing_partition_size",
+            "type": "number",
+            "tags": [],
+            "label": "routing_partition_size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.refresh_interval",
+            "type": "string",
+            "tags": [],
+            "label": "refresh_interval",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.load_fixed_bitset_filters_eagerly",
+            "type": "boolean",
+            "tags": [],
+            "label": "load_fixed_bitset_filters_eagerly",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.shard",
+            "type": "Object",
+            "tags": [],
+            "label": "shard",
+            "description": [],
+            "signature": [
+              "{ check_on_startup: boolean | \"checksum\"; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.number_of_replicas",
+            "type": "number",
+            "tags": [],
+            "label": "number_of_replicas",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.auto_expand_replicas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "auto_expand_replicas",
+            "description": [],
+            "signature": [
+              "string | false"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "lifecycle",
+            "description": [],
+            "signature": [
+              "LifecycleModule"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.routing",
+            "type": "Object",
+            "tags": [],
+            "label": "routing",
+            "description": [],
+            "signature": [
+              "{ allocation: { enable: \"none\" | \"all\" | \"primaries\" | \"new_primaries\"; }; rebalance: { enable: \"none\" | \"all\" | \"primaries\" | \"replicas\"; }; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -2207,7 +2633,15 @@
             "label": "index",
             "description": [],
             "signature": [
-              "Partial<IndexModule> | undefined"
+              "Partial<",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexModule",
+                "text": "IndexModule"
+              },
+              "> | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -2429,6 +2863,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "tags": [],
@@ -2487,98 +2935,6 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/mappings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "indexManagement",
-        "id": "def-common.SerializedEnrichPolicy",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedEnrichPolicy",
-        "description": [],
-        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"match\" | \"range\" | \"geo_match\""
-            ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.sourceIndices",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceIndices",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.matchField",
-            "type": "string",
-            "tags": [],
-            "label": "matchField",
-            "description": [],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.enrichFields",
-            "type": "Array",
-            "tags": [],
-            "label": "enrichFields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.SerializedEnrichPolicy.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
-            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2698,6 +3054,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.ignoreMissingComponentTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreMissingComponentTemplates",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.version",
             "type": "number",
             "tags": [],
@@ -2727,13 +3097,10 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.allowAutoCreate",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "allowAutoCreate",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2761,6 +3128,20 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -2979,6 +3360,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateListItem.ilmPolicy",
             "type": "Object",
             "tags": [],
@@ -2986,6 +3381,20 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.composedOf",
+            "type": "Array",
+            "tags": [],
+            "label": "composedOf",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -3076,8 +3485,22 @@
                 "text": "Mappings"
               },
               " | undefined; lifecycle?: (",
-              "IndicesDataLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; }) | undefined; } | undefined"
+              "IndicesDataStreamLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -3089,6 +3512,20 @@
             "type": "Array",
             "tags": [],
             "label": "composed_of",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.ignore_missing_component_templates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignore_missing_component_templates",
             "description": [],
             "signature": [
               "string[] | undefined"

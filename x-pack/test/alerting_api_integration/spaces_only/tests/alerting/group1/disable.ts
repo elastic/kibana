@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -20,6 +22,8 @@ import {
 } from '../../../../common/lib';
 import { validateEvent } from './event_log';
 
+const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+
 // eslint-disable-next-line import/no-default-export
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -27,11 +31,21 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('disable', () => {
+  describe('disable', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const ruleUtils = new RuleUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await es.deleteByQuery({
+        index: alertAsDataIndex,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
+      await objectRemover.removeAll();
+    });
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
       const scheduledTask = await es.get<TaskManagerDoc>({
@@ -172,6 +186,54 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
+    it('should not untrack alerts if untrack is false', async () => {
+      const { body: createdRule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            throttle: undefined,
+            notify_when: undefined,
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              reference: 'test',
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      await retry.try(async () => {
+        const {
+          hits: { hits: activeAlerts },
+        } = await es.search({
+          index: alertAsDataIndex,
+          body: { query: { match_all: {} } },
+        });
+
+        expect(activeAlerts.length).eql(2);
+        activeAlerts.forEach((activeAlert: any) => {
+          expect(activeAlert._source[ALERT_STATUS]).eql('active');
+        });
+      });
+
+      await ruleUtils.getDisableRequest(createdRule.id, false);
+
+      const {
+        hits: { hits: untrackedAlerts },
+      } = await es.search({
+        index: alertAsDataIndex,
+        body: { query: { match_all: {} } },
+      });
+      expect(untrackedAlerts.length).eql(2);
+      untrackedAlerts.forEach((untrackedAlert: any) => {
+        expect(untrackedAlert._source[ALERT_STATUS]).eql('active');
+      });
+    });
+
     it('should disable rule even if associated task manager document is missing', async () => {
       const { body: createdRule } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -204,7 +266,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
-    describe('legacy', () => {
+    describe('legacy', function () {
       it('should handle disable rule request appropriately', async () => {
         const { body: createdRule } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

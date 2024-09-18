@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -16,13 +17,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiSearchBarProps,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   IconType,
   PropertySort,
   Query,
@@ -77,6 +78,7 @@ interface BaseSavedObjectFinder {
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -254,14 +256,14 @@ export class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.simple);
 
               return (
-                <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
-                  <EuiIcon
-                    aria-label={currentSavedObjectMetaData.name}
-                    type={iconType}
-                    size="s"
-                    data-test-subj="objectType"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={currentSavedObjectMetaData.name}
+                  aria-label={currentSavedObjectMetaData.name}
+                  type={iconType}
+                  size="s"
+                  data-test-subj="objectType"
+                />
               );
             },
           }
@@ -288,7 +290,7 @@ export class SavedObjectFinderUi extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          return (
+          const link = (
             <EuiLink
               onClick={
                 onChoose
@@ -302,6 +304,16 @@ export class SavedObjectFinderUi extends React.Component<
             >
               {item.name}
             </EuiLink>
+          );
+
+          const tooltipText = this.props.getTooltipText?.(item);
+
+          return tooltipText ? (
+            <EuiToolTip position="left" content={tooltipText}>
+              {link}
+            </EuiToolTip>
+          ) : (
+            link
           );
         },
       },

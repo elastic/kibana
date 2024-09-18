@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -78,6 +79,7 @@ const generateId = htmlIdGenerator();
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
+  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -88,6 +90,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
+
+  public componentDidMount() {
+    setTimeout(() => {
+      // defer so input focus ref value has been populated
+      this.savedObjectTitleInputRef.current?.focus();
+    }, 0);
+  }
 
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
@@ -111,7 +120,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         >
           <EuiFieldText
             fullWidth
-            autoFocus
+            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -214,7 +223,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiTextArea
           fullWidth
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
         />
@@ -337,13 +346,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               />
             }
             color="warning"
-            data-test-subj="titleDupicateWarnMsg"
+            data-test-subj="titleDuplicateWarnMsg"
             id={duplicateWarningId}
           >
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Saving '{title}' creates a duplicate title."
+                defaultMessage="Saving ''{title}'' creates a duplicate title."
                 values={{
                   title: this.state.title,
                 }}

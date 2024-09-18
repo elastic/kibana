@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
+import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
@@ -115,6 +117,7 @@ export const PostAgentUpgradeRequestSchema = {
       validate: validateVersion,
     }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -124,6 +127,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
     start_time: schema.maybe(
       schema.string({
@@ -135,6 +139,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
       })
     ),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -160,12 +165,22 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      additional_metrics: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+      ),
+    })
+  ),
 };
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    additional_metrics: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+    ),
   }),
 };
 
@@ -182,11 +197,18 @@ export const GetAgentUploadFileRequestSchema = {
   }),
 };
 
+export const DeleteAgentUploadFileRequestSchema = {
+  params: schema.object({
+    fileId: schema.string(),
+  }),
+};
+
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -212,6 +234,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -242,6 +265,16 @@ export const GetActionStatusRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
+    date: schema.maybe(
+      schema.string({
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
+      })
+    ),
+    latest: schema.maybe(schema.number()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

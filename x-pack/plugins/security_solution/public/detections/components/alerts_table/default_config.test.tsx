@@ -16,6 +16,7 @@ import {
   buildThreatMatchFilter,
   getAlertsDefaultModel,
   getAlertsPreviewDefaultModel,
+  buildAlertsFilterByRuleIds,
 } from './default_config';
 
 jest.mock('./actions');
@@ -67,16 +68,34 @@ const platinumBaseColumns = [
     initialWidth: 450,
   },
   { columnHeaderType: 'not-filtered', id: 'host.name' },
-  { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
   { columnHeaderType: 'not-filtered', id: 'user.name' },
-  { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
-  { columnHeaderType: 'not-filtered', id: 'host.asset.criticality' },
-  { columnHeaderType: 'not-filtered', id: 'user.asset.criticality' },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.risk.calculated_level',
+    displayAsText: 'Host Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.risk.calculated_level',
+    displayAsText: 'User Risk Level',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.asset.criticality',
+    displayAsText: 'Host Criticality',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.asset.criticality',
+    displayAsText: 'User Criticality',
+  },
   { columnHeaderType: 'not-filtered', id: 'process.name' },
   { columnHeaderType: 'not-filtered', id: 'file.name' },
   { columnHeaderType: 'not-filtered', id: 'source.ip' },
   { columnHeaderType: 'not-filtered', id: 'destination.ip' },
 ];
+
+const dataViewId = 'security-solution-default';
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
@@ -86,6 +105,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           negate: false,
+          index: dataViewId,
           disabled: false,
           type: 'phrase',
           key: 'kibana.alert.rule.rule_id',
@@ -110,6 +130,7 @@ describe('alerts default_config', () => {
           meta: {
             alias: null,
             disabled: false,
+            index: dataViewId,
             negate: false,
             key: 'kibana.alert.rule.type',
             type: 'term',
@@ -233,6 +254,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
+          index: dataViewId,
           negate: false,
         },
         query: {
@@ -257,6 +279,75 @@ describe('alerts default_config', () => {
           },
         },
       };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertsFilterByRuleIds', () => {
+    it('given an empty list of rule ids will return an empty filter', () => {
+      const filters = buildAlertsFilterByRuleIds([]);
+      expect(filters).toHaveLength(0);
+    });
+
+    it('builds filter containing 1 rule id passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    it('builds filter containing 3 rule ids passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1', 'rule-id-2', 'rule-id-3']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-2',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-3',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expected);
     });

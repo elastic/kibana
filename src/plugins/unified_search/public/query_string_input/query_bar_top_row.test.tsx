@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
@@ -64,8 +65,8 @@ const kqlQuery = {
   language: 'kuery',
 };
 
-const sqlQuery = {
-  sql: 'SELECT * FROM test',
+const esqlQuery = {
+  esql: 'FROM test',
 };
 
 const createMockWebStorage = () => ({
@@ -297,7 +298,7 @@ describe('QueryBarTopRowTopRow', () => {
   it('Should NOT render query input bar if on text based languages mode', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: sqlQuery,
+        query: esqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,
@@ -310,7 +311,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBe('@timestamp');
     expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toBe(false);
   });
 
@@ -322,7 +323,7 @@ describe('QueryBarTopRowTopRow', () => {
     };
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: sqlQuery,
+        query: esqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,
@@ -335,7 +336,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(false);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBeUndefined();
     expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toMatchInlineSnapshot(`
       Object {
         "display": <span
@@ -345,41 +346,6 @@ describe('QueryBarTopRowTopRow', () => {
         </span>,
       }
     `);
-  });
-
-  it('should render query input bar with hideRunQueryText when configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        hideTextBasedRunQueryLabel: true,
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(true);
-  });
-
-  it('should render query input bar with hideRunQueryText as undefined if not configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(undefined);
   });
 
   it('Should render custom data view picker', () => {

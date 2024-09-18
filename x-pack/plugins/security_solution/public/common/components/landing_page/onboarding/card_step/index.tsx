@@ -26,11 +26,7 @@ import type {
   StepId,
   Step,
 } from '../types';
-import {
-  ALL_DONE_TEXT,
-  COLLAPSE_STEP_BUTTON_LABEL,
-  EXPAND_STEP_BUTTON_LABEL,
-} from '../translations';
+import { ALL_DONE_TEXT, EXPAND_STEP_BUTTON_LABEL } from '../translations';
 
 import { StepContent } from './step_content';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
@@ -75,13 +71,13 @@ const CardStepComponent: React.FC<{
   const isDone = finishedSteps.has(stepId);
 
   const toggleStep = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       const newStatus = !isExpandedStep;
 
       if (hasStepContent) {
         // Toggle step and sync the expanded card step to storage & reducer
-        onStepClicked({ stepId, cardId, sectionId, isExpanded: newStatus });
+        onStepClicked({ stepId, cardId, sectionId, isExpanded: newStatus, trigger: 'click' });
 
         navigateTo({
           deepLinkId: SecurityPageName.landing,
@@ -149,7 +145,8 @@ const CardStepComponent: React.FC<{
               color="primary"
               onClick={toggleStep}
               iconType={isExpandedStep ? 'arrowUp' : 'arrowDown'}
-              aria-label={isExpandedStep ? COLLAPSE_STEP_BUTTON_LABEL : EXPAND_STEP_BUTTON_LABEL}
+              aria-label={EXPAND_STEP_BUTTON_LABEL(title ?? '')}
+              aria-expanded={isExpandedStep}
               size="xs"
               css={toggleButtonStyles}
               isDisabled={!hasStepContent}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
@@ -17,6 +18,8 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 
 export function createCoreSetupMock({
@@ -44,6 +47,8 @@ export function createCoreSetupMock({
     settings: settingsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     theme: themeServiceMock.createSetupContract(),
+    security: securityServiceMock.createSetup(),
+    userProfile: userProfileServiceMock.createSetup(),
     plugins: {
       onSetup: jest.fn(),
       onStart: jest.fn(),

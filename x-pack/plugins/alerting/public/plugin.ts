@@ -14,7 +14,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './services/alert_api';
+import { loadRule, loadRuleType } from './services/rule_api';
 import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
@@ -57,6 +57,7 @@ export interface PluginSetupContract {
 }
 export interface PluginStartContract {
   getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
+  getMaxAlertsPerRun: () => number;
 }
 export interface AlertingPluginSetup {
   management: ManagementSetup;
@@ -69,13 +70,28 @@ export interface AlertingPluginStart {
   data: DataPublicPluginStart;
 }
 
+export interface AlertingUIConfig {
+  rules: {
+    run: {
+      alerts: {
+        max: number;
+      };
+    };
+  };
+}
+
 export class AlertingPublicPlugin
   implements
     Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
 {
   private alertNavigationRegistry?: AlertNavigationRegistry;
+  private config: AlertingUIConfig;
+  readonly maxAlertsPerRun: number;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.config = this.initContext.config.get<AlertingUIConfig>();
+    this.maxAlertsPerRun = this.config.rules.run.alerts.max;
+  }
 
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
@@ -149,6 +165,9 @@ export class AlertingPublicPlugin
         if (rule.viewInAppRelativeUrl) {
           return rule.viewInAppRelativeUrl;
         }
+      },
+      getMaxAlertsPerRun: () => {
+        return this.maxAlertsPerRun;
       },
     };
   }

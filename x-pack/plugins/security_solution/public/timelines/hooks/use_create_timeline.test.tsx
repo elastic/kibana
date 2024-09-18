@@ -4,124 +4,139 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseCreateTimelineParams } from './use_create_timeline';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { TimelineType } from '../../../common/api/timeline';
+import { RowRendererCount, TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
 import { inputsActions } from '../../common/store/inputs';
-import { sourcererActions } from '../../common/store/sourcerer';
+import { sourcererActions } from '../../sourcerer/store';
 import { appActions } from '../../common/store/app';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { TestProviders, mockGlobalState } from '../../common/mock';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../common/hooks/use_selector');
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-
+jest.mock('../../common/containers/use_global_time', () => {
   return {
-    ...original,
-    useSelector: jest.fn(),
-    useDispatch: () => jest.fn(),
+    useGlobalTime: jest.fn().mockReturnValue({
+      from: '2022-04-05T12:00:00.000Z',
+      to: '2022-04-08T12:00:00.000Z',
+      setQuery: () => jest.fn(),
+      deleteQuery: () => jest.fn(),
+    }),
   };
 });
+jest.mock('../../common/lib/kibana');
+
+jest.mock('../../common/hooks/use_experimental_features');
 
 describe('useCreateTimeline', () => {
-  let hookResult: RenderHookResult<
-    UseCreateTimelineParams,
-    (options?: { timeRange?: TimeRange }) => void
-  >;
-
-  const resetDiscoverAppState = jest.fn();
+  const resetDiscoverAppState = jest.fn().mockResolvedValue({});
   (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });
 
   it('should return a function', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({});
-
-    hookResult = renderHook(() =>
-      useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default })
+    const hookResult = renderHook(
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      }
     );
 
     expect(hookResult.result.current).toEqual(expect.any(Function));
   });
 
-  it('should dispatch correct actions when calling the returned function', () => {
-    const dataViewId = 'dataViewId';
-    const selectedPatterns = ['selectedPatterns'];
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      id: dataViewId,
-      patternList: selectedPatterns,
-    });
-
+  it('should dispatch correct actions when calling the returned function', async () => {
     const createTimeline = jest.spyOn(timelineActions, 'createTimeline');
     const setSelectedDataView = jest.spyOn(sourcererActions, 'setSelectedDataView');
     const addLinkTo = jest.spyOn(inputsActions, 'addLinkTo');
     const addNotes = jest.spyOn(appActions, 'addNotes');
 
-    hookResult = renderHook(() =>
-      useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default })
+    const hookResult = renderHook(
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      }
     );
 
     expect(hookResult.result.current).toEqual(expect.any(Function));
 
-    hookResult.result.current();
-
-    expect(createTimeline).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.test,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: 'default',
-      updated: undefined,
-    });
-    expect(setSelectedDataView).toHaveBeenCalledWith({
-      id: SourcererScopeName.timeline,
-      selectedDataViewId: dataViewId,
-      selectedPatterns,
-    });
+    await hookResult.result.current();
+    expect(createTimeline.mock.calls[0][0].id).toEqual(TimelineId.test);
+    expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineTypeEnum.default);
+    expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultUdtHeaders);
+    expect(createTimeline.mock.calls[0][0].dataViewId).toEqual(
+      mockGlobalState.sourcerer.defaultDataView.id
+    );
+    expect(createTimeline.mock.calls[0][0].indexNames).toEqual(
+      expect.arrayContaining(
+        mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
+      )
+    );
+    expect(createTimeline.mock.calls[0][0].show).toEqual(true);
+    expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
+    expect(createTimeline.mock.calls[0][0].excludedRowRendererIds).toHaveLength(RowRendererCount);
+    expect(setSelectedDataView.mock.calls[0][0].id).toEqual(SourcererScopeName.timeline);
+    expect(setSelectedDataView.mock.calls[0][0].selectedDataViewId).toEqual(
+      mockGlobalState.sourcerer.defaultDataView.id
+    );
+    expect(setSelectedDataView.mock.calls[0][0].selectedPatterns).toEqual(
+      expect.arrayContaining(
+        mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
+      )
+    );
     expect(addLinkTo).toHaveBeenCalledWith([InputsModelId.global, InputsModelId.timeline]);
     expect(addNotes).toHaveBeenCalledWith({ notes: [] });
   });
 
-  it('should run the onClick method if provided', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({});
-
+  it('should run the onClick method if provided', async () => {
     const onClick = jest.fn();
-    hookResult = renderHook(() =>
-      useCreateTimeline({
-        timelineId: TimelineId.test,
-        timelineType: TimelineType.default,
-        onClick,
-      })
+    const hookResult = renderHook(
+      () =>
+        useCreateTimeline({
+          timelineId: TimelineId.test,
+          timelineType: TimelineTypeEnum.default,
+          onClick,
+        }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      }
     );
 
-    hookResult.result.current();
+    await hookResult.result.current();
 
     expect(onClick).toHaveBeenCalled();
     expect(resetDiscoverAppState).toHaveBeenCalled();
   });
 
-  it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({});
-
+  it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', async () => {
     const removeLinkTo = jest.spyOn(inputsActions, 'removeLinkTo');
     const setAbsoluteRangeDatePicker = jest.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
 
-    hookResult = renderHook(() =>
-      useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default })
+    const hookResult = renderHook(
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      }
     );
 
     const timeRange: TimeRange = { kind: 'absolute', from: '', to: '' };
-    hookResult.result.current({ timeRange });
+    await hookResult.result.current({ timeRange });
 
     expect(removeLinkTo).toHaveBeenCalledWith([InputsModelId.timeline, InputsModelId.global]);
     expect(setAbsoluteRangeDatePicker).toHaveBeenCalledWith({
@@ -130,17 +145,21 @@ describe('useCreateTimeline', () => {
     });
   });
 
-  it('should dispatch removeLinkTo action if relative timeRange is passed to callback', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({});
-
+  it('should dispatch removeLinkTo action if relative timeRange is passed to callback', async () => {
     const setRelativeRangeDatePicker = jest.spyOn(inputsActions, 'setRelativeRangeDatePicker');
 
-    hookResult = renderHook(() =>
-      useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default })
+    const hookResult = renderHook(
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      }
     );
 
     const timeRange: TimeRange = { kind: 'relative', fromStr: '', toStr: '', from: '', to: '' };
-    hookResult.result.current({ timeRange });
+    await hookResult.result.current({ timeRange });
 
     expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
       ...timeRange,

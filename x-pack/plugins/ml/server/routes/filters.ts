@@ -7,9 +7,10 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
-import { FilterManager, FormFilter, UpdateFilter } from '../models/filter';
+import type { FormFilter, UpdateFilter } from '../models/filter';
+import { FilterManager } from '../models/filter';
 import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.
@@ -45,16 +46,6 @@ function deleteFilter(mlClient: MlClient, filterId: string) {
 }
 
 export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup Filters
-   *
-   * @api {get} /internal/ml/filters Get filters
-   * @apiName GetFilters
-   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection. Sets the size limit explicitly to return a maximum of 1000.
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object[]} filters list of filters
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters`,
@@ -62,6 +53,9 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetFilters'],
       },
+      summary: 'Gets filters',
+      description:
+        'Retrieves the list of filters which are used for custom rules in anomaly detection. Sets the size limit explicitly to return a maximum of 1000.',
     })
     .addVersion(
       {
@@ -81,18 +75,6 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Filters
-   *
-   * @api {get} /internal/ml/filters/:filterId Gets filter by ID
-   * @apiName GetFilterById
-   * @apiDescription Retrieves the filter with the specified ID.
-   *
-   * @apiSchema (params) filterIdSchema
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} filter the filter with the specified ID
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
@@ -100,6 +82,8 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetFilters'],
       },
+      summary: 'Gets filter by ID',
+      description: 'Retrieves the filter with the specified ID.',
     })
     .addVersion(
       {
@@ -120,18 +104,6 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Filters
-   *
-   * @api {put} /internal/ml/filters Creates a filter
-   * @apiName CreateFilter
-   * @apiDescription Instantiates a filter, for use by custom rules in anomaly detection.
-   *
-   * @apiSchema (body) createFilterSchema
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} filter created filter
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/filters`,
@@ -139,6 +111,8 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateFilter'],
       },
+      summary: 'Creates a filter',
+      description: 'Instantiates a filter, for use by custom rules in anomaly detection.',
     })
     .addVersion(
       {
@@ -161,19 +135,6 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Filters
-   *
-   * @api {put} /internal/ml/filters/:filterId Updates a filter
-   * @apiName UpdateFilter
-   * @apiDescription Updates the  description of a filter, adds items or removes items.
-   *
-   * @apiSchema (params) filterIdSchema
-   * @apiSchema (body) updateFilterSchema
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} filter updated filter
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
@@ -181,6 +142,8 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateFilter'],
       },
+      summary: 'Updates a filter',
+      description: 'Updates the description of a filter, adds items or removes items.',
     })
     .addVersion(
       {
@@ -207,15 +170,6 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Filters
-   *
-   * @api {delete} /internal/ml/filters/:filterId Delete filter
-   * @apiName DeleteFilter
-   * @apiDescription Deletes the filter with the specified ID.
-   *
-   * @apiSchema (params) filterIdSchema
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
@@ -223,6 +177,8 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canDeleteFilter'],
       },
+      summary: 'Deletes a filter',
+      description: 'Deletes the filter with the specified ID.',
     })
     .addVersion(
       {
@@ -247,17 +203,6 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup Filters
-   *
-   * @api {get} /internal/ml/filters/_stats Gets filters stats
-   * @apiName GetFiltersStats
-   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection,
-   *          with stats on the list of jobs and detectors which are using each filter.
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object[]} filters list of filters with stats on usage
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters/_stats`,
@@ -265,6 +210,9 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetFilters'],
       },
+      summary: 'Gets filters stats',
+      description:
+        'Retrieves the list of filters which are used for custom rules in anomaly detection, with stats on the list of jobs and detectors which are using each filter.',
     })
     .addVersion(
       {

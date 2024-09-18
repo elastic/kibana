@@ -6,20 +6,23 @@
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import type {
-  EmbeddableFactory,
-  EmbeddableInput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import {
+  getESQLAdHocDataview,
+  getIndexForESQLQuery,
+  ENABLE_ESQL,
+  getESQLQueryColumns,
+  getInitialESQLQuery,
+} from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../lens_suggestions_api';
-import { getLensAttributes } from '../../app_plugin/shared/edit_on_the_fly/helpers';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
+import { Embeddable } from '../../embeddable';
+import type { EditorFrameService } from '../../editor_frame_service';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -30,69 +33,77 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export function isCreateActionCompatible(core: CoreStart) {
-  return core.uiSettings.get('discover:enableESQL');
+export async function isCreateActionCompatible(core: CoreStart) {
+  return core.uiSettings.get(ENABLE_ESQL);
 }
 
 export async function executeCreateAction({
   deps,
   core,
-  createNewEmbeddable,
-  deleteEmbeddable,
+  api,
+  editorFrameService,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
-  createNewEmbeddable: (
-    embeddableFactory: EmbeddableFactory,
-    initialInput?: Partial<EmbeddableInput>,
-    dismissNotification?: boolean
-  ) => Promise<undefined | IEmbeddable>;
-  deleteEmbeddable: (embeddableId: string) => void;
+  api: PresentationContainer;
+  editorFrameService: EditorFrameService;
 }) {
-  const isCompatibleAction = isCreateActionCompatible(core);
-  const defaultDataView = await deps.dataViews.getDefaultDataView({
-    displayErrors: false,
-  });
-
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
     if (!indexName) return null;
-    const dataView = await getESQLAdHocDataview(indexName, deps.dataViews);
+    const dataView = await getESQLAdHocDataview(`from ${indexName}`, deps.dataViews);
     return dataView;
   };
 
-  const dataView = defaultDataView ?? (await getFallbackDataView());
+  const [isCompatibleAction, dataView] = await Promise.all([
+    isCreateActionCompatible(core),
+    getFallbackDataView(),
+  ]);
 
   if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();
   }
-  const visualizationMap = getVisualizationMap();
-  const datasourceMap = getDatasourceMap();
-  const defaultIndex = dataView.getIndexPattern();
+
+  let visualizationMap = getVisualizationMap();
+  let datasourceMap = getDatasourceMap();
+
+  if (!visualizationMap || !datasourceMap) {
+    [visualizationMap, datasourceMap] = await Promise.all([
+      editorFrameService.loadVisualizations(),
+      editorFrameService.loadDatasources(),
+    ]);
+
+    if (!visualizationMap && !datasourceMap) {
+      throw new IncompatibleActionError();
+    }
+
+    // persist for retrieval elsewhere
+    setDatasourceMap(datasourceMap);
+    setVisualizationMap(visualizationMap);
+  }
+
+  const esqlQuery = getInitialESQLQuery(dataView);
 
   const defaultEsqlQuery = {
-    esql: `from ${defaultIndex} | limit 10`,
+    esql: esqlQuery,
   };
 
   // For the suggestions api we need only the columns
   // so we are requesting them with limit 0
   // this is much more performant than requesting
   // all the table
-  const performantQuery = {
-    esql: `from ${defaultIndex} | limit 0`,
-  };
-
-  const table = await fetchDataFromAggregateQuery(
-    performantQuery,
-    dataView,
-    deps.data,
-    deps.expressions
-  );
+  const abortController = new AbortController();
+  const columns = await getESQLQueryColumns({
+    esqlQuery,
+    search: deps.data.search.search,
+    signal: abortController.signal,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+  });
 
   const context = {
-    dataViewSpec: dataView.toSpec(),
+    dataViewSpec: dataView.toSpec(false),
     fieldName: '',
-    textBasedColumns: table?.columns,
+    textBasedColumns: columns,
     query: defaultEsqlQuery,
   };
 
@@ -103,36 +114,32 @@ export async function executeCreateAction({
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) return undefined;
   const [firstSuggestion] = allSuggestions;
-  const attrs = getLensAttributes({
+  const attrs = getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
     suggestion: firstSuggestion,
     dataView,
   });
 
-  const input = {
-    attributes: attrs,
-    id: generateId(),
-  };
-  const embeddableStart = deps.embeddable;
-  const factory = embeddableStart.getEmbeddableFactory('lens');
-  if (!factory) {
-    return undefined;
-  }
-  const embeddable = await createNewEmbeddable(factory, input, true);
+  const embeddable = await api.addNewPanel<object, Embeddable>({
+    panelType: 'lens',
+    initialState: {
+      attributes: attrs,
+      id: generateId(),
+    },
+  });
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
     const deletePanel = () => {
-      deleteEmbeddable(embeddable.id);
+      api.removePanel(embeddable.id);
     };
 
     executeEditAction({
       embeddable,
       startDependencies: deps,
-      overlays: core.overlays,
-      theme: core.theme,
       isNewPanel: true,
       deletePanel,
+      ...core,
     });
   }
 }

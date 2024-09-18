@@ -25,14 +25,14 @@ export const overwrittenSessionApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/security/overwritten_session',
-      async mount({ element, theme$ }: AppMountParameters) {
+      async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderOverwrittenSessionPage }] = await Promise.all([
           getStartServices(),
           import('./overwritten_session_page'),
         ]);
         return renderOverwrittenSessionPage(
-          coreStart.i18n,
-          { element, theme$ },
+          coreStart,
+          { element },
           {
             authc,
             basePath: coreStart.http.basePath,

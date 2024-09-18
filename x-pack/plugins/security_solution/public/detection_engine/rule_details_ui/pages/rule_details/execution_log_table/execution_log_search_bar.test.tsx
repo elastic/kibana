@@ -10,6 +10,10 @@ import React from 'react';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { noop } from 'lodash/fp';
 
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
 /**
  * NOTE: This component is currently not shown in the UI as custom search queries
  * are not yet fully supported by the Rule Execution Log aggregation API since
@@ -27,6 +31,8 @@ describe('ExecutionLogSearchBar', () => {
           onlyShowFilters={true}
           selectedStatuses={[]}
           onStatusFilterChange={noop}
+          selectedRunTypes={[]}
+          onRunTypeFilterChange={noop}
           onSearch={noop}
         />
       );

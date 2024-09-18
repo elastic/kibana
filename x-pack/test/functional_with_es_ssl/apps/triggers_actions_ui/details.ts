@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function createConnectorManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdConnector } = await supertest
@@ -200,6 +201,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await actionsMenuItemElem.at(1)?.click();
 
+        await testSubjects.click('confirmModalConfirmButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.try(async () => {
           expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
         });
@@ -315,9 +319,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/172941
-    // FLAKY: https://github.com/elastic/kibana/issues/173008
-    describe.skip('Edit rule button', function () {
+    describe('Edit rule button', function () {
       const ruleName = uuidv4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
@@ -379,7 +381,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
         await retry.tryForTime(30 * 1000, async () => {
@@ -466,7 +468,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -543,7 +545,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -653,7 +655,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
       });
     });
@@ -985,55 +987,48 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Execution log', () => {
       const testRunUuid = uuidv4();
-      let rule: any;
-
-      before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
-
-        const alerts = [{ id: 'us-central' }];
-        rule = await createRuleWithActionsAndParams(
-          testRunUuid,
-          {
-            instances: alerts,
-          },
-          {
-            schedule: { interval: '1s' },
-          }
-        );
-
-        // refresh to see rule
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // click on first rule
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
-
-        // await first run to complete so we have an initial state
-        await retry.try(async () => {
-          const { alerts: alertInstances } = await getAlertSummary(rule.id);
-          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
-        });
-      });
 
       after(async () => {
         await objectRemover.removeAll();
       });
 
       it('renders the event log list and can filter/sort', async () => {
-        await browser.refresh();
+        await pageObjects.common.navigateToApp('triggersActions');
+        await testSubjects.click('rulesTab');
+
+        const alerts = [{ id: 'us-central' }];
+        const rule = await createRuleWithActionsAndParams(testRunUuid, {
+          instances: alerts,
+        });
+
+        await retry.try(async () => {
+          const { alerts: alertInstances } = await getAlertSummary(rule.id);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
+        });
+
+        // Run again to generate some event logs
+        await retry.try(async () => {
+          await supertest
+            .post(`/internal/alerting/rule/${rule.id}/_run_soon`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204);
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        await testSubjects.click('rulesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         await (await testSubjects.find('eventLogListTab')).click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Check to see if the experimental is enabled, if not, just return
         const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
         if (!tabbedContentExists) {
           return;
         }
-
-        // Ensure we have some log data to work with
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-
-        const refreshButton = await testSubjects.find('superDatePickerApplyTimeButton');
-        await refreshButton.click();
 
         // List, date picker, and status picker all exists
         await testSubjects.existOrFail('eventLogList');
@@ -1046,7 +1041,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(statusNumber.getVisibleText()).to.eql(0);
 
         await statusFilter.click();
+
         await testSubjects.click('eventLogStatusFilter-success');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         await statusFilter.click();
 
         statusFilter = await testSubjects.find('eventLogStatusFilterButton');

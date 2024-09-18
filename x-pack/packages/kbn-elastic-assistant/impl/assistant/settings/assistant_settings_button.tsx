@@ -7,21 +7,29 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import { DataStreamApis } from '../use_data_stream_apis';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
+import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation;
+  selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
+  conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 /**
@@ -29,13 +37,16 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversation,
-    setSelectedConversationId,
+    selectedConversationId,
+    onConversationSelected,
+    conversations,
+    conversationsLoaded,
+    refetchCurrentUserConversations,
+    refetchPrompts,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -48,13 +59,22 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       cleanupAndCloseModal();
     }, [cleanupAndCloseModal]);
 
-    const handleSave = useCallback(() => {
-      cleanupAndCloseModal();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-      });
-    }, [cleanupAndCloseModal, toasts]);
+    const handleSave = useCallback(
+      async (success: boolean) => {
+        cleanupAndCloseModal();
+        await refetchCurrentUserConversations();
+        if (refetchPrompts) {
+          await refetchPrompts();
+        }
+        if (success) {
+          toasts?.addSuccess({
+            iconType: 'check',
+            title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+          });
+        }
+      },
+      [cleanupAndCloseModal, refetchCurrentUserConversations, refetchPrompts, toasts]
+    );
 
     const handleShowConversationSettings = useCallback(() => {
       setSelectedSettingsTab(CONVERSATIONS_TAB);
@@ -71,17 +91,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
+            color="text"
           />
         </EuiToolTip>
 
         {isSettingsModalVisible && (
           <AssistantSettings
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
-            selectedConversation={selectedConversation}
-            setSelectedConversationId={setSelectedConversationId}
+            defaultConnector={defaultConnector}
+            selectedConversationId={selectedConversationId}
+            onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
+            conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
           />
         )}
       </>

@@ -34,9 +34,9 @@
           "(client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.IScopedClusterClient",
+            "section": "def-server.IScopedClusterClient",
             "text": "IScopedClusterClient"
           },
           ") => { validateCategoryExamples: (indexPatternTitle: string, query: ",
@@ -111,9 +111,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],

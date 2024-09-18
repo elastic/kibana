@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -342,6 +343,20 @@ export function getCoreUsageCollector(
       },
       environment: {
         memory: {
+          arrayBuffersBytes: {
+            type: 'long',
+            _meta: {
+              description:
+                'Memory allocated for array buffers. This is also included in the external value.',
+            },
+          },
+          externalBytes: {
+            type: 'long',
+            _meta: {
+              description: 'Memory usage of C++ objects bound to JavaScript objects managed by V8.',
+            },
+          },
+          residentSetSizeBytes: { type: 'long', _meta: { description: 'Node RSS.' } },
           heapSizeLimit: { type: 'long', _meta: { description: 'Host memory heap size limit.' } },
           heapTotalBytes: {
             type: 'long',

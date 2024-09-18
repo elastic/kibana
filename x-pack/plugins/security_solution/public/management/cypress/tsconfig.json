@@ -31,5 +31,7 @@
     "@kbn/test",
     "@kbn/repo-info",
     "@kbn/tooling-log",
+    "@kbn/security-solution-serverless",
+    "@kbn/dev-utils",
   ]
 }

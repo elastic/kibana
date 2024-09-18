@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EPM Endpoints Bulk get assets installs all assets when installing a package for the first time should get the assets based on the required objects 1`] = `
+Array [
+  Object {
+    "appLink": "/app/management/data/index_lifecycle_management/policies/edit/all_assets",
+    "attributes": Object {},
+    "id": "all_assets",
+    "type": "ilm_policy",
+  },
+  Object {
+    "appLink": "/app/management/data/index_lifecycle_management/policies/edit/logs-all_assets.test_logs-all_assets",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs-all_assets",
+    "type": "data_stream_ilm_policy",
+  },
+  Object {
+    "appLink": "/app/management/data/index_lifecycle_management/policies/edit/metrics-all_assets.test_metrics-all_assets",
+    "attributes": Object {},
+    "id": "metrics-all_assets.test_metrics-all_assets",
+    "type": "data_stream_ilm_policy",
+  },
+  Object {
+    "appLink": "/app/ml/trained_models?_a=(trained_models:(queryText:'model_id:(default)'))",
+    "attributes": Object {},
+    "id": "default",
+    "type": "ml_model",
+  },
+  Object {
+    "appLink": "/app/management/ingest/ingest_pipelines/?pipeline=logs-all_assets.test_logs-0.1.0",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs-0.1.0",
+    "type": "ingest_pipeline",
+  },
+  Object {
+    "appLink": "/app/management/ingest/ingest_pipelines/?pipeline=logs-all_assets.test_logs-0.1.0-pipeline1",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs-0.1.0-pipeline1",
+    "type": "ingest_pipeline",
+  },
+  Object {
+    "appLink": "/app/management/ingest/ingest_pipelines/?pipeline=logs-all_assets.test_logs-0.1.0-pipeline2",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs-0.1.0-pipeline2",
+    "type": "ingest_pipeline",
+  },
+  Object {
+    "appLink": "/app/management/ingest/ingest_pipelines/?pipeline=metrics-all_assets.test_metrics-0.1.0",
+    "attributes": Object {},
+    "id": "metrics-all_assets.test_metrics-0.1.0",
+    "type": "ingest_pipeline",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/templates/logs-all_assets.test_logs",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs",
+    "type": "index_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/component_templates/logs-all_assets.test_logs@package",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs@package",
+    "type": "component_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/component_templates/logs-all_assets.test_logs@custom",
+    "attributes": Object {},
+    "id": "logs-all_assets.test_logs@custom",
+    "type": "component_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/templates/metrics-all_assets.test_metrics",
+    "attributes": Object {},
+    "id": "metrics-all_assets.test_metrics",
+    "type": "index_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/component_templates/metrics-all_assets.test_metrics@package",
+    "attributes": Object {},
+    "id": "metrics-all_assets.test_metrics@package",
+    "type": "component_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/component_templates/metrics-all_assets.test_metrics@custom",
+    "attributes": Object {},
+    "id": "metrics-all_assets.test_metrics@custom",
+    "type": "component_template",
+  },
+  Object {
+    "appLink": "/app/dashboards#/view/sample_dashboard",
+    "attributes": Object {
+      "description": "Sample dashboard",
+      "title": "[Logs Sample] Overview ECS",
+    },
+    "id": "sample_dashboard",
+    "type": "dashboard",
+  },
+  Object {
+    "appLink": "/app/dashboards#/view/sample_dashboard2",
+    "attributes": Object {
+      "description": "Sample dashboard 2",
+      "title": "[Logs Sample2] Overview ECS",
+    },
+    "id": "sample_dashboard2",
+    "type": "dashboard",
+  },
+  Object {
+    "appLink": "/app/lens#/edit/sample_lens",
+    "attributes": Object {
+      "description": "",
+      "title": "sample-lens",
+    },
+    "id": "sample_lens",
+    "type": "lens",
+  },
+  Object {
+    "appLink": "/app/visualize#/edit/sample_visualization",
+    "attributes": Object {
+      "description": "sample visualization update",
+      "title": "sample vis title",
+    },
+    "id": "sample_visualization",
+    "type": "visualization",
+  },
+  Object {
+    "appLink": "/app/discover#/view/sample_search",
+    "attributes": Object {
+      "description": "",
+      "title": "All logs [Logs Kafka] ECS",
+    },
+    "id": "sample_search",
+    "type": "search",
+  },
+  Object {
+    "appLink": "/app/management/kibana/dataViews/dataView/test-*",
+    "attributes": Object {
+      "title": "test-*",
+    },
+    "id": "test-*",
+    "type": "index-pattern",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
+      "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
+      "title": "Nginx access logs",
+    },
+    "id": "sample_ml_module",
+    "type": "ml-module",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
+      "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
+    },
+    "id": "sample_security_rule",
+    "type": "security-rule",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {},
+    "id": "sample_csp_rule_template",
+    "type": "csp-rule-template",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {},
+    "id": "sample_osquery_pack_asset",
+    "type": "osquery-pack-asset",
+  },
+  Object {
+    "appLink": "/app/osquery/saved_queries/sample_osquery_saved_query",
+    "attributes": Object {
+      "description": "Test saved query description",
+    },
+    "id": "sample_osquery_saved_query",
+    "type": "osquery-saved-query",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
+      "description": "",
+    },
+    "id": "sample_tag",
+    "type": "tag",
+  },
+]
+`;

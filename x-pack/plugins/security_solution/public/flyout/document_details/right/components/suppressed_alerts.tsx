@@ -8,24 +8,41 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { i18n } from '@kbn/i18n';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+
 import {
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
+
+const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.flyout.right.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
 
 export interface SuppressedAlertsProps {
   /**
    * Value of the kibana.alert.suppression.doc_count field
    */
   alertSuppressionCount: number;
+  /**
+   * Rule type, value of kibana.alert.rule.type field
+   */
+  ruleType: Type | undefined;
 }
 
 /**
  * Show related alerts by ancestry in summary row
  */
-export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppressionCount }) => {
+export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
+  alertSuppressionCount,
+  ruleType,
+}) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -45,21 +62,23 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           key={`correlation-row-suppressed-alerts`}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
-          size="s"
-          iconType="beaker"
-          tooltipContent={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.entities.suppressedAlertTechnicalPreviewTooltip"
-              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-            />
-          }
-          tooltipPosition="bottom"
-          data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
-        />
-      </EuiFlexItem>
+      {ruleType && isSuppressionRuleInGA(ruleType) ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
+            size="s"
+            iconType="beaker"
+            tooltipContent={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.suppressedAlertTechnicalPreviewTooltip"
+                defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              />
+            }
+            tooltipPosition="bottom"
+            data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -7,21 +7,34 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { useMemo } from 'react';
 
 export const useOnboardingStyles = () => {
   const { euiTheme } = useEuiTheme();
 
-  return {
-    wrapperStyles: css({
-      margin: `0 -${euiTheme.size.l}`,
+  return useMemo(
+    () => ({
+      wrapperStyles: css({
+        margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
+      }),
+      headerSectionStyles: css({
+        backgroundColor: euiTheme.colors.lightestShade,
+      }),
+      progressSectionStyles: css({
+        backgroundColor: euiTheme.colors.lightestShade,
+        padding: `${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.m}`,
+      }),
+      stepsSectionStyles: css({
+        padding: `0 ${euiTheme.size.xxl} ${euiTheme.size.xxxl}`,
+        backgroundColor: euiTheme.colors.lightestShade,
+      }),
     }),
-    progressSectionStyles: css({
-      backgroundColor: euiTheme.colors.lightestShade,
-      padding: `${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.m}`,
-    }),
-    stepsSectionStyles: css({
-      padding: `0 ${euiTheme.size.xxl} ${euiTheme.size.xxxl}`,
-      backgroundColor: euiTheme.colors.lightestShade,
-    }),
-  };
+    [
+      euiTheme.colors.lightestShade,
+      euiTheme.size.l,
+      euiTheme.size.m,
+      euiTheme.size.xxl,
+      euiTheme.size.xxxl,
+    ]
+  );
 };

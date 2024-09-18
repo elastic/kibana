@@ -56,6 +56,11 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         ),
         body: bodySchema,
       },
+      options: {
+        summary: 'Create an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
@@ -78,10 +83,11 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen },
-            options: { id: params?.id },
-          });
+          const { systemActions, ...alertRes }: SanitizedRule<RuleTypeParams> =
+            await rulesClient.create<RuleTypeParams>({
+              data: { ...alert, notifyWhen },
+              options: { id: params?.id },
+            });
           return res.ok({
             body: alertRes,
           });

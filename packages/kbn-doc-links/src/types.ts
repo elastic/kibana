@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -11,6 +12,7 @@
  */
 export interface DocLinksMeta {
   version: string;
+  ecs_version: string;
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
@@ -23,6 +25,7 @@ export interface DocLinksMeta {
 export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
+  readonly apiReference: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -122,6 +125,8 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsClientDeploy: string;
+    readonly connectorsMappings: string;
     readonly connectorsAzureBlobStorage: string;
     readonly connectorsBox: string;
     readonly connectorsClients: string;
@@ -138,10 +143,12 @@ export interface DocLinks {
     readonly connectorsMySQL: string;
     readonly connectorsNative: string;
     readonly connectorsNetworkDrive: string;
+    readonly connectorsNotion: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
     readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
+    readonly connectorsRedis: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
@@ -155,9 +162,11 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly e5Model: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
+    readonly inferenceApiCreate: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -174,10 +183,13 @@ export interface DocLinks {
     readonly searchApplicationsSearch: string;
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
+    readonly semanticSearch: string;
     readonly searchTemplates: string;
+    readonly semanticTextField: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly syncRulesAdvanced: string;
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
@@ -327,7 +339,9 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly aiAssistant: string;
     readonly artifactControl: string;
+    readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -348,12 +362,13 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
-      readonly hostRiskScore: string;
-      readonly userRiskScore: string;
       readonly entityRiskScoring: string;
+      readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
   };
@@ -365,6 +380,7 @@ export interface DocLinks {
     readonly percolate: string;
     readonly queryDsl: string;
     readonly queryESQL: string;
+    readonly queryESQLExamples: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -430,11 +446,15 @@ export interface DocLinks {
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
     sloBurnRateRule: string;
+    aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
     actionTypes: string;
-    apmRules: string;
+    apmRulesErrorCount: string;
+    apmRulesTransactionDuration: string;
+    apmRulesTransactionError: string;
+    apmRulesAnomaly: string;
     emailAction: string;
     emailActionConfig: string;
     emailExchangeClientSecretConfig: string;
@@ -522,8 +542,10 @@ export interface DocLinks {
     datastreamsManualRollover: string;
     datastreamsTSDS: string;
     datastreamsTSDSMetrics: string;
+    datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
     learnMoreBlog: string;
@@ -538,9 +560,17 @@ export interface DocLinks {
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
+    scalingKubernetesResourcesAndLimits: string;
+    roleAndPrivileges: string;
+    proxiesSettings: string;
+    unprivilegedMode: string;
   }>;
+  readonly integrationDeveloper: {
+    upload: string;
+  };
   readonly ecs: {
     readonly guide: string;
+    readonly dataStreams: string;
   };
   readonly clients: {
     readonly guide: string;
@@ -636,6 +666,13 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+  };
+  readonly playground: {
+    readonly chatPlayground: string;
+    readonly retrievalOptimize: string;
+    readonly retrieval: string;
+    readonly context: string;
+    readonly hiddenFields: string;
   };
 }
 

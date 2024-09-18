@@ -6,8 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiTitle, EuiText, EuiSelect } from '@elastic/eui';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSpacer, EuiTitle, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
+import {
+  ActionParamsProps,
+  JsonEditorWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
@@ -34,20 +37,24 @@ const fields: Array<{
   { label: i18n.MESSAGE_KEY, fieldKey: 'message_key' },
 ];
 
-const additionalInformation = JSON.stringify({
-  alert: {
-    id: '{{alert.id}}',
-    actionGroup: '{{alert.actionGroup}}',
-    actionSubgroup: '{{alert.actionSubgroup}}',
-    actionGroupName: '{{alert.actionGroupName}}',
+const additionalInformation = JSON.stringify(
+  {
+    alert: {
+      id: '{{alert.id}}',
+      actionGroup: '{{alert.actionGroup}}',
+      actionSubgroup: '{{alert.actionSubgroup}}',
+      actionGroupName: '{{alert.actionGroupName}}',
+    },
+    rule: {
+      id: '{{rule.id}}',
+      name: '{{rule.name}}',
+      type: '{{rule.type}}',
+    },
+    date: '{{date}}',
   },
-  rule: {
-    id: '{{rule.id}}',
-    name: '{{rule.name}}',
-    type: '{{rule.type}}',
-  },
-  date: '{{date}}',
-});
+  null,
+  4
+);
 
 const ServiceNowITOMParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITOMActionParams>
@@ -57,8 +64,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const { description, severity } = params;
-
+  const { description, severity, additional_info: additionalInfo } = params;
   const {
     http,
     notifications: { toasts },
@@ -136,7 +142,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
             {i18n.REQUIRED_LABEL}
           </EuiText>
         }
-        error={errors.severity}
+        error={errors.severity as string}
         isInvalid={isFieldInvalid(severity, errors.severity)}
       >
         <EuiSelect
@@ -159,6 +165,38 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
         inputTargetValue={description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
       />
+      <EuiFormRow
+        fullWidth
+        error={errors['subActionParams.additional_info'] as string[]}
+        isInvalid={
+          errors['subActionParams.additional_info'] !== undefined &&
+          Number(errors['subActionParams.additional_info'].length) > 0
+        }
+      >
+        <JsonEditorWithMessageVariables
+          messageVariables={messageVariables}
+          paramsProperty={'additional_info'}
+          inputTargetValue={additionalInfo ?? ''}
+          errors={errors.additional_info as string[]}
+          label={
+            <>
+              {i18n.ADDITIONAL_INFO}
+              <EuiIconTip
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+                data-test-subj="otherFieldsHelpTooltip"
+                aria-label={i18n.ADDITIONAL_INFO_HELP}
+                content={i18n.ADDITIONAL_INFO_HELP_TEXT}
+              />
+            </>
+          }
+          onDocumentsChange={(json: string) => {
+            editSubActionProperty('additional_info', json);
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 };

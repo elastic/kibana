@@ -6,15 +6,14 @@
  */
 
 import type React from 'react';
+import type { IconType } from '@elastic/eui';
 import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
-  TimelineTypeLiteral,
-  TimelineTypeLiteralWithNull,
+  TimelineType,
   TimelineStatus,
-  TemplateTimelineTypeLiteral,
-  TimelineStatusLiteralWithNull,
+  TemplateTimelineType,
   Note,
 } from '../../../../common/api/timeline';
 
@@ -39,11 +38,11 @@ export interface TimelineActionsOverflowColumns {
   width: string;
   actions: Array<{
     name: string;
-    icon?: string;
+    icon: IconType;
     onClick?: (timeline: OpenTimelineResult) => void;
     description: string;
     render?: (timeline: OpenTimelineResult) => JSX.Element;
-  } | null>;
+  }>;
 }
 
 /** The results of the query run by the OpenTimeline component */
@@ -62,7 +61,7 @@ export interface OpenTimelineResult {
   status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -97,7 +96,7 @@ export type OnOpenTimeline = ({
 }: {
   duplicate: boolean;
   timelineId: string;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -117,11 +116,11 @@ export type OnToggleShowNotes = (itemIdToExpandedNotesRowMap: Record<string, JSX
 
 /** Parameters to the OnTableChange callback  */
 export interface OnTableChangeParams {
-  page: {
+  page?: {
     index: number;
     size: number;
   };
-  sort: {
+  sort?: {
     field: string;
     direction: 'asc' | 'desc';
   };
@@ -186,7 +185,7 @@ export interface OpenTimelineProps {
   /** The results of executing a search, null is the status before data fatched */
   searchResults: OpenTimelineResult[] | null;
   /** the currently-selected timelines in the table */
-  selectedItems: OpenTimelineResult[];
+  selectedItems?: OpenTimelineResult[];
   /** Toggle export timelines modal*/
   setImportDataModalToggle?: React.Dispatch<React.SetStateAction<boolean>>;
   /** the requested sort direction of the query results */
@@ -194,9 +193,9 @@ export interface OpenTimelineProps {
   /** the requested field to sort on */
   sortField: string;
   /** this affects timeline's behaviour like editable / duplicatible */
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   /* active or immutable */
-  timelineStatus: TimelineStatusLiteralWithNull;
+  timelineStatus: TimelineStatus | null;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
   /** timeline / timeline template */
@@ -207,6 +206,7 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
+  tabName?: string;
 }
 
 export interface ResolveTimelineConfig {
@@ -228,7 +228,7 @@ export interface UpdateTimeline {
   preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = (args: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',
@@ -238,13 +238,13 @@ export enum TimelineTabsStyle {
 export interface TimelineTab {
   disabled: boolean;
   href: string;
-  id: TimelineTypeLiteral;
+  id: TimelineType;
   name: string;
-  onClick: (ev: { preventDefault: () => void }) => void;
+  onClick: (ev: React.SyntheticEvent) => void;
 }
 
 export interface TemplateTimelineFilter {
-  id: TemplateTimelineTypeLiteral;
+  id: TemplateTimelineType;
   name: string;
   disabled: boolean;
   withNext: boolean;

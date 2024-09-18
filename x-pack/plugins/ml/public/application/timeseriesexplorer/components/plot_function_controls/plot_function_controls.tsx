@@ -9,10 +9,13 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import { mlJobService } from '../../../services/job_service';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { useMlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { useMlResultsService } from '../../../services/results_service';
 import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { MlEntity } from '../../../../embeddables';
 
 const plotByFunctionOptions = [
   {
@@ -36,6 +39,7 @@ const plotByFunctionOptions = [
 ];
 export const PlotByFunctionControls = ({
   functionDescription,
+  job,
   setFunctionDescription,
   selectedDetectorIndex,
   selectedJobId,
@@ -43,40 +47,42 @@ export const PlotByFunctionControls = ({
   entityControlsCount,
 }: {
   functionDescription: undefined | string;
+  job?: CombinedJob | MlJob;
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
-  selectedEntities: Record<string, any>;
+  selectedEntities?: MlEntity;
   entityControlsCount: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
+  const mlResultsService = useMlResultsService();
+  const mlJobService = useMlJobService();
 
   const getFunctionDescriptionToPlot = useCallback(
     async (
       _selectedDetectorIndex: number,
-      _selectedEntities: Record<string, any>,
-      _selectedJobId: string,
+      _selectedEntities: MlEntity | undefined,
       _selectedJob: CombinedJob
     ) => {
       const functionToPlot = await getFunctionDescription(
         {
           selectedDetectorIndex: _selectedDetectorIndex,
           selectedEntities: _selectedEntities,
-          selectedJobId: _selectedJobId,
           selectedJob: _selectedJob,
         },
-        toastNotificationService
+        toastNotificationService,
+        mlResultsService
       );
       setFunctionDescription(functionToPlot);
     },
-    [setFunctionDescription, toastNotificationService]
+    [setFunctionDescription, toastNotificationService, mlResultsService]
   );
 
   useEffect(() => {
     if (functionDescription !== undefined) {
       return;
     }
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = (job ?? mlJobService.getJob(selectedJobId)) as CombinedJob;
     // if no controls, it's okay to fetch
     // if there are series controls, only fetch if user has selected something
     const validEntities =
@@ -88,12 +94,7 @@ export const PlotByFunctionControls = ({
     ) {
       const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
       if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
-        getFunctionDescriptionToPlot(
-          selectedDetectorIndex,
-          selectedEntities,
-          selectedJobId,
-          selectedJob
-        );
+        getFunctionDescriptionToPlot(selectedDetectorIndex, selectedEntities, selectedJob);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

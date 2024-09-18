@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -86,13 +87,14 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     name: serverName,
     securityResponseHeaders,
     customResponseHeaders,
-    csp: { header: cspHeader },
+    csp: { header: cspHeader, reportOnlyHeader: cspReportOnlyHeader },
   } = config;
 
   const additionalHeaders = {
     ...securityResponseHeaders,
     ...customResponseHeaders,
     'Content-Security-Policy': cspHeader,
+    'Content-Security-Policy-Report-Only': cspReportOnlyHeader,
     [KIBANA_NAME_HEADER]: serverName,
   };
 

@@ -15,7 +15,6 @@ import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
   getInstalledRules,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
@@ -24,6 +23,7 @@ import {
   reviewPrebuiltRulesToInstall,
   reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return getPackageResponse.body.item.version ?? '';
   };
 
-  describe('@ess @serverless @skipInQA update_prebuilt_rules_package', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_prebuilt_rules_package', () => {
     before(async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');

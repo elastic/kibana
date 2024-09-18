@@ -8,10 +8,10 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { getDataViewId } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
 
@@ -19,9 +19,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
   const logger = getService('log');
-  const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
+  const dataViewPattern =
+    'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*';
 
   function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
     return apmApiClient.writeUser({
@@ -39,14 +40,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   function deleteDataView(spaceId: string) {
     return supertest
-      .delete(`/s/${spaceId}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}?force=true`)
+      .delete(
+        `/s/${spaceId}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}?force=true`
+      )
       .set('kbn-xsrf', 'foo');
   }
 
   function getDataView({ spaceId }: { spaceId: string }) {
     const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return supertest.get(
-      `${spacePrefix}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}`
+      `${spacePrefix}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}`
     );
   }
 
@@ -81,7 +84,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177120
   registry.when('mappings and APM data exists', { config: 'basic', archives: [] }, () => {
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await generateApmData(synthtrace);
     });
@@ -113,11 +118,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(dataView.id).to.be('apm_static_data_view_id_default');
         expect(dataView.name).to.be('APM');
-        expect(dataView.title).to.be('traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*');
+        expect(dataView.title).to.be(
+          'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*'
+        );
       });
     });
 
-    describe('when fetching the data view', async () => {
+    describe('when fetching the data view', () => {
       let dataViewResponse: request.Response;
 
       before(async () => {
@@ -204,7 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating data view in "default" space', async () => {
+    describe('when creating data view in "default" space', () => {
       it('can be retrieved from the "default" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'default' });
         const res = await getDataView({ spaceId: 'default' });
@@ -219,7 +226,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating data view in "foo" space', async () => {
+    describe('when creating data view in "foo" space', () => {
       it('can be retrieved from the "foo" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'foo' });
         const res = await getDataView({ spaceId: 'foo' });

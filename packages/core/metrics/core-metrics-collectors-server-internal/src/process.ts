@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import v8 from 'v8';
@@ -42,7 +43,7 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         external_in_bytes: memoryUsage.external,
       },
       pid: process.pid,
-      event_loop_delay: eventLoopDelayHistogram.mean,
+      event_loop_delay: eventLoopDelayHistogram.max,
       event_loop_delay_histogram: eventLoopDelayHistogram,
       event_loop_utilization: eventLoopUtilization,
       uptime_in_millis: process.uptime() * 1000,

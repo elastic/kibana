@@ -8,14 +8,14 @@
 import {
   startTransformsRequestSchema,
   type StartTransformsRequestSchema,
-} from '../../../../common/api_schemas/start_transforms';
+} from '../../api_schemas/start_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -39,6 +39,11 @@ export function registerRoute({ router, license }: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(routeHandler)
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

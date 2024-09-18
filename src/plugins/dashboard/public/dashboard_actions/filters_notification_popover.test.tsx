@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
@@ -63,8 +64,8 @@ describe('filters notification popover', () => {
         getAllDataViews: jest.fn(),
         getDashboardPanelFromId: jest.fn(),
       },
-      localFilters: filtersSubject,
-      localQuery: querySubject,
+      filters$: filtersSubject,
+      query$: querySubject,
     };
   });
 
@@ -90,7 +91,7 @@ describe('filters notification popover', () => {
   });
 
   it('renders the query section when given a query', async () => {
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     await renderAndOpenPopover();
     expect(await screen.findByTestId('filtersNotificationModal__query')).toBeInTheDocument();
   });
@@ -103,7 +104,7 @@ describe('filters notification popover', () => {
 
   it('does not render an edit button when the query is ESQL', async () => {
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
     await renderAndOpenPopover();
     expect(

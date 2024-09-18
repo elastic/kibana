@@ -141,7 +141,7 @@ describe('createActionRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
   });
 
   it('should track every call', async () => {

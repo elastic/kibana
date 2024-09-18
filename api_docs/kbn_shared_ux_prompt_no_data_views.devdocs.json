@@ -30,7 +30,7 @@
           "\nA service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`\ncomponent.\n\nUse of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider."
         ],
         "signature": [
-          "({ onDataViewCreated, allowAdHocDataView, }: ",
+          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
           "NoDataViewsPromptProps",
           ") => JSX.Element"
         ],
@@ -43,7 +43,7 @@
             "id": "def-public.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView = false,\n}",
+            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView = false,\n}",
             "description": [],
             "signature": [
               "NoDataViewsPromptProps"
@@ -67,7 +67,7 @@
           "\nA presentational component that is shown in cases when there are no data views created yet."
         ],
         "signature": [
-          "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, emptyPromptColor, }: ",
+          "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, onTryESQL, esqlDocLink, emptyPromptColor, }: ",
           "NoDataViewsPromptComponentProps",
           ") => JSX.Element"
         ],
@@ -80,7 +80,7 @@
             "id": "def-public.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onClickCreate,\n  canCreateNewDataView,\n  dataViewsDocLink,\n  emptyPromptColor = 'plain',\n}",
+            "label": "{\n  onClickCreate,\n  canCreateNewDataView,\n  dataViewsDocLink,\n  onTryESQL,\n  esqlDocLink,\n  emptyPromptColor = 'plain',\n}",
             "description": [],
             "signature": [
               "NoDataViewsPromptComponentProps"
@@ -104,9 +104,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataViewsPromptKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -117,12 +117,12 @@
             "id": "def-public.NoDataViewsPromptKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "NoDataViewsPromptKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
             "deprecated": false,
@@ -143,9 +143,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataViewsPromptServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -159,11 +159,46 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "NoDataViewsPromptServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-public.useOnTryESQL",
+        "type": "Function",
+        "tags": [],
+        "label": "useOnTryESQL",
+        "description": [],
+        "signature": [
+          "({ locatorClient, navigateToApp }: ",
+          "UseOnTryEsqlParams",
+          ") => (() => void) | undefined"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/impl/src/hooks/use_on_try_esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.useOnTryESQL.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ locatorClient, navigateToApp }",
+            "description": [],
+            "signature": [
+              "UseOnTryEsqlParams"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/impl/src/hooks/use_on_try_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -200,24 +235,6 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-public.NoDataViewsPromptComponentProps.onClickCreate",
-            "type": "Function",
-            "tags": [],
-            "label": "onClickCreate",
-            "description": [
-              "Click handler for create button."
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
             "id": "def-public.NoDataViewsPromptComponentProps.dataViewsDocLink",
             "type": "string",
             "tags": [],
@@ -242,7 +259,59 @@
               "The background color of the prompt; defaults to `plain`."
             ],
             "signature": [
-              "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+              "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptComponentProps.onClickCreate",
+            "type": "Function",
+            "tags": [],
+            "label": "onClickCreate",
+            "description": [
+              "Click handler for create button."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptComponentProps.onTryESQL",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryESQL",
+            "description": [
+              "Handler for someone wanting to try ES|QL."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptComponentProps.esqlDocLink",
+            "type": "string",
+            "tags": [],
+            "label": "esqlDocLink",
+            "description": [
+              "Link to documentation on ES|QL."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
@@ -272,7 +341,9 @@
             "label": "coreStart",
             "description": [],
             "signature": [
-              "{ docLinks: { links: { indexPatterns: { introduction: string; }; }; }; }"
+              "{ docLinks: { links: { indexPatterns: { introduction: string; }; query: { queryESQL: string; }; }; }; application: { navigateToApp: ",
+              "NavigateToAppFn",
+              "; }; }"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
@@ -293,6 +364,22 @@
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptKibanaDependencies.share",
+            "type": "Object",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ url: { locators: ",
+              "ILocatorClient",
+              "; }; } | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -308,6 +395,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc data view from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
             "id": "def-public.NoDataViewsPromptProps.onDataViewCreated",
@@ -344,19 +447,21 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-public.NoDataViewsPromptProps.allowAdHocDataView",
-            "type": "CompoundType",
+            "id": "def-public.NoDataViewsPromptProps.onESQLNavigationComplete",
+            "type": "Function",
             "tags": [],
-            "label": "allowAdHocDataView",
+            "label": "onESQLNavigationComplete",
             "description": [
-              "if set to true allows creation of an ad-hoc data view from data view editor"
+              "Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover."
             ],
             "signature": [
-              "boolean | undefined"
+              "(() => void) | undefined"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -431,6 +536,35 @@
             "label": "dataViewsDocLink",
             "description": [
               "A link to information about Data Views in Kibana"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptServices.onTryESQL",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryESQL",
+            "description": [
+              "Get a handler for trying ES|QL"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptServices.esqlDocLink",
+            "type": "string",
+            "tags": [],
+            "label": "esqlDocLink",
+            "description": [
+              "A link to the documentation for ES|QL"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,

@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
@@ -34,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -67,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch?compress=true`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -100,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -143,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -174,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -214,6 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`/internal/bsearch`)
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({
               batch: [
                 {
@@ -239,6 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -273,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -323,6 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -358,6 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -407,6 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -428,7 +443,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/_query',
-              querystring: 'drop_null_columns',
             });
           });
 
@@ -436,6 +450,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -457,7 +472,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.attributes.requestParams).to.eql({
               method: 'POST',
               path: '/_query',
-              querystring: 'drop_null_columns',
             });
           });
         });
@@ -467,6 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -496,6 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -527,6 +543,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {

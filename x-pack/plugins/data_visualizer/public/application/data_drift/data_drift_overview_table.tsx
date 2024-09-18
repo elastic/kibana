@@ -6,15 +6,15 @@
  */
 
 import type { UseTableState } from '@kbn/ml-in-memory-table';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
-  EuiTableFieldDataColumnType,
   EuiToolTip,
 } from '@elastic/eui';
 import { FieldTypeIcon } from '../common/components/field_type_icon';
@@ -305,7 +305,6 @@ export const DataDriftOverviewTable = ({
       cellProps={getCellProps}
       itemId="featureName"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
       sorting={sorting}
       onChange={onTableChange}
       pagination={pagination}

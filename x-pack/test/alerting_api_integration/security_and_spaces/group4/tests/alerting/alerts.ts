@@ -14,7 +14,7 @@ import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/t
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
+import { UserAtSpaceScenarios, Superuser, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
@@ -45,7 +45,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+
     afterEach(() => objectRemover.removeAll());
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
@@ -1506,6 +1508,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: 1,
                             duration: { us: 0 },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '1' },
@@ -1542,6 +1545,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: 1,
                             duration: { us: 0 },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '2' },
@@ -1594,6 +1598,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: expectExpect.any(Number),
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '1' },
@@ -1630,6 +1635,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: expectExpect.any(Number),
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '2' },
@@ -1730,6 +1736,7 @@ instanceStateValue: true
                         uuid: expectExpect.any(String),
                         tags: ['tag-A', 'tag-B'],
                       },
+                      consecutive_matches: 1,
                       duration: { us: 0 },
                       time_range: { gte: expectExpect.any(String) },
                       instance: { id: '1' },
@@ -1766,6 +1773,7 @@ instanceStateValue: true
                         uuid: expectExpect.any(String),
                         tags: ['tag-A', 'tag-B'],
                       },
+                      consecutive_matches: 1,
                       duration: { us: 0 },
                       time_range: { gte: expectExpect.any(String) },
                       instance: { id: '2' },
@@ -1867,6 +1875,76 @@ instanceStateValue: true
         });
       });
     }
+
+    describe('connector adapters', () => {
+      const space = SuperuserAtSpace1.space;
+
+      const connectorId = 'system-connector-test.system-action-connector-adapter';
+      const name = 'Test system action with a connector adapter set';
+
+      it('should use connector adapters correctly on system actions', async () => {
+        const alertUtils = new AlertUtils({
+          supertestWithoutAuth,
+          objectRemover,
+          space,
+          user: SuperuserAtSpace1.user,
+        });
+
+        const startDate = new Date().toISOString();
+        const reference = alertUtils.generateReference();
+        /**
+         * Creates a rule that always fire with a system action
+         * that has configured a connector adapter.
+         *
+         * System action: x-pack/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        const response = await alertUtils.createAlwaysFiringSystemAction({
+          reference,
+          overwrites: { schedule: { interval: '1s' } },
+        });
+
+        expect(response.status).to.eql(200);
+
+        await validateSystemActionEventLog({
+          spaceId: space.id,
+          connectorId,
+          outcome: 'success',
+          message: `action executed: test.system-action-connector-adapter:${connectorId}: ${name}`,
+          startDate,
+        });
+
+        /**
+         * The executor function of the system action
+         * writes the params in the test index. We
+         * get the doc to verify that the connector adapter
+         * injected the param correctly.
+         */
+        await esTestIndexTool.waitForDocs(
+          'action:test.system-action-connector-adapter',
+          reference,
+          1
+        );
+
+        const docs = await esTestIndexTool.search(
+          'action:test.system-action-connector-adapter',
+          reference
+        );
+
+        const doc = docs.body.hits.hits[0]._source as { params: Record<string, unknown> };
+
+        expect(doc.params).to.eql({
+          myParam: 'param from rule action',
+          index: '.kibana-alerting-test-data',
+          reference: 'alert-utils-ref:1:superuser',
+          /**
+           * Param was injected by the connector adapter in
+           * x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+           */
+          injected: 'param from connector adapter',
+        });
+      });
+    });
   });
 
   interface ValidateEventLogParams {
@@ -1971,4 +2049,46 @@ instanceStateValue: true
       expect(event?.error?.message).to.eql(errorMessage);
     }
   }
+
+  interface ValidateSystemActionEventLogParams {
+    spaceId: string;
+    connectorId: string;
+    outcome: string;
+    message: string;
+    startDate: string;
+    errorMessage?: string;
+  }
+
+  const validateSystemActionEventLog = async (
+    params: ValidateSystemActionEventLogParams
+  ): Promise<void> => {
+    const { spaceId, connectorId, outcome, message, startDate, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      const events_ = await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: connectorId,
+        provider: 'actions',
+        actions: new Map([['execute', { gte: 1 }]]),
+      });
+
+      const filteredEvents = events_.filter((event) => event!['@timestamp']! >= startDate);
+      if (filteredEvents.length < 1) throw new Error('no recent events found yet');
+
+      return filteredEvents;
+    });
+
+    expect(events.length).to.be(1);
+
+    const event = events[0];
+
+    expect(event?.message).to.eql(message);
+    expect(event?.event?.outcome).to.eql(outcome);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  };
 }

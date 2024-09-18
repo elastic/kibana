@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
@@ -17,6 +17,7 @@ import {
 import type { IndexPattern } from '../../../../types';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
+import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -70,12 +71,15 @@ export const staticValueOperation: OperationDefinition<
 
     return column.params.value != null && !isValid
       ? [
-          i18n.translate('xpack.lens.indexPattern.staticValueError', {
-            defaultMessage: 'The static value of {value} is not a valid number',
-            values: { value: column.params.value },
-          }),
+          {
+            uniqueId: STATIC_VALUE_NOT_VALID_NUMBER,
+            message: i18n.translate('xpack.lens.indexPattern.staticValueError', {
+              defaultMessage: 'The static value of {value} is not a valid number',
+              values: { value: column.params.value },
+            }),
+          },
         ]
-      : undefined;
+      : [];
   },
   getPossibleOperation() {
     return {
@@ -163,7 +167,7 @@ export const staticValueOperation: OperationDefinition<
     paramEditorCustomProps,
   }) {
     const onChange = useCallback(
-      (newValue) => {
+      (newValue?: string) => {
         // even if debounced it's triggering for empty string with the previous valid value
         if (
           currentColumn.params.value === newValue ||

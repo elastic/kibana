@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
@@ -26,6 +27,8 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {
@@ -49,6 +52,8 @@ export function createInternalCoreSetupMock() {
     coreUsageData: coreUsageDataServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
     userSettings: userSettingsServiceMock.createSetupContract(),
+    security: securityServiceMock.createInternalSetup(),
+    userProfile: userProfileServiceMock.createInternalSetup(),
   };
   return setupDeps;
 }

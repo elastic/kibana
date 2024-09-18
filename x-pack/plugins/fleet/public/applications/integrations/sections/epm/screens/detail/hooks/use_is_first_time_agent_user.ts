@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { useGetAgentPoliciesQuery, useGetAgentsQuery } from '../../../../../hooks';
-import { policyHasFleetServer } from '../../../../../services';
+import {
+  FLEET_SERVER_PACKAGE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../../../../../common/constants';
+import { useAuthz, useGetAgentsQuery, useGetPackagePoliciesQuery } from '../../../../../hooks';
 
 interface UseIsFirstTimeAgentUserResponse {
   isFirstTimeAgentUser?: boolean;
@@ -14,19 +17,24 @@ interface UseIsFirstTimeAgentUserResponse {
 }
 
 export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse => {
+  const authz = useAuthz();
   const {
-    data: agentPolicies,
+    data: packagePolicies,
     isLoading: areAgentPoliciesLoading,
     isFetched: areAgentsFetched,
-  } = useGetAgentPoliciesQuery({
-    full: true,
-  });
+  } = useGetPackagePoliciesQuery(
+    {
+      kuery: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+    },
+    {
+      enabled: authz.fleet.readAgentPolicies,
+    }
+  );
+
+  const policyIds = [...new Set(packagePolicies?.items.flatMap((item) => item.policy_ids) ?? [])];
 
   // now get all agents that are NOT part of a fleet server policy
-  const serverPolicyIdsQuery = (agentPolicies?.items || [])
-    .filter((item) => policyHasFleetServer(item))
-    .map((p) => `policy_id:${p.id}`)
-    .join(' or ');
+  const serverPolicyIdsQuery = policyIds.map((policyId) => `policy_id:${policyId}`).join(' or ');
 
   // get agents that are not unenrolled and not fleet server
   const kuery =
@@ -44,7 +52,7 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   );
 
   return {
-    isLoading: areAgentPoliciesLoading || areAgentsLoading,
-    isFirstTimeAgentUser: agents?.data?.total === 0,
+    isLoading: authz.fleet.readAgentPolicies && (areAgentPoliciesLoading || areAgentsLoading),
+    isFirstTimeAgentUser: authz.fleet.readAgentPolicies && agents?.data?.total === 0,
   };
 };

@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -65,12 +66,14 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -128,6 +131,7 @@ export type SecurityAlertType<
 
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
+  actions: SetupPlugins['actions'];
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
@@ -136,6 +140,8 @@ export interface CreateSecurityRuleTypeWrapperProps {
   version: string;
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
+  alerting: SetupPlugins['alerting'];
+  analytics?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -388,6 +394,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
 }

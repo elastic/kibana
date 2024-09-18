@@ -25,6 +25,7 @@ import {
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
 } from '../../telemetry/event_based_telemetry';
+import { Metadata } from '@kbn/elastic-assistant-common';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -244,9 +245,9 @@ describe('ElasticsearchStore', () => {
         ],
       });
 
-      const document = new Document({
+      const document = new Document<Metadata>({
         pageContent: 'interesting stuff',
-        metadata: { source: '1' },
+        metadata: { kbResource: 'esql', required: false, source: '1' },
       });
 
       const docsInstalled = await esStore.addDocuments([document]);
@@ -262,6 +263,8 @@ describe('ElasticsearchStore', () => {
           },
           {
             metadata: {
+              kbResource: 'esql',
+              required: false,
               source: '1',
             },
             text: 'interesting stuff',

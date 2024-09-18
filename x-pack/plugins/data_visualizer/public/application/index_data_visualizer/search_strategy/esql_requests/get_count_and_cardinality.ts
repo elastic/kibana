@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { TimeRange } from '@kbn/es-query';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
-import { AggregatableField } from '../../types/esql_data_visualizer';
-import { handleError, HandleErrorCallback } from './handle_error';
+import type { AggregatableField } from '../../types/esql_data_visualizer';
+import type { HandleErrorCallback } from './handle_error';
+import { handleError } from './handle_error';
 
 interface Field extends Column {
   aggregatable?: boolean;
@@ -32,37 +34,78 @@ const getESQLOverallStatsInChunk = async ({
   limitSize,
   totalCount,
   onError,
+  timeRange,
 }: {
   runRequest: UseCancellableSearch['runRequest'];
   fields: Field[];
   esqlBaseQueryWithLimit: string;
   filter?: estypes.QueryDslQueryContainer;
-  limitSize?: ESQLDefaultLimitSizeOption;
+  limitSize: number;
   totalCount: number;
   onError?: HandleErrorCallback;
+  timeRange?: TimeRange;
 }) => {
   if (fields.length > 0) {
-    const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
+    const aggToIndex = { count: 0, cardinality: 1 };
+    // Track what's the starting index for the next field
+    // For aggregatable field, we are getting count(EVAL MV_MIN()) and count_disticnt
+    // For non-aggregatable field, we are getting only count()
+    let startIndex = 0;
+    /** Example query:
+     * from {indexPattern} | LIMIT {limitSize}
+     * | STATs `{aggregableField}_count` = COUNT(MV_MIN(`{aggregableField}`)),
+     * `{aggregableField}_cardinality` = COUNT_DISTINCT({aggregableField}),
+     * `{nonAggregableField}_count` = COUNT({nonAggregableField})
+     */
+    const fieldsToFetch: Array<Field & { evalQuery?: string; query: string; startIndex: number }> =
+      fields.map((field) => {
+        if (field.aggregatable) {
+          const result = {
+            ...field,
+            startIndex,
+            // Field values can be an array of values (fieldName = ['a', 'b', 'c'])
+            // and count(fieldName) will count all the field values in the array
+            // Ex: for 2 docs, count(fieldName) might return 5
+            // So we need to do count(EVAL(MV_MIN(fieldName))) instead
+            // to get accurate % of rows where field value exists
+            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(MV_MIN(${getSafeESQLName(
+              field.name
+            )})), ${getSafeESQLName(
+              `${field.name}_cardinality`
+            )} = COUNT_DISTINCT(${getSafeESQLName(field.name)})`,
+          };
+          // +2 for count, and count_dictinct
+          startIndex += 2;
+          return result;
+        } else {
+          const result = {
+            ...field,
+            startIndex,
+            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
+              field.name
+            )})`,
+          };
+          // +1 for count for non-aggregatable field
+          startIndex += 1;
+          return result;
+        }
+      });
 
-    let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
-    countQuery += aggregatableFieldsToQuery
-      .map((field) => {
-        // count idx = 0, cardinality idx = 1
-        return `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(field.name)}),
-          ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
-          field.name
-        )})`;
-      })
-      .join(',');
+    let countQuery = fieldsToFetch.length > 0 ? '| STATS ' : '';
+    countQuery += fieldsToFetch.map((field) => field.query).join(',');
+    const query = appendToESQLQuery(esqlBaseQueryWithLimit, countQuery);
+    const namedParams = getStartEndParams(esqlBaseQueryWithLimit, timeRange);
 
     const request = {
       params: {
-        query: esqlBaseQueryWithLimit + countQuery,
+        query,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
+
     try {
-      const esqlResults = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
+      const esqlResults = await runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY });
       const stats = {
         aggregatableExistsFields: [] as AggregatableField[],
         aggregatableNotExistsFields: [] as AggregatableField[],
@@ -73,15 +116,17 @@ const getESQLOverallStatsInChunk = async ({
       if (!esqlResults) {
         return;
       }
-      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchResponse;
 
-      const sampleCount =
-        limitSize === 'none' || !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
-      aggregatableFieldsToQuery.forEach((field, idx) => {
-        const count = esqlResultsResp.values[0][idx * 2] as number;
-        const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
+      const sampleCount = !isDefined(limitSize) ? totalCount : limitSize;
+      fieldsToFetch.forEach((field, idx) => {
+        const count = esqlResultsResp.values[0][field.startIndex + aggToIndex.count] as number;
 
         if (field.aggregatable === true) {
+          const cardinality = esqlResultsResp.values[0][
+            field.startIndex + aggToIndex.cardinality
+          ] as number;
+
           if (count > 0) {
             stats.aggregatableExistsFields.push({
               ...field,
@@ -102,14 +147,20 @@ const getESQLOverallStatsInChunk = async ({
             });
           }
         } else {
-          const fieldData = {
-            fieldName: field.name,
-            existsInDocs: true,
-          };
           if (count > 0) {
-            stats.nonAggregatableExistsFields.push(fieldData);
+            stats.nonAggregatableExistsFields.push({
+              fieldName: field.name,
+              existsInDocs: true,
+              stats: {
+                sampleCount,
+                count,
+              },
+            });
           } else {
-            stats.nonAggregatableNotExistsFields.push(fieldData);
+            stats.nonAggregatableNotExistsFields.push({
+              fieldName: field.name,
+              existsInDocs: false,
+            });
           }
         }
       });
@@ -123,8 +174,8 @@ const getESQLOverallStatsInChunk = async ({
           defaultMessage:
             'Unable to fetch count & cardinality for {count} {count, plural, one {field} other {fields}}: {fieldNames}',
           values: {
-            count: aggregatableFieldsToQuery.length,
-            fieldNames: aggregatableFieldsToQuery.map((r) => r.name).join(),
+            count: fieldsToFetch.length,
+            fieldNames: fieldsToFetch.map((r) => r.name).join(),
           },
         }),
       });
@@ -148,14 +199,16 @@ export const getESQLOverallStats = async ({
   limitSize,
   totalCount,
   onError,
+  timeRange,
 }: {
   runRequest: UseCancellableSearch['runRequest'];
   fields: Column[];
   esqlBaseQueryWithLimit: string;
   filter?: estypes.QueryDslQueryContainer;
-  limitSize?: ESQLDefaultLimitSizeOption;
+  limitSize: number;
   totalCount: number;
   onError?: HandleErrorCallback;
+  timeRange?: TimeRange;
 }) => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
@@ -172,6 +225,7 @@ export const getESQLOverallStats = async ({
           filter,
           totalCount,
           onError,
+          timeRange,
         })
       )
     )

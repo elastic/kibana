@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Writable } from 'stream';
@@ -20,6 +21,7 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  durationToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -49,6 +51,10 @@ export type ImmediateExecuteFn = (
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
+/**
+ * @deprecated
+ * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+ */
 export class CsvSearchSourceImmediateExportType extends ExportType<
   JobParamsDownloadCSV,
   ImmediateExecuteFn,
@@ -108,7 +114,17 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     };
     const cancellationToken = new CancellationToken();
     const csvConfig = this.config.csv;
-    const taskInstanceFields = { startedAt: null, retryAt: null };
+    const taskInstanceFields =
+      csvConfig.scroll.duration === 'auto'
+        ? {
+            startedAt: new Date(),
+            retryAt: new Date(Date.now() + durationToNumber(this.config.queue.timeout)),
+          }
+        : {
+            startedAt: null,
+            retryAt: null,
+          };
+
     const csv = new CsvGenerator(
       job,
       csvConfig,

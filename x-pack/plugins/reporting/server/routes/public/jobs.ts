@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../..';
-import { PUBLIC_ROUTES } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../common';
 import { commonJobsRouteHandlerFactory } from '../common/jobs';
 
@@ -16,7 +16,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
   const { router } = setupDeps;
 
   // use common route handlers that are shared for public and internal routes
-  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting, { isInternal: false });
 
   const registerPublicDownloadReport = () => {
     // trigger a download of the output from a job

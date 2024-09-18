@@ -12,6 +12,21 @@ Array [
   "testy19",
   "testy23",
   "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy5",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
 ]
 `;
 
@@ -27,6 +42,21 @@ Array [
   "testy19",
   "testy23",
   "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy5",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
 ]
 `;
 
@@ -44,13 +74,13 @@ exports[`policy table shows empty state when there are no policies 1`] = `
     class="emotion-euiPageSection__content-l-center"
   >
     <div
-      class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
+      class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
     >
       <div
-        class="euiEmptyPrompt__main"
+        class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
       >
         <div
-          class="euiEmptyPrompt__icon"
+          class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
         >
           <span
             color="subdued"
@@ -58,45 +88,41 @@ exports[`policy table shows empty state when there are no policies 1`] = `
           />
         </div>
         <div
-          class="euiEmptyPrompt__content"
+          class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
         >
-          <div
-            class="euiEmptyPrompt__contentInner"
+          <h1
+            class="euiTitle emotion-euiTitle-m"
           >
-            <h1
-              class="euiTitle emotion-euiTitle-m"
-            >
-              Create your first index lifecycle policy
-            </h1>
-            <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiText emotion-euiText-m-euiTextColor-subdued"
-            >
-              <p>
-                 An index lifecycle policy helps you manage your indices as they age.
-              </p>
-            </div>
-            <div
-              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-            />
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="createPolicyButton"
-              type="button"
+            Create your first index lifecycle policy
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p>
+               An index lifecycle policy helps you manage your indices as they age.
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <button
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+            data-test-subj="createPolicyButton"
+            type="button"
+          >
+            <span
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
-              >
-                <span
-                  color="inherit"
-                  data-euiicon-type="plusInCircle"
-                />
-                Create policy
-              </span>
-            </button>
-          </div>
+                color="inherit"
+                data-euiicon-type="plusInCircle"
+              />
+              Create policy
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -116,6 +142,21 @@ Array [
   "testy23",
   "testy25",
   "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
@@ -131,6 +172,21 @@ Array [
   "testy19",
   "testy23",
   "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;
 
@@ -146,6 +202,21 @@ Array [
   "testy23",
   "testy25",
   "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
@@ -161,6 +232,21 @@ Array [
   "testy19",
   "testy23",
   "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;
 
@@ -176,6 +262,21 @@ Array [
   "testy85",
   "testy83",
   "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
 ]
 `;
 
@@ -191,6 +292,21 @@ Array [
   "testy23",
   "testy25",
   "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
@@ -206,6 +322,21 @@ Array [
   "testy77",
   "testy73",
   "testy71",
+  "testy7",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy5",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
+  "testy31",
 ]
 `;
 
@@ -221,5 +352,20 @@ Array [
   "testy19",
   "testy23",
   "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;

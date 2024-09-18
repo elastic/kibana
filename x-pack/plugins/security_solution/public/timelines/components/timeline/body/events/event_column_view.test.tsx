@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
@@ -13,18 +13,20 @@ import { TestProviders } from '../../../../../common/mock';
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import {
-  NOTES_DISABLE_TOOLTIP,
-  NOTES_TOOLTIP,
-} from '../../../../../common/components/header_actions/translations';
 import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
+
+jest.mock('../../../../../common/components/header_actions/add_note_icon_item', () => {
+  return {
+    AddEventNoteAction: jest.fn(() => <div data-test-subj="add-note-button-mock" />),
+  };
+});
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -42,7 +44,7 @@ jest.mock('../../../../../common/components/user_privileges', () => {
     }),
   };
 });
-
+jest.mock('../../../../../common/components/guided_onboarding_tour/tour_step');
 jest.mock('../../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../../common/lib/kibana');
 
@@ -77,7 +79,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineTypeEnum.default);
   const ACTION_BUTTON_COUNT = 4;
   const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
@@ -122,42 +124,23 @@ describe('EventColumnView', () => {
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
     const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
-    expect(wrapper.find('[data-test-subj="timeline-notes-button-small"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="add-note-button-mock"]').exists()).toBe(false);
   });
 
-  test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
+  test('it does NOT render a notes button when showNotes is false', () => {
+    const wrapper = mount(<EventColumnView {...props} showNotes={false} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
 
-    expect(props.toggleShowNotes).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="timeline-notes-button-small"]').first().simulate('click');
-
-    expect(props.toggleShowNotes).toHaveBeenCalled();
-  });
-
-  test('it renders correct tooltip for NotesButton - timeline', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(NOTES_TOOLTIP);
-  });
-
-  test('it renders correct tooltip for NotesButton - timeline template', () => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.template);
-
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
-      NOTES_DISABLE_TOOLTIP
-    );
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+    expect(wrapper.find('[data-test-subj="add-note-button-mock"]').exists()).toBe(false);
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {
     const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
@@ -167,10 +150,11 @@ describe('EventColumnView', () => {
     const wrapper = mount(
       <EventColumnView
         {...props}
+        timelineId={TimelineId.test}
         leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 

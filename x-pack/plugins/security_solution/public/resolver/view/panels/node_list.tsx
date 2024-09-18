@@ -13,7 +13,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from '../side_effect_context';
-import { StyledPanel } from '../styles';
 import {
   StyledLabelTitle,
   StyledAnalyzedEvent,
@@ -46,7 +45,6 @@ interface ProcessTableView {
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
-// eslint-disable-next-line react/display-name
 export const NodeList = memo(({ id }: { id: string }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
     () => [
@@ -124,7 +122,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
-    <StyledPanel hasBorder>
+    <>
       <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
@@ -135,11 +133,12 @@ export const NodeList = memo(({ id }: { id: string }) => {
         columns={columns}
         sorting
       />
-    </StyledPanel>
+    </>
   );
 });
 
-// eslint-disable-next-line react/display-name
+NodeList.displayName = 'NodeList';
+
 const NodeDetailLink = memo(
   ({ id, name, nodeID }: { id: string; name?: string; nodeID: string }) => {
     const isOrigin = useSelector((state: State) => {
@@ -211,7 +210,8 @@ const NodeDetailLink = memo(
   }
 );
 
-// eslint-disable-next-line react/display-name
+NodeDetailLink.displayName = 'NodeDetailLink';
+
 const NodeDetailTimestamp = memo(
   ({ eventDate, id }: { eventDate: string | number | undefined; id: string }) => {
     const formattedDate = useFormattedDate(eventDate);
@@ -235,3 +235,5 @@ const NodeDetailTimestamp = memo(
     );
   }
 );
+
+NodeDetailTimestamp.displayName = 'NodeDetailTimestamp';

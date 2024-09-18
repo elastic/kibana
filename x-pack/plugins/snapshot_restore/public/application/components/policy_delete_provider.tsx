@@ -56,7 +56,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
               values: { count: itemsDeleted.length },
             })
           : i18n.translate('xpack.snapshotRestore.deletePolicy.successSingleNotificationTitle', {
-              defaultMessage: "Deleted policy '{name}'",
+              defaultMessage: "Deleted policy ''{name}''",
               values: { name: itemsDeleted[0] },
             });
         toastNotifications.addSuccess(successMessage);
@@ -79,7 +79,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
               },
             })
           : i18n.translate('xpack.snapshotRestore.deletePolicy.errorSingleNotificationTitle', {
-              defaultMessage: "Error deleting policy '{name}'",
+              defaultMessage: "Error deleting policy ''{name}''",
               values: { name: (errors && errors[0].name) || policiesToDelete[0] },
             });
         toastNotifications.addDanger(errorMessage);
@@ -101,7 +101,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
           isSingle ? (
             <FormattedMessage
               id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteSingleTitle"
-              defaultMessage="Delete policy '{name}'?"
+              defaultMessage="Delete policy ''{name}''?"
               values={{ name: policyNames[0] }}
             />
           ) : (

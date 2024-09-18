@@ -1,41 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '..';
-
-import { ConnectorDocument, ConnectorStatus } from '../types/connectors';
+import { ConnectorStatus } from '../types/connectors';
 
 export const updateConnectorStatus = async (
   client: ElasticsearchClient,
   connectorId: string,
   status: ConnectorStatus
 ) => {
-  const connectorResult = await client.get<ConnectorDocument>({
-    id: connectorId,
-    index: CONNECTORS_INDEX,
+  return await client.transport.request<Result>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_status`,
+    body: {
+      status,
+    },
   });
-  const connector = connectorResult._source;
-  if (connector) {
-    const result = await client.index<ConnectorDocument>({
-      document: { ...connector, status },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
-    });
-    await client.indices.refresh({ index: CONNECTORS_INDEX });
-    return result;
-  } else {
-    throw new Error(
-      i18n.translate('searchConnectors.server.connectors.serviceType.error', {
-        defaultMessage: 'Could not find document',
-      })
-    );
-  }
 };

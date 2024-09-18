@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -42,11 +43,13 @@ run(
     }
 
     let branch: string = '';
+    let pipeline: string = '';
     if (updateGithub) {
       let isPr = false;
 
       if (process.env.BUILDKITE === 'true') {
         branch = process.env.BUILDKITE_BRANCH || '';
+        pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
         isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
         updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
       } else {
@@ -137,7 +140,8 @@ run(
               buildUrl,
               existingIssue,
               githubApi,
-              branch
+              branch,
+              pipeline
             );
             const url = existingIssue.github.htmlUrl;
             existingIssue.github.body = newBody;
@@ -150,7 +154,7 @@ run(
             continue;
           }
 
-          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch);
+          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch, pipeline);
           existingIssues.addNewlyCreated(failure, newIssue);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {

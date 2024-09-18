@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
+  fn.cancel = jest.fn();
+  return fn;
+});
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -961,5 +967,37 @@ describe('SavedObjectsFinder', () => {
       expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
       expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(0);
     });
+  });
+
+  it('should add a tooltip when text is provided', async () => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+      hits: [doc, doc2, doc3],
+    });
+
+    const tooltipText = 'This is a tooltip';
+
+    render(
+      <SavedObjectFinder
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
+        savedObjectMetaData={metaDataConfig}
+        getTooltipText={(item) => (item.id === doc3.id ? tooltipText : undefined)}
+      />
+    );
+
+    const assertTooltip = async (linkTitle: string, show: boolean) => {
+      const elem = await screen.findByText(linkTitle);
+      await userEvent.hover(elem);
+
+      const tooltip = screen.queryByText(tooltipText);
+      if (show) {
+        expect(tooltip).toBeInTheDocument();
+      } else {
+        expect(tooltip).toBeNull();
+      }
+    };
+
+    assertTooltip(doc.attributes.title, false);
+    assertTooltip(doc2.attributes.title, false);
+    assertTooltip(doc3.attributes.title, true);
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -20,7 +21,6 @@ import {
   startElasticsearch,
   KibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
 
 describe('when migrating to a new version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -104,7 +104,10 @@ describe('when migrating to a new version', () => {
       const logs = await readLog();
       expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
       expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-      expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS.');
+      expect(logs).toMatch(
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION.'
+      );
+      expect(logs).toMatch('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.');
       expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
       expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.');
@@ -141,6 +144,5 @@ describe('when migrating to a new version', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });

@@ -1,0 +1,1566 @@
+openapi: 3.0.3
+info:
+  description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
+  title: Security Solution Lists API (Elastic Cloud and self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/lists:
+    delete:
+      description: |
+        Delete a list using the list ID.
+        > info
+        > When you delete a list, all of its list items are also deleted.
+      operationId: DeleteList
+      parameters:
+        - description: List's `id` value
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - in: query
+          name: deleteReferences
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - in: query
+          name: ignoreReferences
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Delete a list
+      tags:
+        - Security Solution Lists API
+    get:
+      description: Get the details of a list using the list ID.
+      operationId: ReadList
+      parameters:
+        - description: List's `id` value
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ListId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get list details
+      tags:
+        - Security Solution Lists API
+    patch:
+      description: Update specific fields of an existing list using the list ID.
+      operationId: PatchList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                description:
+                  $ref: '#/components/schemas/ListDescription'
+                id:
+                  $ref: '#/components/schemas/ListId'
+                meta:
+                  $ref: '#/components/schemas/ListMetadata'
+                name:
+                  $ref: '#/components/schemas/ListName'
+                version:
+                  minimum: 1
+                  type: integer
+              required:
+                - id
+        description: List's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Patch a list
+      tags:
+        - Security Solution Lists API
+    post:
+      description: Create a new list.
+      operationId: CreateList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  $ref: '#/components/schemas/ListDescription'
+                deserializer:
+                  type: string
+                id:
+                  $ref: '#/components/schemas/ListId'
+                meta:
+                  $ref: '#/components/schemas/ListMetadata'
+                name:
+                  $ref: '#/components/schemas/ListName'
+                serializer:
+                  type: string
+                type:
+                  $ref: '#/components/schemas/ListType'
+                version:
+                  default: 1
+                  minimum: 1
+                  type: integer
+              required:
+                - name
+                - description
+                - type
+        description: List's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List already exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Create a list
+      tags:
+        - Security Solution Lists API
+    put:
+      description: >
+        Update a list using the list ID. The original list is replaced, and all
+        unspecified fields are deleted.
+
+        > info
+
+        > You cannot modify the `id` value.
+      operationId: UpdateList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                description:
+                  $ref: '#/components/schemas/ListDescription'
+                id:
+                  $ref: '#/components/schemas/ListId'
+                meta:
+                  $ref: '#/components/schemas/ListMetadata'
+                name:
+                  $ref: '#/components/schemas/ListName'
+                version:
+                  minimum: 1
+                  type: integer
+              required:
+                - id
+                - name
+                - description
+        description: List's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Update a list
+      tags:
+        - Security Solution Lists API
+  /api/lists/_find:
+    get:
+      description: >-
+        Get a paginated subset of lists. By default, the first page is returned,
+        with 20 results per page.
+      operationId: FindLists
+      parameters:
+        - description: The page number to return
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+        - description: The number of lists to return per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+        - description: Determines which field is used to sort the results
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: >
+            Returns the list that come after the last list returned in the
+            previous call
+
+            (use the cursor value returned in the previous call). This parameter
+            uses
+
+            the `tie_breaker_id` field to ensure all lists are sorted and
+            returned correctly.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindListsCursor'
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
+            using the <field name>:<field value> syntax.
+          in: query
+          name: filter
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindListsFilter'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cursor:
+                    $ref: '#/components/schemas/FindListsCursor'
+                  data:
+                    items:
+                      $ref: '#/components/schemas/List'
+                    type: array
+                  page:
+                    minimum: 0
+                    type: integer
+                  per_page:
+                    minimum: 0
+                    type: integer
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - cursor
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get lists
+      tags:
+        - Security Solution Lists API
+  /api/lists/index:
+    delete:
+      description: Delete the `.lists` and `.items` data streams.
+      operationId: DeleteListIndex
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+                required:
+                  - acknowledged
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List data stream not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Delete list data streams
+      tags:
+        - Security Solution Lists API
+    get:
+      description: Verify that `.lists` and `.items` data streams exist.
+      operationId: ReadListIndex
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list_index:
+                    type: boolean
+                  list_item_index:
+                    type: boolean
+                required:
+                  - list_index
+                  - list_item_index
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List data stream(s) not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get status of list data streams
+      tags:
+        - Security Solution Lists API
+    post:
+      description: Create `.lists` and `.items` data streams in the relevant space.
+      operationId: CreateListIndex
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+                required:
+                  - acknowledged
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List data stream exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Create list data streams
+      tags:
+        - Security Solution Lists API
+  /api/lists/items:
+    delete:
+      description: 'Delete a list item using its `id`, or its `list_id` and `value` fields.'
+      operationId: DeleteListItem
+      parameters:
+        - description: Required if `list_id` and `value` are not specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: Required if `id` is not specified
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: Required if `id` is not specified
+          in: query
+          name: value
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Determines when changes made by the request are made visible to
+            search
+          in: query
+          name: refresh
+          required: false
+          schema:
+            default: 'false'
+            enum:
+              - 'true'
+              - 'false'
+              - wait_for
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ListItem'
+                  - items:
+                      $ref: '#/components/schemas/ListItem'
+                    type: array
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Delete a list item
+      tags:
+        - Security Solution Lists API
+    get:
+      description: Get the details of a list item.
+      operationId: ReadListItem
+      parameters:
+        - description: Required if `list_id` and `value` are not specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: Required if `id` is not specified
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: Required if `id` is not specified
+          in: query
+          name: value
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ListItem'
+                  - items:
+                      $ref: '#/components/schemas/ListItem'
+                    type: array
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get a list item
+      tags:
+        - Security Solution Lists API
+    patch:
+      description: Update specific fields of an existing list item using the list item ID.
+      operationId: PatchListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                id:
+                  $ref: '#/components/schemas/ListItemId'
+                meta:
+                  $ref: '#/components/schemas/ListItemMetadata'
+                refresh:
+                  description: >-
+                    Determines when changes made by the request are made visible
+                    to search
+                  enum:
+                    - 'true'
+                    - 'false'
+                    - wait_for
+                  type: string
+                value:
+                  $ref: '#/components/schemas/ListItemValue'
+              required:
+                - id
+        description: List item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Patch a list item
+      tags:
+        - Security Solution Lists API
+    post:
+      description: >
+        Create a list item and associate it with the specified list.
+
+
+        All list items in the same list must be the same type. For example, each
+        list item in an `ip` list must define a specific IP address.
+
+        > info
+
+        > Before creating a list item, you must create a list.
+      operationId: CreateListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/ListItemId'
+                list_id:
+                  $ref: '#/components/schemas/ListId'
+                meta:
+                  $ref: '#/components/schemas/ListItemMetadata'
+                refresh:
+                  description: >-
+                    Determines when changes made by the request are made visible
+                    to search
+                  enum:
+                    - 'true'
+                    - 'false'
+                    - wait_for
+                  type: string
+                value:
+                  $ref: '#/components/schemas/ListItemValue'
+              required:
+                - list_id
+                - value
+        description: List item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List item already exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Create a list item
+      tags:
+        - Security Solution Lists API
+    put:
+      description: >
+        Update a list item using the list item ID. The original list item is
+        replaced, and all unspecified fields are deleted.
+
+        > info
+
+        > You cannot modify the `id` value.
+      operationId: UpdateListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                id:
+                  $ref: '#/components/schemas/ListItemId'
+                meta:
+                  $ref: '#/components/schemas/ListItemMetadata'
+                value:
+                  $ref: '#/components/schemas/ListItemValue'
+              required:
+                - id
+                - value
+        description: List item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Update a list item
+      tags:
+        - Security Solution Lists API
+  /api/lists/items/_export:
+    post:
+      description: Export list item values from the specified list.
+      operationId: ExportListItems
+      parameters:
+        - description: List's id to export
+          in: query
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ListId'
+      responses:
+        '200':
+          content:
+            application/ndjson:
+              schema:
+                description: A `.txt` file containing list items from the specified list
+                format: binary
+                type: string
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Export list items
+      tags:
+        - Security Solution Lists API
+  /api/lists/items/_find:
+    get:
+      description: Get all list items in the specified list.
+      operationId: FindListItems
+      parameters:
+        - description: List's id
+          in: query
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: The page number to return
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+        - description: The number of list items to return per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+        - description: Determines which field is used to sort the results
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: >
+            Returns the list that come after the last list returned in the
+            previous call
+
+            (use the cursor value returned in the previous call). This parameter
+            uses
+
+            the `tie_breaker_id` field to ensure all lists are sorted and
+            returned correctly.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindListItemsCursor'
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
+            using the <field name>:<field value> syntax.
+          in: query
+          name: filter
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindListItemsFilter'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cursor:
+                    $ref: '#/components/schemas/FindListItemsCursor'
+                  data:
+                    items:
+                      $ref: '#/components/schemas/ListItem'
+                    type: array
+                  page:
+                    minimum: 0
+                    type: integer
+                  per_page:
+                    minimum: 0
+                    type: integer
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - cursor
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get list items
+      tags:
+        - Security Solution Lists API
+  /api/lists/items/_import:
+    post:
+      description: >
+        Import list items from a TXT or CSV file. The maximum file size is 9
+        million bytes.
+
+
+        You can import items to a new or existing list.
+      operationId: ImportListItems
+      parameters:
+        - description: |
+            List's id.
+
+            Required when importing to an existing list.
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListId'
+        - description: >
+            Type of the importing list.
+
+
+            Required when importing a new list that is `list_id` is not
+            specified.
+          in: query
+          name: type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListType'
+        - in: query
+          name: serializer
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: deserializer
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Determines when changes made by the request are made visible to
+            search
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - wait_for
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: >-
+                    A `.txt` or `.csv` file containing newline separated list
+                    items
+                  format: binary
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: List with specified list_id does not exist response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Import list items
+      tags:
+        - Security Solution Lists API
+  /api/lists/privileges:
+    get:
+      operationId: ReadListPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_authenticated:
+                    type: boolean
+                  listItems:
+                    $ref: '#/components/schemas/ListItemPrivileges'
+                  lists:
+                    $ref: '#/components/schemas/ListPrivileges'
+                required:
+                  - lists
+                  - listItems
+                  - is_authenticated
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Get list privileges
+      tags:
+        - Security Solution Lists API
+components:
+  schemas:
+    FindListItemsCursor:
+      $ref: '#/components/schemas/NonEmptyString'
+    FindListItemsFilter:
+      type: string
+    FindListsCursor:
+      $ref: '#/components/schemas/NonEmptyString'
+    FindListsFilter:
+      type: string
+    List:
+      type: object
+      properties:
+        _version:
+          type: string
+        '@timestamp':
+          format: date-time
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        description:
+          $ref: '#/components/schemas/ListDescription'
+        deserializer:
+          type: string
+        id:
+          $ref: '#/components/schemas/ListId'
+        immutable:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/ListMetadata'
+        name:
+          $ref: '#/components/schemas/ListName'
+        serializer:
+          type: string
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ListType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+        version:
+          minimum: 1
+          type: integer
+      required:
+        - id
+        - type
+        - name
+        - description
+        - immutable
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ListDescription:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListItem:
+      type: object
+      properties:
+        _version:
+          type: string
+        '@timestamp':
+          format: date-time
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        deserializer:
+          type: string
+        id:
+          $ref: '#/components/schemas/ListItemId'
+        list_id:
+          $ref: '#/components/schemas/ListId'
+        meta:
+          $ref: '#/components/schemas/ListItemMetadata'
+        serializer:
+          type: string
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ListType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+        value:
+          $ref: '#/components/schemas/ListItemValue'
+      required:
+        - id
+        - type
+        - list_id
+        - value
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ListItemId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListItemMetadata:
+      additionalProperties: true
+      type: object
+    ListItemPrivileges:
+      type: object
+      properties:
+        application:
+          additionalProperties:
+            type: boolean
+          type: object
+        cluster:
+          additionalProperties:
+            type: boolean
+          type: object
+        has_all_requested:
+          type: boolean
+        index:
+          additionalProperties:
+            additionalProperties:
+              type: boolean
+            type: object
+          type: object
+        username:
+          type: string
+      required:
+        - username
+        - has_all_requested
+        - cluster
+        - index
+        - application
+    ListItemValue:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListMetadata:
+      additionalProperties: true
+      type: object
+    ListName:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListPrivileges:
+      type: object
+      properties:
+        application:
+          additionalProperties:
+            type: boolean
+          type: object
+        cluster:
+          additionalProperties:
+            type: boolean
+          type: object
+        has_all_requested:
+          type: boolean
+        index:
+          additionalProperties:
+            additionalProperties:
+              type: boolean
+            type: object
+          type: object
+        username:
+          type: string
+      required:
+        - username
+        - has_all_requested
+        - cluster
+        - index
+        - application
+    ListType:
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+      type: string
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    PlatformErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+      required:
+        - statusCode
+        - error
+        - message
+    SiemErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+      required:
+        - status_code
+        - message
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
+    name: Security Solution Lists API

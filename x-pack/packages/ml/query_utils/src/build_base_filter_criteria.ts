@@ -6,7 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+
+import { isDefaultQuery } from './default_query';
+import { isFilterBasedDefaultQuery } from './filter_based_default_query';
 
 /**
  * Builds the base filter criteria used in queries,
@@ -20,9 +23,10 @@ import { Query } from '@kbn/es-query';
  */
 export function buildBaseFilterCriteria(
   timeFieldName?: string,
-  earliestMs?: number,
-  latestMs?: number,
-  query?: Query['query']
+  earliestMs?: number | string,
+  latestMs?: number | string,
+  query?: Query['query'],
+  timeFormat = 'epoch_millis'
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
 
@@ -30,15 +34,20 @@ export function buildBaseFilterCriteria(
     filterCriteria.push({
       range: {
         [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis',
+          gte: earliestMs as estypes.DateMath,
+          lte: latestMs as estypes.DateMath,
+          format: timeFormat,
         },
       },
     });
   }
 
-  if (query && typeof query === 'object') {
+  if (
+    query &&
+    typeof query === 'object' &&
+    !isDefaultQuery(query) &&
+    !isFilterBasedDefaultQuery(query)
+  ) {
     filterCriteria.push(query);
   }
 

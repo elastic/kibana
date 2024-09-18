@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -73,7 +74,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath'
   >;
   esJavaOpts?: string;
   /**
@@ -202,6 +203,7 @@ export function createTestEsCluster<
     license,
     basePath,
     esArgs,
+    resources: files,
   };
 
   return new (class TestCluster {
@@ -225,22 +227,21 @@ export function createTestEsCluster<
 
     async start() {
       let installPath: string;
+      let disableEsTmpDir: boolean;
 
       // We only install once using the first node. If the cluster has
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        installPath = (
-          await firstNode.installSource({
-            sourcePath: config.sourcePath,
-            license: config.license,
-            password: config.password,
-            basePath: config.basePath,
-            esArgs: config.esArgs,
-          })
-        ).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSource({
+          sourcePath: config.sourcePath,
+          license: config.license,
+          password: config.password,
+          basePath: config.basePath,
+          esArgs: config.esArgs,
+        }));
       } else if (esFrom === 'snapshot') {
-        installPath = (await firstNode.installSnapshot(config)).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
       } else if (esFrom === 'serverless') {
         if (!esServerlessOptions) {
           throw new Error(
@@ -250,6 +251,7 @@ export function createTestEsCluster<
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
+          dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
           clean: true,
@@ -297,10 +299,11 @@ export function createTestEsCluster<
             // If we have multiple nodes, we shouldn't try setting up the native realm
             // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
-            skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipSecuritySetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
             writeLogsToPath,
+            disableEsTmpDir,
           });
         });
       }

@@ -9,21 +9,21 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
-import '../../../../common/mock/match_media';
 import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import type { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { NotePreviews } from '../note_previews';
+import { TimelineId } from '../../../../../common/types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
@@ -40,17 +40,9 @@ jest.mock('react-redux', () => {
 
 describe('#getCommonColumns', () => {
   let mockResults: OpenTimelineResult[];
-  let queryClient: QueryClient;
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
-      },
-    });
   });
 
   describe('Expand column', () => {
@@ -60,11 +52,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(hasNotes),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(true);
     });
@@ -75,11 +65,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(missingNotes),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
     });
 
@@ -89,11 +77,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(nullNotes),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
     });
 
@@ -103,11 +89,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(emptylNotes),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
     });
 
@@ -118,11 +102,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(missingSavedObjectId),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
     });
 
@@ -132,11 +114,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(nullSavedObjectId),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
     });
 
@@ -146,11 +126,9 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(hasNotes),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       const props = wrapper
         .find('[data-test-subj="expand-notes"]')
         .first()
@@ -170,11 +148,9 @@ describe('#getCommonColumns', () => {
         ...getMockTimelinesTableProps(hasNotes),
         itemIdToExpandedNotesRowMap,
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       const props = wrapper
         .find('[data-test-subj="expand-notes"]')
         .first()
@@ -197,16 +173,16 @@ describe('#getCommonColumns', () => {
         itemIdToExpandedNotesRowMap,
         onToggleShowNotes,
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <TimelinesTable {...testProps} />
-        </QueryClientProvider>
-      );
+      const wrapper = mountWithI18nProvider(<TimelinesTable {...testProps} />, {
+        wrappingComponent: createReactQueryWrapper(),
+      });
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
-        'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
+        'saved-timeline-11': (
+          <NotePreviews notes={hasNotes[0].notes} timelineId={TimelineId.active} />
+        ),
       });
     });
 
@@ -226,12 +202,13 @@ describe('#getCommonColumns', () => {
         onToggleShowNotes,
       };
 
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
@@ -247,12 +224,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(mockResults),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(wrapper.find('thead tr th').at(1).text()).toContain(i18n.TIMELINE_NAME);
@@ -262,12 +240,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(mockResults),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -286,12 +265,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(missingSavedObjectId),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -308,12 +288,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(missingTitle),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -332,12 +313,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(withMissingSavedObjectIdAndTitle),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -353,12 +335,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(withJustWhitespaceTitle),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -377,12 +360,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(withMissingSavedObjectId),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -394,12 +378,13 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders a hyperlink when the timeline has a saved object id', () => {
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -418,12 +403,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(missingSavedObjectId),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(
@@ -441,12 +427,13 @@ describe('#getCommonColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
         onOpenTimeline,
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       wrapper
@@ -463,24 +450,26 @@ describe('#getCommonColumns', () => {
 
   describe('Description column', () => {
     test('it renders the expected column name', () => {
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(wrapper.find('thead tr th').at(2).text()).toContain(i18n.DESCRIPTION);
     });
 
     test('it renders the description when the timeline has a description', () => {
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
@@ -491,12 +480,13 @@ describe('#getCommonColumns', () => {
     test('it renders a placeholder when the timeline has no description', () => {
       const missingDescription: OpenTimelineResult[] = [omit('description', { ...mockResults[0] })];
 
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
       expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
         getEmptyValue()
@@ -511,12 +501,13 @@ describe('#getCommonColumns', () => {
       const testProps: TimelinesTableProps = {
         ...getMockTimelinesTableProps(justWhitespaceDescription),
       };
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
       expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
         getEmptyValue()
@@ -526,24 +517,26 @@ describe('#getCommonColumns', () => {
 
   describe('Last Modified column', () => {
     test('it renders the expected column name', () => {
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(wrapper.find('thead tr th').at(3).text()).toContain(i18n.LAST_MODIFIED);
     });
 
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
-        </QueryClientProvider>
+      const wrapper = mountWithI18nProvider(
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>,
+        {
+          wrappingComponent: createReactQueryWrapper(),
+        }
       );
 
       expect(wrapper.find('[data-test-subj="updated"]').first().text().length).toBeGreaterThan(
@@ -555,12 +548,13 @@ describe('#getCommonColumns', () => {
   test('it renders a placeholder when the timeline has no last modified (updated) date', () => {
     const missingUpdated: OpenTimelineResult[] = [omit('updated', { ...mockResults[0] })];
 
-    const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
-        </ThemeProvider>
-      </QueryClientProvider>
+    const wrapper = mountWithI18nProvider(
+      <ThemeProvider theme={mockTheme}>
+        <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
+      </ThemeProvider>,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
     );
     expect(wrapper.find('[data-test-subj="updated"]').first().text()).toEqual(getEmptyValue());
   });

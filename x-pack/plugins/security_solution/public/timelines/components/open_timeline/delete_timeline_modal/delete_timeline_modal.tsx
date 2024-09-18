@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { useParams } from 'react-router-dom';
 import * as i18n from '../translations';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 interface Props {
   title?: string | null;
@@ -28,7 +28,7 @@ export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
 export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => {
   const { tabName } = useParams<{ tabName: TimelineType }>();
   const warning =
-    tabName === TimelineType.template
+    tabName === TimelineTypeEnum.template
       ? i18n.DELETE_TIMELINE_TEMPLATE_WARNING
       : i18n.DELETE_TIMELINE_WARNING;
 

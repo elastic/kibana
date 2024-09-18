@@ -4,7 +4,110 @@
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
+xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
+xpack.search.notebooks.enabled: false
+
+## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Applications feature privileges are fine-tuned to grant access to Logs, and Observability apps.
+  apm:
+    ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
+    name: "Applications"
+    privileges:
+      # Infrastructure's `All` feature privilege should implicitly grant `All` access to Logs and Observability apps.
+      all.composedOf:
+        - feature: "logs"
+          privileges: [ "all" ]
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Infrastructure's `Read` feature privilege should implicitly grant `Read` access to Logs and Observability apps.
+      read.composedOf:
+        - feature: "logs"
+          privileges: [ "read" ]
+        - feature: "observability"
+          privileges: [ "read" ]
+  ### Dashboards feature should be moved from Analytics category to the Observability one.
+  dashboard.category: "observability"
+  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
+  ### fine-tuned to grant access to Observability app.
+  discover:
+    category: "observability"
+    privileges:
+      # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
+      all.composedOf:
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Discover `Read` feature privilege should implicitly grant `Read` access to Observability app.
+      read.composedOf:
+        - feature: "observability"
+          privileges: [ "read" ]
+  ### Fleet feature privileges are fine-tuned to grant access to Logs app.
+  fleetv2:
+    privileges:
+      # Fleet `All` feature privilege should implicitly grant `All` access to Logs app.
+      all.composedOf:
+        - feature: "logs"
+          privileges: [ "all" ]
+      # Fleet `Read` feature privilege should implicitly grant `Read` access to Logs app.
+      read.composedOf:
+        - feature: "logs"
+          privileges: [ "read" ]
+  ### Infrastructure feature privileges are fine-tuned to grant access to Logs, and Observability apps.
+  infrastructure:
+    ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
+    name: "Infrastructure"
+    privileges:
+      # Infrastructure's `All` feature privilege should implicitly grant `All` access to Logs and Observability apps.
+      all.composedOf:
+        - feature: "logs"
+          privileges: [ "all" ]
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Infrastructure's `Read` feature privilege should implicitly grant `Read` access to Logs and Observability apps.
+      read.composedOf:
+        - feature: "logs"
+          privileges: [ "read" ]
+        - feature: "observability"
+          privileges: [ "read" ]
+  ### Logs feature is hidden in Role management since it's automatically granted by either Infrastructure, or Applications features.
+  logs.hidden: true
+  ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
+  ml:
+    category: "observability"
+    order: 1200
+  ### Observability feature is hidden in Role management since it's automatically granted by either Discover,
+  ### Infrastructure, Applications, Synthetics, or SLOs features.
+  observability.hidden: true
+  ### SLOs feature privileges are fine-tuned to grant access to Observability app.
+  slo:
+    privileges:
+      # SLOs `All` feature privilege should implicitly grant `All` access to Observability app.
+      all.composedOf:
+        - feature: "observability"
+          privileges: [ "all" ]
+      # SLOs `Read` feature privilege should implicitly grant `Read` access to Observability app.
+      read.composedOf:
+        - feature: "observability"
+          privileges: [ "read" ]
+  ### Stack alerts is hidden in Role management since it's not needed.
+  stackAlerts.hidden: true
+  ### Synthetics feature privileges are fine-tuned to grant access to Observability app.
+  uptime:
+    ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
+    name: "Synthetics"
+    privileges:
+      # Synthetics `All` feature privilege should implicitly grant `All` access to Observability app.
+      all.composedOf:
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Synthetics `Read` feature privilege should implicitly grant `Read` access to Observability app.
+      read.composedOf:
+        - feature: "observability"
+          privileges: [ "read" ]
+
+## Enable the slo plugin
+xpack.slo.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
@@ -39,16 +142,17 @@ xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
-xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.2'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-xpack.fleet.internal.registry.spec.max: '3.0'
-# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
-xpack.fleet.internal.registry.spec.min: '1.0'
 xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
     'beaconing',
-    'osquery_manager',
+    'cloud_security_posture',
+    'cloud_defend',
+    'security_detection_engine',
 
     # Removed in 8.11 integrations
     'cisco',
@@ -77,12 +181,15 @@ xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
 
+## Set the AI Assistant type
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: false
+xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console

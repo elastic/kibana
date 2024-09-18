@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { MANAGEMENT_PATH, MANAGE_PATH } from '../../common/constants';
 import { SecurityPageName } from '../app/types';
 import { ManagementContainer } from './pages';
@@ -17,9 +17,9 @@ import { ManageLandingPage } from './pages/landing';
 
 const ManagementLanding = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.administration}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.administration} redirectOnMissing>
       <ManageLandingPage />
-    </TrackApplicationView>
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 

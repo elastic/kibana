@@ -1,8 +1,6 @@
 post:
-  summary: Creates a runtime field.
-  operationId: createRuntimeField
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  summary: Create a runtime field
+  operationId: createRuntimeFieldDefault
   tags:
     - data views
   parameters:
@@ -29,12 +27,17 @@ post:
         examples:
           createRuntimeFieldRequest:
             $ref: '../components/examples/create_runtime_field_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object    
 
 put:
-  summary: Create or update an existing runtime field.
-  operationId: createUpdateRuntimeField
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  summary: Create or update a runtime field
+  operationId: createUpdateRuntimeFieldDefault
   tags:
     - data views
   parameters:
@@ -81,9 +84,9 @@ put:
                 type: array
                 items:
                   type: object
-          examples:
-            createRuntimeFieldResponse:
-              $ref: '../components/examples/create_runtime_field_response.yaml'
+          # examples:
+          #   createRuntimeFieldResponse:
+          #     $ref: '../components/examples/create_runtime_field_response.yaml'
     '400':
       description: Bad request
       content:

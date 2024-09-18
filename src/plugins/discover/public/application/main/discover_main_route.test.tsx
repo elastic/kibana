@@ -1,26 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
-import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
 import {
   createCustomizationService,
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
-import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
+import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -41,11 +42,22 @@ jest.mock('./discover_main_app', () => {
   };
 });
 
-setScopedHistory(scopedHistoryMock.create());
+let mockRootProfileLoading = false;
+
+jest.mock('../../context_awareness', () => {
+  const originalModule = jest.requireActual('../../context_awareness');
+  return {
+    ...originalModule,
+    useRootProfile: () => ({
+      rootProfileLoading: mockRootProfileLoading,
+    }),
+  };
+});
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
+    mockRootProfileLoading = false;
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
@@ -100,25 +112,33 @@ describe('DiscoverMainRoute', () => {
     });
   });
 
-  test('should pass hideNavMenuItems=true to DiscoverTopNavServerless while loading', async () => {
+  test('renders LoadingIndicator while root profile is loading', async () => {
+    mockRootProfileLoading = true;
     const component = mountComponent(true, true);
-    expect(component.find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(true);
     await waitFor(() => {
-      expect(component.update().find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(
-        false
-      );
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(false);
+    });
+    mockRootProfileLoading = false;
+    await waitFor(() => {
+      component.setProps({}).update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('should pass hideNavMenuItems=true to DiscoverTopNavInline while loading', async () => {
+    const component = mountComponent(true, true);
+    expect(component.find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(true);
+    await waitFor(() => {
+      expect(component.update().find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(false);
     });
   });
 });
 
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props: MainRouteProps = {
-    isDev: false,
     customizationCallbacks: [],
-    customizationContext: {
-      displayMode: 'standalone',
-      showLogsExplorerTabs: false,
-    },
+    customizationContext: mockCustomizationContext,
   };
 
   return mountWithIntl(
@@ -140,5 +160,3 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
   return discoverServiceMock;
 }
-
-setHeaderActionMenuMounter(jest.fn());

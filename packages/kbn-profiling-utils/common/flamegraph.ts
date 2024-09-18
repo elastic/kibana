@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
-import { createStackFrameMetadata, getCalleeLabel } from './profiling';
+import { createStackFrameMetadata, getCalleeLabel, isErrorFrame } from './profiling';
 import { convertTonsToKgs } from './utils';
 
 /**
@@ -81,9 +82,25 @@ export interface ElasticFlameGraph
  * This allows us to create a flamegraph in two steps (e.g. first on the server
  * and finally in the browser).
  * @param base BaseFlameGraph
+ * @param showErrorFrames
  * @returns ElasticFlameGraph
  */
-export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
+export function createFlameGraph(
+  base: BaseFlameGraph,
+  showErrorFrames: boolean
+): ElasticFlameGraph {
+  if (!showErrorFrames) {
+    // This loop jumps over the error frames in the graph.
+    // Error frames only appear as child nodes of the root frame.
+    // Error frames only have a single child node.
+    for (let i = 0; i < base.Edges[0].length; i++) {
+      const childNodeID = base.Edges[0][i];
+      if (isErrorFrame(base.FrameType[childNodeID])) {
+        base.Edges[0][i] = base.Edges[childNodeID][0];
+      }
+    }
+  }
+
   const graph: ElasticFlameGraph = {
     Size: base.Size,
     SamplingRate: base.SamplingRate,

@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiStat, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiStat, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { getColor, getTooltipContent } from './helpers';
 import { TITLE_SIZE } from '../constants';
 import * as i18n from './translations';
 
-const ANONYMIZATION_ICON = 'eyeClosed';
-
-const AnonymizationIconFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
 interface Props {
   anonymized: number;
+  titleSize?: 'xs' | 's' | 'xxxs' | 'xxs' | 'm' | 'l' | undefined;
+  gap?: string;
   isDataAnonymizable: boolean;
-  showIcon?: boolean;
+  inline?: boolean;
 }
 
 const AnonymizedStatComponent: React.FC<Props> = ({
   anonymized,
   isDataAnonymizable,
-  showIcon = false,
+  inline,
+  titleSize = TITLE_SIZE,
+  gap = euiThemeVars.euiSizeXS,
 }) => {
   const color = useMemo(() => getColor(isDataAnonymizable), [isDataAnonymizable]);
 
@@ -40,37 +38,31 @@ const AnonymizedStatComponent: React.FC<Props> = ({
 
   const description = useMemo(
     () => (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        {showIcon && (
-          <AnonymizationIconFlexItem grow={false}>
-            <EuiIcon
-              color={color}
-              data-test-subj="anonymizationIcon"
-              size="m"
-              type={ANONYMIZATION_ICON}
-            />
-          </AnonymizationIconFlexItem>
-        )}
-
-        <EuiFlexItem grow={false}>
-          <EuiText color={color} data-test-subj="description" size="s">
-            {i18n.ANONYMIZED_FIELDS}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText color={color} data-test-subj="description" size="s">
+        {i18n.ANONYMIZED_FIELDS}
+      </EuiText>
     ),
-    [color, showIcon]
+    [color]
   );
 
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiStat
+        css={
+          inline
+            ? css`
+                display: flex;
+                align-items: center;
+                gap: ${gap};
+              `
+            : null
+        }
         data-test-subj="anonymizedFieldsStat"
         description={description}
         reverse
         titleColor={color}
         title={anonymized}
-        titleSize={TITLE_SIZE}
+        titleSize={titleSize}
       />
     </EuiToolTip>
   );

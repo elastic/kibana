@@ -6,11 +6,16 @@
  */
 
 import type {
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
   CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
@@ -20,7 +25,7 @@ import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solutio
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { FtrService } from '../../functional/ftr_provider_context';
-import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
+import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -122,18 +127,42 @@ export class EndpointArtifactsTestResources extends FtrService {
     return this.createExceptionItem(blocklist);
   }
 
-  async getArtifacts() {
+  async createArtifact(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData | undefined> {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+        return this.createTrustedApp(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+        return this.createEventFilter(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+        return this.createBlocklist(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+        return this.createHostIsolationException(overrides);
+      }
+    }
+  }
+
+  async getArtifactsFromUnifiedManifestSO(): Promise<
+    Array<
+      InternalUnifiedManifestSchemaResponseType['_source']['endpoint:unified-user-artifact-manifest']
+    >
+  > {
     const {
       hits: { hits: manifestResults },
-    } = await this.esClient.search({
+    } = await this.esClient.search<InternalUnifiedManifestSchemaResponseType['_source']>({
       index: '.kibana*',
-      query: { bool: { filter: [{ term: { type: ManifestConstants.SAVED_OBJECT_TYPE } }] } },
-      size: 1,
+      query: {
+        bool: { filter: [{ term: { type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE } }] },
+      },
     });
 
-    const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-    const artifacts = manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
-
-    return artifacts;
+    return manifestResults.map(
+      (result) => result._source!['endpoint:unified-user-artifact-manifest']
+    );
   }
 }

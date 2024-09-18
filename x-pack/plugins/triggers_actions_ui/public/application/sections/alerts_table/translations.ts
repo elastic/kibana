@@ -35,3 +35,31 @@ export const ALERTS_TABLE_TITLE = i18n.translate(
     defaultMessage: 'Alerts table',
   }
 );
+
+export const ALERTS_TABLE_FILTERS_ERROR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.filters.errorTitle',
+  {
+    defaultMessage: 'Unsupported alerts filters set',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorTitle',
+  {
+    defaultMessage: 'Cannot display alerts',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorBody',
+  {
+    defaultMessage: 'An error occurred while rendering the alerts table',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorCopyToClipboardLabel',
+  {
+    defaultMessage: 'Copy error to clipboard',
+  }
+);

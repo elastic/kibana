@@ -78,7 +78,10 @@ export function registerCspmUsageCollector(
           getInstallationStats(esClient, soClient, coreServices, logger)
         ),
         awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
-        awaitPromiseSafe('Cloud Accounts', getAllCloudAccountsStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Cloud Accounts',
+          getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
+        ),
         awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
       ]);
       return {

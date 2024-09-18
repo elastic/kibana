@@ -12,7 +12,7 @@ import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import type { Dispatch, Middleware, Store } from 'redux';
+import type { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -24,27 +24,24 @@ import { useKibana } from '../lib/kibana';
 import { UpsellingProvider } from '../components/upselling_provider';
 import { MockAssistantProvider } from './mock_assistant_provider';
 import { ConsoleManager } from '../../management/components/console';
-import type { State } from '../store';
-import { createStore } from '../store';
-import { mockGlobalState } from './global_state';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
 import type { FieldHook } from '../../shared_imports';
-import { SUB_PLUGINS_REDUCER } from './utils';
-import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { localStorageMock } from './mock_local_storage';
 import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
-import type { AppAction } from '../store/actions';
-import type { Immutable } from '../../../common/endpoint/types';
+import { createMockStore } from './create_store';
+import type { StartServices } from '../../types';
 
 interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
   cellActions?: Action[];
+  startServices?: StartServices;
 }
 
 export const kibanaMock = createStartServicesMock();
@@ -54,22 +51,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-const { storage: storageMock } = createSecuritySolutionStorageMock();
-
-export const createMockStore = (
-  state: State = mockGlobalState,
-  pluginsReducer: typeof SUB_PLUGINS_REDUCER = SUB_PLUGINS_REDUCER,
-  kibana: typeof kibanaMock = kibanaMock,
-  storage: typeof storageMock = storageMock,
-  additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
-) => {
-  return createStore(state, pluginsReducer, kibana, storage, additionalMiddleware);
-};
 
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createMockStore(),
+  startServices,
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
@@ -88,7 +75,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
 
   return (
     <I18nProvider>
-      <MockKibanaContextProvider>
+      <MockKibanaContextProvider startServices={startServices}>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -129,6 +116,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
   store = createMockStore(),
   onDragEnd = jest.fn(),
+  startServices,
   cellActions = [],
 }) => {
   const queryClient = new QueryClient({
@@ -140,7 +128,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   });
   return (
     <I18nProvider>
-      <MockKibanaContextProvider>
+      <MockKibanaContextProvider startServices={startServices}>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>

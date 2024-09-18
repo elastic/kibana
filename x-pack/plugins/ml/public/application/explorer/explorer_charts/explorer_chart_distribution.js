@@ -14,7 +14,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
@@ -24,6 +23,7 @@ import {
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../formatters/format_value';
 import {
@@ -32,14 +32,18 @@ import {
   numTicksForDateFormat,
   removeLabelOverlap,
   chartExtendedLimits,
+  LINE_CHART_ANOMALY_RADIUS,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
-import { TRANSPARENT_BACKGROUND } from './constants';
+import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
+import { filter } from 'rxjs';
+import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
+import { SCHEDULE_EVENT_MARKER_ENTITY } from '../../../../common/constants/charts';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
 // If a rare/event-distribution chart has a cardinality of 10 or less,
 // then the chart will display the y axis labels for each lane of events.
@@ -49,14 +53,38 @@ const CONTENT_WRAPPER_HEIGHT = 215;
 const Y_AXIS_LABEL_THRESHOLD = 10;
 
 export class ExplorerChartDistribution extends React.Component {
+  static contextType = context;
+
   static propTypes = {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number,
     tooltipService: PropTypes.object.isRequired,
+    cursor$: PropTypes.object,
   };
 
+  constructor(props) {
+    super(props);
+    this.chartScales = undefined;
+    this.cursorStateSubscription = undefined;
+  }
   componentDidMount() {
     this.renderChart();
+    this.cursorStateSubscription = this.props.cursor$
+      .pipe(filter((c) => c.isDateHistogram))
+      .subscribe((cursor) => {
+        drawCursor(
+          cursor.cursor,
+          this.rootNode,
+          this.props.id,
+          this.props.seriesConfig,
+          this.chartScales,
+          this.props.chartTheme
+        );
+      });
+  }
+
+  componentWillUnmount() {
+    this.cursorStateSubscription?.unsubscribe();
   }
 
   componentDidUpdate() {
@@ -70,8 +98,7 @@ export class ExplorerChartDistribution extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
-      chartTheme,
-      cursor,
+      id: chartId,
     } = this.props;
 
     const element = this.rootNode;
@@ -83,13 +110,12 @@ export class ExplorerChartDistribution extends React.Component {
       return;
     }
 
-    const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
+    const fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+      config.jobId,
+      config.detectorIndex
+    );
 
     let vizWidth = 0;
-    const chartHeight = 170;
-    const LINE_CHART_ANOMALY_RADIUS = 7;
-    const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
-
     const chartType = getChartType(config);
 
     // Left margin is adjusted later for longest y-axis label.
@@ -112,19 +138,18 @@ export class ExplorerChartDistribution extends React.Component {
     drawRareChart(filteredChartData);
 
     function init({ chartData, functionDescription }) {
-      const $el = $('.ml-explorer-chart');
-
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
       const chartElement = d3.select(element).select('.content-wrapper');
       chartElement.select('svg').remove();
 
-      const svgWidth = $el.width();
-      const svgHeight = chartHeight + margin.top + margin.bottom;
+      const svgWidth = element.clientWidth;
+      const svgHeight = CHART_HEIGHT + margin.top + margin.bottom;
 
       const svg = chartElement
         .append('svg')
         .classed('ml-explorer-chart-svg', true)
+        .attr('id', 'ml-explorer-chart-svg' + chartId)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
@@ -134,12 +159,29 @@ export class ExplorerChartDistribution extends React.Component {
         .key((d) => d.entity)
         .entries(chartData)
         .sort((a, b) => {
+          // To display calendar event markers we populate the chart with fake data points.
+          // If a category has fake data points, it should be sorted to the end.
+          const aHasFakeData = a.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+          const bHasFakeData = b.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+
+          if (aHasFakeData && !bHasFakeData) {
+            return 1;
+          }
+
+          if (bHasFakeData && !aHasFakeData) {
+            return -1;
+          }
+
           return b.values.length - a.values.length;
         })
         .filter((d, i) => {
           // only filter for rare charts
           if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-            return i < categoryLimit || d.key === highlight;
+            return (
+              i < categoryLimit ||
+              d.key === highlight ||
+              d.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY)
+            );
           }
           return true;
         })
@@ -166,7 +208,7 @@ export class ExplorerChartDistribution extends React.Component {
 
         lineChartYScale = d3.scale
           .linear()
-          .range([chartHeight, 0])
+          .range([CHART_HEIGHT, 0])
           .domain([yScaleDomainMin < 0 ? yScaleDomainMin : 0, yScaleDomainMax])
           .nice();
       } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
@@ -174,7 +216,7 @@ export class ExplorerChartDistribution extends React.Component {
         const rowMargin = 5;
         lineChartYScale = d3.scale
           .ordinal()
-          .rangePoints([rowMargin, chartHeight - rowMargin])
+          .rangePoints([rowMargin, CHART_HEIGHT - rowMargin])
           .domain(scaleCategories);
       } else {
         throw new Error(`chartType '${chartType}' not supported`);
@@ -258,7 +300,7 @@ export class ExplorerChartDistribution extends React.Component {
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
@@ -266,17 +308,17 @@ export class ExplorerChartDistribution extends React.Component {
 
       drawRareChartAxes();
       drawRareChartHighlightedSpan();
-      drawSyncedCursorLine(lineChartGroup);
+      drawCursorListener(lineChartGroup);
       drawRareChartDots(data, lineChartGroup, lineChartValuesLine);
       drawRareChartMarkers(data);
     }
 
-    function drawSyncedCursorLine(lineChartGroup) {
+    function drawCursorListener(lineChartGroup) {
       lineChartGroup
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .on('mouseout', function () {
           onPointerUpdate({
@@ -291,46 +333,19 @@ export class ExplorerChartDistribution extends React.Component {
         .on('mousemove', function () {
           const mouse = d3.mouse(this);
 
-          onPointerUpdate({
-            chartId: 'ml-anomaly-chart-metric',
-            scale: 'time',
-            smHorizontalValue: null,
-            smVerticalValue: null,
-            type: 'Over',
-            unit: undefined,
-            x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
-          });
+          if (onPointerUpdate) {
+            onPointerUpdate({
+              chartId: 'ml-anomaly-chart-metric',
+              scale: 'time',
+              smHorizontalValue: null,
+              smVerticalValue: null,
+              type: 'Over',
+              unit: undefined,
+              x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
+            });
+          }
         })
         .style('fill', TRANSPARENT_BACKGROUND);
-
-      const cursorData =
-        cursor &&
-        cursor.type === 'Over' &&
-        cursor.x >= config.plotEarliest &&
-        cursor.x <= config.plotLatest
-          ? [cursor.x]
-          : [];
-
-      const cursorMouseLine = lineChartGroup
-        .append('g')
-        .attr('class', 'ml-anomaly-chart-cursor')
-        .selectAll('.ml-anomaly-chart-cursor-line')
-        .data(cursorData);
-
-      cursorMouseLine
-        .enter()
-        .append('path')
-        .attr('class', 'ml-anomaly-chart-cursor-line')
-        .attr('d', (ts) => {
-          const xPosition = lineChartXScale(ts);
-          return `M${xPosition},${chartHeight} ${xPosition},0`;
-        })
-        // Use elastic chart's cursor line style if possible
-        .style('stroke', chartTheme.crosshair.line.stroke)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
-
-      cursorMouseLine.exit().remove();
     }
 
     function drawRareChartAxes() {
@@ -348,7 +363,7 @@ export class ExplorerChartDistribution extends React.Component {
         .axis()
         .scale(lineChartXScale)
         .orient('bottom')
-        .innerTickSize(-chartHeight)
+        .innerTickSize(-CHART_HEIGHT)
         .outerTickSize(0)
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
@@ -376,7 +391,8 @@ export class ExplorerChartDistribution extends React.Component {
         .orient('left')
         .innerTickSize(0)
         .outerTickSize(0)
-        .tickPadding(10);
+        .tickPadding(10)
+        .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
         yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
@@ -387,7 +403,7 @@ export class ExplorerChartDistribution extends React.Component {
       const gAxis = axes
         .append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + chartHeight + ')')
+        .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
         .call(xAxis);
 
       axes.append('g').attr('class', 'y axis').call(yAxis);
@@ -448,7 +464,7 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('rx', 3)
         .attr('ry', 3)
         .attr('width', rectWidth - 4)
-        .attr('height', chartHeight - 4);
+        .attr('height', CHART_HEIGHT - 4);
     }
 
     function drawRareChartMarkers(data) {
@@ -521,7 +537,8 @@ export class ExplorerChartDistribution extends React.Component {
       const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
-      if (marker.entity !== undefined) {
+      // Hide entity for scheduled events with mocked value.
+      if (marker.entity !== undefined && marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY) {
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
             defaultMessage: 'entity',
@@ -593,7 +610,11 @@ export class ExplorerChartDistribution extends React.Component {
             });
           }
         }
-      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
+      } else if (
+        chartType !== CHART_TYPE.EVENT_DISTRIBUTION &&
+        // Hide value for scheduled events with mocked value.
+        marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY
+      ) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
@@ -633,6 +654,7 @@ export class ExplorerChartDistribution extends React.Component {
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
+    this.chartScales = { lineChartXScale, margin };
   }
 
   shouldComponentUpdate() {

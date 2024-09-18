@@ -6,7 +6,8 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues } from '../../__mocks__/kea_logic';
+
+import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -17,18 +18,6 @@ import { EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { RolesEmptyPrompt } from './roles_empty_prompt';
 
 describe('RolesEmptyPrompt', () => {
-  const {
-    security: {
-      authc: { getCurrentUser },
-    },
-  } = mockKibanaValues;
-
-  const mockCurrentUser = (user?: unknown) =>
-    (getCurrentUser as jest.Mock).mockReturnValue(Promise.resolve(user));
-
-  const mockCurrentUserError = () =>
-    (getCurrentUser as jest.Mock).mockReturnValue(Promise.reject());
-
   const onEnable = jest.fn();
 
   const props = {
@@ -42,25 +31,20 @@ describe('RolesEmptyPrompt', () => {
     roles: ['superuser'],
   };
 
-  beforeAll(() => {
-    mockCurrentUser();
-  });
+  beforeAll(() => {});
 
   it('gets the current user on mount', () => {
     shallow(<RolesEmptyPrompt {...props} />);
-
-    expect(getCurrentUser).toHaveBeenCalled();
   });
 
-  it('does not render if the getCurrentUser promise returns error', async () => {
-    mockCurrentUserError();
+  it('does not render if there is no user', async () => {
     const wrapper = await shallow(<RolesEmptyPrompt {...props} />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
   it('renders', async () => {
-    mockCurrentUser(mockUser);
+    setMockValues({ user: mockUser });
     const wrapper = await shallow(<RolesEmptyPrompt {...props} />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
@@ -68,9 +52,11 @@ describe('RolesEmptyPrompt', () => {
   });
 
   it('disables button when non-superuser', async () => {
-    mockCurrentUser({
-      username: 'user',
-      roles: ['foo'],
+    setMockValues({
+      user: {
+        username: 'user',
+        roles: ['foo'],
+      },
     });
     const wrapper = await shallow(<RolesEmptyPrompt {...props} />);
 
@@ -81,7 +67,7 @@ describe('RolesEmptyPrompt', () => {
   });
 
   it('calls onEnable on change', async () => {
-    mockCurrentUser(mockUser);
+    setMockValues({ user: mockUser });
     const wrapper = await shallow(<RolesEmptyPrompt {...props} />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
     prompt.find(EuiButton).simulate('click');

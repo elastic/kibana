@@ -27,7 +27,7 @@ export function useFinishAndArchiveMaintenanceWindow() {
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsFinishedAndArchiveSuccess', {
-          defaultMessage: "Cancelled and archived running maintenance window '{title}'",
+          defaultMessage: "Cancelled and archived running maintenance window ''{title}''",
           values: {
             title: data.title,
           },

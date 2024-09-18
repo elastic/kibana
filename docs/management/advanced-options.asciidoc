@@ -43,8 +43,11 @@ Change the settings that apply only to {kib} spaces.
 [[auto-complete-use-time-tange]]`autocomplete:useTimeRange`::
 When disabled, autocompletes the suggestions from your data set instead of the time range.
 
+[[bfetch-disable]]`bfetch:disable`::
+deprecated:[8.15.0] When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.  
+
 [[bfetch-disable-compression]]`bfetch:disableCompression`::
-When disabled, allows you to debug individual requests, but increases the response size.
+deprecated:[8.15.0] When disabled, allows you to debug individual requests, but increases the response size.
 
 [[csv-quotevalues]]`csv:quoteValues`::
 Set this property to `true` to quote exported values.
@@ -184,8 +187,10 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
-to apply the setting.
+The UI theme that the {kib} UI should use.
+Set to `enabled` or `disabled` to enable or disable the dark theme.
+Set to `system` to have the {kib} UI theme follow the system theme.
+You must refresh the page to apply the setting.
 
 [[theme-version]]`theme:version`::
 Kibana only ships with the v8 theme now, so this setting can no longer be edited.
@@ -204,8 +209,11 @@ The default refresh interval for the time filter. Example:
 The default selection in the time filter.
 
 [[truncate-maxheight]]`truncate:maxHeight`::
-The maximum height that a cell occupies in a table. Set to 0 to disable
+deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
+
+[[enableESQL]]`enableESQL`::
+This setting enables ES|QL in Kibana.
 
 [float]
 [[presentation-labs]]
@@ -217,7 +225,8 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. 
+//For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -263,7 +272,8 @@ the `xpack.banners.backgroundColor` configuration property.
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+deprecated:[7.7.0]
+Deprecated; use <<kibana-feature-privileges,feature privileges>> instead.
 The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
@@ -288,9 +298,6 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover:enableESQL]]`discover:enableESQL`::
-experimental[] Allows ES|QL queries for search.
-
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
 
@@ -307,6 +314,7 @@ Limits the number of rows per page in the document table.
 Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
+deprecated:[8.15.0]
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
 When disabled, *Discover* loads fields using the {es} search API's
 {ref}/search-fields.html#search-fields-param[`fields`] parameter.
@@ -336,7 +344,7 @@ Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
 [[doctable-legacy]]`doc_table:legacy`::
-Controls the way the document table looks and works.
+deprecated:[8.15.0] Controls the way the document table looks and works.
 To use the new *Document Explorer* instead of the classic view, turn off this option.
 The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
@@ -411,7 +419,7 @@ beta:[] Enables the usage of service transaction metrics, which are low cardinal
 
 [[observability-apm-labs]]`observability:apmLabsButton`::
 Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
-See <<apm-labs>> to learn more.
+// See <<apm-labs>> to learn more.
 
 [[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
 When enabled, displays the critical path of a trace.
@@ -433,17 +441,26 @@ Set the default environment for the APM app. When left empty, data from all envi
 [[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
 Enable the Universal Profiling integration in APM.
 
+[[observability-profiling-show-error-frames]]`observability:profilingShowErrorFrames`::
+Show error frames in the Universal Profiling views to indicate stack unwinding failures.
+
 [[observability-apm-enable-table-search-bar]]`observability:apmEnableTableSearchBar`::
 beta:[] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
 
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
 
+[[observability-enable-legacy-uptime-app]]`observability:enableLegacyUptimeApp`::
+Shows the Uptime app even if there is no recent Heartbeat data.
+
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
-Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
+Determines whether the comparison feature is enabled or disabled by default in the APM app.
 
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.
+
+[[observability-apm-enable-transaction-profiling]]`observability:apmEnableTransactionProfiling`::
+Enable Universal Profiling on Transaction view.
 
 [[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
 When enabled, allows you to inspect {es} queries in API responses.
@@ -457,8 +474,32 @@ preview:[] Enable the APM Trace Explorer feature, that allows you to search and 
 [[observability-infrastructure-profiling-integration]]`observability:enableInfrastructureProfilingIntegration`::
 preview:[] Enables the Profiling view in Host details within Infrastructure.
 
-[[observability-infrastructure-hosts-custom-dashboard]]`observability:enableInfrastructureHostsCustomDashboards`::
-preview:[] Enables option to link custom dashboards in the Host Details view.
+[[observability-infrastructure-asset-custom-dashboard]]`observability:enableInfrastructureAssetCustomDashboards`::
+preview:[] Enables option to link custom dashboards in the Asset Details view.
+
+[[observability-profiling-per-vcpu-watt-x86]]`observability:profilingPervCPUWattX86`::
+The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
+
+[[observability-profiling-per-vcpu-watt-arm64]]`observability:profilingPervCPUWattArm64`::
+The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture.
+
+[[observability-profiling-datacenter-PUE]]`observability:profilingDatacenterPUE`::
+Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the https://ela.st/uptimeinstitute[Uptime Institute] survey.
+
+[[observability-profiling-per-co2-per-kwh]]`observability:profilingCo2PerKWH`::
+Carbon intensity measures how clean your data center electricity is. Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
+
+[[observability-profiling-aws-cost-discount-rate]]`observability:profilingAWSCostDiscountRate`::
+If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.
+
+[[observability-profiling-azure-cost-discount-rate]]`observability:profilingAzureCostDiscountRate`::
+If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
+
+[[observability-profiling-use-topNFunctions-from-stacktraces]]`observability:profilingFetchTopNFunctionsFromStacktraces`::
+Switch to fetch the TopN Functions from the Stacktraces API.
+
+[[observability-profiling-cost-per-vcpu-per-hour]]`observability:profilingCostPervCPUPerHour`::
+Default Hourly Cost per CPU Core for machines not on AWS or Azure.
 
 [float]
 [[kibana-reporting-settings]]
@@ -476,7 +517,7 @@ deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future vers
 
 [horizontal]
 [[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
-Enables the creation of data views that capture rollup indices, which in
+deprecated:[8.15.0] Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.
 
@@ -510,13 +551,13 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 
 [[search-includefrozen]]`search:includeFrozen`::
-**This setting is deprecated and will not be supported as of 9.0.**
+deprecated:[7.16.0]
 Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
-session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for search requests. To disable
+the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]
@@ -587,11 +628,11 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[7.11.0]
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[8.10.0]
 Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::

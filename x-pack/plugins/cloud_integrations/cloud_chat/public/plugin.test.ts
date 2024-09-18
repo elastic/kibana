@@ -6,43 +6,35 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudChatConfigType } from '../server/config';
 import { CloudChatPlugin } from './plugin';
+import { type MockedLogger } from '@kbn/logging-mocks';
 
 describe('Cloud Chat Plugin', () => {
   describe('#setup', () => {
     describe('setupChat', () => {
-      let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
       let newTrialEndDate: Date;
+      let logger: MockedLogger;
 
       beforeEach(() => {
-        consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
         newTrialEndDate = new Date();
         newTrialEndDate.setDate(new Date().getDate() + 14);
       });
 
-      afterEach(() => {
-        consoleMock.mockRestore();
-      });
-
       const setupPlugin = async ({
         config = {},
-        securityEnabled = true,
-        currentUserProps = {},
         isCloudEnabled = true,
         failHttp = false,
         trialEndDate = newTrialEndDate,
       }: {
         config?: Partial<CloudChatConfigType>;
-        securityEnabled?: boolean;
-        currentUserProps?: Record<string, any>;
         isCloudEnabled?: boolean;
         failHttp?: boolean;
         trialEndDate?: Date;
       }) => {
         const initContext = coreMock.createPluginInitializerContext(config);
+        logger = initContext.logger as MockedLogger;
 
         const plugin = new CloudChatPlugin(initContext);
 
@@ -50,35 +42,27 @@ describe('Cloud Chat Plugin', () => {
         const coreStart = coreMock.createStart();
 
         if (failHttp) {
-          coreSetup.http.get.mockImplementation(() => {
+          coreSetup.http.get.mockImplementation(async () => {
             throw new Error('HTTP request failed');
           });
         }
 
         coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
 
-        const securitySetup = securityMock.createSetup();
-        securitySetup.authc.getCurrentUser.mockResolvedValue(
-          securityMock.createMockAuthenticatedUser(currentUserProps)
-        );
-
         const cloud = cloudMock.createSetup();
 
         plugin.setup(coreSetup, {
           cloud: { ...cloud, isCloudEnabled, trialEndDate },
-          ...(securityEnabled ? { security: securitySetup } : {}),
         });
+
+        // Wait for the async processes to complete
+        await new Promise((resolve) => process.nextTick(resolve));
 
         return { initContext, plugin, coreSetup };
       };
 
       it('chatConfig is not retrieved if cloud is not enabled', async () => {
         const { coreSetup } = await setupPlugin({ isCloudEnabled: false });
-        expect(coreSetup.http.get).not.toHaveBeenCalled();
-      });
-
-      it('chatConfig is not retrieved if security is not enabled', async () => {
-        const { coreSetup } = await setupPlugin({ securityEnabled: false });
         expect(coreSetup.http.get).not.toHaveBeenCalled();
       });
 
@@ -94,7 +78,7 @@ describe('Cloud Chat Plugin', () => {
           failHttp: true,
         });
         expect(coreSetup.http.get).toHaveBeenCalled();
-        expect(consoleMock).toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining(`Error setting up Chat`));
       });
 
       it('chatConfig is not retrieved if chat is enabled and url is provided but trial has expired', async () => {

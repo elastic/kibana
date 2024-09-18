@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
@@ -14,7 +14,7 @@ import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover
 export const test = {};
 
 export function useDatastreamsRollover() {
-  const { api, overlays } = useComponentTemplatesContext();
+  const { api, startServices } = useComponentTemplatesContext();
 
   const showDatastreamRolloverModal = useCallback(
     async (componentTemplateName: string) => {
@@ -38,6 +38,7 @@ export function useDatastreamsRollover() {
       }
 
       if (dataStreamsToRollover.length) {
+        const { overlays, ...mountServices } = startServices;
         const ref = overlays.openModal(
           toMountPoint(
             <MappingsDatastreamRolloverModal
@@ -47,14 +48,15 @@ export function useDatastreamsRollover() {
               onClose={() => {
                 ref.close();
               }}
-            />
+            />,
+            mountServices
           )
         );
 
         await ref.onClose;
       }
     },
-    [api, overlays]
+    [api, startServices]
   );
 
   return {

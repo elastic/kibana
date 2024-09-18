@@ -5,18 +5,16 @@
  * 2.0.
  */
 
+import type { DataViewTitleSchema } from '../../api_schemas/common';
+import { dataViewTitleSchema } from '../../api_schemas/common';
+import type { FieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
+import { fieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
 import { addInternalBasePath } from '../../../../common/constants';
-
-import { dataViewTitleSchema, DataViewTitleSchema } from '../../../../common/api_schemas/common';
-import {
-  fieldHistogramsRequestSchema,
-  FieldHistogramsRequestSchema,
-} from '../../../../common/api_schemas/field_histograms';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   router.versioned
     .post({
       path: addInternalBasePath('field_histograms/{dataViewTitle}'),
@@ -32,8 +30,11 @@ export function registerRoute({ router, license }: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

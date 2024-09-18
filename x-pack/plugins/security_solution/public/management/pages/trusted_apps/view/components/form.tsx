@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -19,15 +19,16 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
+  validateHasWildcardWithWrongOperator,
   isPathValid,
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -41,6 +42,7 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -58,19 +60,14 @@ import {
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
 } from '../translations';
-import { OS_TITLES } from '../../../../common/translations';
+import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
@@ -87,13 +84,17 @@ interface ValidationResult {
   result: Partial<{
     [key in keyof NewTrustedApp]: FieldValidationState;
   }>;
+
+  /**  Additional Warning callout after submit */
+  extraWarning?: boolean;
 }
 
 const addResultToValidation = (
   validation: ValidationResult,
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
-  resultValue: React.ReactNode
+  resultValue: React.ReactNode,
+  addToFront?: boolean
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -103,8 +104,14 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  validation.result[field]![type].push(errorMarkup);
+
+  if (addToFront) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    validation.result[field]![type].unshift(errorMarkup);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    validation.result[field]![type].push(errorMarkup);
+  }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
@@ -115,6 +122,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     isValid,
     result: {},
   };
+  let extraWarning: ValidationResult['extraWarning'];
 
   // Name field
   if (!values.name.trim()) {
@@ -152,6 +160,30 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
         value: (entry as TrustedAppConditionEntry).value,
       });
 
+      if (
+        validateHasWildcardWithWrongOperator({
+          operator: entry.type as EntryTypes,
+          value: (entry as TrustedAppConditionEntry).value,
+        })
+      ) {
+        if (entry.field === ConditionEntryField.PATH) {
+          extraWarning = true;
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
+          );
+        } else {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongField(index)
+          );
+        }
+      }
+
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
         isValid = false;
         addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.mustHaveValue(index));
@@ -181,6 +213,19 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     });
   }
 
+  if (extraWarning) {
+    addResultToValidation(
+      validation,
+      'entries',
+      'errors',
+      <>
+        <EuiSpacer size="s" />
+        <WildCardWithWrongOperatorCallout />
+      </>,
+      true
+    );
+    validation.extraWarning = extraWarning;
+  }
   validation.isValid = isValid;
   return validation;
 };
@@ -203,13 +248,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 
@@ -245,6 +290,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         onChange({
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
+          confirmModalLabels: updatedValidationResult.extraWarning
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
+            : undefined,
         });
       },
       [onChange]
@@ -252,9 +304,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         const nextItem = { ...item, tags };
         // Preserve old selected policies when switching to global
@@ -282,7 +332,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleOnNameBlur = useCallback(
+    const handleOnNameBlur = useCallback<NonNullable<EuiFieldTextProps['onBlur']>>(
       ({ target: { name } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));

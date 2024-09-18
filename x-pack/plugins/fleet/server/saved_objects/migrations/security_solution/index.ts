@@ -19,3 +19,8 @@ export { migratePackagePolicyToV860 } from './to_v8_6_0';
 export { migratePackagePolicyToV870 } from './to_v8_7_0';
 export { migratePackagePolicyToV880 } from './to_v8_8_0';
 export { migratePackagePolicyToV8100 } from './to_v8_10_0';
+export {
+  migratePackagePolicyToV8140,
+  migratePackagePolicyEnableCapsToV8140,
+  migratePackagePolicyAddAntivirusRegistrationModeToV8140,
+} from './to_v8_14_0';

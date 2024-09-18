@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 
@@ -50,7 +51,7 @@ export const PageHeader: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+  const updateTimeState = useCallback<NonNullable<FullTimeRangeSelectorProps['callback']>>(
     (update) => {
       setGlobalState({
         time: {

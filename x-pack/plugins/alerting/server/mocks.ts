@@ -36,6 +36,7 @@ const createSetupMock = () => {
       getContextInitializationPromise: jest.fn(),
     },
     getDataStreamAdapter: jest.fn(),
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };
@@ -173,10 +174,10 @@ const createRuleExecutorServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
-    searchSourceClient: searchSourceCommonMock,
+    getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     share: createShareStartMock(),
-    dataViews: dataViewPluginMocks.createStartContract(),
+    getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

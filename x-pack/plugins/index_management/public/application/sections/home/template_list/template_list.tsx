@@ -159,7 +159,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const renderHeader = () => (
     // flex-grow: 0 is needed here because the parent element is a flex column and the header would otherwise expand.
-    <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
+    <EuiFlexGroup alignItems="center" gutterSize="m" style={{ flexGrow: 0 }}>
       <EuiFlexItem grow={true}>
         <EuiText color="subdued">
           <FormattedMessage

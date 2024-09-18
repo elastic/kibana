@@ -6,6 +6,7 @@
  */
 
 import {
+  APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
@@ -44,10 +45,10 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       });
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
-        transaction: 'traces-apm*,apm-*',
-        span: 'traces-apm*,apm-*',
-        error: 'logs-apm*,apm-*',
-        metric: 'metrics-apm*,apm-*',
+        transaction: 'traces-apm*,apm-*,traces-*.otel-*',
+        span: 'traces-apm*,apm-*,traces-*.otel-*',
+        error: 'logs-apm*,apm-*,logs-*.otel-*',
+        metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
         onboarding: 'apm-*',
         sourcemap: 'apm-*',
       });
@@ -70,6 +71,28 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
 
       expect(readResponse.status).to.be(200);
       expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
+    });
+
+    it('updates apm indices removing legacy sourcemap', async () => {
+      const INDEX_VALUE = 'foo-*';
+
+      const writeResponse = await apmApiClient.writeUser({
+        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        params: {
+          body: { sourcemap: 'bar-*', transaction: INDEX_VALUE },
+        },
+      });
+      expect(writeResponse.status).to.be(200);
+      const savedAPMSavedObject = writeResponse.body
+        .attributes as Partial<APMIndicesSavedObjectBody>;
+      expect(savedAPMSavedObject.apmIndices?.transaction).to.eql(INDEX_VALUE);
+      expect(savedAPMSavedObject.apmIndices?.sourcemap).to.eql(undefined);
+
+      const readResponse = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/settings/apm-indices',
+      });
+      expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
+      expect(readResponse.body.sourcemap).to.eql('apm-*');
     });
   });
 }

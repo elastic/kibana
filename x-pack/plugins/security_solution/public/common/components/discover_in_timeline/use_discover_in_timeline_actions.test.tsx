@@ -159,7 +159,10 @@ describe('useDiscoverInTimelineActions', () => {
             grid: undefined,
             hideAggregatedPreview: undefined,
             hideChart: true,
-            index: 'the-data-view-id',
+            dataSource: {
+              type: 'dataView',
+              dataViewId: 'the-data-view-id',
+            },
             interval: 'auto',
             query: customQuery,
             rowHeight: undefined,
@@ -173,42 +176,13 @@ describe('useDiscoverInTimelineActions', () => {
     });
   });
 
-  describe('restoreDiscoverAppStateFromSavedSearch', () => {
-    it('should restore basic discover app state and timeRange from a given saved Search', async () => {
-      const { result, waitFor } = renderTestHook();
-      result.current.restoreDiscoverAppStateFromSavedSearch(savedSearchMock);
-
-      await waitFor(() => {
-        const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        const globalState = mockDiscoverStateContainerRef.current.globalState.get();
-        expect(appState).toMatchObject({
-          breakdownField: 'customBreakDownField',
-          columns: ['default_column'],
-          filters: [customFilter],
-          grid: undefined,
-          hideAggregatedPreview: undefined,
-          hideChart: true,
-          index: 'the-data-view-id',
-          interval: 'auto',
-          query: customQuery,
-          rowHeight: undefined,
-          rowsPerPage: undefined,
-          savedQuery: undefined,
-          sort: [['@timestamp', 'desc']],
-          viewMode: undefined,
-        });
-
-        expect(globalState).toMatchObject({ time: { from: 'now-20d', to: 'now' } });
-      });
-    });
-  });
   describe('resetDiscoverAppState', () => {
     it('should reset Discover AppState to a default state', async () => {
       const { result, waitFor } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        expect(appState).toMatchObject(result.current.getDefaultDiscoverAppState());
+        expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });
     it('should reset Discover time to a default state', async () => {

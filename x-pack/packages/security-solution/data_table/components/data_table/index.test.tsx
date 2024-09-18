@@ -48,15 +48,7 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-window.matchMedia = jest.fn().mockImplementation((query) => {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-  };
-});
+const dataViewId = 'security-solution-default';
 
 export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
@@ -185,6 +177,7 @@ describe('DataTable', () => {
         fields: [timestampFieldSpec],
         getCellValue: expect.any(Function),
         metadata: {
+          dataViewId,
           scopeId: 'table-test',
         },
         dataGridRef: expect.any(Object),
@@ -276,7 +269,7 @@ describe('DataTable', () => {
     );
 
     // click the `@timestamp` column header to display the popover
-    fireEvent.click(screen.getByText('@timestamp'));
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
     // click the `Remove column` action in the popover
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));

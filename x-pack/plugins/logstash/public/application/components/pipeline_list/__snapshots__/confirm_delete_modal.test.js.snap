@@ -4,14 +4,13 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
 <EuiConfirmModal
   buttonColor="danger"
   cancelButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cancel"
       id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
-      values={Object {}}
     />
   }
   confirmButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete {numPipelinesSelected} pipelines"
       id="xpack.logstash.confirmDeleteModal.deletedPipelinesConfirmButtonLabel"
       values={
@@ -25,7 +24,7 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete {numPipelinesSelected} pipelines"
       id="xpack.logstash.confirmDeleteModal.deletedPipelinesTitle"
       values={
@@ -37,10 +36,9 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
   }
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="You cannot recover deleted pipelines."
       id="xpack.logstash.confirmDeleteModal.deletedPipelinesWarningMessage"
-      values={Object {}}
     />
   </p>
 </EuiConfirmModal>
@@ -50,24 +48,22 @@ exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = 
 <EuiConfirmModal
   buttonColor="danger"
   cancelButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cancel"
       id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
-      values={Object {}}
     />
   }
   confirmButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete pipeline"
       id="xpack.logstash.confirmDeleteModal.deletedPipelineConfirmButtonLabel"
-      values={Object {}}
     />
   }
   defaultFocusedButton="cancel"
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete pipeline \\"{id}\\""
       id="xpack.logstash.confirmDeleteModal.deletedPipelineTitle"
       values={
@@ -79,10 +75,9 @@ exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = 
   }
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="You cannot recover a deleted pipeline"
       id="xpack.logstash.confirmDeleteModal.deletedPipelineWarningMessage"
-      values={Object {}}
     />
   </p>
 </EuiConfirmModal>

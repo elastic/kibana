@@ -20,9 +20,13 @@ import {
   TAGS_RULE_BULK_MENU_ITEM,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
+  RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING,
 } from '../../../../../screens/rules_bulk_actions';
 
-import { TIMELINE_TEMPLATE_DETAILS } from '../../../../../screens/rule_details';
+import {
+  INVESTIGATION_FIELDS_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
+} from '../../../../../screens/rule_details';
 
 import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
 
@@ -72,10 +76,19 @@ import {
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
   assertDefaultValuesAreAppliedToScheduleFields,
+  openBulkEditAddInvestigationFieldsForm,
+  typeInvestigationFields,
+  checkOverwriteInvestigationFieldsCheckbox,
+  openBulkEditDeleteInvestigationFieldsForm,
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
+import {
+  hasIndexPatterns,
+  getDetails,
+  hasInvestigationFields,
+  assertDetailsNotExist,
+} from '../../../../../tasks/rule_details';
 import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
@@ -102,14 +115,16 @@ import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_
 const RULE_NAME = 'Custom rule for bulk actions';
 const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
 
-const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
+const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*', 'auditbeat-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
+const prePopulatedInvestigationFields = ['agent.version', 'host.name'];
 
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
 
 const defaultRuleData = {
   index: prePopulatedIndexPatterns,
   tags: prePopulatedTags,
+  investigation_fields: { field_names: prePopulatedInvestigationFields },
   timeline_title: 'Generic Threat Match Timeline',
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
@@ -129,6 +144,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       getMachineLearningRule({
         name: 'New ML Rule Test',
         tags: ['test-default-tag-1', 'test-default-tag-2'],
+        investigation_fields: { field_names: prePopulatedInvestigationFields },
         enabled: false,
       })
     );
@@ -182,7 +198,8 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
     });
 
-    it('Only prebuilt rules selected', { tags: ['@brokenInServerlessQA'] }, () => {
+    // github.com/elastic/kibana/issues/179954
+    it('Only prebuilt rules selected', { tags: ['@skipInServerlessMKI'] }, () => {
       createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
@@ -200,9 +217,10 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
+    // https://github.com/elastic/kibana/issues/179955
     it(
       'Prebuilt and custom rules selected: user proceeds with custom rules editing',
-      { tags: ['@brokenInServerlessQA'] },
+      { tags: ['@skipInServerlessMKI'] },
       () => {
         getRulesManagementTableRows().then((existedRulesRows) => {
           createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
@@ -230,9 +248,10 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       }
     );
 
+    // https://github.com/elastic/kibana/issues/179956
     it(
       'Prebuilt and custom rules selected: user cancels action',
-      { tags: ['@brokenInServerlessQA'] },
+      { tags: ['@skipInServerlessMKI'] },
       () => {
         createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
@@ -556,6 +575,86 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       // on error toast button click display error that index patterns can't be empty
       clickErrorToastBtn();
       cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
+    });
+  });
+
+  describe('Investigation fields actions', () => {
+    it('Add investigation fields to custom rules', () => {
+      getRulesManagementTableRows().then((rows) => {
+        const fieldsToBeAdded = ['source.ip', 'destination.ip'];
+        const resultingFields = [...prePopulatedInvestigationFields, ...fieldsToBeAdded];
+
+        selectAllRules();
+
+        // open add custom highlighted fields form and add 2 new fields
+        openBulkEditAddInvestigationFieldsForm();
+        typeInvestigationFields(fieldsToBeAdded);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if rule has been updated
+        goToRuleDetailsOf(RULE_NAME);
+        hasInvestigationFields(resultingFields.join(''));
+      });
+    });
+
+    it('Overwrite investigation fields in custom rules', () => {
+      getRulesManagementTableRows().then((rows) => {
+        const fieldsToOverwrite = ['source.ip'];
+
+        selectAllRules();
+
+        // open add tags form, check overwrite tags and warning message, type tags
+        openBulkEditAddInvestigationFieldsForm();
+        checkOverwriteInvestigationFieldsCheckbox();
+
+        cy.get(RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING).should(
+          'have.text',
+          `You’re about to overwrite custom highlighted fields for the ${rows.length} rules you selected. To apply and save the changes, click Save.`
+        );
+
+        typeInvestigationFields(fieldsToOverwrite);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if rule has been updated
+        goToRuleDetailsOf(RULE_NAME);
+        hasInvestigationFields(fieldsToOverwrite.join(''));
+      });
+    });
+
+    it('Delete investigation fields from custom rules', () => {
+      getRulesManagementTableRows().then((rows) => {
+        const fieldsToDelete = prePopulatedInvestigationFields.slice(0, 1);
+        const resultingFields = prePopulatedInvestigationFields.slice(1);
+
+        selectAllRules();
+
+        // open add tags form, check overwrite tags, type tags
+        openBulkEditDeleteInvestigationFieldsForm();
+        typeInvestigationFields(fieldsToDelete);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if rule has been updated
+        goToRuleDetailsOf(RULE_NAME);
+        hasInvestigationFields(resultingFields.join(''));
+      });
+    });
+
+    it('Delete all investigation fields from custom rules', () => {
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
+
+        openBulkEditDeleteInvestigationFieldsForm();
+        typeInvestigationFields(prePopulatedInvestigationFields);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if rule has been updated
+        goToRuleDetailsOf(RULE_NAME);
+        assertDetailsNotExist(INVESTIGATION_FIELDS_DETAILS);
+      });
     });
   });
 

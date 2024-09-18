@@ -21,7 +21,7 @@ function isNotNullOrZeroCoordinate(coordinate: Coordinate) {
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -64,6 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177642
   registry.when('Serverless metrics charts', { config: 'basic', archives: [] }, () => {
     const {
       memoryTotal,
@@ -75,11 +76,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serverlessId,
     } = config;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
-      await generateData({ start, end, synthtraceEsClient });
+      await generateData({ start, end, apmSynthtraceEsClient });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('Python service', () => {
       let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
@@ -117,7 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      let metricsChart: typeof serverlessMetrics.charts[0] | undefined;
+      let metricsChart: (typeof serverlessMetrics.charts)[0] | undefined;
 
       describe('Cold start duration', () => {
         before(() => {
@@ -182,7 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
+        let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';
@@ -244,7 +246,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      let metricsChart: typeof serverlessMetrics.charts[0] | undefined;
+      let metricsChart: (typeof serverlessMetrics.charts)[0] | undefined;
 
       describe('Cold start duration', () => {
         before(() => {
@@ -305,7 +307,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
+        let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';

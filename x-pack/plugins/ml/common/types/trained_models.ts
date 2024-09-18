@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -113,6 +114,14 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   version: string;
   inference_config?: Record<string, any>;
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices?: boolean;
+  /**
+   * Inference services associated with the model
+   */
+  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
@@ -167,6 +176,7 @@ export interface TrainedModelDeploymentStatsResponse {
     threads_per_allocation: number;
     number_of_allocations: number;
   }>;
+  reason?: string;
 }
 
 export interface AllocatedModel {
@@ -290,4 +300,9 @@ export interface MemoryStatsResponse {
 export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export interface ModelDownloadState {
+  total_parts: number;
+  downloaded_parts: number;
 }

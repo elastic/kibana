@@ -5,71 +5,60 @@
  * 2.0.
  */
 
-import {
-  FLYOUT_BODY_TEST_ID,
-  JSON_TAB_TEST_ID,
-  OVERVIEW_TAB_TEST_ID,
-  TABLE_TAB_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/right/test_ids';
-import {
-  RISK_SCORE_TITLE_TEST_ID,
-  RISK_SCORE_VALUE_TEST_ID,
-  SEVERITY_VALUE_TEST_ID,
-  STATUS_BUTTON_TEST_ID,
-  FLYOUT_HEADER_TITLE_TEST_ID,
-  ASSIGNEES_HEADER_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
-import {
-  COLLAPSE_DETAILS_BUTTON_TEST_ID,
-  EXPAND_DETAILS_BUTTON_TEST_ID,
-  TITLE_HEADER_TEXT_TEST_ID,
-  TITLE_LINK_ICON_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const DOCUMENT_DETAILS_FLYOUT_BODY = getDataTestSubjectSelector(FLYOUT_BODY_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_BODY = getDataTestSubjectSelector(
+  'securitySolutionFlyoutBody'
+);
 
 /* Header */
 
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_ICON = getDataTestSubjectSelector(
-  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+  'securitySolutionFlyoutAlertTitleIcon'
 );
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE = getDataTestSubjectSelector(
-  TITLE_HEADER_TEXT_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+  'securitySolutionFlyoutAlertTitleText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON = getDataTestSubjectSelector(
-  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+  'securitySolutionFlyoutAlertTitleLinkIcon'
 );
 export const DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON =
   getDataTestSubjectSelector('euiFlyoutCloseButton');
 export const DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON = getDataTestSubjectSelector(
-  EXPAND_DETAILS_BUTTON_TEST_ID
+  'securitySolutionFlyoutNavigationExpandDetailButton'
 );
 export const DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON = getDataTestSubjectSelector(
-  COLLAPSE_DETAILS_BUTTON_TEST_ID
+  'securitySolutionFlyoutNavigationCollapseDetailButton'
 );
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB =
-  getDataTestSubjectSelector(OVERVIEW_TAB_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB = getDataTestSubjectSelector(TABLE_TAB_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB = getDataTestSubjectSelector(JSON_TAB_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutOverviewTab'
+);
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutTableTab'
+);
+export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutJsonTab'
+);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS =
-  getDataTestSubjectSelector(STATUS_BUTTON_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE =
-  getDataTestSubjectSelector(RISK_SCORE_TITLE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE =
-  getDataTestSubjectSelector(RISK_SCORE_VALUE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE =
-  getDataTestSubjectSelector(SEVERITY_VALUE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES =
-  getDataTestSubjectSelector(ASSIGNEES_HEADER_TEST_ID);
+  getDataTestSubjectSelector('rule-status-badge');
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderRiskScoreTitle'
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderRiskScoreValue'
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE = getDataTestSubjectSelector('severity');
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderAssigneesHeader'
+);
 
 /* Footer */
 
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER = getDataTestSubjectSelector(
-  'side-panel-flyout-footer'
+  'securitySolutionFlyoutFooter'
 );
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(
-  'take-action-dropdown-btn'
+  'securitySolutionFlyoutFooterDropdownButton'
 );
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN =
   getDataTestSubjectSelector('takeActionPanelMenu');

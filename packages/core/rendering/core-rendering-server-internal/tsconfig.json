@@ -39,6 +39,12 @@
     "@kbn/core-custom-branding-server-mocks",
     "@kbn/core-user-settings-server-mocks",
     "@kbn/core-user-settings-server-internal",
+    "@kbn/core-logging-common-internal",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-i18n-server",
+    "@kbn/core-i18n-server-internal",
+    "@kbn/core-i18n-server-mocks",
+    "@kbn/apm-config-loader",
   ],
   "exclude": [
     "target/**/*",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
@@ -20,7 +21,6 @@ import {
   AppMountParameters,
   AppUpdater,
   AppStatus,
-  AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
@@ -55,21 +55,15 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const config = this.initializerContext.config.get();
-    const navLinkStatus =
-      AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
-
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        navLinkStatus,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          navLinkStatus,
         })),
       })
     );
@@ -145,6 +139,12 @@ export class ManagementPlugin
       },
     });
 
+    core.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       sections: this.managementSections.setup(),
       locator,
@@ -161,14 +161,12 @@ export class ManagementPlugin
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
       });
     }
 
     return {
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };

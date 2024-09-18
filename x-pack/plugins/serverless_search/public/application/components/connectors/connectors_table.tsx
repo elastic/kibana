@@ -38,7 +38,6 @@ import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
 import {
   CONNECTORS_LABEL,
-  CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
@@ -54,7 +53,7 @@ export const ConnectorsTable: React.FC = () => {
   const [query, setQuery] = useState<string>('');
 
   const { data, isError, isLoading } = useConnectors();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
@@ -128,7 +127,7 @@ export const ConnectorsTable: React.FC = () => {
       field: 'service_type',
       name: typeLabel,
       render: (serviceType: string | null) => {
-        const typeData = (connectorTypes?.connectors || []).find(
+        const typeData = connectorTypes.find(
           (connector) => connector.serviceType === (serviceType ?? '')
         );
         if (!typeData) {
@@ -256,8 +255,8 @@ export const ConnectorsTable: React.FC = () => {
             connectors: <strong>{CONNECTORS_LABEL}</strong>,
             items: (
               <strong>
-                <EuiI18nNumber value={pageIndex * pageSize + 1} />-
-                <EuiI18nNumber value={pageIndex * pageSize + 1 + items.length} />
+                <EuiI18nNumber value={pageIndex * pageSize} />-
+                <EuiI18nNumber value={pageIndex * pageSize + items.length} />
               </strong>
             ),
             count: <EuiI18nNumber value={data?.connectors.length ?? 0} />,
@@ -297,7 +296,7 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connec
         <DeleteConnectorModal
           closeDeleteModal={() => setModalIsOpen(false)}
           connectorId={connector.id}
-          connectorName={connector.name || CONNECTOR_LABEL}
+          connectorName={connector.name}
         />
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>

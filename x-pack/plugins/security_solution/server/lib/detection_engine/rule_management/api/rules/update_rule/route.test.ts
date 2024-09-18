@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getRuleMock,
@@ -16,6 +13,7 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
@@ -23,26 +21,24 @@ import {
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
-
-jest.mock('../../../../../machine_learning/authz');
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRuleRoute(server.router, ml);
+    updateRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -99,10 +95,8 @@ describe('Update rule route', () => {
     });
 
     it('returns a 403 if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.updateRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
       const request = requestMock.create({
         method: 'put',
@@ -185,15 +179,12 @@ describe('Update rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
-    const getResponseAction = (command: string = 'isolate') => ({
+    const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {
         command,
         comment: '',
+        ...(config ? { config } : {}),
       },
     });
     const defaultAction = getResponseAction();
@@ -249,6 +240,7 @@ describe('Update rule route', () => {
                 params: {
                   command: 'isolate',
                   comment: '',
+                  config: undefined,
                 },
               },
             ],
@@ -272,7 +264,7 @@ describe('Update rule route', () => {
       );
     });
     test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+      const wrongAction = getResponseAction('execute');
 
       const request = requestMock.create({
         method: 'post',
@@ -284,7 +276,23 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\"`
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+      );
+    });
+    test('fails when provided with payload missing data', async () => {
+      const wrongAction = getResponseAction('kill-process', { overwrite: true });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
       );
     });
   });

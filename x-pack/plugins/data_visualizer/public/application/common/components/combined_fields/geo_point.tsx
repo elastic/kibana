@@ -8,8 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -17,22 +19,23 @@ import {
   EuiSpacer,
   EuiButton,
   EuiSelect,
-  EuiSelectOption,
   EuiFormErrorText,
 } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { CombinedField } from './types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import {
   createGeoPointCombinedField,
   isWithinLatRange,
   isWithinLonRange,
   getFieldNames,
   getNameCollisionMsg,
+  addCombinedFieldsToMappings,
+  addCombinedFieldsToPipeline,
 } from './utils';
+import type { AddCombinedField } from './combined_fields_form';
 
 interface Props {
-  addCombinedField: (combinedField: CombinedField) => void;
+  addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
   results: FindFileStructureResponse;
 }
@@ -98,13 +101,18 @@ export class GeoPointForm extends Component<Props, State> {
 
   onSubmit = () => {
     try {
-      this.props.addCombinedField(
-        createGeoPointCombinedField(
-          this.state.latField,
-          this.state.lonField,
-          this.state.geoPointField
-        )
+      const combinedField = createGeoPointCombinedField(
+        this.state.latField,
+        this.state.lonField,
+        this.state.geoPointField
       );
+
+      this.props.addCombinedField(
+        combinedField,
+        (mappings) => addCombinedFieldsToMappings(mappings, [combinedField]),
+        (pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField])
+      );
+
       this.setState({ submitError: '' });
     } catch (error) {
       this.setState({ submitError: error.message });

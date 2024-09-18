@@ -8,6 +8,7 @@
 import React, { useCallback, memo } from 'react';
 import { EuiToolTip, EuiLink } from '@elastic/eui';
 
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
 import type { TimelineProps } from './types';
 import * as i18n from './translations';
@@ -19,6 +20,8 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   graphEventId,
 }) => {
   const { addError } = useAppToasts();
+
+  const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
   const handleTimelineClick = useTimelineClick();
 
@@ -37,8 +40,12 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
     [id, graphEventId, handleTimelineClick, onError]
   );
   return (
-    <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>
-      <EuiLink onClick={onClickTimeline} data-test-subj={`markdown-timeline-link-${id}`}>
+    <EuiToolTip content={interactionsUpsellingMessage ?? i18n.TIMELINE_ID(id ?? '')}>
+      <EuiLink
+        onClick={onClickTimeline}
+        disabled={!!interactionsUpsellingMessage}
+        data-test-subj={`markdown-timeline-link-${id}`}
+      >
         {title}
       </EuiLink>
     </EuiToolTip>

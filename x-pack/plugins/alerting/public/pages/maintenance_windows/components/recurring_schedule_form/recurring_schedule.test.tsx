@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Frequency } from '@kbn/rrule';
 import { fireEvent, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -25,7 +25,7 @@ const initialValue: FormProps = {
 describe('RecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
+  const MockHookWrapperComponent: FC<PropsWithChildren<{ iv?: FormProps }>> = ({
     children,
     iv = initialValue,
   }) => {
@@ -64,7 +64,7 @@ describe('RecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    const btn = within(result.getByTestId('ends-field')).getByTestId('ondate');
+    const btn = within(result.getByTestId('ends-field')).getByTestId('recurrenceEndOptionOnDate');
 
     fireEvent.click(btn);
     expect(result.getByTestId('until-field')).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('RecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    const btn = within(result.getByTestId('ends-field')).getByTestId('afterx');
+    const btn = within(result.getByTestId('ends-field')).getByTestId('recurrenceEndOptionAfterX');
 
     fireEvent.click(btn);
     expect(result.getByTestId('count-field')).toBeInTheDocument();
@@ -90,8 +90,12 @@ describe('RecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId('select');
-    const endsInput = within(result.getByTestId('ends-field')).getByTestId('never');
+    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId(
+      'recurringScheduleRepeatSelect'
+    );
+    const endsInput = within(result.getByTestId('ends-field')).getByTestId(
+      'recurrenceEndOptionNever'
+    );
 
     expect(frequencyInput).toHaveValue('3');
     expect(endsInput).toHaveAttribute('aria-pressed', 'true');
@@ -112,8 +116,12 @@ describe('RecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId('select');
-    const endsInput = within(result.getByTestId('ends-field')).getByTestId('ondate');
+    const frequencyInput = within(result.getByTestId('frequency-field')).getByTestId(
+      'recurringScheduleRepeatSelect'
+    );
+    const endsInput = within(result.getByTestId('ends-field')).getByTestId(
+      'recurrenceEndOptionOnDate'
+    );
     const untilInput = within(result.getByTestId('until-field')).getByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'

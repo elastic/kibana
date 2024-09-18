@@ -10,7 +10,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
-import * as i18n from '../translations';
 import { Configure } from './configure';
 
 describe('Configure ', () => {
@@ -27,27 +26,65 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(await screen.findByTestId('text-custom-field-required')).toBeInTheDocument();
   });
 
-  it('updates field options correctly', async () => {
+  it('updates field options correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
-    userEvent.click(screen.getByText('Submit'));
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith({}, true);
+    });
+  });
+
+  // Flaky: https://github.com/elastic/kibana/issues/178001
+  it.skip('updates field options with default value correctly when not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          options: {
-            required: true,
-          },
+          defaultValue: 'Default value',
+        },
+        true
+      );
+    });
+  });
+
+  it('updates field options correctly when required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          required: true,
+          defaultValue: 'Default value',
         },
         true
       );

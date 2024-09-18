@@ -12,24 +12,25 @@ import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import type { State } from '../../../../common/store/types';
-import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
+import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { timelineActions } from '../../../../timelines/store';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
 
 const { setEventsLoading, setSelected } = dataTableActions;
@@ -66,8 +67,8 @@ export const useAddBulkToTimelineAction = ({
   const {
     browserFields,
     dataViewId,
-    runtimeMappings,
     indexPattern,
+    sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -80,24 +81,28 @@ export const useAddBulkToTimelineAction = ({
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
-    field: columnId,
-    direction: sortDirection as Direction,
-    esTypes: esTypes ?? [],
-    type: columnType,
-  }));
+  const timelineQuerySortField = useMemo(() => {
+    return sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+      field: columnId,
+      direction: sortDirection as Direction,
+      esTypes: esTypes ?? [],
+      type: columnType,
+    }));
+  }, [sort]);
 
   const combinedFilters = useMemo(() => [...localFilters, ...filters], [localFilters, filters]);
 
-  const combinedQuery = combineQueries({
-    config: esQueryConfig,
-    dataProviders: [],
-    indexPattern,
-    filters: combinedFilters,
-    kqlQuery: { query: '', language: 'kuery' },
-    browserFields,
-    kqlMode: 'filter',
-  });
+  const combinedQuery = useMemo(() => {
+    return combineQueries({
+      config: esQueryConfig,
+      dataProviders: [],
+      indexPattern,
+      filters: combinedFilters,
+      kqlQuery: { query: '', language: 'kuery' },
+      browserFields,
+      kqlMode: 'filter',
+    });
+  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -115,7 +120,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
@@ -134,19 +139,22 @@ export const useAddBulkToTimelineAction = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
+  const updateTimeline = useUpdateTimeline();
+
   const createTimeline = useCallback(
-    ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
-      clearActiveTimeline();
+    async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
+      await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
-      dispatchUpdateTimeline(dispatch)({
+      updateTimeline({
         duplicate: true,
         from,
         id: TimelineId.active,
@@ -159,9 +167,9 @@ export const useAddBulkToTimelineAction = ({
         },
         to,
         ruleNote,
-      })();
+      });
     },
-    [dispatch, updateTimelineIsLoading, clearActiveTimeline, from, to]
+    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline, from, to]
   );
 
   const sendBulkEventsToTimelineHandler = useCallback(
@@ -184,8 +192,10 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+  const onActionClick = useCallback<
+    NonNullable<BulkActionsConfig['onClick'] | CustomBulkAction['onClick']>
+  >(
+    (items, isAllSelected, setLoading, clearSelection) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param

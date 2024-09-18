@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import moment from 'moment-timezone';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
@@ -18,6 +20,8 @@ jest.mock('../../../../app_dependencies');
 
 import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
+
+const queryClient = new QueryClient();
 
 describe('Transform: Transform List <ExpandedRow />', () => {
   const onAlertEdit = jest.fn();
@@ -35,10 +39,12 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
-    render(
-      <MlSharedContext.Provider value={mlShared}>
-        <ExpandedRow item={item} onAlertEdit={onAlertEdit} transformsStatsLoading={false} />
-      </MlSharedContext.Provider>
+    renderReactTestingLibraryWithI18n(
+      <QueryClientProvider client={queryClient}>
+        <MlSharedContext.Provider value={mlShared}>
+          <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
+        </MlSharedContext.Provider>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {

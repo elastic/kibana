@@ -91,6 +91,7 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
+import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
 
 interface ActionUpdate {
   name: string;
@@ -419,6 +420,13 @@ export class ActionsClient {
   }
 
   /**
+   * Get all system connectors
+   */
+  public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
+    return getAllSystemConnectors({ context: this.context });
+  }
+
+  /**
    * Get bulk actions with in-memory list
    */
   public async getBulk({
@@ -549,15 +557,17 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieve access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
+          () =>
+            `Failed to retrieve access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
@@ -576,17 +586,19 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
-            err.message
-          }`
+          () =>
+            `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
+              err.message
+            }`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
@@ -691,7 +703,7 @@ export class ActionsClient {
       let actionTypeId: string | undefined;
 
       try {
-        if (this.isPreconfigured(actionId)) {
+        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
           const connector = this.context.inMemoryConnectors.find(
             (inMemoryConnector) => inMemoryConnector.id === actionId
           );

@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -26,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('no management privileges', () => {
+    describe('no management privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read']);
       });
@@ -65,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
           sectionLinks: [
+            'triggersActionsAlerts',
             'triggersActions',
             'cases',
             'triggersActionsConnectors',
@@ -77,6 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           sectionLinks: [
             'dataViews',
             'filesManagement',
+            'aiAssistantManagementSelection',
             'objects',
             'tags',
             'search_sessions',

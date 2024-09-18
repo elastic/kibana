@@ -8,6 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
@@ -19,7 +21,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_paginated_alerts');
@@ -41,7 +43,9 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 const renderRelatedAlertsBySession = () =>
   render(
     <TestProviders>
-      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

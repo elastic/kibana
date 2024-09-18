@@ -51,7 +51,7 @@ export const getLifecycleValue = (
     return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
       defaultMessage: 'Disabled',
     });
-  } else if (!lifecycle?.data_retention) {
+  } else if (!lifecycle?.effective_retention && !lifecycle?.data_retention) {
     const infiniteDataRetention = i18n.translate(
       'xpack.idxMgmt.dataStreamList.dataRetentionInfinite',
       {
@@ -75,7 +75,8 @@ export const getLifecycleValue = (
   }
 
   // Extract size and unit, in order to correctly map the unit to the correct text
-  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
+  const activeRetention = lifecycle?.effective_retention || lifecycle?.data_retention;
+  const { size, unit } = splitSizeAndUnits(activeRetention as string);
   const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
   const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
 

@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index Templates', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
@@ -42,8 +42,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         log.debug('[Setup error] Error creating test policy');
         throw e;
       }
-
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the index templates tab', async () => {
@@ -103,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
+          expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE_NAME);
         });
       });
     });

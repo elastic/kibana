@@ -12,7 +12,7 @@ import { config, generateData } from './generate_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -33,12 +33,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/176990
   registry.when('Memory', { config: 'trial', archives: [] }, () => {
     before(async () => {
-      await generateData({ start, end, synthtraceEsClient });
+      await generateData({ start, end, apmSynthtraceEsClient });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     it('returns system memory stats', async () => {
       const expectedFreeMemory = 1 - config.memoryFree / config.memoryTotal;

@@ -54,9 +54,10 @@ configurations.
 
 **If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
 
-In case a common test needs to be skipped for one of the projects, there are the following
-suite tags available to do so: `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be
-added like this to a test suite:
+In case a common test needs to be skipped for one of the projects 
+(in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
+there are the following suite tags available to do so: 
+`skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
 ```
 describe('my test suite', function () {
@@ -103,6 +104,72 @@ tests that should run in a serverless environment have to be added to the
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
 
+### Roles-based testing
+
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+and in oder to properly test Kibana functionality, test design requires to login with
+a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
+the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
+
+General recommendations:
+- use the minimal required role to access tested functionality
+- when feature logic depends on both project type & role, make sure to add separate tests
+- avoid using basic authentication, unless it is the actual test case
+- run the tests against real project(s) on MKI to validate it is stable
+
+
+#### Functional UI test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `loginWithRole` call in `before` hook
+- no need to log out, you can change role by calling `loginWithRole` again.
+- for the common tests you can use `loginWithPrivilegedRole` to login as Editor/Developer 
+
+```
+describe("my test suite", async function() {
+  before(async () => {
+    await PageObjects.svlCommonPage.loginWithRole('viewer');
+    await esArchiver.load(...);
+    await PageObjects.dashboard.navigateToApp();
+  });
+
+  it('test step', async() => {
+    await PageObjects.dashboard.loadSavedDashboard('old dashboard');
+    await PageObjects.dashboard.waitForRenderComplete();
+    ...
+  });
+});
+```
+
+#### API integration test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `createM2mApiKeyWithRoleScope` call in `before` hook
+- don't forget to invalidate api key using `invalidateApiKeyWithRoleScope` in `after` hook
+- make api calls using `supertestWithoutAuth` with generated api key header
+
+```
+describe("my test suite", async function() {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyWithRoleScope(roleAuthc);
+    });
+
+    it(''test step', async () => {
+      const { body, status } = await supertestWithoutAuth
+        .delete('/api/spaces/space/default')
+        .set(commonRequestHeader)
+        .set(roleAuthc.apiKeyHeader);
+      ...
+    });
+});
+```
+
 ### Testing with feature flags
 
 **tl;dr:** Tests specific to functionality behind a feature flag need special
@@ -143,8 +210,44 @@ node scripts/functional_test_runner.js --config test_serverless/api_integration/
 ## Run tests on MKI
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
 ```
-TEST_CLOUD=1 TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
 ```
+
+Steps to follow to run on QA environment:
+- Go to `CLOUD_HOST_NAME` and create a project.
+- Go to `CLOUD_HOST_NAME/account/keys` and create Cloud specific API Key.
+- We need the key from step 2 to obtain basic auth credentials for ES and Kibana.
+  Make a POST request to the following endpoint.
+  ```
+  POST CLOUD_HOST_NAME/api/v1/serverless/projects/<project-type>/<project-id>/_reset-internal-credentials
+  Authorization: ApiKey <Cloud-API-key>
+  Content-Type: application/json
+  ```
+
+  In response you should get credentials.
+  ```
+  {
+    "password": "testing-internal_pwd",
+    "username": "testing-internal"
+  }
+  ```
+  We would use these credentials for `TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443"` and `TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME"`
+- Now we need to create a user with the roles we want to test. Go to members page - `CLOUD_HOST_NAME/account/members` and click `[Invite member]`.
+  - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instanse access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
+  - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
+    ```
+    {
+      "viewer": {
+        "password": "xxxx",
+        "email": "email_of_the_elastic_cloud_account"
+      }
+    }
+    ```
+- Now run the tests from the `x-pack` directory
+```
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
+```
+
 
 ## Skipping tests for MKI run
 The tests that are listed in the the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
@@ -157,3 +260,19 @@ describe("my test suite", async function() {
 ```
 
 If you are running tests from your local against MKI projects, make sure to add `--exclude-tag=skipMKI` to your FTR command.
+
+## Run tests with dockerized package registry
+
+For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
+
+To be able to run this version locally you must have a docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+
+```
+export set FLEET_PACKAGE_REGISTRY_PORT=12345
+```
+
+To unset the variable, and run the tests against the real endpoint again, execute
+
+```
+unset FLEET_PACKAGE_REGISTRY_PORT 
+```

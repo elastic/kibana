@@ -7,11 +7,12 @@
 
 import React from 'react';
 
-import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorDefinition } from '../types';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
 
 interface ResearchConfigurationProps {
   nativeConnector: ConnectorDefinition;
@@ -22,42 +23,63 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
   const { docsUrl, externalDocsUrl, name } = nativeConnector;
 
   return (
-    <>
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.description',
-          {
-            defaultMessage:
-              'This connector supports several authentication methods. Ask your administrator for the correct connection credentials.',
-          }
-        )}
-      </EuiText>
-      <EuiSpacer />
-      <EuiFlexGroup direction="row" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={docsUrl}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
-              {
-                defaultMessage: 'Documentation',
-              }
-            )}
-          </EuiLink>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.enterpriseSearch.researchConfiguration.euiText.checkRequirementsLabel"
+          defaultMessage="Check Requirements"
+        />
+      }
+      iconType="iInCircle"
+    >
+      <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+        <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.researchConfiguration.p.referToTheDocumentationLabel"
+                defaultMessage="Refer to the documentation for this connector to learn about prerequisites for connecting to {serviceType} and configuration requirements."
+                values={{
+                  serviceType: name,
+                }}
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
-        {externalDocsUrl && (
+        <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiLink target="_blank" href={externalDocsUrl}>
+            <EuiLink
+              data-test-subj="enterpriseSearchResearchConfigurationDocumentationLink"
+              target="_blank"
+              href={docsUrl}
+            >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
                 {
-                  defaultMessage: '{name} documentation',
-                  values: { name },
+                  defaultMessage: 'Documentation',
                 }
               )}
             </EuiLink>
           </EuiFlexItem>
-        )}
+          {externalDocsUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="enterpriseSearchResearchConfigurationNameDocumentationLink"
+                target="_blank"
+                href={externalDocsUrl}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                  {
+                    defaultMessage: '{name} documentation',
+                    values: { name },
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
-    </>
+    </EuiCallOut>
   );
 };

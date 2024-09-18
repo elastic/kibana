@@ -423,37 +423,40 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should not bulk update API key with apiKey operation', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            enabled: false,
-          })
-        );
+    describe('bulk update API key with apiKey operation', function () {
+      this.tags('skipFIPS');
+      it('should not bulk update API key with apiKey operation', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          );
 
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      const payload = {
-        ids: [createdRule.id],
-        operations: [
-          {
-            operation: 'set',
-            field: 'apiKey',
-          },
-        ],
-      };
+        const payload = {
+          ids: [createdRule.id],
+          operations: [
+            {
+              operation: 'set',
+              field: 'apiKey',
+            },
+          ],
+        };
 
-      const bulkApiKeyResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-        .set('kbn-xsrf', 'foo')
-        .send(payload);
+        const bulkApiKeyResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload);
 
-      expect(bulkApiKeyResponse.body.errors).to.have.length(0);
-      expect(bulkApiKeyResponse.body.rules).to.have.length(1);
-      expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
-      expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(0);
+        expect(bulkApiKeyResponse.body.errors).to.have.length(0);
+        expect(bulkApiKeyResponse.body.rules).to.have.length(1);
+        expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
+        expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(0);
+      });
     });
 
     it(`shouldn't bulk edit rule from another space`, async () => {

@@ -20,7 +20,6 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -93,11 +92,10 @@ export const cardinalityOperation: OperationDefinition<
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

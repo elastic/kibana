@@ -10,7 +10,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import '../../../../common/mock/match_media';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { mockIndexPattern, TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';

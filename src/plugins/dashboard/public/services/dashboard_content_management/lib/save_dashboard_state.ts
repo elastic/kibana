@@ -1,26 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import {
-  controlGroupInputToRawControlGroupAttributes,
-  generateNewControlIds,
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
-import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
@@ -30,22 +24,9 @@ import {
   DashboardContentManagementRequiredServices,
   SaveDashboardProps,
   SaveDashboardReturn,
-  SavedDashboardInput,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
-
-export const serializeControlGroupInput = (
-  controlGroupInput: SavedDashboardInput['controlGroupInput']
-) => {
-  // only save to saved object if control group is not default
-  if (
-    !controlGroupInput ||
-    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
-  ) {
-    return undefined;
-  }
-  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
-};
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -68,11 +49,13 @@ type SaveDashboardStateProps = SaveDashboardProps & {
 };
 
 export const saveDashboardState = async ({
+  controlGroupReferences,
   data,
   embeddable,
   lastSavedId,
   saveOptions,
   currentState,
+  panelReferences,
   dashboardBackup,
   contentManagement,
   savedObjectsTagging,
@@ -90,7 +73,6 @@ export const saveDashboardState = async ({
     query,
     title,
     filters,
-    version,
     timeRestore,
     description,
 
@@ -100,12 +82,22 @@ export const saveDashboardState = async ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    controlGroupInput,
   } = currentState;
 
-  let { panels, controlGroupInput } = currentState;
+  let { panels } = currentState;
+  let prefixedPanelReferences = panelReferences;
   if (saveOptions.saveAsCopy) {
-    panels = generateNewPanelIds(panels);
-    controlGroupInput = generateNewControlIds(controlGroupInput);
+    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
+      panels,
+      panelReferences
+    );
+    panels = newPanels;
+    prefixedPanelReferences = newPanelReferences;
+    //
+    // do not need to generate new ids for controls.
+    // ControlGroup Component is keyed on dashboard id so changing dashboard id mounts new ControlGroup Component.
+    //
   }
 
   /**
@@ -152,8 +144,8 @@ export const saveDashboardState = async ({
     : undefined;
 
   const rawDashboardAttributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
-    controlGroupInput: serializeControlGroupInput(controlGroupInput),
+    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+    controlGroupInput,
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',
     refreshInterval,
@@ -180,19 +172,43 @@ export const saveDashboardState = async ({
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
+  const allReferences = [
+    ...references,
+    ...(prefixedPanelReferences ?? []),
+    ...(controlGroupReferences ?? []),
+  ];
+
   /**
    * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
+
   try {
-    const result = await contentManagement.client.create<
-      DashboardCrudTypes['CreateIn'],
-      DashboardCrudTypes['CreateOut']
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: attributes,
-      options: { id: idToSaveTo, references, overwrite: true },
-    });
+    const result = idToSaveTo
+      ? await contentManagement.client.update<
+          DashboardCrudTypes['UpdateIn'],
+          DashboardCrudTypes['UpdateOut']
+        >({
+          id: idToSaveTo,
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+            mergeAttributes: false,
+          },
+        })
+      : await contentManagement.client.create<
+          DashboardCrudTypes['CreateIn'],
+          DashboardCrudTypes['CreateOut']
+        >({
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+          },
+        });
+
     const newId = result.item.id;
 
     if (newId) {
@@ -207,12 +223,12 @@ export const saveDashboardState = async ({
        */
       if (newId !== lastSavedId) {
         dashboardBackup.clearState(lastSavedId);
-        return { redirectRequired: true, id: newId };
+        return { redirectRequired: true, id: newId, references: allReferences };
       } else {
         dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
       }
     }
-    return { id: newId };
+    return { id: newId, references: allReferences };
   } catch (error) {
     toasts.addDanger({
       title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),

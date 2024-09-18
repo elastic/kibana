@@ -17,9 +17,11 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common'
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
-import type { ColumnConfig } from '../../../../common/expressions';
+import { RowHeightMode } from '../../../../common/types';
+import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
 import { buildColumnsMetaLookup } from './helpers';
+import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -44,13 +46,13 @@ export const createGridColumns = (
       ) => void)
     | undefined,
   isReadOnly: boolean,
-  columnConfig: ColumnConfig,
+  columnConfig: DatatableColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
   onColumnHide: ((eventData: { columnId: string }) => void) | undefined,
   alignments: Record<string, 'left' | 'right' | 'center'>,
-  headerRowHeight: 'auto' | 'single' | 'custom',
+  headerRowHeight: RowHeightMode,
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
@@ -260,10 +262,12 @@ export const createGridColumns = (
       }
     }
     const currentAlignment = alignments && alignments[field];
-    const hasMultipleRows = headerRowHeight === 'auto' || headerRowHeight === 'custom';
+    const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
+      headerRowHeight
+    );
 
     const columnStyle = css({
-      ...(headerRowHeight === 'custom' && {
+      ...((headerRowHeight === DEFAULT_HEADER_ROW_HEIGHT || headerRowHeight === undefined) && {
         WebkitLineClamp: headerRowLines,
       }),
       ...(hasMultipleRows && {

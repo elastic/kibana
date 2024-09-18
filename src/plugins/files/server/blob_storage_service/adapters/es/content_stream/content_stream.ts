@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import cuid from 'cuid';
-import * as cborx from 'cbor-x';
+import { createId } from '@paralleldrive/cuid2';
+import { encode, decode } from '@kbn/cbor';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -144,7 +145,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const decodedChunkDoc: GetResponse<FileChunkDocument> | undefined = buffer.byteLength
-        ? (cborx.decode(buffer) as GetResponse<FileChunkDocument>)
+        ? (decode(buffer) as GetResponse<FileChunkDocument>)
         : undefined;
 
       // Because `asStream` was used in retrieving the document, errors are also not be processed
@@ -225,7 +226,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = cuid();
+      this.id = createId();
     }
     return this.id;
   }
@@ -245,7 +246,7 @@ export class ContentStream extends Duplex {
           id,
           index,
           op_type: 'create',
-          document: cborx.encode({
+          document: encode({
             data,
             bid,
             // Mark it as last?

@@ -65,6 +65,7 @@ export const createEndpointArtifactClientMock = (
     bulkDeleteArtifacts: jest.fn(async (...args) =>
       endpointArtifactClientMocked.bulkDeleteArtifacts(...args)
     ),
+    fetchAll: jest.fn((...args) => endpointArtifactClientMocked.fetchAll(...args)),
     _esClient: esClient,
   };
 };

@@ -32,7 +32,7 @@ export interface AttributeToEncrypt {
 export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
-  readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly attributesToIncludeInAAD?: ReadonlySet<string>;
 }
 
 /**
@@ -308,11 +308,12 @@ export class EncryptedSavedObjectsService {
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been encrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${encryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been encrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${encryptedAttributesKeys}`
       );
     }
 
@@ -569,11 +570,12 @@ export class EncryptedSavedObjectsService {
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been decrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${decryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been decrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${decryptedAttributesKeys}`
       );
     }
 
@@ -600,21 +602,19 @@ export class EncryptedSavedObjectsService {
     attributes: Record<string, unknown>
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD: Record<string, unknown> = {};
-    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
-        attributesAAD[attributeKey] = attributeValue;
-      }
-    }
+    const attributesAAD: Record<string, unknown> =
+      typeDefinition.collectAttributesForAAD(attributes);
 
     if (Object.keys(attributesAAD).length === 0) {
       this.options.logger.debug(
-        `The AAD for saved object "${descriptorToArray(
-          descriptor
-        )}" does not include any attributes.`
+        () =>
+          `The AAD for saved object "${descriptorToArray(
+            descriptor
+          )}" does not include any attributes.`
       );
     }
 
+    // Always add the descriptor to the AAD.
     return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 

@@ -1,23 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  reactEmbeddableRegistryHasKey,
-  shouldRefreshFilterCompareOptions,
-} from '@kbn/embeddable-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  isFilterPinned,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
+import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
@@ -82,6 +75,9 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     const explicitInputComparePromises = Object.values(currentValue ?? {}).map(
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
+          const {
+            embeddable: { reactEmbeddableRegistryHasKey },
+          } = pluginServices.getServices();
           const embeddableId = panel.explicitInput.id;
           if (!embeddableId || reactEmbeddableRegistryHasKey(panel.type)) {
             // if this is a new style embeddable, it will handle its own diffing.
@@ -137,14 +133,4 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   },
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
-};
-
-export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
-  filters: ({ currentValue, lastValue }) =>
-    onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
-
-  // fire on all time range changes, regardless of timeRestore
-  timeRange: ({ currentValue, lastValue }) =>
-    areTimesEqual(currentValue?.from, lastValue?.from) &&
-    areTimesEqual(currentValue?.to, lastValue?.to),
 };

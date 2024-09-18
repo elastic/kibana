@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SyncStatus } from '..';
-
 import { syncStatusToColor, syncStatusToText } from './sync_status_to_text';
+import { isSyncCancellable, SyncStatus } from '..';
 
 describe('syncStatusToText', () => {
   it('should return correct value for completed', () => {
@@ -55,5 +55,35 @@ describe('syncStatusToColor', () => {
   });
   it('should return correct value for suspended', () => {
     expect(syncStatusToColor(SyncStatus.SUSPENDED)).toEqual('warning');
+  });
+});
+
+describe('isSyncCancellable', () => {
+  it('should return true for in progress status', () => {
+    expect(isSyncCancellable(SyncStatus.IN_PROGRESS)).toBe(true);
+  });
+
+  it('should return true for pending status', () => {
+    expect(isSyncCancellable(SyncStatus.PENDING)).toBe(true);
+  });
+
+  it('should return true for suspended status', () => {
+    expect(isSyncCancellable(SyncStatus.SUSPENDED)).toBe(true);
+  });
+
+  it('should return false for canceling status', () => {
+    expect(isSyncCancellable(SyncStatus.CANCELING)).toBe(false);
+  });
+
+  it('should return false for completed status', () => {
+    expect(isSyncCancellable(SyncStatus.COMPLETED)).toBe(false);
+  });
+
+  it('should return false for error status', () => {
+    expect(isSyncCancellable(SyncStatus.ERROR)).toBe(false);
+  });
+
+  it('should return false for canceled status', () => {
+    expect(isSyncCancellable(SyncStatus.CANCELED)).toBe(false);
   });
 });

@@ -520,9 +520,9 @@
               "(crumbs: ",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeBreadcrumb",
+                "section": "def-public.ChromeBreadcrumb",
                 "text": "ChromeBreadcrumb"
               },
               "[]) => void"
@@ -541,9 +541,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-common.ChromeBreadcrumb",
+                    "section": "def-public.ChromeBreadcrumb",
                     "text": "ChromeBreadcrumb"
                   },
                   "[]"
@@ -566,9 +566,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown>"
@@ -579,9 +579,31 @@
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.ManagementAppMountParams.theme$",
+            "id": "def-public.ManagementAppMountParams.theme",
             "type": "Object",
             "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-public.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementAppMountParams.theme$",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
             "label": "theme$",
             "description": [],
             "signature": [
@@ -589,16 +611,22 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -785,38 +813,6 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "management",
-          "id": "def-public.ManagementStart.setIsSidebarEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsSidebarEnabled",
-          "description": [],
-          "signature": [
-            "(enabled: boolean) => void"
-          ],
-          "path": "src/plugins/management/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "management",
-              "id": "def-public.ManagementStart.setIsSidebarEnabled.$1",
-              "type": "boolean",
-              "tags": [],
-              "label": "enabled",
-              "description": [],
-              "signature": [
-                "boolean"
-              ],
-              "path": "src/plugins/management/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
         {
           "parentPluginId": "management",
           "id": "def-public.ManagementStart.setupCardsNavigation",

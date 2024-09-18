@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "globalSearchBar",
-    "server": false,
+    "server": true,
     "browser": true,
     "configPath": [
       "xpack",

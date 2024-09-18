@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import type { TimelineType, TimelineSavedObject } from '../../../../common/api/timeline';
+import { type TimelineStatus, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';
@@ -46,11 +46,12 @@ const isUpdatingStatus = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
-  return obj?.status === TimelineStatus.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
+  return obj?.status === TimelineStatusEnum.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
 };
 
 const isGivenTitleValid = (status: TimelineStatus, title: string | null | undefined) => {
-  return (status !== TimelineStatus.draft && !isEmpty(title)) || status === TimelineStatus.draft
+  return (status !== TimelineStatusEnum.draft && !isEmpty(title)) ||
+    status === TimelineStatusEnum.draft
     ? null
     : EMPTY_TITLE_ERROR_MESSAGE;
 };
@@ -71,7 +72,7 @@ export const commonFailureChecker = (status: TimelineStatus, title: string | nul
 const commonUpdateTemplateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -124,7 +125,7 @@ const commonUpdateTemplateTimelineCheck = (
 const commonUpdateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -153,7 +154,7 @@ const commonUpdateTimelineCheck = (
 const commonUpdateCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -188,7 +189,7 @@ const commonUpdateCases = (
 const createTemplateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -214,7 +215,7 @@ const createTemplateTimelineCheck = (
 export const checkIsUpdateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -233,8 +234,8 @@ export const checkIsUpdateViaImportFailureCases = (
   } else {
     const isStatusValid =
       ((existTemplateTimeline?.status == null ||
-        existTemplateTimeline?.status === TimelineStatus.active) &&
-        (status == null || status === TimelineStatus.active)) ||
+        existTemplateTimeline?.status === TimelineStatusEnum.active) &&
+        (status == null || status === TimelineStatusEnum.active)) ||
       (existTemplateTimeline?.status != null && status === existTemplateTimeline?.status);
 
     if (!isStatusValid) {
@@ -276,7 +277,7 @@ export const checkIsUpdateViaImportFailureCases = (
 export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -310,7 +311,7 @@ export const checkIsUpdateFailureCases = (
 export const checkIsCreateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -341,14 +342,14 @@ export const checkIsCreateFailureCases = (
 export const checkIsCreateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  if (status === TimelineStatus.draft) {
+  if (status === TimelineStatusEnum.draft) {
     return {
       body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
       statusCode: 405,

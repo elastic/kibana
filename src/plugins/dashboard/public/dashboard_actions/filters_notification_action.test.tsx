@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
@@ -61,8 +62,8 @@ describe('filters notification action', () => {
           getAllDataViews: jest.fn(),
           getDashboardPanelFromId: jest.fn(),
         },
-        localFilters: filtersSubject,
-        localQuery: querySubject,
+        filters$: filtersSubject,
+        query$: querySubject,
       },
     };
   });
@@ -82,13 +83,13 @@ describe('filters notification action', () => {
   });
 
   it('is compatible when api has at least one local query', async () => {
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     expect(await action.isCompatible(context)).toBe(true);
   });
 
   it('is incompatible when api is in view mode', async () => {
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     updateViewMode('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
@@ -96,7 +97,7 @@ describe('filters notification action', () => {
   it('calls onChange when view mode changes', () => {
     const onChange = jest.fn();
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     action.subscribeToCompatibilityChanges(context, onChange);
     updateViewMode('view');
     expect(onChange).toHaveBeenCalledWith(false, action);
@@ -112,7 +113,7 @@ describe('filters notification action', () => {
   it('calls onChange when query changes', async () => {
     const onChange = jest.fn();
     action.subscribeToCompatibilityChanges(context, onChange);
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 });

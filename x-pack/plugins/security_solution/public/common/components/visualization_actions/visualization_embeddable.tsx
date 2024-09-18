@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -16,7 +16,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
@@ -38,7 +38,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const { indicesExist } = useSourcererDataView(lensProps.scopeId);
 
   const memorizedTimerange = useRef(lensProps.timerange);
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const { responses: visualizationData } = useVisualizationResponse({ visualizationId: id });
   const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;

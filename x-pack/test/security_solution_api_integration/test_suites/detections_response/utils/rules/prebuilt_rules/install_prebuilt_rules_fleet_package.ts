@@ -15,7 +15,6 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
-import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
 const MAX_RETRIES = 2;
@@ -37,15 +36,16 @@ export const installPrebuiltRulesFleetPackage = async ({
   retryService,
 }: {
   es: Client;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   version?: string;
   overrideExistingPackage: boolean;
   retryService: RetryService;
 }): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
-    const response = await retry<InstallPackageResponse>({
-      test: async () => {
+    const response = await retryService.tryWithRetries<InstallPackageResponse>(
+      installPrebuiltRulesFleetPackage.name,
+      async () => {
         const testResponse = await supertest
           .post(epmRouteService.getInstallPath('security_detection_engine', version))
           .set('kbn-xsrf', 'true')
@@ -58,18 +58,20 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return testResponse.body;
       },
-      retryService,
-      retries: MAX_RETRIES,
-      timeout: ATTEMPT_TIMEOUT,
-    });
+      {
+        retryCount: MAX_RETRIES,
+        timeout: ATTEMPT_TIMEOUT,
+      }
+    );
 
     await refreshSavedObjectIndices(es);
 
     return response;
   } else {
     // Install the latest version
-    const response = await retry<BulkInstallPackagesResponse>({
-      test: async () => {
+    const response = await retryService.tryWithRetries<BulkInstallPackagesResponse>(
+      installPrebuiltRulesFleetPackage.name,
+      async () => {
         const testResponse = await supertest
           .post(epmRouteService.getBulkInstallPath())
           .query({ prerelease: true })
@@ -90,10 +92,11 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return body;
       },
-      retryService,
-      retries: MAX_RETRIES,
-      timeout: ATTEMPT_TIMEOUT,
-    });
+      {
+        retryCount: MAX_RETRIES,
+        timeout: ATTEMPT_TIMEOUT,
+      }
+    );
 
     await refreshSavedObjectIndices(es);
 

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
   FormProvider,
@@ -65,7 +66,7 @@ const SettingsApplicationContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
+export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicationServices>> = ({
   children,
   ...services
 }) => {
@@ -114,10 +115,9 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const SettingsApplicationKibanaProvider: FC<
+  PropsWithChildren<SettingsApplicationKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const {
     docLinks,
     notifications,

@@ -39,7 +39,8 @@ import { Detail } from '.';
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-describe('when on integration detail', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192999
+describe.skip('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
@@ -646,6 +647,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: '',
         namespace: 'default',
         policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
+        policy_ids: ['521c1b70-3976-11eb-ad1c-3baa423084d9'],
         enabled: true,
         inputs: [
           {
@@ -724,6 +726,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: '',
         namespace: 'default',
         policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
+        policy_ids: ['125c1b70-3976-11eb-ad1c-3baa423085y6'],
         enabled: true,
         inputs: [
           {

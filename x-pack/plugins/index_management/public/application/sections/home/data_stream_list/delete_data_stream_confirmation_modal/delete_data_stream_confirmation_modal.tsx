@@ -42,7 +42,7 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
               ? i18n.translate(
                   'xpack.idxMgmt.deleteDataStreamsConfirmationModal.successDeleteSingleNotificationMessageText',
                   {
-                    defaultMessage: "Deleted data stream '{dataStreamName}'",
+                    defaultMessage: "Deleted data stream ''{dataStreamName}''",
                     values: { dataStreamName: dataStreams[0] },
                   }
                 )
@@ -76,7 +76,7 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
             : i18n.translate(
                 'xpack.idxMgmt.deleteDataStreamsConfirmationModal.errorNotificationMessageText',
                 {
-                  defaultMessage: "Error deleting data stream '{name}'",
+                  defaultMessage: "Error deleting data stream ''{name}''",
                   values: { name: (errors && errors[0].name) || dataStreams[0] },
                 }
               );

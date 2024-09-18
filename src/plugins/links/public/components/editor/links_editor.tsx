@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiBadge,
+  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -28,19 +29,15 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  Link,
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
-import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
@@ -49,16 +46,18 @@ import { LinksEditorSingleLink } from './links_editor_single_link';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './links_editor.scss';
+import { ResolvedLink } from '../../types';
+import { getOrderedLinkList } from '../../lib/resolve_links';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
     id: LINKS_VERTICAL_LAYOUT,
-    label: LinksLayoutInfo[LINKS_VERTICAL_LAYOUT].displayName,
+    label: LinksStrings.editor.panelEditor.getVerticalLayoutLabel(),
     'data-test-subj': `links--panelEditor--${LINKS_VERTICAL_LAYOUT}LayoutBtn`,
   },
   {
     id: LINKS_HORIZONTAL_LAYOUT,
-    label: LinksLayoutInfo[LINKS_HORIZONTAL_LAYOUT].displayName,
+    label: LinksStrings.editor.panelEditor.getHorizontalLayoutLabel(),
     'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];
@@ -69,16 +68,16 @@ const LinksEditor = ({
   onClose,
   initialLinks,
   initialLayout,
-  parentDashboard,
+  parentDashboardId,
   isByReference,
   flyoutId,
 }: {
-  onSaveToLibrary: (newLinks: Link[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: Link[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
+  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
   onClose: () => void;
-  initialLinks?: Link[];
+  initialLinks?: ResolvedLink[];
   initialLayout?: LinksLayoutType;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }) => {
@@ -90,8 +89,8 @@ const LinksEditor = ({
     initialLayout ?? LINKS_VERTICAL_LAYOUT
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
-  const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
+  const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
+  const [saveByReference, setSaveByReference] = useState(isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -100,11 +99,11 @@ const LinksEditor = ({
       setOrderedLinks([]);
       return;
     }
-    setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
+    setOrderedLinks(getOrderedLinkList(initialLinks));
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
-    ({ source, destination }) => {
+    ({ source, destination }: DropResult) => {
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {
@@ -118,9 +117,9 @@ const LinksEditor = ({
   );
 
   const addOrEditLink = useCallback(
-    async (linkToEdit?: Link) => {
+    async (linkToEdit?: ResolvedLink) => {
       const newLink = await openLinkEditorFlyout({
-        parentDashboard,
+        parentDashboardId,
         link: linkToEdit,
         mainFlyoutId: flyoutId,
         ref: editLinkFlyoutRef,
@@ -130,17 +129,20 @@ const LinksEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order } as Link;
+                return { ...newLink, order: linkToEdit.order } as ResolvedLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length } as Link]);
+          setOrderedLinks([
+            ...orderedLinks,
+            { ...newLink, order: orderedLinks.length } as ResolvedLink,
+          ]);
         }
       }
     },
-    [editLinkFlyoutRef, orderedLinks, parentDashboard, flyoutId]
+    [editLinkFlyoutRef, orderedLinks, parentDashboardId, flyoutId]
   );
 
   const hasZeroLinks = useMemo(() => {
@@ -173,22 +175,14 @@ const LinksEditor = ({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
-              {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge
-                color="hollow"
-                tabIndex={0}
-                title=""
-                aria-label={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}
-              >
-                {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+        // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+        // https://github.com/elastic/eui/pull/7855.
+        css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
+      >
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
@@ -228,7 +222,6 @@ const LinksEditor = ({
                           {(provided) => (
                             <LinksEditorSingleLink
                               link={link}
-                              parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
                               dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`

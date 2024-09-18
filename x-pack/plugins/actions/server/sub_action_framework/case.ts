@@ -5,50 +5,61 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import {
-  ExternalServiceIncidentResponse,
-  PushToServiceParams,
-  PushToServiceResponse,
-} from './types';
+import { schema, Type } from '@kbn/config-schema';
+import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
 import { ServiceParams } from './types';
+import { ConnectorUsageCollector } from '../usage';
 
-export interface CaseConnectorInterface {
-  addComment: ({
-    incidentId,
-    comment,
-  }: {
-    incidentId: string;
-    comment: string;
-  }) => Promise<unknown>;
-  createIncident: (incident: Record<string, unknown>) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: ({
-    incidentId,
-    incident,
-  }: {
-    incidentId: string;
-    incident: Record<string, unknown>;
-  }) => Promise<ExternalServiceIncidentResponse>;
-  getIncident: ({ id }: { id: string }) => Promise<unknown>;
-  pushToService: (params: PushToServiceParams) => Promise<PushToServiceResponse>;
+export interface CaseConnectorInterface<Incident, GetIncidentResponse> {
+  addComment: (
+    { incidentId, comment }: { incidentId: string; comment: string },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) => Promise<void>;
+  createIncident: (
+    incident: Incident,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (
+    {
+      incidentId,
+      incident,
+    }: {
+      incidentId: string;
+      incident: Incident;
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) => Promise<ExternalServiceIncidentResponse>;
+  getIncident: (
+    { id }: { id: string },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) => Promise<GetIncidentResponse>;
+  pushToService: (
+    params: {
+      incident: { externalId: string | null } & Incident;
+      comments: Array<{ commentId: string; comment: string }>;
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) => Promise<PushToServiceResponse>;
 }
 
-export abstract class CaseConnector<Config, Secrets>
+export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentResponse>
   extends SubActionConnector<Config, Secrets>
-  implements CaseConnectorInterface
+  implements CaseConnectorInterface<Incident, GetIncidentResponse>
 {
-  constructor(params: ServiceParams<Config, Secrets>) {
+  constructor(
+    params: ServiceParams<Config, Secrets>,
+    pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
+  ) {
     super(params);
 
     this.registerSubAction({
       name: 'pushToService',
       method: 'pushToService',
       schema: schema.object({
-        incident: schema.object(
-          { externalId: schema.nullable(schema.string()) },
-          { unknowns: 'allow' }
-        ),
+        incident: schema
+          .object(pushToServiceIncidentParamsSchema)
+          .extends({ externalId: schema.nullable(schema.string()) }),
         comments: schema.nullable(
           schema.arrayOf(
             schema.object({
@@ -61,49 +72,71 @@ export abstract class CaseConnector<Config, Secrets>
     });
   }
 
-  public abstract addComment({
-    incidentId,
-    comment,
-  }: {
-    incidentId: string;
-    comment: string;
-  }): Promise<unknown>;
+  public abstract addComment(
+    {
+      incidentId,
+      comment,
+    }: {
+      incidentId: string;
+      comment: string;
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<void>;
 
   public abstract createIncident(
-    incident: Record<string, unknown>
+    incident: Incident,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ExternalServiceIncidentResponse>;
-  public abstract updateIncident({
-    incidentId,
-    incident,
-  }: {
-    incidentId: string;
-    incident: Record<string, unknown>;
-  }): Promise<ExternalServiceIncidentResponse>;
-  public abstract getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse>;
+  public abstract updateIncident(
+    {
+      incidentId,
+      incident,
+    }: {
+      incidentId: string;
+      incident: Incident;
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ExternalServiceIncidentResponse>;
+  public abstract getIncident(
+    { id }: { id: string },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<GetIncidentResponse>;
 
-  public async pushToService(params: PushToServiceParams) {
+  public async pushToService(
+    params: {
+      incident: { externalId: string | null } & Incident;
+      comments: Array<{ commentId: string; comment: string }>;
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
     const { incident, comments } = params;
     const { externalId, ...rest } = incident;
 
     let res: PushToServiceResponse;
 
     if (externalId != null) {
-      res = await this.updateIncident({
-        incidentId: externalId,
-        incident: rest,
-      });
+      res = await this.updateIncident(
+        {
+          incidentId: externalId,
+          incident: rest as Incident,
+        },
+        connectorUsageCollector
+      );
     } else {
-      res = await this.createIncident(rest);
+      res = await this.createIncident(rest as Incident, connectorUsageCollector);
     }
 
     if (comments && Array.isArray(comments) && comments.length > 0) {
       res.comments = [];
 
       for (const currentComment of comments) {
-        await this.addComment({
-          incidentId: res.id,
-          comment: currentComment.comment,
-        });
+        await this.addComment(
+          {
+            incidentId: res.id,
+            comment: currentComment.comment,
+          },
+          connectorUsageCollector
+        );
 
         res.comments = [
           ...(res.comments ?? []),

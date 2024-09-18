@@ -5,8 +5,10 @@ info:
 paths:
   /internal/detection_engine/rules/{ruleId}/execution/results:
     put:
-      operationId: GetRuleExecutionResults
+      x-labels: [ess, serverless]
+      x-internal: true
       x-codegen-enabled: true
+      operationId: GetRuleExecutionResults
       summary: Returns execution results of a given rule (aggregated by execution UUID) from Event Log.
       tags:
         - Rule Execution Log API
@@ -47,6 +49,15 @@ paths:
             type: array
             items:
               $ref: '../../model/execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
+            default: []
+        - name: run_type_filters
+          in: query
+          required: false
+          description: Comma-separated list of rule run types to filter results by
+          schema:
+            type: array
+            items:
+              $ref: '../../model/execution_run_type.schema.yaml#/components/schemas/RuleRunType'
             default: []
         - name: sort_field
           in: query

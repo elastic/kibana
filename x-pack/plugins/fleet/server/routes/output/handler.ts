@@ -109,9 +109,9 @@ export const putOutputHandler: RequestHandler<
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
     }
 
     const body: GetOneOutputResponse = {
@@ -144,7 +144,7 @@ export const postOutputHandler: RequestHandler<
     ensureNoDuplicateSecrets(newOutput);
     const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     }
 
     const body: GetOneOutputResponse = {
@@ -170,6 +170,10 @@ async function validateOutputServerless(
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
   }
   // Elasticsearch outputs must have the default host URL in serverless.
+  // No need to validate on update if hosts are not passed.
+  if (outputId && !output.hosts) {
+    return;
+  }
   const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
   let originalOutput;
   if (outputId) {
@@ -230,7 +234,7 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
 export const getLatestOutputHealth: RequestHandler<
   TypeOf<typeof GetLatestOutputHealthRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const outputHealth = await outputService.getLatestOutputHealth(
       esClient,

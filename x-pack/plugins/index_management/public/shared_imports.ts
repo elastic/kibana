@@ -67,6 +67,7 @@ export {
   NumericField,
   JsonEditorField,
   ComboBoxField,
+  RadioGroupField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
@@ -75,6 +76,7 @@ export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
-  KibanaThemeProvider,
   useExecutionContext,
 } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

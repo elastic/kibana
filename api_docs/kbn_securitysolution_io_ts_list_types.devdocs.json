@@ -18,74 +18,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-        "id": "def-common.updateExceptionListItemValidate",
-        "type": "Function",
-        "tags": [],
-        "label": "updateExceptionListItemValidate",
-        "description": [],
-        "signature": [
-          "(schema: { description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time?: string | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) => string[]"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_validation/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.updateExceptionListItemValidate.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time?: string | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_validation/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-        "id": "def-common.validateComments",
-        "type": "Function",
-        "tags": [],
-        "label": "validateComments",
-        "description": [],
-        "signature": [
-          "(item: { description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time?: string | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) => string[]"
-        ],
-        "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_validation/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.validateComments.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "item",
-            "description": [],
-            "signature": [
-              "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time?: string | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_validation/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -108,9 +41,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -156,9 +89,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -218,9 +151,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -280,9 +213,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -353,9 +286,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -471,9 +404,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1587,9 +1520,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1738,9 +1671,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1803,9 +1736,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1971,9 +1904,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2073,9 +2006,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2135,9 +2068,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2245,9 +2178,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2506,9 +2439,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2540,9 +2473,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               }
             ],
@@ -2975,7 +2908,7 @@
         "label": "CreateListItemSchema",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: object | undefined; }"
+          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: object | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "deprecated": false,
@@ -2990,7 +2923,7 @@
         "label": "CreateListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; id: string | undefined; meta: object | undefined; }"
+          "{ list_id: string; value: string; id: string | undefined; meta: object | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "deprecated": false,
@@ -3020,7 +2953,7 @@
         "label": "CreateListSchemaDecoded",
         "description": [],
         "signature": [
-          "{ type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; id: string | undefined; name: string; serializer: string | undefined; meta: object | undefined; description: string; deserializer: string | undefined; } & { version: number; }"
+          "{ id: string | undefined; meta: object | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; name: string; serializer: string | undefined; description: string; deserializer: string | undefined; } & { version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_schema/index.ts",
         "deprecated": false,
@@ -3215,7 +3148,7 @@
         "label": "DeleteListItemSchema",
         "description": [],
         "signature": [
-          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; }"
+          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "deprecated": false,
@@ -3230,7 +3163,7 @@
         "label": "DeleteListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; }"
+          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "deprecated": false,
@@ -4190,7 +4123,7 @@
         "label": "ImportListItemQuerySchema",
         "description": [],
         "signature": [
-          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; }"
+          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "deprecated": false,
@@ -4205,7 +4138,7 @@
         "label": "ImportListItemQuerySchemaEncoded",
         "description": [],
         "signature": [
-          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; }"
+          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "deprecated": false,
@@ -4460,7 +4393,7 @@
         "label": "ListOperatorType",
         "description": [],
         "signature": [
-          "\"match\" | \"wildcard\" | \"nested\" | \"list\" | \"exists\" | \"match_any\""
+          "\"wildcard\" | \"match\" | \"nested\" | \"list\" | \"exists\" | \"match_any\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
         "deprecated": false,
@@ -4850,7 +4783,7 @@
         "label": "PatchListItemSchema",
         "description": [],
         "signature": [
-          "{ id: string; } & { _version?: string | undefined; meta?: object | undefined; value?: string | undefined; }"
+          "{ id: string; } & { _version?: string | undefined; meta?: object | undefined; value?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "deprecated": false,
@@ -4865,7 +4798,7 @@
         "label": "PatchListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ id: string; _version: string | undefined; meta: object | undefined; value: string | undefined; }"
+          "{ id: string; _version: string | undefined; meta: object | undefined; value: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "deprecated": false,
@@ -5108,6 +5041,36 @@
           "{ id: string; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/read_list_schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.Refresh",
+        "type": "Type",
+        "tags": [],
+        "label": "Refresh",
+        "description": [],
+        "signature": [
+          "\"true\" | \"false\""
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.RefreshWithWaitFor",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshWithWaitFor",
+        "description": [],
+        "signature": [
+          "\"true\" | \"false\" | \"wait_for\""
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5465,7 +5428,7 @@
         "label": "UpdateExceptionListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; _version: string | undefined; comments: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time: string | undefined; id: string | undefined; item_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"expire_time\" | \"namespace_type\" | \"os_types\"> & { comments: ({ comment: string; } & { id?: string | undefined; })[]; tags: string[]; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; expire_time: string | undefined; }"
+          "Omit<{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; _version: string | undefined; comments: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time: string | undefined; id: string | undefined; item_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"expire_time\" | \"namespace_type\" | \"os_types\"> & { comments: ({ comment: string; } & { id?: string | undefined; })[]; tags: string[]; entries: ({ value: string; type: \"match\"; field: string; operator: \"excluded\" | \"included\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"excluded\" | \"included\"; } | { type: \"list\"; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; field: string; operator: \"excluded\" | \"included\"; } | { type: \"exists\"; field: string; operator: \"excluded\" | \"included\"; } | { type: \"nested\"; entries: ({ value: string; type: \"match\"; field: string; operator: \"excluded\" | \"included\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"excluded\" | \"included\"; } | { type: \"exists\"; field: string; operator: \"excluded\" | \"included\"; })[]; field: string; } | { value: string; type: \"wildcard\"; field: string; operator: \"excluded\" | \"included\"; })[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; expire_time: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_schema/index.ts",
         "deprecated": false,
@@ -6130,7 +6093,15 @@
           "Type",
           "<string, string, unknown>; meta: ",
           "ObjectC",
-          "; }>>]>"
+          "; refresh: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">, ",
+          "LiteralC",
+          "<\"wait_for\">]>; }>>]>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "deprecated": false,
@@ -6455,7 +6426,13 @@
           "Type",
           "<string, string, unknown>; list_id: ",
           "Type",
-          "<string, string, unknown>; }>>]>"
+          "<string, string, unknown>; refresh: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">]>; }>>]>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "deprecated": false,
@@ -9493,7 +9470,15 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; }>>"
+          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; refresh: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">, ",
+          "LiteralC",
+          "<\"wait_for\">]>; }>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "deprecated": false,
@@ -10550,7 +10535,13 @@
           "ObjectC",
           "; value: ",
           "StringC",
-          "; }>>]>"
+          "; refresh: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">]>; }>>]>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "deprecated": false,
@@ -10809,6 +10800,48 @@
           "<string, string, unknown>; }>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/read_list_schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.refresh",
+        "type": "Object",
+        "tags": [],
+        "label": "refresh",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">]>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.refreshWithWaitFor",
+        "type": "Object",
+        "tags": [],
+        "label": "refreshWithWaitFor",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"true\">, ",
+          "LiteralC",
+          "<\"false\">, ",
+          "LiteralC",
+          "<\"wait_for\">]>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

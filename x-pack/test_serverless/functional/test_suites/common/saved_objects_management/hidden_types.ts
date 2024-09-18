@@ -7,6 +7,7 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
+import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const fixturePaths = {
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
@@ -38,11 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      // await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
@@ -57,11 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .expect(200)
           .then((resp) => {
             expect(
-              resp.body.saved_objects.map((obj: any) => ({
-                id: obj.id,
-                type: obj.type,
-                hidden: obj.meta.hiddenType,
-              }))
+              resp.body.saved_objects
+                .map((obj: any) => ({
+                  id: obj.id,
+                  type: obj.type,
+                  hidden: obj.meta.hiddenType,
+                }))
+                .sort(byIdAscComparator)
             ).to.eql([
               {
                 id: 'obj_1',

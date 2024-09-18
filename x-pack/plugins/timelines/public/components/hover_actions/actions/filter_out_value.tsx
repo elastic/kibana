@@ -33,12 +33,13 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     size,
     showTooltip = false,
     value,
+    dataViewId,
   }) => {
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal == null || currentVal?.length === 0
-          ? createFilter(field, null, false)
-          : createFilter(field, currentVal, true);
+          ? createFilter(field, null, false, dataViewId)
+          : createFilter(field, currentVal, true, dataViewId);
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
         : makeFilter(value);
@@ -54,7 +55,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
       if (onClick != null) {
         onClick();
       }
-    }, [field, filterManager, onClick, onFilterAdded, value]);
+    }, [field, filterManager, onClick, onFilterAdded, value, dataViewId]);
 
     useEffect(() => {
       if (!ownFocus) {

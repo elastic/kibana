@@ -146,18 +146,14 @@ describe('Azure Open AI Utils', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_CHAT_URL);
       const match = chatUrl.match(regex);
       expect(match).not.toBeNull();
-      expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions'
-      );
+      expect(match![0]).toEqual('/openai/deployments/NEW-DEPLOYMENT-321/chat/completions');
     });
 
     it('should match valid completion url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_URL);
       const match = completionUrl.match(regex);
       expect(match).not.toBeNull();
-      expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions'
-      );
+      expect(match![0]).toEqual('/openai/deployments/NEW-DEPLOYMENT-321/completions');
     });
 
     it('should match valid completion extensions url', () => {
@@ -165,32 +161,38 @@ describe('Azure Open AI Utils', () => {
       const match = completionExtensionsUrl.match(regex);
       expect(match).not.toBeNull();
       expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions'
+        '/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions'
       );
     });
 
     it('should not match invalid chat url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_CHAT_URL);
-      const match =
-        'https://openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15'.match(
-          regex
-        );
-      expect(match).toBeNull();
+      [
+        'https://openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/not-completions?api-version=2023-05-15',
+      ].forEach((url) => {
+        const match = url.match(regex);
+        expect(match).toBeNull();
+      });
     });
 
     it('should not match invalid completion url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_URL);
-      const match = 'https://fooai.com/completions?api-version=2023-05-15'.match(regex);
-      expect(match).toBeNull();
+      [
+        'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/not-completions?api-version=2023-05-15',
+      ].forEach((url) => {
+        const match = url.match(regex);
+        expect(match).toBeNull();
+      });
     });
 
     it('should not match invalid completion extensions url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL);
-      const match =
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/extensions/chat/completions?api-version=2023-05-15'.match(
-          regex
-        );
-      expect(match).toBeNull();
+      [
+        'https://My-test-resource-123.openai.azure.com/openai/deployments/extensions/chat/not-completions?api-version=2023-05-15',
+      ].forEach((url) => {
+        const match = url.match(regex);
+        expect(match).toBeNull();
+      });
     });
   });
 });

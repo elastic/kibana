@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -66,7 +67,7 @@ export const errors = {
   invalidMaxValue: (max: number) =>
     new Error(
       i18n.translate('expressionShape.functions.progress.invalidMaxValueErrorMessage', {
-        defaultMessage: "Invalid {arg} value: '{max, number}'. '{arg}' must be greater than 0",
+        defaultMessage: "Invalid {arg} value: ''{max, number}''. ''{arg}'' must be greater than 0",
         values: {
           arg: 'max',
           max,
@@ -77,7 +78,7 @@ export const errors = {
     new Error(
       i18n.translate('expressionShape.functions.progress.invalidValueErrorMessage', {
         defaultMessage:
-          "Invalid value: '{value, number}'. Value must be between 0 and {max, number}",
+          "Invalid value: ''{value, number}''. Value must be between 0 and {max, number}",
         values: {
           value,
           max,

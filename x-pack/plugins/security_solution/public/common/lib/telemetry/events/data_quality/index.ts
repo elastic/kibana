@@ -25,7 +25,7 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
       type: 'keyword',
       _meta: {
         description: 'Index uuid',
-        optional: false,
+        optional: true,
       },
     },
     indexName: {

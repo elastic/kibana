@@ -5,29 +5,39 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
+import { type Subject } from 'rxjs';
+import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
-import { isDatasetSelection } from '../../../../common/dataset_selection';
+import {
+  isDataSourceSelection,
+  isDataViewSelection,
+} from '../../../../common/data_source_selection';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   createCreateDataViewFailedNotifier,
   createDatasetSelectionRestoreFailedNotifier,
+  createDataViewSelectionRestoreFailedNotifier,
 } from './notifications';
 import {
   initializeControlPanels,
   subscribeControlGroup,
   updateControlPanels,
 } from './services/control_panels';
-import { createAndSetDataView } from './services/data_view_service';
+import { changeDataView, createAdHocDataView } from './services/data_view_service';
 import {
+  redirectToDiscover,
   subscribeToDiscoverState,
   updateContextFromDiscoverAppState,
+  updateContextFromDiscoverDataState,
   updateDiscoverAppStateFromContext,
 } from './services/discover_service';
-import { validateSelection } from './services/selection_service';
+import { initializeSelection } from './services/selection_service';
 import {
   subscribeToTimefilterService,
   updateContextFromTimefilter,
@@ -38,11 +48,12 @@ import {
   LogsExplorerControllerEvent,
   LogsExplorerControllerTypeState,
 } from './types';
+import { createDataReceivedEventEmitter } from './public_events';
 
 export const createPureLogsExplorerControllerStateMachine = (
   initialContext: LogsExplorerControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwESBGAgLFYDAKglCdMBjnuRhxi2MyuAxayGDsxChGQIDND0BQVB0bQAAk1D0ABxDAlCEhDBWQxAyN8W8wkCJIfDSIFzzlLJ0KyfIwmVAIklCUIdLhCc5ynBjjIgUzzMstzbPsxy+Gc9oGo8yghE4205AEhRevUJQMBUZQMGQcQVEkfRoruRDtwQB9RXBVCIn3cwQnBc8S1VcEVQ0yIPgCAJSp9N9W0My0TOc7gLKsmyOooBynLOVz7vuIQBrUIaRqG8bSEm-QFDEVQdDEBQADE1EkZBOLEGak3m8FS1COUAmCNS5Wvc80hSYtPFS4rvDvJJNJOvS6IDKrBBq67bva+y2AgBgup6vrPu+0a-oBvR4ZEuLnh8FJCaK6t8drcstrFJSIj24EDs8I6ydoiqLrRK66ru9yGaZsAPo0L7hs5iapr84GArByHodhwT115YS5tE4FwUYFUifMdJlQid2sklnaZfFOWtIV46qPHX130qozqdq7o6bexCWBwVrmSxfZBmGR13WmWYaPKiPVcYmObvq+PKET5PMT2HEl2jLk41thNZti1xEEK4qlKBPIUfVHJQmxtCIVS9MvewopQ9z8PzspqP1djkutYT5gk5eyvWVxQh8UHPBiTJL1dOV-Pp8ummNfpxfl5c1e05rzlELXaw7ZipCW+edMUi9kIwh77xNXPIJITeGkfKy0ayniVnnKen5j6MGOHOMKtAl6wBYOwac1UhBGEkJNNQ3kABaWhdAGBEDoZACgwpEO6uBW0kheYO35nmAEgI0afGVAHXC3xnjlgkrlSUwQmHuzHjCfeECDJHzVjVWB754GoEQY0HWet1AKGkJIDAAB1BQ3UBryBoc3J4LwDwAk1Ojcih5wh-ylNlIqljEj4wopRQRZVJ4iKgWImBcCEE4CQYzZmGi+oEJUEQkhtpQpjSig3eCTdn66JRn4VImRqx+DCLwzIAQzFkRdvuDMqk-D5FvHY6iQjHH+mcYXCRpopEyKXhXLsPZnSukzuyT0YczpOPbCUtx0iPHlxXtUhcEZ2S31jFcMJ9sdGt3RuYN4GRAShG-r-dhKkMzSzvFpXcRNEgh3sadfSRTWnVVcZI9xSDKndLnDUvsG8BxDhHGOCezSdmoOjqU1Y5TOnHMvj08MsAb4rnvhuCJ80VJpKSNqLIoJ+FpBvH-QIEl1rlhJumImaRKJUQoKgCAcAXBNO2WaP5CNRLuBvIREI4QviKgSf4CUwQSYkQPOkMi4DCkflYLs6muK+YvxyH-bwMT8Z-D5fyv4Aj8kOLuR+FlOxU44jZbQl+7hSye01AWdhyoJnYV+DM7UMzUoMtFZHS0s53xnOlaMhAXgJlZCzEHJK-KCgKX3GWFSt57zcvLHqceBTdUF2qsayJPwSKpA+JWBWvwgTanPKhV4CteEkTlCEHIwQdXYr1S42m89GoypGb6hA1ZVQo2UujasmMVJ4QIoENIGZgS5MSImimxS9mps1umsuzVGYrzPs3TN81Ah7hybC3aeQ-CZV+ACJhqUf5BoKDWlWojC4NvbY9LxYAfUAu1DyksCSSb1nMAeNhioso5TyuWIERUSrupFUmr10c52l0em8iVVcBjLsdqeGJwJULig3WRIq-dspVgjcCI8B4p2HzrY89piCn382rBM9MXdg1kX3KS1unxX0oyBO+9U6M8lYtrSykyTy6AvKOSgqmkBIMv3rCkWDQbgQIbDfMlGKQxTZlPGkfhwHIF4fEeBzpi7yO6KlP8UiylbzZLyPjP+R6lLdwVms9jZ6tm4YefhnjRyL4GtNEax+-zHZYQBH8EInxNLrsHfMt2bxKygt+HKP4nxijFCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2VYFEAeAHANqgE5hEDCqAdgC5Gr76kB0ArpQJYfXsCG+7AL0gBiAEqYymAJIA1TABEA+gGUAKgEFVmRWQDyAOQ1T9mUQG0ADAF1EoXKljtuVWyGyIAjAA4AzEy8eAEwALF7B3h7BgV4AnAA0IACenhYA7EweAKwWOakeAGz5AL5FCWgYOATEpBQ0dAzMnE68-AKcUMpgjADGzpTCxlKqUurIUgBa2vKa6ooyUpgA6pY2SCD2jn2u7gh5+Rn5PjExXpmRPh4+CckIPl5eTD4+mTFHqTEW95nBJWXoWHhCCRyFRaPRGEQmE1uHxBO1Oj0+gN9EMRmNJopphplJhVCtXBtmi41jtUoF9gUjiczsELlckogAkxgscTpcCp9AoFfiBygCqsDamCGpDoS04ZQOl0wL12FRhFj1DjVCpMMgJMMDIpxGpdOJFAAxdRSZAAVXE+LWhK2JMQZIph2Op3Ol2unlS6RimQu3y9J0CFg8PL5lSBNVB9QhUK44rakoRMqRivmS1V6rImv02swuv1RpN5swlrsDiJlG2dosDqpztproZCEKfnyeS8Fg+vjCxVKvP+oeqILq4MaMdhcag8h41B4MnYYAA7sIIFQwNGAG6oADWq5DgIHQsjI+aY-ak+ns4XCE4G+6U7llBWxfWpZtoB2Hm8gUeAY8qUyjuCTIvDdBBshiZl8i8VJ8gsANUirQNgz7PdBQjYdRVHVpTynGc50XUg6EhAgpwAM2IABbJhdwFcMhxFaNjywyUz1wy9r1QW8+kfawCRfe8KwQD8vC-Hwfz-ACgJAp5Mgyf9Ag7d5YJickkIqFDaOFKMxRPZicNgMBqCXFd1y3HdkJowdNKPGEmInPSDKvSgbzvKhuNWEtNn421QMCECPBid4mC9VIfEgoDfzJVJVP5MNLMPDDGIlOzp30wyCOIJhiOoMiiEo6jYoPdCGJspKWNSxznK46wn2tLy30QfJfIbX9AyC2JOUCD0YkiLxov7VC6K0zCksK-AAAUeEoLpYCMqaTO3KjzIKtD6O02zRomqb8FgCqOJch9qp4q0+OJerG28DJW1bbxlNCPzjmCJhyTJO4oirZ4fD69S4qKtaRpWzbpuEdKiPwUiKMWtSLNGobEvHDbJum3bOPvNzeM8063Aai7f28a7YhCYCGwDKCmDJCwnmgy4qa+6GVthkqhAgMQJGkORMSkZQ9DkURFHUMaxpUDQtBqk7y28rIsgONsP3CDx3r84ILBk9r8hZTJ3nl2JaeWwbrNjERxEkWQpk57nTExGYhc0Isjo8ssBKViwmGVmJ8m8fIThiWkvRA459liHxAwC0Sg69HX93p-Wx0N1mTcUABFU1TAATWtkW7efDHxbOrIKe-AInk6z3-w8PzAiCNraVg+TKU+nt8sjvWEsZ2PjfZ4YAFlMANE0tF5rvbfcrOHYl70ZMCDWwhCUJLmOPyP32b0gnku5AjuT4I4GqyW4N5mjbZ7RB975B++zA0dQACUUYx+5kUZRezgTIkCo5APJeWWQ+VI-Ng520jbJkDWdw1bRC3hpeKxU95MAgDhZQqAWBEG6GABMsoqBQggIwYQpoxpYimFbZQuhzSSDTBqKQBhH6jzOspL8yk-TeEyFyAoP9iaRH-pPGCxdQqHHrn8KGusd5QJjhAGBcCEFIJQdKNBlAMFYJwXgy2GgVBENECQnE6ZMxmA8MPWqmN3zBFSI9HwtI1YUw9GkV4IEuTGKYDBV4uNupeh+A3JaTdBF-SZqI6c8DEHINQX0WRYBsG4Jtoo2YhDiHaHUWQihgQdFi2fgYoxJilY+HMe8ekNx-JnCel-UxLJIKbxcfwtxkCPGQC8TwHxEj-H3iYN0AAFpNKA2Fzx4VmqudiC1G7bzKcNTxsDvHiL8VIgJjTmmtNYvOZG+00bHSfhLVI9wnohTSQGKI8F4isPCLJd2xwPwHO5MUmKpTfr9IqYMqpwzJGIjqeMyUkyLz4SIIRTKYNsoQx6RAs5cMLliN8TcxMdymkPN0m0tiTk9pVSsJQ18WNBJ-nAvcTquMoJRG+FYiwBiyYU0+PLIOnUqzgJ+qtc5IjLnVJGbc9B3QSB3klOoCAl8OIsSeR0+aZkSm9J+a3cl-yamjLuXS7gDKmUspwk8mZ0LYV1Xhb+b0uyHGfxCJkzwpx0jvEgoBN29wji8N7Fy75pLfl8qGQC2pNLhXtEZcy7orL2kgzeeDXKkMTncuNbyyplLAXSPqVa0Vtr7UQsqqjQ68SFm5z-I9FkFcgj5CAoUdefloLJLWUsqCxwlnEphtHVoFTugrQAOJ0BYLgWArAOBkuRKiUYExtB6EMKIXQyBFCFqbTgvmY0pAyr0Z4EmBccjew1r+NWVjghKyYHJcdVYyQhDJNmqOu9hH1KLSWstgSFRWxTIsRQ8ibbyB7TnOV2rbFeiDuOpsat8hWLJA8YIkEoKfyHWEBdzchF5pEQWuixaEHrvYJgoJe6tA6AMKoJtLaxrqBMMgZQh7EkFGZO9PIiL-IUysd6dIgZS51heGEKKxz+pGoZtAr9wof2lvLaWwZ7QEZbRmsuOaXTOVuqI7mwQ+bV2-so7gajkpaNI3YijVyYb0ZULlf20SbZ2yAWQ6O4mQF0hnDksFT2vUCPfRzUuj9K7v1ru47xqA-HtrAxeRlLKOU8quPdcR5dpH6jkfXVR+lhmAaI22lK0NMLM66KPe+CT0RB0yZHcEKxhSgoPvktkbVRSeyUFQBAOArgvkkohKJuFOwAC016GxZZdjkQMk9uoBDSO2V9gi2DlIgGl2VOwoh+SDrY8k-5DGe3jUAtTfCWMpbY+OC1R6fOO0gi7JZVYpPVxCL-dIcbh2xHluvD0ZW+lw0eXharvaEDe3SBXKCysQoGNiJkKSyyLiT3XqkxqjDFs8tjJM1Ka3fOeBZB4HF8lfBXU+Id4mORmRyV1R+MkLx9XJc0++-6dFAbbXuwJZ4z215tjbO8SeytMVViCq8JZCmPQY6ux6veUPvLCX2HQl4DCmEtkVnkR4tJDHUxgtBGIOObPaYpdcvr+OzpoqCpForjCK7k+ai2AO1OK53GEt7I5nXCPda0+x01VzzWCvQf+xg7O5WXADl4RN1IqZ3CsSEZ7+28gBXHZPIHVnWMy4GfyqlQKaUgpaWCqZqudgBlasY0KhjGGHHHUTG4FcogZFElG8X53Gc9b+WagV1KZG0rAM5m14rwXzmd4gV3sOTGe-JMYu6zVTgPA9MYxhzC0l3DD5bjjumuMp4QJz4nPOycsL9x9F2jVaThAB+OsvoPPF2foA5yjlaTXV8-s9pT1PLhB0imOtWLsjjB016FPGXfKs6bI3pwJw-PZ+Ggv+TXmvZZhHQ6cNHXIs8XHjd2SXGnF3d4r2vrjrAePOaM-AeZYmdg0K5-Q04Df0NHAOHJFWI1L4EGCUEUEAA */
   createMachine<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent,
@@ -57,14 +68,55 @@ export const createPureLogsExplorerControllerStateMachine = (
         uninitialized: {
           on: {
             RECEIVED_STATE_CONTAINER: {
-              target: 'initializingDataView',
+              target: 'initializingSelection',
               actions: ['storeDiscoverStateContainer'],
+            },
+          },
+        },
+        initializingSelection: {
+          invoke: {
+            src: 'initializeSelection',
+          },
+          on: {
+            INITIALIZE_DATA_VIEW: {
+              target: 'initializingDataView',
+              actions: ['storeDataSourceSelection'],
+            },
+            INITIALIZE_DATASET: {
+              target: 'initializingDataset',
+              actions: ['storeDataSourceSelection'],
+            },
+            DATASET_SELECTION_RESTORE_FAILURE: {
+              target: 'initializingDataset',
+              actions: ['storeDefaultSelection', 'notifyDatasetSelectionRestoreFailed'],
+            },
+            DATAVIEW_SELECTION_RESTORE_FAILURE: {
+              target: 'initializingDataset',
+              actions: ['storeDefaultSelection', 'notifyDataViewSelectionRestoreFailed'],
             },
           },
         },
         initializingDataView: {
           invoke: {
-            src: 'createDataView',
+            src: 'changeDataView',
+            onDone: {
+              target: 'initializingControlPanels',
+              actions: ['updateDiscoverAppStateFromContext', 'updateTimefilterFromContext'],
+            },
+            onError: {
+              target: 'initializingDataset',
+              actions: [
+                'storeDefaultSelection',
+                'notifyCreateDataViewFailed',
+                'updateDiscoverAppStateFromContext',
+                'updateTimefilterFromContext',
+              ],
+            },
+          },
+        },
+        initializingDataset: {
+          invoke: {
+            src: 'createAdHocDataView',
             onDone: {
               target: 'initializingControlPanels',
               actions: ['updateDiscoverAppStateFromContext', 'updateTimefilterFromContext'],
@@ -103,43 +155,46 @@ export const createPureLogsExplorerControllerStateMachine = (
               id: 'timefilterService',
             },
           ],
+          entry: ['resetRows'],
           states: {
-            datasetSelection: {
-              initial: 'validatingSelection',
+            dataSourceSelection: {
+              initial: 'idle',
               states: {
-                validatingSelection: {
-                  invoke: {
-                    src: 'validateSelection',
-                  },
-                  on: {
-                    LISTEN_TO_CHANGES: {
-                      target: 'idle',
-                    },
-                    UPDATE_DATASET_SELECTION: {
-                      target: 'updatingDataView',
-                      actions: ['storeDatasetSelection'],
-                    },
-                    DATASET_SELECTION_RESTORE_FAILURE: {
-                      target: 'updatingDataView',
-                      actions: ['notifyDatasetSelectionRestoreFailed'],
-                    },
-                  },
-                },
                 idle: {
                   on: {
-                    UPDATE_DATASET_SELECTION: {
-                      target: 'updatingDataView',
-                      actions: ['storeDatasetSelection'],
+                    UPDATE_DATA_SOURCE_SELECTION: [
+                      {
+                        cond: 'isDataViewNotAllowed',
+                        actions: ['redirectToDiscover'],
+                      },
+                      {
+                        cond: 'isDataViewAllowed',
+                        target: 'changingDataView',
+                        actions: ['storeDataSourceSelection'],
+                      },
+                      {
+                        target: 'creatingAdHocDataView',
+                        actions: ['storeDataSourceSelection'],
+                      },
+                    ],
+                  },
+                },
+                changingDataView: {
+                  invoke: {
+                    src: 'changeDataView',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyDataViewUpdate'],
                     },
-                    DATASET_SELECTION_RESTORE_FAILURE: {
-                      target: 'updatingDataView',
-                      actions: ['notifyDatasetSelectionRestoreFailed'],
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyCreateDataViewFailed'],
                     },
                   },
                 },
-                updatingDataView: {
+                creatingAdHocDataView: {
                   invoke: {
-                    src: 'createDataView',
+                    src: 'createAdHocDataView',
                     onDone: {
                       target: 'idle',
                       actions: ['notifyDataViewUpdate'],
@@ -196,6 +251,9 @@ export const createPureLogsExplorerControllerStateMachine = (
             RECEIVE_DISCOVER_APP_STATE: {
               actions: ['updateContextFromDiscoverAppState'],
             },
+            RECEIVE_DISCOVER_DATA_STATE: {
+              actions: ['updateContextFromDiscoverDataState', 'emitDataReceived'],
+            },
             RECEIVE_QUERY_STATE: {
               actions: ['updateQueryStateFromQueryServiceState'],
             },
@@ -211,36 +269,31 @@ export const createPureLogsExplorerControllerStateMachine = (
     },
     {
       actions: {
-        storeDatasetSelection: actions.assign((_context, event) =>
-          'data' in event && isDatasetSelection(event.data)
-            ? {
-                datasetSelection: event.data,
-              }
+        storeDefaultSelection: actions.assign((_context) => ({
+          dataSourceSelection: _context.allSelection,
+        })),
+        storeDataSourceSelection: actions.assign((_context, event) =>
+          'data' in event && isDataSourceSelection(event.data)
+            ? { dataSourceSelection: event.data }
             : {}
         ),
         storeDiscoverStateContainer: actions.assign((_context, event) =>
           'discoverStateContainer' in event
-            ? {
-                discoverStateContainer: event.discoverStateContainer,
-              }
+            ? { discoverStateContainer: event.discoverStateContainer }
             : {}
         ),
         storeControlGroupAPI: actions.assign((_context, event) =>
-          'controlGroupAPI' in event
-            ? {
-                controlGroupAPI: event.controlGroupAPI,
-              }
-            : {}
+          'controlGroupAPI' in event ? { controlGroupAPI: event.controlGroupAPI } : {}
         ),
         storeControlPanels: actions.assign((_context, event) =>
-          'data' in event && ControlPanelRT.is(event.data)
-            ? {
-                controlPanels: event.data,
-              }
-            : {}
+          'data' in event && ControlPanelRT.is(event.data) ? { controlPanels: event.data } : {}
         ),
+        resetRows: actions.assign((_context, event) => ({
+          rows: [],
+        })),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
         updateContextFromDiscoverAppState,
+        updateContextFromDiscoverDataState,
         updateDiscoverAppStateFromContext,
         updateContextFromTimefilter,
       },
@@ -248,37 +301,81 @@ export const createPureLogsExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
+        // Default guard to allow logs data views, it is over-writable on the final config when creating a machine
+        isDataViewAllowed: (_context, event) => {
+          if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+            return event.data.selection.dataView.isLogsDataType();
+          }
+          return false;
+        },
+        // Default guard to not allow unknown data views, it is over-writable on the final config when creating a machine
+        isDataViewNotAllowed: (_context, event) => {
+          if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+            return event.data.selection.dataView.isUnknownDataType();
+          }
+          return false;
+        },
       },
     }
   );
 
 export interface LogsExplorerControllerStateMachineDependencies {
   datasetsClient: IDatasetsClient;
+  dataViews: DataViewsPublicPluginStart;
+  events?: LogsExplorerCustomizations['events'];
   initialContext?: LogsExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;
+  uiSettings: IUiSettingsClient;
+  publicEvents$: Subject<LogsExplorerPublicEvent>;
 }
 
 export const createLogsExplorerControllerStateMachine = ({
   datasetsClient,
+  dataViews,
+  events,
   initialContext = DEFAULT_CONTEXT,
   query,
   toasts,
+  uiSettings,
+  publicEvents$,
 }: LogsExplorerControllerStateMachineDependencies) =>
   createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
+      notifyDataViewSelectionRestoreFailed: createDataViewSelectionRestoreFailedNotifier(toasts),
+      redirectToDiscover: redirectToDiscover(events),
       updateTimefilterFromContext: updateTimefilterFromContext(query),
+      emitDataReceived: createDataReceivedEventEmitter(publicEvents$),
     },
     services: {
-      createDataView: createAndSetDataView(),
+      changeDataView: changeDataView({ dataViews }),
+      createAdHocDataView: createAdHocDataView(),
       initializeControlPanels: initializeControlPanels(),
+      initializeSelection: initializeSelection({ datasetsClient, dataViews, events, uiSettings }),
       subscribeControlGroup: subscribeControlGroup(),
       updateControlPanels: updateControlPanels(),
-      validateSelection: validateSelection({ datasetsClient }),
       discoverStateService: subscribeToDiscoverState(),
       timefilterService: subscribeToTimefilterService(query),
+    },
+    guards: {
+      isDataViewAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
+      isDataViewNotAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return !event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
     },
   });
 

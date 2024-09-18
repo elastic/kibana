@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -15,7 +16,6 @@ import {
   Settings,
   AreaSeries,
   CurveType,
-  PartialTheme,
 } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -27,11 +27,8 @@ import type { Feature } from '../types';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
-import {
-  DVKey,
-  DVStorageMapped,
-  DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE,
-} from '../../index_data_visualizer/types/storage';
+import type { DVKey, DVStorageMapped } from '../../index_data_visualizer/types/storage';
+import { DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE } from '../../index_data_visualizer/types/storage';
 import { DATA_DRIFT_COMPARISON_CHART_TYPE } from '../../index_data_visualizer/types/data_drift';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
@@ -112,7 +109,7 @@ export const DataDriftDistributionChart = ({
           idSelected={comparisonChartType}
           onChange={(id: string) =>
             setComparisonChartType(
-              id as typeof DATA_DRIFT_COMPARISON_CHART_TYPE[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
+              id as (typeof DATA_DRIFT_COMPARISON_CHART_TYPE)[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
             )
           }
           isIconOnly

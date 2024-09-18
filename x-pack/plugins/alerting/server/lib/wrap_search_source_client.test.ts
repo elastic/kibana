@@ -11,7 +11,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { of, throwError } from 'rxjs';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
-const logger = loggingSystemMock.create().get();
+let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
 const rule = {
   name: 'test-rule',
@@ -36,6 +36,10 @@ const createSearchSourceClientMock = () => {
 describe('wrapSearchSourceClient', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
   });
 
   afterAll(() => {
@@ -64,6 +68,31 @@ describe('wrapSearchSourceClient', () => {
     });
   });
 
+  test('searches with provided request timeout', async () => {
+    const abortController = new AbortController();
+    const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
+
+    const { searchSourceClient } = wrapSearchSourceClient({
+      logger,
+      rule,
+      searchSourceClient: searchSourceClientMock,
+      abortController,
+      requestTimeout: 5000,
+    });
+    const wrappedSearchSource = await searchSourceClient.createEmpty();
+    await wrappedSearchSource.fetch();
+
+    expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
+      abortSignal: abortController.signal,
+      transport: {
+        requestTimeout: 5000,
+      },
+    });
+    expect(loggingSystemMock.collect(logger).debug.map((params) => params[0])).toContain(
+      `executing query for rule .test-rule-type:abcdefg in space my-space - with options {} and 5000ms requestTimeout`
+    );
+  });
+
   test('uses search options when specified', async () => {
     const abortController = new AbortController();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
@@ -73,13 +102,15 @@ describe('wrapSearchSourceClient', () => {
       rule,
       searchSourceClient: searchSourceClientMock,
       abortController,
+      requestTimeout: 5000,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    await wrappedSearchSource.fetch({ isStored: true });
+    await wrappedSearchSource.fetch({ isStored: true, transport: { requestTimeout: 10000 } });
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       isStored: true,
       abortSignal: abortController.signal,
+      transport: { requestTimeout: 5000 },
     });
   });
 
@@ -109,7 +140,7 @@ describe('wrapSearchSourceClient', () => {
     expect(stats.numSearches).toEqual(3);
     expect(stats.esSearchDurationMs).toEqual(999);
 
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(loggingSystemMock.collect(logger).debug.map((params) => params[0])).toContain(
       `executing query for rule .test-rule-type:abcdefg in space my-space - with options {}`
     );
   });

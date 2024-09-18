@@ -6,32 +6,57 @@
  */
 
 import { get } from 'lodash/fp';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest } from '@kbn/core-http-server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PassThrough, Readable } from 'stream';
-import { RequestBody } from './langchain/types';
+import { Logger } from '@kbn/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
-  actions: ActionsPluginStart;
+  onLlmResponse?: (content: string) => Promise<void>;
+  abortSignal?: AbortSignal;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  params: InvokeAIActionsParams;
+  actionTypeId: string;
+  logger: Logger;
 }
-interface StaticResponse {
+export interface StaticResponse {
   connector_id: string;
   data: string;
   status: string;
 }
 
-export const executeAction = async ({
-  actions,
-  request,
-  connectorId,
-}: Props): Promise<StaticResponse | Readable> => {
-  const actionsClient = await actions.getActionsClientWithRequest(request);
+interface InvokeAIActionsParams {
+  subActionParams: {
+    messages: Array<{ role: string; content: string }>;
+    model?: string;
+    n?: number;
+    stop?: string | string[] | null;
+    stopSequences?: string[];
+    temperature?: number;
+  };
+  subAction: 'invokeAI' | 'invokeStream';
+}
 
+export const executeAction = async ({
+  onLlmResponse,
+  actionsClient,
+  params,
+  connectorId,
+  actionTypeId,
+  logger,
+  abortSignal,
+}: Props): Promise<StaticResponse | Readable> => {
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: request.body.params,
+    params: {
+      subAction: params.subAction,
+      subActionParams: {
+        ...params.subActionParams,
+        signal: abortSignal,
+      },
+    },
   });
 
   if (actionResult.status === 'error') {
@@ -41,17 +66,29 @@ export const executeAction = async ({
   }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
+    if (onLlmResponse) {
+      await onLlmResponse(content);
+    }
     return {
       connector_id: connectorId,
       data: content, // the response from the actions framework
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult) as Readable;
 
+  const readable = get('data', actionResult) as Readable;
   if (typeof readable?.read !== 'function') {
     throw new Error('Action result status is error: result is not streamable');
   }
+
+  // do not await, blocks stream for UI
+  handleStreamStorage({
+    actionTypeId,
+    onMessageSent: onLlmResponse,
+    logger,
+    responseStream: readable,
+    abortSignal,
+  }).catch(() => {});
 
   return readable.pipe(new PassThrough());
 };

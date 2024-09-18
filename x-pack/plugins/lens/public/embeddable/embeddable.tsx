@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -41,10 +42,10 @@ import {
   ErrorLike,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -74,7 +75,6 @@ import type {
   IBasePath,
   IUiSettingsClient,
   KibanaExecutionContext,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -83,8 +83,9 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -105,7 +106,6 @@ import {
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
-  isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
@@ -162,7 +162,7 @@ interface PreventableEvent {
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-interface LensBaseEmbeddableInput extends EmbeddableInput {
+export interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -185,6 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -235,7 +236,6 @@ export interface LensEmbeddableDeps {
   coreStart: CoreStart;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -260,7 +260,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {errors.length ? (
               <>
-                <p>{errors[0].longMessage}</p>
+                <p>{errors[0].longMessage as React.ReactNode}</p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
@@ -494,7 +494,7 @@ export class Embeddable
           distinctUntilChanged((a, b) => fastIsEqual(a, b)),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           this.reload();
         })
     );
@@ -511,7 +511,7 @@ export class Embeddable
           distinctUntilChanged(),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           // only reload if drilldowns are set
           if (this.getInput().enhancements?.dynamicActions) {
             this.reload();
@@ -611,6 +611,22 @@ export class Embeddable
 
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
+  private handleExternalUserMessage = (messages: UserMessage[]) => {
+    if (this.input.onBeforeBadgesRender) {
+      // we need something else to better identify those errors
+      const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+        message.displayLocations.some((location) => location.id === 'embeddableBadge')
+      );
+
+      if (messagesToHandle.length > 0) {
+        const customBadgeMessages = this.input.onBeforeBadgesRender(messagesToHandle);
+        return [...originalMessages, ...customBadgeMessages];
+      }
+    }
+
+    return messages;
+  };
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(
@@ -638,8 +654,9 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return this.handleExternalUserMessage(userMessages);
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
@@ -663,6 +680,10 @@ export class Embeddable
         fromDate: mergedSearchContext.timeRange?.from ?? '',
         toDate: mergedSearchContext.timeRange?.to ?? '',
       },
+      absDateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
       activeData: this.activeData,
     };
 
@@ -680,10 +701,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return this.handleExternalUserMessage(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 
@@ -769,22 +792,28 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: this.deps.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
-          : undefined,
-      });
+      const references =
+        activeDatasourceId === 'formBased'
+          ? extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: this.deps.datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates: Object.fromEntries(
+                Object.entries(datasourceStates).map(([id, state]) => [
+                  id,
+                  { isLoading: false, state },
+                ])
+              ),
+              visualizationState,
+              activeVisualization: this.activeVisualizationId
+                ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+                : undefined,
+            })
+          : [];
       const attrs = {
         ...viz,
         state: {
@@ -853,7 +882,7 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(
+  async openConfigPanel(
     startDependencies: LensPluginStartDependencies,
     isNewPanel?: boolean,
     deletePanel?: () => void
@@ -885,7 +914,7 @@ export class Embeddable
           navigateToLensEditor={
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
-          displayFlyoutHeader={true}
+          displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
           deletePanel={deletePanel}
@@ -913,6 +942,12 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
+
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
@@ -990,9 +1025,7 @@ export class Embeddable
 
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    this.removeActiveDataWarningMessages = this.addUserMessages(searchWarningMessages);
 
     this.activeData = newActiveData;
 
@@ -1036,6 +1069,7 @@ export class Embeddable
     });
 
     trackUiCounterEvents(events, executionContext);
+    this.trackContentfulRender();
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -1121,7 +1155,7 @@ export class Embeddable
     if (this.expression && !blockingErrors.length) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
             <ExpressionWrapper
               ExpressionRenderer={this.expressionRenderer}
               expression={this.expression || null}
@@ -1137,7 +1171,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
+              interactive={!input.disableTriggers}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1155,7 +1189,7 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
             />
-          </KibanaThemeProvider>
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1170,6 +1204,25 @@ export class Embeddable
     this.renderUserMessages();
   }
 
+  private trackContentfulRender() {
+    if (!this.activeData || !canTrackContentfulRender(this.parent)) {
+      return;
+    }
+
+    const hasData = Object.values(this.activeData).some((table) => {
+      if (table.meta?.statistics?.totalCount != null) {
+        // if totalCount is set, refer to total count
+        return table.meta.statistics.totalCount > 0;
+      }
+      // if not, fall back to check the rows of the table
+      return table.rows.length > 0;
+    });
+
+    if (hasData) {
+      this.parent.trackContentfulRender();
+    }
+  }
+
   private renderUserMessages() {
     const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
       severity: 'error',
@@ -1178,14 +1231,12 @@ export class Embeddable
     if (errors.length && this.domNode) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-            <I18nProvider>
-              <VisualizationErrorPanel
-                errors={errors}
-                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
+            <VisualizationErrorPanel
+              errors={errors}
+              canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+            />
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1217,10 +1268,10 @@ export class Embeddable
 
     if (this.badgeDomNode) {
       render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         this.badgeDomNode
       );
     }
@@ -1341,6 +1392,7 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
+    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
 
     eventHandler?.({
       ...event.data,
@@ -1356,6 +1408,7 @@ export class Embeddable
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
+            query: esqlQuery,
           },
           embeddable: this,
         });
@@ -1483,7 +1536,9 @@ export class Embeddable
     const input = this.getInput();
 
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    // this is necessary for the dataview embeddable but not the ES|QL one
     if (
+      !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
       indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
     ) {
@@ -1531,7 +1586,7 @@ export class Embeddable
 
   public getIsEditable() {
     // for ES|QL, editing is allowed only if the advanced setting is on
-    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get('discover:enableESQL')) {
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get(ENABLE_ESQL)) {
       return false;
     }
     return (
@@ -1585,8 +1640,19 @@ export class Embeddable
     return this.savedVis?.state.query;
   }
 
-  public getSavedVis(): Readonly<Document | undefined> {
-    return this.savedVis;
+  public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
+    if (!this.savedVis) {
+      return;
+    }
+
+    // Why are 'type' and 'savedObjectId' keys being removed?
+    // Prior to removing them,
+    // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
+    const savedVis = { ...this.savedVis };
+    delete savedVis.type;
+    delete savedVis.savedObjectId;
+    return savedVis;
   }
 
   destroy() {

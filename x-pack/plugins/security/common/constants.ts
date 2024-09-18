@@ -18,6 +18,11 @@ export const UNKNOWN_SPACE = '?';
 export const APPLICATION_PREFIX = 'kibana-';
 
 /**
+ * The wildcard identifier for all application privileges.
+ */
+export const PRIVILEGES_ALL_WILDCARD = '*';
+
+/**
  * Reserved application privileges are always assigned to this "wildcard" application.
  * This allows them to be applied to any Kibana "tenant" (`kibana.index`). Since reserved privileges are always assigned to reserved (built-in) roles,
  * it's not possible to know the tenant ahead of time.
@@ -59,6 +64,15 @@ export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
  */
 export const NAME_REGEX =
   /^(?! )[a-zA-Z0-9 !"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]*[a-zA-Z0-9!"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]$/;
+
+/**
+ * Matches valid usernames and role names for serverless offering.
+ *
+ * - Must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.
+ * - Must not contain white spaces characters.
+ * - Must not have a leading dot, hyphen, or underscore.
+ */
+export const SERVERLESS_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
 
 /**
  * Maximum length of usernames and role names.

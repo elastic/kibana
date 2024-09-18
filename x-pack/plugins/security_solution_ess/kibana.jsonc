@@ -10,11 +10,11 @@
     "configPath": ["xpack", "securitySolutionEss"],
     "requiredPlugins": [
       "securitySolution",
+      "management",
+      "navigation",
       "licensing",
     ],
-    "optionalPlugins": [
-      "cloudExperiments",
-    ],
+    "optionalPlugins": [],
     "requiredBundles": [ "kibanaReact"]
   }
 }

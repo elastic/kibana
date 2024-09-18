@@ -7,13 +7,15 @@
 
 import React from 'react';
 
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSummary } from '../privilege_summary';
 
@@ -92,6 +94,27 @@ describe('<SpaceAwarePrivilegeSection>', () => {
 
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} editable={false} />);
     expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
+  });
+
+  it('hides privilege buttons if role has a base wildcard privilege', () => {
+    const props = buildProps({
+      role: {
+        elasticsearch: {
+          cluster: ['manage'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['*'],
+            feature: {},
+          },
+        ],
+      },
+    });
+
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
+    expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
+    expect(wrapper.find('button[data-test-subj="privilegeSummaryButton"]')).toHaveLength(0);
   });
 
   it('Renders flyout after clicking "Add space privilege" button', () => {

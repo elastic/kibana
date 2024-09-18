@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -40,7 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.savedObjects.cleanStandardList();
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       const URL = '/api/kibana/management/saved_objects/_bulk_get';

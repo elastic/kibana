@@ -13,7 +13,6 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import {
   getDraftTimeline,
@@ -22,13 +21,9 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { cleanDraftTimelineSchema, TimelineType } from '../../../../../../common/api/timeline';
+import { cleanDraftTimelineSchema, TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
-export const cleanDraftTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .post({
       path: TIMELINE_DRAFT_URL,
@@ -45,7 +40,7 @@ export const cleanDraftTimelinesRoute = (
         version: '2023-10-31',
       },
       async (context, request, response) => {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -56,7 +51,7 @@ export const cleanDraftTimelinesRoute = (
           if (draftTimeline?.savedObjectId) {
             await resetTimeline(
               frameworkRequest,
-              [draftTimeline.savedObjectId],
+              draftTimeline.savedObjectId,
               request.body.timelineType
             );
             const cleanedDraftTimeline = await getTimeline(
@@ -75,7 +70,7 @@ export const cleanDraftTimelinesRoute = (
             });
           }
           const templateTimelineData =
-            request.body.timelineType === TimelineType.template
+            request.body.timelineType === TimelineTypeEnum.template
               ? {
                   timelineType: request.body.timelineType,
                   templateTimelineId: uuidv4(),

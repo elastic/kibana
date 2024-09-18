@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DropType } from '../types';
@@ -22,6 +23,7 @@ export interface HumanData {
 
 export interface Ghost {
   children: React.ReactElement;
+  className?: string;
   style: React.CSSProperties;
 }
 
@@ -56,7 +58,7 @@ export type DropIdentifier = DragDropIdentifier & {
  */
 export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
-export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> | undefined;
+export type RegisteredDropTargets = Record<string, DropIdentifier> | undefined;
 
 export interface DragContextState {
   /**
@@ -70,7 +72,7 @@ export interface DragContextState {
   /**
    * currently selected drop target
    */
-  activeDropTarget?: DropIdentifier;
+  hoveredDropTarget?: DropIdentifier;
   /**
    * currently registered drop targets
    */

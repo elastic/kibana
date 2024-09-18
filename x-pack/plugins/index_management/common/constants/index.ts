@@ -14,6 +14,8 @@ export * from './index_statuses';
 // the request is 4096 bytes we can fit a max of 16 indices in a single request.
 export const MAX_INDICES_PER_REQUEST = 16;
 
+export const MAX_DATA_RETENTION = 'max_retention';
+
 export {
   UIM_APP_NAME,
   UIM_APP_LOAD,
@@ -52,5 +54,6 @@ export {
 
 export { MAJOR_VERSION } from './plugin';
 
-export { Section, IndexDetailsSection } from './home_sections';
-export type { IndexDetailsTab, IndexDetailsTabId } from './home_sections';
+export { Section, IndexDetailsSection } from '@kbn/index-management-shared-types';
+export type { IndexDetailsTab, IndexDetailsTabId } from '@kbn/index-management-shared-types';
+export * from './allow_auto_create';

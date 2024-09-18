@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq } from 'lodash';
@@ -178,11 +179,11 @@ export const Tabs: React.FC<TabsProps> = ({
     docLinks,
     dataViewFieldEditor,
     overlays,
-    theme,
     dataViews,
     http,
     application,
     savedObjectsManagement,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
@@ -308,8 +309,8 @@ export const Tabs: React.FC<TabsProps> = ({
   }, []);
 
   const openFieldEditor = useCallback(
-    (fieldName?: string) => {
-      closeEditorHandler.current = dataViewFieldEditor.openEditor({
+    async (fieldName?: string) => {
+      closeEditorHandler.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: indexPattern,
         },
@@ -377,7 +378,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, index) => {
+                    {indexedFieldTypes.map((item) => {
                       const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
                       return (
                         <EuiFilterSelectItem
@@ -582,8 +583,8 @@ export const Tabs: React.FC<TabsProps> = ({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme}
                     userEditPermission={dataViews.getCanSaveSync()}
+                    startServices={startServices}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -661,7 +662,7 @@ export const Tabs: React.FC<TabsProps> = ({
       DeleteRuntimeFieldProvider,
       refreshFields,
       overlays,
-      theme,
+      startServices,
       dataViews,
       compositeRuntimeFields,
       http,

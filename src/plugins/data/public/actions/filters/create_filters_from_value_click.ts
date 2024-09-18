@@ -1,14 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  toggleFilterNegated,
+  type AggregateQuery,
+} from '@kbn/es-query';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -22,6 +30,7 @@ interface ValueClickDataContext {
   }>;
   timeFieldName?: string;
   negate?: boolean;
+  query?: AggregateQuery;
 }
 
 /**
@@ -147,4 +156,33 @@ export const createFiltersFromValueClickAction = async ({
   return _.uniqWith(mapAndFlattenFilters(filters), (a, b) =>
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
+};
+
+/** @public */
+export const appendFilterToESQLQueryFromValueClickAction = ({
+  data,
+  query,
+}: ValueClickDataContext) => {
+  if (!query) {
+    return;
+  }
+  // Do not append in case of time series, for now. We need to find a way to compute the interval
+  // to create the time range filter correctly. The users can brush to update the time filter instead.
+  const dataPoints = data.filter((point) => {
+    return point && point.table?.columns?.[point.column]?.meta?.type !== 'date';
+  });
+
+  if (!dataPoints.length) {
+    return;
+  }
+  const { table, column: columnIndex, row: rowIndex } = dataPoints[dataPoints.length - 1];
+
+  if (table?.columns?.[columnIndex]) {
+    const column = table.columns[columnIndex];
+    const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+    if (value == null) {
+      return;
+    }
+    return appendWhereClauseToESQLQuery(query.esql, column.name, value, '+', column.meta?.type);
+  }
 };

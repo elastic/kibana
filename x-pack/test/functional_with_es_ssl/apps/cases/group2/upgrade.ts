@@ -78,7 +78,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('does not show any error toasters', async () => {
-        expect(await toasts.getToastCount()).to.be(0);
+        expect(await toasts.getCount()).to.be(0);
       });
 
       it('shows the title correctly', async () => {
@@ -294,7 +294,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('does not show any error toasters', async () => {
-        expect(await toasts.getToastCount()).to.be(0);
+        expect(await toasts.getCount()).to.be(0);
       });
 
       it('shows the title correctly', async () => {

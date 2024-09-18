@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { combineLatest, from } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap } from 'rxjs';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
-  IEsSearchResponse,
 } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
@@ -72,7 +73,7 @@ export class SearchAPI {
         });
 
         return from(
-          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, request.index)
+          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, `${request.index}`)
         ).pipe(
           tap((params) => {
             /** inspect request data **/

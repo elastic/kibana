@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isSupportedEsServerMock } from './find.isolated.test.mocks';
@@ -22,7 +23,7 @@ const hitToSavedObject = (hit: estypes.SearchHit<any>): SavedObject => {
   const type = hit._source.type;
   return {
     type,
-    id: hit._id,
+    id: hit._id!,
     references: [],
     attributes: hit._source[type],
   };

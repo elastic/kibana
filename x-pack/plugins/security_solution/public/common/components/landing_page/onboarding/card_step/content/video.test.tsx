@@ -17,6 +17,7 @@ jest.mock('../../context/step_context');
 jest.mock('./content_wrapper');
 
 jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
   EuiFlexGroup: ({ children, onClick }: EuiFlexGroupProps) => {
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
@@ -52,6 +53,7 @@ describe('Video Component', () => {
       cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
+      trigger: 'click',
     });
 
     const iframe = screen.getByTitle(WATCH_VIDEO_BUTTON_TITLE);

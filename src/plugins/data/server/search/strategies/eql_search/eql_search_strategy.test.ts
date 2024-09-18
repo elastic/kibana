@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/core/server';
@@ -190,7 +191,6 @@ describe('EQL search strategy', () => {
               options,
               params: {
                 ...params,
-                // @ts-expect-error not allowed at top level when using `typesWithBodyKey`
                 wait_for_completion_timeout: '5ms',
                 keep_on_completion: false,
               },
@@ -276,6 +276,48 @@ describe('EQL search strategy', () => {
         const [[_params, requestOptions]] = mockEqlSearch.mock.calls;
 
         expect(requestOptions).toEqual({ ignore: [400], meta: true, signal: undefined });
+      });
+
+      describe('EQL-specific arguments', () => {
+        it('passes along a timestamp_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', timestamp_field: 'timestamp' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(expect.objectContaining({ timestamp_field: 'timestamp' }));
+        });
+
+        it('passes along an event_category_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', event_category_field: 'event_category' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(
+            expect.objectContaining({ event_category_field: 'event_category' })
+          );
+        });
+
+        it('passes along a tiebreaker_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', tiebreaker_field: 'event_category' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(
+            expect.objectContaining({ tiebreaker_field: 'event_category' })
+          );
+        });
       });
     });
 

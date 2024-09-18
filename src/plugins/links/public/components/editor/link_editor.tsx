@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -26,17 +27,15 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   LinkOptions,
-  Link,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import { LinkInfo } from '../../embeddable/types';
+import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
@@ -45,18 +44,19 @@ export const LinkEditor = ({
   link,
   onSave,
   onClose,
-  parentDashboard,
+  parentDashboardId,
 }: {
   onClose: () => void;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   link?: UnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
-  onSave: (newLink: Omit<Link, 'order'>) => void;
+  onSave: (newLink: UnorderedLink) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
+  const [linkDescription, setLinkDescription] = useState<string | undefined>();
   const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
@@ -79,18 +79,19 @@ export const LinkEditor = ({
 
   /** When a new destination is picked, handle the logic for what to display as the current + default labels */
   const handleDestinationPicked = useCallback(
-    (destination?: string, label?: string) => {
+    (destination?: string, label?: string, description?: string) => {
       setLinkDestination(destination);
       if (!currentLinkLabel || defaultLinkLabel === currentLinkLabel) {
         setCurrentLinkLabel(label ?? '');
       }
       setDefaultLinkLabel(label);
+      setLinkDescription(description);
     },
     [defaultLinkLabel, currentLinkLabel]
   );
 
   return (
-    <EuiFocusTrap className={'linkEditor in'} data-test-subj="links--linkEditor--flyout">
+    <EuiFocusTrap className={'linkEditor in'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -108,7 +109,7 @@ export const LinkEditor = ({
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="links--linkEditor--flyout">
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
@@ -124,7 +125,7 @@ export const LinkEditor = ({
           </EuiFormRow>
           <LinkDestination
             link={link}
-            parentDashboard={parentDashboard}
+            parentDashboardId={parentDashboardId}
             selectedLinkType={selectedLinkType}
             setDestination={handleDestinationPicked}
           />
@@ -169,6 +170,8 @@ export const LinkEditor = ({
                     id: link?.id ?? uuidv4(),
                     destination: linkDestination,
                     options: linkOptions,
+                    title: defaultLinkLabel ?? '',
+                    description: linkDescription,
                   });
 
                   onClose();

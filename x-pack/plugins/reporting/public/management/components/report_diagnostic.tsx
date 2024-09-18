@@ -19,8 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ClientConfigType } from '@kbn/reporting-public';
-import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
+import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -103,7 +103,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
           id="xpack.reporting.listing.diagnosticSuccessMessage"
           color="success"
           title={i18n.translate('xpack.reporting.listing.diagnosticSuccessMessage', {
-            defaultMessage: 'Everything looks good for reporting to function.',
+            defaultMessage: 'Everything looks good for screenshot reports to function.',
           })}
         />
       );

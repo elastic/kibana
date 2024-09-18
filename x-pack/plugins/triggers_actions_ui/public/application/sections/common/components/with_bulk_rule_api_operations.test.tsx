@@ -40,7 +40,7 @@ jest.mock('../../../lib/rule_api/bulk_disable', () => ({
 jest.mock('../../../lib/rule_api/get_rule', () => ({
   loadRule: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/resolve_rule', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/resolve_rule', () => ({
   resolveRule: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/rule_types', () => ({
@@ -59,7 +59,7 @@ const { bulkDeleteRules } = jest.requireMock('../../../lib/rule_api/bulk_delete'
 const { bulkEnableRules } = jest.requireMock('../../../lib/rule_api/bulk_enable');
 const { bulkDisableRules } = jest.requireMock('../../../lib/rule_api/bulk_disable');
 const { loadRule } = jest.requireMock('../../../lib/rule_api/get_rule');
-const { resolveRule } = jest.requireMock('../../../lib/rule_api/resolve_rule');
+const { resolveRule } = jest.requireMock('@kbn/alerts-ui-shared/src/common/apis/resolve_rule');
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
 const { loadActionErrorLog } = jest.requireMock('../../../lib/rule_api/load_action_error_log');
 
@@ -139,7 +139,11 @@ describe('with_bulk_rule_api_operations', () => {
   it('disableRule calls the disableRule api', () => {
     const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ bulkDisableRules, rule }: ComponentOpts & { rule: Rule }) => {
-      return <button onClick={() => bulkDisableRules({ ids: [rule.id] })}>{'call api'}</button>;
+      return (
+        <button onClick={() => bulkDisableRules({ ids: [rule.id], untrack: true })}>
+          {'call api'}
+        </button>
+      );
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
@@ -148,7 +152,7 @@ describe('with_bulk_rule_api_operations', () => {
     component.find('button').simulate('click');
 
     expect(bulkDisableRules).toHaveBeenCalledTimes(1);
-    expect(bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], http });
+    expect(bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], http, untrack: true });
   });
 
   // bulk rules
@@ -212,7 +216,9 @@ describe('with_bulk_rule_api_operations', () => {
     const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ bulkDisableRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
-        <button onClick={() => bulkDisableRules({ ids: rules.map((rule) => rule.id) })}>
+        <button
+          onClick={() => bulkDisableRules({ ids: rules.map((rule) => rule.id), untrack: true })}
+        >
           {'call api'}
         </button>
       );
@@ -227,6 +233,7 @@ describe('with_bulk_rule_api_operations', () => {
     expect(bulkDisableRules).toHaveBeenCalledWith({
       ids: [rules[0].id, rules[1].id],
       http,
+      untrack: true,
     });
   });
 
@@ -276,7 +283,7 @@ describe('with_bulk_rule_api_operations', () => {
     component.find('button').simulate('click');
 
     expect(resolveRule).toHaveBeenCalledTimes(1);
-    expect(resolveRule).toHaveBeenCalledWith({ ruleId, http });
+    expect(resolveRule).toHaveBeenCalledWith({ id: ruleId, http });
   });
 
   it('loadRuleTypes calls the loadRuleTypes api', () => {

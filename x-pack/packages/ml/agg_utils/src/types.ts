@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 /**
  * Represents a field-based cardinality aggregation configuration.
@@ -49,6 +49,25 @@ export interface FieldValuePair {
    * of the list of predefined field candidates is of type long/number
    */
   fieldValue: string | number;
+}
+
+/**
+ * Represents an item set returned from `frequent_item_sets` augmented
+ * with some metadata related to log rate analysis.
+ */
+export interface ItemSet {
+  /** An array of field-value pairs representing the items in the set. */
+  set: FieldValuePair[];
+  /** The size of the item set. */
+  size: number;
+  /** The maximum p-value associated with the item set. */
+  maxPValue: number;
+  /** The document count of the item set. */
+  doc_count: number;
+  /** The support value of the item set. */
+  support: number;
+  /** The total document count. */
+  total_doc_count: number;
 }
 
 /**
@@ -103,7 +122,7 @@ type SignificantItemTypeKeys = keyof typeof SIGNIFICANT_ITEM_TYPE;
 /**
  * Represents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration.
  */
-export type SignificantItemType = typeof SIGNIFICANT_ITEM_TYPE[SignificantItemTypeKeys];
+export type SignificantItemType = (typeof SIGNIFICANT_ITEM_TYPE)[SignificantItemTypeKeys];
 
 /**
  * Represents significant item metadata for a field/value pair.
@@ -161,24 +180,12 @@ interface SignificantItemHistogramItemBase {
 }
 
 /**
- * @deprecated since version 2 of internal log rate analysis REST API endpoint
+ * Represents a data item in a significant term histogram.
  */
-interface SignificantItemHistogramItemV1 extends SignificantItemHistogramItemBase {
-  /** The document count for this item in the significant term context. */
-  doc_count_significant_term: number;
-}
-
-interface SignificantItemHistogramItemV2 extends SignificantItemHistogramItemBase {
+export interface SignificantItemHistogramItem extends SignificantItemHistogramItemBase {
   /** The document count for this histogram item in the significant item context. */
   doc_count_significant_item: number;
 }
-
-/**
- * Represents a data item in a significant term histogram.
- */
-export type SignificantItemHistogramItem =
-  | SignificantItemHistogramItemV1
-  | SignificantItemHistogramItemV2;
 
 /**
  * Represents histogram data for a field/value pair.

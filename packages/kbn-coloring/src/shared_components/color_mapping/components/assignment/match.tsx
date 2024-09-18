@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,7 +16,6 @@ import { ColorMapping } from '../../config';
 
 export const Match: React.FC<{
   index: number;
-  editable: boolean;
   rule:
     | ColorMapping.RuleAuto
     | ColorMapping.RuleMatchExactly
@@ -25,7 +25,7 @@ export const Match: React.FC<{
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
   assignmentValuesCounter: Map<string | string[], number>;
-}> = ({ index, rule, updateValue, editable, options, specialTokens, assignmentValuesCounter }) => {
+}> = ({ index, rule, updateValue, options, specialTokens, assignmentValuesCounter }) => {
   const duplicateWarning = i18n.translate(
     'coloring.colorMapping.assignments.duplicateCategoryWarning',
     {
@@ -74,8 +74,8 @@ export const Match: React.FC<{
   return (
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
+        isClearable
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
-        isDisabled={!editable}
         fullWidth={true}
         aria-label={i18n.translate('coloring.colorMapping.assignments.autoAssignedTermAriaLabel', {
           defaultMessage:
@@ -84,7 +84,7 @@ export const Match: React.FC<{
         placeholder={i18n.translate(
           'coloring.colorMapping.assignments.autoAssignedTermPlaceholder',
           {
-            defaultMessage: 'Auto assigned',
+            defaultMessage: 'Auto assigning term',
           }
         )}
         options={convertedOptions}
@@ -100,11 +100,11 @@ export const Match: React.FC<{
           );
         }}
         onCreateOption={(label) => {
-          if (selectedOptions.findIndex((option) => option.label.toLowerCase() === label) === -1) {
+          if (selectedOptions.findIndex((option) => option.label === label) === -1) {
             updateValue([...selectedOptions, { label, value: label }].map((d) => d.value));
           }
         }}
-        isClearable={false}
+        isCaseSensitive
         compressed
       />
     </EuiFlexItem>

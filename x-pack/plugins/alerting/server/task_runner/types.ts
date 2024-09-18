@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  Logger,
+  KibanaRequest,
+  IBasePath,
+  ExecutionContextStart,
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
 import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
-import { TaskRunnerContext } from './task_runner_factory';
+import { AlertsService } from '../alerts_service/alerts_service';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -23,11 +38,25 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleSystemAction,
+  RulesSettingsFlappingProperties,
 } from '../../common';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
+import {
+  CombinedSummarizedAlerts,
+  MaintenanceWindowClientApi,
+  RawRule,
+  RulesClientApi,
+  RuleTypeRegistry,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { BackfillClient } from '../backfill_client/backfill_client';
+import { ElasticsearchError } from '../lib';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { RulesSettingsService } from '../rules_settings';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -42,20 +71,20 @@ export type RuleTaskStateAndMetrics = RuleTaskState & {
 };
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
-  fakeRequest: KibanaRequest;
-  rulesClient: RulesClientApi;
-  rule: SanitizedRule<Params>;
   apiKey: RawRule['apiKey'];
+  fakeRequest: KibanaRequest;
+  rule: SanitizedRule<Params>;
+  rulesClient: RulesClientApi;
   validatedParams: Params;
+  version: string | undefined;
 }
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-// / ExecutionHandler
-
-export interface ExecutionHandlerOptions<
+// ActionScheduler
+export interface ActionSchedulerOptions<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
@@ -96,7 +125,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -107,3 +136,49 @@ export type Executable<
       summarizedAlerts: CombinedSummarizedAlerts;
     }
 );
+
+export interface RuleTypeRunnerContext {
+  alertingEventLogger: AlertingEventLogger;
+  flappingSettings?: RulesSettingsFlappingProperties;
+  namespace?: string;
+  queryDelaySec?: number;
+  ruleId: string;
+  ruleLogPrefix: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
+  spaceId: string;
+}
+
+export interface RuleRunnerErrorStackTraceLog {
+  message: ElasticsearchError;
+  stackTrace?: string;
+}
+
+export interface TaskRunnerContext {
+  actionsConfigMap: ActionsConfigMap;
+  actionsPlugin: ActionsPluginStartContract;
+  alertsService: AlertsService | null;
+  backfillClient: BackfillClient;
+  basePathService: IBasePath;
+  cancelAlertsOnRuleTimeout: boolean;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
+  data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+  elasticsearch: ElasticsearchServiceStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  eventLogger: IEventLogger;
+  executionContext: ExecutionContextStart;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  kibanaBaseUrl: string | undefined;
+  logger: Logger;
+  maxAlerts: number;
+  maxEphemeralActionsPerRule: number;
+  ruleTypeRegistry: RuleTypeRegistry;
+  rulesSettingsService: RulesSettingsService;
+  savedObjects: SavedObjectsServiceStart;
+  share: SharePluginStart;
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  supportsEphemeralTasks: boolean;
+  uiSettings: UiSettingsServiceStart;
+  usageCounter?: UsageCounter;
+}

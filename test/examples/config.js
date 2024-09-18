@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -18,7 +19,6 @@ export default async function ({ readConfigFile }) {
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
-      require.resolve('./embeddables'),
       require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./unified_field_list_examples'),
       require.resolve('./discover_customization_examples'),
       require.resolve('./error_boundary'),
+      require.resolve('./response_stream'),
     ],
     services: {
       ...functionalConfig.get('services'),

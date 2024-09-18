@@ -11,6 +11,7 @@ const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
   schema.literal('maxQueuedActions'),
+  schema.literal('ruleExecution'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([
@@ -194,7 +195,7 @@ const rawRuleAlertsFilterSchema = schema.object({
 
 const rawRuleActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   actionRef: schema.string(),
   actionTypeId: schema.string(),
   params: schema.recordOf(schema.string(), schema.any()),
@@ -213,7 +214,7 @@ const rawRuleActionSchema = schema.object({
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
-export const notificationDelaySchema = schema.object({
+export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
@@ -274,5 +275,5 @@ export const rawRuleSchema = schema.object({
   ),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
   typeVersion: schema.maybe(schema.number()),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
 });

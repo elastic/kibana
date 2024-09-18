@@ -11,8 +11,10 @@ import {
   ALERT_SEVERITY,
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
+import { EventKind } from '../constants/event_kinds';
+import type { GetFieldsData } from '../hooks/use_get_fields_data';
 
-const mockFieldData: Record<string, string[]> = {
+export const mockFieldData: Record<string, string[]> = {
   [ALERT_SEVERITY]: ['low'],
   [ALERT_RISK_SCORE]: ['0'],
   'host.name': ['host1'],
@@ -20,6 +22,11 @@ const mockFieldData: Record<string, string[]> = {
   [ALERT_REASON]: ['reason'],
   [ALERT_SUPPRESSION_DOCS_COUNT]: ['1'],
   '@timestamp': ['2023-01-01T00:00:00.000Z'],
+  'event.kind': [EventKind.signal],
+  'kibana.alert.original_time': ['2023-01-01T00:00:00.000Z'],
+  'process.entity_id': ['process.entity_id'],
+  'process.entry_leader.entity_id': ['process.entry_leader.entity_id'],
+  'process.entry_leader.start': ['process.entry_leader.start'],
 };
 
 /**
@@ -27,4 +34,5 @@ const mockFieldData: Record<string, string[]> = {
  * @param field
  * @returns string[]
  */
-export const mockGetFieldsData = (field: string): string[] => mockFieldData[field] ?? [];
+export const mockGetFieldsData: GetFieldsData = (field: string): string[] =>
+  mockFieldData[field] ?? [];

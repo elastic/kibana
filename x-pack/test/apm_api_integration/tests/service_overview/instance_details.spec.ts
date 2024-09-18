@@ -17,7 +17,7 @@ type ServiceOverviewInstanceDetails =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
 
   const start = '2023-08-22T00:00:00.000Z';
   const end = '2023-08-22T01:00:00.000Z';
@@ -47,6 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177494
   registry.when('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
     const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 

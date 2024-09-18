@@ -28,7 +28,7 @@ export function PageErrorNotExist({ id }: { id?: string }) {
           {id ? (
             <FormattedMessage
               id="xpack.watcher.pageErrorNotExist.description"
-              defaultMessage="A watch with ID '{id}' could not be found."
+              defaultMessage="A watch with ID ''{id}'' could not be found."
               values={{ id }}
             />
           ) : (

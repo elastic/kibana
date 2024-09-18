@@ -31,6 +31,7 @@ export interface UpdateListItemOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   isPatch?: boolean;
+  refresh?: boolean;
 }
 
 export const updateListItem = async ({
@@ -43,6 +44,7 @@ export const updateListItem = async ({
   meta,
   dateNow,
   isPatch = false,
+  refresh = false,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const listItem = await getListItem({ esClient, id, listItemIndex });
@@ -81,7 +83,7 @@ export const updateListItem = async ({
             values: [id],
           },
         },
-        refresh: false,
+        refresh,
         script: {
           lang: 'painless',
           params,

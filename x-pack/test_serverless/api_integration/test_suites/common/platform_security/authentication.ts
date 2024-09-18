@@ -7,26 +7,38 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
+  const config = getService('config');
 
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
   describe('security/authentication', function () {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('route access', () => {
       describe('disabled', () => {
         // ToDo: uncomment when we disable login
         // it('login', async () => {
-        //   const { body, status } = await supertest
+        //   const { body, status } = await supertestWithoutAuth
         //     .post('/internal/security/login')
-        //     .set(svlCommonApi.getInternalRequestHeader());
+        //     .set(svlCommonApi.getInternalRequestHeader()).set(roleAuthc.apiKeyHeader)
         //   svlCommonApi.assertApiNotFound(body, status);
         // });
 
         it('logout (deprecated)', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .get('/api/security/v1/logout')
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
 
@@ -144,8 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: {},
             operator: true,
             roles: ['superuser'],
-            // We use `elastic` for MKI, and `elastic_serverless` for any other testing environment.
-            username: expect.stringContaining('elastic'),
+            username: config.get('servers.kibana.username'),
           });
           expect(status).toBe(200);
         });

@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { TimeBucketsInterval } from '../services/time_buckets';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -93,8 +93,14 @@ export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
-  topValuesSampleSize: number;
-  topValuesSamplerShardSize: number;
+  sampledValues?: Bucket[];
+  topValuesSampleSize?: number;
+  topValuesSamplerShardSize?: number;
+  /**
+   * Approximate: true for when the terms are from a random subset of the source data
+   * such that result/count for each term is not deterministic every time
+   */
+  approximate?: boolean;
 }
 
 export interface DateFieldStats {
@@ -205,8 +211,8 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 export interface FieldStatsCommonRequestParams {
   index: string;
   timeFieldName?: string;
-  earliestMs?: number | undefined;
-  latestMs?: number | undefined;
+  earliestMs?: number | string | undefined;
+  latestMs?: number | string | undefined;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
@@ -221,8 +227,8 @@ export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
-  earliest?: number;
-  latest?: number;
+  earliest?: number | string;
+  latest?: number | string;
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];
@@ -281,7 +287,7 @@ export const EMBEDDABLE_SAMPLER_OPTION = {
   NORMAL: 'normal_sampling',
 };
 export type FieldStatsEmbeddableSamplerOption =
-  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+  (typeof EMBEDDABLE_SAMPLER_OPTION)[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
 
 export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
   return arg.mode === 'random_sampling';

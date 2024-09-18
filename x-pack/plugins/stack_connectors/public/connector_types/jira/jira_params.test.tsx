@@ -12,7 +12,7 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -37,6 +37,7 @@ const actionParams = {
       priority: 'High',
       externalId: null,
       parent: null,
+      otherFields: null,
     },
     comments: [],
   },
@@ -149,6 +150,7 @@ describe('JiraParamsFields renders', () => {
     expect(results.getByTestId('descriptionTextArea')).toBeInTheDocument();
     expect(results.getByTestId('labelsComboBox')).toBeInTheDocument();
     expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
+    expect(results.getByTestId('otherFieldsJsonEditor')).toBeInTheDocument();
   });
 
   it('it shows loading when loading issue types', () => {
@@ -352,7 +354,7 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.description).toEqual('new desc');
     });
 
-    it('updates issue type', () => {
+    it('updates issue type', async () => {
       const results = render(<JiraParamsFields {...defaultProps} />);
 
       expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
@@ -360,12 +362,10 @@ describe('JiraParamsFields renders', () => {
         true
       );
 
-      act(() => {
-        userEvent.selectOptions(
-          results.getByTestId('issueTypeSelect'),
-          results.getByRole('option', { name: 'Task' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('issueTypeSelect'),
+        results.getByRole('option', { name: 'Task' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.issueType).toEqual('10005');
     });
@@ -381,12 +381,10 @@ describe('JiraParamsFields renders', () => {
         );
       });
 
-      act(() => {
-        userEvent.selectOptions(
-          results.getByTestId('prioritySelect'),
-          results.getByRole('option', { name: 'Medium' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('prioritySelect'),
+        results.getByRole('option', { name: 'Medium' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
     });
@@ -475,6 +473,29 @@ describe('JiraParamsFields renders', () => {
       ]);
     });
 
+    it('updates additional fields', () => {
+      const TEST_VALUE = '{"field_id":"bar"}';
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const otherFields = results.getByTestId('otherFieldsJsonEditor');
+
+      fireEvent.change(otherFields, {
+        target: { value: TEST_VALUE },
+      });
+
+      expect(editAction.mock.calls[0][1].incident.otherFields).toEqual(TEST_VALUE);
+    });
+
+    it('updating additional fields with an empty string sets its value to null', async () => {
+      render(<JiraParamsFields {...defaultProps} />);
+      const otherFields = await screen.findByTestId('otherFieldsJsonEditor');
+
+      await userEvent.click(otherFields);
+      await userEvent.paste('foobar');
+      await userEvent.clear(otherFields);
+
+      expect(editAction.mock.calls[1][1].incident.otherFields).toEqual(null);
+    });
+
     it('Clears any left behind priority when issueType changes and hasPriority becomes false', async () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
@@ -524,6 +545,13 @@ describe('JiraParamsFields renders', () => {
           true
         );
       });
+    });
+
+    it('renders additional info for the additional fields field', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const additionalFields = results.getByText('Additional fields help');
+
+      expect(additionalFields).toBeInTheDocument();
     });
   });
 });

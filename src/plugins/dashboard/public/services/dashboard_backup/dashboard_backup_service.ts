@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom } from 'rxjs';
@@ -20,10 +21,15 @@ import type { DashboardBackupServiceType } from './types';
 import type { DashboardContainerInput } from '../../../common';
 import { DashboardNotificationsService } from '../notifications/types';
 import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
+import { UnsavedPanelState } from '../../dashboard_container/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
-const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
+export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
+const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
+
+// this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
+const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
 interface DashboardBackupRequiredServices {
   notifications: DashboardNotificationsService;
@@ -75,11 +81,22 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      const sessionStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY);
-      const sessionStorageForSpace = sessionStorage?.[this.activeSpaceId] || {};
-      if (sessionStorageForSpace[id]) {
-        delete sessionStorageForSpace[id];
-        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStorage);
+      const dashboardStateStorage =
+        this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
+      if (dashboardStateStorage[id]) {
+        delete dashboardStateStorage[id];
+        this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, {
+          [this.activeSpaceId]: dashboardStateStorage,
+        });
+      }
+
+      const panelsStorage =
+        this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] ?? {};
+      if (panelsStorage[id]) {
+        delete panelsStorage[id];
+        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, {
+          [this.activeSpaceId]: panelsStorage,
+        });
       }
     } catch (e) {
       this.notifications.toasts.addDanger({
@@ -89,9 +106,16 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public getState(id = DASHBOARD_PANELS_UNSAVED_ID): Partial<DashboardContainerInput> | undefined {
+  public getState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
+      const dashboardState = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[
+        this.activeSpaceId
+      ]?.[id] as Partial<DashboardContainerInput> | undefined;
+      const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[
+        id
+      ] as UnsavedPanelState | undefined;
+
+      return { dashboardState, panels };
     } catch (e) {
       this.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),
@@ -100,11 +124,19 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardContainerInput>) {
+  public setState(
+    id = DASHBOARD_PANELS_UNSAVED_ID,
+    newState: Partial<DashboardContainerInput>,
+    unsavedPanels: UnsavedPanelState
+  ) {
     try {
-      const sessionStateStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-      set(sessionStateStorage, [this.activeSpaceId, id], newState);
-      this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStateStorage);
+      const dashboardStateStorage = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
+      set(dashboardStateStorage, [this.activeSpaceId, id], newState);
+      this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, dashboardStateStorage);
+
+      const panelsStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) ?? {};
+      set(panelsStorage, [this.activeSpaceId, id], unsavedPanels);
+      this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, panelsStorage, true);
     } catch (e) {
       this.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsSetError(e.message),
@@ -116,18 +148,25 @@ class DashboardBackupService implements DashboardBackupServiceType {
   public getDashboardIdsWithUnsavedChanges() {
     try {
       const dashboardStatesInSpace =
-        this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {};
-      const dashboardsWithUnsavedChanges: string[] = [];
+        this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
+      const panelStatesInSpace =
+        this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] ?? {};
 
-      Object.keys(dashboardStatesInSpace).map((dashboardId) => {
-        if (
-          dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
-          Object.keys(dashboardStatesInSpace[dashboardId]).some(
-            (stateKey) => stateKey !== 'viewMode'
+      const dashboardsSet: Set<string> = new Set<string>();
+
+      [...Object.keys(panelStatesInSpace), ...Object.keys(dashboardStatesInSpace)].map(
+        (dashboardId) => {
+          if (
+            dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
+            (Object.keys(dashboardStatesInSpace[dashboardId]).some(
+              (stateKey) => stateKey !== 'viewMode'
+            ) ||
+              Object.keys(panelStatesInSpace?.[dashboardId]).length > 0)
           )
-        )
-          dashboardsWithUnsavedChanges.push(dashboardId);
-      });
+            dashboardsSet.add(dashboardId);
+        }
+      );
+      const dashboardsWithUnsavedChanges = [...dashboardsSet];
 
       /**
        * Because we are storing these unsaved dashboard IDs in React component state, we only want things to be re-rendered

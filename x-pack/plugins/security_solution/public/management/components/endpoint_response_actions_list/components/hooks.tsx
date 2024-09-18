@@ -55,7 +55,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   });
 
   const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
+    ({ start, end }: DurationRange) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         startDate: start,
@@ -66,7 +66,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   );
 
   const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
+    (recentlyUsedDateRanges: DateRangePickerValues['recentlyUsedDateRanges']) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         recentlyUsedDateRanges,
@@ -153,6 +153,12 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
+interface GetTypesFilterInitialStateArguments {
+  isFlyout: boolean;
+  agentTypes?: string[];
+  types?: string[];
+}
+
 /**
  *
  * @param isSentinelOneV1Enabled
@@ -163,44 +169,67 @@ export type ActionsLogPopupFilters = Extract<
  * @description
  * sets the initial state of the types filter options
  */
-const getTypesFilterInitialState = (
-  isSentinelOneV1Enabled: boolean,
-  isFlyout: boolean,
-  agentTypes?: string[],
-  types?: string[]
-): FilterItems => {
-  const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
-    key,
-    label,
-    isGroupLabel: false,
-    checked,
-    'data-test-subj': `types-filter-option`,
-  });
+const useTypesFilterInitialState = ({
+  isFlyout,
+  agentTypes,
+  types,
+}: GetTypesFilterInitialStateArguments): FilterItems => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
+  const getFilterOptions = useCallback(
+    ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
+      key,
+      label,
+      isGroupLabel: false,
+      checked,
+      'data-test-subj': `types-filter-option`,
+    }),
+    []
+  );
 
   // action types filter options
-  const defaultFilterOptions = RESPONSE_ACTION_TYPE.map((type) =>
-    getFilterOptions({
-      key: type,
-      label: getTypeDisplayName(type),
-      checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
-    })
+  const defaultFilterOptions = useMemo(
+    () =>
+      RESPONSE_ACTION_TYPE.map((type) =>
+        getFilterOptions({
+          key: type,
+          label: getTypeDisplayName(type),
+          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+        })
+      ),
+    [getFilterOptions, isFlyout, types]
   );
 
   // v8.13 onwards
   // for showing agent types and action types in the same filter
-  if (isSentinelOneV1Enabled) {
+  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled) {
+    if (!isFlyout) {
+      return [
+        {
+          label: FILTER_NAMES.agentTypes,
+          isGroupLabel: true,
+        },
+        ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
+          getFilterOptions({
+            key: type,
+            label: getAgentTypeName(type),
+            checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
+          })
+        ),
+        {
+          label: FILTER_NAMES.actionTypes,
+          isGroupLabel: true,
+        },
+        ...defaultFilterOptions,
+      ];
+    }
+
     return [
-      {
-        label: FILTER_NAMES.agentTypes,
-        isGroupLabel: true,
-      },
-      ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
-        getFilterOptions({
-          key: type,
-          label: getAgentTypeName(type),
-          checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
-        })
-      ),
       {
         label: FILTER_NAMES.actionTypes,
         isGroupLabel: true,
@@ -236,10 +265,6 @@ export const useActionsLogFilter = ({
   // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
   setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-
   const {
     agentTypes = [],
     commands,
@@ -271,10 +296,15 @@ export const useActionsLogFilter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const typesFilterInitialState = useTypesFilterInitialState({
+    isFlyout,
+    agentTypes,
+    types,
+  });
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypesFilter
-      ? getTypesFilterInitialState(isSentinelOneV1Enabled, isFlyout, agentTypes, types)
+      ? typesFilterInitialState
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
@@ -290,6 +320,7 @@ export const useActionsLogFilter = ({
               status={getActionStatus(statusName)}
             />
           ) as unknown as string,
+          searchableLabel: statusName,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
@@ -336,7 +367,10 @@ export const useActionsLogFilter = ({
     () => items.filter((item) => item.checked === 'on').length,
     [items]
   );
-  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+  const numFilters = useMemo(
+    () => items.filter((item) => item.key && item.checked !== 'on').length,
+    [items]
+  );
 
   return {
     areHostsSelectedOnMount,

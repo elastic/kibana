@@ -1,0 +1,153 @@
+openapi: 3.0.0
+info:
+  title: Create Conversation API endpoint
+  version: '2023-10-31'
+paths:
+  /api/security_ai_assistant/current_user/conversations:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateConversation
+      description: Create a new Security AI Assistant conversation.
+      summary: Create a conversation
+      tags:
+        - Conversation API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+  /api/security_ai_assistant/current_user/conversations/{id}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ReadConversation
+      description: Get the details of an existing conversation using the conversation ID.
+      summary: Get a conversation
+      tags:
+        - Conversations API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    put:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpdateConversation
+      description: Update an existing conversation using the conversation ID.
+      summary: Update a conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    delete:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeleteConversation
+      description: Delete an existing conversation using the conversation ID.
+      summary: Delete a conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

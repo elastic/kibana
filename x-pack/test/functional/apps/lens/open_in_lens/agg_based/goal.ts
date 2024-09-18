@@ -155,7 +155,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'ios',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,047,486.03',
+          value: '65,047,486.03%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
@@ -165,7 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '66,144,823.35',
+          value: '66,144,823.35%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
@@ -175,7 +175,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,933,477.76',
+          value: '65,933,477.76%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
@@ -185,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 8',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,157,898.23',
+          value: '65,157,898.23%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
@@ -195,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,365,950.93',
+          value: '65,365,950.93%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
@@ -215,7 +215,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

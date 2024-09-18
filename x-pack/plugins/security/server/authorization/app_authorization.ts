@@ -6,7 +6,7 @@
  */
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 
 class ProtectedApplications {

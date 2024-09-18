@@ -6,15 +6,16 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, map } from 'rxjs';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-  ISearchStart,
-} from '@kbn/data-plugin/public';
+} from '@kbn/search-types';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
@@ -24,8 +25,9 @@ import type {
   Field,
   FieldStatsCommonRequestParams,
   StringFieldStats,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
@@ -83,6 +85,7 @@ export const fetchStringFieldsStats = (
       ),
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
+
         const aggregations = resp.rawResponse.aggregations;
 
         const aggsPath = ['sample'];
@@ -97,7 +100,9 @@ export const fetchStringFieldsStats = (
 
           const { topValuesSampleSize, topValues } = processTopValues(
             fieldAgg,
-            get(aggregations, ['sample', 'doc_count'])
+            get(aggregations, ['sample', 'probability']) < 1
+              ? get(aggregations, ['sample', 'doc_count'])
+              : undefined
           );
           const stats = {
             fieldName: field.fieldName,

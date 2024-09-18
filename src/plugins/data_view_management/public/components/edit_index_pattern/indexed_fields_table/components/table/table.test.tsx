@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,9 +12,9 @@ import { shallow } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
-import { overlayServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 
-const theme = themeServiceMock.createStartContract();
+const coreStart = coreMock.createStart();
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -91,7 +92,7 @@ const renderTable = (
       editField={editField}
       deleteField={() => {}}
       openModal={overlayServiceMock.createStartContract().openModal}
-      theme={theme}
+      startServices={coreStart}
     />
   );
 

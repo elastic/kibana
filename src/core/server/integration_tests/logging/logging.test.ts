@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { Subject } from 'rxjs';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 function createRoot() {
   return createkbnTestServerRoot({
@@ -45,7 +47,7 @@ describe('logging service', () => {
     let root: ReturnType<typeof createRoot>;
     let mockConsoleLog: jest.SpyInstance;
     beforeAll(async () => {
-      mockConsoleLog = jest.spyOn(global.console, 'log');
+      mockConsoleLog = jest.spyOn(unsafeConsole, 'log');
       root = createRoot();
 
       await root.preboot();
@@ -148,7 +150,7 @@ describe('logging service', () => {
     };
 
     beforeAll(async () => {
-      mockConsoleLog = jest.spyOn(global.console, 'log');
+      mockConsoleLog = jest.spyOn(unsafeConsole, 'log');
       root = createRoot();
 
       await root.preboot();

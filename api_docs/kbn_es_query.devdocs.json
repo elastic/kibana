@@ -678,8 +678,8 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
+            "section": "def-common.DataViewBaseNoFields",
+            "text": "DataViewBaseNoFields"
           },
           ") => ",
           {
@@ -731,8 +731,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
+                "section": "def-common.DataViewBaseNoFields",
+                "text": "DataViewBaseNoFields"
               }
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/exists_filter.ts",
@@ -997,8 +997,8 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
+            "section": "def-common.DataViewBaseNoFields",
+            "text": "DataViewBaseNoFields"
           },
           ") => ",
           {
@@ -1069,8 +1069,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
+                "section": "def-common.DataViewBaseNoFields",
+                "text": "DataViewBaseNoFields"
               }
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.ts",
@@ -1109,8 +1109,8 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
+            "section": "def-common.DataViewBaseNoFields",
+            "text": "DataViewBaseNoFields"
           },
           ") => ",
           {
@@ -1174,8 +1174,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
+                "section": "def-common.DataViewBaseNoFields",
+                "text": "DataViewBaseNoFields"
               }
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.ts",
@@ -1448,8 +1448,8 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
+            "section": "def-common.DataViewBaseNoFields",
+            "text": "DataViewBaseNoFields"
           },
           " | undefined, formattedValue?: string | undefined) => ",
           {
@@ -1528,8 +1528,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
+                "section": "def-common.DataViewBaseNoFields",
+                "text": "DataViewBaseNoFields"
               },
               " | undefined"
             ],
@@ -2570,7 +2570,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          ") => never"
+          ") => \"esql\""
         ],
         "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
@@ -2579,7 +2579,7 @@
           {
             "parentPluginId": "@kbn/es-query",
             "id": "def-common.getAggregateQueryMode.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
@@ -2675,6 +2675,86 @@
               "HasSubtype"
             ],
             "path": "packages/kbn-es-query/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getKqlFieldNames",
+        "type": "Function",
+        "tags": [],
+        "label": "getKqlFieldNames",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.KueryNode",
+            "text": "KueryNode"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/utils/get_kql_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getKqlFieldNames.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/kuery/utils/get_kql_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getKqlFieldNamesFromExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "getKqlFieldNamesFromExpression",
+        "description": [],
+        "signature": [
+          "(expression: string) => string[]"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/utils/get_kql_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getKqlFieldNamesFromExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/utils/get_kql_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4325,8 +4405,6 @@
           "FilterMetaParams",
           " | undefined; length: number; toString(): string; toLocaleString(): string; pop(): boolean | undefined; push(...items: boolean[]): number; concat(...items: ConcatArray<boolean>[]): boolean[]; concat(...items: (boolean | ConcatArray<boolean>)[]): boolean[]; join(separator?: string | undefined): string; reverse(): boolean[]; shift(): boolean | undefined; slice(start?: number | undefined, end?: number | undefined): boolean[]; sort(compareFn?: ((a: boolean, b: boolean) => number) | undefined): boolean[]; splice(start: number, deleteCount?: number | undefined): boolean[]; splice(start: number, deleteCount: number, ...items: boolean[]): boolean[]; unshift(...items: boolean[]): number; indexOf(searchElement: boolean, fromIndex?: number | undefined): number; lastIndexOf(searchElement: boolean, fromIndex?: number | undefined): number; every<S extends boolean>(predicate: (value: boolean, index: number, array: boolean[]) => value is S, thisArg?: any): this is S[]; every(predicate: (value: boolean, index: number, array: boolean[]) => unknown, thisArg?: any): boolean; some(predicate: (value: boolean, index: number, array: boolean[]) => unknown, thisArg?: any): boolean; forEach(callbackfn: (value: boolean, index: number, array: boolean[]) => void, thisArg?: any): void; map<U>(callbackfn: (value: boolean, index: number, array: boolean[]) => U, thisArg?: any): U[]; filter<S extends boolean>(predicate: (value: boolean, index: number, array: boolean[]) => value is S, thisArg?: any): S[]; filter(predicate: (value: boolean, index: number, array: boolean[]) => unknown, thisArg?: any): boolean[]; reduce(callbackfn: (previousValue: boolean, currentValue: boolean, currentIndex: number, array: boolean[]) => boolean): boolean; reduce(callbackfn: (previousValue: boolean, currentValue: boolean, currentIndex: number, array: boolean[]) => boolean, initialValue: boolean): boolean; reduce<U>(callbackfn: (previousValue: U, currentValue: boolean, currentIndex: number, array: boolean[]) => U, initialValue: U): U; reduceRight(callbackfn: (previousValue: boolean, currentValue: boolean, currentIndex: number, array: boolean[]) => boolean): boolean; reduceRight(callbackfn: (previousValue: boolean, currentValue: boolean, currentIndex: number, array: boolean[]) => boolean, initialValue: boolean): boolean; reduceRight<U>(callbackfn: (previousValue: U, currentValue: boolean, currentIndex: number, array: boolean[]) => U, initialValue: U): U; find<S extends boolean>(predicate: (this: void, value: boolean, index: number, obj: boolean[]) => value is S, thisArg?: any): S | undefined; find(predicate: (value: boolean, index: number, obj: boolean[]) => unknown, thisArg?: any): boolean | undefined; findIndex(predicate: (value: boolean, index: number, obj: boolean[]) => unknown, thisArg?: any): number; fill(value: boolean, start?: number | undefined, end?: number | undefined): boolean[]; copyWithin(target: number, start: number, end?: number | undefined): boolean[]; entries(): IterableIterator<[number, boolean]>; keys(): IterableIterator<number>; values(): IterableIterator<boolean>; includes(searchElement: boolean, fromIndex?: number | undefined): boolean; flatMap<U, This = undefined>(callback: (this: This, value: boolean, index: number, array: boolean[]) => U | readonly U[], thisArg?: This | undefined): U[]; flat<A, D extends number = 1>(this: A, depth?: D | undefined): FlatArray<A, D>[]; at(index: number): boolean | undefined; [Symbol.iterator](): IterableIterator<boolean>; [Symbol.unscopables](): { copyWithin: boolean; entries: boolean; fill: boolean; find: boolean; findIndex: boolean; keys: boolean; values: boolean; }; } | { query: ",
           "FilterMetaParams",
-          " | undefined; from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | undefined; } | { query: ",
-          "FilterMetaParams",
           " | undefined; length: number; toString(): string; toLocaleString(): string; pop(): number | undefined; push(...items: number[]): number; concat(...items: ConcatArray<number>[]): number[]; concat(...items: (number | ConcatArray<number>)[]): number[]; join(separator?: string | undefined): string; reverse(): number[]; shift(): number | undefined; slice(start?: number | undefined, end?: number | undefined): number[]; sort(compareFn?: ((a: number, b: number) => number) | undefined): number[]; splice(start: number, deleteCount?: number | undefined): number[]; splice(start: number, deleteCount: number, ...items: number[]): number[]; unshift(...items: number[]): number; indexOf(searchElement: number, fromIndex?: number | undefined): number; lastIndexOf(searchElement: number, fromIndex?: number | undefined): number; every<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): this is S[]; every(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; some(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; forEach(callbackfn: (value: number, index: number, array: number[]) => void, thisArg?: any): void; map<U>(callbackfn: (value: number, index: number, array: number[]) => U, thisArg?: any): U[]; filter<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): S[]; filter(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): number[]; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; find<S extends number>(predicate: (this: void, value: number, index: number, obj: number[]) => value is S, thisArg?: any): S | undefined; find(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number | undefined; findIndex(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number; fill(value: number, start?: number | undefined, end?: number | undefined): number[]; copyWithin(target: number, start: number, end?: number | undefined): number[]; entries(): IterableIterator<[number, number]>; keys(): IterableIterator<number>; values(): IterableIterator<number>; includes(searchElement: number, fromIndex?: number | undefined): boolean; flatMap<U, This = undefined>(callback: (this: This, value: number, index: number, array: number[]) => U | readonly U[], thisArg?: This | undefined): U[]; flat<A, D extends number = 1>(this: A, depth?: D | undefined): FlatArray<A, D>[]; at(index: number): number | undefined; [Symbol.iterator](): IterableIterator<number>; [Symbol.unscopables](): { copyWithin: boolean; entries: boolean; fill: boolean; find: boolean; findIndex: boolean; keys: boolean; values: boolean; }; } | { query: ",
           "FilterMetaParams",
           " | undefined; $state?: { store: ",
@@ -4346,6 +4424,8 @@
             "text": "FilterMeta"
           },
           "; } | { query: ",
+          "FilterMetaParams",
+          " | undefined; from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | undefined; } | { query: ",
           "FilterMetaParams",
           " | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type: \"range\"; key?: string | undefined; params?: (",
           "FilterMetaParams",
@@ -5249,6 +5329,99 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataViewBase",
+        "description": [
+          "\nA base interface for an index pattern"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBaseNoFields",
+            "text": "DataViewBaseNoFields"
+          }
+        ],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.DataViewBase.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewBaseNoFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataViewBaseNoFields",
+        "description": [],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.DataViewBaseNoFields.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.DataViewBaseNoFields.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-es-query/src/es_query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.EsQueryFiltersConfig",
         "type": "Interface",
         "tags": [],
@@ -5885,7 +6058,7 @@
         "label": "AggregateQuery",
         "description": [],
         "signature": [
-          "{ sql: string; } | { esql: string; }"
+          "{ esql: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
         "deprecated": false,
@@ -5919,31 +6092,6 @@
           "; query?: Record<string, any> | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/custom_filter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.DataViewBase",
-        "type": "Type",
-        "tags": [],
-        "label": "DataViewBase",
-        "description": [
-          "\nA base interface for an index pattern"
-        ],
-        "signature": [
-          "{ fields: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          "[]; id?: string | undefined; title: string; }"
-        ],
-        "path": "packages/kbn-es-query/src/es_query/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6391,7 +6539,7 @@
           " & { meta: ",
           "PhraseFilterMeta",
           "; query: { script: { script: ",
-          "InlineScript",
+          "Script",
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.ts",
@@ -6423,7 +6571,7 @@
             "text": "RangeFilterMeta"
           },
           "; query: { script: { script: ",
-          "InlineScript",
+          "Script",
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
@@ -6730,7 +6878,7 @@
             "label": "range",
             "description": [],
             "signature": [
-              "(fieldName: string, operator: \"gt\" | \"gte\" | \"lt\" | \"lte\", value: string | number) => ",
+              "(fieldName: string, operator: \"gte\" | \"lte\" | \"gt\" | \"lt\", value: string | number) => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -6766,7 +6914,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"gt\" | \"gte\" | \"lt\" | \"lte\""
+                  "\"gte\" | \"lte\" | \"gt\" | \"lt\""
                 ],
                 "path": "packages/kbn-es-query/src/kuery/node_types/node_builder.ts",
                 "deprecated": false,

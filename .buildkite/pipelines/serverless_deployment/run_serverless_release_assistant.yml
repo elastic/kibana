@@ -1,0 +1,46 @@
+## Lists potential commits for deployment
+## Creates deploy@<timestamp> tag on Kibana
+## Then kicks of the deployment to QA
+
+agents:
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: "List potential commits"
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state initialize
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state collect_commits
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/list_commit_candidates.ts 50
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_selection
+    key: select_commit
+    env:
+      AUTO_SELECT_COMMIT: $AUTO_SELECT_COMMIT
+
+  - wait: ~
+
+  - label: "Collect commit info"
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state collect_commit_info
+      - bash .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state wait_for_confirmation
+    key: collect_data
+    depends_on: select_commit
+    env:
+      AUTO_SELECT_COMMIT: $AUTO_SELECT_COMMIT
+
+  - wait: ~
+
+  - label: ":ship: Create Deploy Tag"
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state create_deploy_tag
+      - bash .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state tag_created
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_gpctl_trigger.ts
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_wizard_messaging.ts --state trigger_gpctl
+    env:
+      DRY_RUN: $DRY_RUN
+
+  - wait: ~

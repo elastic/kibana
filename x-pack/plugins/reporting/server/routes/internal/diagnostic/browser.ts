@@ -7,10 +7,10 @@
 
 import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
 import type { ReportingCore } from '../../..';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
@@ -40,10 +40,10 @@ const path = INTERNAL_ROUTES.DIAGNOSE.BROWSER;
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
-  router.post(
+  router.get(
     {
       path,
-      validate: {},
+      validate: false,
       options: { access: 'internal' },
     },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {

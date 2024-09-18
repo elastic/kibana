@@ -7,8 +7,7 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
@@ -17,15 +16,15 @@ import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
@@ -70,7 +69,7 @@ const mockRuleApis = {
 };
 
 const authorizedConsumers = {
-  [ALERTS_FEATURE_ID]: { read: true, all: true },
+  [ALERTING_FEATURE_ID]: { read: true, all: true },
 };
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
@@ -82,7 +81,7 @@ const ruleType: RuleType = {
   actionVariables: { context: [], state: [], params: [] },
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   enabledInLicense: true,
 };
@@ -92,7 +91,7 @@ describe('rule_details', () => {
     it('renders the rule name as a title', () => {
       const rule = mockRule();
       expect(
-        shallow(
+        shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         ).find('EuiPageHeader')
       ).toBeTruthy();
@@ -101,7 +100,7 @@ describe('rule_details', () => {
     it('renders the rule type badge', () => {
       const rule = mockRule();
       expect(
-        shallow(
+        shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         ).find(<EuiBadge>{ruleType.name}</EuiBadge>)
       ).toBeTruthy();
@@ -130,7 +129,9 @@ describe('rule_details', () => {
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
       expect(
-        shallow(<RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />)
+        shallowWithIntl(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        )
           .find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
           .exists()
       ).toBeFalsy();
@@ -148,12 +149,60 @@ describe('rule_details', () => {
           },
         },
       });
-      const wrapper = shallow(
+      const wrapper = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       );
-      expect(
-        wrapper.find('[data-test-subj="ruleErrorBanner"]').first().text()
-      ).toMatchInlineSnapshot(`"<EuiIcon /> Cannot run rule, test <FormattedMessage />"`);
+      expect(wrapper.find('[data-test-subj="ruleErrorBanner"]').first().shallow())
+        .toMatchInlineSnapshot(`
+        <EuiPanel
+          borderRadius="none"
+          color="danger"
+          css="unknown styles"
+          data-test-subj="ruleErrorBanner"
+          grow={false}
+          paddingSize="s"
+          panelRef={null}
+        >
+          <p
+            className="euiCallOutHeader__title"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              color="inherit"
+              css="unknown styles"
+              size="m"
+              type="error"
+            />
+            Cannot run rule
+          </p>
+          <EuiSpacer
+            size="s"
+          />
+          <EuiText
+            color="default"
+            size="xs"
+          >
+            <EuiText
+              size="xs"
+            >
+              test
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiPanel>
+      `);
     });
 
     it('renders the rule warning banner with warning message, when rule status is a warning', () => {
@@ -168,7 +217,7 @@ describe('rule_details', () => {
           },
         },
       });
-      const wrapper = shallow(
+      const wrapper = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       );
       expect(
@@ -296,7 +345,7 @@ describe('rule_details', () => {
       it('links to the app that created the rule', () => {
         const rule = mockRule();
         expect(
-          shallow(
+          shallowWithIntl(
             <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
           ).find('ViewInApp')
         ).toBeTruthy();
@@ -304,29 +353,28 @@ describe('rule_details', () => {
 
       it('links to the Edit flyout', () => {
         const rule = mockRule();
-        const pageHeaderProps = shallow(
+        const pageHeaderProps = shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         )
           .find('EuiPageHeader')
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
-      `);
+          <React.Fragment>
+            <EuiButtonEmpty
+              data-test-subj="openEditRuleFlyoutButton"
+              disabled={false}
+              iconType="pencil"
+              name="edit"
+              onClick={[Function]}
+            >
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Edit"
+                id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+              />
+            </EuiButtonEmpty>
+          </React.Fragment>
+        `);
       });
     });
   });
@@ -372,29 +420,28 @@ describe('rule_details', () => {
           },
         ],
       });
-      const pageHeaderProps = shallow(
+      const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
         .find('EuiPageHeader')
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <EuiButtonEmpty
-          data-test-subj="openEditRuleFlyoutButton"
-          disabled={false}
-          iconType="pencil"
-          name="edit"
-          onClick={[Function]}
-        >
-          <FormattedMessage
-            defaultMessage="Edit"
-            id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </React.Fragment>
-    `);
+        <React.Fragment>
+          <EuiButtonEmpty
+            data-test-subj="openEditRuleFlyoutButton"
+            disabled={false}
+            iconType="pencil"
+            name="edit"
+            onClick={[Function]}
+          >
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Edit"
+              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+            />
+          </EuiButtonEmpty>
+        </React.Fragment>
+      `);
     });
 
     it('should not render an edit button when rule editable but actions arent', () => {
@@ -413,7 +460,7 @@ describe('rule_details', () => {
         ],
       });
       expect(
-        shallow(
+        shallowWithIntl(
           <RuleDetails
             rule={rule}
             ruleType={ruleType}
@@ -436,29 +483,28 @@ describe('rule_details', () => {
         muteAll: false,
         actions: [],
       });
-      const pageHeaderProps = shallow(
+      const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
         .find('EuiPageHeader')
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <EuiButtonEmpty
-          data-test-subj="openEditRuleFlyoutButton"
-          disabled={false}
-          iconType="pencil"
-          name="edit"
-          onClick={[Function]}
-        >
-          <FormattedMessage
-            defaultMessage="Edit"
-            id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </React.Fragment>
-    `);
+        <React.Fragment>
+          <EuiButtonEmpty
+            data-test-subj="openEditRuleFlyoutButton"
+            disabled={false}
+            iconType="pencil"
+            name="edit"
+            onClick={[Function]}
+          >
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Edit"
+              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+            />
+          </EuiButtonEmpty>
+        </React.Fragment>
+      `);
     });
   });
 
@@ -772,8 +818,16 @@ describe('rule_details', () => {
 
       disableButton.simulate('click');
 
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).toBeTruthy();
+
+      modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
+
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
+      });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -813,7 +867,7 @@ describe('rule_details', () => {
       name: `rule-${uuidv4()}`,
       tags: [],
       ruleTypeId: '.noop',
-      consumer: ALERTS_FEATURE_ID,
+      consumer: ALERTING_FEATURE_ID,
       schedule: { interval: '1m' },
       actions: [],
       params: {},

@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
@@ -20,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -33,18 +39,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item if no X-axis was specified', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - With Y-Axis only');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Heatmap - With Y-Axis only')).to.eql(true);
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - With X-Axis only');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Heatmap - With X-Axis only')).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - With X-Axis only');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Heatmap - With X-Axis only');
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -77,8 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens if Y-axis is defined, but X-axis is not', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - With Y-Axis only');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Heatmap - With Y-Axis only');
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -92,8 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should respect heatmap colors number', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - Color number');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Heatmap - Color number');
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -112,8 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show respect heatmap custom color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Heatmap - Custom Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Heatmap - Custom Color ranges');
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');

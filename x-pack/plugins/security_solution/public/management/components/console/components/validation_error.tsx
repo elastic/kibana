@@ -41,24 +41,31 @@ export const ValidationError = memo<
       }
       data-test-subj={getTestId('validationError')}
     >
-      <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
-      <EuiSpacer size="s" />
-      <CommandInputUsage commandDef={command.commandDefinition} />
-      <ConsoleCodeBlock>
-        <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.securitySolution.console.validationError.helpMessage"
-          defaultMessage="Enter {helpCmd} for further assistance."
-          values={{
-            helpCmd: (
-              <ConsoleCodeBlock
-                bold
-                inline
-              >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
-            ),
-          }}
-        />
-      </ConsoleCodeBlock>
+      <div data-test-subj={getTestId('validationError-message')}>
+        {store.errorMessage as ReactNode}
+      </div>
+
+      {!command.commandDefinition.helpHidden && (
+        <div data-test-subj={getTestId('validationError-commandUsage')}>
+          <EuiSpacer size="s" />
+          <CommandInputUsage commandDef={command.commandDefinition} />
+          <ConsoleCodeBlock>
+            <EuiSpacer size="m" />
+            <FormattedMessage
+              id="xpack.securitySolution.console.validationError.helpMessage"
+              defaultMessage="Enter {helpCmd} for further assistance."
+              values={{
+                helpCmd: (
+                  <ConsoleCodeBlock
+                    bold
+                    inline
+                  >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
+                ),
+              }}
+            />
+          </ConsoleCodeBlock>
+        </div>
+      )}
     </UnsupportedMessageCallout>
   );
 });

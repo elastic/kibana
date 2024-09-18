@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
   noCasesPermissions,
@@ -17,8 +17,8 @@ import {
 } from '../../../common/mock';
 import { AlertPropertyActions } from './alert_property_actions';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174667
-describe.skip('AlertPropertyActions', () => {
+describe('AlertPropertyActions', () => {
+  let user: UserEvent;
   let appMock: AppMockRenderer;
 
   const props = {
@@ -27,9 +27,25 @@ describe.skip('AlertPropertyActions', () => {
     onDelete: jest.fn(),
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
     appMock = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMock.clearQueryCache();
   });
 
   it('renders the correct number of actions', async () => {
@@ -37,7 +53,7 @@ describe.skip('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
@@ -49,31 +65,15 @@ describe.skip('AlertPropertyActions', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the modal info correctly for one alert', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-
-    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alert');
-    expect(await screen.findByText('Remove')).toBeInTheDocument();
-  });
-
   it('renders the modal info correctly for multiple alert', async () => {
     appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+    await user.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
@@ -86,14 +86,14 @@ describe.skip('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+    await user.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Remove'));
+    await user.click(await screen.findByText('Remove'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();

@@ -17,7 +17,10 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
@@ -26,7 +29,6 @@ import type { FieldValueThreshold } from '../../../../detection_engine/rule_crea
 import type {
   BuildingBlockType,
   RelatedIntegrationArray,
-  RequiredFieldArray,
   RuleAuthorArray,
   RuleLicense,
   RuleNameOverride,
@@ -37,6 +39,8 @@ import type {
   RuleAction,
   AlertSuppression,
   ThresholdAlertSuppression,
+  RelatedIntegration,
+  RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -101,6 +105,8 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  maxSignals?: number;
+  setup: SetupGuide;
 }
 
 export interface AboutStepRuleDetails {
@@ -143,8 +149,8 @@ export interface DefineStepRule {
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
   dataViewTitle?: string;
-  relatedIntegrations: RelatedIntegrationArray;
-  requiredFields: RequiredFieldArray;
+  relatedIntegrations?: RelatedIntegrationArray;
+  requiredFields?: RequiredFieldInput[];
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
@@ -187,7 +193,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertingRuleAction[];
+  actions: Array<AlertingRuleAction | AlertingRuleSystemAction>;
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
@@ -222,6 +228,8 @@ export interface DefineStepRuleJson {
   event_category_override?: string;
   tiebreaker_field?: string;
   alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
+  related_integrations?: RelatedIntegration[];
+  required_fields?: RequiredFieldInput[];
 }
 
 export interface AboutStepRuleJson {
@@ -240,11 +248,13 @@ export interface AboutStepRuleJson {
   rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: Threats;
+  setup: string;
   threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
   investigation_fields?: InvestigationFields;
+  max_signals?: number;
 }
 
 export interface ScheduleStepRuleJson {

@@ -55,6 +55,7 @@ curl -XGET elasticsearch_ip_or_hostname:9200/
 ----
 curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true
 ----
+These {kib}-backing indices must also not have {ref}/indices-get-settings.html[index settings] flagging `read_only_allow_delete` or `write` {ref}/index-modules-blocks.html[index blocks]. 
 . <<start-stop,Shut down all {kib} nodes>>. 
 . Choose any {kib} node, then update the config to set the <<change-overall-log-level,debug logging>>.
 . <<start-stop,Start the node>>, then check the start-up debug logs for `ERROR` messages or other start-up issues. 
@@ -63,3 +64,5 @@ For example:
 
 * When {kib} is unable to connect to a healthy {es} cluster, errors like `master_not_discovered_exception` or `unable to revive connection` or `license is not available` errors appear.
 * When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.
+
+You can find a Kibana health troubleshooting walkthrough in https://www.elastic.co/blog/troubleshooting-kibana-health[this blog] or in link:https://www.youtube.com/watch?v=AlgGYcpGvOA[this video]. 

@@ -53,14 +53,14 @@ import {
 } from './utils';
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { mlJobService } from '../../services/job_service';
+import { mlJobServiceFactory } from '../../services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
-import { ml } from '../../services/ml_api_service';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    selectedJob: PropTypes.object,
   };
 
   constructor(props) {
@@ -80,14 +80,18 @@ class RuleEditorFlyoutUI extends Component {
 
     this.partitioningFieldNames = [];
     this.canGetFilters = checkPermission('canGetFilters');
+
+    this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
   }
 
   componentDidMount() {
-    this.toastNotificationService = toastNotificationServiceProvider(
-      this.props.kibana.services.notifications.toasts
-    );
-    if (typeof this.props.setShowFunction === 'function') {
-      this.props.setShowFunction(this.showFlyout);
+    if (this.props.kibana.services.notifications) {
+      this.toastNotificationService = toastNotificationServiceProvider(
+        this.props.kibana.services.notifications.toasts
+      );
+      if (typeof this.props.setShowFunction === 'function') {
+        this.props.setShowFunction(this.showFlyout);
+      }
     }
   }
 
@@ -99,7 +103,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
-    const job = mlJobService.getJob(anomaly.jobId);
+    const job = this.props.selectedJob ?? this.mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
@@ -147,7 +151,7 @@ class RuleEditorFlyoutUI extends Component {
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.
-      ml.filters
+      this.props.kibana.services.mlServices.mlApi.filters
         .filters()
         .then((filters) => {
           const filterListIds = filters.map((filter) => filter.filter_id);
@@ -335,13 +339,15 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
+    const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
+    const { mlApi } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(job, detectorIndex, ruleIndex, editedRule)
+    saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApi)
       .then((resp) => {
         if (resp.success) {
           toasts.add({
@@ -389,12 +395,14 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   deleteRuleAtIndex = (index) => {
+    const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
+    const { mlApi } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    deleteJobRule(job, detectorIndex, index)
+    deleteJobRule(mlJobService, job, detectorIndex, index, mlApi)
       .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(
@@ -442,7 +450,8 @@ class RuleEditorFlyoutUI extends Component {
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
     const { toasts } = this.props.kibana.services.notifications;
-    addItemToFilter(item, filterId)
+    const { mlApi } = this.props.kibana.services.mlServices;
+    addItemToFilter(item, filterId, mlApi)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
           toasts.add({
@@ -480,7 +489,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   render() {
-    const docsUrl = this.props.kibana.services.docLinks.links.ml.customRules;
+    const docsUrl = this.props.kibana.services.docLinks?.links.ml.customRules;
     const {
       isFlyoutVisible,
       job,
@@ -561,6 +570,7 @@ class RuleEditorFlyoutUI extends Component {
 
       flyout = (
         <EuiFlyout
+          data-test-subj="mlRuleEditorFlyout"
           className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"

@@ -11,6 +11,11 @@ import type { Response } from 'supertest';
 import { SavedObject } from '@kbn/core/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+interface MinimalSO {
+  id: string;
+  type: string;
+}
+
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
@@ -29,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kbnServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis'
       );
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await pageObjects.savedObjects.waitTableIsLoaded();
@@ -42,7 +47,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis'
       );
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('APIS', () => {
@@ -119,10 +123,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             .expect(200)
             .then((resp) => {
               expect(
-                resp.body.saved_objects.map((so: { id: string; type: string }) => ({
-                  id: so.id,
-                  type: so.type,
-                }))
+                resp.body.saved_objects
+                  .map((so: MinimalSO) => ({
+                    id: so.id,
+                    type: so.type,
+                  }))
+                  .sort((a: MinimalSO, b: MinimalSO) => (a.id > b.id ? 1 : -1))
               ).to.eql([
                 {
                   id: 'hidden-from-http-apis-1',

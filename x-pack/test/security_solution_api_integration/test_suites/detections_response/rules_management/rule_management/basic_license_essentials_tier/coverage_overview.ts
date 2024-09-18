@@ -17,13 +17,12 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
-  createRule,
-  deleteAllRules,
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
   getCustomQueryRuleParams,
   createNonSecurityRule,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -450,7 +449,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        describe('source', () => {
+        // https://github.com/elastic/kibana/issues/183240
+        describe('@skipInServerlessMKI source', () => {
           it('returns response filtered by custom rules', async () => {
             await createPrebuiltRuleAssetSavedObjects(es, [
               createRuleAssetSavedObject({
@@ -614,7 +614,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('error cases', async () => {
+      describe('error cases', () => {
         it('throws error when request body is not valid', async () => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)

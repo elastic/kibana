@@ -110,6 +110,8 @@ describe('TaskManagerMetricsCollector', () => {
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes: new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']),
+      excludedTypes: new Set(['taskType4', 'taskType5']),
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
@@ -141,8 +143,15 @@ describe('TaskManagerMetricsCollector', () => {
           type: 'long',
           script: {
             source: `
+                def taskStatus = doc['task.status'];
                 def runAt = doc['task.runAt'];
-                if(!runAt.empty) {
+
+                if (taskStatus.empty) {
+                  emit(0);
+                  return;
+                }
+
+                if(taskStatus.value == 'idle') {
                   emit((new Date().getTime() - runAt.value.getMillis()) / 1000);
                 } else {
                   def retryAt = doc['task.retryAt'];
@@ -182,6 +191,20 @@ describe('TaskManagerMetricsCollector', () => {
                           },
                         },
                         { range: { 'task.retryAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          terms: {
+                            'task.taskType': ['taskType1', 'taskType2', 'taskType3'],
+                          },
+                        },
                       ],
                     },
                   },
@@ -299,10 +322,13 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
+    const taskTypes = new Set([]);
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes,
+      excludedTypes: taskTypes,
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
@@ -365,10 +391,13 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
+    const taskTypes = new Set([]);
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes,
+      excludedTypes: taskTypes,
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);

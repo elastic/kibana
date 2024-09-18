@@ -18,14 +18,14 @@ import {
   EuiImage,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { IndexDetails } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types_old';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
@@ -69,13 +69,16 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   return (
     <EuiEmptyPrompt
       data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
-          <FormattedHTMLMessage
-            tagName="h2"
+          <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
-            defaultMessage="Detect vulnerabilities in your <br/> cloud assets"
+            defaultMessage="Detect vulnerabilities in your {lineBreak} cloud assets"
+            ignoreTag
+            values={{
+              lineBreak: <br />,
+            }}
           />
         </h2>
       }

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Response Actions Schema
   version: 'not applicable'
-paths: {}
+paths: { }
 components:
   x-codegen-enabled: true
   schemas:
@@ -34,7 +34,7 @@ components:
           description: Query ID
         query:
           type: string
-          description: Query to execute
+          description: Query to run
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         version:
@@ -113,7 +113,7 @@ components:
         - actionTypeId
         - params
 
-    EndpointParams:
+    DefaultParams:
       type: object
       properties:
         command:
@@ -125,6 +125,32 @@ components:
       required:
         - command
 
+    ProcessesParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - kill-process
+            - suspend-process
+        comment:
+          type: string
+        config:
+          required:
+            - field
+          type: object
+          properties:
+            field:
+              type: string
+              description: Field to use instead of process.pid
+            overwrite:
+              type: boolean
+              description: Whether to overwrite field with process.pid
+              default: true
+      required:
+        - command
+        - config
+
     EndpointResponseAction:
       type: object
       properties:
@@ -133,7 +159,9 @@ components:
           enum:
             - .endpoint
         params:
-          $ref: '#/components/schemas/EndpointParams'
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
       required:
         - action_type_id
         - params
@@ -147,7 +175,9 @@ components:
           enum:
             - .endpoint
         params:
-          $ref: '#/components/schemas/EndpointParams'
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
       required:
         - actionTypeId
         - params

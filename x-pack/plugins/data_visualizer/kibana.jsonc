@@ -12,7 +12,6 @@
       "usageCollection",
       "embeddable",
       "share",
-      "discover",
       "fileUpload",
       "uiActions",
       "charts",
@@ -30,6 +29,7 @@
       "cloud"
     ],
     "requiredBundles": [
+      "dataViews",
       "kibanaReact",
       "kibanaUtils",
       "maps",
@@ -37,7 +37,8 @@
       "fieldFormats",
       "uiActions",
       "lens",
-      "textBasedLanguages",
+      "esql",
+      "visualizations"
     ]
   }
 }

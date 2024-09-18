@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 export interface AuthenticationServiceSetup {
   /**

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -46,12 +47,35 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
         defaultMessage: 'Dark mode',
       }),
-      value: defaultDarkMode,
+      value: defaultDarkMode ? 'enabled' : 'disabled',
       description: i18n.translate('core.ui_settings.params.darkModeText', {
-        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
+        defaultMessage:
+          `The UI theme that the Kibana UI should use. ` +
+          `Set to 'Enabled' to enable the dark theme, or 'Disabled' to disable it. ` +
+          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme. ` +
+          `A page reload is required for the setting to be applied.`,
       }),
+      type: 'select',
+      options: ['enabled', 'disabled', 'system'],
+      optionLabels: {
+        enabled: i18n.translate('core.ui_settings.params.darkMode.options.enabled', {
+          defaultMessage: `Enabled`,
+        }),
+        disabled: i18n.translate('core.ui_settings.params.darkMode.options.disabled', {
+          defaultMessage: `Disabled`,
+        }),
+        system: i18n.translate('core.ui_settings.params.darkMode.options.system', {
+          defaultMessage: `Sync with system`,
+        }),
+      },
       requiresPageReload: true,
-      schema: schema.boolean(),
+      schema: schema.oneOf([
+        schema.literal('enabled'),
+        schema.literal('disabled'),
+        schema.literal('system'),
+        // for backward-compatibility
+        schema.boolean(),
+      ]),
     },
     /**
      * Theme is sticking around as there are still a number of places reading it and

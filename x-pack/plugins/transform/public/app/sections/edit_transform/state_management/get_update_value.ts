@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
 
-import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
+import type { PostTransformsUpdateRequestSchema } from '../../../../../server/routes/api_schemas/update_transforms';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import type { FormFields, FormFieldsState } from './form_field';

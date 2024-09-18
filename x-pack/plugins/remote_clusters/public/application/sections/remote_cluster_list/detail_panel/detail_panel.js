@@ -126,7 +126,7 @@ export class DetailPanel extends Component {
           title={
             <FormattedMessage
               id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
-              defaultMessage="'{remoteCluster}' has deprecated settings"
+              defaultMessage="''{remoteCluster}'' has deprecated settings"
               values={{
                 remoteCluster: clusterName,
               }}

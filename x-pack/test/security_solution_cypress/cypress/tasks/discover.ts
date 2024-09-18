@@ -15,7 +15,6 @@ import {
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
   DISCOVER_FIELD_LIST_LOADING,
   DISCOVER_ESQL_EDITABLE_INPUT,
-  DISCOVER_ESQL_INPUT_EXPAND,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 import { goToEsqlTab } from './timeline';
@@ -28,8 +27,7 @@ export const switchDataViewTo = (dataviewName: string) => {
 };
 
 export const switchDataViewToESQL = () => {
-  openDataViewSwitcher();
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWICTHER).trigger('click');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWITCHER).trigger('click');
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
 };
 
@@ -56,8 +54,6 @@ export const selectCurrentDiscoverEsqlQuery = (
   goToEsqlTab();
   // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).click({ force: true });
-  // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_INPUT_EXPAND).click({ force: true });
   fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };
 
@@ -110,6 +106,10 @@ export const addFieldToTable = (fieldId: string) => {
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().should('exist');
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
   clearFieldSearch();
+};
+
+export const removeFieldFromTable = (fieldId: string) => {
+  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().click();
 };
 
 export const createAdHocDataView = (name: string, indexPattern: string, save: boolean = false) => {

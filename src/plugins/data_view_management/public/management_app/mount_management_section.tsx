@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -53,8 +54,7 @@ export async function mountManagementSection(
       overlays,
       http,
       docLinks,
-      theme,
-      i18n: coreI18n,
+      ...startServices
     },
     {
       data,
@@ -93,9 +93,9 @@ export async function mountManagementSection(
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
-    theme,
     savedObjectsManagement,
     noDataPage,
+    ...startServices,
   };
 
   const editPath = '/dataView/:id/field/:fieldName';
@@ -103,7 +103,7 @@ export async function mountManagementSection(
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
   ReactDOM.render(
-    <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
+    <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <Router history={params.history}>
           <Routes>

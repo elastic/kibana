@@ -12,7 +12,7 @@
     "patterns": [
       "_eql/search/status/{id}"
     ],
-    "documentation": " https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-status-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-status-api.html",
     "availability": {
       "stack": true,
       "serverless": true

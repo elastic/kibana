@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import apm from 'elastic-apm-node';
@@ -29,7 +30,6 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -38,7 +38,12 @@ import {
   PNG_REPORT_TYPE_V2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
-import { decryptJobHeaders, ExportType, getFullRedirectAppUrl } from '@kbn/reporting-server';
+import {
+  decryptJobHeaders,
+  ExportType,
+  getFullRedirectAppUrl,
+  REPORTING_TRANSACTION_TYPE,
+} from '@kbn/reporting-server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -64,6 +69,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
    * @returns jobParams
    */
   public createJob = async ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
+    // FIXME: validate that locatorParams exists, and contains an ID field and params object
     return {
       ...jobParams,
       locatorParams: [locatorParams],

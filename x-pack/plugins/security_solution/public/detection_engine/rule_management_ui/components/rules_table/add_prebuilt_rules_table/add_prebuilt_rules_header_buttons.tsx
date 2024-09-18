@@ -13,13 +13,18 @@ import * as i18n from './translations';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: {
+      selectedRules,
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      hasRulesToInstall,
+    },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
   const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
   const canUserEditRules = canUserCRUD && !isUserDataLoading;
 
-  const isRulesAvailableForInstall = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
@@ -46,7 +51,8 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!canUserEditRules || !isRulesAvailableForInstall || isRequestInProgress}
+          disabled={!canUserEditRules || !hasRulesToInstall || isRequestInProgress}
+          aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}
           {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}

@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState } from 'react';
+
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiToolTip, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopoverContent,
@@ -15,9 +23,12 @@ import {
 
 interface DocumentationPopoverProps {
   language: string;
+  isHelpMenuOpen: boolean;
+  onHelpMenuVisibilityChange: (status: boolean) => void;
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
+  linkToDocumentation?: string;
 }
 
 function DocumentationPopover({
@@ -25,43 +36,55 @@ function DocumentationPopover({
   sections,
   buttonProps,
   searchInDescription,
+  linkToDocumentation,
+  isHelpMenuOpen,
+  onHelpMenuVisibilityChange,
 }: DocumentationPopoverProps) {
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
-
   const toggleDocumentationPopover = useCallback(() => {
-    setIsHelpOpen(!isHelpOpen);
-  }, [isHelpOpen]);
+    onHelpMenuVisibilityChange?.(!isHelpMenuOpen);
+  }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
+
+  useEffect(() => {
+    onHelpMenuVisibilityChange(isHelpMenuOpen ?? false);
+  }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
 
   return (
-    <EuiPopover
-      panelClassName="documentation__docs--overlay"
-      panelPaddingSize="none"
-      isOpen={isHelpOpen}
-      closePopover={() => setIsHelpOpen(false)}
-      button={
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('languageDocumentationPopover.tooltip', {
-            defaultMessage: '{lang} reference',
-            values: {
-              lang: language,
-            },
-          })}
-        >
-          <EuiButtonIcon
-            iconType="documentation"
-            onClick={toggleDocumentationPopover}
-            {...buttonProps}
-          />
-        </EuiToolTip>
-      }
+    <EuiOutsideClickDetector
+      onOutsideClick={() => {
+        onHelpMenuVisibilityChange?.(false);
+      }}
     >
-      <LanguageDocumentationPopoverContent
-        language={language}
-        sections={sections}
-        searchInDescription={searchInDescription}
-      />
-    </EuiPopover>
+      <EuiPopover
+        panelClassName="documentation__docs--overlay"
+        panelPaddingSize="none"
+        isOpen={isHelpMenuOpen}
+        closePopover={() => onHelpMenuVisibilityChange(false)}
+        button={
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('languageDocumentationPopover.tooltip', {
+              defaultMessage: '{lang} reference',
+              values: {
+                lang: language,
+              },
+            })}
+          >
+            <EuiButtonIcon
+              iconType="documentation"
+              onClick={toggleDocumentationPopover}
+              {...buttonProps}
+            />
+          </EuiToolTip>
+        }
+      >
+        <LanguageDocumentationPopoverContent
+          language={language}
+          sections={sections}
+          searchInDescription={searchInDescription}
+          linkToDocumentation={linkToDocumentation}
+        />
+      </EuiPopover>
+    </EuiOutsideClickDetector>
   );
 }
 

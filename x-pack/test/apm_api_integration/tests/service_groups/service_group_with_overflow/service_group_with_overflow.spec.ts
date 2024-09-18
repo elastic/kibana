@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when(
     'Display overflow bucket in Service Groups',
@@ -33,11 +33,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await deleteAllServiceGroups(apmApiClient);
-        synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
 
       before(async () => {
-        await generateData({ start, end, synthtraceEsClient });
+        await generateData({ start, end, apmSynthtraceEsClient });
 
         const docs = [
           createServiceTransactionMetricsDocs({

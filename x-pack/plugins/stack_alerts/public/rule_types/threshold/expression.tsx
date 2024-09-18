@@ -20,7 +20,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getFields,
-  COMPARATORS,
   builtInComparators,
   OfExpression,
   ThresholdExpression,
@@ -30,6 +29,7 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdRuleParams } from './types';
 import './expression.scss';
@@ -70,6 +70,15 @@ function indexParamToArray(index: string | string[]): string[] {
   return isString(index) ? [index] : index;
 }
 
+interface EsField {
+  name: string;
+  type: string;
+  normalizedType: string;
+  searchable: boolean;
+  aggregatable: boolean;
+}
+const EMPTY_ARRAY: EsField[] = [];
+
 export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
 > = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
@@ -91,24 +100,18 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  const [esFields, setEsFields] = useState<EsField[] | undefined>(undefined);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
+      // @ts-expect-error upgrade typescript v5.1.6
       errors[errorKey].length >= 1 &&
       ruleParams[errorKey as keyof IndexThresholdRuleParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
+    // @ts-expect-error upgrade typescript v5.1.6
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -130,9 +133,10 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
-
     if (indexArray.length > 0) {
       await refreshEsFields(indexArray);
+    } else {
+      setEsFields([]);
     }
   };
 
@@ -174,7 +178,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         <IndexSelectPopover
           index={indexArray}
           data-test-subj="indexSelectPopover"
-          esFields={esFields}
+          esFields={esFields ?? EMPTY_ARRAY}
           timeField={timeField}
           errors={errors}
           onIndexChange={async (indices: string[]) => {
@@ -226,7 +230,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         <OfExpression
           aggField={aggField}
           data-test-subj="aggTypeExpression"
-          fields={esFields}
+          fields={esFields ?? EMPTY_ARRAY}
           aggType={aggType}
           errors={errors}
           display="fullWidth"
@@ -295,14 +299,16 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         })}
         fullWidth
         display="rowCompressed"
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.filterKuery.length > 0}
-        error={errors.filterKuery}
+        error={errors.filterKuery as string[]}
       >
         <EuiFieldSearch
           data-test-subj="filterKuery"
           onChange={handleFilterChange}
           value={filterKuery}
           fullWidth
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.filterKuery.length > 0}
         />
       </EuiFormRow>

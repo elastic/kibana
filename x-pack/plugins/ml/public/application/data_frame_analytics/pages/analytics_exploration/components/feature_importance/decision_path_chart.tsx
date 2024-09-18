@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type {
+  AxisStyle,
+  LineAnnotationStyle,
+  LineAnnotationDatum,
+  PartialTheme,
+  RecursivePartial,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
-  AxisStyle,
   Chart,
   LineAnnotation,
-  LineAnnotationStyle,
-  LineAnnotationDatum,
   LineSeries,
-  PartialTheme,
   Position,
-  RecursivePartial,
   ScaleType,
   Settings,
   LEGACY_LIGHT_THEME,
@@ -120,7 +122,7 @@ export const DecisionPathChart = ({
       );
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
-  const tickFormatter = useCallback((d) => formatSingleValue(d, '').toString(), []);
+  const tickFormatter = useCallback((d: any) => formatSingleValue(d, '').toString(), []);
 
   return (
     <div data-test-subj="mlDFADecisionPathChart">
@@ -150,7 +152,7 @@ export const DecisionPathChart = ({
           title={i18n.translate(
             'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
             {
-              defaultMessage: "{xAxisLabel} for '{predictionFieldName}'",
+              defaultMessage: "{xAxisLabel} for ''{predictionFieldName}''",
               values: { predictionFieldName, xAxisLabel },
             }
           )}

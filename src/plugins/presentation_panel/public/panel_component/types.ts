@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  PhaseEvent,
+  HasParentApi,
+  HasUniqueId,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesBlockingError,
-  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  HasParentApi,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
@@ -37,13 +37,16 @@ export interface PresentationPanelInternalProps<
   componentProps?: Omit<React.ComponentProps<PanelCompatibleComponent<ApiType, PropsType>>, 'ref'>;
 
   showShadow?: boolean;
+  showBorder?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
 
+  /**
+   * Set to true to not show PanelLoader component while Panel is loading
+   */
+  hideLoader?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
-
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
@@ -60,22 +63,23 @@ export interface PresentationPanelInternalProps<
  * The API that any component passed to the `Component` prop of `PresentationPanel` should implement.
  * Everything in this API is Partial because it is valid for a component to implement none of these methods.
  */
-export type DefaultPresentationPanelApi = Partial<
-  HasUniqueId &
-    PublishesPanelTitle &
-    PublishesDataLoading &
-    PublishesBlockingError &
-    PublishesPanelDescription &
-    PublishesDisabledActionIds &
-    HasParentApi<
-      PresentationContainer &
-        Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
-    >
->;
+export interface DefaultPresentationPanelApi
+  extends HasUniqueId,
+    Partial<
+      PublishesPanelTitle &
+        PublishesDataLoading &
+        PublishesBlockingError &
+        PublishesPanelDescription &
+        PublishesDisabledActionIds &
+        HasParentApi<
+          PresentationContainer &
+            Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
+        >
+    > {}
 
 export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
-  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType>>;
+  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };

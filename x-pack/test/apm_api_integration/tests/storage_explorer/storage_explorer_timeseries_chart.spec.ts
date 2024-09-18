@@ -16,7 +16,7 @@ type StorageTimeSeries = APIReturnType<'GET /internal/apm/storage_chart'>;
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -50,6 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177539
   registry.when('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       let body: StorageTimeSeries;
@@ -63,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go-2', environment: 'production', agentName: 'go' })
           .instance('instance');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
             .rate(1)
@@ -89,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         status = response.status;
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns correct HTTP status', async () => {
         expect(status).to.be(200);

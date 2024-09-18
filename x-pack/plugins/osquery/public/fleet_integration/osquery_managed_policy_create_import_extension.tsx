@@ -194,7 +194,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   }, [getUrlForApp, policy?.policy_id]);
 
   const handleConfigUpload = useCallback(
-    (newConfig) => {
+    (newConfig: any) => {
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;
@@ -291,8 +291,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (newPolicy?.package?.version) {
-      if (!editMode && satisfies(newPolicy?.package?.version, '<0.6.0')) {
+
+    const policyVersion = newPolicy?.package?.version;
+    if (policyVersion) {
+      /* From 0.6.0 we don't provide an input template, so we have to set it here */
+      const versionWithoutTemplate = satisfies(policyVersion, '>=0.6.0');
+
+      if (!editMode && !versionWithoutTemplate) {
         const updatedPolicy = produce(newPolicy, (draft) => {
           set(draft, 'inputs[0].streams', []);
         });
@@ -302,9 +307,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         });
       }
 
-      /* From 0.6.0 we don't provide an input template, so we have to set it here */
-      if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
+      if (versionWithoutTemplate) {
         const updatedPolicy = produce(newPolicy, (draft) => {
+          const hasNewInputs = newPolicy.inputs[0]?.streams?.length;
+          // 1.12.0 introduces multiple streams
+          const versionWithStreams = satisfies(policyVersion, '>=1.12.0');
+
+          if (versionWithStreams && hasNewInputs) {
+            return draft;
+          }
+
           if (editMode && policy?.inputs.length) {
             set(draft, 'inputs', policy.inputs);
           } else {

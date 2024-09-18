@@ -12,8 +12,8 @@ import type {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { EuiDataGridColumn } from '@elastic/eui';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
@@ -129,7 +129,7 @@ export function registerAlertsTableConfiguration(
     },
     columns,
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
-    getRenderCellValue: getRenderCellValue(fieldFormats),
+    getRenderCellValue,
     sort,
     useActionsColumn: () => ({
       renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {

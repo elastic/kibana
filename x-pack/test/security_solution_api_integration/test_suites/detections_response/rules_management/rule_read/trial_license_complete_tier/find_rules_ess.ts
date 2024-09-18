@@ -15,9 +15,7 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
   createRuleThroughAlertingEndpoint,
-  deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -27,15 +25,14 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess find_rules - ESS specific logic', () => {
     beforeEach(async () => {
@@ -46,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
      * Tests the legacy actions to ensure we can export legacy notifications
      * @deprecated Once the legacy notification system is removed, remove this test too.
      */
-    describe('legacy_notification_system', async () => {
+    describe('legacy_notification_system', () => {
       it('should be able to a read a scheduled action correctly', async () => {
         // create an connector/action
         const { body: hookAction } = await supertest
@@ -87,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...expectedRule,

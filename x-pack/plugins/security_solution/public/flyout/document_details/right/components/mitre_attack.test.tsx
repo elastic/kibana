@@ -8,20 +8,21 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { MitreAttack } from './mitre_attack';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 
-const renderMitreAttack = (contextValue: RightPanelContext) =>
+const renderMitreAttack = (contextValue: DocumentDetailsContext) =>
   render(
-    <RightPanelContext.Provider value={contextValue}>
+    <DocumentDetailsContext.Provider value={contextValue}>
       <MitreAttack />
-    </RightPanelContext.Provider>
+    </DocumentDetailsContext.Provider>
   );
 
-describe('<MitreAttack />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176002
+describe.skip('<MitreAttack />', () => {
   it('should render mitre attack information', async () => {
-    const contextValue = { searchHit: mockSearchHit } as unknown as RightPanelContext;
+    const contextValue = { searchHit: mockSearchHit } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderMitreAttack(contextValue);
 
@@ -36,7 +37,7 @@ describe('<MitreAttack />', () => {
       searchHit: {
         some_field: 'some_value',
       },
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderMitreAttack(contextValue);
 

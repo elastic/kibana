@@ -14,7 +14,6 @@ import type { UseGetCase } from '../../containers/use_get_case';
 import type { CaseViewTabsProps } from './case_view_tabs';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import '../../common/mock/match_media';
 import { createAppMockRenderer } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { useGetCase } from '../../containers/use_get_case';
@@ -104,12 +103,11 @@ describe('CaseViewTabs', () => {
     );
   });
 
-  it('shows the files tab with the correct count and colour', async () => {
+  it('shows the files tab with the correct count', async () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
 
     const badge = await screen.findByTestId('case-view-files-stats-badge');
 
-    expect(badge.getAttribute('class')).toMatch(/accent/);
     expect(badge).toHaveTextContent('3');
   });
 
@@ -121,22 +119,13 @@ describe('CaseViewTabs', () => {
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
-  it('the files tab count has a different color if the tab is not active', async () => {
-    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
-
-    expect(
-      (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
-    ).not.toMatch(/accent/);
-  });
-
-  it('shows the alerts tab with the correct count and colour', async () => {
+  it('shows the alerts tab with the correct count', async () => {
     appMockRenderer.render(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
     );
 
     const badge = await screen.findByTestId('case-view-alerts-stats-badge');
 
-    expect(badge.getAttribute('class')).toMatch(/accent/);
     expect(badge).toHaveTextContent('3');
   });
 
@@ -154,7 +143,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
@@ -168,7 +157,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
@@ -182,7 +171,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
