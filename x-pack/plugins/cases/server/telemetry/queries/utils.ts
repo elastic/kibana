@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
-import type { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -32,6 +31,7 @@ import type {
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -126,7 +126,7 @@ export const getCountsAndMaxData = async ({
   savedObjectType,
   filter,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsClient: TelemetrySavedObjectsClient;
   savedObjectType: string;
   filter?: KueryNode;
 }) => {

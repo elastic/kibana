@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
@@ -37,6 +37,7 @@ import {
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
+import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
@@ -146,7 +147,7 @@ export const getCasesTelemetryData = async ({
 };
 
 const getCasesSavedObjectTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, CaseAggregationResult>> => {
   const caseByOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
@@ -233,7 +234,7 @@ const getAssigneesAggregations = () => ({
 });
 
 const getCommentsSavedObjectTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, AttachmentAggregationResult>> => {
   const attachmentRegistries = () => ({
     externalReferenceTypes: {
@@ -291,7 +292,7 @@ const getCommentsSavedObjectTelemetry = async (
 };
 
 const getFilesTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResults>> => {
   const averageSize = () => ({
     averageSize: {
@@ -341,7 +342,7 @@ const getFilesTelemetry = async (
 };
 
 const getAlertsTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
   return savedObjectsClient.find<unknown, ReferencesAggregation>({
     page: 0,
@@ -360,7 +361,7 @@ const getAlertsTelemetry = async (
 };
 
 const getConnectorsTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
   return savedObjectsClient.find<unknown, ReferencesAggregation>({
     page: 0,
