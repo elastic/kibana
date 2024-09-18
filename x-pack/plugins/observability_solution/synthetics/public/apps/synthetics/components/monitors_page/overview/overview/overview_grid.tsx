@@ -93,7 +93,7 @@ export const OverviewGrid = memo(() => {
   );
 
   useEffect(() => {
-    if (monitorsSortedByStatus.length && maxItem) {
+    if (monitorsSortedByStatus.length) {
       const batch: TrendRequest[] = [];
       const chunk = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
       for (const item of chunk) {

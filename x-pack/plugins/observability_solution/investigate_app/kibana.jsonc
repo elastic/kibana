@@ -19,6 +19,9 @@
       "datasetQuality",
       "unifiedSearch",
       "security",
+      "observability",
+      "licensing",
+      "ruleRegistry"
     ],
     "requiredBundles": [
       "esql",
