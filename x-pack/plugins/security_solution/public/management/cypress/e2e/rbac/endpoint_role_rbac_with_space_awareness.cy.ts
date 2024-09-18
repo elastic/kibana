@@ -12,6 +12,7 @@ import {
   clickFlyoutAddKibanaPrivilegeButton,
   clickRoleSaveButton,
   clickViewPrivilegeSummaryButton,
+  ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS,
   expandEndpointSecurityFeaturePrivileges,
   expandSecuritySolutionCategoryKibanaPrivileges,
   navigateToRolePage,
@@ -110,20 +111,7 @@ describe(
         ]);
     });
 
-    [
-      'endpoint_list',
-      'trusted_applications',
-      'host_isolation_exceptions',
-      'blocklist',
-      'event_filters',
-      'elastic_defend_policy_management',
-      'response_actions_history',
-      'host_isolation',
-      'process_operations',
-      'file_operations',
-      'execute_operations',
-      'scan_operations',
-    ].forEach((subFeaturePrivilegeId) => {
+    ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
       it(`should NOT display the privilege tooltip for ${subFeaturePrivilegeId}`, () => {
         cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
           'not.exist'

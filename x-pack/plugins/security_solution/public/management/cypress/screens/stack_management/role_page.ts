@@ -44,7 +44,7 @@ export const getKibanaFeaturePrivilegesFlyout = (): Cypress.Chainable => {
  * Expands the "Security" (security solution) accordion on the Kibana privilesge flyout
  */
 export const expandSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable => {
-  return cy.getByTestSubj('featureCategoryButton_securitySolution').closest('button').click();
+  return cy.getByTestSubj('featureCategory_securitySolution_accordionToggle').click();
 };
 
 /**
@@ -65,11 +65,11 @@ export const getSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable
  * kibana feature privileges grouping. This is the area where Endpoint related RBAC is managed
  */
 export const expandEndpointSecurityFeaturePrivileges = (): Cypress.Chainable => {
-  return cy.get('.featurePrivilegeName:contains("Security")').closest('button').click();
+  return cy.getByTestSubj('featurePrivilegeControls_securitySolution_siem_accordionToggle').click();
 };
 
 export const getEndpointSecurityFeaturePrivileges = () => {
-  return cy.get('.featurePrivilegeName:contains("Security")').closest('.euiAccordion');
+  return cy.getByTestSubj('featureCategory_securitySolution_siem');
 };
 
 /**
@@ -108,36 +108,38 @@ export const clickEndpointSubFeaturePrivilegesCustomization = (): Cypress.Chaina
     .click();
 };
 
-type EndpointSubFeatureNames =
-  | 'endpoint_list'
-  | 'trusted_applications'
-  | 'host_isolation_exceptions'
-  | 'blocklist'
-  | 'event_filters'
-  | 'policy_management'
-  | 'actions_log_management'
-  | 'host_isolation'
-  | 'process_operations'
-  | 'file_operations'
-  | 'execute_operations'
-  | 'scan_operations';
+export const ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS = Object.freeze([
+  'endpoint_list',
+  'trusted_applications',
+  'host_isolation_exceptions',
+  'blocklist',
+  'event_filters',
+  'elastic_defend_policy_management',
+  'response_actions_history',
+  'host_isolation',
+  'process_operations',
+  'file_operations',
+  'execute_operations',
+  'scan_operations',
+] as const);
+
+type EndpointSubFeaturePrivilegeId = (typeof ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS)[number];
+
+/* @private */
+const privilegeMapToTitle = Object.freeze({
+  all: 'All',
+  read: 'Read',
+  none: 'None',
+});
 
 export const setEndpointSubFeaturePrivilege = (
-  feature: EndpointSubFeatureNames,
+  feature: EndpointSubFeaturePrivilegeId,
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
-  if (privilege === 'none') {
-    // `none` does not have a unique test subject inside of the Kibana privileges flyout. To get
-    // around this, we first find the `All` option for the feature and then from there we can get its
-    // associated `none` button
-    getEndpointSecurityFeaturePrivileges()
-      .findByTestSubj(`${feature}_all`)
-      .parent()
-      .findByTestSubj('none')
-      .click();
-  }
-
-  return getEndpointSecurityFeaturePrivileges().findByTestSubj(`${feature}_${privilege}`).click();
+  return getEndpointSecurityFeaturePrivileges()
+    .findByTestSubj(`securitySolution_siem_${feature}_privilegeGroup`)
+    .find(`button[title="${privilegeMapToTitle[privilege]}"]`)
+    .click();
 };
 
 /**
