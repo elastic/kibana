@@ -137,7 +137,7 @@ export const ControlRenderer = <
 
   return component && isControlGroupInitialized ? (
     // @ts-expect-error
-    <ControlPanel<ApiType> Component={component} uuid={uuid} className={className} />
+    <ControlPanel<ApiType> Component={component} uuid={uuid} />
   ) : // Control group will not display controls until all controls are initialized
   null;
 };
