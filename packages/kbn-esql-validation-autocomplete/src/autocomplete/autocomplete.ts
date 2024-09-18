@@ -1959,5 +1959,5 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
     }
   }
 
-  return (await getFieldsByType('any')) as SuggestionRawDefinition[];
+  return (await getFieldsByType('any', [], { advanceCursor: true })) as SuggestionRawDefinition[];
 };
