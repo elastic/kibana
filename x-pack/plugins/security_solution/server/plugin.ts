@@ -550,6 +550,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     // Assistant Tool and Feature Registration
+    plugins.elasticAssistant.registerTools(
+      APP_UI_ID,
+      getAssistantTools(config.experimentalFeatures.assistantNaturalLanguageESQLTool)
+    );
     const features = {
       assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,

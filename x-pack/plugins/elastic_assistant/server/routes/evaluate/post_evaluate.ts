@@ -150,6 +150,8 @@ export const postEvaluateRoute = (
           // Default ELSER model
           const elserId = await getElser();
 
+          const inference = ctx.elasticAssistant.inference;
+
           // Data clients
           const anonymizationFieldsDataClient =
             (await assistantContext.getAIAssistantAnonymizationFieldsDataClient()) ?? undefined;
@@ -258,6 +260,8 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 // onNewReplacements,
                 replacements,
+                inference,
+                connectorId: connector.id,
                 size,
               };
 

@@ -45,6 +45,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
@@ -65,6 +66,10 @@ export interface ElasticAssistantPluginStart {
    * Actions plugin start contract.
    */
   actions: ActionsPluginStart;
+  /**
+   * Inference plugin start contract.
+   */
+  inference: InferenceServerStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -105,6 +110,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   licensing: LicensingPluginStart;
@@ -126,6 +132,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -229,7 +236,9 @@ export type AssistantToolLlm =
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
+  inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
+  connectorId?: string;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
