@@ -24,7 +24,7 @@ import type {
 } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import type { ComboBoxOption, EntityControlProps } from '../entity_control/entity_control';
+import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
 import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
@@ -53,19 +53,39 @@ export type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, undefined>;
 
 export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 
+const getFilterBy = (
+  currentEntity: Entity,
+  entities: Entity[]
+): Pick<UiPartitionFieldConfig, 'filterBy'> | undefined => {
+  if (currentEntity.fieldType !== 'by_field') {
+    return;
+  }
+  const query = entities.find((e) => e.fieldType === 'partition_field')?.fieldValue;
+
+  if (!query) return;
+
+  return {
+    filterBy: {
+      field: 'partition_field_value',
+      query,
+    },
+  };
+};
+
 /**
  * Provides default fields configuration.
  */
 const getDefaultFieldConfig = (
-  fieldTypes: MlEntityFieldType[],
+  entities: Entity[],
   isAnomalousOnly: boolean,
   applyTimeRange: boolean
 ): UiPartitionFieldsConfig => {
-  return fieldTypes.reduce((acc, f) => {
-    acc[f] = {
+  return entities.reduce((acc, f) => {
+    acc[f.fieldType] = {
       applyTimeRange,
       anomalousOnly: isAnomalousOnly,
       sort: { by: 'anomaly_score', order: 'desc' },
+      ...getFilterBy(f, entities),
     };
     return acc;
   }, {} as UiPartitionFieldsConfig);
@@ -143,7 +163,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   const resultFieldsConfig = useMemo(() => {
     return {
       ...getDefaultFieldConfig(
-        entityControls.map((v) => v.fieldType),
+        entityControls,
         !storageFieldsConfig
           ? true
           : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
@@ -236,7 +256,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
       }, {} as Record<string, any>),
       [entity.fieldName]: fieldValue,
     };
-
+    // Maybe reload entity values
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 

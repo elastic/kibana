@@ -35,6 +35,10 @@ export type PartitionFieldConfig =
         by: 'anomaly_score' | 'name';
         order: 'asc' | 'desc';
       };
+      filterBy?: {
+        field: `${MlEntityFieldType}_value`;
+        query?: any;
+      };
     }
   | undefined;
 
