@@ -15,7 +15,7 @@ import {
   type LaunchDarklyEntitiesGetter,
   type Usage,
 } from './register_usage_collector';
-import { launchDarklyClientMocks } from '../launch_darkly_client/mocks';
+import type { LDClient } from '@launchdarkly/node-server-sdk';
 
 describe('cloudExperiments usage collector', () => {
   let collector: Collector<Usage>;
@@ -43,17 +43,21 @@ describe('cloudExperiments usage collector', () => {
   });
 
   test('should return all the flags returned by the client', async () => {
-    const launchDarklyClient = launchDarklyClientMocks.createLaunchDarklyClient();
-    getLaunchDarklyEntitiesMock.mockReturnValueOnce({ launchDarklyClient });
-
-    launchDarklyClient.getAllFlags.mockResolvedValueOnce({
-      initialized: true,
-      flags: {
+    const allFlagStateImplementation: jest.Mocked<LDClient['allFlagsState']> = async () => ({
+      valid: true,
+      allValues: jest.fn().mockReturnValue({
         'my-plugin.my-feature-flag': true,
         'my-plugin.my-other-feature-flag': 22,
-      },
-      flagNames: ['my-plugin.my-feature-flag', 'my-plugin.my-other-feature-flag'],
+      }),
+      getFlagReason: jest.fn(),
+      getFlagValue: jest.fn(),
+      toJSON: jest.fn(),
     });
+    const launchDarklyClient: jest.Mocked<LDClient> = {
+      allFlagsState: jest.fn().mockImplementation(allFlagStateImplementation),
+    } as unknown as jest.Mocked<LDClient>; // Force-casting here because we don't need to mock the entire client
+
+    getLaunchDarklyEntitiesMock.mockReturnValueOnce({ launchDarklyClient, currentContext: {} });
 
     await expect(collector.fetch(createCollectorFetchContextMock())).resolves.toStrictEqual({
       flagNames: ['my-plugin.my-feature-flag', 'my-plugin.my-other-feature-flag'],

@@ -19,7 +19,10 @@ import {
   PluginInitializerContext,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
+import {
+  EntityManagerPublicPluginSetup,
+  EntityManagerPublicPluginStart,
+} from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -146,7 +149,7 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
-  entityManager: EntityManagerPublicPluginSetup;
+  entityManager: EntityManagerPublicPluginStart;
   logsShared: LogsSharedClientStartExports;
 }
 

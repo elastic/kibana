@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
-  DiffableAllFields,
   InlineKqlQuery,
+  RuleDataSource,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import { getDataSourceProps, getQueryLanguageLabel, typeCheckFilters } from '../../../../helpers';
+import { getDataSourceProps, getQueryLanguageLabel, isFilters } from '../../../../helpers';
 
 const defaultI18nLabels = {
   query: descriptionStepI18n.QUERY_LABEL,
@@ -25,7 +25,7 @@ const defaultI18nLabels = {
 
 interface InlineQueryProps {
   kqlQuery: InlineKqlQuery;
-  dataSource?: DiffableAllFields['data_source'];
+  dataSource?: RuleDataSource;
   i18nLabels?: {
     query: string;
     language: string;
@@ -49,14 +49,12 @@ export function InlineKqlQueryReadOnly({
     },
   ];
 
-  const filters = typeCheckFilters(kqlQuery.filters);
-
-  if (filters.length > 0) {
+  if (isFilters(kqlQuery.filters) && kqlQuery.filters.length > 0) {
     const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: i18nLabels.filters,
-      description: <Filters filters={filters} {...dataSourceProps} />,
+      description: <Filters filters={kqlQuery.filters} {...dataSourceProps} />,
     });
   }
 

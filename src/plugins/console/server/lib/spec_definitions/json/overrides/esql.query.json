@@ -5,21 +5,6 @@
       "locale": "",
       "params": [],
       "query": ""
-    },
-    "url_params": {
-      "format": [
-        "cbor",
-        "csv",
-        "json",
-        "smile",
-        "txt",
-        "tsv",
-        "yaml"
-      ],
-      "drop_null_columns": [
-        "false",
-        "true"
-      ]
     }
   }
 }
