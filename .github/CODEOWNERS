@@ -1760,7 +1760,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
-/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
 
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design

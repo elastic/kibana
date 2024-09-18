@@ -56,7 +56,6 @@ export interface UsageStats {
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
-  'observability:aiAssistantLogsIndexPattern': string;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
