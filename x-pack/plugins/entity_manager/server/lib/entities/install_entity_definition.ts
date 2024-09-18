@@ -46,6 +46,7 @@ import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { stopTransforms } from './stop_transforms';
 import { deleteTransforms } from './delete_transforms';
+import { generateEntitiesInstanceIndexTemplateConfig } from './templates/entities_instance';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -204,6 +205,11 @@ async function install({
       esClient,
       logger,
       template: generateEntitiesLatestIndexTemplateConfig(definition),
+    }),
+    upsertTemplate({
+      esClient,
+      logger,
+      template: generateEntitiesInstanceIndexTemplateConfig(definition),
     }),
   ]).then(throwIfRejected);
 

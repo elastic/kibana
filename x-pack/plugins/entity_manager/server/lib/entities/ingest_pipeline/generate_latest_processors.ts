@@ -181,7 +181,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       script: {
         lang: 'painless',
         source: `
-        if (ctx.containsKey('sourceIndex')) {       
+        if (ctx.containsKey('sourceIndex')) {
           for (def index : ctx.sourceIndex) {
             if (index instanceof String && index.contains(':')) {
               def matcher = /([^:]+):/.matcher(index);

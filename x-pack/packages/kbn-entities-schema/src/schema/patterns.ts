@@ -8,11 +8,12 @@
 export const ENTITY_BASE_PREFIX = 'entities';
 export const ENTITY_HISTORY = 'history' as const;
 export const ENTITY_LATEST = 'latest' as const;
+export const ENTITY_INSTANCE = 'instance' as const;
 
 export const ENTITY_SCHEMA_VERSION_V1 = 'v1';
 
 type SchemaVersion = `v${number}`;
-type Dataset = typeof ENTITY_LATEST | typeof ENTITY_HISTORY;
+type Dataset = typeof ENTITY_LATEST | typeof ENTITY_HISTORY | typeof ENTITY_INSTANCE;
 
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;

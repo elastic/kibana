@@ -7,11 +7,16 @@
 
 import { z } from '@kbn/zod';
 import { entityDefinitionSchema, createEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { v4 } from 'uuid';
 import { EntityDefinitionIdInvalid } from '../../../lib/entities/errors/entity_definition_id_invalid';
 import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
 import { EntityIdConflict } from '../../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../../lib/entities/errors/invalid_transform_error';
+import { EntityAPIKeyServiceDisabled } from '../../../lib/entities/errors/entity_api_key_service_disabled';
+import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../../common/errors';
+import { EntityPermissionDenied } from '../../../lib/entities/errors/entity_permission_denied';
+import { setupApiKeys } from '../../../lib/auth/setup_api_keys';
 
 /**
  * @openapi
@@ -53,13 +58,30 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
     query: createEntityDefinitionQuerySchema,
     body: entityDefinitionSchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({
+    context,
+    request,
+    response,
+    params,
+    logger,
+    server,
+    getScopedClient,
+    tasks,
+  }) => {
     try {
       const client = await getScopedClient({ request });
+      const apiKeyId = params.body.apiKeyId ?? v4();
       const definition = await client.createEntityDefinition({
-        definition: params.body,
+        definition: { ...params.body, apiKeyId },
         installOnly: params.query.installOnly,
       });
+
+      // TODO There is a bunch of crap we need to deal with reguards to when
+      // the setupAPiKeys call fails and reverting everything that createEntityDefinition handles.
+      // I'm defering this for now since this is just a prototype and we can
+      // invest more later in this area.
+      await setupApiKeys(context, request, server, definition.id, apiKeyId);
+      await tasks.entityMergeTask.start(definition, request, server);
 
       return response.ok({ body: definition });
     } catch (e) {
@@ -67,6 +89,20 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
 
       if (e instanceof EntityDefinitionIdInvalid) {
         return response.badRequest({ body: e });
+      }
+
+      if (e instanceof EntityAPIKeyServiceDisabled) {
+        return response.ok({
+          body: { success: false, reason: ERROR_API_KEY_SERVICE_DISABLED, message: e.message },
+        });
+      }
+
+      if (e instanceof EntityPermissionDenied) {
+        return response.forbidden({
+          body: {
+            message: e.message,
+          },
+        });
       }
 
       if (e instanceof EntityIdConflict) {

@@ -17,7 +17,10 @@ export const getClientsFromAPIKey = ({
 }: {
   apiKey: EntityDiscoveryAPIKey;
   server: EntityManagerServerSetup;
-}): { esClient: ElasticsearchClient; soClient: SavedObjectsClientContract } => {
+}): {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+} => {
   const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
   const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asSecondaryAuthUser;
   const soClient = server.core.savedObjects.getScopedClient(fakeRequest);

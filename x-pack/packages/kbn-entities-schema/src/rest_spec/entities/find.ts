@@ -28,8 +28,8 @@ export const findEntitiesQuerySchema = z.object({
   perPage: z.coerce.number().default(10),
   query: z.optional(z.string()),
   searchAfter: z.optional(searchAfterSchema),
-  sortField: z.string().default('entity.displayName.keyword'),
-  sortDirection: z.enum(['asc', 'desc']).default('asc'),
+  sortField: z.optional(z.string().default('entity.displayName.keyword')),
+  sortDirection: z.optional(z.enum(['asc', 'desc']).default('asc')),
 });
 
 export type FindEntitiesQuery = z.infer<typeof findEntitiesQuerySchema>;

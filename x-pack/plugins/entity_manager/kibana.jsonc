@@ -21,7 +21,8 @@
       "presentationUtil",
       "usageCollection",
       "licensing",
-      "transform"
+      "transform",
+      "taskManager"
     ],
     "optionalPlugins": [
       "cloud",

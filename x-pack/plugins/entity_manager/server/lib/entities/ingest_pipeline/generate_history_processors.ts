@@ -140,54 +140,62 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
       },
     },
     {
-      script: {
-        description: 'Generated the entity.id field',
-        source: cleanScript(`
-        // This function will recursively collect all the values of a HashMap of HashMaps
-        Collection collectValues(HashMap subject) {
-          Collection values = new ArrayList();
-          // Iterate through the values
-          for(Object value: subject.values()) {
-            // If the value is a HashMap, recurse
-            if (value instanceof HashMap) {
-              values.addAll(collectValues((HashMap) value));
-            } else {
-              values.add(String.valueOf(value));
-            }
-          }
-          return values;
-        }
-
-        // Create the string builder
-        StringBuilder entityId = new StringBuilder();
-
-        if (ctx["entity"]["identity"] != null) {
-          // Get the values as a collection
-          Collection values = collectValues(ctx["entity"]["identity"]);
-
-          // Convert to a list and sort
-          List sortedValues = new ArrayList(values);
-          Collections.sort(sortedValues);
-
-          // Create comma delimited string
-          for(String instanceValue: sortedValues) {
-            entityId.append(instanceValue);
-            entityId.append(":");
-          }
-
-            // Assign the entity.id
-          ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
-        }
-       `),
+      set: {
+        field: 'entity.id',
+        value: definition.identityFields
+          .map((field) => `{{{entity.identity.${field.field}}}}`)
+          .join('-'),
       },
     },
-    {
-      fingerprint: {
-        fields: ['entity.id'],
-        target_field: 'entity.id',
-        method: 'MurmurHash3',
-      },
-    },
+    // {
+    //   script: {
+    //     description: 'Generated the entity.id field',
+    //     source: cleanScript(`
+    //     // This function will recursively collect all the values of a HashMap of HashMaps
+    //     Collection collectValues(HashMap subject) {
+    //       Collection values = new ArrayList();
+    //       // Iterate through the values
+    //       for(Object value: subject.values()) {
+    //         // If the value is a HashMap, recurse
+    //         if (value instanceof HashMap) {
+    //           values.addAll(collectValues((HashMap) value));
+    //         } else {
+    //           values.add(String.valueOf(value));
+    //         }
+    //       }
+    //       return values;
+    //     }
+
+    //     // Create the string builder
+    //     StringBuilder entityId = new StringBuilder();
+
+    //     if (ctx["entity"]["identity"] != null) {
+    //       // Get the values as a collection
+    //       Collection values = collectValues(ctx["entity"]["identity"]);
+
+    //       // Convert to a list and sort
+    //       List sortedValues = new ArrayList(values);
+    //       Collections.sort(sortedValues);
+
+    //       // Create comma delimited string
+    //       for(String instanceValue: sortedValues) {
+    //         entityId.append(instanceValue);
+    //         entityId.append(":");
+    //       }
+
+    //         // Assign the entity.id
+    //       ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
+    //     }
+    //    `),
+    //   },
+    // },
+    // {
+    //   fingerprint: {
+    //     fields: ['entity.id'],
+    //     target_field: 'entity.id',
+    //     method: 'MurmurHash3',
+    //   },
+    // },
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },

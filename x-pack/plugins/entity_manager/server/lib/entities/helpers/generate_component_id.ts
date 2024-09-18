@@ -8,6 +8,7 @@
 import {
   ENTITY_BASE_PREFIX,
   ENTITY_HISTORY,
+  ENTITY_INSTANCE,
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
   EntityDefinition,
@@ -61,3 +62,10 @@ export function generateLatestIndexName(definition: EntityDefinition) {
 
 export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
+
+export const generateInstanceIndexTemplateId = (definition: EntityDefinition) =>
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_INSTANCE}_${definition.id}_index_template` as const;
+
+export function generateApiKeyId(id: string) {
+  return `API-KEY:${id}`;
+}

@@ -108,7 +108,7 @@ export class EntityClient {
     perPage = 10,
     query = '',
     searchAfter,
-    sortField = '@timestamp',
+    sortField = 'entity.displayName.keyword',
     sortDirection = 'asc',
   }: FindEntitiesQuery) {
     return await findEntities(this.options.esClient, perPage, query, searchAfter, {

@@ -32,6 +32,9 @@ export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
 
 export const entityLatestSchema = z
   .object({
+    event: z.object({
+      ingested: z.string(),
+    }),
     entity: entityBaseSchema.merge(
       z.object({
         lastSeenTimestamp: z.string(),

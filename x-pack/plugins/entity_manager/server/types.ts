@@ -12,6 +12,10 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
@@ -21,6 +25,7 @@ export interface EntityManagerServerSetup {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -29,10 +34,12 @@ export interface ElasticsearchAccessorOptions {
 
 export interface EntityManagerPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface EntityManagerPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
 }
