@@ -182,6 +182,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
         title: (
           <EuiText
             size="xs"
+            data-test-subj={'securitySolutionFlyoutInsightsMisconfigurationsTitleText'}
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}

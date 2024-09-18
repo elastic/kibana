@@ -20,6 +20,12 @@ import { visit } from '../../../tasks/navigation';
 const HOST_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleText'
 );
+
+const HOST_INSIGHT_TAB_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutInsightInputsTab');
+const HOST_INSIGHT_TABLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutMisconfigurationFindingsTable'
+);
+
 const timestamp = Date.now();
 
 // Create a Date object using the timestamp
@@ -95,5 +101,15 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
 
     cy.log('check if Misconfiguration preview title shown');
     cy.get(HOST_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
+  });
+
+  it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+    createMockFinding();
+    cy.reload();
+    expandFirstAlertHostFlyout();
+    cy.contains('Failed findings', { timeout: 3000 });
+    cy.contains('Misconfigurations').click();
+    cy.get(HOST_INSIGHT_TAB_TITLE).should('be.visible');
+    cy.get(HOST_INSIGHT_TABLE).should('be.visible');
   });
 });
