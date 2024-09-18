@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleTagArray } from '../../../../../../../../../common/api/detection_engine';
 import { Tags } from '../../../../rule_about_section';
 
 interface TagsReadOnlyProps {
-  tags: DiffableAllFields['tags'];
+  tags: RuleTagArray;
 }
 
 export function TagsReadOnly({ tags }: TagsReadOnlyProps) {

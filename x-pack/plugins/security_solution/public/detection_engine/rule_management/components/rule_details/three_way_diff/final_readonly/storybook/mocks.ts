@@ -9,7 +9,8 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType, KqlQueryType } from '../../../../../../../../common/api/detection_engine';
 import type {
-  DiffableAllFields,
+  DataSourceDataView,
+  DataSourceIndexPatterns,
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
@@ -18,6 +19,8 @@ import type {
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
+  InlineKqlQuery,
+  RuleEqlQuery,
   SavedKqlQuery,
 } from '../../../../../../../../common/api/detection_engine';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../../common/constants';
@@ -59,7 +62,7 @@ export const savedQueryResponse = {
   namespaces: ['default'],
 };
 
-export const inlineKqlQuery: DiffableAllFields['kql_query'] = {
+export const inlineKqlQuery: InlineKqlQuery = {
   type: KqlQueryType.inline_query,
   query: 'event.action: "user_login" and source.ip: "192.168.1.100"',
   language: 'kuery',
@@ -71,18 +74,18 @@ export const savedKqlQuery: SavedKqlQuery = {
   saved_query_id: 'fake-saved-query-id',
 };
 
-export const eqlQuery: DiffableAllFields['eql_query'] = {
+export const eqlQuery: RuleEqlQuery = {
   query: 'process where process.name == "powershell.exe" and process.args : "* -EncodedCommand *"',
   language: 'eql',
   filters,
 };
 
-export const dataSourceWithIndexPatterns: DiffableAllFields['data_source'] = {
+export const dataSourceWithIndexPatterns: DataSourceIndexPatterns = {
   type: DataSourceType.index_patterns,
   index_patterns: ['logs-*'],
 };
 
-export const dataSourceWithDataView: DiffableAllFields['data_source'] = {
+export const dataSourceWithDataView: DataSourceDataView = {
   type: DataSourceType.data_view,
   data_view_id: 'logs-*',
 };

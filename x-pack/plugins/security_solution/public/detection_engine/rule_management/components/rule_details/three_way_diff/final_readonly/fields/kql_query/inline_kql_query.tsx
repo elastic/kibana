@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
-  DiffableAllFields,
   InlineKqlQuery,
+  RuleDataSource,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
@@ -25,7 +25,7 @@ const defaultI18nLabels = {
 
 interface InlineQueryProps {
   kqlQuery: InlineKqlQuery;
-  dataSource?: DiffableAllFields['data_source'];
+  dataSource?: RuleDataSource;
   i18nLabels?: {
     query: string;
     language: string;

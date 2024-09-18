@@ -8,14 +8,17 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type {
+  RuleDataSource,
+  RuleEqlQuery,
+} from '../../../../../../../../../common/api/detection_engine';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
 import { getDataSourceProps, typeCheckFilters } from '../../../../helpers';
 
 interface EqlQueryReadOnlyProps {
-  eqlQuery: DiffableAllFields['eql_query'];
-  dataSource: DiffableAllFields['data_source'];
+  eqlQuery: RuleEqlQuery;
+  dataSource?: RuleDataSource;
 }
 
 export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps) {

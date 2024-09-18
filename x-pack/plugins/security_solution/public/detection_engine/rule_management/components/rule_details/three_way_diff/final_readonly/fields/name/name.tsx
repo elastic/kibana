@@ -8,18 +8,18 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleName } from '../../../../../../../../../common/api/detection_engine';
 
-interface RuleNameProps {
-  name: DiffableAllFields['name'];
+interface NameProps {
+  name: RuleName;
 }
 
-function RuleName({ name }: RuleNameProps) {
+function Name({ name }: NameProps) {
   return <>{name}</>;
 }
 
 interface NameReadOnlyProps {
-  name: DiffableAllFields['name'];
+  name: RuleName;
 }
 
 export function NameReadOnly({ name }: NameReadOnlyProps) {
@@ -28,7 +28,7 @@ export function NameReadOnly({ name }: NameReadOnlyProps) {
       listItems={[
         {
           title: ruleDetailsI18n.NAME_FIELD_LABEL,
-          description: <RuleName name={name} />,
+          description: <Name name={name} />,
         },
       ]}
     />
