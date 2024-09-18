@@ -58,7 +58,6 @@ export type DashboardApi = CanExpandPanels &
     getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
     getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
     getSettings: () => DashboardStateFromSettingsFlyout;
-    getPanelsState: () => DashboardPanelMap;
     hasOverlays$: PublishingSubject<boolean | undefined>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
     hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
@@ -81,7 +80,6 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     setViewMode: (viewMode: ViewMode) => void;
-    openSettingsFlyout: () => void;
     useMargins$: PublishingSubject<boolean | undefined>;
 
     // TODO remove types below this line - from legacy embeddable system

@@ -93,13 +93,7 @@ import {
   DashboardStateFromSettingsFlyout,
   UnsavedPanelState,
 } from '../types';
-import {
-  addFromLibrary,
-  addOrUpdateEmbeddable,
-  runQuickSave,
-  runInteractiveSave,
-  showSettings,
-} from './api';
+import { addFromLibrary, addOrUpdateEmbeddable, runQuickSave, runInteractiveSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import {
   combineDashboardFiltersWithControlGroupFilters,
@@ -570,7 +564,6 @@ export class DashboardContainer
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
-  public openSettingsFlyout = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public duplicatePanel(id: string) {

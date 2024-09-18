@@ -12,8 +12,8 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardPanelMap } from '../../../../common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 
@@ -21,9 +21,7 @@ export const useDashboardGridSettings = (panelsInOrder: string[], panels: Dashbo
   const dashboardApi = useDashboardApi();
   const { euiTheme } = useEuiTheme();
 
-  const viewMode = useStateFromPublishingSubject(
-    dashboardApi.viewMode
-  );
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
 
   const layouts = useMemo(() => {
     return {
