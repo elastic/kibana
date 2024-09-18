@@ -1074,9 +1074,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.priorityFieldLabel', {
         defaultMessage: 'Priority',
       }),
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.priorityHelpTextDescription', {
-        defaultMessage: 'The priority of the field.',
-      }),
       formatters: [toInt],
       validations: [
         {

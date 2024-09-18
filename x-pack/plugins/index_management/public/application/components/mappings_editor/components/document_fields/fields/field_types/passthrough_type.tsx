@@ -7,22 +7,13 @@
 
 import React from 'react';
 
-import { PathParameter } from '../../field_parameters';
-import { NormalizedField, NormalizedFields } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { BasicParametersSection } from '../edit_field';
 
-interface Props {
-  field: NormalizedField;
-  allFields: NormalizedFields['byId'];
-}
-
-export const PassthroughType = ({ field, allFields }: Props) => {
+export const PassthroughType = () => {
   return (
     <BasicParametersSection>
-      <PathParameter field={field} allFields={allFields} />
-
       <UseField path="priority" config={getFieldConfig('priority')} component={Field} />
     </BasicParametersSection>
   );
