@@ -32,7 +32,7 @@ paths:
           name: id
           schema:
             type: string
-          description: The ID of the timeline to retrieve
+          description: The ID of the Timeline to retrieve.
       responses:
         '200':
           description: Indicates that the (template) Timeline was found and returned.

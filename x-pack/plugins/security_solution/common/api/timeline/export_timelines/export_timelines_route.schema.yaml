@@ -30,7 +30,7 @@ paths:
             type: string
           description: The name of the file to export
       requestBody:
-        description: The IDs of the Timelines to export
+        description: The IDs of the Timelines to export.
         required: true
         content:
           application/json:
@@ -49,7 +49,7 @@ paths:
             application/ndjson:
               schema:
                 type: string
-                description: NDJSON of the exported timelines
+                description: NDJSON of the exported Timelines
         '400':
           description: Indicates that the export size limit was exceeded.
           content:
