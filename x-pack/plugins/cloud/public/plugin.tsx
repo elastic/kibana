@@ -230,7 +230,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       const result = await http.get<ElasticsearchConfigType>('/api/internal/elasticsearch_config');
       // Short-circuiting to empty string ensures this is only set once
       this.elasticsearchUrl = result.elasticsearch_url || '';
-      return { elasticsearchUrl: result.elasticsearch_url };
+      return { elasticsearchUrl: this.elasticsearch_url };
     } catch {
       this.logger.error('Failed to fetch Elasticsearch config');
       return {
