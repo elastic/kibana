@@ -113,6 +113,21 @@ exports.EcsCustomPropertyMappings = {
                   status_order: {
                     type: 'long',
                   },
+                  backfill: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                      start: {
+                        type: 'date',
+                      },
+                      interval: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
                   metrics: {
                     properties: {
                       number_of_triggered_actions: {
@@ -242,6 +257,10 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          type_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           execution: {
             properties: {
               source: {
@@ -266,6 +285,13 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                     },
+                  },
+                },
+              },
+              usage: {
+                properties: {
+                  request_body_bytes: {
+                    type: 'long',
                   },
                 },
               },

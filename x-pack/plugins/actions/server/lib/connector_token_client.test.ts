@@ -11,6 +11,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { ConnectorTokenClient } from './connector_token_client';
 import { Logger } from '@kbn/core/server';
 import { ConnectorToken } from '../types';
+import * as allRetry from './retry_if_conflicts';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
@@ -36,6 +37,7 @@ beforeAll(() => {
 beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
+  jest.restoreAllMocks();
   connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
@@ -301,30 +303,47 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
-      errors: [
-        {
-          id: '1',
-          error: {
-            error: 'error',
-            statusCode: 503,
-            message: 'There is a conflict.',
-          },
-          type: 'conflict',
-        },
-      ],
-    });
-
-    const result = await connectorTokenClient.update({
-      id: '1',
-      tokenType: 'access_token',
-      token: 'testtokenvalue',
-      expiresAtMillis: expiresAt,
-    });
-    expect(result).toEqual(null);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(0);
+    const retryIfConflictsMock = jest.spyOn(allRetry, 'retryIfConflicts');
+    retryIfConflictsMock.mockRejectedValue(new Error('There is a conflict.'));
+    await expect(
+      connectorTokenClient.update({
+        id: '1',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAtMillis: expiresAt,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
     expect(logger.error.mock.calls[0]).toMatchObject([
-      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict. ',
+      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
+    ]);
+  });
+
+  test('should attempt oper', async () => {
+    const expiresAt = new Date().toISOString();
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    const retryIfConflictsMock = jest.spyOn(allRetry, 'retryIfConflicts');
+    retryIfConflictsMock.mockRejectedValue(new Error('There is a conflict.'));
+    await expect(
+      connectorTokenClient.update({
+        id: '1',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAtMillis: expiresAt,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
     ]);
   });
 
@@ -560,9 +579,7 @@ describe('updateOrReplace()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
-      errors: [],
-    });
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'connector_token',
@@ -594,7 +611,6 @@ describe('updateOrReplace()', () => {
     expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.checkConflicts).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
       'newToken'

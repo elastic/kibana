@@ -4,34 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
-} from '@kbn/securitysolution-grouping/src';
+} from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import {
+  LATEST_FINDINGS_RETENTION_POLICY,
+  buildMutedRulesFilter,
+} from '@kbn/cloud-security-posture-common';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
   useGroupedFindings,
 } from './use_grouped_findings';
-import { FINDINGS_UNIT, groupingTitle, defaultGroupingOptions, getDefaultQuery } from './constants';
+import {
+  FINDINGS_UNIT,
+  groupingTitle,
+  defaultGroupingOptions,
+  getDefaultQuery,
+  MISCONFIGURATIONS_GROUPS_UNIT,
+} from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -124,13 +132,13 @@ export const isFindingsRootGroupingAggregation = (
  */
 export const useLatestFindingsGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
+  getGroupStats?: GetGroupStats<FindingsGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -144,6 +152,7 @@ export const useLatestFindingsGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -158,9 +167,10 @@ export const useLatestFindingsGrouping = ({
     getDefaultQuery,
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
+    groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
@@ -254,6 +264,7 @@ export const useLatestFindingsGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useMemo } from 'react';
@@ -52,12 +53,9 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   const hiddenObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);
-  const managedObjects = useMemo(() => {
-    return selectedObjects.filter((obj) => obj.managed);
-  }, [selectedObjects]);
   const deletableObjects = useMemo(() => {
     return selectedObjects
-      .filter((obj) => !obj.meta.hiddenType && !obj.managed)
+      .filter((obj) => !obj.meta.hiddenType)
       .map(({ type, id, meta, namespaces = [] }) => {
         const { title = '', icon = 'apps' } = meta;
         const isShared = namespaces.length > 1 || namespaces.includes('*');
@@ -88,7 +86,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {hiddenObjects.length + managedObjects.length > 0 && (
+        {hiddenObjects.length > 0 && (
           <>
             <EuiCallOut
               data-test-subj="cannotDeleteObjectsConfirmWarning"
@@ -111,16 +109,6 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                     id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
                     defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted."
                     values={{ objectCount: hiddenObjects.length }}
-                  />
-                </p>
-              )}
-
-              {managedObjects.length > 0 && (
-                <p>
-                  <FormattedMessage
-                    id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.managedContent"
-                    defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} managed by Elastic and cannot be deleted."
-                    values={{ objectCount: managedObjects.length }}
                   />
                 </p>
               )}

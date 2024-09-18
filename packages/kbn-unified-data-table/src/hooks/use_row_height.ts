@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -15,7 +16,7 @@ import {
   updateStoredRowHeight,
 } from '../utils/row_heights';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
-import { RowHeightSettingsProps } from '../components/row_height_settings';
+import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
 
 interface UseRowHeightProps {
   storage: Storage;
@@ -57,11 +58,11 @@ export const useRowHeight = ({
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
     switch (rowHeightLines) {
       case ROWS_HEIGHT_OPTIONS.auto:
-        return 'auto';
+        return RowHeightMode.auto;
       case ROWS_HEIGHT_OPTIONS.single:
-        return 'single';
+        return RowHeightMode.single;
       default:
-        return 'custom';
+        return RowHeightMode.custom;
     }
   }, [rowHeightLines]);
 
@@ -70,10 +71,10 @@ export const useRowHeight = ({
       let newRowHeightLines: number;
 
       switch (newRowHeight) {
-        case 'auto':
+        case RowHeightMode.auto:
           newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
           break;
-        case 'single':
+        case RowHeightMode.single:
           newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
           break;
         default:

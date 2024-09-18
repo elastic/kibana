@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 /**
  * This API publishes a saved object id which can be used to determine which saved object this API is linked to.
@@ -23,9 +24,3 @@ export const apiPublishesSavedObjectId = (
 ): unknownApi is PublishesSavedObjectId => {
   return Boolean(unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId !== undefined);
 };
-
-/**
- * A hook that gets this API's saved object ID as a reactive variable which will cause re-renders on change.
- */
-export const useSavedObjectId = (api: PublishesSavedObjectId | undefined) =>
-  useStateFromPublishingSubject(api?.savedObjectId);

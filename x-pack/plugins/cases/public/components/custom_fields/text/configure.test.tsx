@@ -12,8 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Configure } from './configure';
 
-// Failing: See https://github.com/elastic/kibana/issues/176600
-describe.skip('Configure ', () => {
+describe('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -37,7 +36,7 @@ describe.skip('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -45,15 +44,17 @@ describe.skip('Configure ', () => {
     });
   });
 
-  it('updates field options with default value correctly when not required', async () => {
+  // Flaky: https://github.com/elastic/kibana/issues/178001
+  it.skip('updates field options with default value correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -73,9 +74,10 @@ describe.skip('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid

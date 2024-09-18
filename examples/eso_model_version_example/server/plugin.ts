@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,9 +114,10 @@ export class EsoModelVersionExample implements Plugin<void, void> {
                   aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()) })),
                   secrets: schema.any(),
                 },
-                // 'ignore' will strip any new unknown fields coming from new versions (a zero-downtime upgrade consideration)
-                // We want to do this unless we have a compelling reason not to, like if we know we want to add a new AAD field
-                // in the next version (see model version 2)
+                // 'ignore' will strip any new unknown fields coming from new versions
+                // We want to do this unless we have a compelling reason not to, e.g. in a zero-downtime upgrade scenario
+                // and we know that in the next version we will add a new nested field to an attribute that is already
+                // included in AAD (see model version 2)
                 { unknowns: 'ignore' }
               ),
               create: schema.object({
@@ -126,28 +128,36 @@ export class EsoModelVersionExample implements Plugin<void, void> {
               }),
             },
           },
-          inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // Pass in the type registration for the specific version
-          outputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // In this case both input an output are V1
+          // Pass in the type registration for the specific version. In this case both input and output are V1.
+          inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration,
+          outputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration,
           shouldTransformIfDecryptionFails: true,
         }),
         2: plugins.encryptedSavedObjects.createModelVersion({
           modelVersion: {
             changes: [
-              // Version 2 adds additional optional properties (or "sub-fields") to aadField1 and secrets, we're going to back fill them.
-              // Version 2 also adds an optional field aadExcludedField, which is excluded from AAD. This will be stripped out for
-              // older versions during zero-downtime upgrades due to the forwardCompatibility schema in model version 1.
+              // Version 2 adds a new attribute aadField2 which is included in AAD, we're not going to backfill it. During a
+              // zero-downtime upgrade, the previous version of Kibana will not know to include it in AAD based on the wrapped
+              // model version 1 definition. We need to keep it empty in this version, but can backfill it in the next version
+              // safely.
+
+              // Version 2 also adds an additional optional property (or "sub-field") to secrets, an encrypted field, we're
+              // going to backfill it. Note that during a zero-downtime upgrade, the previous version of Kibana needs to be
+              // able to handle additional properties to encrypted attributes gracefully if they are backfilled.
+
+              // Version 2 also adds an optional field aadExcludedField, which is excluded from AAD. This will be stripped out
+              // in older versions during zero-downtime upgrades due to the forwardCompatibility schema in model version 1.
               {
                 type: 'data_backfill',
                 backfillFn: (doc) => {
-                  const aadField1 = doc.attributes.aadField1;
                   const secrets = doc.attributes.secrets;
                   return {
                     attributes: {
-                      aadField1: { ...aadField1, flag2: false },
                       secrets: {
                         ...secrets,
                         b: "model version 2 adds property 'b' to the secrets attribute",
                       },
+                      aadExcludedField: 'model version 2 adds this non-AAD attribute',
                     },
                   };
                 },
@@ -161,17 +171,22 @@ export class EsoModelVersionExample implements Plugin<void, void> {
                   aadField1: schema.maybe(
                     schema.object({
                       flag1: schema.maybe(schema.boolean()),
-                      flag2: schema.maybe(schema.boolean()),
+                    })
+                  ),
+                  aadField2: schema.maybe(
+                    schema.object({
+                      foo: schema.maybe(schema.string()),
+                      bar: schema.maybe(schema.string()),
                     })
                   ),
                   aadExcludedField: schema.maybe(schema.string()),
                   secrets: schema.any(),
                 },
-                // If we know that we will be adding a new AAD field in the next version, we will NOT strip new fields
-                // in the forward compatibility schema. This is a Zero-downtime upgrade consideration and ensures that
-                // old versions will use those fields when constructing AAD. The caveat is that we need to know ahead
-                // of time, and make sure the consuming code can handle having the additional attribute, even if it
-                // is not used yet.
+                // If we know that we will be adding a new property/sub-field to an AAD-included attribute in the next
+                // version, we will choose NOT to strip new fields in the forward compatibility schema. This is a zero-
+                // downtime upgrade consideration and ensures that old versions will use the additionally included
+                // fields when constructing AAD. The caveat is that we need to know ahead of time, and this version of
+                // Kibana (prior to version 3) needs to be able to handle the additional properties gracefully.
                 { unknowns: 'allow' }
               ),
               create: schema.object({
@@ -180,7 +195,12 @@ export class EsoModelVersionExample implements Plugin<void, void> {
                 aadField1: schema.maybe(
                   schema.object({
                     flag1: schema.maybe(schema.boolean()),
-                    flag2: schema.maybe(schema.boolean()),
+                  })
+                ),
+                aadField2: schema.maybe(
+                  schema.object({
+                    foo: schema.maybe(schema.string()),
+                    bar: schema.maybe(schema.string()),
                   })
                 ),
                 aadExcludedField: schema.maybe(schema.string()),
@@ -188,19 +208,39 @@ export class EsoModelVersionExample implements Plugin<void, void> {
               }),
             },
           },
-          inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // In this case we are expecting to transform from a V1 object
-          outputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration, // to a V2 object
+          // In this case we are expecting to transform from a V1 object to a V2 object
+          inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration,
+          outputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration,
           shouldTransformIfDecryptionFails: true,
         }),
         3: plugins.encryptedSavedObjects.createModelVersion({
           modelVersion: {
-            // Version 3 adds a new attribute aadField2 which is included in AAD, we're not going to back fill it.
-            // For zero-downtime this new attribute is ok, because the previous model version allows unknown fields and will not strip it.
-            // The previous version will include it by default when constructing AAD.
+            // Version 3 removes the toBeRemoved attribute.
+
+            // Version 3 adds an optional field flag2 to the aadField1 attribute, which is included in AAD. As the previous model
+            // version allows unknown fields, we can backill it here.
+
+            // Version 3 also backfills the previously added addField2, which is safe to do now, as the previous model version
+            // has already defined it as an AAD-included field.
             changes: [
               {
                 type: 'data_removal',
                 removedAttributePaths: ['toBeRemoved'],
+              },
+              {
+                type: 'data_backfill',
+                backfillFn: (doc) => {
+                  const aadField1 = doc.attributes.aadField1;
+                  return {
+                    attributes: {
+                      aadField1: { ...aadField1, flag2: false },
+                      aadField2: {
+                        foo: 'model version 3 backfills aadField2.foo',
+                        bar: 'model version 3 backfills aadField2.bar',
+                      },
+                    },
+                  };
+                },
               },
             ],
             schemas: {
@@ -244,8 +284,10 @@ export class EsoModelVersionExample implements Plugin<void, void> {
               }),
             },
           },
-          inputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration, // In this case we are expecting to transform from V2 to V3. This happens to be the latest
-          outputType: esoModelVersionExampleV3.EsoModelVersionExampleTypeRegistration, // version, but being explicit means we don't need to change this when we implement V4
+          // In this case we are expecting to transform from V2 to V3. This happens to be the latest
+          // version, but being explicit means we don't need to change this when we implement V4
+          inputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration,
+          outputType: esoModelVersionExampleV3.EsoModelVersionExampleTypeRegistration,
           shouldTransformIfDecryptionFails: true,
         }),
       },
@@ -400,10 +442,10 @@ export class EsoModelVersionExample implements Plugin<void, void> {
           const decrypted = await Promise.all(
             documentVersionConstants.map(async (obj) => {
               const parts = obj.id.split(':', 2);
-              const dooder = await esoClient.getDecryptedAsInternalUser(parts[0], parts[1], {
+              const result = await esoClient.getDecryptedAsInternalUser(parts[0], parts[1], {
                 namespace,
               });
-              return dooder;
+              return result;
             })
           );
 

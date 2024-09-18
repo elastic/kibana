@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type {
@@ -30,12 +31,12 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
+  UnifiedHistogramVisContext,
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
-import { useStableCallback } from './hooks/use_stable_callback';
+import { useStableCallback } from '../hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
   abortController?: AbortController;
@@ -48,7 +49,7 @@ export interface HistogramProps {
   hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributesContext: LensAttributesContext;
+  visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -95,7 +96,7 @@ export function Histogram({
   hasLensSuggestions,
   getTimeRange,
   refetch$,
-  lensAttributesContext: attributesContext,
+  visContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -106,7 +107,6 @@ export function Histogram({
   abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
-  const [chartSize, setChartSize] = useState('100%');
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -115,18 +115,7 @@ export function Histogram({
     isPlainRecord,
     timeField: dataView.timeFieldName,
   });
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
-  const { attributes } = attributesContext;
-
-  useEffect(() => {
-    if (attributes.visualizationType === 'lnsMetric') {
-      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
-      setChartSize(`${size}px`);
-    } else {
-      setChartSize('100%');
-    }
-  }, [attributes, containerHeight, containerWidth]);
+  const { attributes } = visContext;
 
   const onLoad = useStableCallback(
     (
@@ -178,7 +167,7 @@ export function Histogram({
     request,
     getTimeRange,
     refetch$,
-    attributesContext,
+    visContext,
     onLoad,
   });
 
@@ -197,7 +186,7 @@ export function Histogram({
     }
 
     & .lnsExpressionRenderer {
-      width: ${chartSize};
+      width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
       box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
@@ -220,8 +209,8 @@ export function Histogram({
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
         data-request-data={requestData}
+        data-suggestion-type={visContext.suggestionType}
         css={chartCss}
-        ref={chartRef}
       >
         <lens.EmbeddableComponent
           {...lensProps}

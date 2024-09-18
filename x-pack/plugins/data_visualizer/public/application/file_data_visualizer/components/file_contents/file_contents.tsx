@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -25,7 +26,7 @@ import { useGrokHighlighter } from './use_text_parser';
 import { LINE_LIMIT } from './grok_highlighter';
 
 interface Props {
-  data: string;
+  fileContents: string;
   format: string;
   numberOfLines: number;
   semiStructureTextData: SemiStructureTextData | null;
@@ -50,7 +51,12 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStructureTextData }) => {
+export const FileContents: FC<Props> = ({
+  fileContents,
+  format,
+  numberOfLines,
+  semiStructureTextData,
+}) => {
   let mode = EDITOR_MODE.TEXT;
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
@@ -62,8 +68,8 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     semiStructureTextDataGuard(semiStructureTextData)
   );
   const formattedData = useMemo(
-    () => limitByNumberOfLines(data, numberOfLines),
-    [data, numberOfLines]
+    () => limitByNumberOfLines(fileContents, numberOfLines),
+    [fileContents, numberOfLines]
   );
 
   const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
@@ -77,7 +83,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       semiStructureTextData!;
 
     grokHighlighter(
-      data,
+      fileContents,
       grokPattern!,
       mappings,
       ecsCompatibility,
@@ -95,7 +101,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
           setIsSemiStructureTextData(false);
         }
       });
-  }, [data, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
+  }, [fileContents, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
 
   return (
     <>
@@ -141,10 +147,10 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       ) : (
         <>
           {highlightedLines.map((line, i) => (
-            <>
+            <React.Fragment key={`line-${i}`}>
               {line}
               {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
-            </>
+            </React.Fragment>
           ))}
         </>
       )}

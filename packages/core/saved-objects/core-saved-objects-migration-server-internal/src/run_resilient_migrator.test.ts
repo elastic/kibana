@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import buffer from 'buffer';
@@ -18,7 +19,11 @@ import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
-import { indexTypesMapMock, savedObjectTypeRegistryMock } from './run_resilient_migrator.fixtures';
+import {
+  hashToVersionMapMock,
+  indexTypesMapMock,
+  savedObjectTypeRegistryMock,
+} from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
 
@@ -70,8 +75,10 @@ describe('runResilientMigrator', () => {
       kibanaVersion: options.kibanaVersion,
       waitForMigrationCompletion: options.waitForMigrationCompletion,
       mustRelocateDocuments: options.mustRelocateDocuments,
+      indexTypes: options.indexTypes,
       indexTypesMap: options.indexTypesMap,
-      targetMappings: options.targetMappings,
+      hashToVersionMap: options.hashToVersionMap,
+      targetIndexMappings: options.targetIndexMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
       coreMigrationVersionPerType: options.coreMigrationVersionPerType,
@@ -117,8 +124,10 @@ const mockOptions = (): RunResilientMigratorParams => {
     kibanaVersion: '8.8.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['a', 'c'],
     indexTypesMap: indexTypesMapMock,
-    targetMappings: {
+    hashToVersionMap: hashToVersionMapMock,
+    targetIndexMappings: {
       properties: {
         a: { type: 'keyword' },
         c: { type: 'long' },

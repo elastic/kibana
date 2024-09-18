@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,7 +22,7 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { pluginServices } from '../services/plugin_services';
 import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
@@ -57,9 +58,8 @@ export const confirmCreateWithUnsaved = (
   const descriptionId = 'confirmDiscardOrKeepDescription';
 
   const {
-    settings: {
-      theme: { theme$ },
-    },
+    analytics,
+    settings: { i18n, theme },
     overlays: { openModal },
   } = pluginServices.getServices();
 
@@ -120,7 +120,7 @@ export const confirmCreateWithUnsaved = (
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>,
-      { theme$ }
+      { analytics, i18n, theme }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

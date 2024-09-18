@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/inference_integration_flyout",
+  "owner": "@elastic/ml-ui"
+}

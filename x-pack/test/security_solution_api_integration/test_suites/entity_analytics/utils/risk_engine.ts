@@ -13,10 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  EcsRiskScore,
-  RiskScore,
-} from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import type { EcsRiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -25,8 +22,12 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
   RISK_ENGINE_PRIVILEGES_URL,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -37,7 +38,7 @@ import {
   routeWithNamespace,
 } from '../../../../common/utils/security_solution';
 
-const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
+const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
   const {
     '@timestamp': timestamp,
     inputs,
@@ -49,10 +50,13 @@ const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   return rest;
 };
 
-export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
-  scores.map(sanitizeScore);
+export const sanitizeScores = (
+  scores: Array<Partial<EntityRiskScoreRecord>>
+): Array<Partial<EntityRiskScoreRecord>> => scores.map(sanitizeScore);
 
-export const normalizeScores = (scores: Array<Partial<EcsRiskScore>>): Array<Partial<RiskScore>> =>
+export const normalizeScores = (
+  scores: Array<Partial<EcsRiskScore>>
+): Array<Partial<EntityRiskScoreRecord>> =>
   scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
 
 export const buildDocument = (body: object, id?: string) => {
@@ -74,7 +78,7 @@ export const createAndSyncRuleAndAlertsFactory =
     log,
     namespace,
   }: {
-    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    supertest: SuperTest.Agent;
     log: ToolingLog;
     namespace?: string;
   }) =>
@@ -144,6 +148,52 @@ export const deleteRiskScoreIndices = async ({
   } catch (e) {
     log.warning(`Error deleting risk score indices: ${e.message}`);
   }
+};
+
+export const areRiskScoreIndicesEmpty = async ({
+  es,
+  namespace = 'default',
+  log,
+}: {
+  es: Client;
+  namespace?: string;
+  log: ToolingLog;
+}): Promise<boolean> => {
+  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+  let riskScoreCount = 0;
+  let riskScoreLatestCount = 0;
+
+  try {
+    const [riskScoreCountRes, riskScoreLatestCountRes] = await Promise.all([
+      es.count({ index: riskScoreIndex }),
+      es.count({ index: riskScoreLatestIndex }),
+    ]);
+    riskScoreCount = riskScoreCountRes.count;
+    riskScoreLatestCount = riskScoreLatestCountRes.count;
+  } catch (e) {
+    if (e.meta.statusCode === 404) {
+      return true;
+    }
+    throw e;
+  }
+
+  const isEmpty = riskScoreCount === 0 && riskScoreLatestCount === 0;
+
+  if (!isEmpty) {
+    log.warning(
+      `Risk score indices are not empty. Risk score index count: ${riskScoreCount}, Risk score latest index count: ${riskScoreLatestCount}`
+    );
+    const [riskScoreDocs, riskScoreLatestDocs] = await Promise.all([
+      es.search({ index: riskScoreIndex, size: 25 }),
+      es.search({ index: riskScoreLatestIndex, size: 25 }),
+    ]);
+
+    log.info(`Risk score index documents: ${JSON.stringify(riskScoreDocs.hits.hits)}`);
+    log.info(`Risk score latest index documents: ${JSON.stringify(riskScoreLatestDocs.hits.hits)}`);
+  }
+
+  return isEmpty;
 };
 
 /**
@@ -396,14 +446,11 @@ export const clearLegacyTransforms = async ({
   es: Client;
   log: ToolingLog;
 }): Promise<void> => {
-  const transforms = legacyTransformIds.map((transform) =>
-    es.transform.deleteTransform({
-      transform_id: transform,
-      force: true,
-    })
-  );
   try {
-    await Promise.all(transforms);
+    await removeLegacyTransforms({
+      namespace: 'default',
+      esClient: es,
+    });
   } catch (e) {
     log.warning(`Error deleting legacy transforms: ${e.message}`);
   }
@@ -413,7 +460,7 @@ export const clearLegacyDashboards = async ({
   supertest,
   log,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
 }): Promise<void> => {
   try {
@@ -423,8 +470,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
 
     await supertest
       .post(
@@ -432,8 +478,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
   } catch (e) {
     log.warning(`Error deleting legacy dashboards: ${e.message}`);
   }
@@ -484,45 +529,59 @@ export const getLegacyRiskScoreDashboards = async ({
   return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
 };
 
-export const riskEngineRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  namespace?: string
-) => ({
-  init: async () =>
+export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => ({
+  init: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  getStatus: async () =>
+  getStatus: async (expectStatusCode: number = 200) =>
     await supertest
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  enable: async () =>
+  enable: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  disable: async () =>
+  disable: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
+
+  privileges: async (expectStatusCode: number = 200) =>
+    await supertest
+      .get(RISK_ENGINE_PRIVILEGES_URL)
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
+
+  scheduleNow: async (expectStatusCode: number = 200) =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
 });
 
 interface Credentials {
@@ -531,7 +590,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>
@@ -571,11 +630,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
       .expect(expectStatusCode),
 });
 
-export const installLegacyRiskScore = async ({
-  supertest,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-}) => {
+export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')

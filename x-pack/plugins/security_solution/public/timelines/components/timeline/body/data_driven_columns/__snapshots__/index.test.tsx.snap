@@ -34,6 +34,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -85,6 +91,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -172,6 +181,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -223,6 +238,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -310,6 +328,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -361,6 +385,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -448,6 +475,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -499,6 +532,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -586,6 +622,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -637,6 +679,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -724,6 +769,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -775,6 +826,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",
@@ -862,6 +916,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "event.kind",
+          "value": Array [
+            "signal",
+          ],
+        },
+        Object {
           "field": "host.name",
           "value": Array [
             "apache",
@@ -913,6 +973,9 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
           "id": Array [
             "1",
+          ],
+          "kind": Array [
+            "signal",
           ],
           "module": Array [
             "nginx",

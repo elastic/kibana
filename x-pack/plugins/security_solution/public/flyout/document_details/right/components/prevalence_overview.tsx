@@ -10,11 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
 
@@ -27,8 +28,14 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
-    useRightPanelContext();
+  const {
+    eventId,
+    indexName,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    investigationFields,
+    isPreviewMode,
+  } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goPrevalenceTab = useCallback(() => {
@@ -66,6 +73,21 @@ export const PrevalenceOverview: FC = () => {
       ),
     [data]
   );
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goPrevalenceTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
+                defaultMessage="Show all prevalence"
+              />
+            ),
+          }
+        : undefined,
+    [goPrevalenceTab, isPreviewMode]
+  );
 
   return (
     <ExpandablePanel
@@ -76,16 +98,8 @@ export const PrevalenceOverview: FC = () => {
             defaultMessage="Prevalence"
           />
         ),
-        link: {
-          callback: goPrevalenceTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
-              defaultMessage="Show all prevalence"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       content={{ loading, error }}
       data-test-subj={PREVALENCE_TEST_ID}

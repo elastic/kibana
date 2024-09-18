@@ -128,57 +128,14 @@ export interface XYByValueAnnotationLayerConfig {
   };
 }
 
-export type XYPersistedByValueAnnotationLayerConfig = Omit<
-  XYByValueAnnotationLayerConfig,
-  'indexPatternId' | 'hide' | 'simpleView'
-> & { persistanceType?: 'byValue'; hide?: boolean; simpleView?: boolean }; // props made optional for backwards compatibility since this is how the existing saved objects are
-
 export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
   annotationGroupId: string;
   __lastSaved: EventAnnotationGroupConfig;
 };
 
-export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
-  XYByValueAnnotationLayerConfig,
-  'layerId' | 'layerType'
-> & {
-  persistanceType: 'byReference';
-  annotationGroupRef: string;
-};
-
-/**
- * This is the type of hybrid layer we get after the user has made a change to
- * a by-reference annotation layer and saved the visualization without
- * first saving the changes to the library annotation layer.
- *
- * We maintain the link to the library annotation group, but allow the users
- * changes (persisted in the visualization state) to override the attributes in
- * the library version until the user
- * - saves the changes to the library annotation group
- * - reverts the changes
- * - unlinks the layer from the library annotation group
- */
-export type XYPersistedLinkedByValueAnnotationLayerConfig = Omit<
-  XYPersistedByValueAnnotationLayerConfig,
-  'persistanceType'
-> &
-  Omit<XYPersistedByReferenceAnnotationLayerConfig, 'persistanceType'> & {
-    persistanceType: 'linked';
-  };
-
 export type XYAnnotationLayerConfig =
   | XYByReferenceAnnotationLayerConfig
   | XYByValueAnnotationLayerConfig;
-
-export type XYPersistedAnnotationLayerConfig =
-  | XYPersistedByReferenceAnnotationLayerConfig
-  | XYPersistedByValueAnnotationLayerConfig
-  | XYPersistedLinkedByValueAnnotationLayerConfig;
-
-export type XYPersistedLayerConfig =
-  | XYDataLayerConfig
-  | XYReferenceLineLayerConfig
-  | XYPersistedAnnotationLayerConfig;
 
 export type XYLayerConfig =
   | XYDataLayerConfig
@@ -218,34 +175,32 @@ export interface XYState {
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
-  valuesInLegend?: boolean;
 }
 
 export type State = XYState;
 
-export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: XYPersistedLayerConfig[];
+const barShared = {
+  sortPriority: 1,
+  description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+    defaultMessage: 'Compare categories or groups of data with bars.',
+  }),
 };
 
-export type PersistedState = XYPersistedState;
+const areaShared = {
+  sortPriority: 3,
+  description: i18n.translate('xpack.lens.area.visualizationDescription', {
+    defaultMessage: 'Compare distributions of cumulative data trends.',
+  }),
+};
 
-const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-  defaultMessage: 'Bar',
-});
-
-const groupLabelForLineAndArea = i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-  defaultMessage: 'Line and area',
-});
-
-export const visualizationTypes: VisualizationType[] = [
+export const visualizationSubtypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: IconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar vertical',
     }),
-    groupLabel: groupLabelForBar,
-    sortPriority: 4,
+    ...barShared,
   },
   {
     id: 'bar_horizontal',
@@ -256,7 +211,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal',
     }),
-    groupLabel: groupLabelForBar,
+    ...barShared,
   },
   {
     id: 'bar_stacked',
@@ -264,7 +219,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Bar vertical stacked',
     }),
-    groupLabel: groupLabelForBar,
+    ...barShared,
   },
   {
     id: 'bar_percentage_stacked',
@@ -272,7 +227,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar vertical percentage',
     }),
-    groupLabel: groupLabelForBar,
+    ...barShared,
   },
   {
     id: 'bar_horizontal_stacked',
@@ -283,7 +238,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal stacked',
     }),
-    groupLabel: groupLabelForBar,
+    ...barShared,
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -297,7 +252,7 @@ export const visualizationTypes: VisualizationType[] = [
         defaultMessage: 'Bar horizontal percentage',
       }
     ),
-    groupLabel: groupLabelForBar,
+    ...barShared,
   },
   {
     id: 'area',
@@ -305,7 +260,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    ...areaShared,
   },
   {
     id: 'area_stacked',
@@ -313,7 +268,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Area stacked',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    ...areaShared,
   },
   {
     id: 'area_percentage_stacked',
@@ -321,7 +276,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    ...areaShared,
   },
   {
     id: 'line',
@@ -329,7 +284,73 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
-    groupLabel: groupLabelForLineAndArea,
     sortPriority: 2,
+    description: i18n.translate('xpack.lens.line.visualizationDescription', {
+      defaultMessage: 'Reveal variations in data over time.',
+    }),
+  },
+];
+
+export const visualizationTypes: VisualizationType[] = [
+  {
+    id: 'bar',
+    subtypes: [
+      'bar',
+      'bar_stacked',
+      'bar_percentage_stacked',
+      'bar_horizontal',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+    ],
+    icon: IconChartBar,
+    label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
+      defaultMessage: 'Bar',
+    }),
+    sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
+    getCompatibleSubtype: (seriesType?: string) => {
+      if (seriesType === 'area') {
+        return 'bar';
+      } else if (seriesType === 'area_stacked') {
+        return 'bar_stacked';
+      } else if (seriesType === 'area_percentage_stacked') {
+        return 'bar_percentage_stacked';
+      }
+    },
+  },
+  {
+    id: 'area',
+    icon: IconChartArea,
+    label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
+      defaultMessage: 'Area',
+    }),
+    sortPriority: 3,
+    description: i18n.translate('xpack.lens.area.visualizationDescription', {
+      defaultMessage: 'Compare distributions of cumulative data trends.',
+    }),
+    subtypes: ['area', 'area_stacked', 'area_percentage_stacked'],
+    getCompatibleSubtype: (seriesType?: string) => {
+      if (seriesType === 'bar') {
+        return 'area';
+      } else if (seriesType === 'bar_stacked') {
+        return 'area_stacked';
+      } else if (seriesType === 'bar_percentage_stacked') {
+        return 'area_percentage_stacked';
+      }
+    },
+  },
+  {
+    id: 'line',
+    icon: IconChartLine,
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
+    }),
+    sortPriority: 2,
+    description: i18n.translate('xpack.lens.line.visualizationDescription', {
+      defaultMessage: 'Reveal variations in data over time or categorically.',
+    }),
+    subtypes: ['line'],
   },
 ];

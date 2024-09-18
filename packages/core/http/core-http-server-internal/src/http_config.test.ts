@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
+import { permissionsPolicyConfig } from './permissions_policy';
 import { ExternalUrlConfig } from './external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
@@ -349,6 +351,14 @@ test('can specify socket timeouts', () => {
   expect(socketTimeout).toBe(5e5);
 });
 
+test('can specify payload timeouts', () => {
+  const obj = {
+    payloadTimeout: 654321,
+  };
+  const { payloadTimeout } = config.schema.validate(obj);
+  expect(payloadTimeout).toBe(654321);
+});
+
 describe('with compression', () => {
   test('accepts valid referrer whitelist', () => {
     const {
@@ -486,6 +496,11 @@ describe('cors', () => {
   });
 });
 
+test('oas is disabled by default', () => {
+  const { oas } = config.schema.validate({});
+  expect(oas.enabled).toBe(false);
+});
+
 describe('versioned', () => {
   it('defaults version resolution "oldest" not in dev', () => {
     expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
@@ -510,15 +525,16 @@ describe('versioned', () => {
 });
 
 describe('restrictInternalApis', () => {
-  it('is only allowed on serverless', () => {
-    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).toThrow(
-      /a value wasn't expected/
-    );
-    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).toThrow(
-      /a value wasn't expected/
-    );
+  it('is allowed on serverless and traditional', () => {
+    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();
+    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).not.toThrow();
     expect(
       config.schema.validate({ restrictInternalApis: true }, { serverless: true })
+    ).toMatchObject({
+      restrictInternalApis: true,
+    });
+    expect(
+      config.schema.validate({ restrictInternalApis: true }, { traditional: true })
     ).toMatchObject({
       restrictInternalApis: true,
     });
@@ -526,6 +542,9 @@ describe('restrictInternalApis', () => {
   it('defaults to false', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
+    ).toMatchObject({ restrictInternalApis: false });
+    expect(
+      config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
     ).toMatchObject({ restrictInternalApis: false });
   });
 });
@@ -536,9 +555,14 @@ describe('cdn', () => {
       cdn: { url: 'https://cdn.example.com' },
     });
   });
+  it('can be "unset" using "null"', () => {
+    expect(config.schema.validate({ cdn: { url: null } })).toMatchObject({
+      cdn: { url: null },
+    });
+  });
   it.each([['foo'], ['http:./']])('throws for invalid URL %s', (url) => {
-    expect(() => config.schema.validate({ cdn: { url } })).toThrowErrorMatchingInlineSnapshot(
-      `"[cdn.url]: expected URI with scheme [http|https]."`
+    expect(() => config.schema.validate({ cdn: { url } })).toThrow(
+      /expected URI with scheme \[http\|https\]/
     );
   });
   it.each([
@@ -550,6 +574,73 @@ describe('cdn', () => {
     ],
   ])('throws for disallowed values %s', (url, expecterError) => {
     expect(() => config.schema.validate({ cdn: { url } })).toThrow(expecterError);
+  });
+});
+
+describe('http2 protocol', () => {
+  it('throws if http2 is enabled but TLS is not', () => {
+    expect(() =>
+      config.schema.validate({
+        protocol: 'http2',
+        ssl: {
+          enabled: false,
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"http2 requires TLS to be enabled. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+    );
+  });
+  it('throws if http2 is enabled but TLS has no suitable versions', () => {
+    expect(() =>
+      config.schema.validate({
+        protocol: 'http2',
+        ssl: {
+          enabled: true,
+          supportedProtocols: ['TLSv1.1'],
+          certificate: '/path/to/certificate',
+          key: '/path/to/key',
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"http2 requires 'ssl.supportedProtocols' to include TLSv1.2 or TLSv1.3. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+    );
+  });
+  it('does not throws if http2 is enabled and TLS is not if http2.allowUnsecure is true', () => {
+    expect(
+      config.schema.validate({
+        protocol: 'http2',
+        http2: {
+          allowUnsecure: true,
+        },
+        ssl: {
+          enabled: false,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http2',
+      })
+    );
+  });
+  it('does not throws if supportedProtocols are not valid for h2c if http2.allowUnsecure is true', () => {
+    expect(
+      config.schema.validate({
+        protocol: 'http2',
+        http2: {
+          allowUnsecure: true,
+        },
+        ssl: {
+          enabled: true,
+          supportedProtocols: ['TLSv1.1'],
+          certificate: '/path/to/certificate',
+          key: '/path/to/key',
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http2',
+      })
+    );
   });
 });
 
@@ -569,7 +660,13 @@ describe('HttpConfig', () => {
       },
     });
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
@@ -583,7 +680,13 @@ describe('HttpConfig', () => {
   it('defaults restrictInternalApis to false', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
     expect(httpConfig.restrictInternalApis).toBe(false);
   });
 });

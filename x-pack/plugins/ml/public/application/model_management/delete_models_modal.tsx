@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -48,7 +49,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
   const modelsWithInferenceAPIs = models.filter((m) => m.hasInferenceServices);
 
   const inferenceAPIsIDs: string[] = modelsWithInferenceAPIs.flatMap((model) => {
-    return (model.inference_apis ?? []).map((inference) => inference.model_id);
+    return (model.inference_apis ?? []).map((inference) => inference.inference_id);
   });
 
   const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {

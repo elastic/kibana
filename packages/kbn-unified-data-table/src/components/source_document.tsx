@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment } from 'react';
@@ -37,6 +38,7 @@ export function SourceDocument({
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
+  isCompressed = true,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -48,6 +50,7 @@ export function SourceDocument({
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
+  isCompressed?: boolean;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -59,14 +62,14 @@ export function SourceDocument({
   return (
     <EuiDescriptionList
       type="inline"
-      compressed
+      compressed={isCompressed}
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
         // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && !row.flattened[fieldName]) return null;
+        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">

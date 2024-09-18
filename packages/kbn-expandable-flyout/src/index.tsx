@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { useInitializeFromLocalStorage } from './hooks/use_initialize_from_local_storage';
+import { FlyoutCustomProps, SettingsMenu } from './components/settings_menu';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
@@ -18,6 +22,7 @@ import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
 import { LeftSection } from './components/left_section';
 import { isPreviewBanner } from './components/preview_section';
+import { selectPushVsOverlay, useSelector } from './store/redux';
 
 const flyoutInnerStyles = { height: '100%' };
 
@@ -26,6 +31,18 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    * List of all registered panels available for render
    */
   registeredPanels: Panel[];
+  /**
+   * Allows for custom styles to be passed to the EuiFlyout component
+   */
+  customStyles?: Interpolation<Theme>;
+  /**
+   * Callback function to let application's code the flyout is closed
+   */
+  onClose?: EuiFlyoutProps['onClose'];
+  /**
+   * Set of properties that drive a settings menu
+   */
+  flyoutCustomProps?: FlyoutCustomProps;
 }
 
 /**
@@ -36,10 +53,18 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
  * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
+  customStyles,
   registeredPanels,
+  flyoutCustomProps,
   ...flyoutProps
 }) => {
   const windowWidth = useWindowSize();
+
+  useInitializeFromLocalStorage();
+
+  // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
+  const type = useSelector(selectPushVsOverlay);
+  const flyoutType = flyoutCustomProps?.pushVsOverlay?.disabled ? 'overlay' : type;
 
   const { left, right, preview } = useExpandableFlyoutState();
   const { closeFlyout } = useExpandableFlyoutApi();
@@ -60,7 +85,6 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     ? mostRecentPreview?.params?.banner
     : undefined;
 
-  const showBackButton = !!preview && preview.length > 1;
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
@@ -77,13 +101,27 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     showPreview,
   });
 
-  const hideFlyout = !left && !right && !preview?.length;
+  const hideFlyout = !(left && leftSection) && !(right && rightSection) && !preview?.length;
+
   if (hideFlyout) {
     return null;
   }
 
   return (
-    <EuiFlyout {...flyoutProps} size={flyoutWidth} ownFocus={false} onClose={closeFlyout}>
+    <EuiFlyout
+      {...flyoutProps}
+      data-panel-id={right?.id ?? ''}
+      type={flyoutType}
+      size={flyoutWidth}
+      ownFocus={false}
+      onClose={(e) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      }}
+      css={customStyles}
+    >
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}
@@ -108,11 +146,12 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       {showPreview ? (
         <PreviewSection
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
-          showBackButton={showBackButton}
           leftPosition={previewSectionLeft}
           banner={previewBanner}
         />
       ) : null}
+
+      {!flyoutCustomProps?.hideSettings && <SettingsMenu flyoutCustomProps={flyoutCustomProps} />}
     </EuiFlyout>
   );
 };

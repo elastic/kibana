@@ -20,13 +20,12 @@
       "taskManager",
       "cloud",
       "fleet",
-      "actions"
+      "actions",
+      "discover"
     ],
     "optionalPlugins": [
-      "securitySolutionEss"
+      "securitySolutionEss",
+      "integrationAssistant"
     ],
-    "requiredBundles": [
-      "usageCollection"
-    ]
   }
 }

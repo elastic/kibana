@@ -10,11 +10,11 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 // Generate synthetic data for the environment test suite
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
 }) {
@@ -63,5 +63,5 @@ export async function generateData({
       return [...loopGeneratedDocs, customDoc];
     });
 
-  await synthtraceEsClient.index(docs);
+  return apmSynthtraceEsClient.index(docs);
 }

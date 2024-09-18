@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
-import type { CustomizationCallback } from '../../customizations';
-import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
-import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -27,11 +26,10 @@ export interface DiscoverContainerInternalProps {
    *  already consumes.
    */
   overrideServices: Partial<DiscoverServices>;
-  getDiscoverServices: () => Promise<DiscoverServices>;
+  getDiscoverServices: () => DiscoverServices;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  isDev: boolean;
   isLoading?: boolean;
 }
 
@@ -47,38 +45,31 @@ const discoverContainerWrapperCss = css`
 `;
 
 const customizationContext: DiscoverCustomizationContext = {
+  solutionNavId: null,
   displayMode: 'embedded',
-  showLogsExplorerTabs: false,
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
 };
 
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
   customizationCallbacks,
-  isDev,
   getDiscoverServices,
   stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
-  const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
-  const [initialized, setInitialized] = useState(false);
+  const services = useMemo<DiscoverServices>(() => {
+    return {
+      ...getDiscoverServices(),
+      ...overrideServices,
+      getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
+    };
+  }, [getDiscoverServices, overrideServices, scopedHistory]);
 
-  useEffect(() => {
-    getDiscoverServices().then((svcs) => setDiscoverServices(svcs));
-  }, [getDiscoverServices]);
-
-  useEffect(() => {
-    setScopedHistory(scopedHistory);
-    setHeaderActionMenuMounter(() => {});
-    setInitialized(true);
-  }, [scopedHistory]);
-
-  const services = useMemo(() => {
-    if (!discoverServices) return;
-    return { ...discoverServices, ...overrideServices };
-  }, [discoverServices, overrideServices]);
-
-  if (!initialized || !services || isLoading) {
+  if (isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />
@@ -101,7 +92,6 @@ export const DiscoverContainerInternal = ({
             customizationCallbacks={customizationCallbacks}
             customizationContext={customizationContext}
             stateStorageContainer={stateStorageContainer}
-            isDev={isDev}
           />
         </KibanaContextProvider>
       </EuiFlexItem>

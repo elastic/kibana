@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SimpleQuery } from '@kbn/ml-query-utils';
 
 import { getMlSharedImports } from '../../shared_imports';
 
-import { SimpleQuery } from '../common';
-
-import { SearchItems } from './use_search_items';
+import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
 
 jest.mock('../../shared_imports');
@@ -49,7 +47,7 @@ const queryClient = new QueryClient();
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">
           <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>

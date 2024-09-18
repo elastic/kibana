@@ -317,7 +317,7 @@ const UnstyledProcessEventDot = React.memo(
     }, [dispatch, nodeID, timestamp, id]);
 
     const handleClick = useCallback(
-      (clickEvent) => {
+      (clickEvent: React.MouseEvent) => {
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
@@ -464,7 +464,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.processDescription"
-              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} false {{descriptionText}}}"
+              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} other {{descriptionText}}}"
               values={{
                 isEventBeingAnalyzed: isOrigin,
                 descriptionText,
@@ -584,7 +584,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     width: fit-content;
   }
 
-  & .euiSelectableList-bordered {
+  & .euiSelectableList {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
   }

@@ -22,7 +22,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/i18n-react",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/unified-search-plugin",

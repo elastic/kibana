@@ -21,3 +21,5 @@ export {
 } from './job_details';
 
 export { JobStatus } from './job_status';
+
+export { DeprecationCallout } from './deprecation_callout';

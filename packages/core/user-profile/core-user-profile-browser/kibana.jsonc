@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-user-profile-browser",
+  "owner": "@elastic/kibana-core"
+}

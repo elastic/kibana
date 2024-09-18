@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { each } from 'lodash';
-import type { ExperimentalFeatures } from '../../../../common';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
 import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
@@ -18,36 +16,39 @@ import type { AlertWithAgent, Alert } from './types';
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
   osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const getScheduleNotificationResponseActionsService =
   ({
     osqueryCreateActionService,
     endpointAppContextService,
-    experimentalFeatures,
   }: ScheduleNotificationResponseActionsService) =>
-  ({ signals, responseActions }: ScheduleNotificationActions) => {
+  async ({ signals, responseActions }: ScheduleNotificationActions) => {
     const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
-    each(responseActions, (responseAction) => {
-      if (
-        responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
-        osqueryCreateActionService
-      ) {
-        osqueryResponseAction(responseAction, osqueryCreateActionService, {
-          alerts,
-        });
-      }
-      if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
-        endpointResponseAction(
-          responseAction,
-          endpointAppContextService,
-          {
+    await Promise.all(
+      responseActions.map(async (responseAction) => {
+        if (
+          responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
+          osqueryCreateActionService
+        ) {
+          await osqueryResponseAction(responseAction, osqueryCreateActionService, {
             alerts,
-          },
-          experimentalFeatures
-        );
-      }
-    });
+          });
+        }
+        if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
+          // We currently support only automated response actions for Elastic Defend. This will
+          // need to be updated once we introduce support for other EDR systems.
+          // For an explanation of why this is needed, see this comment here:
+          // https://github.com/elastic/kibana/issues/180774#issuecomment-2139526239
+          const alertsFromElasticDefend = alerts.filter((alert) => alert.agent.type === 'endpoint');
+
+          if (alertsFromElasticDefend.length > 0) {
+            await endpointResponseAction(responseAction, endpointAppContextService, {
+              alerts: alertsFromElasticDefend,
+            });
+          }
+        }
+      })
+    );
   };

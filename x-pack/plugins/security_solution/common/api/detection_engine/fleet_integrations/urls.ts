@@ -7,5 +7,7 @@
 
 import { INTERNAL_DETECTION_ENGINE_URL as INTERNAL_URL } from '../../../constants';
 
+export const GET_ALL_INTEGRATIONS_URL = `${INTERNAL_URL}/fleet/integrations/all` as const;
+
 export const GET_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_URL}/fleet/integrations/installed` as const;

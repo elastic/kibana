@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getOpenAlerts, getEqlRuleForAlertTesting } from '../../../utils';
+import { getAlerts, getEqlRuleForAlertTesting } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
    * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
-  describe('@ess @serverless timestamp tests', () => {
+  describe('@ess @serverless @serverlessQA timestamp tests', () => {
     describe('alerts generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
      * If no timestamp override field exists in the indices but one was provided to the rule,
      * the rule's query will additionally search for events using the `@timestamp` field
      */
-    describe('alerts generated from events with timestamp override field', async () => {
+    describe('alerts generated from events with timestamp override field', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await createAlertsIndex(supertest, log);
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getOpenAlerts(
+          const alertsOpen = await getAlerts(
             supertest,
             log,
             es,
@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp_override_fallback_disabled: true,
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getOpenAlerts(
+          const alertsOpen = await getAlerts(
             supertest,
             log,
             es,

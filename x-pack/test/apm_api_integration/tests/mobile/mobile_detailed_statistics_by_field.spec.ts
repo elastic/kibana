@@ -19,7 +19,7 @@ type MobileDetailedStatisticsResponse =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -72,19 +72,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/177388
+  registry.when.skip(
     'Mobile detailed statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
       before(async () => {
         await generateMobileData({
-          synthtraceEsClient,
+          apmSynthtraceEsClient,
           start,
           end,
         });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('when comparison is disable', () => {
         it('returns current period data only', async () => {

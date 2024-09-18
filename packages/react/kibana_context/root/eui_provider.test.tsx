@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEuiTheme } from '@elastic/eui';
@@ -56,7 +57,7 @@ describe('KibanaEuiProvider', () => {
     const coreTheme: KibanaTheme = { darkMode: true };
 
     const wrapper = mountWithIntl(
-      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }}>
+      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} modify={{ breakpoint: { xxl: 1600 } }}>
         <InnerComponent />
       </KibanaEuiProvider>
     );
@@ -64,6 +65,7 @@ describe('KibanaEuiProvider', () => {
     await refresh(wrapper);
 
     expect(euiTheme!.colorMode).toEqual('DARK');
+    expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
     expect(consoleWarnMock).not.toBeCalled();
   });
 

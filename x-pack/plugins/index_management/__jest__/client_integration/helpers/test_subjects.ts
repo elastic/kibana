@@ -114,4 +114,5 @@ export type TestSubjects =
   | 'indicesSearch'
   | 'noIndicesMessage'
   | 'clearIndicesSearch'
+  | 'usingMaxRetention'
   | 'componentTemplatesLink';

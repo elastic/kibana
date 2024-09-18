@@ -167,5 +167,11 @@ describe('SolutionSideNav', () => {
       expect(result.queryByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });
+
+    it('should call onMount when function is provided', () => {
+      const onMount = jest.fn();
+      renderNav({ onMount });
+      expect(onMount).toHaveBeenCalled();
+    });
   });
 });

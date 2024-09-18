@@ -29,6 +29,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

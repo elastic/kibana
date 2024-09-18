@@ -7,21 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
-import { AlertSummaryWidgetProps } from './types';
+import { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
 import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './components/constants';
-
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation(() => true),
-}));
-
-const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 jest.mock('../../hooks/use_load_alert_summary', () => ({
   useLoadAlertSummary: jest.fn().mockReturnValue({
@@ -35,7 +31,15 @@ jest.mock('../../hooks/use_load_alert_summary', () => ({
     },
   }),
 }));
+
+const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
+
 const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
+
+const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+  charts: chartPluginMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+};
 
 describe('AlertSummaryWidget', () => {
   const mockedTimeRange = {
@@ -51,6 +55,7 @@ describe('AlertSummaryWidget', () => {
           featureIds={['apm', 'uptime', 'logs']}
           onClick={jest.fn}
           timeRange={mockedTimeRange}
+          dependencies={dependencies}
           {...props}
         />
       </IntlProvider>

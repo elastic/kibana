@@ -38,10 +38,10 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
-    showAIPlayground: false,
   },
   appSearch: {
     accountId: 'some-id-string',
+    kibanaUIsEnabled: true,
     onboardingComplete: true,
     role: {
       id: 'account_id:somestring|user_oid:somestring',

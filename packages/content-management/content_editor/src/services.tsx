@@ -1,17 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useContext, useCallback, useMemo } from 'react';
-import type { FC, ReactNode } from 'react';
-import type { Observable } from 'rxjs';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import {
+  UserProfilesProvider,
+  useUserProfilesServices,
+} from '@kbn/content-management-user-profiles';
+
 import type { EuiComboBoxProps } from '@elastic/eui';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
@@ -45,16 +54,28 @@ const ContentEditorContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const ContentEditorProvider: FC<Services> = ({ children, ...services }) => {
+export const ContentEditorProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   return <ContentEditorContext.Provider value={services}>{children}</ContentEditorContext.Provider>;
 };
+
+/**
+ * Specific services for mounting React
+ */
+interface ContentEditorStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
 
 /**
  * Kibana-specific service types.
  */
 export interface ContentEditorKibanaDependencies {
   /** CoreStart contract */
-  core: {
+  core: ContentEditorStartServices & {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
@@ -63,21 +84,7 @@ export interface ContentEditorKibanaDependencies {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
     };
-    theme: {
-      theme$: Observable<Theme>;
-    };
   };
-  /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
-   *
-   * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-   * ```
-   */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
   /**
    * The public API from the savedObjectsTaggingOss plugin.
    * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
@@ -93,7 +100,12 @@ export interface ContentEditorKibanaDependencies {
           object: {
             references: SavedObjectsReference[];
           };
-          onClick?: (tag: { name: string; description: string; color: string }) => void;
+          onClick?: (tag: {
+            name: string;
+            description: string;
+            color: string;
+            managed: boolean;
+          }) => void;
         }>;
         SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
       };
@@ -104,13 +116,12 @@ export interface ContentEditorKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
-  const { core, toMountPoint, savedObjectsTagging } = services;
-  const { openFlyout: coreOpenFlyout } = core.overlays;
-  const { theme$ } = core.theme;
+export const ContentEditorKibanaProvider: FC<
+  PropsWithChildren<ContentEditorKibanaDependencies>
+> = ({ children, ...services }) => {
+  const { core, savedObjectsTagging } = services;
+  const { overlays, notifications, ...startServices } = core;
+  const { openFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
     const Comp: Services['TagList'] = ({ references }) => {
@@ -124,18 +135,26 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
     return Comp;
   }, [savedObjectsTagging?.ui.components.TagList]);
 
+  const userProfilesServices = useUserProfilesServices();
+
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node, { theme$ }), options);
+      return coreOpenFlyout(
+        toMountPoint(
+          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>,
+          startServices
+        ),
+        options
+      );
     },
-    [coreOpenFlyout, toMountPoint, theme$]
+    [coreOpenFlyout, startServices, userProfilesServices]
   );
 
   return (
     <ContentEditorProvider
       openFlyout={openFlyout}
       notifyError={(title, text) => {
-        core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+        notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
       }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}

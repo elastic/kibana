@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -21,7 +22,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -31,10 +32,11 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -45,8 +47,10 @@ interface StartPlugins {
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
   maps?: MapsStartApi;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;

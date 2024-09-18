@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { memoize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export const createTrycloudOption1 = () => ({
+export const createTrycloudOption1 = memoize(() => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {
     defaultMessage: 'Option 1: Try in Elastic Cloud',
   }),
@@ -27,9 +29,9 @@ To create a cluster, in Elastic Cloud console:\n\
       link: 'https://www.elastic.co/cloud/as-a-service/signup?blade=kib',
     },
   }),
-});
+}));
 
-export const createTrycloudOption2 = () => ({
+export const createTrycloudOption2 = memoize(() => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option2.title', {
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
@@ -43,4 +45,4 @@ Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password*
       passwordTemplate: '`<password>`',
     },
   }),
-});
+}));

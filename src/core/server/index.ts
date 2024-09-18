@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -70,6 +71,11 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+export type {
+  EvaluationContext,
+  FeatureFlagsStart,
+  FeatureFlagsSetup,
+} from '@kbn/core-feature-flags-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -118,6 +124,38 @@ export type {
   UnauthorizedErrorHandler,
 } from '@kbn/core-elasticsearch-server';
 
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+  CoreAuditService,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
+} from '@kbn/core-security-server';
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';
+
+export type {
+  UserProfileUserInfo,
+  UserProfile,
+  UserProfileUserInfoWithSecurity,
+  UserProfileWithSecurity,
+  UserProfileLabels,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileRequestHandlerContext,
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+} from '@kbn/core-user-profile-server';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
@@ -153,7 +191,7 @@ export type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidationError,
   RedirectResponseOptions,
@@ -200,6 +238,7 @@ export type {
   HttpServiceStart,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -449,21 +488,43 @@ export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-l
 
 export type {
   AnalyticsClient,
-  Event,
-  EventContext,
-  EventType,
-  EventTypeOpts,
-  IShipper,
-  ContextProviderOpts,
-  OptInConfig,
-  ShipperClassConstructor,
-  TelemetryCounter,
-  TelemetryCounterType,
-} from '@kbn/analytics-client';
-export type {
+  AnalyticsClientInitContext,
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
+  // Types for the registerShipper API
+  ShipperClassConstructor,
+  RegisterShipperOpts,
+  // Types for the optIn API
+  OptInConfig,
+  OptInConfigPerType,
+  ShipperName,
+  // Types for the registerContextProvider API
+  ContextProviderOpts,
+  ContextProviderName,
+  // Types for the registerEventType API
+  EventTypeOpts,
+  // Events
+  Event,
+  EventContext,
+  EventType,
+  TelemetryCounter,
+  TelemetryCounterType,
+  // Schema
+  RootSchema,
+  SchemaObject,
+  SchemaArray,
+  SchemaChildValue,
+  SchemaMeta,
+  SchemaValue,
+  SchemaMetaOptional,
+  PossibleSchemaTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaTypes,
+  // Shippers
+  IShipper,
 } from '@kbn/core-analytics-server';
 export type {
   RequestHandlerContext,

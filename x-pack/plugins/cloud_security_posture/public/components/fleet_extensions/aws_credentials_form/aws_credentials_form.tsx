@@ -26,7 +26,7 @@ import {
 } from './get_aws_credentials_form_options';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
-import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import { AwsCredentialsType } from '../../../../common/types_old';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -38,6 +38,22 @@ import {
 interface AWSSetupInfoContentProps {
   info: ReactNode;
 }
+
+export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
+
+export const AWS_SETUP_FORMAT = {
+  CLOUD_FORMATION: 'cloud_formation',
+  MANUAL: 'manual',
+} as const;
+
+export const AWS_CREDENTIALS_TYPE = {
+  ASSUME_ROLE: 'assume_role',
+  DIRECT_ACCESS_KEYS: 'direct_access_keys',
+  TEMPORARY_KEYS: 'temporary_keys',
+  SHARED_CREDENTIALS: 'shared_credentials',
+  CLOUD_FORMATION: 'cloud_formation',
+} as const;
+
 export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
     <>
@@ -60,12 +76,12 @@ export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: 'cloud_formation',
+    id: AWS_SETUP_FORMAT.CLOUD_FORMATION,
     label: 'CloudFormation',
     testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
   },
   {
-    id: 'manual',
+    id: AWS_SETUP_FORMAT.MANUAL,
     label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -200,7 +216,7 @@ export const AwsCredentialsForm = ({
     setupFormat,
     group,
     fields,
-    integrationLink,
+    elasticDocLink,
     hasCloudFormationTemplate,
     onSetupFormatChange,
   } = useAwsCredentialsForm({
@@ -221,7 +237,7 @@ export const AwsCredentialsForm = ({
             defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
-                <EuiLink href={integrationLink} target="_blank">
+                <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
                     id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
@@ -243,10 +259,10 @@ export const AwsCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === 'cloud_formation' && (
+      {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
         <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
       )}
-      {setupFormat === 'manual' && (
+      {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
             label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
@@ -265,10 +281,11 @@ export const AwsCredentialsForm = ({
           <EuiSpacer size="m" />
           {group.info}
           <EuiSpacer size="m" />
-          <ReadDocumentation url={integrationLink} />
+          <ReadDocumentation url={elasticDocLink} />
           <EuiSpacer size="l" />
           <AwsInputVarFields
             fields={fields}
+            packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}

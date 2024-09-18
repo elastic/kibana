@@ -8,10 +8,11 @@ import type { ComponentType } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { LogsExplorerLocators } from '../common/locators';
 import type { LogsExplorerProps } from './components/logs_explorer';
 import type { CreateLogsExplorerController } from './controller';
@@ -25,8 +26,8 @@ export interface LogsExplorerPluginStart {
 }
 
 export interface LogsExplorerSetupDeps {
-  share: SharePluginSetup;
   discover: DiscoverSetup;
+  share: SharePluginSetup;
 }
 
 export interface LogsExplorerStartDeps {
@@ -35,5 +36,7 @@ export interface LogsExplorerStartDeps {
   discover: DiscoverStart;
   fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
+  share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
 }

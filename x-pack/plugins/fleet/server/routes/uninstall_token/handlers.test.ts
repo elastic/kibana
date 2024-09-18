@@ -28,9 +28,11 @@ import type { FleetRequestHandlerContext } from '../..';
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { agentPolicyService, appContextService } from '../../services';
-import type {
-  GetUninstallTokenRequestSchema,
-  GetUninstallTokensMetadataRequestSchema,
+import {
+  GetUninstallTokensMetadataResponseSchema,
+  type GetUninstallTokenRequestSchema,
+  type GetUninstallTokensMetadataRequestSchema,
+  GetUninstallTokenResponseSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { createAgentPolicyMock } from '../../../common/mocks';
@@ -95,8 +97,8 @@ describe('uninstall token handlers', () => {
     >;
     const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
-    beforeEach(() => {
-      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+    beforeEach(async () => {
+      const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
       getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
       mockAgentPolicyService.list.mockResolvedValue({
         items: [createAgentPolicyMock()],
@@ -116,22 +118,10 @@ describe('uninstall token handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: uninstallTokensResponseFixture,
       });
-    });
-
-    it('should return internal error when uninstallTokenService is unavailable', async () => {
-      appContextService.stop();
-      appContextService.start({
-        ...appContextStartContractMock,
-        // @ts-expect-error
-        uninstallTokenService: undefined,
-      });
-
-      await getUninstallTokensMetadataHandler(context, request, response);
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: { message: 'Uninstall Token Service is unavailable.' },
-      });
+      const validateResp = GetUninstallTokensMetadataResponseSchema.validate(
+        uninstallTokensResponseFixture
+      );
+      expect(validateResp).toEqual(uninstallTokensResponseFixture);
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {
@@ -147,19 +137,20 @@ describe('uninstall token handlers', () => {
   });
 
   describe('getUninstallTokenHandler', () => {
-    const uninstallTokenFixture: UninstallToken = {
-      id: 'id-1',
-      policy_id: 'policy-id-1',
-      policy_name: null,
-      created_at: '2023-06-15T16:46:48.274Z',
-      token: '123456789',
-    };
+    let uninstallTokenFixture: UninstallToken;
 
     let getTokenMock: jest.Mock;
     let request: KibanaRequest<TypeOf<typeof GetUninstallTokenRequestSchema.params>>;
 
-    beforeEach(() => {
-      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+    beforeEach(async () => {
+      uninstallTokenFixture = {
+        id: 'id-1',
+        policy_id: 'policy-id-1',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+        token: '123456789',
+      };
+      const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
       getTokenMock = uninstallTokenService.getToken as jest.Mock;
 
       const requestOptions: GetUninstallTokenRequest = {
@@ -181,22 +172,10 @@ describe('uninstall token handlers', () => {
           item: uninstallTokenFixture,
         },
       });
-    });
-
-    it('should return internal error when uninstallTokenService is unavailable', async () => {
-      appContextService.stop();
-      appContextService.start({
-        ...appContextStartContractMock,
-        // @ts-expect-error
-        uninstallTokenService: undefined,
+      const validateResp = GetUninstallTokenResponseSchema.validate({
+        item: uninstallTokenFixture,
       });
-
-      await getUninstallTokenHandler(context, request, response);
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: { message: 'Uninstall Token Service is unavailable.' },
-      });
+      expect(validateResp).toEqual({ item: uninstallTokenFixture });
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {

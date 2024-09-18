@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
-import { ml, MlApiServices } from '../ml_api_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlApi } from '../ml_api_service';
+import { useMlApi } from '../../contexts/kibana';
 
-export type MlResultsService = typeof mlResultsService;
+export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
+  ReturnType<typeof resultsServiceRxProvider>;
 
 type Time = string;
 export interface ModelPlotOutputResults {
@@ -23,22 +23,20 @@ export interface CriteriaField {
   fieldValue: any;
 }
 
-export const mlResultsService = mlResultsServiceProvider(ml);
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let mlResultsService: MlResultsService;
+export function mlResultsServiceProvider(mlApi: MlApi) {
+  if (mlResultsService) return mlResultsService;
 
-export function mlResultsServiceProvider(mlApiServices: MlApiServices) {
-  return {
-    ...resultsServiceProvider(mlApiServices),
-    ...resultsServiceRxProvider(mlApiServices),
+  mlResultsService = {
+    ...resultsServiceProvider(mlApi),
+    ...resultsServiceRxProvider(mlApi),
   };
+
+  return mlResultsService;
 }
 
 export function useMlResultsService(): MlResultsService {
-  const {
-    services: {
-      mlServices: { mlApiServices },
-    },
-  } = useMlKibana();
-
-  const resultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), [mlApiServices]);
-  return resultsService;
+  const mlApi = useMlApi();
+  return mlResultsServiceProvider(mlApi);
 }

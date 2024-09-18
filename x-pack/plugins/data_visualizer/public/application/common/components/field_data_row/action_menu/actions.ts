@@ -6,11 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import type { MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
+import {
+  type VisualizeFieldContext,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
+import type { Refresh } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type { FieldVisConfig } from '../../stats_table/types';
@@ -84,8 +88,8 @@ export function getActions(
       },
       onClick: async (item: FieldVisConfig) => {
         if (services?.uiActions && dataView) {
-          const triggerOptions = {
-            indexPatternId: dataView.id,
+          const triggerOptions: VisualizeFieldContext = {
+            dataViewSpec: dataView.toSpec(),
             fieldName: item.fieldName,
             contextualFields: [],
             originatingApp: APP_ID,
@@ -119,8 +123,8 @@ export function getActions(
         ),
         type: 'icon',
         icon: 'indexEdit',
-        onClick: (item: FieldVisConfig) => {
-          dataViewEditorRef.current = services.dataViewFieldEditor?.openEditor({
+        onClick: async (item: FieldVisConfig) => {
+          dataViewEditorRef.current = await services.dataViewFieldEditor?.openEditor({
             ctx: { dataView },
             fieldName: item.fieldName,
             onSave: refreshPage,
@@ -143,8 +147,8 @@ export function getActions(
         available: (item: FieldVisConfig) => {
           return item.deletable === true;
         },
-        onClick: (item: FieldVisConfig) => {
-          dataViewEditorRef.current = services.dataViewFieldEditor?.openDeleteModal({
+        onClick: async (item: FieldVisConfig) => {
+          dataViewEditorRef.current = await services.dataViewFieldEditor?.openDeleteModal({
             ctx: { dataView },
             fieldName: item.fieldName!,
             onDelete: refreshPage,

@@ -11,7 +11,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cloudPostureDashboard']);
+  const pageObjects = getPageObjects([
+    'common',
+    'svlCommonPage',
+    'cloudPostureDashboard',
+    'header',
+  ]);
   const chance = new Chance();
 
   const data = [
@@ -38,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
 
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsViewer();
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       await cspDashboard.waitForPluginInitialized();
@@ -53,12 +58,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168904
-    describe.skip('Kubernetes Dashboard', () => {
+    describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);

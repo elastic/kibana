@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -61,7 +61,7 @@ export class ElasticsearchService
   private client?: ClusterClient;
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
-  private agentManager: AgentManager;
+  private agentManager?: AgentManager;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -69,7 +69,6 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager(this.log.get('agent-manager'));
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -93,17 +92,27 @@ export class ElasticsearchService
 
     const config = await firstValueFrom(this.config$);
 
+    const agentManager = this.getAgentManager(config);
+
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      internalClient: this.client.asInternalUser,
-      log: this.log,
-      ignoreVersionMismatch: config.ignoreVersionMismatch,
-      esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
+      ignoreVersionMismatch: config.ignoreVersionMismatch,
+      healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      log: this.log,
+      internalClient: this.client.asInternalUser,
+    }).pipe(takeUntil(this.stop$));
+
+    // Log every error we may encounter in the connection to Elasticsearch
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
@@ -124,7 +133,7 @@ export class ElasticsearchService
         this.unauthorizedErrorHandler = handler;
       },
       agentStatsProvider: {
-        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+        getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
     };
   }
@@ -136,18 +145,24 @@ export class ElasticsearchService
 
     const config = await firstValueFrom(this.config$);
 
-    // Log every error we may encounter in the connection to Elasticsearch
-    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
-
     let capabilities: ElasticsearchCapabilities;
+    let elasticsearchWaitTime: number;
 
     if (!config.skipStartupConnectionCheck) {
+      const elasticsearchWaitStartTime = performance.now();
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
+
+      elasticsearchWaitTime = Math.round(performance.now() - elasticsearchWaitStartTime);
+      this.log.info(
+        `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`,
+        {
+          event: {
+            type: 'kibana_started.elasticsearch.waitTime',
+            duration: elasticsearchWaitTime,
+          },
+        }
+      );
 
       // Ensure inline scripting is enabled on the ES cluster
       const scriptingEnabled = await isInlineScriptingEnabled({
@@ -169,12 +184,16 @@ export class ElasticsearchService
       capabilities = {
         serverless: false,
       };
+      elasticsearchWaitTime = 0;
     }
 
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
+      metrics: {
+        elasticsearchWaitTime,
+      },
     };
   }
 
@@ -200,8 +219,17 @@ export class ElasticsearchService
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
-      agentFactoryProvider: this.agentManager,
+      agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
     });
+  }
+
+  private getAgentManager({ dnsCacheTtl }: ElasticsearchClientConfig): AgentManager {
+    if (!this.agentManager) {
+      this.agentManager = new AgentManager(this.log.get('agent-manager'), {
+        dnsCacheTtlInSeconds: dnsCacheTtl?.asSeconds() ?? 0, // it should always exists, but some test shortcuts and mocks break this assumption
+      });
+    }
+    return this.agentManager;
   }
 }

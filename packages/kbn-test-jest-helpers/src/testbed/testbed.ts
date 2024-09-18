@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Component as ReactComponent } from 'react';
-import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
+import { Component as ReactComponent, ComponentType } from 'react';
+import { HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
@@ -231,11 +232,11 @@ export function registerTestBed<T extends string = string, P extends object = an
       ) => {
         let errorMessagesWrappers: ReactWrapper<HTMLAttributes, any, ReactComponent>;
         if (typeof wrapper === 'string') {
-          errorMessagesWrappers = find(wrapper).find('.euiFormErrorText');
+          errorMessagesWrappers = find(wrapper).find('div.euiFormErrorText');
         } else {
           errorMessagesWrappers = wrapper
-            ? wrapper.find('.euiFormErrorText')
-            : component.find('.euiFormErrorText');
+            ? wrapper.find('div.euiFormErrorText')
+            : component.find('div.euiFormErrorText');
         }
         return errorMessagesWrappers.map((err) => err.text());
       };
@@ -263,11 +264,11 @@ export function registerTestBed<T extends string = string, P extends object = an
           .slice(1) // we remove the first row as it is the table header
           .map((row) => ({
             reactWrapper: row,
-            columns: row.find('.euiTableCellContent').map((col) => ({
+            columns: row.find('div.euiTableCellContent').map((col) => ({
               reactWrapper: col,
               // We can't access the td value with col.text() because
               // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
-              value: col.find('.euiTableCellContent').text(),
+              value: col.find('div.euiTableCellContent').text(),
             })),
           }));
 

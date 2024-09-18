@@ -29,6 +29,11 @@
     font-family: $euiCodeFontFamily;
     font-size: $euiFontSizeXS;
   }
+
+  .embPanel & {
+    // Bug fix for dashboard panels https://github.com/elastic/kibana/issues/180828
+    mask-image: none;
+  }
 }
 
 .kbnDocTable__footer {

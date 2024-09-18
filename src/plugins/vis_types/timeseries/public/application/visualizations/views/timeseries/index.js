@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useRef, useCallback, useMemo } from 'react';
@@ -11,11 +12,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
-  MULTILAYER_TIME_AXIS_STYLE,
-  renderEndzoneTooltip,
-  useActiveCursor,
-} from '@kbn/charts-plugin/public';
-import {
+  LegendValue,
   Axis,
   Chart,
   Position,
@@ -27,6 +24,11 @@ import {
   Placement,
   Tooltip,
 } from '@elastic/charts';
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '@kbn/charts-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
@@ -183,7 +185,7 @@ export const TimeSeries = ({
       <Settings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
-        showLegendExtra={true}
+        legendValues={[LegendValue.CurrentAndLastValue]}
         onRenderChange={onRenderChange}
         allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}

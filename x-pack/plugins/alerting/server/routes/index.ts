@@ -8,19 +8,19 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
-import { getRuleRoute, getInternalRuleRoute } from './get_rule';
-import { updateRuleRoute } from './update_rule';
-import { deleteRuleRoute } from './delete_rule';
+import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
+import { updateRuleRoute } from './rule/apis/update/update_rule_route';
+import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
-import { disableRuleRoute } from './disable_rule';
-import { enableRuleRoute } from './enable_rule';
-import { findRulesRoute, findInternalRulesRoute } from './find_rules';
+import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
+import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
+import { findRulesRoute, findInternalRulesRoute } from './rule/apis/find/find_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
@@ -34,16 +34,16 @@ import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
-import { unmuteAlertRoute } from './unmute_alert';
-import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
+import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key_route';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
-import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
-import { cloneRuleRoute } from './clone_rule';
+import { cloneRuleRoute } from './rule/apis/clone/clone_rule_route';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
@@ -65,6 +65,12 @@ import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_ge
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+
+// backfill API
+import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
+import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
+import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
+import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -139,4 +145,10 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
+
+  // backfill APIs
+  scheduleBackfillRoute(router, licenseState);
+  getBackfillRoute(router, licenseState);
+  findBackfillRoute(router, licenseState);
+  deleteBackfillRoute(router, licenseState);
 }

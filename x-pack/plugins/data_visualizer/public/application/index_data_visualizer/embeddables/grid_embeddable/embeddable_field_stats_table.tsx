@@ -7,11 +7,9 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { DataVisualizerGridEmbeddableInput } from './types';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
+import type { FieldStatisticTableEmbeddableProps } from './types';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -22,24 +20,22 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 
-export const EmbeddableFieldStatsTableWrapper = ({
-  input,
-  onOutputChange,
-}: {
-  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>;
-  onOutputChange?: (ouput: any) => void;
-}) => {
+const EmbeddableFieldStatsTableWrapper = (
+  props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
+) => {
+  const { onTableUpdate, onAddFilter, onRenderComplete } = props;
+
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
 
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onOutputChange) {
-        onOutputChange(update);
+      if (onTableUpdate) {
+        onTableUpdate(update);
       }
     },
-    [dataVisualizerListState, onOutputChange]
+    [dataVisualizerListState, onTableUpdate]
   );
 
   const {
@@ -50,11 +46,11 @@ export const EmbeddableFieldStatsTableWrapper = ({
     progress,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(input, dataVisualizerListState);
+  } = useDataVisualizerGridData(props, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [input?.lastReloadRequestTime, setLastRefresh]);
+  }, [props?.lastReloadRequestTime, setLastRefresh]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -64,18 +60,24 @@ export const EmbeddableFieldStatsTableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              dataView={input.dataView}
+              dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={input.onAddFilter}
-              totalDocuments={input.totalDocuments}
+              onAddFilter={onAddFilter}
+              totalDocuments={props.totalDocuments}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [input, searchQueryLanguage, searchString]
+    [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
   );
+
+  useEffect(() => {
+    if (progress === 100 && onRenderComplete) {
+      onRenderComplete();
+    }
+  }, [progress, onRenderComplete]);
 
   if (progress === 100 && configs.length === 0) {
     return <EmbeddableNoResultsEmptyPrompt />;
@@ -87,10 +89,15 @@ export const EmbeddableFieldStatsTableWrapper = ({
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onOutputChange}
+      showPreviewByDefault={props?.showPreviewByDefault}
+      onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
+      renderFieldName={props.renderFieldName}
     />
   );
 };
+
+// exporting as default so it be lazy-loaded
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableFieldStatsTableWrapper;

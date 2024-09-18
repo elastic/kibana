@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
+import { of } from 'rxjs';
+
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData, ESConfig } from '../plugin';
+import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
@@ -44,11 +45,13 @@ export const renderApp = (
     core,
     plugins,
     isSidebarEnabled = true,
+    updateSideNavDefinition,
   }: {
     core: CoreStart;
     isSidebarEnabled: boolean;
     params: AppMountParameters;
     plugins: PluginsStart;
+    updateSideNavDefinition: UpdateSideNavDefinitionFn;
   },
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
@@ -68,7 +71,16 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -81,24 +93,14 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
-  let user: AuthenticatedUser | null = null;
-  try {
-    security.authc
-      .getCurrentUser()
-      .then((newUser) => {
-        user = newUser;
-      })
-      .catch(() => {
-        user = null;
-      });
-  } catch {
-    user = null;
-  }
+  const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -106,11 +108,16 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
-    esConfig,
+    coreSecurity: core.security,
     data: plugins.data,
+    esConfig,
+    getChromeStyle$: chrome.getChromeStyle$,
     guidedOnboarding,
     history,
+    indexMappingComponent,
+    isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
     isSidebarEnabled,
     lens,
     ml,
@@ -121,17 +128,20 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchHomepage: plugins.searchHomepage,
+    searchPlayground: plugins.searchPlayground,
+    searchInferenceEndpoints: plugins.searchInferenceEndpoints,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
     uiSettings,
-    user,
+    updateSideNavDefinition,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
-    license$: plugins.licensing.license$,
+    license$: plugins.licensing?.license$ || of(undefined),
   });
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
@@ -139,11 +149,15 @@ export const renderApp = (
     readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
-
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+          }}
+        >
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
@@ -172,7 +186,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
-    plugins.data.search.session.clear();
+    plugins.data?.search.session.clear();
   };
 };
 

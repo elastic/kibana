@@ -18,8 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
+import { Comparator } from '@kbn/alerting-comparators';
 import { builtInComparators } from '../constants';
-import { Comparator } from '../types';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
@@ -104,7 +104,7 @@ export const ThresholdExpression = ({
           display={display === 'inline' ? 'inline' : 'columns'}
           isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length) > 0
+            (errors.threshold1 && errors.threshold1.length)
               ? true
               : false
           }
@@ -120,7 +120,10 @@ export const ThresholdExpression = ({
       repositionOnScroll
     >
       <div>
-        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
+        <ClosablePopoverTitle
+          onClose={() => setAlertThresholdPopoverOpen(false)}
+          dataTestSubj="thresholdPopoverTitle"
+        >
           <>{comparators[comparator].text}</>
         </ClosablePopoverTitle>
         <EuiFlexGroup>
@@ -150,14 +153,14 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
-                    error={errors[`threshold${i}`]}
+                    isInvalid={Number(errors[`threshold${i}`]?.length) > 0 || isNil(threshold[i])}
+                    error={errors[`threshold${i}`] as string[]}
                   >
                     <EuiFieldNumber
-                      data-test-subj="alertThresholdInput"
+                      data-test-subj={`alertThresholdInput${i}`}
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
-                      isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
+                      isInvalid={Number(errors[`threshold${i}`]?.length) > 0 || isNil(threshold[i])}
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;

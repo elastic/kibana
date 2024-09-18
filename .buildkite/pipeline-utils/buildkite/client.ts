@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import axios, { AxiosInstance } from 'axios';
 import { execSync, ExecSyncOptions } from 'child_process';
+
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
+
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
@@ -29,17 +33,34 @@ export interface BuildkiteGroup {
   steps: BuildkiteStep[];
 }
 
-export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep;
+export type BuildkiteStep =
+  | BuildkiteCommandStep
+  | BuildkiteInputStep
+  | BuildkiteTriggerStep
+  | BuildkiteWaitStep;
 
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
   parallelism?: number;
-  agents: {
-    queue: string;
-  };
+  concurrency?: number;
+  concurrency_group?: string;
+  concurrency_method?: 'eager' | 'ordered';
+  agents:
+    | {
+        queue: string;
+      }
+    | {
+        provider?: string;
+        image?: string;
+        imageProject?: string;
+        machineType?: string;
+        minCpuPlatform?: string;
+        preemptible?: boolean;
+      };
   timeout_in_minutes?: number;
   key?: string;
+  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -47,7 +68,7 @@ export interface BuildkiteCommandStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
 }
 
 interface BuildkiteInputTextField {
@@ -91,7 +112,26 @@ export interface BuildkiteInputStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
+}
+
+export interface BuildkiteTriggerStep {
+  trigger: string;
+  label?: string;
+  build?: {
+    message?: string; // The message for the build. Supports emoji.
+    commit?: string; // The commit hash for the build.
+    branch?: string; // The branch for the build.
+    meta_data?: string; // A map of meta-data for the build.
+    env?: Record<string, string>; // A map of environment variables for the build.
+  };
+  async?: boolean;
+  branches?: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  soft_fail?: boolean;
+  depends_on?: string | string[];
+  skip?: string;
 }
 
 export interface BuildkiteTriggerBuildParams {
@@ -108,6 +148,14 @@ export interface BuildkiteTriggerBuildParams {
   pull_request_base_branch?: string;
   pull_request_id?: string | number;
   pull_request_repository?: string;
+}
+
+export interface BuildkiteWaitStep {
+  wait: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  continue_on_failure?: boolean;
+  branches?: string;
 }
 
 export class BuildkiteClient {
@@ -238,7 +286,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.includes('spot=true') &&
+          job.agent_query_rules?.includes('preemptible=true') &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {

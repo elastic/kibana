@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -16,12 +17,12 @@ import {
   EuiPanel,
   EuiButtonGroup,
   toSentenceCase,
+  Direction,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
-
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { SortingService } from './sorting_service';
 import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
@@ -67,7 +68,6 @@ export interface DataViewListItemEnhanced extends DataViewListItem {
 export interface DataViewsListProps {
   dataViewsList: DataViewListItemEnhanced[];
   onChangeDataView: (newId: string) => void;
-  isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
@@ -76,7 +76,6 @@ export interface DataViewsListProps {
 export function DataViewsList({
   dataViewsList,
   onChangeDataView,
-  isTextBasedLangSelected,
   currentDataViewId,
   selectableProps,
   searchListInputId,
@@ -89,9 +88,13 @@ export function DataViewsList({
     []
   );
 
-  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(
-    sortingService.sortData(dataViewsList)
-  );
+  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(() => {
+    // Don't show ES|QL ad hoc data views in the data view list
+    const filteredDataViewsList = dataViewsList.filter(
+      (dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE
+    );
+    return sortingService.sortData(filteredDataViewsList);
+  });
 
   const sortOrderOptions = useMemo(
     () =>
@@ -106,8 +109,8 @@ export function DataViewsList({
   );
 
   const onChangeSortDirection = useCallback(
-    (value) => {
-      sortingService.setDirection(value);
+    (value: string) => {
+      sortingService.setDirection(value as Direction);
       setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
     },
     [sortingService]
@@ -132,7 +135,7 @@ export function DataViewsList({
         key: id,
         label: name ? name : title,
         value: id,
-        checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
+        checked: id === currentDataViewId ? 'on' : undefined,
         append: isAdhoc ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
             {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
@@ -148,6 +151,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
+        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),

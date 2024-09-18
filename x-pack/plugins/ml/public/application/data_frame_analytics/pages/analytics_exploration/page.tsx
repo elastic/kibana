@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,13 +20,10 @@ import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import {
-  AnalyticsIdSelector,
-  AnalyticsSelectorIds,
-  AnalyticsIdSelectorControls,
-} from '../components/analytics_selector';
+import type { AnalyticsSelectorIds } from '../components/analytics_selector';
+import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
@@ -41,7 +39,7 @@ export const Page: FC<{
   } = useMlKibana();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   const jobIdToUse = jobId ?? analyticsId?.job_id;
   const [analysisTypeToUse, setAnalysisTypeToUse] = useState<

@@ -5,50 +5,65 @@
  * 2.0.
  */
 
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
 import React from 'react';
-import type { HostInfo } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';
-
-jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-
-const getEndpointDetails = useGetEndpointDetails as jest.Mock;
+import { agentStatusGetHttpMock } from '../../../mocks';
+import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
+import { waitFor } from '@testing-library/react';
 
 describe('Responder offline callout', () => {
-  let render: () => ReturnType<AppContextTestRender['render']>;
+  let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let endpointDetails: HostInfo;
+  let apiMocks: ReturnType<typeof agentStatusGetHttpMock>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    render = () => (renderResult = mockedContext.render(<OfflineCallout endpointId={'1234'} />));
-    endpointDetails = mockEndpointDetailsApiResult();
-    getEndpointDetails.mockReturnValue({ data: endpointDetails });
-    render();
+    apiMocks = agentStatusGetHttpMock(mockedContext.coreStart.http);
+    render = (agentType?: ResponseActionAgentType) =>
+      (renderResult = mockedContext.render(
+        <OfflineCallout
+          endpointId={'abfe4a35-d5b4-42a0-a539-bd054c791769'}
+          agentType={agentType || 'endpoint'}
+          hostName="Host name"
+        />
+      ));
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  it('should be visible when endpoint is offline', () => {
-    getEndpointDetails.mockReturnValue({
-      data: { ...endpointDetails, host_status: HostStatus.OFFLINE },
-    });
-    render();
-    const callout = renderResult.queryByTestId('offlineCallout');
-    expect(callout).toBeTruthy();
-  });
-  it('should not be visible when endpoint is online', () => {
-    getEndpointDetails.mockReturnValue({
-      data: { ...endpointDetails, host_status: HostStatus.HEALTHY },
-    });
-    render();
-    const callout = renderResult.queryByTestId('offlineCallout');
-    expect(callout).toBeFalsy();
-  });
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
+    'should be visible when agent type is %s and host is offline',
+    async (agentType) => {
+      apiMocks.responseProvider.getAgentStatus.mockReturnValue({
+        data: {
+          'abfe4a35-d5b4-42a0-a539-bd054c791769': agentStatusMocks.generateAgentStatus({
+            agentType,
+            status: HostStatus.OFFLINE,
+          }),
+        },
+      });
+      render(agentType);
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getAgentStatus).toHaveBeenCalled();
+      });
+
+      expect(renderResult.getByTestId('offlineCallout')).toBeTruthy();
+    }
+  );
+
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
+    'should NOT be visible when agent type is %s and host is online',
+    async (agentType) => {
+      render(agentType);
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getAgentStatus).toHaveBeenCalled();
+      });
+
+      expect(renderResult.queryByTestId('offlineCallout')).toBeNull();
+    }
+  );
 });

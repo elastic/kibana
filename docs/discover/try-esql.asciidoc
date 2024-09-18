@@ -1,7 +1,5 @@
 [[try-esql]]
-== Try {esql}
-
-preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
+== Using {esql}
 
 The Elasticsearch Query Language, {esql}, makes it easier to explore your data without leaving Discover. 
 
@@ -11,11 +9,11 @@ In this tutorial we'll use the {kib} sample web logs in Discover and Lens to exp
 [[prerequisite]]
 === Prerequisite 
 
-To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+To be able to select **Language {esql}** from the Data views menu the `enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
 
 [float]
 [[tutorial-try-esql]]
-=== Trying {esql}
+=== Use {esql}
 
 To load the sample data:
 
@@ -23,7 +21,7 @@ To load the sample data:
 . Click **Other sample data sets**.
 . On the Sample web logs card, click **Add data**.
 . Open the main menu and select *Discover*.
-. From the Data views menu, select *Try {esql}*.
+. From the Data views menu, select *Language {esql}*.
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
@@ -38,7 +36,7 @@ FROM kibana_sample_data_logs
 | KEEP machine.os, machine.ram
 ----
 +
-. Click **Update**.
+. Click **▶Run**.
 +
 [role="screenshot"]
 image:images/esql-machine-os-ram.png[An image of the query result]
@@ -59,7 +57,7 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **Update**.
+. Click **▶Run**.
 +
 [role="screenshot"]
 image:images/esql-limit.png[An image of the extended query result]
@@ -77,15 +75,18 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **Update**.
+. Click **▶Run**.
 +
 [role="screenshot"]
-image:images/esql-full-query.png[]
+image:images/esql-full-query.png[An image of the full query result]
 +
 . Click **Save** to save the query and visualization to a dashboard. 
 
 To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization. 
 
-To learn more about {esql}, try other tutorials, see more examples and reference material, refer to {ref}/esql.html[{esql}].
-
+[TIP]
+====
+For the complete {esql} documentation, including tutorials, examples and the full syntax reference, refer to the {ref}/esql.html[{es} documentation].
+For a more detailed overview of {esql} in {kib}, refer to {ref}/esql-kibana.html[Use {esql} in Kibana].
+====
 

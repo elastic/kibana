@@ -13,8 +13,9 @@ import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_ob
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
 import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
-import { manifestType } from './endpoint/lib/artifacts/saved_object_mappings';
+import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
+import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
 
 const types = [
   noteType,
@@ -23,8 +24,10 @@ const types = [
   prebuiltRuleAssetType,
   timelineType,
   manifestType,
+  unifiedManifestType,
   signalsMigrationType,
   riskEngineConfigurationType,
+  entityEngineDescriptorType,
   protectionUpdatesNoteType,
 ];
 

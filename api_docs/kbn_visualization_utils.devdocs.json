@@ -61,23 +61,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined; }) => { title: string; references: { id: string; name: string; type: string; }[]; state: { adHocDataViews?: { [x: string]: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          "; } | undefined; datasourceStates: { [x: string]: {}; formBased?: undefined; } | { formBased: {}; }; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; query: ",
+          " | undefined; }) => { references: { name: string; id: string; type: string; }[]; visualizationType: string; state: { visualization: {}; datasourceStates: Record<string, unknown>; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -93,7 +77,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; visualization: {}; }; visualizationType: string; }"
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; }; title: string; }"
         ],
         "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
         "deprecated": false,
@@ -214,9 +206,9 @@
           "(uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
+            "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           ") => string"
@@ -235,9 +227,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -278,6 +270,140 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.useDebouncedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useDebouncedValue",
+        "description": [
+          "\nDebounces value changes and updates inputValue on root state changes if no debounced changes\nare in flight because the user is currently modifying the value.\n\n* allowFalsyValue: update upstream with all falsy values but null or undefined\n* wait: debounce timeout"
+        ],
+        "signature": [
+          "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue, wait }?: { allowFalsyValue?: boolean | undefined; wait?: number | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
+        ],
+        "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.useDebouncedValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(val: T) => void"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-utils",
+                    "id": "def-common.useDebouncedValue.$1.onChange.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "signature": [
+                      "T"
+                    ],
+                    "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.value",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$1.defaultValue",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.useDebouncedValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ allowFalsyValue, wait = DEFAULT_TIMEOUT }",
+            "description": [],
+            "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$2.allowFalsyValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "allowFalsyValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-utils",
+                "id": "def-common.useDebouncedValue.$2.wait",
+                "type": "number",
+                "tags": [],
+                "label": "wait",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-visualization-utils/src/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

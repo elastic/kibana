@@ -34,6 +34,7 @@ export interface State {
   errorSubmitting: Error | null;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
+  wildcardWarningExists: boolean;
 }
 
 export const initialState: State = {
@@ -55,6 +56,7 @@ export const initialState: State = {
   errorSubmitting: null,
   expireTime: undefined,
   expireErrorExists: false,
+  wildcardWarningExists: false,
 };
 
 export type Action =
@@ -129,11 +131,15 @@ export type Action =
   | {
       type: 'setExpireError';
       errorExists: boolean;
+    }
+  | {
+      type: 'setWildcardWithWrongOperator';
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
   () =>
-  /* eslint complexity: ["error", 21]*/
+  /* eslint complexity: ["error", 22]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -169,6 +175,13 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           itemConditionValidationErrorExists: errorExists,
+        };
+      }
+      case 'setWildcardWithWrongOperator': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          wildcardWarningExists: warningExists,
         };
       }
       case 'setComment': {
@@ -250,7 +263,6 @@ export const createExceptionItemsReducer =
       }
       case 'setListType': {
         const { listType } = action;
-
         return {
           ...state,
           listType,

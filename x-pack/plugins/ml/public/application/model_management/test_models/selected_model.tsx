@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useMemo, useEffect } from 'react';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
@@ -22,11 +23,11 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
-import { InferrerType } from './models';
-import { INPUT_TYPE } from './models/inference_base';
+import type { InferrerType } from './models';
+import type { INPUT_TYPE } from './models/inference_base';
 import { TextExpansionInference } from './models/text_expansion';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
 import {
@@ -52,7 +53,7 @@ export const SelectedModel: FC<Props> = ({
   externalPipelineConfig,
   setCurrentContext,
 }) => {
-  const { trainedModels } = useMlApiContext();
+  const { trainedModels } = useMlApi();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];

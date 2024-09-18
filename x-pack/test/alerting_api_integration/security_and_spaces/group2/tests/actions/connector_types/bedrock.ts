@@ -9,15 +9,13 @@ import expect from '@kbn/expect';
 
 import {
   BedrockSimulator,
-  bedrockSuccessResponse,
+  bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { PassThrough } from 'stream';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';
 const name = 'A bedrock action';
@@ -27,7 +25,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-v2:1',
+  defaultModel: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -57,8 +55,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   };
 
   describe('Bedrock', () => {
-    after(() => {
-      objectRemover.removeAll();
+    after(async () => {
+      await objectRemover.removeAll();
     });
     describe('action creation', () => {
       const simulator = new BedrockSimulator({
@@ -287,7 +285,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
@@ -302,6 +300,12 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           });
           let apiUrl: string;
           let bedrockActionId: string;
+          const DEFAULT_BODY = {
+            anthropic_version: 'bedrock-2023-05-31',
+            messages: [{ role: 'user', content: 'Hello world' }],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            stop_sequences: ['\n\nHuman:'],
+          };
 
           before(async () => {
             apiUrl = await simulator.start();
@@ -312,12 +316,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             simulator.close();
           });
 
-          it('should send a stringified JSON object', async () => {
-            const DEFAULT_BODY = {
-              prompt: `Hello world!`,
-              max_tokens_to_sample: 300,
-              stop_sequences: ['\n\nHuman:'],
-            };
+          it('should send a stringified JSON object with latest body', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${bedrockActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -338,16 +337,34 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse,
+              data: {
+                ...bedrockClaude2SuccessResponse,
+                usage: {
+                  input_tokens: 41,
+                  output_tokens: 64,
+                },
+              },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should overwrite the model when a model argument is provided', async () => {
-            const DEFAULT_BODY = {
-              prompt: `Hello world!`,
-              max_tokens_to_sample: 300,
-              stop_sequences: ['\n\nHuman:'],
-            };
             const { body } = await supertest
               .post(`/api/actions/connector/${bedrockActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -367,8 +384,31 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse,
+              data: {
+                ...bedrockClaude2SuccessResponse,
+                usage: {
+                  input_tokens: 41,
+                  output_tokens: 64,
+                },
+              },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should invoke AI with assistant AI body argument formatted to bedrock expectations', async () => {
@@ -403,54 +443,38 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               .expect(200);
 
             expect(simulator.requestData).to.eql({
-              prompt:
-                'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
-              max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-              temperature: 0.5,
-              stop_sequences: ['\n\nHuman:'],
+              anthropic_version: 'bedrock-2023-05-31',
+              messages: [
+                { role: 'user', content: 'Hello world' },
+                { role: 'assistant', content: 'Hi, I am a good chatbot' },
+                { role: 'user', content: 'What is 2+2?' },
+              ],
+              system: 'Be a good chatbot',
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
             });
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: { message: bedrockSuccessResponse.completion },
+              data: { message: bedrockClaude2SuccessResponse.completion },
             });
-          });
 
-          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
-            await new Promise<void>((resolve, reject) => {
-              const passThrough = new PassThrough();
-
-              supertest
-                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .on('error', reject)
-                .send({
-                  params: {
-                    subAction: 'invokeStream',
-                    subActionParams: {
-                      messages: [
-                        {
-                          role: 'user',
-                          content: 'Hello world',
-                        },
-                      ],
-                    },
-                  },
-                  isEnabledKnowledgeBase: false,
-                  isEnabledRAGAlerts: false,
-                })
-                .pipe(passThrough);
-              const responseBuffer: Uint8Array[] = [];
-              passThrough.on('data', (chunk) => {
-                responseBuffer.push(chunk);
-              });
-
-              passThrough.on('end', () => {
-                const parsed = parseBedrockBuffer(responseBuffer);
-                expect(parsed).to.eql('Hello world, what a unique string!');
-                resolve();
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
               });
             });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(256);
           });
 
           describe('Token tracking dashboard', () => {
@@ -512,6 +536,54 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 connector_id: bedrockActionId,
                 data: { available: true },
               });
+            });
+          });
+        });
+        describe('successful deprecated response simulator', () => {
+          const simulator = new BedrockSimulator({
+            proxy: {
+              config: configService.get('kbnTestServer.serverArgs'),
+            },
+          });
+          let apiUrl: string;
+          let bedrockActionId: string;
+
+          before(async () => {
+            apiUrl = await simulator.start();
+            bedrockActionId = await createConnector(apiUrl);
+          });
+
+          after(() => {
+            simulator.close();
+          });
+
+          it('should send a stringified JSON object with deprecated body', async () => {
+            const DEFAULT_BODY = {
+              prompt: `Hello world!`,
+              max_tokens_to_sample: 300,
+              stop_sequences: ['\n\nHuman:'],
+            };
+            const { body } = await supertest
+              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'test',
+                  subActionParams: {
+                    body: JSON.stringify(DEFAULT_BODY),
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql(DEFAULT_BODY);
+            expect(simulator.requestUrl).to.eql(
+              `${apiUrl}/model/${defaultConfig.defaultModel}/invoke`
+            );
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: bedrockActionId,
+              data: bedrockClaude2SuccessResponse,
             });
           });
         });
@@ -579,7 +651,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             connector_id: bedrockActionId,
             message: 'an error occurred while running the action',
             retry: true,
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message:
               'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
           });
@@ -587,47 +659,4 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
-  let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
-  return chunks
-    .map((chunk) => {
-      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
-      let messageLength = getMessageLength(bedrockBuffer);
-      const buildChunks = [];
-      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
-        const extractedChunk = bedrockBuffer.slice(0, messageLength);
-        buildChunks.push(extractedChunk);
-        bedrockBuffer = bedrockBuffer.slice(messageLength);
-        messageLength = getMessageLength(bedrockBuffer);
-      }
-
-      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-
-      return buildChunks
-        .map((bChunk) => {
-          const event = awsDecoder.decode(bChunk);
-          const body = JSON.parse(
-            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
-          );
-          return body.completion;
-        })
-        .join('');
-    })
-    .join('');
-};
-
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  newBuffer.set(a);
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-function getMessageLength(buffer: Uint8Array): number {
-  if (buffer.byteLength === 0) return 0;
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  return view.getUint32(0, false);
 }

@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ISearchOptions } from '@kbn/search-types';
 import {
-  ISearchOptions,
   ISearchSource,
   ISearchStartSearchSource,
   SearchSource,
@@ -33,13 +33,18 @@ interface WrapParams<T extends ISearchSource | SearchSource> {
   requestTimeout?: number;
 }
 
+export interface WrappedSearchSourceClient {
+  searchSourceClient: ISearchStartSearchSource;
+  getMetrics: () => SearchMetrics;
+}
+
 export function wrapSearchSourceClient({
   logger,
   rule,
   abortController,
   searchSourceClient: pureSearchSourceClient,
   requestTimeout,
-}: Props) {
+}: Props): WrappedSearchSourceClient {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
@@ -148,11 +153,12 @@ function wrapFetch$({
     const start = Date.now();
 
     logger.debug(
-      `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
-        rule.spaceId
-      } - with options ${JSON.stringify(searchOptions)}${
-        requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-      }`
+      () =>
+        `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
+          rule.spaceId
+        } - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
     );
 
     return pureSearchSource

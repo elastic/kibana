@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -20,7 +21,7 @@ import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { SearchSessionsConfigSchema } from '../../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -100,8 +101,7 @@ describe('Background Search Session Management Table', () => {
         );
       });
 
-      expect(table.find('thead th .euiTableCellContent__text').map((node) => node.text()))
-        .toMatchInlineSnapshot(`
+      expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
           "Name",
@@ -136,12 +136,12 @@ describe('Background Search Session Management Table', () => {
 
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
-          "App",
-          "Namevery background search Info",
-          "# Searches0",
-          "StatusExpired",
-          "Created2 Dec, 2020, 00:19:32",
-          "Expiration--",
+          "",
+          "very background search Info",
+          "0",
+          "Expired",
+          "2 Dec, 2020, 00:19:32",
+          "--",
           "",
           "",
         ]

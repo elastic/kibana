@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
 import {
-  AppNavLinkStatus,
-  AppStatus,
   type PublicAppInfo,
   type PublicAppDeepLinkInfo,
+  AppStatus,
 } from '@kbn/core-application-browser';
 import { appendAppPath } from '@kbn/core-application-browser-internal';
 import { NavLinkWrapper } from './nav_link';
@@ -20,34 +20,21 @@ export function toNavLink(
   app: PublicAppInfo,
   basePath: IBasePath,
   deepLink?: PublicAppDeepLinkInfo
-): NavLinkWrapper {
+): NavLinkWrapper | null {
   const relativeBaseUrl = basePath.prepend(app.appRoute!);
   const url = appendAppPath(relativeBaseUrl, deepLink?.path || app.defaultPath);
   const href = relativeToAbsolute(url);
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 
+  if (app.status === AppStatus.inaccessible) return null;
+
   return new NavLinkWrapper({
     ...(deepLink || app),
     ...(app.category ? { category: app.category } : {}), // deepLinks use the main app category
-    hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
-    disabled: (deepLink?.navLinkStatus ?? app.navLinkStatus) === AppNavLinkStatus.disabled,
     baseUrl,
     href,
     url,
   });
-}
-
-function isAppNavLinkHidden(app: PublicAppInfo) {
-  return app.navLinkStatus === AppNavLinkStatus.default
-    ? app.status === AppStatus.inaccessible
-    : app.navLinkStatus === AppNavLinkStatus.hidden;
-}
-
-function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
-  return (
-    deepLink.navLinkStatus === AppNavLinkStatus.default ||
-    deepLink.navLinkStatus === AppNavLinkStatus.hidden
-  );
 }
 
 /**

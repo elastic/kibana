@@ -7,44 +7,35 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const API_BASE_PATH = '/api/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlTemplatesHelpers = getService('svlTemplatesHelpers');
+  const svlTemplatesApi = getService('svlTemplatesApi');
+
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
+
   const es = getService('es');
   const log = getService('log');
   const randomness = getService('randomness');
-  const indexManagementService = getService('indexManagement');
-  let getTemplatePayload: typeof indexManagementService['templates']['helpers']['getTemplatePayload'];
-  let catTemplate: typeof indexManagementService['templates']['helpers']['catTemplate'];
-  let getSerializedTemplate: typeof indexManagementService['templates']['helpers']['getSerializedTemplate'];
-  let createTemplate: typeof indexManagementService['templates']['api']['createTemplate'];
-  let updateTemplate: typeof indexManagementService['templates']['api']['updateTemplate'];
-  let deleteTemplates: typeof indexManagementService['templates']['api']['deleteTemplates'];
-  let simulateTemplate: typeof indexManagementService['templates']['api']['simulateTemplate'];
-  let cleanUpTemplates: typeof indexManagementService['templates']['api']['cleanUpTemplates'];
 
-  let getRandomString: () => string;
+  const getRandomString: () => string = () => randomness.string({ casing: 'lower', alpha: true });
+
   describe('Index templates', function () {
     before(async () => {
-      ({
-        templates: {
-          helpers: { getTemplatePayload, catTemplate, getSerializedTemplate },
-          api: {
-            createTemplate,
-            updateTemplate,
-            deleteTemplates,
-            simulateTemplate,
-            cleanUpTemplates,
-          },
-        },
-      } = indexManagementService);
-      getRandomString = () => randomness.string({ casing: 'lower', alpha: true });
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await cleanUpTemplates({ 'x-elastic-internal-origin': 'xxx' });
+      await svlTemplatesApi.cleanUpTemplates(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('get', () => {
@@ -81,11 +72,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('all', () => {
         it('should list all the index templates with the expected parameters', async () => {
-          const { body: allTemplates } = await supertest
+          const { status, body: allTemplates } = await supertestWithoutAuth
             .get(`${API_BASE_PATH}/index_templates`)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
-            .expect(200);
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
+          expect(status).to.eql(200);
 
           // Legacy templates are not applicable on serverless
           expect(allTemplates.legacyTemplates.length).to.eql(0);
@@ -103,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             'hasAliases',
             'hasMappings',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
             'ignoreMissingComponentTemplates',
           ].sort();
@@ -113,17 +105,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('one', () => {
         it('should return an index template with the expected parameters', async () => {
-          const { body } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .get(`${API_BASE_PATH}/index_templates/${templateName}`)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
-            .expect(200);
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
+          expect(status).to.eql(200);
 
           const expectedKeys = [
             'name',
             'indexPatterns',
             'template',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
             'ignoreMissingComponentTemplates',
           ].sort();
@@ -136,27 +129,46 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('create', () => {
       it('should create an index template', async () => {
-        const payload = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
-        await createTemplate(payload).set('x-elastic-internal-origin', 'xxx').expect(200);
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          `template-${getRandomString()}`,
+          [getRandomString()],
+          undefined,
+          false
+        );
+
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(status).to.eql(200);
       });
 
       it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
 
-        await createTemplate(payload).set('x-elastic-internal-origin', 'xxx');
+        await svlTemplatesApi.createTemplate(payload, roleAuthc);
 
-        await createTemplate(payload).set('x-elastic-internal-origin', 'xxx').expect(409);
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+
+        expect(status).to.eql(409);
       });
 
       it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
         // need to cast as any to avoid errors after deleting index patterns
-        const payload = getTemplatePayload(templateName, [getRandomString()]) as any;
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        ) as any;
 
         delete payload.indexPatterns; // index patterns are required
 
-        const { body } = await createTemplate(payload).set('x-elastic-internal-origin', 'xxx');
+        const { body } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
         expect(body.message).to.contain(
           '[request body.indexPatterns]: expected value of type [array] '
         );
@@ -164,7 +176,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should parse the ES error and return the cause', async () => {
         const templateName = `template-create-parse-es-error`;
-        const payload = getTemplatePayload(templateName, ['create-parse-es-error']);
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          ['create-parse-es-error'],
+          undefined,
+          false
+        );
         const runtime = {
           myRuntimeField: {
             type: 'boolean',
@@ -174,9 +191,8 @@ export default function ({ getService }: FtrProviderContext) {
           },
         };
         payload.template!.mappings = { ...payload.template!.mappings, runtime };
-        const { body } = await createTemplate(payload)
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(400);
+        const { body, status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(status).to.eql(400);
 
         expect(body.attributes).an('object');
         expect(body.attributes.error.reason).contain('template after composition is invalid');
@@ -188,34 +204,50 @@ export default function ({ getService }: FtrProviderContext) {
     describe('update', () => {
       it('should update an index template', async () => {
         const templateName = `template-${getRandomString()}`;
-        const indexTemplate = getTemplatePayload(templateName, [getRandomString()]);
+        const indexTemplate = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
 
-        await createTemplate(indexTemplate).set('x-elastic-internal-origin', 'xxx').expect(200);
+        const { status } = await svlTemplatesApi.createTemplate(indexTemplate, roleAuthc);
+        expect(status).to.eql(200);
 
-        let { body: catTemplateResponse } = await catTemplate(templateName);
-
+        const { body: templates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
         const { name, version } = indexTemplate;
-
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(version?.toString());
+          templates.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(version);
 
         // Update template with new version
         const updatedVersion = 2;
-        await updateTemplate({ ...indexTemplate, version: updatedVersion }, templateName)
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(200);
+        const { status: updateStatus } = await svlTemplatesApi.updateTemplate(
+          { ...indexTemplate, version: updatedVersion },
+          templateName,
+          roleAuthc
+        );
+        expect(updateStatus).to.eql(200);
 
-        ({ body: catTemplateResponse } = await catTemplate(templateName));
+        const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(updatedVersion.toString());
+          templates2.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(updatedVersion);
       });
 
       it('should parse the ES error and return the cause', async () => {
         const templateName = `template-update-parse-es-error`;
-        const payload = getTemplatePayload(templateName, ['update-parse-es-error']);
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          ['update-parse-es-error'],
+          undefined,
+          false
+        );
         const runtime = {
           myRuntimeField: {
             type: 'keyword',
@@ -228,13 +260,18 @@ export default function ({ getService }: FtrProviderContext) {
         // Add runtime field
         payload.template!.mappings = { ...payload.template!.mappings, runtime };
 
-        await createTemplate(payload).set('x-elastic-internal-origin', 'xxx').expect(200);
+        const { status: createStatus } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(createStatus).to.eql(200);
 
         // Update template with an error in the runtime field script
         payload.template!.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
-        const { body } = await updateTemplate(payload, templateName)
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(400);
+        const { status: updateStatus, body } = await svlTemplatesApi.updateTemplate(
+          payload,
+          templateName,
+          roleAuthc
+        );
+
+        expect(updateStatus).to.eql(400);
 
         expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
@@ -245,47 +282,50 @@ export default function ({ getService }: FtrProviderContext) {
     describe('delete', () => {
       it('should delete an index template', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
-
-        const { status: createStatus, body: createBody } = await createTemplate(payload).set(
-          'x-elastic-internal-origin',
-          'xxx'
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
         );
-        if (createStatus !== 200) {
-          throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
-        }
 
-        let { body: catTemplateResponse } = await catTemplate(templateName);
+        const { status: createStatus, body: createBody } = await svlTemplatesApi.createTemplate(
+          payload,
+          roleAuthc
+        );
+        if (createStatus !== 200)
+          throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
+
+        const { body: allTemplates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find((template) => template.name === payload.name)?.name
+          allTemplates.templates.find(({ name }: { name: string }) => name === payload.name)?.name
         ).to.equal(templateName);
 
-        const { status: deleteStatus, body: deleteBody } = await deleteTemplates([
-          { name: templateName },
-        ]).set('x-elastic-internal-origin', 'xxx');
-        if (deleteStatus !== 200) {
-          throw new Error(`Error deleting template: ${deleteBody.message}`);
-        }
+        const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
+          [{ name: templateName }],
+          roleAuthc
+        );
+
+        if (deleteStatus !== 200) throw new Error(`Error deleting template: ${deleteBody.message}`);
 
         expect(deleteBody.errors).to.be.empty();
         expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
-        ({ body: catTemplateResponse } = await catTemplate(templateName));
+        const { body: allTemplates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
-        expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
-          undefined
-        );
+        expect(
+          allTemplates2.templates.find(({ name }: { name: string }) => name === payload.name)
+        ).to.equal(undefined);
       });
     });
 
     describe('simulate', () => {
       it('should simulate an index template', async () => {
-        const payload = getSerializedTemplate([getRandomString()]);
+        const payload = svlTemplatesHelpers.getSerializedTemplate([getRandomString()], false);
 
-        const { body } = await simulateTemplate(payload)
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(200);
+        const { status, body } = await svlTemplatesApi.simulateTemplate(payload, roleAuthc);
+        expect(status).to.eql(200);
         expect(body.template).to.be.ok();
       });
     });

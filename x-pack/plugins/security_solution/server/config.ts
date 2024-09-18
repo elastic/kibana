@@ -13,6 +13,15 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
+/**
+ * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
+ */
+const isValidTaskManagerDuration = (value: string): string | undefined => {
+  if (/^\d+[s,m]{1}$/.test(value)) {
+    return `Invalid duration [${value}]. Value must be a number followed by either 's' for seconds or 'm' for minutes `;
+  }
+};
+
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
@@ -108,6 +117,22 @@ export const configSchema = schema.object({
   packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 25, max: 50, min: 1 }),
 
   /**
+   * Complete External Response Actions task: interval duration
+   */
+  completeExternalResponseActionsTaskInterval: schema.string({
+    defaultValue: '60s',
+    validate: isValidTaskManagerDuration,
+  }),
+
+  /**
+   * Complete External Response Actions task: Timeout value for how long the task should run
+   */
+  completeExternalResponseActionsTaskTimeout: schema.string({
+    defaultValue: '5m',
+    validate: isValidTaskManagerDuration,
+  }),
+
+  /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
@@ -139,6 +164,17 @@ export const configSchema = schema.object({
    */
   offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
+  }),
+  entityAnalytics: schema.object({
+    riskEngine: schema.object({
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+    }),
+    assetCriticality: schema.object({
+      csvUpload: schema.object({
+        errorRetries: schema.number({ defaultValue: 1 }),
+        maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+      }),
+    }),
   }),
 });
 

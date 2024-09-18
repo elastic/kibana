@@ -22,10 +22,13 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
+import { checkForShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -35,9 +38,10 @@ export interface FetchSearchSourceQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    searchSourceClient: ISearchStartSearchSource;
+    getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
     share: SharePluginStart;
-    dataViews: DataViewsContract;
+    getDataViews: () => Promise<DataViewsContract>;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -53,35 +57,52 @@ export async function fetchSearchSourceQuery({
   dateStart,
   dateEnd,
 }: FetchSearchSourceQueryOpts) {
-  const { logger, searchSourceClient } = services;
+  const { logger, getSearchSourceClient, ruleResultService } = services;
+  const searchSourceClient = await getSearchSourceClient();
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+  let initialSearchSource;
+  try {
+    initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw createTaskRunError(err, TaskErrorSource.USER);
+    }
+    throw err;
+  }
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
     index,
     params,
     latestTimestamp,
     dateStart,
     dateEnd,
+    logger,
     alertLimit
   );
 
+  const searchRequestBody: unknown = searchSource.getSearchRequestBody();
   logger.debug(
-    `search source query rule (${ruleId}) query: ${JSON.stringify(
-      searchSource.getSearchRequestBody()
-    )}`
+    () => `search source query rule (${ruleId}) query: ${JSON.stringify(searchRequestBody)}`
   );
 
   const searchResult = await searchSource.fetch();
 
+  // result against CCS indices will return success response with errors nested within
+  // the _shards or _clusters field; look for these errors and bubble them up
+  const anyShardFailures = checkForShardFailures(searchResult);
+  if (anyShardFailures && ruleResultService) {
+    ruleResultService.addLastRunWarning(anyShardFailures);
+    ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
+  }
+
   const link = await generateLink(
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
-    services.dataViews,
+    services.getDataViews,
     index,
     dateStart,
     dateEnd,
@@ -97,33 +118,35 @@ export async function fetchSearchSourceQuery({
       isGroupAgg,
       esResult: searchResult,
       sourceFieldsParams: params.sourceFields,
+      termField: params.termField,
     }),
     index: [index.name],
+    query: searchRequestBody,
   };
 }
 
-export function updateSearchSource(
+export async function updateSearchSource(
   searchSource: ISearchSource,
   index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   dateStart: string,
   dateEnd: string,
+  logger: Logger,
   alertLimit?: number
-): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
+): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeFieldName = params.timeField || index.timeFieldName;
+  const timeField = await index.getTimeField();
 
-  if (!timeFieldName) {
-    throw new Error('Invalid data view without timeFieldName.');
+  if (!timeField) {
+    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const field = index.fields.find((f) => f.name === timeFieldName);
   const filters = [
     buildRangeFilter(
-      field!,
+      timeField,
       { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
       index
     ),
@@ -135,7 +158,7 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater than
       // the timestamp of the previous run, so that those documents are not counted twice
       filterToExcludeHitsFromPreviousRun = buildRangeFilter(
-        field!,
+        timeField,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
         index
       );
@@ -144,10 +167,13 @@ export function updateSearchSource(
   }
 
   const searchSourceChild = searchSource.createChild();
+  if (!isGroupAgg) {
+    searchSourceChild.setField('trackTotalHits', true);
+  }
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
-      [timeFieldName]: {
+      [timeField.name]: {
         order: SortDirection.desc,
         format: 'strict_date_optional_time||epoch_millis',
       },
@@ -170,6 +196,7 @@ export function updateSearchSource(
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     })
   );
   return {
@@ -181,13 +208,14 @@ export function updateSearchSource(
 export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
+  getDataViews: () => Promise<DataViewsContract>,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string,
   filterToExcludeHitsFromPreviousRun: Filter | null
 ) {
+  const dataViews = await getDataViews();
   const prevFilters = [...((searchSource.getField('filter') as Filter[]) || [])];
 
   if (filterToExcludeHitsFromPreviousRun) {
@@ -199,11 +227,14 @@ export async function generateLink(
   }
 
   // make new adhoc data view
-  const newDataView = await dataViews.create({
-    ...dataViewToUpdate.toSpec(false),
-    version: undefined,
-    id: undefined,
-  });
+  const newDataView = await dataViews.create(
+    {
+      ...dataViewToUpdate.toSpec(false),
+      version: undefined,
+      id: undefined,
+    },
+    true
+  );
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
@@ -245,5 +276,5 @@ export function updateFilterReferences(
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  return dataView.toMinimalSpec();
+  return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }

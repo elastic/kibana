@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -51,6 +52,7 @@ export enum OperatingSystem {
 
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
+export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 
 export const validatePotentialWildcardInput = ({
   field = '',
@@ -100,18 +102,26 @@ export const validateFilePathInput = ({
   }
 };
 
-export const validateWildcardInput = (value?: string): string | undefined => {
-  if (/[*?]/.test(value ?? '')) {
-    return WILDCARD_WARNING;
+export const validateWildcardInput = (value: string | string[]): string | undefined => {
+  const wildcardRegex = /[*?]/;
+  if (Array.isArray(value)) {
+    const doesAnyValueContainWildcardInput = value.some((v) => wildcardRegex.test(v));
+    if (doesAnyValueContainWildcardInput) {
+      return WILDCARD_WARNING;
+    }
+  } else {
+    if (wildcardRegex.test(value)) {
+      return WILDCARD_WARNING;
+    }
   }
 };
 
-export const hasWildcardAndInvalidOperator = ({
+export const validateHasWildcardWithWrongOperator = ({
   operator,
   value,
 }: {
-  operator: EntryTypes | TrustedAppEntryTypes;
-  value: string;
+  operator: TrustedAppEntryTypes | EventFiltersTypes;
+  value: string | string[];
 }): boolean => {
   if (operator !== 'wildcard' && validateWildcardInput(value)) {
     return true;

@@ -43,6 +43,7 @@ export const ColumnHeaders: React.FC = () => {
             {
               defaultMessage:
                 'A snippet is an escaped representaiton of a field value. Query matches are encapsulated in <em> tags for highlighting. Fallback will look for a snippet match, but fallback to an escaped raw value if none is found. Range is between 20-1000. Defaults to 100.',
+              ignoreTag: true,
             }
           )}
         />

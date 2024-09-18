@@ -15,7 +15,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 42;
+const NUMBER_OF_CAPABILITIES = 43;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -120,6 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
           isADEnabled: true,
@@ -168,6 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: false,
           canTestTrainedModels: false,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
           isADEnabled: true,
@@ -216,6 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: true,
           canTestTrainedModels: true,
           canCreateTrainedModels: true,
+          canCreateInferenceEndpoint: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
           isADEnabled: true,
@@ -264,6 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetTrainedModels: false,
           canTestTrainedModels: false,
           canCreateTrainedModels: false,
+          canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
           isADEnabled: true,

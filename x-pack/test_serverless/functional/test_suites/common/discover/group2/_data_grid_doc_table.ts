@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const log = getService('log');
   const retry = getService('retry');
@@ -79,13 +78,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -96,10 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -126,12 +122,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('expand-cell-search');
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -140,10 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
-      await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
-        '#kbn_doc_viewer_tab_doc_view_source'
-      );
+      await dataGrid.clickRowToggle({ defaultTabId: 'doc_view_source' });
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -164,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
           const detailsEl = await dataGrid.getDetailsRows();
-          const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+          const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
           expect(defaultMessageEl).to.be.ok();
           await dataGrid.closeFlyout();
         });
@@ -186,9 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
-          await testSubjects.exists(`dscDocNavigationPage0`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage0`);
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
-          await testSubjects.exists(`dscDocNavigationPage1`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage1`);
           await dataGrid.closeFlyout();
         });
       });
@@ -221,7 +214,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add and remove columns', function () {
       const extraColumns = ['phpmemory', 'ip'];
-
+      const expectedFieldLength: Record<string, number> = {
+        phpmemory: 1,
+        ip: 4,
+      };
       afterEach(async function () {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
@@ -233,6 +229,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now
@@ -245,6 +244,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }

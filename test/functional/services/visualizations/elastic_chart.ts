@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DebugState } from '@elastic/charts';
@@ -124,12 +125,10 @@ export class ElasticChartService extends FtrService {
    */
   public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
     const visContainer = await chart.findByCssSelector('.echChartStatus');
-    const debugDataString: string | undefined = await visContainer.getAttribute(
-      'data-ech-debug-state'
-    );
+    const debugDataString = await visContainer.getAttribute('data-ech-debug-state');
     this.log.debug('data-ech-debug-state: ', debugDataString);
 
-    if (debugDataString === undefined) {
+    if (!debugDataString) {
       throw Error(
         `Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`
       );

@@ -8,16 +8,24 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { shallow } from 'enzyme';
 import { Visualization } from '..';
 import { DataViewsState } from '../state_management';
 import { Datasource, UserMessage } from '../types';
 import {
+  UserMessageGetterProps,
   filterAndSortUserMessages,
   getApplicationUserMessages,
 } from './get_application_user_messages';
+import { cleanup, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+jest.mock('@kbn/shared-ux-link-redirect-app', () => {
+  const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
+  return {
+    ...original,
+    RedirectAppLinks: () => <a>RedirectAppLinks</a>,
+  };
+});
 
 describe('application-level user messages', () => {
   it('should generate error if vis type is not provided', () => {
@@ -44,6 +52,7 @@ describe('application-level user messages', () => {
           "longMessage": "Visualization type not found.",
           "severity": "error",
           "shortMessage": "",
+          "uniqueId": "editor_missing_vis_type",
         },
       ]
     `);
@@ -73,6 +82,7 @@ describe('application-level user messages', () => {
           "longMessage": "The visualization type id_for_type_that_doesnt_exist could not be resolved.",
           "severity": "error",
           "shortMessage": "Unknown visualization type",
+          "uniqueId": "editor_unknown_vis_type",
         },
       ]
     `);
@@ -102,6 +112,7 @@ describe('application-level user messages', () => {
           "longMessage": "Could not find datasource for the visualization",
           "severity": "error",
           "shortMessage": "Unknown datasource type",
+          "uniqueId": "editor_unknown_datasource_type",
         },
       ]
     `);
@@ -136,70 +147,57 @@ describe('application-level user messages', () => {
       return core;
     }
 
-    const irrelevantProps = {
-      dataViews: {} as DataViewsState,
-      visualization: {} as Visualization,
-      visualizationState: { activeId: 'foo', state: {} },
+    const renderApplicationUserMessages = (propsOverrides?: Partial<UserMessageGetterProps>) => {
+      const props = {
+        visualizationType: '123',
+        activeDatasource: {
+          checkIntegrity: jest.fn(() => ['missing_pattern']),
+        } as unknown as Datasource,
+        activeDatasourceState: { isLoading: false, state: {} },
+        // user can go to management, but indexPatterns management is not accessible
+        core: createCoreStartWithPermissions({
+          navLinks: { management: true },
+          management: { kibana: { indexPatterns: false } },
+        }),
+        // irrelevantProps
+        dataViews: {} as DataViewsState,
+        visualization: {} as Visualization,
+        visualizationState: { activeId: 'foo', state: {} },
+      };
+      const rtlRender = render(
+        <I18nProvider>
+          {
+            getApplicationUserMessages({
+              ...props,
+              ...propsOverrides,
+            })[0].longMessage as React.ReactNode
+          }
+        </I18nProvider>
+      );
+      return rtlRender;
     };
 
     it('generates error if missing an index pattern', () => {
-      expect(
-        getApplicationUserMessages({
-          visualizationType: '123',
-          activeDatasource: {
-            checkIntegrity: jest.fn(() => ['missing_pattern']),
-          } as unknown as Datasource,
-          activeDatasourceState: { isLoading: false, state: {} },
-          core: createCoreStartWithPermissions(),
-          ...irrelevantProps,
-        })
-      ).toMatchSnapshot();
+      renderApplicationUserMessages({
+        core: createCoreStartWithPermissions(),
+      });
+
+      expect(screen.queryByText('RedirectAppLinks')).toBeInTheDocument();
+      expect(screen.getByTestId('missing-refs-failure')).toHaveTextContent('Data view not found');
     });
 
     it('doesnt show a recreate link if user has no access', () => {
-      expect(
-        mountWithIntl(
-          <div>
-            {
-              getApplicationUserMessages({
-                visualizationType: '123',
-                activeDatasource: {
-                  checkIntegrity: jest.fn(() => ['missing_pattern']),
-                } as unknown as Datasource,
-                activeDatasourceState: { isLoading: false, state: {} },
-                // user can go to management, but indexPatterns management is not accessible
-                core: createCoreStartWithPermissions({
-                  navLinks: { management: true },
-                  management: { kibana: { indexPatterns: false } },
-                }),
-                ...irrelevantProps,
-              })[0].longMessage
-            }
-          </div>
-        ).exists(RedirectAppLinks)
-      ).toBeFalsy();
+      renderApplicationUserMessages();
+      expect(screen.queryByText('RedirectAppLinks')).not.toBeInTheDocument();
+      cleanup();
+      renderApplicationUserMessages({
+        core: createCoreStartWithPermissions({
+          navLinks: { management: false },
+          management: { kibana: { indexPatterns: true } },
+        }),
+      });
 
-      expect(
-        shallow(
-          <div>
-            {
-              getApplicationUserMessages({
-                visualizationType: '123',
-                activeDatasource: {
-                  checkIntegrity: jest.fn(() => ['missing_pattern']),
-                } as unknown as Datasource,
-                activeDatasourceState: { isLoading: false, state: {} },
-                // user can't go to management at all
-                core: createCoreStartWithPermissions({
-                  navLinks: { management: false },
-                  management: { kibana: { indexPatterns: true } },
-                }),
-                ...irrelevantProps,
-              })[0].longMessage
-            }
-          </div>
-        ).exists(RedirectAppLinks)
-      ).toBeFalsy();
+      expect(screen.queryByText('RedirectAppLinks')).not.toBeInTheDocument();
     });
   });
 });
@@ -210,6 +208,7 @@ describe('filtering user messages', () => {
 
   const userMessages: UserMessage[] = [
     {
+      uniqueId: 'unique_id_1',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId1 }],
@@ -217,6 +216,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_2',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId2 }],
@@ -224,6 +224,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_3',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'banner' }],
@@ -231,6 +232,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_4',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualization' }],
@@ -238,6 +240,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_5',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualizationInEditor' }],
@@ -245,6 +248,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_6',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualizationOnEmbeddable' }],
@@ -266,6 +270,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Deprecation notice!",
+          "uniqueId": "unique_id_3",
         },
       ]
     `);
@@ -286,6 +291,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Warning on dimension 1!",
+          "uniqueId": "unique_id_1",
         },
       ]
     `);
@@ -306,6 +312,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Warning on dimension 2!",
+          "uniqueId": "unique_id_2",
         },
       ]
     `);
@@ -322,6 +329,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Visualization error!",
+          "uniqueId": "unique_id_4",
         },
         Object {
           "displayLocations": Array [
@@ -333,6 +341,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Visualization editor error!",
+          "uniqueId": "unique_id_5",
         },
       ]
     `);
@@ -364,6 +373,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Visualization embeddable warning!",
+          "uniqueId": "unique_id_6",
         },
       ]
     `);

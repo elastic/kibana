@@ -6,21 +6,29 @@
  */
 
 import React from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
 const mockSetComplete = jest.fn();
+jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
 
 const content = 'Test Content';
+const mockAbortStream = jest.fn();
 const testProps = {
-  amendMessage: jest.fn(),
+  abortStream: mockAbortStream,
+  connectorId: 'test',
   content,
   index: 1,
-  isLastComment: true,
-  connectorTypeTitle: 'OpenAI',
+  isControlsEnabled: true,
+  refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
+  setIsStreaming: jest.fn(),
   transformMessage: jest.fn(),
 };
 
@@ -36,6 +44,16 @@ describe('StreamComment', () => {
       pendingMessage: 'Test Message',
       setComplete: mockSetComplete,
     });
+    const connectors: unknown[] = [
+      {
+        id: 'hi',
+        name: 'OpenAI connector',
+        actionTypeId: '.gen-ai',
+      },
+    ];
+    jest.mocked(useFetchConnectorsQuery).mockReturnValue({
+      data: connectors,
+    } as unknown as UseQueryResult<Array<AsApiContract<Connector>>, unknown>);
   });
   it('renders content correctly', () => {
     render(<StreamComment {...testProps} />);
@@ -61,12 +79,13 @@ describe('StreamComment', () => {
     expect(screen.getByTestId('regenerateResponseButton')).toBeInTheDocument();
   });
 
-  it('calls setComplete when StopGeneratingButton is clicked', () => {
+  it('calls setComplete and abortStream when StopGeneratingButton is clicked', () => {
     render(<StreamComment {...testProps} reader={mockReader} isFetching={true} />);
 
     fireEvent.click(screen.getByTestId('stopGeneratingButton'));
 
     expect(mockSetComplete).toHaveBeenCalled();
+    expect(mockAbortStream).toHaveBeenCalled();
   });
 
   it('displays an error message correctly', () => {
@@ -79,6 +98,6 @@ describe('StreamComment', () => {
     });
     render(<StreamComment {...testProps} />);
 
-    expect(screen.getByTestId('messsage-error')).toBeInTheDocument();
+    expect(screen.getByTestId('message-error')).toBeInTheDocument();
   });
 });

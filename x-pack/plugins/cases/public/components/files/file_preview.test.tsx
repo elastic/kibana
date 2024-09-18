@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
@@ -17,11 +17,26 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 describe('FilePreview', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('FilePreview rendered correctly', async () => {
@@ -51,7 +66,8 @@ describe('FilePreview', () => {
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
 
-    userEvent.keyboard('{esc}');
+    await user.keyboard('{Escape}');
+    // fireEvent.keyDown(document, { key: 'Escape' });
 
     await waitFor(() => expect(closePreview).toHaveBeenCalled());
   });

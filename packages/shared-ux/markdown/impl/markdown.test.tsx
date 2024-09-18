@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -32,5 +33,17 @@ describe('shared ux markdown component', () => {
     const exampleMarkdownContent = 'error';
     render(<Markdown markdownContent={exampleMarkdownContent} />);
     expect(screen.getByTestId('euiMarkdownEditorToolbar')).toBeInTheDocument();
+  });
+
+  it('renders EuiMarkdownEditor without style passed', () => {
+    render(<Markdown style={{ color: 'red' }} data-test-subj="editor" />);
+    expect(screen.getByTestId('editor')).not.toHaveStyle({ color: 'red' });
+  });
+
+  it('renders EuiMarkdownFormat with style passed', () => {
+    render(
+      <Markdown style={{ color: 'red' }} data-test-subj="format" markdownContent="test" readOnly />
+    );
+    expect(screen.getByTestId('format')).toHaveStyle({ color: 'red' });
   });
 });

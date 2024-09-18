@@ -9,25 +9,26 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertDataViews } from '../../hooks/use_alert_data_view';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 // Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds,
+  featureIds = EMPTY_FEATURE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -46,17 +47,32 @@ export function AlertsSearchBar({
   ...props
 }: AlertsSearchBarProps) {
   const {
+    http,
+    dataViews: dataViewsService,
+    notifications: { toasts },
     unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataViews, loading } = useAlertDataViews(featureIds ?? []);
+  const { dataView } = useAlertsDataView({
+    featureIds,
+    http,
+    dataViewsService,
+    toasts,
+  });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
-  const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataViews;
+  const indexPatterns = useMemo(() => {
+    if (ruleTypeId && aadFields?.length) {
+      return [{ title: ruleTypeId, fields: aadFields }];
+    }
+    if (dataView) {
+      return [dataView];
+    }
+    return null;
+  }, [aadFields, dataView, ruleTypeId]);
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
@@ -70,11 +86,17 @@ export function AlertsSearchBar({
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
 
   const onSearchQuerySubmit = useCallback(
-    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
-      onQuerySubmit({
-        dateRange,
-        query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
-      });
+    (
+      { dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query },
+      isUpdate?: boolean
+    ) => {
+      onQuerySubmit(
+        {
+          dateRange,
+          query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
+        },
+        isUpdate
+      );
       setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
     },
     [onQuerySubmit, setQueryLanguage]
@@ -151,7 +173,7 @@ export function AlertsSearchBar({
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-      indexPatterns={loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
+      indexPatterns={!indexPatterns || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}

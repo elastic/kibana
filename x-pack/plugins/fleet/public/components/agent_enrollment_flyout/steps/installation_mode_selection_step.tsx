@@ -6,13 +6,35 @@
  */
 
 import React from 'react';
-import { EuiRadioGroup } from '@elastic/eui';
+import { EuiRadioGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
+import { useAuthz } from '../../../hooks';
 import type { FlyoutMode } from '../types';
+
+const PermissionWrapper: React.FunctionComponent<
+  React.PropsWithChildren<{
+    showTooltip: boolean;
+  }>
+> = ({ children, showTooltip }) => {
+  return showTooltip && children ? (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.fleet.agentFlyout.standaloneMissingPermissions"
+          defaultMessage="Read access to Agent Policies is required to see the standalone instructions."
+        />
+      }
+    >
+      {children as React.ReactElement}
+    </EuiToolTip>
+  ) : (
+    <>{children}</>
+  );
+};
 
 export const InstallationModeSelectionStep = ({
   selectedPolicyId,
@@ -23,6 +45,7 @@ export const InstallationModeSelectionStep = ({
   mode: FlyoutMode;
   setMode: (v: FlyoutMode) => void;
 }): EuiContainedStepProps => {
+  const authz = useAuthz();
   // radio id has to be unique so that the component works even if appears twice in DOM
   const radioSuffix = 'installation_mode_agent_selection';
 
@@ -63,22 +86,26 @@ export const InstallationModeSelectionStep = ({
           },
           {
             id: `standalone_${radioSuffix}`,
+            // Disabled if no agentPolicies read permission
+            disabled: !authz.fleet.readAgentPolicies,
             label: (
-              <FormattedMessage
-                data-test-subj="agentFlyoutStandaloneRadioButtons"
-                id="xpack.fleet.agentFlyout.standaloneRadioOption"
-                defaultMessage="{standaloneMessage} – Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
-                values={{
-                  standaloneMessage: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.fleet.agentFlyout.standaloneMessage"
-                        defaultMessage="Run standalone"
-                      />
-                    </strong>
-                  ),
-                }}
-              />
+              <PermissionWrapper showTooltip={!authz.fleet.readAgentPolicies}>
+                <FormattedMessage
+                  data-test-subj="agentFlyoutStandaloneRadioButtons"
+                  id="xpack.fleet.agentFlyout.standaloneRadioOption"
+                  defaultMessage="{standaloneMessage} – Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
+                  values={{
+                    standaloneMessage: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.agentFlyout.standaloneMessage"
+                          defaultMessage="Run standalone"
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
+              </PermissionWrapper>
             ),
           },
         ]}

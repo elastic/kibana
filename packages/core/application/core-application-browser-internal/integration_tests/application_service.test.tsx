@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, type Observable, take } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
@@ -160,7 +160,7 @@ describe('ApplicationService', () => {
 
         await act(async () => {
           await navigateToApp('app1');
-          update();
+          await update();
         });
 
         expect(currentAppIds).toEqual(['app1']);
@@ -196,15 +196,15 @@ describe('ApplicationService', () => {
 
         await act(async () => {
           await navigateToApp('app1');
-          update();
+          await update();
         });
         await act(async () => {
           await navigateToApp('app2', { path: '/nested' });
-          update();
+          await update();
         });
         await act(async () => {
           await navigateToApp('app2', { path: '/another-path' });
-          update();
+          await update();
         });
 
         expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested', '/app/app2/another-path']);
@@ -626,9 +626,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(mounter2);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(mounter2);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });
@@ -664,9 +669,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(undefined);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(undefined);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });

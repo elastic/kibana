@@ -123,7 +123,7 @@
         "tags": [],
         "label": "SavedSearchUnwrapMetaInfo",
         "description": [],
-        "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+        "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,7 +137,7 @@
             "signature": [
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
-            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -151,7 +151,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -165,7 +165,7 @@
         "tags": [],
         "label": "SavedSearchUnwrapResult",
         "description": [],
-        "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+        "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,14 +182,14 @@
               ", \"description\"> & { description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[]; }"
             ],
-            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,7 +210,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "path": "src/plugins/saved_search/public/services/saved_searches/to_saved_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -293,60 +293,6 @@
     "misc": [
       {
         "parentPluginId": "savedSearch",
-        "id": "def-public.SavedSearchAttributeService",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedSearchAttributeService",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.AttributeService",
-            "text": "AttributeService"
-          },
-          "<",
-          {
-            "pluginId": "savedSearch",
-            "scope": "public",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-public.SavedSearchByValueAttributes",
-            "text": "SavedSearchByValueAttributes"
-          },
-          ", ",
-          {
-            "pluginId": "savedSearch",
-            "scope": "public",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-public.SearchByValueInput",
-            "text": "SearchByValueInput"
-          },
-          ", ",
-          {
-            "pluginId": "savedSearch",
-            "scope": "public",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-public.SearchByReferenceInput",
-            "text": "SearchByReferenceInput"
-          },
-          ", ",
-          {
-            "pluginId": "savedSearch",
-            "scope": "public",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-public.SavedSearchUnwrapMetaInfo",
-            "text": "SavedSearchUnwrapMetaInfo"
-          },
-          ">"
-        ],
-        "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
         "id": "def-public.SavedSearchByValueAttributes",
         "type": "Type",
         "tags": [],
@@ -358,57 +304,12 @@
           ", \"description\"> & { description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.Reference",
+            "section": "def-server.Reference",
             "text": "Reference"
           },
           "[]; }"
-        ],
-        "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-public.SearchByReferenceInput",
-        "type": "Type",
-        "tags": [],
-        "label": "SearchByReferenceInput",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          " & SearchBaseInput"
-        ],
-        "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-public.SearchByValueInput",
-        "type": "Type",
-        "tags": [],
-        "label": "SearchByValueInput",
-        "description": [],
-        "signature": [
-          "{ attributes: ",
-          {
-            "pluginId": "savedSearch",
-            "scope": "public",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-public.SavedSearchByValueAttributes",
-            "text": "SavedSearchByValueAttributes"
-          },
-          "; } & SearchBaseInput"
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
         "deprecated": false,
@@ -438,7 +339,9 @@
           "label": "get",
           "description": [],
           "signature": [
-            "(savedSearchId: string) => Promise<",
+            "<Serialized extends boolean = false>(savedSearchId: string, serialized?: Serialized | undefined) => Promise<Serialized extends true ? ",
+            "SerializableSavedSearch",
+            " : ",
             {
               "pluginId": "savedSearch",
               "scope": "common",
@@ -466,6 +369,21 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "savedSearch",
+              "id": "def-public.SavedSearchPublicPluginStart.get.$2",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "serialized",
+              "description": [],
+              "signature": [
+                "Serialized | undefined"
+              ],
+              "path": "src/plugins/saved_search/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -504,9 +422,9 @@
             "() => Promise<",
             {
               "pluginId": "@kbn/content-management-utils",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnContentManagementUtilsPluginApi",
-              "section": "def-common.SOWithMetadata",
+              "section": "def-server.SOWithMetadata",
               "text": "SOWithMetadata"
             },
             "<",
@@ -552,7 +470,7 @@
             {
               "parentPluginId": "savedSearch",
               "id": "def-public.SavedSearchPublicPluginStart.save.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "savedSearch",
               "description": [],
@@ -597,21 +515,61 @@
         },
         {
           "parentPluginId": "savedSearch",
-          "id": "def-public.SavedSearchPublicPluginStart.byValue",
-          "type": "Object",
+          "id": "def-public.SavedSearchPublicPluginStart.checkForDuplicateTitle",
+          "type": "Function",
           "tags": [],
-          "label": "byValue",
+          "label": "checkForDuplicateTitle",
           "description": [],
           "signature": [
-            "{ attributeService: ",
+            "(props: Pick<",
             {
-              "pluginId": "savedSearch",
+              "pluginId": "savedObjects",
               "scope": "public",
-              "docId": "kibSavedSearchPluginApi",
-              "section": "def-public.SavedSearchAttributeService",
-              "text": "SavedSearchAttributeService"
+              "docId": "kibSavedObjectsPluginApi",
+              "section": "def-public.OnSaveProps",
+              "text": "OnSaveProps"
             },
-            "; toSavedSearch: (id: string | undefined, result: ",
+            ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">) => Promise<void>"
+          ],
+          "path": "src/plugins/saved_search/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "savedSearch",
+              "id": "def-public.SavedSearchPublicPluginStart.checkForDuplicateTitle.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Pick<",
+                {
+                  "pluginId": "savedObjects",
+                  "scope": "public",
+                  "docId": "kibSavedObjectsPluginApi",
+                  "section": "def-public.OnSaveProps",
+                  "text": "OnSaveProps"
+                },
+                ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">"
+              ],
+              "path": "src/plugins/saved_search/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "savedSearch",
+          "id": "def-public.SavedSearchPublicPluginStart.byValueToSavedSearch",
+          "type": "Function",
+          "tags": [],
+          "label": "byValueToSavedSearch",
+          "description": [],
+          "signature": [
+            "<Serialized extends boolean = false>(result: ",
             {
               "pluginId": "savedSearch",
               "scope": "public",
@@ -619,7 +577,9 @@
               "section": "def-public.SavedSearchUnwrapResult",
               "text": "SavedSearchUnwrapResult"
             },
-            ") => Promise<",
+            ", serialized?: Serialized | undefined) => Promise<Serialized extends true ? ",
+            "SerializableSavedSearch",
+            " : ",
             {
               "pluginId": "savedSearch",
               "scope": "common",
@@ -627,11 +587,50 @@
               "section": "def-common.SavedSearch",
               "text": "SavedSearch"
             },
-            ">; }"
+            ">"
           ],
           "path": "src/plugins/saved_search/public/plugin.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "savedSearch",
+              "id": "def-public.SavedSearchPublicPluginStart.byValueToSavedSearch.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "result",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "savedSearch",
+                  "scope": "public",
+                  "docId": "kibSavedSearchPluginApi",
+                  "section": "def-public.SavedSearchUnwrapResult",
+                  "text": "SavedSearchUnwrapResult"
+                }
+              ],
+              "path": "src/plugins/saved_search/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "savedSearch",
+              "id": "def-public.SavedSearchPublicPluginStart.byValueToSavedSearch.$2",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "serialized",
+              "description": [],
+              "signature": [
+                "Serialized | undefined"
+              ],
+              "path": "src/plugins/saved_search/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -714,7 +713,17 @@
         "label": "fromSavedSearchAttributes",
         "description": [],
         "signature": [
-          "(id: string | undefined, attributes: ",
+          "<Serialized extends boolean = false, ReturnType = Serialized extends true ? ",
+          "SerializableSavedSearch",
+          " : ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.SavedSearch",
+            "text": "SavedSearch"
+          },
+          ">(id: string | undefined, attributes: ",
           "SavedSearchAttributes",
           ", tags: string[] | undefined, searchSource: ",
           {
@@ -724,14 +733,15 @@
             "section": "def-common.ISearchSource",
             "text": "ISearchSource"
           },
-          ", managed: boolean) => ",
+          " | ",
           {
-            "pluginId": "savedSearch",
+            "pluginId": "data",
             "scope": "common",
-            "docId": "kibSavedSearchPluginApi",
-            "section": "def-common.SavedSearch",
-            "text": "SavedSearch"
-          }
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
+          },
+          ", managed: boolean, serialized?: Serialized) => ReturnType"
         ],
         "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
         "deprecated": false,
@@ -785,7 +795,7 @@
           {
             "parentPluginId": "savedSearch",
             "id": "def-common.fromSavedSearchAttributes.$4",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "searchSource",
             "description": [],
@@ -796,6 +806,14 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.ISearchSource",
                 "text": "ISearchSource"
+              },
+              " | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               }
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
@@ -817,6 +835,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.fromSavedSearchAttributes.$6",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "serialized",
+            "description": [],
+            "signature": [
+              "Serialized"
+            ],
+            "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -833,9 +866,9 @@
           "(getStartDependencies: (getKibanaRequest: (() => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
@@ -864,9 +897,9 @@
               "(getKibanaRequest: (() => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
@@ -943,6 +976,69 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.toSavedSearchAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "toSavedSearchAttributes",
+        "description": [],
+        "signature": [
+          "(savedSearch: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.SavedSearch",
+            "text": "SavedSearch"
+          },
+          ", searchSourceJSON: string) => ",
+          "SavedSearchAttributes"
+        ],
+        "path": "src/plugins/saved_search/common/service/saved_searches_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.toSavedSearchAttributes.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.SavedSearch",
+                "text": "SavedSearch"
+              }
+            ],
+            "path": "src/plugins/saved_search/common/service/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.toSavedSearchAttributes.$2",
+            "type": "string",
+            "tags": [],
+            "label": "searchSourceJSON",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/saved_search/common/service/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1047,617 +1143,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-common.SavedSearch",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedSearch",
-        "description": [],
-        "path": "src/plugins/saved_search/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.searchSource",
-            "type": "Object",
-            "tags": [],
-            "label": "searchSource",
-            "description": [],
-            "signature": [
-              "{ create: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; fetch: (options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              },
-              ") => Promise<",
-              "SearchResponse",
-              "<unknown, Record<string, ",
-              "AggregationsAggregate",
-              ">>>; history: ",
-              "SearchRequest",
-              "[]; setField: <K extends keyof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ">(field: K, value: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              "[K]) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ">(field: K) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; setFields: (newFields: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; getId: () => string; getFields: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              "; getField: <K extends keyof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ">(field: K, recurse?: boolean) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              "[K]; getActiveIndexFilter: () => any[]; getOwnField: <K extends keyof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ">(field: K) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              "[K]; createCopy: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; createChild: (options?: {}) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; setParent: (parent?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchSource",
-                "text": "ISearchSource"
-              },
-              " | undefined, options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceOptions",
-                "text": "SearchSourceOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; getParent: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              " | undefined; fetch$: <T = {}>(options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              },
-              ") => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<",
-              "SearchResponse",
-              "<T, Record<string, ",
-              "AggregationsAggregate",
-              ">>>>; onRequestStart: (handler: (searchSource: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              ", options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              },
-              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializedSearchSourceFields",
-                "text": "SerializedSearchSourceFields"
-              },
-              "; serialize: () => { searchSourceJSON: string; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [],
-            "signature": [
-              "SortOrder",
-              "[] | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.columns",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.tags",
-            "type": "Array",
-            "tags": [],
-            "label": "tags",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.grid",
-            "type": "Object",
-            "tags": [],
-            "label": "grid",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedSearch",
-                "scope": "common",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.DiscoverGridSettings",
-                "text": "DiscoverGridSettings"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.hideChart",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideChart",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.viewMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "viewMode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedSearch",
-                "scope": "common",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.VIEW_MODE",
-                "text": "VIEW_MODE"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.hideAggregatedPreview",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideAggregatedPreview",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.rowHeight",
-            "type": "number",
-            "tags": [],
-            "label": "rowHeight",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.headerRowHeight",
-            "type": "number",
-            "tags": [],
-            "label": "headerRowHeight",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.isTextBasedQuery",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isTextBasedQuery",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.usesAdHocDataView",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "usesAdHocDataView",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.timeRestore",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "timeRestore",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.refreshInterval",
-            "type": "Object",
-            "tags": [],
-            "label": "refreshInterval",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.rowsPerPage",
-            "type": "number",
-            "tags": [],
-            "label": "rowsPerPage",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.sampleSize",
-            "type": "number",
-            "tags": [],
-            "label": "sampleSize",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.breakdownField",
-            "type": "string",
-            "tags": [],
-            "label": "breakdownField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.managed",
-            "type": "boolean",
-            "tags": [],
-            "label": "managed",
-            "description": [],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-common.SavedSearch.sharingSavedObjectProps",
-            "type": "Object",
-            "tags": [],
-            "label": "sharingSavedObjectProps",
-            "description": [],
-            "signature": [
-              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/saved_search/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -1716,6 +1201,39 @@
           "1"
         ],
         "path": "src/plugins/saved_search/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.SavedSearch",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearch",
+        "description": [],
+        "signature": [
+          "Partial<",
+          "SavedSearchAttributes",
+          "> & { searchSource: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchSource",
+            "text": "ISearchSource"
+          },
+          "; id?: string | undefined; tags?: string[] | undefined; managed: boolean; references?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
+          "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
+        ],
+        "path": "src/plugins/saved_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

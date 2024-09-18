@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { pick } from '@kbn/std';
+import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
+import { map } from 'rxjs';
 
+import { pick, Semaphore } from '@kbn/std';
+import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -28,6 +30,7 @@ import type {
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
+import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -52,6 +55,7 @@ export interface SetupDeps {
 export class HttpService
   implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
 {
+  private static readonly generateOasSemaphore = new Semaphore(1);
   private readonly prebootServer: HttpServer;
   private isPrebootServerStopped = false;
   private readonly httpServer: HttpServer;
@@ -74,7 +78,13 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
-    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+      configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
+    ]).pipe(
+      map(
+        ([http, csp, externalUrl, permissionsPolicy]) =>
+          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
+      )
+    );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
@@ -182,6 +192,7 @@ export class HttpService
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
           versionedRouterOptions: getVersionedRouterOptions(config),
+          pluginId,
         });
         registerRouter(router);
         return router;
@@ -222,10 +233,88 @@ export class HttpService
         await this.httpsRedirectServer.start(config);
       }
 
+      if (config.oas.enabled) {
+        this.log.info('Registering experimental OAS API');
+        this.registerOasApi(config);
+      }
+
       await this.httpServer.start();
     }
 
     return this.getStartContract();
+  }
+
+  private registerOasApi(config: HttpConfig) {
+    const basePath = this.internalSetup?.basePath;
+    const server = this.internalSetup?.server;
+    if (!basePath || !server) {
+      throw new Error('Cannot register OAS API before server setup is complete');
+    }
+
+    const baseUrl =
+      basePath.publicBaseUrl ?? `http://localhost:${config.port}${basePath.serverBasePath}`;
+
+    server.route({
+      path: '/api/oas',
+      method: 'GET',
+      handler: async (req, h) => {
+        const version = req.query?.version;
+
+        let pathStartsWith: undefined | string[];
+        if (typeof req.query?.pathStartsWith === 'string') {
+          pathStartsWith = [req.query.pathStartsWith];
+        } else {
+          pathStartsWith = req.query?.pathStartsWith;
+        }
+
+        let excludePathsMatching: undefined | string[];
+        if (typeof req.query?.excludePathsMatching === 'string') {
+          excludePathsMatching = [req.query.excludePathsMatching];
+        } else {
+          excludePathsMatching = req.query?.excludePathsMatching;
+        }
+
+        const pluginId = req.query?.pluginId;
+
+        const access = req.query?.access as 'public' | 'internal' | undefined;
+        if (access && !['public', 'internal'].some((a) => a === access)) {
+          return h
+            .response({
+              message: 'Invalid access query parameter. Must be one of "public" or "internal".',
+            })
+            .code(400);
+        }
+
+        return await firstValueFrom(
+          of(1).pipe(
+            HttpService.generateOasSemaphore.acquire(),
+            mergeMap(async () => {
+              try {
+                // Potentially quite expensive
+                const result = generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
+                  baseUrl,
+                  title: 'Kibana HTTP APIs',
+                  version: '0.0.0', // TODO get a better version here
+                  filters: { pathStartsWith, excludePathsMatching, access, version },
+                });
+                return h.response(result);
+              } catch (e) {
+                this.log.error(e);
+                return h.response({ message: e.message }).code(500);
+              }
+            })
+          )
+        );
+      },
+      options: {
+        app: { access: 'public' },
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
+    });
   }
 
   /**

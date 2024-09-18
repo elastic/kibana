@@ -17,7 +17,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -42,12 +41,12 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
+  ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -64,7 +63,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -138,6 +137,7 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
+import { ChartType } from './lens_suggestions_api';
 
 export type { SaveProps } from './app_plugin';
 
@@ -164,7 +164,6 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
@@ -181,6 +180,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -280,7 +280,8 @@ export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigura
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
-  excludedVisualizations?: string[]
+  excludedVisualizations?: string[],
+  preferredChartType?: ChartType
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -385,6 +386,21 @@ export class LensPlugin {
         'lens',
         new EmbeddableFactory(getStartServicesForEmbeddable)
       );
+
+      embeddable.registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+        CONTENT_ID,
+        (savedObject) => {
+          if (!savedObject.managed) {
+            return { savedObjectId: savedObject.id };
+          }
+
+          const panel = {
+            attributes: savedObjectToEmbeddableAttributes(savedObject),
+          };
+
+          return panel;
+        }
+      );
     }
 
     if (share) {
@@ -394,6 +410,15 @@ export class LensPlugin {
         downloadCsvShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          atLeastGold: () => {
+            let isGold = false;
+            startServices()
+              .plugins.licensing?.license$.pipe()
+              .subscribe((license) => {
+                isGold = license.hasAtLeast('gold');
+              });
+            return isGold;
+          },
         })
       );
     }
@@ -430,28 +455,13 @@ export class LensPlugin {
       () => startServices().plugins.data.nowProvider.get()
     );
 
-    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        const panel = {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
-
-        return panel;
-      }
-    );
-
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -625,11 +635,7 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
-    const editInLensAction = new ConfigureInLensPanelAction(
-      startDependencies,
-      core.overlays,
-      core.theme
-    );
+    const editInLensAction = new ConfigureInLensPanelAction(startDependencies, core);
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
@@ -642,8 +648,14 @@ export class LensPlugin {
     );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
-    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
+      if (!this.editorFrameService) {
+        await this.initDependenciesForApi();
+      }
+
+      return this.editorFrameService!;
+    });
+    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
@@ -687,8 +699,8 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./visualizations/xy/types');
-        return visualizationTypes;
+        const { visualizationSubtypes } = await import('./visualizations/xy/types');
+        return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {
@@ -705,13 +717,14 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (context, dataView, excludedVisualizations) => {
+          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
               dataView,
               excludedVisualizations,
+              preferredChartType,
             });
           },
         };

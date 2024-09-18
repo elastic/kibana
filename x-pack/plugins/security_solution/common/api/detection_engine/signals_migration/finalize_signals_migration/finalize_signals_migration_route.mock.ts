@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_route';
+import type { FinalizeAlertsMigrationRequestBody } from './finalize_signals_migration.gen';
 
-export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeSignalsMigrationSchema => ({
+export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeAlertsMigrationRequestBody => ({
   migration_ids: ['migrationSOIdentifier'],
 });

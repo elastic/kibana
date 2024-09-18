@@ -5,59 +5,38 @@
  * 2.0.
  */
 
-import {
-  ALERT_RISK_SCORE,
-  ALERT_RULE_NAME,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
-import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresResponse,
-  RiskScoreBucket,
-} from '../types';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
   doc_count: 2,
-  risk_details: {
-    value: {
-      score: 20,
-      normalized_score: 30.0,
-      notes: [],
-      category_1_score: 30,
-      category_1_count: 1,
-    },
-  },
-  inputs: {
-    took: 17,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
-      },
-      hits: [
-        {
-          _id: '_id',
-          _index: '_index',
-          fields: {
-            '@timestamp': ['2023-07-20T20:31:24.896Z'],
-            [ALERT_RISK_SCORE]: [21],
-            [ALERT_RULE_NAME]: ['Rule Name'],
+  top_inputs: {
+    risk_details: {
+      value: {
+        score: 20,
+        normalized_score: 30.0,
+        notes: [],
+        category_1_score: 30,
+        category_1_count: 1,
+        risk_inputs: [
+          {
+            id: 'test_id',
+            index: '_index',
+            rule_name: 'Test rule',
+            time: '2021-08-19T18:55:59.000Z',
+            score: 30,
+            contribution: 20,
           },
-          sort: [21],
-        },
-      ],
+        ],
+      },
     },
-  },
 
+    doc_count: 2,
+  },
   ...overrides,
 });
 
@@ -79,8 +58,8 @@ const buildAggregationResponseMock = (
 });
 
 const buildResponseMock = (
-  overrides: Partial<CalculateScoresResponse> = {}
-): CalculateScoresResponse => ({
+  overrides: Partial<RiskScoresCalculationResponse> = {}
+): RiskScoresCalculationResponse => ({
   after_keys: { host: { 'host.name': 'hostname' } },
   scores: {
     host: [
@@ -90,7 +69,7 @@ const buildResponseMock = (
         id_value: 'hostname',
         criticality_level: 'high_impact',
         criticality_modifier: 1.5,
-        calculated_level: RiskLevels.unknown,
+        calculated_level: EntityRiskLevelsEnum.Unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
@@ -106,17 +85,20 @@ const buildResponseMock = (
             description: 'Alert from Rule: My rule',
             risk_score: 30,
             timestamp: '2021-08-19T18:55:59.000Z',
+            contribution_score: 20,
           },
         ],
       },
     ],
     user: [],
   },
+  errors: [],
+  scores_written: 1,
   ...overrides,
 });
 
 const buildResponseWithOneScoreMock = () =>
-  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+  buildResponseMock({ scores: { host: [{} as EntityRiskScoreRecord] } });
 
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,

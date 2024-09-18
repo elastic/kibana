@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -28,21 +28,22 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
-import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
+import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
+import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   getTimeRangeSettings,
   parseDateWithDefault,
@@ -51,12 +52,13 @@ import {
 } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
-import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
+import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -240,19 +242,21 @@ const InsightComponent = ({
   relativeFrom,
   relativeTo,
 }: InsightComponentProps) => {
-  const isPlatinum = useLicense().isPlatinumPlus();
+  const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
 
-  if (isPlatinum === false) {
+  if (insightsUpsellingMessage) {
     return (
       <>
-        <EuiButton
-          isDisabled={true}
-          iconSide={'left'}
-          iconType={'timeline'}
-          data-test-subj="insight-investigate-in-timeline-button"
-        >
-          {`${label}`}
-        </EuiButton>
+        <EuiToolTip content={insightsUpsellingMessage}>
+          <EuiButton
+            isDisabled={true}
+            iconSide={'left'}
+            iconType={'timeline'}
+            data-test-subj="insight-investigate-in-timeline-button"
+          >
+            {`${label}`}
+          </EuiButton>
+        </EuiToolTip>
         <div>{description}</div>
       </>
     );
@@ -277,21 +281,17 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { sourcererDataView, indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
-    fieldFormats,
   } = useKibana().services;
-  const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
-      return new DataView({ spec: sourcererDataView, fieldFormats });
-    } else {
-      return null;
-    }
-  }, [sourcererDataView, fieldFormats]);
+
+  const dataView = useGetScopedSourcererDataView({
+    sourcererScope: SourcererScopeName.default,
+  });
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -382,7 +382,7 @@ const InsightEditorComponent = ({
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
   }, []);
-  const selectOnChange = useCallback(
+  const selectOnChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (event) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },

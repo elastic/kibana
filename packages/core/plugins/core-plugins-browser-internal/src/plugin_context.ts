@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -81,6 +82,7 @@ export function createPluginSetupContext<
     },
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
+    featureFlags: deps.featureFlags,
     executionContext: deps.executionContext,
     http: {
       ...deps.http,
@@ -93,6 +95,13 @@ export function createPluginSetupContext<
     uiSettings: deps.uiSettings,
     settings: deps.settings,
     theme: deps.theme,
+    security: {
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+    },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
+    },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
@@ -139,6 +148,7 @@ export function createPluginStartContext<
     customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
+    featureFlags: deps.featureFlags,
     http: {
       ...deps.http,
       staticAssets: {
@@ -156,6 +166,10 @@ export function createPluginStartContext<
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
+    security: {
+      authc: deps.security.authc,
+    },
+    userProfile: deps.userProfile,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },

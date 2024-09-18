@@ -19,7 +19,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ title, description, entityName, entityNamePlural, initialFilter, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, rowItemActions, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
+          ">({ title, description, entityName, entityNamePlural, initialFilter, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, rowItemActions, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, createdByEnabled, recentlyAccessed, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view",
             "scope": "public",
@@ -38,7 +38,7 @@
             "id": "def-public.TableListView.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  title,\n  description,\n  entityName,\n  entityNamePlural,\n  initialFilter,\n  headingId,\n  initialPageSize,\n  listingLimit,\n  urlStateEnabled = true,\n  customTableColumn,\n  emptyPrompt,\n  findItems,\n  createItem,\n  editItem,\n  deleteItems,\n  getDetailViewLink,\n  onClickTitle,\n  rowItemActions,\n  id: listingId,\n  contentEditor,\n  children,\n  titleColumnName,\n  additionalRightSideActions,\n  withoutPageTemplateWrapper,\n}",
+            "label": "{\n  title,\n  description,\n  entityName,\n  entityNamePlural,\n  initialFilter,\n  headingId,\n  initialPageSize,\n  listingLimit,\n  urlStateEnabled = true,\n  customTableColumn,\n  emptyPrompt,\n  findItems,\n  createItem,\n  editItem,\n  deleteItems,\n  getDetailViewLink,\n  getOnClickTitle,\n  rowItemActions,\n  id: listingId,\n  contentEditor,\n  children,\n  titleColumnName,\n  additionalRightSideActions,\n  withoutPageTemplateWrapper,\n  createdByEnabled,\n  recentlyAccessed,\n}",
             "description": [],
             "signature": [
               {
@@ -79,7 +79,7 @@
             "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
-          "<T>, \"id\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"initialPageSize\" | \"listingLimit\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"onClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
+          "<T>, \"id\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"initialPageSize\" | \"listingLimit\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"getOnClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\" | \"createdByEnabled\" | \"recentlyAccessed\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
         ],
         "path": "packages/content-management/table_list_view/src/table_list_view.tsx",
         "deprecated": false,

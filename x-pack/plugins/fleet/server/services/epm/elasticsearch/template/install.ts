@@ -30,7 +30,8 @@ import type {
   EsAssetReference,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
-import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import type { Fields } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -134,7 +135,7 @@ const installPreBuiltTemplates = async (
     const esClientParams = { name: templateName, body: content };
     const esClientRequestOptions = { ignore: [404] };
 
-    if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
+    if (Object.hasOwn(content, 'template') || Object.hasOwn(content, 'composed_of')) {
       // Template is v2
       return retryTransientEsErrors(
         () => esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions),
@@ -288,6 +289,26 @@ function putComponentTemplate(
   };
 }
 
+const DEFAULT_FIELD_LIMIT = 1000;
+const MAX_FIELD_LIMIT = 10000;
+const FIELD_LIMIT_THRESHOLD = 500;
+
+/**
+ * The total field limit is set to 1000 by default, but can be increased to 10000 if the field count is higher than 500.
+ * An explicit limit always overrides the default.
+ *
+ * This can be replaced by a static limit of 1000 once a new major version of the package spec is released which clearly documents the field limit.
+ */
+function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
+  if (explicitLimit) {
+    return explicitLimit;
+  }
+  if (typeof fieldCount !== 'undefined' && fieldCount > FIELD_LIMIT_THRESHOLD) {
+    return MAX_FIELD_LIMIT;
+  }
+  return DEFAULT_FIELD_LIMIT;
+}
+
 export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
@@ -297,6 +318,7 @@ export function buildComponentTemplates(params: {
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   lifecycle?: IndexTemplate['template']['lifecycle'];
+  fieldCount?: number;
 }) {
   const {
     templateName,
@@ -307,6 +329,7 @@ export function buildComponentTemplates(params: {
     pipelineName,
     experimentalDataStreamFeature,
     lifecycle,
+    fieldCount,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -365,8 +388,10 @@ export function buildComponentTemplates(params: {
           mapping: {
             ...templateSettings.index?.mapping,
             total_fields: {
-              ...templateSettings.index?.mapping?.total_fields,
-              limit: '10000',
+              limit: getFieldsLimit(
+                fieldCount,
+                templateSettings.index?.mapping?.total_fields?.limit
+              ),
             },
           },
         },
@@ -499,6 +524,19 @@ export async function ensureAliasHasWriteIndex(opts: {
   }
 }
 
+function countFields(fields: Fields): number {
+  return fields.reduce((acc, field) => {
+    let subCount = 1;
+    if (field.fields) {
+      subCount += countFields(field.fields);
+    }
+    if (field.multi_fields) {
+      subCount += countFields(field.multi_fields);
+    }
+    return subCount + acc;
+  }, 0);
+}
+
 export function prepareTemplate({
   packageInstallContext,
   dataStream,
@@ -509,7 +547,7 @@ export function prepareTemplate({
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
-  const fields = loadFieldsFromYaml(packageInstallContext, dataStream.path);
+  const fields = loadDatastreamsFieldsFromYaml(packageInstallContext, dataStream.path);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
@@ -528,9 +566,6 @@ export function prepareTemplate({
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
-    templateName,
-    packageName,
-    fields: validFields,
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
   });
@@ -544,6 +579,7 @@ export function prepareTemplate({
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
+    fieldCount: countFields(validFields),
   });
 
   const template = getTemplate({

@@ -14,12 +14,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/securitysolution-grouping/src';
+import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
 import { VulnerabilitiesGroupingAggregation } from './hooks/use_grouped_vulnerabilities';
-import { GROUPING_OPTIONS } from './constants';
 import { VULNERABILITIES_GROUPING_COUNTER } from './test_subjects';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT, VULNERABILITIES } from './translations';
 import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
@@ -30,6 +29,7 @@ import {
 } from '../../components/cloud_security_grouping';
 import { VulnerabilitySeverityMap } from '../../components/vulnerability_severity_map';
 import { CloudProviderIcon } from '../../components/cloud_provider_icon';
+import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
 
 export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggregation> = (
   selectedGroup,
@@ -52,7 +52,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
     : '';
 
   switch (selectedGroup) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
       ) : (
@@ -70,9 +70,9 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceId?.buckets?.[0].key}
+                    title={bucket.resourceId?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0].key}
+                    <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -80,7 +80,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
       ) : (
@@ -150,7 +150,7 @@ const VulnerabilitiesCountComponent = ({
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={VULNERABILITIES_GROUPING_COUNTER}
@@ -195,17 +195,13 @@ const SeverityStats = React.memo(SeverityStatsComponent);
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<VulnerabilitiesGroupingAggregation>
-): StatRenderer[] => {
-  const defaultBadges = [
-    {
-      title: VULNERABILITIES,
-      renderer: <VulnerabilitiesCount bucket={bucket} />,
-    },
-    {
-      title: '',
-      renderer: <SeverityStats bucket={bucket} />,
-    },
-  ];
-
-  return defaultBadges;
-};
+): GroupStatsItem[] => [
+  {
+    title: VULNERABILITIES,
+    component: <VulnerabilitiesCount bucket={bucket} />,
+  },
+  {
+    title: '',
+    component: <SeverityStats bucket={bucket} />,
+  },
+];

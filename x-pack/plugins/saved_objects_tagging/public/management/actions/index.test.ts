@@ -36,7 +36,7 @@ describe('getTableActions', () => {
     { assignableTypes = ['foo', 'bar'] }: { assignableTypes?: string[] } = {}
   ) =>
     getTableActions({
-      core,
+      startServices: core,
       tagClient,
       tagCache,
       assignmentService,

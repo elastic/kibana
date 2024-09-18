@@ -13,45 +13,34 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
-  ALERT_RULE_NAME,
   ALERT_WORKFLOW_STATUS,
-  EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type {
+  AssetCriticalityRecord,
+  RiskScoresPreviewResponse,
+} from '../../../../common/api/entity_analytics';
+import type {
+  AfterKeys,
+  EntityRiskScoreRecord,
+  RiskScoreWeights,
+} from '../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
-  type RiskWeights,
-  type RiskScore,
   getRiskLevel,
   RiskCategories,
+  RiskWeightTypes,
 } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import {
-  applyCriticalityToScore,
-  getCriticalityModifier,
-  normalize,
-} from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
-import {
-  buildCategoryCountDeclarations,
-  buildCategoryAssignment,
-  buildCategoryScoreDeclarations,
-  buildWeightingOfScoreByCategory,
-  getGlobalWeightForIdentifierType,
-} from './risk_weights';
+import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
+import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
-  CalculateScoresResponse,
   RiskScoreBucket,
 } from '../types';
-import {
-  RISK_SCORING_INPUTS_COUNT_MAX,
-  RISK_SCORING_SUM_MAX,
-  RISK_SCORING_SUM_VALUE,
-} from './constants';
+import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
+import { getPainlessScripts, type PainlessScripts } from './painless';
 
 const formatForResponse = ({
   bucket,
@@ -65,15 +54,16 @@ const formatForResponse = ({
   now: string;
   identifierField: string;
   includeNewFields: boolean;
-}): RiskScore => {
+}): EntityRiskScoreRecord => {
+  const riskDetails = bucket.top_inputs.risk_details;
+
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
-    score: bucket.risk_details.value.normalized_score,
+    score: riskDetails.value.normalized_score,
     modifier: criticalityModifier,
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
-  const categoryTwoScore =
-    normalizedScoreWithCriticality - bucket.risk_details.value.normalized_score;
+  const categoryTwoScore = normalizedScoreWithCriticality - riskDetails.value.normalized_score;
   const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
@@ -88,23 +78,19 @@ const formatForResponse = ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
     calculated_level: calculatedLevel,
-    calculated_score: bucket.risk_details.value.score,
+    calculated_score: riskDetails.value.score,
     calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: normalize({
-      number: bucket.risk_details.value.category_1_score,
-      max: RISK_SCORING_SUM_MAX,
-    }),
-    category_1_count: bucket.risk_details.value.category_1_count,
-    notes: bucket.risk_details.value.notes,
-    inputs: bucket.inputs.hits.hits.map((riskInput) => ({
-      id: riskInput._id,
-      index: riskInput._index,
-      description: `Alert from Rule: ${
-        riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'
-      }`,
+    category_1_score: riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+    category_1_count: riskDetails.value.category_1_count,
+    notes: riskDetails.value.notes,
+    inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
+      id: riskInput.id,
+      index: riskInput.index,
+      description: `Alert from Rule: ${riskInput.rule_name ?? 'RULE_NOT_FOUND'}`,
       category: RiskCategories.category_1,
-      risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
-      timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
+      risk_score: riskInput.score,
+      timestamp: riskInput.time,
+      contribution_score: riskInput.contribution,
     })),
     ...(includeNewFields ? newFields : {}),
   };
@@ -114,59 +100,23 @@ const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryCo
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
-const buildReduceScript = ({
-  globalIdentifierTypeWeight,
-}: {
-  globalIdentifierTypeWeight?: number;
-}): string => {
-  return `
-    Map results = new HashMap();
-    List inputs = [];
-    for (state in states) {
-      inputs.addAll(state.inputs)
-    }
-    Collections.sort(inputs, (a, b) -> b.get('weighted_score').compareTo(a.get('weighted_score')));
-
-    double num_inputs_to_score = Math.min(inputs.length, params.max_risk_inputs_per_identity);
-    results['notes'] = [];
-    if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
-      results['notes'].add('Number of risk inputs (' + inputs.length + ') exceeded the maximum allowed (' + params.max_risk_inputs_per_identity + ').');
-    }
-
-    ${buildCategoryScoreDeclarations()}
-    ${buildCategoryCountDeclarations()}
-
-    double total_score = 0;
-    double current_score = 0;
-    for (int i = 0; i < num_inputs_to_score; i++) {
-      current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
-
-      ${buildCategoryAssignment()}
-      total_score += current_score;
-    }
-
-    ${globalIdentifierTypeWeight != null ? `total_score *= ${globalIdentifierTypeWeight};` : ''}
-    double score_norm = 100 * total_score / params.risk_cap;
-    results['score'] = total_score;
-    results['normalized_score'] = score_norm;
-
-    return results;
-  `;
-};
-
 const buildIdentifierTypeAggregation = ({
   afterKeys,
   identifierType,
   pageSize,
   weights,
+  alertSampleSizePerShard,
+  scriptedMetricPainless,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
+  alertSampleSizePerShard: number;
+  scriptedMetricPainless: PainlessScripts;
 }): AggregationsAggregationContainer => {
-  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
-  const identifierField = getFieldForIdentifierAgg(identifierType);
+  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType(identifierType, weights);
+  const identifierField = getFieldForIdentifier(identifierType);
 
   return {
     composite: {
@@ -183,38 +133,25 @@ const buildIdentifierTypeAggregation = ({
       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
     },
     aggs: {
-      inputs: {
-        top_hits: {
-          size: 5,
-          sort: { [ALERT_RISK_SCORE]: 'desc' },
-          _source: false,
-          docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
+      top_inputs: {
+        sampler: {
+          shard_size: alertSampleSizePerShard,
         },
-      },
-      risk_details: {
-        scripted_metric: {
-          init_script: 'state.inputs = []',
-          map_script: `
-              Map fields = new HashMap();
-              String category = doc['${EVENT_KIND}'].value;
-              double score = doc['${ALERT_RISK_SCORE}'].value;
-              double weighted_score = 0.0;
 
-              fields.put('time', doc['@timestamp'].value);
-              fields.put('category', category);
-              fields.put('score', score);
-              ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
-              fields.put('weighted_score', weighted_score);
-
-              state.inputs.add(fields);
-            `,
-          combine_script: 'return state;',
-          params: {
-            max_risk_inputs_per_identity: RISK_SCORING_INPUTS_COUNT_MAX,
-            p: RISK_SCORING_SUM_VALUE,
-            risk_cap: RISK_SCORING_SUM_MAX,
+        aggs: {
+          risk_details: {
+            scripted_metric: {
+              init_script: scriptedMetricPainless.init,
+              map_script: scriptedMetricPainless.map,
+              combine_script: scriptedMetricPainless.combine,
+              params: {
+                p: RIEMANN_ZETA_S_VALUE,
+                risk_cap: RIEMANN_ZETA_VALUE,
+                global_identifier_type_weight: globalIdentifierTypeWeight || 1,
+              },
+              reduce_script: scriptedMetricPainless.reduce,
+            },
           },
-          reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
         },
       },
     },
@@ -233,7 +170,7 @@ const processScores = async ({
   identifierField: string;
   logger: Logger;
   now: string;
-}): Promise<RiskScore[]> => {
+}): Promise<EntityRiskScoreRecord[]> => {
   if (buckets.length === 0) {
     return [];
   }
@@ -268,6 +205,12 @@ const processScores = async ({
   });
 };
 
+export const getGlobalWeightForIdentifierType = (
+  identifierType: IdentifierType,
+  weights?: RiskScoreWeights
+): number | undefined =>
+  weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
+
 export const calculateRiskScores = async ({
   afterKeys: userAfterKeys,
   assetCriticalityService,
@@ -281,14 +224,15 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
+  alertSampleSizePerShard = 10_000,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
-} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
+} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
-
+    const scriptedMetricPainless = await getPainlessScripts();
     const filter = [
       filterFromRange(range),
       { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
@@ -298,15 +242,27 @@ export const calculateRiskScores = async ({
       filter.push(userFilter as QueryDslQueryContainer);
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
-
     const request = {
       size: 0,
       _source: false,
       index,
+      ignore_unavailable: true,
       runtime_mappings: runtimeMappings,
       query: {
-        bool: {
-          filter,
+        function_score: {
+          query: {
+            bool: {
+              filter,
+              should: [
+                {
+                  match_all: {}, // This forces ES to calculate score
+                },
+              ],
+            },
+          },
+          field_value_factor: {
+            field: ALERT_RISK_SCORE, // sort by risk score
+          },
         },
       },
       aggs: identifierTypes.reduce((aggs, _identifierType) => {
@@ -315,6 +271,8 @@ export const calculateRiskScores = async ({
           identifierType: _identifierType,
           pageSize,
           weights,
+          alertSampleSizePerShard,
+          scriptedMetricPainless,
         });
         return aggs;
       }, {} as Record<string, AggregationsAggregationContainer>),

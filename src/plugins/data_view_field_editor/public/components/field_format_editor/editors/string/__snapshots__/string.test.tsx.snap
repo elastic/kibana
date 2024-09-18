@@ -3,19 +3,13 @@
 exports[`StringFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Transform"
         id="indexPatternFieldEditor.string.transformLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiSelect
       data-test-subj="stringEditorTransform"

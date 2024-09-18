@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -11,6 +12,6 @@
  */
 export const DEV_TOOLS_FEATURE_ID = 'devTools';
 /**
- * UI Setting ID for enabling / disabling the docked console in Kibana
+ * UI Setting ID for enabling / disabling the persistent console in Kibana
  */
-export const ENABLE_DOCKED_CONSOLE_UI_SETTING_ID = 'devTools:enableDockedConsole';
+export const ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID = 'devTools:enablePersistentConsole';

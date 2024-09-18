@@ -10,27 +10,22 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { DeepReadonly } from '../../../../../../../common/types/common';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
-import { ActionDispatchers, ACTION } from './actions';
+import type { ActionDispatchers } from './actions';
+import { ACTION } from './actions';
 import { reducer } from './reducer';
-import {
-  getInitialState,
-  getJobConfigFromFormState,
-  FormMessage,
-  State,
-  SourceIndexMap,
-  getFormStateFromJobConfig,
-} from './state';
+import type { FormMessage, State, SourceIndexMap } from './state';
+import { getInitialState, getJobConfigFromFormState, getFormStateFromJobConfig } from './state';
 
-import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+import type { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 
 export interface AnalyticsCreationStep {
   number: ANALYTICS_STEPS;
@@ -54,6 +49,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       data: { dataViews },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
@@ -91,14 +87,21 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const analyticsJobConfig = (
       isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
     ) as DataFrameAnalyticsConfig;
+    const errorMessage = i18n.translate(
+      'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+      {
+        defaultMessage: 'An error occurred creating the data frame analytics job:',
+      }
+    );
 
     try {
-      await ml.dataFrameAnalytics.createDataFrameAnalytics(
+      const creationResp = await mlApi.dataFrameAnalytics.createDataFrameAnalytics(
         jobId,
         analyticsJobConfig,
         createDataView,
         form.timeFieldName
       );
+
       addRequestMessage({
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
@@ -108,21 +111,29 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsJobCreated(true);
-      refresh();
-      return true;
+
+      if (
+        creationResp.dataFrameAnalyticsJobsCreated.length &&
+        creationResp.dataFrameAnalyticsJobsErrors.length === 0
+      ) {
+        setIsJobCreated(true);
+        refresh();
+        return true;
+      } else if (creationResp.dataFrameAnalyticsJobsErrors.length) {
+        addRequestMessage({
+          error: extractErrorProperties(creationResp.dataFrameAnalyticsJobsErrors[0].error).message,
+          message: errorMessage,
+        });
+        return false;
+      }
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
-          {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
-          }
-        ),
+        message: errorMessage,
       });
       return false;
     }
+    return false;
   };
 
   const prepareFormValidation = async () => {
@@ -157,7 +168,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const startAnalyticsJob = async () => {
     try {
-      const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
+      const response = await mlApi.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
         throw new Error(response);
       }

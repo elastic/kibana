@@ -80,6 +80,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       app_search: {
         account: {
           id: 'some-id-string',
+          kibana_uis_enabled: true,
           onboarding_complete: true,
         },
         role: {
@@ -99,7 +100,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
-          kibanaUIsEnabled: false,
+          kibana_uis_enabled: false,
         },
         account: {
           id: 'some-id-string',
@@ -174,6 +175,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       appSearch: {
         accountId: undefined,
+        kibanaUIsEnabled: false,
         onboardingComplete: false,
         role: {
           id: undefined,
@@ -211,7 +213,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       hasDefaultIngestPipeline: false,
       hasNativeConnectors: false,
       hasWebCrawler: false,
-      showAIPlayground: false,
       host: '',
     };
 
@@ -225,7 +226,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasDefaultIngestPipeline: false,
         hasNativeConnectors: false,
         hasWebCrawler: false,
-        showAIPlayground: false,
       },
       kibanaVersion: '1.0.0',
     });
@@ -261,7 +261,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
-    callEnterpriseSearchConfigAPI(mockDependencies);
+    void callEnterpriseSearchConfigAPI(mockDependencies);
     jest.advanceTimersByTime(150);
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.'

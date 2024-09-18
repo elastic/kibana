@@ -5,124 +5,127 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  binaryToString,
-  getSimpleRule,
-  getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  updateUsername,
-} from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless export_rules', () => {
     describe('exporting rules', () => {
-      beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const ruleToExport = getCustomQueryRuleParams();
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
       });
 
       it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        const ruleToExport = getCustomQueryRuleParams();
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(bodyToTest).to.eql(expectedRule);
+        expect(exportedRule).toMatchObject(ruleToExport);
       });
 
-      it('should export a exported count with a single rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+      it('should export defaultable fields when values are set', async () => {
+        const defaultableFields: BaseDefaultableFields = {
+          max_signals: 200,
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
+          setup: '# some setup markdown',
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
+        };
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        const ruleToExport = getCustomQueryRuleParams(defaultableFields);
+
+        const expectedRule = {
+          ...ruleToExport,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(bodySplitAndParsed).to.eql({
+        expect(exportedRule).toMatchObject(expectedRule);
+      });
+
+      it('should have export summary reflecting a number of rules', async () => {
+        const ruleToExport = getCustomQueryRuleParams();
+
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportSummary = JSON.parse(body.toString().split(/\n/)[1]);
+
+        expect(exportSummary).toMatchObject({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
           exported_count: 1,
           exported_rules_count: 1,
-          missing_exception_list_item_count: 0,
-          missing_exception_list_items: [],
-          missing_exception_lists: [],
-          missing_exception_lists_count: 0,
-          missing_rules: [],
-          missing_rules_count: 0,
-          excluded_action_connection_count: 0,
-          excluded_action_connections: [],
-          exported_action_connector_count: 0,
-          missing_action_connection_count: 0,
-          missing_action_connections: [],
         });
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
-        await createRule(supertest, log, getSimpleRule('rule-2'));
+        const ruleToExport1 = getCustomQueryRuleParams({ rule_id: 'rule-1' });
+        const ruleToExport2 = getCustomQueryRuleParams({ rule_id: 'rule-2' });
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        await securitySolutionApi.createRule({ body: ruleToExport1 });
+        await securitySolutionApi.createRule({ body: ruleToExport2 });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
-        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-        const secondRule = removeServerGeneratedProperties(secondRuleParsed);
-        const expectedRule = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
-        const expectedRule2 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
+        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[0]);
+        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[1]);
 
-        expect([firstRule, secondRule]).to.eql([expectedRule, expectedRule2]);
+        expect([exportedRule1, exportedRule2]).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(ruleToExport1),
+            expect.objectContaining(ruleToExport2),
+          ])
+        );
       });
     });
   });

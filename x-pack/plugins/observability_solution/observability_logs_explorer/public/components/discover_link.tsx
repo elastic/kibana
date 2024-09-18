@@ -8,7 +8,7 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
+import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import {
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
@@ -30,7 +30,6 @@ export const ConnectedDiscoverLink = React.memo(() => {
   } = useKibanaContextForPlugin();
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
-
   if (pageState.matches({ initialized: 'validLogsExplorerState' })) {
     return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
   } else {
@@ -47,14 +46,17 @@ export const DiscoverLinkForValidState = React.memo(
   ({
     discover,
     pageState: {
-      context: { logsExplorerState },
+      context: { logsExplorerState, allSelection },
     },
   }: {
     discover: DiscoverStart;
     pageState: InitializedPageState;
   }) => {
     const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
-      const index = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
+      const index = hydrateDataSourceSelection(
+        logsExplorerState.dataSourceSelection,
+        allSelection
+      ).toDataviewSpec();
       return {
         breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(logsExplorerState),
@@ -68,7 +70,7 @@ export const DiscoverLinkForValidState = React.memo(
         timeRange: logsExplorerState.time,
         dataViewSpec: index,
       };
-    }, [logsExplorerState]);
+    }, [allSelection, logsExplorerState]);
 
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }

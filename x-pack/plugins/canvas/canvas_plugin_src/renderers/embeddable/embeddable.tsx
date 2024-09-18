@@ -5,25 +5,33 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
-  IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-  isErrorEmbeddable,
   EmbeddablePanel,
+  IEmbeddable,
+  isErrorEmbeddable,
+  ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
-import { StartDeps } from '../../plugin';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React, { FC } from 'react';
+import ReactDOM from 'react-dom';
+import { useSearchApi } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
+import { pluginServices } from '../../../public/services';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
+import {
+  CanvasContainerApi,
+  EmbeddableInput,
+  RendererFactory,
+  RendererHandlers,
+} from '../../../types';
+import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { RendererFactory, EmbeddableInput } from '../../../types';
-import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import { useGetAppContext } from './use_get_app_context';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -32,42 +40,83 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
-const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
-  const I18nContext = core.i18n.Context;
+const renderReactEmbeddable = ({
+  type,
+  uuid,
+  input,
+  container,
+  handlers,
+  core,
+}: {
+  type: string;
+  uuid: string;
+  input: EmbeddableInput;
+  container: CanvasContainerApi;
+  handlers: RendererHandlers;
+  core: CoreStart;
+}) => {
+  // wrap in functional component to allow usage of hooks
+  const RendererWrapper: FC<{}> = () => {
+    const getAppContext = useGetAppContext(core);
+    const searchApi = useSearchApi({ filters: input.filters });
+
+    return (
+      <ReactEmbeddableRenderer
+        type={type}
+        maybeId={uuid}
+        getParentApi={(): CanvasContainerApi => ({
+          ...container,
+          getAppContext,
+          getSerializedStateForChild: () => ({
+            rawState: omit(input, ['disableTriggers', 'filters']),
+          }),
+          ...searchApi,
+        })}
+        key={`${type}_${uuid}`}
+        onAnyStateChange={(newState) => {
+          const newExpression = embeddableInputToExpression(
+            newState.rawState as unknown as EmbeddableInput,
+            type,
+            undefined,
+            true
+          );
+          if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+        }}
+      />
+    );
+  };
+
+  return (
+    <KibanaRenderContextProvider {...core}>
+      <div
+        className={CANVAS_EMBEDDABLE_CLASSNAME}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
+      >
+        <RendererWrapper />
+      </div>
+    </KibanaRenderContextProvider>
+  );
+};
+
+const renderEmbeddableFactory = (core: CoreStart, _plugins: StartDeps) => {
   const EmbeddableRenderer: FC<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
-    const currentAppId = useObservable(core.application.currentAppId$, undefined);
+    const getAppContext = useGetAppContext(core);
 
-    if (!currentAppId) {
-      return null;
-    }
-
-    const canvasAppContext: EmbeddableAppContext = {
-      getCurrentPath: () => {
-        const urlToApp = core.application.getUrlForApp(currentAppId);
-        const inAppPath = window.location.pathname.replace(urlToApp, '');
-
-        return inAppPath + window.location.search + window.location.hash;
-      },
-      currentAppId: CANVAS_APP,
-    };
-
-    embeddable.getAppContext = () => canvasAppContext;
+    embeddable.getAppContext = getAppContext;
 
     return <EmbeddablePanel embeddable={embeddable} />;
   };
 
   return (embeddableObject: IEmbeddable) => {
     return (
-      <div
-        className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: '100%', height: '100%', cursor: 'auto' }}
-      >
-        <I18nContext>
-          <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
-            <EmbeddableRenderer embeddable={embeddableObject} />
-          </KibanaThemeProvider>
-        </I18nContext>
-      </div>
+      <KibanaRenderContextProvider {...core}>
+        <div
+          className={CANVAS_EMBEDDABLE_CLASSNAME}
+          style={{ width: '100%', height: '100%', cursor: 'auto' }}
+        >
+          <EmbeddableRenderer embeddable={embeddableObject} />
+        </div>
+      </KibanaRenderContextProvider>
     );
   };
 };
@@ -75,20 +124,45 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
 export const embeddableRendererFactory = (
   core: CoreStart,
   plugins: StartDeps
-): RendererFactory<EmbeddableExpression<EmbeddableInput>> => {
+): RendererFactory<EmbeddableExpression<EmbeddableInput> & { canvasApi: CanvasContainerApi }> => {
   const renderEmbeddable = renderEmbeddableFactory(core, plugins);
   return () => ({
     name: 'embeddable',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: async (domNode, { input, embeddableType }, handlers) => {
+    render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+      const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (!embeddablesRegistry[uniqueId]) {
+      if (embeddables.reactEmbeddableRegistryHasKey(embeddableType)) {
+        /**
+         * Prioritize React embeddables
+         */
+        ReactDOM.render(
+          renderReactEmbeddable({
+            input,
+            handlers,
+            uuid: uniqueId,
+            type: embeddableType,
+            container: canvasApi,
+            core,
+          }),
+          domNode,
+          () => handlers.done()
+        );
+
+        handlers.onDestroy(() => {
+          handlers.onEmbeddableDestroyed();
+          return ReactDOM.unmountComponentAtNode(domNode);
+        });
+      } else if (!embeddablesRegistry[uniqueId]) {
+        /**
+         * Handle legacy embeddables - embeddable does not exist in registry
+         */
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
@@ -155,6 +229,9 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
+        /**
+         * Handle legacy embeddables - embeddable already exists in registry
+         */
         const embeddable = embeddablesRegistry[uniqueId];
 
         // updating embeddable input with changes made to expression or filters

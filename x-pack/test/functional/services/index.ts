@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
-import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
+import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
@@ -69,7 +69,7 @@ import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
-
+import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -131,4 +131,7 @@ export const services = {
   aiops: AiopsProvider,
   sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
+  slo: kibanaXPackApiIntegrationServices.slo,
+  dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
+  sloUi: SloUiServiceProvider,
 };

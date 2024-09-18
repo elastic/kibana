@@ -13,6 +13,7 @@ import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { SeriesType } from '@kbn/visualizations-plugin/common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -244,6 +245,7 @@ export const addLayer = createAction<{
   layerType: LayerType;
   extraArg: unknown;
   ignoreInitialValues?: boolean;
+  seriesType?: SeriesType;
 }>('lens/addLayer');
 export const onDropToDimension = createAction<{
   source: DragDropIdentifier;
@@ -618,6 +620,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const {
           datasourceState: syncedDatasourceState,
           visualizationState: syncedVisualizationState,
+          frame,
         } = syncLinkedDimensions(
           currentState,
           visualizationMap,
@@ -625,7 +628,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           payload.datasourceId
         );
 
-        state.visualization.state = syncedVisualizationState;
+        const visualization = visualizationMap[state.visualization.activeId!];
+
+        state.visualization.state =
+          visualization.onDatasourceUpdate?.(syncedVisualizationState, frame) ??
+          syncedVisualizationState;
         state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
       })
       .addCase(updateVisualizationState, (state, { payload }) => {
@@ -877,7 +884,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeVisualization.removeLayer &&
           state.visualization.state
         ) {
-          const updater = layerIds.reduce(
+          const updater = layerIds.reduce<unknown>(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state
@@ -908,7 +915,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       .addCase(
         addLayer,
-        (state, { payload: { layerId, layerType, extraArg, ignoreInitialValues } }) => {
+        (state, { payload: { layerId, layerType, extraArg, seriesType, ignoreInitialValues } }) => {
           if (!state.activeDatasourceId || !state.visualization.activeId) {
             return state;
           }
@@ -924,7 +931,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             layerId,
             layerType,
             currentDataViewsId,
-            extraArg
+            extraArg,
+            seriesType
           );
 
           const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
@@ -1224,14 +1232,14 @@ function syncLinkedDimensions(
   const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
 
-  const getDimensionGroups = (layerId: string) =>
-    activeVisualization.getConfiguration({
-      state: visualizationState,
-      layerId,
-      frame,
-    }).groups;
-
   if (linkedDimensions) {
+    const getDimensionGroups = (layerId: string) =>
+      activeVisualization.getConfiguration({
+        state: visualizationState,
+        layerId,
+        frame,
+      }).groups;
+
     const idAssuredLinks = linkedDimensions.map((link) => ({
       ...link,
       to: { ...link.to, columnId: link.to.columnId ?? generateId() },
@@ -1273,5 +1281,5 @@ function syncLinkedDimensions(
     });
   }
 
-  return { datasourceState, visualizationState };
+  return { datasourceState, visualizationState, frame };
 }

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { PluginServiceProvider, PluginServiceProviders } from './provider';
 import { PluginServiceProvidersMediator } from './providers_mediator';
 
@@ -18,7 +19,10 @@ import { PluginServiceProvidersMediator } from './providers_mediator';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export class PluginServiceRegistry<Services, StartParameters = {}> {
+export class PluginServiceRegistry<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> {
   private providers: PluginServiceProviders<Services, StartParameters>;
   private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;
   private _isStarted = false;
@@ -55,7 +59,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
 
     // Collect and combine Context.Provider elements from each Service Provider into a single
     // Functional Component.
-    const provider: React.FC = ({ children }) => (
+    const provider: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <>
         {values.reduceRight((acc, serviceProvider) => {
           return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;

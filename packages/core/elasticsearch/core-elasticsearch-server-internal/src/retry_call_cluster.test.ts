@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
 
@@ -69,11 +69,9 @@ describe('retryCallCluster', () => {
 
 describe('migrationRetryCallCluster', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();
-    logger = loggingSystemMock.createLogger();
   });
 
   const mockClientPingWithErrorBeforeSuccess = (error: any) => {
@@ -88,21 +86,21 @@ describe('migrationRetryCallCluster', () => {
       new errors.NoLivingConnectionsError('no living connections', {} as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
   it('retries ES API calls that rejects with `ConnectionError`', async () => {
     mockClientPingWithErrorBeforeSuccess(new errors.ConnectionError('connection error', {} as any));
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
   it('retries ES API calls that rejects with `TimeoutError`', async () => {
     mockClientPingWithErrorBeforeSuccess(new errors.TimeoutError('timeout error', {} as any));
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -113,7 +111,7 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -124,7 +122,7 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -135,7 +133,7 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -146,7 +144,7 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -157,7 +155,7 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
   });
 
@@ -173,63 +171,8 @@ describe('migrationRetryCallCluster', () => {
       } as any)
     );
 
-    const result = await migrationRetryCallCluster(() => client.ping(), logger, 1);
+    const result = await migrationRetryCallCluster(() => client.ping(), 1);
     expect(result).toEqual(dummyBody);
-  });
-
-  it('logs only once for each unique error message', async () => {
-    client.ping
-      .mockImplementationOnce(() =>
-        createErrorReturn(
-          new errors.ResponseError({
-            statusCode: 503,
-          } as any)
-        )
-      )
-      .mockImplementationOnce(() =>
-        createErrorReturn(new errors.ConnectionError('connection error', {} as any))
-      )
-      .mockImplementationOnce(() =>
-        createErrorReturn(
-          new errors.ResponseError({
-            statusCode: 503,
-          } as any)
-        )
-      )
-      .mockImplementationOnce(() =>
-        createErrorReturn(new errors.ConnectionError('connection error', {} as any))
-      )
-      .mockImplementationOnce(() =>
-        createErrorReturn(
-          new errors.ResponseError({
-            statusCode: 500,
-            body: {
-              error: {
-                type: 'snapshot_in_progress_exception',
-              },
-            },
-          } as any)
-        )
-      )
-      .mockImplementationOnce(() =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
-      );
-
-    await migrationRetryCallCluster(() => client.ping(), logger, 1);
-
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Unable to connect to Elasticsearch. Error: Response Error",
-        ],
-        Array [
-          "Unable to connect to Elasticsearch. Error: connection error",
-        ],
-        Array [
-          "Unable to connect to Elasticsearch. Error: snapshot_in_progress_exception",
-        ],
-      ]
-    `);
   });
 
   it('rejects when ES API calls reject with other errors', async () => {
@@ -250,9 +193,9 @@ describe('migrationRetryCallCluster', () => {
         elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
       );
 
-    await expect(
-      migrationRetryCallCluster(() => client.ping(), logger, 1)
-    ).rejects.toMatchInlineSnapshot(`[ResponseError: I'm a teapot]`);
+    await expect(migrationRetryCallCluster(() => client.ping(), 1)).rejects.toMatchInlineSnapshot(
+      `[ResponseError: I'm a teapot]`
+    );
   });
 
   it('stops retrying when ES API calls reject with other errors', async () => {
@@ -268,8 +211,8 @@ describe('migrationRetryCallCluster', () => {
         elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
       );
 
-    await expect(
-      migrationRetryCallCluster(() => client.ping(), logger, 1)
-    ).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
+    await expect(migrationRetryCallCluster(() => client.ping(), 1)).rejects.toMatchInlineSnapshot(
+      `[Error: unknown error]`
+    );
   });
 });

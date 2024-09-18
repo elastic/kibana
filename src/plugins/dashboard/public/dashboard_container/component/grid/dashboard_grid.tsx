@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import 'react-resizable/css/styles.css';
@@ -20,7 +21,6 @@ import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
-import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
@@ -47,10 +47,6 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       setTimeout(() => setDelayedIsPanelMaximized(false), 0);
     }
   }, [expandedPanelId]);
-
-  const { onPanelStatusChange } = useDashboardPerformanceTracker({
-    panelCount: Object.keys(panels).length,
-  });
 
   const panelsInOrder: string[] = useMemo(() => {
     return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
@@ -80,11 +76,10 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
           type={type}
           expandedPanelId={expandedPanelId}
           focusedPanelId={focusedPanelId}
-          onPanelStatusChange={onPanelStatusChange}
         />
       );
     });
-  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder, focusedPanelId]);
+  }, [expandedPanelId, panels, panelsInOrder, focusedPanelId]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {

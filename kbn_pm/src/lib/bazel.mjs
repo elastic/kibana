@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -149,13 +150,13 @@ export async function installYarnDeps(log, opts = undefined) {
   await runBazel(log, ['run', '@nodejs//:yarn'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
-    env: {
-      RE2_DOWNLOAD_MIRROR:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
-    },
   });
 
   log.success('yarn deps installed');
+
+  await run('yarn', ['playwright', 'install']);
+
+  log.success('Playwright browsers installed');
 }
 
 /**

@@ -5,28 +5,35 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { InvokeCreator } from 'xstate';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
 import {
+  DataViewSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
   SingleDatasetSelection,
   UnresolvedDatasetSelection,
-} from '../../../../../common/dataset_selection';
+} from '../../../../../common/data_source_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
-import { redirectToDiscover } from './discover_service';
 
 interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
-  discover: DiscoverStart;
+  dataViews: DataViewsPublicPluginStart;
+  events?: LogsExplorerCustomizations['events'];
+  uiSettings: IUiSettingsClient;
 }
 
 export const initializeSelection =
   ({
     datasetsClient,
-    discover,
+    dataViews,
+    events,
+    uiSettings,
   }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent
@@ -35,35 +42,55 @@ export const initializeSelection =
   async (send) => {
     /**
      * First validation.
-     * If the selection is a data view which is not of logs type, redirect to Discover.
+     * The selection is a data view.
      */
-    if (
-      isDataViewSelection(context.datasetSelection) &&
-      context.datasetSelection.selection.dataView.isUnknownDataType()
-    ) {
-      return redirectToDiscover({ context, datasetSelection: context.datasetSelection, discover });
+    if (isDataViewSelection(context.dataSourceSelection)) {
+      let dataViewSelection: DataViewSelection | null = context.dataSourceSelection;
+      /**
+       * If the selection is unresolved, perform a look up to retrieve it.
+       */
+      if (dataViewSelection.selection.dataView.isUnresolvedDataType()) {
+        try {
+          dataViewSelection = await lookupUnresolvedDataViewSelection(dataViewSelection, {
+            dataViews,
+          });
+
+          if (dataViewSelection === null) {
+            return send('DATAVIEW_SELECTION_RESTORE_FAILURE');
+          }
+        } catch {
+          return send('DATAVIEW_SELECTION_RESTORE_FAILURE');
+        }
+      }
+
+      /**
+       * If the selection is a data view which is not of logs type, invoke the customization event for unknown data views.
+       */
+      if (
+        !dataViewSelection.selection.dataView.testAgainstAllowedList(
+          uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+        ) &&
+        events?.onUknownDataViewSelection
+      ) {
+        return events.onUknownDataViewSelection(context);
+      }
+
+      return send({ type: 'INITIALIZE_DATA_VIEW', data: dataViewSelection });
     }
 
     /**
      * Second validation.
-     * If the selection is a data view, initialize it.
+     * If the selection is an unresolved dataset, perform a look up against integrations.
      */
-    if (isDataViewSelection(context.datasetSelection)) {
-      return send('INITIALIZE_DATA_VIEW');
-    }
-
-    /**
-     * Third validation.
-     * If the selection is an unresolved dataset, perform a look up against integrations..
-     */
-    if (isUnresolvedDatasetSelection(context.datasetSelection)) {
+    if (isUnresolvedDatasetSelection(context.dataSourceSelection)) {
       try {
-        const selection = await lookupUnresolvedDatasetSelection(context.datasetSelection, {
-          datasetsClient,
-        });
+        const datasetSelection = await lookupUnresolvedDatasetSelection(
+          context.dataSourceSelection,
+          { datasetsClient }
+        );
 
-        if (selection !== null) {
-          return send({ type: 'INITIALIZE_DATASET', data: selection });
+        if (datasetSelection !== null) {
+          return send({ type: 'INITIALIZE_DATASET', data: datasetSelection });
         }
       } catch {
         return send('DATASET_SELECTION_RESTORE_FAILURE');
@@ -77,10 +104,10 @@ export const initializeSelection =
   };
 
 const lookupUnresolvedDatasetSelection = async (
-  datasetSelection: UnresolvedDatasetSelection,
+  unresolvedDatasetSelection: UnresolvedDatasetSelection,
   { datasetsClient }: Pick<LogsExplorerControllerSelectionServiceDeps, 'datasetsClient'>
 ) => {
-  const nameQuery = datasetSelection.selection.dataset.parentIntegration?.name;
+  const nameQuery = unresolvedDatasetSelection.selection.dataset.parentIntegration?.name;
 
   if (nameQuery) {
     return null;
@@ -104,4 +131,25 @@ const lookupUnresolvedDatasetSelection = async (
 
   const dataset = Dataset.create(targetDataset, installedIntegration);
   return SingleDatasetSelection.create(dataset);
+};
+
+const lookupUnresolvedDataViewSelection = async (
+  unresolvedDataViewSelection: DataViewSelection,
+  { dataViews }: Pick<LogsExplorerControllerSelectionServiceDeps, 'dataViews'>
+) => {
+  const resolvedDataView = await dataViews.get(unresolvedDataViewSelection.toDataviewSpec().id);
+
+  if (!resolvedDataView) {
+    return null;
+  }
+
+  return DataViewSelection.fromSelection({
+    dataView: {
+      id: resolvedDataView.id ?? '',
+      kibanaSpaces: resolvedDataView.namespaces,
+      name: resolvedDataView.name,
+      title: resolvedDataView.getIndexPattern(),
+      type: resolvedDataView.type,
+    },
+  });
 };

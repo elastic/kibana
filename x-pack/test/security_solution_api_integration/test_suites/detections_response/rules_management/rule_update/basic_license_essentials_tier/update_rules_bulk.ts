@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
-import {
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
+  getCustomQueryRuleParams,
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -30,10 +27,10 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless update_rules_bulk', () => {
     describe('update rules bulk', () => {
@@ -53,32 +50,62 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
 
         // update a simple rule's name
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
+      });
+
+      it('should update a rule with defaultable fields', async () => {
+        const ruleUpdateProperties = getCustomQueryRuleParams({
+          rule_id: 'rule-1',
+          max_signals: 200,
+          setup: '# some setup markdown',
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
+        });
+
+        const expectedRule = {
+          ...ruleUpdateProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: updatedRulesBulkResponse } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [ruleUpdateProperties],
+          })
+          .expect(200);
+
+        expect(updatedRulesBulkResponse[0]).toMatchObject(expectedRule);
+
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(updatedRule).toMatchObject(expectedRule);
       });
 
       it('should update two rule properties of name using the two rules rule_id', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // create a second simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleRuleUpdate('rule-2'))
-          .expect(200);
+        await securitySolutionApi.createRule({ body: getSimpleRule('rule-2') }).expect(200);
 
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
@@ -87,27 +114,25 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
+        const username = await utils.getUsername();
         const outputRule1 = getSimpleRuleOutput();
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
-        const expectedRule = updateUsername(outputRule1, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule1, username);
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
-        const expectedRule2 = updateUsername(outputRule2, ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(outputRule2, username);
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
-        expect(bodyToCompare1).to.eql(expectedRule);
-        expect(bodyToCompare2).to.eql(expectedRule2);
+        expect(bodyToCompare1).toEqual(expectedRule);
+        expect(bodyToCompare2).toEqual(expectedRule2);
       });
 
       it('should update a single rule property of name using an id', async () => {
@@ -119,20 +144,17 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should update two rule properties of name using the two rules id', async () => {
@@ -150,27 +172,25 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
         delete updatedRule2.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
+        const username = await utils.getUsername();
         const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
-        const expectedRule = updateUsername(outputRule1, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule1, username);
 
         const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
-        const expectedRule2 = updateUsername(outputRule2, ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(outputRule2, username);
 
         const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
-        expect(bodyToCompare1).to.eql(expectedRule);
-        expect(bodyToCompare2).to.eql(expectedRule2);
+        expect(bodyToCompare1).toEqual(expectedRule);
+        expect(bodyToCompare2).toEqual(expectedRule2);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
@@ -182,20 +202,17 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should change the revision of a rule when it updates enabled and another property', async () => {
@@ -206,21 +223,18 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.severity = 'low';
         updatedRule1.enabled = false;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
@@ -231,31 +245,23 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_title = 'some title';
         ruleUpdate.timeline_id = 'some id';
 
-        await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
-          .expect(200);
+        await securitySolutionApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         // update a simple rule's name
         const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
@@ -263,14 +269,11 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
-        expect(body).to.eql([
+        expect(body).toEqual([
           {
             id: '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5',
             error: {
@@ -286,14 +289,11 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.rule_id = 'fake_id';
         delete ruleUpdate.id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
-        expect(body).to.eql([
+        expect(body).toEqual([
           {
             rule_id: 'fake_id',
             error: { status_code: 404, message: 'rule_id: "fake_id" not found' },
@@ -313,20 +313,17 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.id;
 
         // update one rule name and give a fake id for the second
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate, ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate, ruleUpdate2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect([bodyToCompare, body[1]]).to.eql([
+        expect([bodyToCompare, body[1]]).toEqual([
           expectedRule,
           {
             error: {
@@ -352,20 +349,17 @@ export default ({ getService }: FtrProviderContext) => {
         rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([rule1, rule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [rule1, rule2] })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect([bodyToCompare, body[1]]).to.eql([
+        expect([bodyToCompare, body[1]]).toEqual([
           expectedRule,
           {
             error: {

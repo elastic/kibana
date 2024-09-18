@@ -7,8 +7,11 @@
 
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
+import { getSpaceUrl } from '../space';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
 export const API_AUTH = Object.freeze({
@@ -21,6 +24,8 @@ export const API_HEADERS = Object.freeze({
   'x-elastic-internal-origin': 'security-solution',
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
+
+export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const rootRequest = <T = unknown>({
   headers: optionHeaders,
@@ -35,170 +40,67 @@ export const rootRequest = <T = unknown>({
     ...restOptions,
   });
 
+// a helper function to wait for the root request to be successful
+// defaults to 5 second intervals for 3 attempts
+// can be helpful when waiting for a resource to be created before proceeding
+export const waitForRootRequest = <T = unknown>(
+  fn: Cypress.Chainable<Cypress.Response<T>>,
+  interval = 5000,
+  timeout = 15000
+) =>
+  cy.waitUntil(() => fn.then((response) => cy.wrap(response.status === 200)), {
+    interval,
+    timeout,
+  });
+
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
-  rootRequest({
-    method: 'POST',
-    url: '/api/detection_engine/rules/_bulk_action',
-    body: {
-      query: '',
-      action: 'delete',
-    },
-    failOnStatusCode: false,
-    timeout: 300000,
-  });
+  cy.currentSpace().then((spaceId) => {
+    const url = spaceId
+      ? `/s/${spaceId}${DETECTION_ENGINE_RULES_BULK_ACTION}`
+      : DETECTION_ENGINE_RULES_BULK_ACTION;
 
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'alert',
-              },
-            },
-          ],
-        },
+    rootRequest({
+      method: 'POST',
+      url,
+      body: {
+        query: '',
+        action: 'delete',
       },
-    },
-  });
+      failOnStatusCode: false,
+      timeout: 300000,
+    });
 
-  deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
-};
-
-export const deleteExceptionLists = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list',
-              },
-            },
-          ],
-        },
-      },
-    },
+    deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
   });
 };
 
-export const deleteEndpointExceptionList = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'exception-list-agnostic',
-              },
-            },
-          ],
-        },
-      },
-    },
+export const getConnectors = () =>
+  rootRequest<AllConnectorsResponse[]>({
+    method: 'GET',
+    url: 'api/actions/connectors',
   });
-};
-
-export const deleteTimelines = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'siem-ui-timeline',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
-export const deleteAllCasesItems = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      type: 'cases',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-configure',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-comments',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-user-action',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'cases-connector-mappings',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
 
 export const deleteConnectors = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'action',
-              },
-            },
-          ],
-        },
-      },
-    },
+  cy.currentSpace().then((spaceId) => {
+    getConnectors().then(($response) => {
+      if ($response.body.length > 0) {
+        const ids = $response.body.map((connector) => {
+          return connector.id;
+        });
+        ids.forEach((id) => {
+          if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+            rootRequest({
+              method: 'DELETE',
+              url: spaceId
+                ? getSpaceUrl(spaceId, `api/actions/connector/${id}`)
+                : `api/actions/connector/${id}`,
+            });
+          }
+        });
+      }
+    });
   });
 };
 

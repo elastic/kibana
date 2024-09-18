@@ -20,10 +20,10 @@ export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   return {
@@ -51,6 +51,8 @@ export default async function ({ readConfigFile }) {
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
         '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
+        // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
+        '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       ],
@@ -146,6 +148,9 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
+      spacesManagement: {
+        pathname: '/app/management/kibana/spaces',
+      },
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
       },
@@ -181,6 +186,15 @@ export default async function ({ readConfigFile }) {
       },
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
+      obsAIAssistant: {
+        pathname: '/app/observabilityAIAssistant',
+      },
+      aiAssistantManagementSelection: {
+        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+      },
+      obsAIAssistantManagement: {
+        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
       },
     },
 

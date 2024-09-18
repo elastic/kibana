@@ -7,6 +7,7 @@
 
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
@@ -26,10 +27,10 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
-  const EuiFlexGroupMock = jest.fn(({ children }) => {
+  const EuiFlexGroupMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   });
-  const EuiFlexItemMock = jest.fn(({ children }) => {
+  const EuiFlexItemMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   });
   return {

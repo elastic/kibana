@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
     before(() => {
@@ -66,11 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      return synthtraceEsClient.index(events);
+      return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
     describe('create rule without kql query', () => {

@@ -392,8 +392,8 @@ describe('RuleToImport', () => {
   });
 
   test('language does not validate with something made up', () => {
+    // @ts-expect-error assign unsupported value
     const payload = getImportRulesSchemaMock({
-      // @ts-expect-error assign unsupported value
       language: 'something-made-up',
     });
 
@@ -776,20 +776,6 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload = getImportRulesSchemaMock({
-      actions: [
-        // @ts-expect-error assign unsupported value
-        { id: 'id', action_type_id: 'action_type_id', params: {} },
-      ],
-    });
-
-    const result = RuleToImport.safeParse(payload);
-    expectParseError(result);
-
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.group: Required"`);
-  });
-
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload = getImportRulesSchemaMock({
       actions: [
@@ -1067,6 +1053,43 @@ describe('RuleToImport', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toContain('data_view_id: Expected string');
+    });
+  });
+
+  describe('rule_source', () => {
+    test('it should validate a rule with "rule_source" set to internal', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: {
+          type: 'internal',
+        },
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('it should validate a rule with "rule_source" set to external', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('it should validate a rule with "rule_source" set to undefined', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: undefined,
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 });

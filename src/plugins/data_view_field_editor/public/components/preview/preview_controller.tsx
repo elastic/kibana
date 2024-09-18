@@ -1,14 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewLazy,
+  DataViewField,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import { NotificationsStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
@@ -17,18 +26,32 @@ import debounce from 'lodash/debounce';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
-import type { FieldFormatsStart } from '../../shared_imports';
+import type { FieldFormatsStart, RuntimeType } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
+import { Field } from '../../types';
+import { pluginName } from '../../constants';
+import { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
   return renderToString(<>{content}</>);
 };
 
+interface PreviewControllerArgs {
+  dataView: DataViewLazy;
+  dataViewToUpdate: DataView | DataViewLazy;
+  onSave: (field: DataViewField[]) => void;
+  fieldToEdit?: Field;
+  fieldTypeToProcess: InternalFieldType;
+  deps: PreviewControllerDependencies;
+}
+
 interface PreviewControllerDependencies {
-  dataView: DataView;
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  usageCollection: UsageCollectionStart;
+  notifications: NotificationsStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 const previewStateDefault: PreviewState = {
@@ -58,13 +81,30 @@ const previewStateDefault: PreviewState = {
   isPreviewAvailable: true,
   /** Flag to show/hide the preview panel */
   isPanelVisible: true,
+  isSaving: false,
+  concreteFields: [],
+  fieldMap: {},
 };
 
 export class PreviewController {
-  constructor({ dataView, search, fieldFormats }: PreviewControllerDependencies) {
+  constructor({
+    deps,
+    // using two different data view references while API consumers might be passing in
+    // dataView or dataViewLazy. Don't want to rely on DataView with full field list.
+    dataView,
+    dataViewToUpdate,
+    onSave,
+    fieldToEdit,
+    fieldTypeToProcess,
+  }: PreviewControllerArgs) {
+    this.deps = deps;
+
     this.dataView = dataView;
-    this.search = search;
-    this.fieldFormats = fieldFormats;
+    this.dataViewToUpdate = dataViewToUpdate;
+    this.onSave = onSave;
+
+    this.fieldToEdit = fieldToEdit;
+    this.fieldTypeToProcess = fieldTypeToProcess;
 
     this.internalState$ = new BehaviorSubject<PreviewState>({
       ...previewStateDefault,
@@ -73,12 +113,26 @@ export class PreviewController {
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
 
     this.fetchSampleDocuments();
+
+    this.setExistingConcreteFields();
+    this.setFieldList();
   }
 
   // dependencies
-  private dataView: DataView;
-  private search: ISearchStart;
-  private fieldFormats: FieldFormatsStart;
+  private dataView: DataViewLazy;
+  private dataViewToUpdate: DataView | DataViewLazy;
+
+  private deps: {
+    search: ISearchStart;
+    fieldFormats: FieldFormatsStart;
+    usageCollection: UsageCollectionStart;
+    notifications: NotificationsStart;
+    dataViews: DataViewsPublicPluginStart;
+  };
+
+  private onSave: (field: DataViewField[]) => void;
+  private fieldToEdit?: Field;
+  private fieldTypeToProcess: InternalFieldType;
 
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
@@ -98,6 +152,169 @@ export class PreviewController {
     script: undefined,
     documentId: undefined,
   };
+
+  private setFieldList = async () => {
+    const fieldMap = (
+      await this.dataView.getFields({
+        fieldName: ['*'],
+        scripted: false,
+        runtime: false,
+      })
+    ).getFieldMapSorted();
+
+    this.updateState({ fieldMap });
+  };
+
+  private setExistingConcreteFields = async () => {
+    const existing: Array<{ name: string; type: string }> = [];
+
+    const fieldMap = (
+      await this.dataView.getFields({
+        fieldName: ['*'],
+        scripted: false,
+        runtime: false,
+      })
+    ).getFieldMap();
+
+    // remove name of currently edited field
+    if (this.fieldToEdit?.name) {
+      delete fieldMap[this.fieldToEdit?.name];
+    }
+
+    Object.values(fieldMap).forEach((fld) => {
+      existing.push({
+        name: fld.name,
+        type: (fld.esTypes && fld.esTypes[0]) || '',
+      });
+    });
+
+    this.updateState({ concreteFields: existing });
+  };
+
+  updateConcreteField = async (updatedField: Field): Promise<DataViewField[]> => {
+    const editedField = await this.dataViewToUpdate.getFieldByName(updatedField.name);
+
+    if (!editedField) {
+      throw new Error(
+        `Unable to find field named '${
+          updatedField.name
+        }' on index pattern '${this.dataViewToUpdate.getIndexPattern()}'`
+      );
+    }
+
+    // Update custom label, popularity and format
+    this.dataViewToUpdate.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+    this.dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+    this.dataViewToUpdate.setFieldCustomDescription(
+      updatedField.name,
+      updatedField.customDescription
+    );
+    this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
+
+    if (updatedField.popularity !== undefined) {
+      this.dataViewToUpdate.setFieldCount(updatedField.name, updatedField.popularity || 0);
+      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
+    }
+
+    if (updatedField.format) {
+      this.dataViewToUpdate.setFieldFormat(updatedField.name, updatedField.format!);
+      this.dataView.setFieldFormat(updatedField.name, updatedField.format!);
+    } else {
+      this.dataViewToUpdate.deleteFieldFormat(updatedField.name);
+      this.dataView.deleteFieldFormat(updatedField.name);
+    }
+
+    return [editedField];
+  };
+
+  updateRuntimeField = async (updatedField: Field): Promise<DataViewField[]> => {
+    const nameHasChanged =
+      Boolean(this.fieldToEdit) && this.fieldToEdit!.name !== updatedField.name;
+    const typeHasChanged =
+      Boolean(this.fieldToEdit) && this.fieldToEdit!.type !== updatedField.type;
+    const hasChangeToOrFromComposite =
+      typeHasChanged &&
+      (this.fieldToEdit!.type === 'composite' || updatedField.type === 'composite');
+
+    const { script } = updatedField;
+
+    // this seems a bit convoluted
+    if (this.fieldTypeToProcess === 'runtime') {
+      try {
+        this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+        // eslint-disable-next-line no-empty
+      } catch {}
+      // rename an existing runtime field
+      if (nameHasChanged || hasChangeToOrFromComposite) {
+        this.dataViewToUpdate.removeRuntimeField(this.fieldToEdit!.name);
+        this.dataView.removeRuntimeField(this.fieldToEdit!.name);
+      }
+
+      this.dataViewToUpdate.addRuntimeField(updatedField.name, {
+        type: updatedField.type as RuntimeType,
+        script,
+        fields: updatedField.fields,
+      });
+      this.dataView.addRuntimeField(updatedField.name, {
+        type: updatedField.type as RuntimeType,
+        script,
+        fields: updatedField.fields,
+      });
+    } else {
+      try {
+        this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    this.dataView.addRuntimeField(updatedField.name, updatedField);
+    return this.dataViewToUpdate.addRuntimeField(updatedField.name, updatedField);
+  };
+
+  saveField = async (updatedField: Field) => {
+    try {
+      this.deps.usageCollection.reportUiCounter(
+        pluginName,
+        METRIC_TYPE.COUNT,
+        this.fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
+      );
+      // eslint-disable-next-line no-empty
+    } catch {}
+
+    this.setIsSaving(true);
+
+    try {
+      const editedFields: DataViewField[] =
+        this.fieldTypeToProcess === 'runtime'
+          ? await this.updateRuntimeField(updatedField)
+          : await this.updateConcreteField(updatedField as Field);
+
+      const afterSave = () => {
+        const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+          defaultMessage: "Saved ''{fieldName}''",
+          values: { fieldName: updatedField.name },
+        });
+        this.deps.notifications.toasts.addSuccess(message);
+        this.setIsSaving(false);
+        this.onSave(editedFields);
+      };
+
+      if (this.dataViewToUpdate.isPersisted()) {
+        await this.deps.dataViews.updateSavedObject(this.dataViewToUpdate);
+      }
+      afterSave();
+
+      this.setIsSaving(false);
+    } catch (e) {
+      const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
+        defaultMessage: 'Failed to save field changes',
+      });
+      this.deps.notifications.toasts.addError(e, { title });
+      this.setIsSaving(false);
+    }
+  };
+
+  public getInternalFieldType = () => this.fieldTypeToProcess;
 
   togglePinnedField = (fieldName: string) => {
     const currentState = this.state$.getValue();
@@ -203,6 +420,10 @@ export class PreviewController {
     });
   };
 
+  private setIsSaving = (isSaving: boolean) => {
+    this.updateState({ isSaving });
+  };
+
   private setIsFetchingDocument = (isFetchingDocument: boolean) => {
     this.updateState({
       isFetchingDocument,
@@ -272,7 +493,7 @@ export class PreviewController {
     type: Params['type'];
   }) => {
     if (format?.id) {
-      const formatter = this.fieldFormats.getInstance(format.id, format.params);
+      const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
         return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
       }
@@ -280,7 +501,7 @@ export class PreviewController {
 
     if (type) {
       const fieldType = castEsToKbnFieldTypeName(type);
-      const defaultFormatterForType = this.fieldFormats.getDefaultInstance(fieldType);
+      const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
         return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
       }
@@ -299,7 +520,7 @@ export class PreviewController {
     this.setIsFetchingDocument(true);
     this.setPreviewResponse({ fields: [], error: null });
 
-    const [response, searchError] = await this.search
+    const [response, searchError] = await this.deps.search
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
@@ -346,7 +567,7 @@ export class PreviewController {
     this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
 
-    const [response, searchError] = await this.search
+    const [response, searchError] = await this.deps.search
       .search({
         params: {
           index: this.dataView.getIndexPattern(),

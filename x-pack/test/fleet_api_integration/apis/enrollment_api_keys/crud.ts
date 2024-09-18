@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
+import { getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 import { testUsers } from '../test_users';
@@ -21,10 +21,12 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_enrollment_api_keys_crud', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -32,9 +34,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('GET /fleet/enrollment_api_keys', async () => {
+    describe('GET /fleet/enrollment_api_keys', () => {
       it('should list existing api keys', async () => {
         const { body: apiResponse } = await supertest
           .get(`/api/fleet/enrollment_api_keys`)
@@ -52,13 +53,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .get(`/api/fleet/enrollment_api_keys`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .expect(403);
-      });
-
       it('should return 200 if the passed kuery is correct', async () => {
         await supertest
           .get(`/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.policy_id:policy1`)
@@ -73,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if the passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct', async () => {
         await supertest
           .get(
             `/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.non_existent_parameter:test`
@@ -82,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
@@ -90,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('GET /fleet/enrollment_api_keys/{id}', async () => {
+    describe('GET /fleet/enrollment_api_keys/{id}', () => {
       it('should allow to retrieve existing api keys', async () => {
         const { body: apiResponse } = await supertest
           .get(`/api/fleet/enrollment_api_keys/${ENROLLMENT_KEY_ID}`)
@@ -105,16 +99,9 @@ export default function (providerContext: FtrProviderContext) {
           .auth(testUsers.setup.username, testUsers.setup.password)
           .expect(200);
       });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .get(`/api/fleet/enrollment_api_keys/${ENROLLMENT_KEY_ID}`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .expect(403);
-      });
     });
 
-    describe('DELETE /fleet/enrollment_api_keys/{id}', async () => {
+    describe('DELETE /fleet/enrollment_api_keys/{id}', () => {
       let keyId: string;
       let esApiKeyId: string;
       before(async () => {
@@ -139,14 +126,6 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(apiKeys).length(1);
         expect(apiKeys[0].invalidated).eql(true);
-      });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .delete(`/api/fleet/enrollment_api_keys/${keyId}`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .set('kbn-xsrf', 'xxx')
-          .expect(403);
       });
     });
 
@@ -183,17 +162,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
-      });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .post(`/api/fleet/enrollment_api_keys`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            policy_id: 'policy1',
-          })
-          .expect(403);
       });
 
       it('should allow to create an enrollment api key with agent policy and unique name', async () => {

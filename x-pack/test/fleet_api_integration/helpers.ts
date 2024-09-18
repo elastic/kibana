@@ -8,6 +8,7 @@
 import * as uuid from 'uuid';
 import { ToolingLog } from '@kbn/tooling-log';
 import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -15,6 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
@@ -24,9 +26,25 @@ export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   mochaContext.skip();
 }
 
+export function isDockerRegistryEnabledOrSkipped(providerContext: FtrProviderContext) {
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return true;
+  }
+
+  const { getService } = providerContext;
+  const dockerServers = getService('dockerServers');
+  const server = dockerServers.get('registry');
+
+  return server.enabled;
+}
+
 export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const dockerServers = getService('dockerServers');
+
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return;
+  }
 
   const server = dockerServers.get('registry');
   const log = getService('log');
@@ -108,7 +126,7 @@ export async function generateAgent(
   });
 }
 
-export function setPrereleaseSetting(supertest: any) {
+export function setPrereleaseSetting(supertest: SuperTestAgent) {
   before(async () => {
     await supertest
       .put('/api/fleet/settings')
@@ -124,26 +142,60 @@ export function setPrereleaseSetting(supertest: any) {
   });
 }
 
-export const generateNPolicies = async (
-  supertest: any,
+export async function enableSecrets(providerContext: FtrProviderContext) {
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: true,
+    });
+  }
+}
+
+export const generateNAgentPolicies = async (
+  supertest: SuperTestAgent,
   number: number,
   overwrite?: Partial<CreateAgentPolicyRequest['body']>
 ): Promise<AgentPolicy[]> => {
-  const promises = [];
+  const agentPolicyPromises: Array<Promise<AgentPolicy>> = [];
 
   for (let i = 0; i < number; i++) {
-    promises.push(
-      supertest
-        .post(agentPolicyRouteService.getCreatePath())
-        .set('kbn-xsrf', 'xxxx')
-        .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default', ...overwrite })
-        .expect(200)
-    );
+    agentPolicyPromises.push(generateAgentPolicy(supertest, overwrite));
   }
 
-  const responses = await Promise.all(promises);
+  const agentPolicies = await Promise.all(agentPolicyPromises);
 
-  return responses.map(({ body }) => (body as CreateAgentPolicyResponse).item);
+  return agentPolicies;
+};
+
+export const generateAgentPolicy = async (
+  supertest: SuperTestAgent,
+  overwrite?: Partial<CreateAgentPolicyRequest['body']>
+): Promise<AgentPolicy> => {
+  const response = await supertest
+    .post(agentPolicyRouteService.getCreatePath())
+    .set('kbn-xsrf', 'xxxx')
+    .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default', ...overwrite })
+    .expect(200);
+
+  return (response.body as CreateAgentPolicyResponse).item;
 };
 
 export const addUninstallTokenToPolicy = async (

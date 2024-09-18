@@ -12,7 +12,7 @@ import type { PolicyDetailsAction } from '.';
 import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
 import { policyConfig } from './selectors';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../../../../../common/endpoint/types';
 import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -23,7 +23,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 describe('policy details: ', () => {
   let store: Store;
-  let getState: typeof store['getState'];
+  let getState: (typeof store)['getState'];
   let dispatch: Dispatch<PolicyDetailsAction>;
   let policyItem: PolicyData;
 
@@ -37,6 +37,7 @@ describe('policy details: ', () => {
       updated_at: '',
       updated_by: '',
       policy_id: '',
+      policy_ids: [''],
       enabled: true,
       inputs: [
         {
@@ -257,6 +258,7 @@ describe('policy details: ', () => {
         name: '',
         description: '',
         policy_id: '',
+        policy_ids: [''],
         enabled: true,
         inputs: [
           {
@@ -277,6 +279,7 @@ describe('policy details: ', () => {
                     cluster_name: '',
                     cluster_uuid: '',
                     serverless: false,
+                    billable: false,
                   },
                   windows: {
                     events: {
@@ -289,7 +292,7 @@ describe('policy details: ', () => {
                       registry: true,
                       security: true,
                     },
-                    malware: { mode: 'prevent', blocklist: true },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: {
                       mode: 'off',
@@ -322,12 +325,13 @@ describe('policy details: ', () => {
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
-                      enabled: false,
+                      enabled: true,
+                      mode: 'sync_with_malware_prevent',
                     },
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
-                    malware: { mode: 'prevent', blocklist: true },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     behavior_protection: {
                       mode: 'off',
                       supported: false,
@@ -363,7 +367,7 @@ describe('policy details: ', () => {
                       tty_io: false,
                     },
                     logging: { file: 'info' },
-                    malware: { mode: 'prevent', blocklist: true },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     behavior_protection: {
                       mode: 'off',
                       supported: false,
@@ -388,7 +392,7 @@ describe('policy details: ', () => {
                       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
                   },
-                },
+                } as PolicyConfig,
               },
             },
           },

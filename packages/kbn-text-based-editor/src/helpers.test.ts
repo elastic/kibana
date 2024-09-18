@@ -1,18 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import {
-  parseErrors,
-  parseWarning,
-  getInlineEditorText,
-  getWrappedInPipesCode,
-  getIndicesList,
-} from './helpers';
+import { parseErrors, parseWarning, getIndicesList, getRemoteIndicesList } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -208,56 +204,6 @@ describe('helpers', function () {
     });
   });
 
-  describe('getInlineEditorText', function () {
-    it('should return the entire query if it is one liner', function () {
-      const text = getInlineEditorText('FROM index1 | keep field1, field2 | order field1', false);
-      expect(text).toEqual(text);
-    });
-
-    it('should return the query on one line with extra space if is multiliner', function () {
-      const text = getInlineEditorText(
-        'FROM index1 | keep field1, field2\n| keep field1, field2 | order field1',
-        true
-      );
-      expect(text).toEqual(
-        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
-      );
-    });
-
-    it('should return the query on one line with extra spaces removed if is multiliner', function () {
-      const text = getInlineEditorText(
-        'FROM index1 | keep field1, field2\n| keep field1, field2 \n  | order field1',
-        true
-      );
-      expect(text).toEqual(
-        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
-      );
-    });
-  });
-
-  describe('getWrappedInPipesCode', function () {
-    it('should return the code wrapped', function () {
-      const code = getWrappedInPipesCode('FROM index1 | keep field1, field2 | order field1', false);
-      expect(code).toEqual('FROM index1\n| keep field1, field2\n| order field1');
-    });
-
-    it('should return the code unwrapped', function () {
-      const code = getWrappedInPipesCode(
-        'FROM index1 \n| keep field1, field2 \n| order field1',
-        true
-      );
-      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
-      const code = getWrappedInPipesCode(
-        'FROM index1       \n| keep field1, field2     \n| order field1',
-        true
-      );
-      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
-    });
-  });
-
   describe('getIndicesList', function () {
     it('should return also system indices with hidden flag on', async function () {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
@@ -276,9 +222,69 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true },
-        { name: 'logs', hidden: false },
+        { name: '.system1', hidden: true, type: 'Index' },
+        { name: 'logs', hidden: false, type: 'Index' },
       ]);
+    });
+
+    it('should type correctly the aliases', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'alias1',
+            title: 'system1',
+            tags: [
+              {
+                name: 'Alias',
+                type: 'alias',
+              },
+            ],
+          },
+          {
+            name: 'logs',
+            title: 'logs',
+          },
+        ]),
+      };
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: 'alias1', hidden: false, type: 'Alias' },
+        { name: 'logs', hidden: false, type: 'Index' },
+      ]);
+    });
+  });
+
+  describe('getRemoteIndicesList', function () {
+    it('should filter out aliases and hidden indices', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'remote: alias1',
+            item: {
+              indices: ['index1'],
+            },
+          },
+          {
+            name: 'remote:.system1',
+            item: {
+              name: 'system',
+            },
+          },
+          {
+            name: 'remote:logs',
+            item: {
+              name: 'logs',
+              timestamp_field: '@timestamp',
+            },
+          },
+        ]),
+      };
+      const indices = await getRemoteIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
     });
   });
 });

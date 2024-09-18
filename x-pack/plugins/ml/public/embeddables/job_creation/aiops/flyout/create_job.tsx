@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckableCard,
   EuiTitle,
   EuiSpacer,
   EuiSwitch,
   EuiHorizontalRule,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFormRow,
   EuiCallOut,
@@ -47,11 +48,10 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       data,
       share,
       uiSettings,
-      mlServices: { mlApiServices },
       dashboardService,
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
-
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
     CATEGORIZATION_TYPE.COUNT
   );
@@ -71,7 +71,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useMemo(() => {
-    const newJobCapsService = new NewJobCapsService(mlApiServices);
+    const newJobCapsService = new NewJobCapsService(mlApi);
     newJobCapsService.initializeFromDataVIew(dataView).then(() => {
       const options: EuiComboBoxOptionOption[] = [
         ...createFieldOptions(newJobCapsService.categoryFields, []),
@@ -80,19 +80,19 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       }));
       setCategoryFieldsOptions(options);
     });
-  }, [dataView, mlApiServices]);
+  }, [dataView, mlApi]);
 
   const quickJobCreator = useMemo(
     () =>
       new QuickCategorizationJobCreator(
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
         data,
-        mlApiServices
+        mlApi
       ),
-
-    [dashboardService, data, mlApiServices, uiSettings]
+    [dashboardService, data, mlApi, uiSettings]
   );
 
   function createADJobInWizard() {
@@ -145,7 +145,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     <JobDetails
       createADJob={createADJob}
       createADJobInWizard={createADJobInWizard}
-      embeddable={undefined}
       timeRange={timeRange}
       layer={undefined}
       layerIndex={0}

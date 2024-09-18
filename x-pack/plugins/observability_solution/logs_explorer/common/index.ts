@@ -14,11 +14,17 @@ export {
 export type { AvailableControlPanels, ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
-  datasetSelectionPlainRT,
-  hydrateDatasetSelection,
+  dataSourceSelectionPlainRT,
+  singleDatasetSelectionPlainRT,
+  DataViewSelection,
+  hydrateDataSourceSelection,
+  isDatasetSelection,
+  isDataSourceSelection,
+  isDataViewSelection,
+  isUnresolvedDatasetSelection,
   UnresolvedDatasetSelection,
-} from './dataset_selection';
-export type { DatasetSelectionPlain } from './dataset_selection';
+} from './data_source_selection';
+export type { DataSourceSelectionPlain } from './data_source_selection';
 export type {
   ChartDisplayOptions,
   DisplayOptions,

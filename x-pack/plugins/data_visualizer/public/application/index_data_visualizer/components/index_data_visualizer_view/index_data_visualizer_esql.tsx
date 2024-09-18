@@ -7,11 +7,12 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
@@ -31,7 +32,7 @@ import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme'
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
@@ -41,22 +42,26 @@ import {
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
 import type {
-  DataVisualizerGridInput,
+  ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedPageUrlState,
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
-import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
-
+const DEFAULT_ESQL_QUERY = { esql: '' };
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
+  // Query that has been typed, but has not submitted with cmd + enter
+  const [localQuery, setLocalQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
+  const [query, setQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
   const toggleShowEmptyFields = () => {
@@ -90,9 +95,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
   };
 
-  // Query that has been typed, but has not submitted with cmd + enter
-  const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
-
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
     if (isESQLQuery(query)) {
@@ -103,7 +105,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       return undefined;
     }
     return indexPatternFromQuery;
-  }, [query]);
+  }, [query?.esql]);
 
   useEffect(
     function updateAdhocDataViewFromQuery() {
@@ -113,7 +115,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         if (!indexPattern) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPattern,
+          query.esql,
           currentDataView
         );
 
@@ -134,7 +136,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [indexPattern, data.dataViews, currentDataView]
   );
 
-  const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
+  const input: ESQLDataVisualizerGridEmbeddableState = useMemo(() => {
     return {
       dataView: currentDataView,
       query,
@@ -142,8 +144,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       sessionId: undefined,
       visibleFieldNames: undefined,
       allowEditDataView: true,
-      id: 'esql_data_visualizer',
+      id: FieldStatsComponentType.EsqlDataVisualizer,
       indexPattern,
+      esql: true,
     };
   }, [currentDataView, query?.esql]);
 
@@ -159,17 +162,18 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const {
     totalCount,
     progress: combinedProgress,
+    queryHistoryStatus,
     overallStatsProgress,
     configs,
     documentCountStats,
     metricsStats,
     timefilter,
     getItemIdToExpandedRowMap,
-    onQueryUpdate,
+    resetData,
     limitSize,
     showEmptyFields,
     fieldsCountStats,
-  } = useESQLDataVisualizerData(input, dataVisualizerListState, setQuery);
+  } = useESQLDataVisualizerData(input, dataVisualizerListState);
 
   const hasValidTimeField = useMemo(
     () => currentDataView?.timeFieldName !== undefined,
@@ -195,6 +199,16 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       setLocalQuery(q);
     }
   }, []);
+  const onTextLangQuerySubmit = useCallback(
+    async (q: AggregateQuery | undefined) => {
+      if (isESQLQuery(q)) {
+        resetData();
+        setQuery(q);
+      }
+    },
+    [resetData]
+  );
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -248,12 +262,10 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         <TextBasedLangEditor
           query={localQuery}
           onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onQueryUpdate}
-          expandCodeEditor={() => false}
-          isCodeEditorExpanded={true}
-          detectTimestamp={true}
-          hideMinimizeButton={true}
+          onTextLangQuerySubmit={onTextLangQuerySubmit}
+          detectedTimestamp={currentDataView?.timeFieldName}
           hideRunQueryText={false}
+          isLoading={queryHistoryStatus ?? false}
         />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>

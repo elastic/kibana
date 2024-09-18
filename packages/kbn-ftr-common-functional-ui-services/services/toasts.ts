@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -37,20 +38,6 @@ export class ToastsService extends FtrService {
     const message: string = await messageElement.getVisibleText();
 
     return { title, message };
-  }
-
-  public async toastMessageByTestSubj(testSubj = 'csp:toast-success') {
-    const testSubjSvc = this.testSubjects;
-    return {
-      async getElement(): Promise<WebElementWrapper> {
-        return await testSubjSvc.find(testSubj);
-      },
-      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
-        const element = await this.getElement();
-        const link = await element.findByTestSubject(linkTestSubj);
-        await link.click();
-      },
-    };
   }
 
   /**
@@ -123,7 +110,7 @@ export class ToastsService extends FtrService {
     });
   }
 
-  public async getElementByIndex(index: number): Promise<WebElementWrapper> {
+  public async getElementByIndex(index: number = 1): Promise<WebElementWrapper> {
     return await (await this.getGlobalList()).findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 

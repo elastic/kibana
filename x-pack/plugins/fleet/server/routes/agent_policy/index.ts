@@ -43,9 +43,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
+      description: `Get agent policies`,
     })
     .addVersion(
       {
@@ -59,8 +61,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
     })
     .addVersion(
@@ -75,9 +78,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { all: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
+      description: `Get an agent policy by ID`,
     })
     .addVersion(
       {
@@ -92,8 +97,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
+      description: `Create an agent policy`,
     })
     .addVersion(
       {
@@ -108,8 +114,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
+      description: `Update an agent policy by ID`,
     })
     .addVersion(
       {
@@ -124,8 +131,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
+      description: `Copy an agent policy by ID`,
     })
     .addVersion(
       {
@@ -140,7 +148,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
     })
     .addVersion(
@@ -156,8 +164,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
+      description: `Get a full agent policy by ID`,
     })
     .addVersion(
       {
@@ -172,9 +181,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
       enableQueryVersion: true,
+      description: `Download an agent policy by ID`,
     })
     .addVersion(
       {
@@ -189,8 +199,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: K8S_API_ROUTES.K8S_INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
+      description: `Get full K8s agent manifest`,
     })
     .addVersion(
       {
@@ -205,7 +216,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
       enableQueryVersion: true,
     })

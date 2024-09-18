@@ -12,8 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
@@ -189,8 +187,3 @@ export const getFieldColumns = ({
     ? getFieldTableColumns({ highlight, onHide })
     : getDefaultFieldTableColumns({ highlight })),
 ];
-
-/** Returns whether the table column has actions attached to it */
-export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
-  return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
-};

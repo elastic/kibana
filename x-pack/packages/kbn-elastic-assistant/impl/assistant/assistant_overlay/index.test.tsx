@@ -28,24 +28,26 @@ describe('AssistantOverlay', () => {
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
-    const modal = getByTestId('ai-assistant-modal');
-    expect(modal).toBeInTheDocument();
+    const flyout = getByTestId('ai-assistant-flyout');
+    expect(flyout).toBeInTheDocument();
   });
 
-  it('modal closes when close button is clicked', () => {
-    const { getByLabelText, queryByTestId } = render(
+  it('flyout closes when close button is clicked', () => {
+    const { queryByTestId } = render(
       <TestProviders>
         <AssistantOverlay />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
-    const closeButton = getByLabelText('Closes this modal window');
-    fireEvent.click(closeButton);
-    const modal = queryByTestId('ai-assistant-modal');
-    expect(modal).not.toBeInTheDocument();
+    const closeButton = queryByTestId('euiFlyoutCloseButton');
+    if (closeButton) {
+      fireEvent.click(closeButton);
+    }
+    const flyout = queryByTestId('ai-assistant-flyout');
+    expect(flyout).not.toBeInTheDocument();
   });
 
-  it('Assistant invoked from shortcut tracking happens on modal open only (not close)', () => {
+  it('Assistant invoked from shortcut tracking happens on flyout open only (not close)', () => {
     render(
       <TestProviders providerContext={{ assistantTelemetry }}>
         <AssistantOverlay />
@@ -61,7 +63,7 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
   });
 
-  it('modal closes when shortcut is pressed and modal is already open', () => {
+  it('flyout closes when shortcut is pressed and flyout is already open', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <AssistantOverlay />
@@ -69,18 +71,18 @@ describe('AssistantOverlay', () => {
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
-    const modal = queryByTestId('ai-assistant-modal');
-    expect(modal).not.toBeInTheDocument();
+    const flyout = queryByTestId('ai-assistant-flyout');
+    expect(flyout).not.toBeInTheDocument();
   });
 
-  it('modal does not open when incorrect shortcut is pressed', () => {
+  it('flyout does not open when incorrect shortcut is pressed', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <AssistantOverlay />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
-    const modal = queryByTestId('ai-assistant-modal');
-    expect(modal).not.toBeInTheDocument();
+    const flyout = queryByTestId('ai-assistant-flyout');
+    expect(flyout).not.toBeInTheDocument();
   });
 });

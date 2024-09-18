@@ -32,7 +32,7 @@ export const SemanticSearchSection: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.title"
-                  defaultMessage="Set up semantic search"
+                  defaultMessage="ML Applications"
                 />
               </h2>
             </EuiTitle>
@@ -42,7 +42,7 @@ export const SemanticSearchSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
-                  defaultMessage="Combine any of these information retrieval tools."
+                  defaultMessage="Use Elasticsearch to build applications that leverage machine learning capabilities."
                 />
               </p>
             </EuiText>
@@ -58,7 +58,7 @@ export const SemanticSearchSection: React.FC = () => {
               initialIsOpen
               icon={elserIllustration}
               title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
-                defaultMessage: 'Elastic Learned Sparse Encoder',
+                defaultMessage: 'Semantic search with ELSER',
               })}
               description={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.elserAccordion.description',
@@ -106,7 +106,7 @@ export const SemanticSearchSection: React.FC = () => {
               description={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
                 {
-                  defaultMessage: 'Insightful data enrichment with trained ML models',
+                  defaultMessage: 'Extract entities and sentiment from text',
                 }
               )}
               currentExpandedId={currentExpandedId}

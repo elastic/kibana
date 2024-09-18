@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { EsErrorBody } from '@kbn/ml-error-utils';
+import type { EsErrorBody } from '@kbn/ml-error-utils';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { ANALYSIS_CONFIG_TYPE } from './constants';
+import type { ANALYSIS_CONFIG_TYPE } from './constants';
 
 /**
  * Interface for DFA API response for deletion status
@@ -210,7 +210,7 @@ export function isDataFrameAnalyticsConfigs(arg: unknown): arg is DataFrameAnaly
  * Union type of DFA anlaysis config types
  */
 export type DataFrameAnalysisConfigType =
-  typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+  (typeof ANALYSIS_CONFIG_TYPE)[keyof typeof ANALYSIS_CONFIG_TYPE];
 
 /**
  * Union type of DFA task states

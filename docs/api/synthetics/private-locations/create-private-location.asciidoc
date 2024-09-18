@@ -61,7 +61,7 @@ The API returns the created private location as follows:
 [source,json]
 --------------------------------------------------
 {
-  "id": "unique-location-id",
+  "id": "abcd1234",
   "label": "Private Location 1",
   "agentPolicyId": "abcd1234",
   "tags": ["private", "testing"],

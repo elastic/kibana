@@ -6,8 +6,7 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
-import { Position } from '@elastic/charts';
-import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
+import { LegendValue, Position } from '@elastic/charts';
 import {
   Operation,
   OperationDescriptor,
@@ -23,13 +22,9 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
-  XYPersistedState,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -58,6 +53,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import {
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
+} from './persistence';
+import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -141,7 +143,7 @@ describe('xy_visualization', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(IconChartBar);
-      expect(desc.label).toEqual('Bar vertical');
+      expect(desc.label).toEqual('Bar');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -154,18 +156,15 @@ describe('xy_visualization', () => {
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
-
-      expect(desc.label).toEqual('Bar horizontal');
+      expect(desc.label).toEqual('Bar');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
-      expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Area stacked'
-      );
+      expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'Bar horizontal stacked'
+        'Bar'
       );
     });
   });
@@ -194,17 +193,15 @@ describe('xy_visualization', () => {
     it('should combine multiple layers into one type', () => {
       expect(
         xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal', 'bar_horizontal'))
-      ).toEqual('bar_horizontal');
+      ).toEqual('bar');
     });
 
     it('should return the subtype for single layers', () => {
       expect(xyVisualization.getVisualizationTypeId(mixedState('area'))).toEqual('area');
       expect(xyVisualization.getVisualizationTypeId(mixedState('line'))).toEqual('line');
-      expect(xyVisualization.getVisualizationTypeId(mixedState('area_stacked'))).toEqual(
-        'area_stacked'
-      );
+      expect(xyVisualization.getVisualizationTypeId(mixedState('area_stacked'))).toEqual('area');
       expect(xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal_stacked'))).toEqual(
-        'bar_horizontal_stacked'
+        'bar'
       );
     });
   });
@@ -227,7 +224,7 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "paletteId": "eui_amsterdam_color_blind",
                 "specialAssignments": Array [
                   Object {
                     "color": Object {
@@ -602,6 +599,53 @@ describe('xy_visualization', () => {
         )
       ).toHaveLength(1);
     });
+
+    describe('transforming to legend stats', () => {
+      it('loads a xy chart with `legendStats` property', () => {
+        const persistedState: XYPersistedState = {
+          ...exampleState(),
+          legend: {
+            ...exampleState().legend,
+            legendStats: [LegendValue.CurrentAndLastValue],
+          },
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+      it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: false,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual([]);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with `valuesInLegend` property equal to true and transforms to legendStats: [`values`]', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: true,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with deprecated undefined `valuesInLegend` and transforms to legendStats: [`values`]', () => {
+        const transformedState = xyVisualization.initialize(() => 'first', exampleState());
+
+        expect(transformedState.legend.legendStats).toEqual(undefined);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+    });
   });
 
   describe('#removeLayer', () => {
@@ -796,6 +840,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -2786,6 +2831,48 @@ describe('xy_visualization', () => {
           },
         ]);
       });
+      it('should return an error with batched messages for the same error with the correct index for multiple layers', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'referenceLine',
+                layerType: layerTypes.REFERENCELINE,
+                accessors: [],
+              },
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'third',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layers 3, 4 require a field for the Vertical axis.',
+          },
+        ]);
+      });
       it("should return an error when some layers are complete but other layers aren't", () => {
         expect(
           getErrorMessages(xyVisualization, {
@@ -3051,6 +3138,7 @@ describe('xy_visualization', () => {
                 "longMessage": "",
                 "severity": "error",
                 "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+                "uniqueId": "annotation_missing_date_histogram",
               },
             ]
           `);
@@ -3202,7 +3290,7 @@ describe('xy_visualization', () => {
               },
             ],
             "fixableInEditor": true,
-            "longMessage": <FormattedMessage
+            "longMessage": <Memo(MemoizedFormattedMessage)
               defaultMessage="{label} contains array values. Your visualization may not render as expected."
               id="xpack.lens.xyVisualization.arrayValues"
               values={
@@ -3215,6 +3303,7 @@ describe('xy_visualization', () => {
             />,
             "severity": "warning",
             "shortMessage": "",
+            "uniqueId": "xy_rendering_values_array",
           }
         `);
       });
@@ -3319,7 +3408,7 @@ describe('xy_visualization', () => {
             fixableInEditor: false,
             severity: 'info',
             shortMessage: 'Layers ignoring global filters',
-            uniqueId: 'ignoring-global-filters-layers',
+            uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
           })
         );
       });

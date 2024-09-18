@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -58,13 +59,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogsExplorer.submitQuery('*favicon*');
 
         const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
-        discoverLink.click();
+        await discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
-        });
+        await dataViews.waitForSwitcherToBe('All logs');
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
@@ -99,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should navigate to the observability onboarding overview page', async () => {
         const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
-        onboardingLink.click();
+        await onboardingLink.click();
 
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();

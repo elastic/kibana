@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
+import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import {
   ToolbarSelector,
   ToolbarSelectorProps,
@@ -37,6 +38,7 @@ export const BreakdownFieldSelector = ({
       .filter(fieldSupportsBreakdown)
       .map((field) => ({
         key: field.name,
+        name: field.name,
         label: field.displayName,
         value: field.name,
         checked:
@@ -69,7 +71,7 @@ export const BreakdownFieldSelector = ({
     return options;
   }, [dataView, breakdown.field]);
 
-  const onChange: ToolbarSelectorProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
     (chosenOption) => {
       const field = chosenOption?.value
         ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
@@ -102,8 +104,12 @@ export const BreakdownFieldSelector = ({
           defaultMessage: 'Select breakdown field',
         }
       )}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={fieldOptions}
       onChange={onChange}
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default BreakdownFieldSelector;

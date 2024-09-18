@@ -6,16 +6,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { betaBadgeProps, technicalPreviewBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -76,13 +77,12 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(
       ([id, details]) =>
         actionTypeRegistry.has(id) &&
-        !actionTypeRegistry.get(id).hideInUi &&
-        details.enabledInConfig
+        details.enabledInConfig === true &&
+        !actionTypeRegistry.get(id).hideInUi
     )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
@@ -91,7 +91,6 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        isBeta: actionTypeModel.isBeta,
         isExperimental: actionTypeModel.isExperimental,
       };
     });
@@ -103,10 +102,8 @@ export const ActionTypeMenu = ({
       const card = (
         <EuiCard
           betaBadgeProps={
-            item.isBeta
-              ? betaBadgeProps
-              : item.isExperimental
-              ? technicalPreviewBadgeProps
+            item.isExperimental
+              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
           titleSize="xs"
@@ -124,7 +121,7 @@ export const ActionTypeMenu = ({
       return (
         <EuiFlexItem key={index}>
           {checkEnabledResult.isEnabled && card}
-          {!checkEnabledResult.isEnabled && (
+          {checkEnabledResult.isEnabled === false && (
             <EuiToolTip position="top" content={checkEnabledResult.message}>
               {card}
             </EuiToolTip>

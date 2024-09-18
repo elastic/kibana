@@ -6,7 +6,7 @@
  */
 
 import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
-import { CspStatusCode } from '../../../../common/types_old';
+import { CspStatusCode } from '@kbn/cloud-security-posture-common';
 
 export type CloudSecurityUsageCollectorType =
   | 'Indices'
@@ -143,6 +143,7 @@ export interface CloudSecurityInstallationStats {
   created_at: string;
   agent_count: number;
   is_setup_automatic: boolean;
+  is_agentless: boolean;
   account_type?: 'single-account' | 'organization-account';
   setup_access_option: SetupAccessOption;
 }
@@ -177,10 +178,6 @@ export interface CloudProvider {
 
 export interface KubernetesVersion {
   metrics: { 'cloudbeat.kubernetes.version': string };
-}
-
-export interface PackagePolicyId {
-  metrics: { 'cloud_security_posture.package_policy.id': string };
 }
 
 export interface LatestDocTimestamp {

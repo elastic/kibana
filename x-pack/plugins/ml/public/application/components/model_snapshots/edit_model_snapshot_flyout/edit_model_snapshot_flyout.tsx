@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -25,12 +26,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../../services/ml_api_service';
-import { useNotifications } from '../../../contexts/kibana';
+import { useMlApi, useNotifications } from '../../../contexts/kibana';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -39,6 +39,7 @@ interface Props {
 }
 
 export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout }) => {
+  const mlApi = useMlApi();
   const { toasts } = useNotifications();
   const [description, setDescription] = useState(snapshot.description);
   const [retain, setRetain] = useState(snapshot.retain);
@@ -54,7 +55,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
   const updateSnapshot = useCallback(async () => {
     try {
-      await ml.updateModelSnapshot(snapshot.job_id, snapshot.snapshot_id, {
+      await mlApi.updateModelSnapshot(snapshot.job_id, snapshot.snapshot_id, {
         description,
         retain,
       });
@@ -71,7 +72,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
   const deleteSnapshot = useCallback(async () => {
     try {
-      await ml.deleteModelSnapshot(snapshot.job_id, snapshot.snapshot_id);
+      await mlApi.deleteModelSnapshot(snapshot.job_id, snapshot.snapshot_id);
       hideDeleteModal();
       closeWithReload();
     } catch (error) {

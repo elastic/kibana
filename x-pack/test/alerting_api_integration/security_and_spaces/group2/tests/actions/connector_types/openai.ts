@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import {
   OpenAISimulator,
@@ -14,6 +15,7 @@ import {
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getEventLog } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
 const name = 'A genAi action';
@@ -48,8 +50,8 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   };
 
   describe('OpenAI', () => {
-    after(() => {
-      objectRemover.removeAll();
+    after(async () => {
+      await objectRemover.removeAll();
     });
     describe('action creation', () => {
       const simulator = new OpenAISimulator({
@@ -90,7 +92,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: 'gpt-4',
+            defaultModel: 'gpt-4o',
           },
         });
       });
@@ -267,7 +269,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: OpenAI. Connector type: .gen-ai`,
           });
         });
@@ -315,6 +317,23 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               data: genAiSuccessResponse,
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: genAiActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(78);
           });
           describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
@@ -487,7 +506,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

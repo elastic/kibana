@@ -13,14 +13,13 @@ properties:
   settings:
     $ref: 'settings.yaml'
   severity:
-    $ref: 'severity_property.yaml'
+    $ref: 'case_severity.yaml'
   status: 
-    $ref: 'status.yaml'
+    $ref: 'case_status.yaml'
   tags: 
     type: array
     items:
       type: string
-    examples:
-      - ["tag-1"]
+      example: ["tag-1"]
   title:
     type: string

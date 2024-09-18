@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ml } from './ml_api_service';
-import { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
+import type { MlApi } from './ml_api_service';
+import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
 
 export interface CloudInfo {
   cloudId: string | null;
@@ -28,9 +28,9 @@ const cloudInfo: CloudInfo = {
   deploymentId: null,
 };
 
-export async function loadMlServerInfo() {
+export async function loadMlServerInfo(mlApi: MlApi) {
   try {
-    const resp = await ml.mlInfo();
+    const resp = await mlApi.mlInfo();
     defaults = resp.defaults;
     limits = resp.limits;
     cloudInfo.cloudId = resp.cloudId ?? null;

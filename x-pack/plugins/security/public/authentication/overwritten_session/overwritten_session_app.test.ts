@@ -63,8 +63,8 @@ describe('overwrittenSessionApp', () => {
     ).renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
-      coreStartMock.i18n,
-      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      coreStartMock,
+      { element: appMountParams.element },
       { authc: authcMock, basePath: coreStartMock.http.basePath }
     );
   });

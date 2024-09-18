@@ -10,29 +10,24 @@ import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
-import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
-import type { MlFeatures } from '../../common/constants/app';
-import { MlLicense } from '../../common/license';
-import { MlCapabilitiesService } from './capabilities/check_capabilities';
+import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
-import { mlUsageCollectionProvider } from './services/usage_collection';
 import { MlRouter } from './routing';
-import { mlApiServicesProvider } from './services/ml_api_service';
-import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
+import { getMlGlobalServices } from './util/get_services';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -46,25 +41,10 @@ interface AppProps {
   appMountParams: AppMountParameters;
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 const localStorage = new Storage(window.localStorage);
-
-/**
- * Provides global services available across the entire ML app.
- */
-export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
-  const httpService = new HttpService(httpStart);
-  const mlApiServices = mlApiServicesProvider(httpService);
-
-  return {
-    httpService,
-    mlApiServices,
-    mlUsageCollection: mlUsageCollectionProvider(usageCollection),
-    mlCapabilities: new MlCapabilitiesService(mlApiServices),
-    mlLicense: new MlLicense(),
-  };
-}
 
 export interface MlServicesContext {
   mlServices: MlGlobalServices;
@@ -72,15 +52,25 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
+const App: FC<AppProps> = ({
+  coreStart,
+  deps,
+  appMountParams,
+  isServerless,
+  mlFeatures,
+  experimentalFeatures,
+}) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
+
   const services: StartServices = useMemo(() => {
     return {
+      ...coreStart,
       cases: deps.cases,
       charts: deps.charts,
       contentManagement: deps.contentManagement,
@@ -93,8 +83,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licensing: deps.licensing,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
+      observabilityAIAssistant: deps.observabilityAIAssistant,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
@@ -105,8 +97,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
@@ -129,32 +120,35 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
 
   if (!licenseReady || !mlCapabilities) return null;
 
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: !isServerless,
   };
 
-  const I18nContext = coreStart.i18n.Context;
   const ApplicationUsageTrackingProvider =
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   return (
-    <ApplicationUsageTrackingProvider>
-      <I18nContext>
-        <KibanaThemeProvider theme$={appMountParams.theme$}>
-          <KibanaContextProvider services={services}>
-            <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
-                  <MlRouter pageDeps={pageDeps} />
-                </EnabledFeaturesContextProvider>
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </ApplicationUsageTrackingProvider>
+    <KibanaRenderContextProvider {...startServices}>
+      <ApplicationUsageTrackingProvider>
+        <KibanaContextProvider services={services}>
+          <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <EnabledFeaturesContextProvider
+                isServerless={isServerless}
+                mlFeatures={mlFeatures}
+                showMLNavMenu={chromeStyle === 'classic'}
+                experimentalFeatures={experimentalFeatures}
+              >
+                <MlRouter pageDeps={pageDeps} />
+              </EnabledFeaturesContextProvider>
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </KibanaContextProvider>
+      </ApplicationUsageTrackingProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -163,32 +157,9 @@ export const renderApp = (
   deps: MlDependencies,
   appMountParams: AppMountParameters,
   isServerless: boolean,
-  mlFeatures: MlFeatures
+  mlFeatures: MlFeatures,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
-  setDependencyCache({
-    timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.fieldFormats,
-    autocomplete: deps.unifiedSearch.autocomplete,
-    config: coreStart.uiSettings!,
-    chrome: coreStart.chrome!,
-    docLinks: coreStart.docLinks!,
-    toastNotifications: coreStart.notifications.toasts,
-    overlays: coreStart.overlays,
-    theme: coreStart.theme,
-    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    basePath: coreStart.http.basePath,
-    savedSearch: deps.savedSearch,
-    application: coreStart.application,
-    http: coreStart.http,
-    security: deps.security,
-    dashboard: deps.dashboard,
-    maps: deps.maps,
-    dataVisualizer: deps.dataVisualizer,
-    dataViews: deps.data.dataViews,
-    share: deps.share,
-    lens: deps.lens,
-  });
-
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
@@ -198,12 +169,12 @@ export const renderApp = (
       appMountParams={appMountParams}
       isServerless={isServerless}
       mlFeatures={mlFeatures}
+      experimentalFeatures={experimentalFeatures}
     />,
     appMountParams.element
   );
 
   return () => {
-    clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
     deps.data.search.session.clear();
   };

@@ -6,10 +6,9 @@
  */
 
 import expect from 'expect';
-
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { combineToNdJson, getCustomQueryRuleParams } from '../../../utils';
 import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { combineToNdJson, getCustomQueryRuleParams } from '../../../utils';
 import { createConnector, deleteConnector, getConnector } from '../../../utils/connectors';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -17,8 +16,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176836
-  describe.skip('@ess @brokenInServerless @skipInQA import action connectors', () => {
+  describe('@ess @skipInServerlessMKI import action connectors', () => {
     const CONNECTOR_ID = '1be16246-642a-4ed8-bfd3-b47f8c7d7055';
     const ANOTHER_CONNECTOR_ID = 'abc16246-642a-4ed8-bfd3-b47f8c7d7055';
     const CUSTOM_ACTION_CONNECTOR = {

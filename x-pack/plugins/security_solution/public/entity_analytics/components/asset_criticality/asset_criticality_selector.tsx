@@ -8,6 +8,8 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import {
+  EuiToolTip,
+  EuiIcon,
   EuiSpacer,
   useEuiFontSize,
   EuiButtonIcon,
@@ -34,16 +36,17 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useToggle } from 'react-use';
 import { PICK_ASSET_CRITICALITY } from './translations';
-import {
-  AssetCriticalityBadge,
-  AssetCriticalityBadgeAllowMissing,
-} from './asset_criticality_badge';
+import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import type {
+  CriticalityLevel,
+  CriticalityLevelWithUnassigned,
+} from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
   entity: Entity;
+  onChange?: () => void;
 }
 const AssetCriticalitySelectorComponent: React.FC<{
   criticality: State;
@@ -52,6 +55,15 @@ const AssetCriticalitySelectorComponent: React.FC<{
 }> = ({ criticality, entity, compressed = false }) => {
   const [visible, toggleModal] = useToggle(false);
   const sFontSize = useEuiFontSize('s').fontSize;
+
+  const onSave = (value: CriticalityLevelWithUnassigned) => {
+    criticality.mutation.mutate({
+      criticalityLevel: value,
+      idField: `${entity.type}.name`,
+      idValue: entity.name,
+    });
+    toggleModal(false);
+  };
 
   return (
     <>
@@ -71,7 +83,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <AssetCriticalityBadgeAllowMissing
+            <AssetCriticalityBadge
               criticalityLevel={criticality.query.data?.criticality_level}
               dataTestSubj="asset-criticality-level"
               className={css`
@@ -122,7 +134,11 @@ const AssetCriticalitySelectorComponent: React.FC<{
         </EuiFlexGroup>
       )}
       {visible ? (
-        <AssetCriticalityModal entity={entity} criticality={criticality} toggle={toggleModal} />
+        <AssetCriticalityModal
+          onSave={onSave}
+          initialCriticalityLevel={criticality.query.data?.criticality_level}
+          toggle={toggleModal}
+        />
       ) : null}
     </>
   );
@@ -131,12 +147,13 @@ const AssetCriticalitySelectorComponent: React.FC<{
 export const AssetCriticalitySelector = React.memo(AssetCriticalitySelectorComponent);
 AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';
 
-const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
+const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity, onChange }) => {
   const { euiTheme } = useEuiTheme();
   const privileges = useAssetCriticalityPrivileges(entity.name);
   const criticality = useAssetCriticalityData({
     entity,
     enabled: !!privileges.data?.has_read_permissions,
+    onChange,
   });
 
   if (privileges.isLoading || !privileges.data?.has_read_permissions) {
@@ -148,16 +165,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
       <EuiAccordion
         initialIsOpen
         id="asset-criticality-selector"
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
-                defaultMessage="Asset Criticality"
-              />
-            </h3>
-          </EuiTitle>
-        }
+        buttonContent={<AssetCriticalityTitle />}
         buttonProps={{
           css: css`
             color: ${euiTheme.colors.primary};
@@ -172,16 +180,48 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
   );
 };
 
+export const AssetCriticalityTitle = () => (
+  <EuiToolTip
+    position="top"
+    content={
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
+        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+      />
+    }
+  >
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
+              defaultMessage="Asset Criticality"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="iInCircle" color="subdued" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiToolTip>
+);
+
 interface ModalProps {
-  criticality: State;
+  initialCriticalityLevel: CriticalityLevel | undefined;
   toggle: (nextValue: boolean) => void;
-  entity: Entity;
+  onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
+const AssetCriticalityModal: React.FC<ModalProps> = ({
+  initialCriticalityLevel,
+  toggle,
+  onSave,
+}) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
-  const [value, setNewValue] = useState<CriticalityLevel>(
-    criticality.query.data?.criticality_level ?? 'medium_impact'
+  const [value, setNewValue] = useState<CriticalityLevelWithUnassigned>(
+    initialCriticalityLevel ?? 'unassigned'
   );
 
   return (
@@ -210,14 +250,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, togg
         </EuiButtonEmpty>
 
         <EuiButton
-          onClick={() => {
-            criticality.mutation.mutate({
-              criticalityLevel: value,
-              idField: `${entity.type}.name`,
-              idValue: entity.name,
-            });
-            toggle(false);
-          }}
+          onClick={() => onSave(value)}
           fill
           data-test-subj="asset-criticality-modal-save-btn"
         >
@@ -231,7 +264,9 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, togg
   );
 };
 
-const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel> => ({
+const option = (
+  level: CriticalityLevelWithUnassigned
+): EuiSuperSelectOption<CriticalityLevelWithUnassigned> => ({
   value: level,
   dropdownDisplay: (
     <AssetCriticalityBadge
@@ -244,7 +279,8 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
     <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
   ),
 });
-const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
+const options: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> = [
+  option('unassigned'),
   option('low_impact'),
   option('medium_impact'),
   option('high_impact'),

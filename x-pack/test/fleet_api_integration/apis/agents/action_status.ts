@@ -12,7 +12,6 @@ import {
   AGENT_POLICY_INDEX,
 } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
@@ -22,13 +21,14 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('action_status_api', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
@@ -195,6 +195,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             revision_idx: 2,
             policy_id: 'policy3',
+            coordinator_idx: 0,
             '@timestamp': '2023-03-15T13:00:00.000Z',
           },
         });
@@ -204,6 +205,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             revision_idx: 2,
             policy_id: 'policy2',
+            coordinator_idx: 0,
             '@timestamp': '2023-03-15T14:00:00.000Z',
           },
         });
@@ -213,6 +215,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             revision_idx: 3,
             policy_id: 'policy2',
+            coordinator_idx: 0,
             '@timestamp': '2023-03-15T15:00:00.000Z',
           },
         });
@@ -243,6 +246,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       });
+
       it('should respond 200 and the action statuses', async () => {
         const res = await supertest.get(`/api/fleet/agents/action_status`).expect(200);
         expect(res.body.items).to.eql([
@@ -322,6 +326,134 @@ export default function (providerContext: FtrProviderContext) {
             cancellationTime: '2022-09-15T11:00:00.000Z',
             latestErrors: [],
           },
+          {
+            actionId: 'action4',
+            nbAgentsActionCreated: 3,
+            nbAgentsAck: 0,
+            type: 'UNENROLL',
+            nbAgentsActioned: 3,
+            status: 'EXPIRED',
+            expiration: '2022-09-14T10:00:00.000Z',
+            creationTime: '2022-09-15T10:10:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
+          },
+          {
+            actionId: 'action3',
+            nbAgentsActionCreated: 2,
+            nbAgentsAck: 2,
+            type: 'UPGRADE',
+            nbAgentsActioned: 2,
+            status: 'COMPLETE',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:05:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            completionTime: '2022-09-15T12:00:00.000Z',
+            latestErrors: [],
+          },
+          {
+            actionId: 'action2',
+            nbAgentsActionCreated: 5,
+            nbAgentsAck: 0,
+            version: '8.5.0',
+            startTime: '2022-09-15T10:00:00.000Z',
+            type: 'UPGRADE',
+            nbAgentsActioned: 5,
+            status: 'IN_PROGRESS',
+            creationTime: '2022-09-15T10:00:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
+          },
+        ]);
+      });
+
+      it('should handle pagination', async () => {
+        let res = await supertest
+          .get(`/api/fleet/agents/action_status?page=0&perPage=5`)
+          .expect(200);
+        expect(res.body.items).to.eql([
+          {
+            actionId: 'policy2:3',
+            creationTime: '2023-03-15T15:00:00.000Z',
+            completionTime: '2023-03-15T15:00:00.000Z',
+            type: 'POLICY_CHANGE',
+            nbAgentsActioned: 2,
+            nbAgentsAck: 1,
+            nbAgentsActionCreated: 2,
+            nbAgentsFailed: 0,
+            status: 'IN_PROGRESS',
+            policyId: 'policy2',
+            revision: 3,
+          },
+          {
+            actionId: 'policy2:2',
+            creationTime: '2023-03-15T14:00:00.000Z',
+            completionTime: '2023-03-15T14:00:00.000Z',
+            type: 'POLICY_CHANGE',
+            nbAgentsActioned: 2,
+            nbAgentsAck: 2,
+            nbAgentsActionCreated: 2,
+            nbAgentsFailed: 0,
+            status: 'COMPLETE',
+            policyId: 'policy2',
+            revision: 2,
+          },
+          {
+            actionId: 'policy3:2',
+            creationTime: '2023-03-15T13:00:00.000Z',
+            completionTime: '2023-03-15T13:00:00.000Z',
+            type: 'POLICY_CHANGE',
+            nbAgentsActioned: 0,
+            nbAgentsAck: 0,
+            nbAgentsActionCreated: 0,
+            nbAgentsFailed: 0,
+            status: 'COMPLETE',
+            policyId: 'policy3',
+            revision: 2,
+          },
+          {
+            actionId: 'action7',
+            nbAgentsActionCreated: 1,
+            nbAgentsAck: 0,
+            type: 'POLICY_REASSIGN',
+            nbAgentsActioned: 1,
+            status: 'FAILED',
+            expiration: '2099-09-16T10:00:00.000Z',
+            newPolicyId: 'policy1',
+            creationTime: '2022-09-15T10:30:00.000Z',
+            nbAgentsFailed: 1,
+            hasRolloutPeriod: false,
+            completionTime: '2022-09-15T11:00:00.000Z',
+            latestErrors: [
+              {
+                agentId: 'agent1',
+                error: 'agent already assigned',
+                timestamp: '2022-09-15T11:00:00.000Z',
+                hostname: 'agent1',
+              },
+            ],
+          },
+          {
+            actionId: 'action5',
+            nbAgentsActionCreated: 3,
+            nbAgentsAck: 0,
+            startTime: '2022-09-15T10:20:00.000Z',
+            type: 'UPGRADE',
+            nbAgentsActioned: 3,
+            status: 'CANCELLED',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:20:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            cancellationTime: '2022-09-15T11:00:00.000Z',
+            latestErrors: [],
+          },
+        ]);
+        res = await supertest.get(`/api/fleet/agents/action_status?page=1&perPage=5`).expect(200);
+        expect(res.body.items).to.eql([
           {
             actionId: 'action4',
             nbAgentsActionCreated: 3,

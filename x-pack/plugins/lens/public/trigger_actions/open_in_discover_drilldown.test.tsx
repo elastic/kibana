@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
-import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import React from 'react';
 import type { ApplicationStart } from '@kbn/core/public';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
-import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
   ActionFactoryContext,
@@ -17,6 +17,7 @@ import {
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
+import { LensApi } from '../embeddable';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
@@ -45,18 +46,18 @@ describe('open in discover drilldown', () => {
     window.open = originalOpen;
   });
 
-  it('provides UI to edit config', () => {
+  it('provides UI to edit config', async () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
     const setConfig = jest.fn();
-    const instance = mount(
+    render(
       <Component
         config={{ openInNewTab: false }}
         onConfig={setConfig}
         context={{} as ActionFactoryContext}
       />
     );
-    instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
+    await userEvent.click(screen.getByRole('switch'));
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
 
@@ -64,7 +65,7 @@ describe('open in discover drilldown', () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
     await drilldown.isCompatible(
       { openInNewTab: true },
-      { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
+      { embeddable: { type: 'lens' } as LensApi, filters }
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
@@ -73,7 +74,7 @@ describe('open in discover drilldown', () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
     await drilldown.execute(
       { openInNewTab: true },
-      { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
+      { embeddable: { type: 'lens' } as LensApi, filters }
     );
     expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });

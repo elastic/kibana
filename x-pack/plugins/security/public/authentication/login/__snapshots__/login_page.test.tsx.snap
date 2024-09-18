@@ -14,10 +14,9 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
     color="subdued"
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
         id="xpack.security.loginPage.openInNewWindowOrChangeBrowserSettingsTitle"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -29,10 +28,9 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
     iconType="popout"
     target="_blank"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Open in new window"
       id="xpack.security.loginPage.openInNewWindowButton"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -52,10 +50,9 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
     color="subdued"
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To view this content, open it in a new window or ask your administrator to allow cross-origin cookies."
         id="xpack.security.loginPage.openInNewWindowOrChangeKibanaConfigTitle"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -67,10 +64,9 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
     iconType="popout"
     target="_blank"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Open in new window"
       id="xpack.security.loginPage.openInNewWindowButton"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -79,17 +75,15 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
 exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="See the Kibana logs for details and try reloading the page."
       id="xpack.security.loginPage.esUnavailableMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cannot connect to the Elasticsearch cluster"
       id="xpack.security.loginPage.esUnavailableTitle"
-      values={Object {}}
     />
   }
 />
@@ -98,17 +92,15 @@ exports[`LoginPage disabled form states renders as expected when a connection to
 exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="See the Kibana logs for details and try reloading the page."
       id="xpack.security.loginPage.unknownLayoutMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Unsupported login form layout."
       id="xpack.security.loginPage.unknownLayoutTitle"
-      values={Object {}}
     />
   }
 />
@@ -117,17 +109,15 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Contact your system administrator."
       id="xpack.security.loginPage.noLoginMethodsAvailableMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Login is disabled."
       id="xpack.security.loginPage.noLoginMethodsAvailableTitle"
-      values={Object {}}
     />
   }
 />
@@ -136,17 +126,15 @@ exports[`LoginPage disabled form states renders as expected when login is not en
 exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Contact your system administrator."
       id="xpack.security.loginPage.requiresSecureConnectionMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="A secure connection is required for log in"
       id="xpack.security.loginPage.requiresSecureConnectionTitle"
-      values={Object {}}
     />
   }
 />
@@ -155,17 +143,15 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
 exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
       id="xpack.security.loginPage.xpackUnavailableMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
       id="xpack.security.loginPage.xpackUnavailableTitle"
-      values={Object {}}
     />
   }
 />
@@ -174,17 +160,15 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
 <DisabledLoginForm
   message={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Enable cookies in your browser settings to continue."
       id="xpack.security.loginPage.requiresCookiesMessage"
-      values={Object {}}
     />
   }
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cookies are required to log in to Elastic"
       id="xpack.security.loginPage.requiresCookiesTitle"
-      values={Object {}}
     />
   }
 />
@@ -336,10 +320,9 @@ exports[`LoginPage page renders as expected 1`] = `
         size="m"
       >
         <h1>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Welcome to Elastic"
             id="xpack.security.loginPage.welcomeTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -430,10 +413,9 @@ exports[`LoginPage page renders with custom branding 1`] = `
         size="m"
       >
         <h1>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Welcome to Elastic"
             id="xpack.security.loginPage.welcomeTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>

@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
-import { safeDump } from 'js-yaml';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
-import { API_VERSIONS } from '../../../../common/constants';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { getRootIntegrations } from '../../../../common/services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
-import {
-  useGetOneEnrollmentAPIKey,
-  useStartServices,
-  sendGetOneAgentPolicyFull,
-  useAgentVersion,
-} from '../../../hooks';
+import { useGetOneEnrollmentAPIKey, useStartServices, useAgentVersion } from '../../../hooks';
+import { useFetchFullPolicy } from '../hooks';
 
 import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
@@ -61,74 +54,10 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
 }) => {
-  const core = useStartServices();
-  const { notifications } = core;
-  const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
-  const [yaml, setYaml] = useState<any | undefined>('');
-
-  let downloadLink = '';
-
-  if (selectedPolicy?.id) {
-    downloadLink =
-      isK8s === 'IS_KUBERNETES'
-        ? core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(
-              selectedPolicy?.id
-            )}?kubernetes=true&standalone=true&apiVersion=${API_VERSIONS.public.v1}`
-          )
-        : core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(
-              selectedPolicy?.id
-            )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
-          );
-  }
-
-  useEffect(() => {
-    async function fetchFullPolicy() {
-      try {
-        if (!selectedPolicy?.id) {
-          return;
-        }
-        let query = { standalone: true, kubernetes: false };
-        if (isK8s === 'IS_KUBERNETES') {
-          query = { standalone: true, kubernetes: true };
-        }
-        const res = await sendGetOneAgentPolicyFull(selectedPolicy?.id, query);
-        if (res.error) {
-          throw res.error;
-        }
-
-        if (!res.data) {
-          throw new Error('No data while fetching full agent policy');
-        }
-        setFullAgentPolicy(res.data.item);
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: 'Error',
-        });
-      }
-    }
-    if (isK8s !== 'IS_LOADING') {
-      fetchFullPolicy();
-    }
-  }, [selectedPolicy, notifications.toasts, isK8s, core.http.basePath]);
-
-  useEffect(() => {
-    if (!fullAgentPolicy) {
-      return;
-    }
-    if (isK8s === 'IS_KUBERNETES') {
-      if (typeof fullAgentPolicy === 'object') {
-        return;
-      }
-      setYaml(fullAgentPolicy);
-    } else {
-      if (typeof fullAgentPolicy === 'string') {
-        return;
-      }
-      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
-    }
-  }, [fullAgentPolicy, isK8s]);
+  const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } = useFetchFullPolicy(
+    selectedPolicy,
+    isK8s
+  );
 
   const agentVersion = useAgentVersion();
 
@@ -159,7 +88,10 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         selectedPolicyId: selectedPolicy?.id,
         yaml,
-        downloadLink,
+        downloadYaml,
+        apiKey,
+        onCreateApiKey,
+        isCreatingApiKey,
       })
     );
 
@@ -168,14 +100,13 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         installCommand: standaloneInstallCommands,
         isK8s,
         cloudSecurityIntegration,
+        rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
       })
     );
 
     return steps;
   }, [
     agentVersion,
-    isK8s,
-    cloudSecurityIntegration,
     agentPolicy,
     selectedPolicy,
     agentPolicies,
@@ -184,8 +115,13 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
+    isK8s,
     yaml,
-    downloadLink,
+    downloadYaml,
+    apiKey,
+    onCreateApiKey,
+    isCreatingApiKey,
+    cloudSecurityIntegration,
     mode,
     setMode,
   ]);
@@ -204,8 +140,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
-  fleetServerHosts,
+  fleetServerHost,
   fleetProxy,
+  downloadSource,
   refreshAgentPolicies,
   mode,
   setMode,
@@ -224,19 +161,18 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const apiKeyData = apiKey?.data;
   const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
 
-  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
+  const { enrolledAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
 
   const agentVersion = useAgentVersion();
 
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
-  const fleetServerHost = fleetServerHosts?.[0];
-
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
-    fleetServerHosts,
+    fleetServerHost,
     fleetProxy,
+    downloadSource,
     agentVersion: agentVersion || '',
     gcpProjectId,
     gcpOrganizationId,
@@ -309,6 +245,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
           fleetServerHost,
           enrollToken,
+          rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
         })
       );
     }

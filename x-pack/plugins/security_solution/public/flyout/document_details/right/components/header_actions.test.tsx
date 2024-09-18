@@ -6,27 +6,22 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { copyToClipboard } from '@elastic/eui';
-import { RightPanelContext } from '../context';
+import { render } from '@testing-library/react';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
 import { HeaderActions } from './header_actions';
 import { useAssistant } from '../hooks/use_assistant';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvidersComponent } from '../../../../common/mock';
-import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
+import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
-jest.mock(
-  '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link'
-);
+jest.mock('../hooks/use_get_flyout_link');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
   EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
 }));
 
@@ -34,47 +29,41 @@ const alertUrl = 'https://example.com/alert';
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderHeaderActions = (contextValue: RightPanelContext) =>
+const renderHeaderActions = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HeaderActions />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 
 describe('<HeaderAction />', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?',
+      },
+    });
+  });
+
   beforeEach(() => {
-    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);
+    window.location.search = '?';
+    jest.mocked(useGetFlyoutLink).mockReturnValue(alertUrl);
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
 
   describe('Share alert url action', () => {
-    it('should render share button in the title and copy the the value to clipboard if document is an alert', () => {
-      const syncedFlyoutState = 'flyoutState';
-      const query = `?${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`;
-
-      Object.defineProperty(window, 'location', {
-        value: {
-          search: query,
-        },
-      });
-
+    it('should render share button in the title', () => {
       const { getByTestId } = renderHeaderActions(mockContextValue);
       const shareButton = getByTestId(SHARE_BUTTON_TEST_ID);
       expect(shareButton).toBeInTheDocument();
-
-      fireEvent.click(shareButton);
-
-      expect(copyToClipboard).toHaveBeenCalledWith(
-        `${alertUrl}&${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`
-      );
     });
 
     it('should not render share button in the title if alert is missing url info', () => {
-      jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(null);
+      jest.mocked(useGetFlyoutLink).mockReturnValue(null);
       const { queryByTestId } = renderHeaderActions(mockContextValue);
       expect(queryByTestId(SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });

@@ -10,7 +10,7 @@ import type {
   InfraMetadata,
   InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
@@ -22,38 +22,50 @@ const timeRange = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
-  const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
-    const response = await supertest
+  const fetchMetadata = async (
+    body: InfraMetadataRequest,
+    roleAuthc: RoleCredentials
+  ): Promise<InfraMetadata | undefined> => {
+    const response = await supertestWithoutAuth
       .post('/api/infra/metadata')
-      .set('kbn-xsrf', 'foo')
-      .set('x-elastic-internal-origin', 'foo')
-      .auth(username, password)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /infra/metadata', () => {
+    let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('Host asset type', () => {
-        before(() => esArchiver.load(ARCHIVE_NAME));
-        after(() => esArchiver.unload(ARCHIVE_NAME));
-
+        before(async () => {
+          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+          await esArchiver.load(ARCHIVE_NAME);
+        });
+        after(async () => {
+          await esArchiver.unload(ARCHIVE_NAME);
+          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        });
         it('with serverless existing host', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'serverless-host',
-            nodeType: 'host',
-            timeRange,
-          });
+          const metadata = await fetchMetadata(
+            {
+              sourceId: 'default',
+              nodeId: 'serverless-host',
+              nodeType: 'host',
+              timeRange,
+            },
+            roleAuthc
+          );
 
           if (metadata) {
             expect(metadata.features.length).to.be(4);
             expect(metadata.name).to.equal('serverless-host');
+            expect(metadata.hasSystemIntegration).to.equal(true);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.above(timeRange.from);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.below(timeRange.to);
             expect(metadata.info?.agent).to.eql({

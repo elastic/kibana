@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -75,9 +75,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -101,9 +101,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -141,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -192,9 +192,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -222,9 +222,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -1541,9 +1541,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsOpenPointInTimeResponse",
+                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
                 "text": "SavedObjectsOpenPointInTimeResponse"
               },
               ">"
@@ -1587,9 +1587,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClosePointInTimeResponse",
+                "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
               ">"
@@ -2660,7 +2660,7 @@
               "\nGiven a list item id, this will delete the single list item"
             ],
             "signature": [
-              "({ id }: ",
+              "({ id, refresh, }: ",
               "DeleteListItemOptions",
               ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
@@ -2673,7 +2673,7 @@
                 "id": "def-server.ListClient.deleteListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id }",
+                "label": "{\n    id,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "DeleteListItemOptions"
@@ -2698,7 +2698,7 @@
               "\nGiven a list value, this will delete all list items that have that value"
             ],
             "signature": [
-              "({ listId, value, type, }: ",
+              "({ listId, value, type, refresh, }: ",
               "DeleteListItemByValueOptions",
               ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
@@ -2711,7 +2711,7 @@
                 "id": "def-server.ListClient.deleteListItemByValue.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    listId,\n    value,\n    type,\n  }",
+                "label": "{\n    listId,\n    value,\n    type,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "DeleteListItemByValueOptions"
@@ -2846,7 +2846,7 @@
               "\nImports list items to a stream. If the list already exists, this will append the list items to the existing list.\nIf the list does not exist, this will auto-create the list and then add the items to that list.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer."
             ],
             "signature": [
-              "({ deserializer, serializer, type, listId, stream, meta, version, }: ",
+              "({ deserializer, serializer, type, listId, stream, meta, version, refresh, }: ",
               "ImportListItemsToStreamOptions",
               ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
@@ -2859,7 +2859,7 @@
                 "id": "def-server.ListClient.importListItemsToStream.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n  }",
+                "label": "{\n    deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "ImportListItemsToStreamOptions"
@@ -2920,7 +2920,7 @@
               "\nCreates a list item given at least \"value\", \"type\", and a \"listId\" where \"listId\" is the parent container that this list\nitem belongs to.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer."
             ],
             "signature": [
-              "({ id, deserializer, serializer, listId, value, type, meta, }: ",
+              "({ id, deserializer, serializer, listId, value, type, meta, refresh, }: ",
               "CreateListItemOptions",
               ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
@@ -2933,7 +2933,7 @@
                 "id": "def-server.ListClient.createListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n  }",
+                "label": "{\n    id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "CreateListItemOptions"
@@ -2992,7 +2992,7 @@
               "\nPatches a list item's value given the id of the list item.\nSee {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html}\nfor more information around optimistic concurrency control."
             ],
             "signature": [
-              "({ _version, id, value, meta, }: ",
+              "({ _version, id, value, meta, refresh, }: ",
               "UpdateListItemOptions",
               ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
@@ -3005,7 +3005,7 @@
                 "id": "def-server.ListClient.patchListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    _version,\n    id,\n    value,\n    meta,\n  }",
+                "label": "{\n    _version,\n    id,\n    value,\n    meta,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "UpdateListItemOptions"
@@ -4293,9 +4293,9 @@
             "(savedObjectsClient: ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsClientContract",
+              "section": "def-server.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
             ", user: string, enableServerExtensionPoints?: boolean | undefined) => ",
@@ -4322,9 +4322,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-common.SavedObjectsClientContract",
+                  "section": "def-server.SavedObjectsClientContract",
                   "text": "SavedObjectsClientContract"
                 }
               ],
@@ -4370,9 +4370,9 @@
             "(esClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-common.ElasticsearchClient",
+              "section": "def-server.ElasticsearchClient",
               "text": "ElasticsearchClient"
             },
             ", spaceId: string, user: string) => ",
@@ -4501,7 +4501,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                ">; }; helpers: ",
+                "default",
+                "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
                 "SearchRequest",
@@ -4533,9 +4535,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; helpers: ",
-                "default",
-                "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
@@ -4571,6 +4571,32 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "BulkResponse",
+                ">; }; capabilities: { (this: That, params?: ",
+                "TODO",
+                " | ",
+                "TODO",
+                " | undefined, options?: ",
+                "TransportRequestOptionsWithOutMeta",
+                " | undefined): Promise<",
+                "TODO",
+                ">; (this: That, params?: ",
+                "TODO",
+                " | ",
+                "TODO",
+                " | undefined, options?: ",
+                "TransportRequestOptionsWithMeta",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<",
+                "TODO",
+                ", unknown>>; (this: That, params?: ",
+                "TODO",
+                " | ",
+                "TODO",
+                " | undefined, options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<",
+                "TODO",
                 ">; }; cat: ",
                 "default",
                 "; ccr: ",
@@ -4628,6 +4654,8 @@
                 " | undefined): Promise<",
                 "ClosePointInTimeResponse",
                 ">; }; cluster: ",
+                "default",
+                "; connector: ",
                 "default",
                 "; count: { (this: That, params?: ",
                 "CountRequest",
@@ -4738,6 +4766,8 @@
                 ">; }; enrich: ",
                 "default",
                 "; eql: ",
+                "default",
+                "; esql: ",
                 "default",
                 "; exists: { (this: That, params: ",
                 "ExistsRequest",
@@ -4991,6 +5021,8 @@
                 "WriteResponseBase",
                 ">; }; indices: ",
                 "default",
+                "; inference: ",
+                "default",
                 "; info: { (this: That, params?: ",
                 "InfoRequest",
                 " | ",
@@ -5219,7 +5251,9 @@
                 "PingRequest",
                 " | undefined, options?: ",
                 "TransportRequestOptions",
-                " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+                " | undefined): Promise<boolean>; }; profiling: ",
+                "default",
+                "; putScript: { (this: That, params: ",
                 "PutScriptRequest",
                 " | ",
                 "PutScriptRequest",
@@ -5245,7 +5279,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "AcknowledgedResponseBase",
-                ">; }; rankEval: { (this: That, params: ",
+                ">; }; queryRules: ",
+                "default",
+                "; rankEval: { (this: That, params: ",
                 "RankEvalRequest",
                 " | ",
                 "RankEvalRequest",
@@ -5488,6 +5524,8 @@
                 "; security: ",
                 "default",
                 "; shutdown: ",
+                "default",
+                "; simulate: ",
                 "default",
                 "; slm: ",
                 "default",

@@ -20,8 +20,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
-
 import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -37,10 +35,11 @@ import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
+  isCrawler: boolean;
   isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
-  onChange: (criteria: CriteriaWithPagination<Connector>) => void;
+  onChange: (criteria: CriteriaWithPagination<ConnectorViewItem>) => void;
   onDelete: (connectorName: string, connectorId: string, indexName: string | null) => void;
 }
 export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
@@ -53,42 +52,54 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     },
   },
   onChange,
+  isCrawler,
   isLoading,
   onDelete,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
+    ...(!isCrawler
+      ? [
+          {
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
+              {
+                defaultMessage: 'Connector name',
+              }
+            ),
+            render: (connector: ConnectorViewItem) => (
+              <EuiLinkTo
+                to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
+              >
+                {connector.name}
+              </EuiLinkTo>
+            ),
+            width: '25%',
+          },
+        ]
+      : []),
     {
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
-        {
-          defaultMessage: 'Connector name',
-        }
-      ),
-      render: (connector: Connector) => (
-        <EuiLinkTo to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}>
-          {connector.name}
-        </EuiLinkTo>
-      ),
-      width: '25%',
-    },
-    {
-      field: 'index_name',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.indexName',
         {
           defaultMessage: 'Index name',
         }
       ),
-      render: (indexName: string) =>
-        indexName ? (
-          <EuiLinkTo to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}>
-            {indexName}
-          </EuiLinkTo>
+      render: (connector: ConnectorViewItem) =>
+        connector.index_name ? (
+          connector.indexExists ? (
+            <EuiLinkTo
+              to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: connector.index_name })}
+            >
+              {connector.index_name}
+            </EuiLinkTo>
+          ) : (
+            connector.index_name
+          )
         ) : (
           '--'
         ),
-      width: '25%',
+      width: isCrawler ? '70%' : '25%',
     },
     {
       field: 'docsCount',
@@ -100,31 +111,35 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       truncateText: true,
     },
+    ...(!isCrawler
+      ? [
+          {
+            field: 'service_type',
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
+              {
+                defaultMessage: 'Connector type',
+              }
+            ),
+            render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
+            truncateText: true,
+            width: '15%',
+          },
+        ]
+      : []),
     {
-      field: 'service_type',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
-        {
-          defaultMessage: 'Connector type',
-        }
-      ),
-      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
-      truncateText: true,
-      width: '25%',
-    },
-    {
-      field: 'status',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.status',
         {
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connectorStatus: ConnectorStatus) => {
-        const label = connectorStatusToText(connectorStatus);
-        return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
+      render: (connector: ConnectorViewItem) => {
+        const label = connectorStatusToText(connector);
+        return <EuiBadge color={connectorStatusToColor(connector)}>{label}</EuiBadge>;
       },
       truncateText: true,
+      width: '15%',
     },
     {
       actions: [
@@ -146,10 +161,15 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           type: 'icon',
         },
         {
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
-            { defaultMessage: 'View this connector' }
-          ),
+          description: isCrawler
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewCrawler',
+                { defaultMessage: 'View this crawler' }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
+                { defaultMessage: 'View this connector' }
+              ),
           enabled: (connector) => !!connector.index_name,
           icon: 'eye',
           isPrimary: false,
@@ -164,11 +184,22 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               }
             ),
           onClick: (connector) => {
-            navigateToUrl(
-              generateEncodedPath(CONNECTOR_DETAIL_PATH, {
-                connectorId: connector.id,
-              })
-            );
+            if (isCrawler) {
+              // crawler always has an index this is to satisfy TS
+              if (connector.index_name) {
+                navigateToUrl(
+                  generateEncodedPath(SEARCH_INDEX_PATH, {
+                    indexName: connector.index_name,
+                  })
+                );
+              }
+            } else {
+              navigateToUrl(
+                generateEncodedPath(CONNECTOR_DETAIL_PATH, {
+                  connectorId: connector.id,
+                })
+              );
+            }
           },
           type: 'icon',
         },
@@ -181,6 +212,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
     },
   ];
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>

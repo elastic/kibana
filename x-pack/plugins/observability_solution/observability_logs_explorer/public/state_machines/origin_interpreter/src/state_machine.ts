@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { createMachine, InterpreterFrom } from 'xstate';
-import { ObservabilityLogsExplorerHistory } from '../../../types';
+import type {
+  ObservabilityLogsExplorerHistory,
+  ObservabilityLogsExplorerStartServices,
+} from '../../../types';
 import { FEEDBACK_DELAY_MS } from './constants';
 import { DEFAULT_CONTEXT } from './defaults';
 import { initializeFromLocationState } from './location_state_service';
 import { createRequestFeedbackNotifier } from './notifications';
-import {
+import type {
   OriginInterpreterContext,
   OriginInterpreterEvent,
   OriginInterpreterTypeState,
@@ -65,7 +68,8 @@ export const createPureOriginInterpreterStateMachine = (initialContext: OriginIn
     }
   );
 
-export interface OriginInterpreterStateMachineDependencies {
+export interface OriginInterpreterStateMachineDependencies
+  extends ObservabilityLogsExplorerStartServices {
   initialContext?: OriginInterpreterContext;
   history: ObservabilityLogsExplorerHistory;
   toasts: IToasts;
@@ -75,10 +79,11 @@ export const createOriginInterpreterStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   history,
   toasts,
+  ...startServices
 }: OriginInterpreterStateMachineDependencies) =>
   createPureOriginInterpreterStateMachine(initialContext).withConfig({
     actions: {
-      requestFeedback: createRequestFeedbackNotifier(toasts),
+      requestFeedback: createRequestFeedbackNotifier(toasts, startServices),
     },
     services: {
       initializeFromLocationState: initializeFromLocationState({ history }),

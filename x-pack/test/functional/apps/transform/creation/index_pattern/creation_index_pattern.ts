@@ -22,9 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const transform = getService('transform');
   const pageObjects = getPageObjects(['discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/151889
-  // Failing: See https://github.com/elastic/kibana/issues/151811
-  describe.skip('creation_index_pattern', function () {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -126,8 +124,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '7',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
@@ -225,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               chartAvailable: true,
               id: 'customer_full_name',
-              legend: 'top 20 of 3321 categories',
+              legend: 'top 20 of 3327 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
                 { color: '#54B399', percentage: 75 },
@@ -329,8 +327,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '-1',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -408,8 +406,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '0',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
           pivotAdvancedEditorValue: {
@@ -474,8 +472,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '101',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           latestPreview: {
             column: 0,
@@ -494,11 +492,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           transformPreview: {
             column: 0,
             values: [
-              'July 12th 2019, 22:16:19',
-              'July 12th 2019, 22:50:53',
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:15:22',
-              'July 12th 2019, 23:31:12',
+              'July 12th 2023, 22:16:19',
+              'July 12th 2023, 22:50:53',
+              'July 12th 2023, 23:06:43',
+              'July 12th 2023, 23:15:22',
+              'July 12th 2023, 23:31:12',
             ],
           },
           discoverQueryHits: '10',
@@ -529,9 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176697
-        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176698
-        it.skip('navigates through the wizard and sets all needed fields', async () => {
+        it('navigates through the wizard and sets all needed fields', async () => {
           await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
 
@@ -565,6 +561,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('again displays an empty index preview');
           await transform.wizard.assertIndexPreviewEmpty();
+          await transform.datePicker.assertDatePickerDataTierOptionsVisible(true);
 
           await transform.testExecution.logTestStep(
             `clicks the 'Use full data' button to auto-select time range`

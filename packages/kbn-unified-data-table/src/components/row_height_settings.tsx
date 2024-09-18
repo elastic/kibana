@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,13 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+export enum RowHeightMode {
+  auto = 'auto',
+  single = 'single',
+  custom = 'custom',
+}
 export interface RowHeightSettingsProps {
-  rowHeight?: 'auto' | 'single' | 'custom';
+  rowHeight?: RowHeightMode;
   rowHeightLines?: number;
   maxRowHeight?: number;
   label: string;
   compressed?: boolean;
-  onChangeRowHeight: (newHeightMode: 'auto' | 'single' | 'custom' | undefined) => void;
+  onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
 }
@@ -36,25 +42,25 @@ export function RowHeightSettings({
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
-      id: `${idPrefix}single`,
+      id: `${idPrefix}${RowHeightMode.single}`,
       label: i18n.translate('unifiedDataTable.rowHeight.single', {
         defaultMessage: 'Single',
       }),
-      'data-test-subj': `${dataTestSubj}_rowHeight_single`,
+      'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.single}`,
     },
     {
-      id: `${idPrefix}auto`,
+      id: `${idPrefix}${RowHeightMode.auto}`,
       label: i18n.translate('unifiedDataTable.rowHeight.auto', {
         defaultMessage: 'Auto fit',
       }),
-      'data-test-subj': `${dataTestSubj}_rowHeight_auto`,
+      'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.auto}`,
     },
     {
-      id: `${idPrefix}custom`,
+      id: `${idPrefix}${RowHeightMode.custom}`,
       label: i18n.translate('unifiedDataTable.rowHeight.custom', {
         defaultMessage: 'Custom',
       }),
-      'data-test-subj': `${dataTestSubj}_rowHeight_custom`,
+      'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.custom}`,
     },
   ];
 
@@ -67,14 +73,14 @@ export function RowHeightSettings({
             legend={label}
             buttonSize="compressed"
             options={rowHeightModeOptions}
-            idSelected={`${idPrefix}${rowHeight ?? 'single'}`}
+            idSelected={`${idPrefix}${rowHeight ?? RowHeightMode.single}`}
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
             }}
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />
-          {rowHeight === 'custom' ? (
+          {rowHeight === RowHeightMode.custom ? (
             <EuiRange
               compressed
               fullWidth

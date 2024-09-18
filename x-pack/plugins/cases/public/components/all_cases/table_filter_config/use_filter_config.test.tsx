@@ -64,7 +64,9 @@ describe('useFilterConfig', () => {
 
   it('should remove a selected option if the filter is deleted', async () => {
     const { rerender } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren<Parameters<typeof useFilterConfig>[0]>) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,
@@ -99,12 +101,14 @@ describe('useFilterConfig', () => {
     const uiCustomFieldKey = `${CUSTOM_FIELD_KEY_PREFIX}${customFieldKey}`;
 
     localStorage.setItem(
-      'testAppId.cases.list.tableFiltersConfig',
+      'securitySolution.cases.list.tableFiltersConfig',
       JSON.stringify([{ key: uiCustomFieldKey, isActive: false }])
     );
 
     const { result } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren<Parameters<typeof useFilterConfig>[0]>) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,

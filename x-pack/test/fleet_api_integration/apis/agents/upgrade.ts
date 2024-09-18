@@ -11,7 +11,6 @@ import moment from 'moment';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -22,13 +21,14 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -428,6 +428,35 @@ export default function (providerContext: FtrProviderContext) {
           .expect(429);
       });
 
+      it('should respond 200 if trying to upgrade a recently upgraded agent with skipRateLimitCheck flag', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            skipRateLimitCheck: true,
+          })
+          .expect(200);
+      });
+
       it('should respond 200 if trying to upgrade an agent that was upgraded more than 10 minutes ago', async () => {
         await es.update({
           id: 'agent1',
@@ -679,10 +708,8 @@ export default function (providerContext: FtrProviderContext) {
           'fleet-server-policy',
           fleetServerVersion
         );
-      });
 
-      beforeEach(async () => {
-        es.updateByQuery({
+        await es.updateByQuery({
           index: '.fleet-agents',
           body: {
             script: "ctx._source.remove('upgrade_started_at')",
@@ -699,6 +726,75 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
+      });
+
+      it('should respond 200 if trying to upgrade a recently upgraded agent with skipRateLimitCheck flag', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            agents: ['agent1'],
+            skipRateLimitCheck: true,
+          })
+          .expect(200);
+
+        const actionsRes = await supertest.get(`/api/fleet/agents/action_status`);
+        expect(actionsRes.body.items[0].latestErrors.length).to.equal(0);
+      });
+
+      it('should respond with error if trying to upgrade a recently upgraded agent without skipRateLimitCheck flag', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            agents: ['agent1'],
+          })
+          .expect(200);
+
+        const actionsRes = await supertest.get(`/api/fleet/agents/action_status`);
+        expect(actionsRes.body.items[0].status).to.equal('FAILED');
+        const error: any = actionsRes.body.items[0].latestErrors[0];
+        expect(error.error).to.equal(
+          'Agent agent1 is not upgradeable: agent was upgraded 10 minutes ago, please wait 1 minutes before attempting the upgrade again.'
+        );
       });
 
       it('should create a .fleet-actions document with the correct version when bulk upgrade with build version', async () => {

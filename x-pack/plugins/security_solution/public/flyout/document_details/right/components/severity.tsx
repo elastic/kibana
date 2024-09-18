@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CellActions } from './cell_actions';
-import { useRightPanelContext } from '../context';
+import { CellActions } from '../../shared/components/cell_actions';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 const isSeverity = (x: unknown): x is Severity =>
@@ -19,8 +18,8 @@ const isSeverity = (x: unknown): x is Severity =>
 /**
  * Document details severity displayed in flyout right section header
  */
-export const DocumentSeverity: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+export const DocumentSeverity = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 
   if (!fieldsData) {

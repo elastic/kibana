@@ -30,7 +30,6 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
 import {
@@ -234,11 +233,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
 
-    getErrorMessage: (layer, columnId, indexPattern) =>
-      combineErrorMessages([
-        getInvalidFieldMessage(layer, columnId, indexPattern),
-        getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-      ]),
+    getErrorMessage: (layer, columnId, indexPattern) => [
+      ...getInvalidFieldMessage(layer, columnId, indexPattern),
+      ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+    ],
     filterable: true,
     canReduceTimeRange: true,
     quickFunctionDocumentation,

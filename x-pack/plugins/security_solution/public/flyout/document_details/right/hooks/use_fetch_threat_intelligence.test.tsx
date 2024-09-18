@@ -12,9 +12,9 @@ import type {
   UseThreatIntelligenceResult,
 } from './use_fetch_threat_intelligence';
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 
-jest.mock('../../../../common/containers/cti/event_enrichment');
+jest.mock('../../shared/hooks/use_investigation_enrichment');
 
 const dataFormattedForFieldBrowser = [
   {

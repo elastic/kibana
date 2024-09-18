@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface ApiKey {
@@ -14,20 +14,15 @@ export interface ApiKey {
   id: string;
   name: string;
 }
-
-export const generateApiKey = async ({
-  indexName,
-  isNative,
-  secretId,
-}: {
+export interface GenerateConnectorApiKeyApiArgs {
   indexName: string;
   isNative: boolean;
-  secretId: string | null;
-}) => {
+}
+
+export const generateApiKey = async ({ indexName, isNative }: GenerateConnectorApiKeyApiArgs) => {
   const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
   const params = {
     is_native: isNative,
-    secret_id: secretId,
   };
   return await HttpLogic.values.http.post<ApiKey>(route, {
     body: JSON.stringify(params),
@@ -38,3 +33,8 @@ export const GenerateConnectorApiKeyApiLogic = createApiLogic(
   ['generate_connector_api_key_api_logic'],
   generateApiKey
 );
+
+export type GenerateConnectorApiKeyApiLogicActions = Actions<
+  GenerateConnectorApiKeyApiArgs,
+  ApiKey
+>;

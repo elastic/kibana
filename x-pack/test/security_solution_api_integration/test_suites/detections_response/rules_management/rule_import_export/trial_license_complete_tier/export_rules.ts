@@ -10,14 +10,7 @@ import expect from 'expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
-import {
-  binaryToString,
-  getSimpleRule,
-  getSimpleRuleOutput,
-  getWebHookAction,
-  removeServerGeneratedProperties,
-  updateUsername,
-} from '../../../utils';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -26,16 +19,15 @@ import {
   waitForRulePartialFailure,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
+import { createConnector } from '../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @brokenInServerless @skipInQA export_rules', () => {
+  describe('@ess @skipInServerlessMKI export_rules', () => {
     describe('exporting rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -47,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should set the response content types to be expected', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        await createRule(supertest, log, getCustomQueryRuleParams());
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -59,10 +51,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
       });
 
-      it('should validate exported rule schema when its exported by its rule_id', async () => {
+      it('should validate exported rule schema when it is exported by its rule_id', async () => {
         const ruleId = 'rule-1';
 
-        await createRule(supertest, log, getSimpleRule(ruleId, true));
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            enabled: true,
+          })
+        );
 
         await waitForRulePartialFailure({
           supertest,
@@ -89,8 +88,22 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleId1 = 'rule-1';
         const ruleId2 = 'rule-2';
 
-        await createRule(supertest, log, getSimpleRule(ruleId1, true));
-        await createRule(supertest, log, getSimpleRule(ruleId2, true));
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId1,
+            enabled: true,
+          })
+        );
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId2,
+            enabled: true,
+          })
+        );
 
         await waitForRulePartialFailure({
           supertest,
@@ -119,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a exported count with a single rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+        await createRule(supertest, log, getCustomQueryRuleParams());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -151,8 +164,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
-        await createRule(supertest, log, getSimpleRule('rule-2'));
+        const ruleToExport1 = getCustomQueryRuleParams({ rule_id: 'rule-1' });
+        const ruleToExport2 = getCustomQueryRuleParams({ rule_id: 'rule-2' });
+
+        await createRule(supertest, log, ruleToExport1);
+        await createRule(supertest, log, ruleToExport2);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -162,57 +178,42 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-        const secondRule = removeServerGeneratedProperties(secondRuleParsed);
-        const expectedRule1 = updateUsername(
-          getSimpleRuleOutput(firstRule.rule_id),
-          ELASTICSEARCH_USERNAME
-        );
-        const expectedRule2 = updateUsername(
-          getSimpleRuleOutput(secondRule.rule_id),
-          ELASTICSEARCH_USERNAME
-        );
+        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[0]);
+        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[1]);
 
-        expect(firstRule).toEqual(expectedRule1);
-        expect(secondRule).toEqual(expectedRule2);
+        expect([exportedRule1, exportedRule2]).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(ruleToExport1),
+            expect.objectContaining(ruleToExport2),
+          ])
+        );
       });
 
       it('should export multiple actions attached to 1 rule', async () => {
-        // 1st action
-        const { body: hookAction1 } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
-
-        // 2nd action
-        const { body: hookAction2 } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
+        const webHookConnectorParams = getWebHookConnectorParams();
+        const webHookConnectorId1 = await createConnector(supertest, webHookConnectorParams);
+        const webHookConnectorId2 = await createConnector(supertest, webHookConnectorParams);
 
         const action1 = {
           group: 'default',
-          id: hookAction1.id,
-          action_type_id: hookAction1.actionTypeId,
+          id: webHookConnectorId1,
+          action_type_id: webHookConnectorParams.connector_type_id,
           params: {},
         };
         const action2 = {
           group: 'default',
-          id: hookAction2.id,
-          action_type_id: hookAction2.actionTypeId,
+          id: webHookConnectorId2,
+          action_type_id: webHookConnectorParams.connector_type_id,
           params: {},
         };
 
-        const rule1: ReturnType<typeof getSimpleRule> = {
-          ...getSimpleRule('rule-1'),
-          actions: [action1, action2],
-        };
-
-        await createRule(supertest, log, rule1);
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            actions: [action1, action2],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -222,55 +223,45 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-        const expectedRule = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-          ...expectedRule,
+        expect(exportedRule).toMatchObject({
           actions: [
             {
               ...action1,
-              uuid: firstRule.actions[0].uuid,
+              uuid: expect.any(String),
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
             {
               ...action2,
-              uuid: firstRule.actions[1].uuid,
+              uuid: expect.any(String),
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-        };
-        expect(firstRule).toEqual(outputRule1);
+        });
       });
 
       it('should export actions attached to 2 rules', async () => {
-        // create a new action
-        const { body: hookAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
+        const webHookConnectorParams = getWebHookConnectorParams();
+        const webHookConnectorId = await createConnector(supertest, webHookConnectorParams);
 
         const action = {
           group: 'default',
-          id: hookAction.id,
-          action_type_id: hookAction.actionTypeId,
+          id: webHookConnectorId,
+          action_type_id: webHookConnectorParams.connector_type_id,
           params: {},
         };
 
-        const rule1: ReturnType<typeof getSimpleRule> = {
-          ...getSimpleRule('rule-1'),
-          actions: [action],
-        };
-
-        const rule2: ReturnType<typeof getSimpleRule> = {
-          ...getSimpleRule('rule-2'),
-          actions: [action],
-        };
-
-        await createRule(supertest, log, rule1);
-        await createRule(supertest, log, rule2);
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ rule_id: 'rule-1', actions: [action] })
+        );
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ rule_id: 'rule-2', actions: [action] })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -280,59 +271,47 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-        const secondRule = removeServerGeneratedProperties(secondRuleParsed);
-        const expectedRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
+        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[0]);
+        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[1]);
 
-        const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-          ...expectedRule2,
+        expect(exportedRule1).toMatchObject({
           actions: [
             {
               ...action,
-              uuid: firstRule.actions[0].uuid,
+              uuid: expect.any(String),
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-        };
-        const expectedRule1 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
-
-        const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
-          ...expectedRule1,
+        });
+        expect(exportedRule2).toMatchObject({
           actions: [
             {
               ...action,
-              uuid: secondRule.actions[0].uuid,
+              uuid: expect.any(String),
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-        };
-        expect(firstRule).toEqual(outputRule1);
-        expect(secondRule).toEqual(outputRule2);
+        });
       });
 
-      it('should export actions connectors with the rule', async () => {
-        // create a new action
-        const { body: hookAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
+      it('should export action connectors with the rule', async () => {
+        const webHookConnectorParams = getWebHookConnectorParams();
+        const webHookConnectorId = await createConnector(supertest, webHookConnectorParams);
 
         const action = {
           group: 'default',
-          id: hookAction.id,
-          action_type_id: hookAction.actionTypeId,
+          id: webHookConnectorId,
+          action_type_id: webHookConnectorParams.connector_type_id,
           params: {},
         };
 
-        const rule1: ReturnType<typeof getSimpleRule> = {
-          ...getSimpleRule('rule-1'),
-          actions: [action],
-        };
-
-        await createRule(supertest, log, rule1);
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            actions: [action],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -342,36 +321,28 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const connectorsObjectParsed = JSON.parse(body.toString().split(/\n/)[1]);
-        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[2]);
+        const exportedConnectors = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportedSummary = JSON.parse(body.toString().split(/\n/)[2]);
 
-        expect(connectorsObjectParsed).toEqual(
-          expect.objectContaining({
-            attributes: {
-              actionTypeId: '.webhook',
-              config: {
-                hasAuth: true,
-                headers: null,
-                method: 'post',
-                url: 'http://localhost',
-              },
-              isMissingSecrets: true,
-              name: 'Some connector',
-              secrets: {},
+        expect(exportedConnectors).toMatchObject({
+          attributes: {
+            actionTypeId: '.webhook',
+            config: {
+              hasAuth: true,
+              headers: null,
+              method: 'post',
+              url: 'http://localhost',
             },
-            references: [],
-            type: 'action',
-          })
-        );
-        expect(exportDetailsParsed).toEqual({
-          exported_exception_list_count: 0,
-          exported_exception_list_item_count: 0,
+            isMissingSecrets: true,
+            name: 'Webhook connector',
+            secrets: {},
+          },
+          references: [],
+          type: 'action',
+        });
+        expect(exportedSummary).toMatchObject({
           exported_count: 2,
           exported_rules_count: 1,
-          missing_exception_list_item_count: 0,
-          missing_exception_list_items: [],
-          missing_exception_lists: [],
-          missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
           excluded_action_connection_count: 0,
@@ -381,7 +352,8 @@ export default ({ getService }: FtrProviderContext): void => {
           missing_action_connections: [],
         });
       });
-      it('should export rule without the action connector if it is Preconfigured Connector', async () => {
+
+      it('should NOT export preconfigured actions connectors', async () => {
         const action = {
           group: 'default',
           id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
@@ -389,12 +361,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {},
         };
 
-        const rule1: ReturnType<typeof getSimpleRule> = {
-          ...getSimpleRule('rule-1'),
-          actions: [action],
-        };
-
-        await createRule(supertest, log, rule1);
+        await createRule(supertest, log, getCustomQueryRuleParams({ actions: [action] }));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -404,17 +371,11 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportedSummary = JSON.parse(body.toString().split(/\n/)[1]);
 
-        expect(exportDetailsParsed).toEqual({
-          exported_exception_list_count: 0,
-          exported_exception_list_item_count: 0,
+        expect(exportedSummary).toMatchObject({
           exported_count: 1,
           exported_rules_count: 1,
-          missing_exception_list_item_count: 0,
-          missing_exception_list_items: [],
-          missing_exception_lists: [],
-          missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
           excluded_action_connection_count: 0,
@@ -435,6 +396,9 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     rule_id: expect.any(String),
     enabled: expect.any(Boolean),
     immutable: false,
+    rule_source: {
+      type: 'internal',
+    },
     updated_at: expect.any(String),
     updated_by: expect.any(String),
     created_at: expect.any(String),

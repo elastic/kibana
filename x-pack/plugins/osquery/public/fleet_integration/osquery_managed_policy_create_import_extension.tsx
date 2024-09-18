@@ -146,14 +146,21 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     policy?: PackagePolicyEditExtensionComponentProps['policy'];
   }
 >(({ onChange, policy, newPolicy }) => {
-  const [policyAgentsCount, setPolicyAgentsCount] = useState<number | null>(null);
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | null>(null);
+  const [agentlessPolicyIds, setAgentlessPolicyIds] = useState<string[]>([]);
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [editMode] = useState(!!policy);
   const {
     application: { getUrlForApp },
     http,
   } = useKibana().services;
 
+  const policyIdsWithAgents = useMemo(
+    () =>
+      agentlessPolicyIds?.length
+        ? policy?.policy_ids.filter((id) => !agentlessPolicyIds.includes(id))
+        : policy?.policy_ids,
+    [agentlessPolicyIds, policy?.policy_ids]
+  );
   const { form: configForm } = useForm({
     defaultValue: {
       config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
@@ -185,16 +192,19 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   const [{ config }] = useFormData({ form: configForm, watch: 'config' });
   const { isValid, setFieldValue } = configForm;
 
-  const agentsLinkHref = useMemo(() => {
-    if (!policy?.policy_id) return '#';
+  const agentsLinkHref = useCallback(
+    (policyId) => {
+      if (!policy?.policy_ids?.length) return '#';
 
-    return getUrlForApp(PLUGIN_ID, {
-      path: pagePathGetters.policy_details({ policyId: policy?.policy_id })[1],
-    });
-  }, [getUrlForApp, policy?.policy_id]);
+      return getUrlForApp(PLUGIN_ID, {
+        path: pagePathGetters.policy_details({ policyId })[1],
+      });
+    },
+    [getUrlForApp, policy?.policy_ids?.length]
+  );
 
   const handleConfigUpload = useCallback(
-    (newConfig) => {
+    (newConfig: any) => {
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;
@@ -248,42 +258,57 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   );
 
   useEffect(() => {
-    if (editMode && policyAgentsCount === null) {
+    const policyIdsWithNoAgent: string[] = [];
+    if (editMode && !agentlessPolicyIds?.length) {
       const fetchAgentsCount = async () => {
         try {
-          const response = await http.fetch<{ results: { total: number } }>(
-            agentRouteService.getStatusPath(),
-            {
-              query: {
-                policyId: policy?.policy_id,
-              },
-            }
-          );
-          if (response.results) {
-            setPolicyAgentsCount(response.results.total);
+          if (policy?.policy_ids?.length) {
+            await Promise.all(
+              policy.policy_ids.map(async (id: string) => {
+                const response = await http.fetch<{ results: { total: number } }>(
+                  agentRouteService.getStatusPath(),
+                  {
+                    query: {
+                      policyId: id,
+                    },
+                  }
+                );
+                if (response.results.total === 0) {
+                  policyIdsWithNoAgent.push(id);
+                }
+              })
+            );
+            setAgentlessPolicyIds(policyIdsWithNoAgent);
           }
           // eslint-disable-next-line no-empty
         } catch (e) {}
       };
 
       const fetchAgentPolicyDetails = async () => {
-        if (policy?.policy_id) {
+        if (policyIdsWithNoAgent?.length) {
+          const policiesWithoutAgent: AgentPolicy[] = [];
           try {
-            const response = await http.fetch<{ item: AgentPolicy }>(
-              agentPolicyRouteService.getInfoPath(policy?.policy_id)
+            await Promise.all(
+              policyIdsWithNoAgent.map(async (id) => {
+                const response = await http.fetch<{ item: AgentPolicy }>(
+                  agentPolicyRouteService.getInfoPath(id)
+                );
+                if (response.item) {
+                  policiesWithoutAgent.push(response.item);
+                }
+              })
             );
-            if (response.item) {
-              setAgentPolicy(response.item);
+            if (policiesWithoutAgent.length) {
+              setAgentPolicies(policiesWithoutAgent);
             }
             // eslint-disable-next-line no-empty
           } catch (e) {}
         }
       };
 
-      fetchAgentsCount();
-      fetchAgentPolicyDetails();
+      fetchAgentsCount().then(() => fetchAgentPolicyDetails());
     }
-  }, [editMode, http, policy?.policy_id, policyAgentsCount]);
+  }, [editMode, http, agentlessPolicyIds?.length, agentlessPolicyIds, policy?.policy_ids]);
 
   useEffect(() => {
     /*
@@ -291,8 +316,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (newPolicy?.package?.version) {
-      if (!editMode && satisfies(newPolicy?.package?.version, '<0.6.0')) {
+
+    const policyVersion = newPolicy?.package?.version;
+    if (policyVersion) {
+      /* From 0.6.0 we don't provide an input template, so we have to set it here */
+      const versionWithoutTemplate = satisfies(policyVersion, '>=0.6.0');
+
+      if (!editMode && !versionWithoutTemplate) {
         const updatedPolicy = produce(newPolicy, (draft) => {
           set(draft, 'inputs[0].streams', []);
         });
@@ -302,9 +332,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         });
       }
 
-      /* From 0.6.0 we don't provide an input template, so we have to set it here */
-      if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
+      if (versionWithoutTemplate) {
         const updatedPolicy = produce(newPolicy, (draft) => {
+          const hasNewInputs = newPolicy.inputs[0]?.streams?.length;
+          // 1.12.0 introduces multiple streams
+          const versionWithStreams = satisfies(policyVersion, '>=1.12.0');
+
+          if (versionWithStreams && hasNewInputs) {
+            return draft;
+          }
+
           if (editMode && policy?.inputs.length) {
             set(draft, 'inputs', policy.inputs);
           } else {
@@ -351,21 +388,30 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   return (
     <>
       {!editMode ? <DisabledCallout /> : null}
-      {policyAgentsCount === 0 ? (
+      {agentlessPolicyIds?.length ? (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut title="No agents in the policy" color="warning" iconType="help">
                 <p>
-                  {`Fleet has detected that you have not assigned yet any agent to the `}
-                  {
-                    <EuiLink href={agentsLinkHref}>
-                      {agentPolicy?.name ?? policy?.policy_id}
-                    </EuiLink>
-                  }
+                  {i18n.translate(
+                    'xpack.osquery.fleetIntegration.osqueryConfig.noAgentsWarningMessage',
+                    {
+                      defaultMessage:
+                        'Fleet has detected that you have not assigned yet any agent to the ',
+                    }
+                  )}
+                  {agentPolicies?.map((agentPolicy, index) => (
+                    <React.Fragment key={agentPolicy.id}>
+                      <EuiLink href={agentsLinkHref(agentPolicy.id)}>
+                        {agentPolicy.name || agentPolicy?.id}
+                      </EuiLink>
+                      {index < agentPolicies.length - 1 && `, `}
+                    </React.Fragment>
+                  ))}
                   {`. `}
                   <br />
-                  <strong>{`Only agents within the policy with active Osquery Manager integration support the functionality presented below.`}</strong>
+                  <strong>{`Only agents within the policies with active Osquery Manager integration support the functionality presented below.`}</strong>
                 </p>
               </EuiCallOut>
             </EuiFlexItem>
@@ -373,10 +419,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           <EuiSpacer />
         </>
       ) : null}
-
       {!permissionDenied && (
         <>
-          <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
+          <NavigationButtons isDisabled={!editMode} agentPolicyIds={policyIdsWithAgents} />
           <EuiSpacer size="xxl" />
           <EuiAccordion
             css={euiAccordionCss}

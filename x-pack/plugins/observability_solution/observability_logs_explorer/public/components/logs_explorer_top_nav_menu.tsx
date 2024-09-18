@@ -27,21 +27,26 @@ import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
 import { AlertsPopover } from './alerts_popover';
+import { ConnectedDatasetQualityLink } from './dataset_quality_link';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
-    services: { serverless },
+    services: { chrome },
   } = useKibanaContextForPlugin();
 
-  return Boolean(serverless) ? <ServerlessTopNav /> : <StatefulTopNav />;
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
+  return chromeStyle === 'project' ? <ProjectTopNav /> : <ClassicTopNav />;
 };
 
-const ServerlessTopNav = () => {
+const ProjectTopNav = () => {
   const { services } = useKibanaContextForPlugin();
-  const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
 
   return (
-    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader
+      data-test-subj="logsExplorerHeaderMenu"
+      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+    >
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
@@ -66,13 +71,12 @@ const ServerlessTopNav = () => {
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
             <VerticalRule />
+            <ConnectedDatasetQualityLink />
+            <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
@@ -83,17 +87,15 @@ const ServerlessTopNav = () => {
   );
 };
 
-const StatefulTopNav = () => {
+const ClassicTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
-      observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
-      i18n,
+      i18n: i18nStart,
       theme,
     },
   } = useKibanaContextForPlugin();
-
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -127,7 +129,7 @@ const StatefulTopNav = () => {
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n }
+          { theme, i18n: i18nStart }
         ),
       });
     }
@@ -137,7 +139,7 @@ const StatefulTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18n, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
@@ -146,11 +148,10 @@ const StatefulTopNav = () => {
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
             <VerticalRule />
+            <ConnectedDatasetQualityLink />
+            <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>

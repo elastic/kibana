@@ -6,28 +6,32 @@
  */
 
 import { useEuiBackgroundColor } from '@elastic/eui';
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import type { LeftPanelPaths } from '.';
-import { tabs } from './tabs';
-import { FlyoutBody } from '../../shared/components/flyout_body';
+import type { LeftPanelTabType } from './tabs';
 
 export interface PanelContentProps {
   /**
    * Id of the tab selected in the parent component to display its content
    */
   selectedTabId: LeftPanelPaths;
+  /**
+   * Tabs display at the top of left panel
+   */
+  tabs: LeftPanelTabType[];
 }
 
 /**
  * Document details expandable flyout left section. Appears after the user clicks on the expand details button in the right section.
  * Displays the content of investigation and insights tabs (visualize is hidden for 8.9).
  */
-export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
+export const PanelContent: FC<PanelContentProps> = ({ selectedTabId, tabs }) => {
   const selectedTabContent = useMemo(() => {
-    return tabs.filter((tab) => tab.visible).find((tab) => tab.id === selectedTabId)?.content;
-  }, [selectedTabId]);
+    return tabs.find((tab) => tab.id === selectedTabId)?.content;
+  }, [selectedTabId, tabs]);
 
   return (
     <FlyoutBody

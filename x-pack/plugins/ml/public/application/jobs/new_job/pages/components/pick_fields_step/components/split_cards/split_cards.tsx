@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo, Fragment } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { memo, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { SplitField } from '@kbn/ml-anomaly-utils';
@@ -25,7 +26,7 @@ interface Panel {
   marginBottom: number;
 }
 
-export const SplitCards: FC<Props> = memo(
+export const SplitCards: FC<PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
     const panels: Panel[] = [];
 

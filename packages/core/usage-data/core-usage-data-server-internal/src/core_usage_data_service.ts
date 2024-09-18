@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
@@ -34,6 +35,8 @@ import type {
   CoreIncrementUsageCounter,
   ConfigUsageData,
   CoreConfigUsageData,
+  CoreIncrementCounterParams,
+  CoreUsageCounter,
 } from '@kbn/core-usage-data-server';
 import {
   CORE_USAGE_STATS_TYPE,
@@ -331,6 +334,9 @@ export class CoreUsageDataService
       },
       environment: {
         memory: {
+          arrayBuffersBytes: this.opsMetrics.process.memory.array_buffers_in_bytes,
+          residentSetSizeBytes: this.opsMetrics.process.memory.resident_set_size_in_bytes,
+          externalBytes: this.opsMetrics.process.memory.external_in_bytes,
           heapSizeLimit: this.opsMetrics.process.memory.heap.size_limit,
           heapTotalBytes: this.opsMetrics.process.memory.heap.total_in_bytes,
           heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,
@@ -493,29 +499,33 @@ export class CoreUsageDataService
       typeRegistry.registerType(coreUsageStatsType);
     };
 
-    const getClient = () => {
-      const debugLogger = (message: string) => this.logger.debug(message);
-
-      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
+    const registerUsageCounter = (usageCounter: CoreUsageCounter) => {
+      this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
     };
 
-    this.coreUsageStatsClient = getClient();
+    const incrementUsageCounter = (params: CoreIncrementCounterParams) => {
+      try {
+        this.incrementUsageCounter(params);
+      } catch (e) {
+        // Self-defense mechanism since the handler is externally registered
+        this.logger.debug('Failed to increase the usage counter');
+        this.logger.debug(e);
+      }
+    };
+
+    this.coreUsageStatsClient = new CoreUsageStatsClient({
+      debugLogger: (message: string) => this.logger.debug(message),
+      basePath: http.basePath,
+      repositoryPromise: internalRepositoryPromise,
+      stop$: this.stop$,
+      incrementUsageCounter,
+    });
 
     const contract: InternalCoreUsageDataSetup = {
       registerType,
-      getClient,
-      registerUsageCounter: (usageCounter) => {
-        this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
-      },
-      incrementUsageCounter: (params) => {
-        try {
-          this.incrementUsageCounter(params);
-        } catch (e) {
-          // Self-defense mechanism since the handler is externally registered
-          this.logger.debug('Failed to increase the usage counter');
-          this.logger.debug(e);
-        }
-      },
+      getClient: () => this.coreUsageStatsClient!,
+      registerUsageCounter,
+      incrementUsageCounter,
     };
 
     return contract;

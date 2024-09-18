@@ -6,7 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
-import { assetCriticalityRouteHelpersFactoryNoAuth } from '../../utils';
+import {
+  assetCriticalityRouteHelpersFactoryNoAuth,
+  enableAssetCriticalityAdvancedSetting,
+} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
@@ -64,6 +67,9 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
+  const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
+
   describe('Entity Analytics - Asset Criticality Privileges API', () => {
     describe('@ess Asset Criticality Privileges API', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -89,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       before(async () => {
         await createPrivilegeTestUsers();
+        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
       describe('Asset Criticality privileges API', () => {
@@ -137,7 +144,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@serverless Asset Criticality Privileges API', () => {
+    // https://github.com/elastic/kibana/issues/183247
+    describe('@skipInServerless @skipInServerlessMKI Asset Criticality Privileges API', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const assetCriticalityRoutesNoAuth =
         assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);

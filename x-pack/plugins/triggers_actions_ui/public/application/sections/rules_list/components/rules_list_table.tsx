@@ -21,7 +21,6 @@ import {
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiCheckbox,
   RIGHT_ALIGNMENT,
@@ -237,7 +236,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const renderPercentileColumnName = useCallback(() => {
     return (
       <span data-test-subj={`rulesTable-${selectedPercentile}ColumnName`}>
-        <EuiToolTip
+        {selectedPercentile}
+        &nbsp;
+        <EuiIconTip
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip',
             {
@@ -248,12 +249,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
               },
             }
           )}
-        >
-          <span>
-            {selectedPercentile}&nbsp;
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          size="s"
+          color="subdued"
+          type="questionInCircle"
+          className="eui-alignTop"
+        />
         <PercentileSelectablePopover
           options={percentileOptions}
           onOptionsChange={onPercentileOptionsChange}
@@ -422,23 +422,26 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Last run' }
         ),
         name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-lastExecutionDateTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
-              {
-                defaultMessage: 'Start time of the last run.',
-              }
+          <span>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitle',
+              { defaultMessage: 'Last run' }
             )}
-          >
-            <span>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitle',
-                { defaultMessage: 'Last run' }
+            &nbsp;
+            <EuiIconTip
+              data-test-subj="rulesTableCell-lastExecutionDateTooltip"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
+                {
+                  defaultMessage: 'Start time of the last run.',
+                }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </span>
         ),
         sortable: true,
         width: '20%',
@@ -469,26 +472,28 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Notify' }
         ),
         name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-notifyTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+          <span>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle',
               {
-                defaultMessage: 'Snooze notifications for a rule.',
+                defaultMessage: 'Notify',
               }
             )}
-          >
-            <span>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle',
+            &nbsp;
+            <EuiIconTip
+              data-test-subj="rulesTableCell-notifyTooltip"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
                 {
-                  defaultMessage: 'Notify',
+                  defaultMessage: 'Snooze notifications for a rule.',
                 }
               )}
-              &nbsp;
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </span>
         ),
         width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
@@ -581,23 +586,26 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Duration' }
         ),
         name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-durationTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitleTooltip',
-              {
-                defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
-              }
+          <span>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+              { defaultMessage: 'Duration' }
             )}
-          >
-            <span>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
-                { defaultMessage: 'Duration' }
+            &nbsp;
+            <EuiIconTip
+              data-test-subj="rulesTableCell-durationTooltip"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitleTooltip',
+                {
+                  defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
+                }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </span>
         ),
         sortable: true,
         truncateText: false,
@@ -615,7 +623,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiIconTip
                   data-test-subj="ruleDurationWarning"
                   anchorClassName="ruleDurationWarningIcon"
-                  type="rule"
+                  type="warning"
                   color="warning"
                   content={i18n.translate(
                     'xpack.triggersActionsUI.sections.rulesList.ruleTypeExcessDurationMessage',
@@ -654,23 +662,26 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Success ratio' }
         ),
         name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-successRatioTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitleTooltip',
-              {
-                defaultMessage: 'How often this rule runs successfully.',
-              }
+          <span>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+              { defaultMessage: 'Success ratio' }
             )}
-          >
-            <span>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
-                { defaultMessage: 'Success ratio' }
+            &nbsp;
+            <EuiIconTip
+              data-test-subj="rulesTableCell-successRatioTooltip"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitleTooltip',
+                {
+                  defaultMessage: 'How often this rule runs successfully.',
+                }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </span>
         ),
         sortable: true,
         truncateText: false,
@@ -756,7 +767,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                         iconType={'trash'}
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel',
-                          { defaultMessage: 'Delete' }
+                          { defaultMessage: 'Delete "{name}"', values: { name: rule.name } }
                         )}
                       />
                     </EuiFlexItem>
@@ -915,6 +926,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           itemId="id"
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
+          rowHeader="name"
           rowProps={rowProps}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
@@ -944,7 +956,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
             }
           }}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

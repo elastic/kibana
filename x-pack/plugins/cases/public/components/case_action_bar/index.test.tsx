@@ -93,9 +93,12 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).prop('value')).toBe(
-      basicCase.createdAt
-    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-action-bar-status-date"]`)
+        .find('FormattedRelativePreferenceDate')
+        .prop('value')
+    ).toBe(basicCase.createdAt);
   });
 
   it('invalidates the queryClient cache onRefresh', () => {
@@ -213,27 +216,27 @@ describe('CaseActionBar', () => {
     expect(queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
-  it('should not show the delete item in the menu when the user does not have delete privileges', () => {
+  it('should not show the delete item in the menu when the user does not have delete privileges', async () => {
     const { queryByText, queryByTestId } = render(
       <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).not.toBeInTheDocument();
     expect(queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
     expect(queryByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
   });
 
-  it('should show the the delete item in the menu when the user does have delete privileges', () => {
+  it('should show the the delete item in the menu when the user does have delete privileges', async () => {
     const { queryByText } = render(
       <TestProviders permissions={allCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).toBeInTheDocument();
   });
 
@@ -252,7 +255,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     await waitFor(() => {
       expect(screen.getByTestId('property-actions-case-popout')).toBeInTheDocument();
@@ -266,7 +269,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     expect(screen.queryByTestId('property-actions-case-popout')).not.toBeInTheDocument();
   });

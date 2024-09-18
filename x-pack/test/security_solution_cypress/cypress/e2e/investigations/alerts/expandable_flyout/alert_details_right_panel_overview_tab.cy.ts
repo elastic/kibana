@@ -6,10 +6,10 @@
  */
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
-  expandFirstAlertExpandableFlyout,
+  expandAlertAtIndexExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
@@ -39,6 +39,9 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -59,11 +62,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
@@ -72,6 +71,20 @@ import {
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import {
+  HOST_PANEL_HEADER,
+  HOST_PREVIEW_PANEL_FOOTER,
+  OPEN_HOST_FLYOUT_LINK,
+} from '../../../../screens/hosts/flyout_host_panel';
+import {
+  USER_PANEL_HEADER,
+  USER_PREVIEW_PANEL_FOOTER,
+  OPEN_USER_FLYOUT_LINK,
+} from '../../../../screens/users/flyout_user_panel';
+import {
+  PREVIEW_SECTION,
+  PREVIEW_BANNER,
+} from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 
 describe(
   'Alert details expandable flyout right panel overview tab',
@@ -85,7 +98,7 @@ describe(
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
     });
 
     describe('about section', () => {
@@ -212,25 +225,51 @@ describe(
           'contain.text',
           'host.name'
         );
-        const hostNameCell =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
-        cy.get(hostNameCell).and('have.text', 'siem-kibana');
-
-        cy.get(hostNameCell).click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('exist');
-
-        collapseDocumentDetailsExpandableFlyoutLeftSection();
-
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL).should(
           'contain.text',
           'user.name'
         );
+      });
+
+      it('should open host preview when host name is clicked', () => {
+        toggleOverviewTabAboutSection();
+
+        cy.log('should open host preview when clicked on host name');
+
+        const hostNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
+        cy.get(hostNameCell).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview host details');
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.log('should open host flyout when click on footer link');
+
+        cy.get(OPEN_HOST_FLYOUT_LINK).click();
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
+      });
+
+      it('should open user preview when user name is clicked', () => {
+        toggleOverviewTabAboutSection();
+
         const userNameCell =
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
-        cy.get(userNameCell).should('have.text', 'test');
+        cy.get(userNameCell).and('have.text', 'test');
 
         cy.get(userNameCell).click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('exist');
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.get(OPEN_USER_FLYOUT_LINK).click();
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
     });
 
@@ -256,6 +295,46 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
           .should('have.text', 'Entities')
           .and('have.class', 'euiButtonGroupButton-isSelected');
+      });
+
+      it('open host preview when host name is clicked', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('should open host preview when clicked on host name');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview host details');
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.log('should open host flyout when click on footer link');
+
+        cy.get(OPEN_HOST_FLYOUT_LINK).click();
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
+      });
+
+      it('open user preview when user name is clicked', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.get(OPEN_USER_FLYOUT_LINK).click();
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
 
       it('should display threat intelligence section', () => {
@@ -377,6 +456,43 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB)
           .should('have.text', 'Response')
           .and('have.class', 'euiTab-isSelected');
+      });
+    });
+
+    describe('local storage persistence', () => {
+      before(() => {
+        cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+      });
+
+      after(() => {
+        cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
+      });
+
+      it('should persist which section are collapsed/expanded', () => {
+        cy.log('should show the correct expanded and collapsed section by default');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('be.visible');
+
+        cy.log('should persist the expanded and collapsed sections when opening another alert');
+
+        toggleOverviewTabAboutSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
+
+        cy.log('should persist the expanded and collapsed sections after closing the flyout');
+
+        closeFlyout();
+        expandAlertAtIndexExpandableFlyout();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
+
+        cy.log('should persist the expanded and collapsed sections after page reload');
+
+        closeFlyout();
+        cy.reload();
+        expandAlertAtIndexExpandableFlyout();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
       });
     });
   }

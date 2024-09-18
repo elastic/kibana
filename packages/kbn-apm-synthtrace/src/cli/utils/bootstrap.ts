@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createLogger } from '../../lib/utils/create_logger';
 import { getApmEsClient } from './get_apm_es_client';
 import { getLogsEsClient } from './get_logs_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
+import { getAssetsEsClient } from './get_assets_es_client';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
@@ -47,15 +51,39 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
+  const infraEsClient = getInfraEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+
+  const assetsEsClient = getAssetsEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+
+  const syntheticsEsClient = getSyntheticsEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+
   if (runOptions.clean) {
     await apmEsClient.clean();
     await logsEsClient.clean();
+    await infraEsClient.clean();
+    await assetsEsClient.clean();
+    await syntheticsEsClient.clean();
   }
 
   return {
     logger,
     apmEsClient,
     logsEsClient,
+    infraEsClient,
+    assetsEsClient,
+    syntheticsEsClient,
     version,
     kibanaUrl,
     esUrl,

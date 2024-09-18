@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { get } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
@@ -21,9 +24,17 @@ import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -33,14 +44,17 @@ import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details'
 export const CorrelationsOverview: React.FC = () => {
   const {
     dataAsNestedObject,
-    dataFormattedForFieldBrowser,
     eventId,
     indexName,
     getFieldsData,
     scopeId,
     isPreview,
-  } = useRightPanelContext();
+    isPreviewMode,
+  } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
+  const { isTourShown, activeStep } = useTourContext();
+
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
@@ -57,22 +71,24 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const {
-    show: showAlertsByAncestry,
-    documentId,
-    indices,
-  } = useShowRelatedAlertsByAncestry({
+  useEffect(() => {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+      goToCorrelationsTab();
+    }
+  }, [activeStep, goToCorrelationsTab, isTourShown]);
+
+  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
-    dataFormattedForFieldBrowser,
     eventId,
     isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    eventId,
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases();
+  const showCases = useShowRelatedCases({ getFieldsData });
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
@@ -84,6 +100,24 @@ export const CorrelationsOverview: React.FC = () => {
     showCases ||
     showSuppressedAlerts;
 
+  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
+
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToCorrelationsTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+                defaultMessage="Show all correlations"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToCorrelationsTab]
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -93,33 +127,29 @@ export const CorrelationsOverview: React.FC = () => {
             defaultMessage="Correlations"
           />
         ),
-        link: {
-          callback: goToCorrelationsTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
-              defaultMessage="Show all correlations"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
     >
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           {showSuppressedAlerts && (
-            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}
           {showCases && <RelatedCases eventId={eventId} />}
-          {showSameSourceAlerts && originalEventId && (
+          {showSameSourceAlerts && (
             <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
           )}
           {showAlertsBySession && entityId && (
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
-          {showAlertsByAncestry && documentId && indices && (
-            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          {showAlertsByAncestry && (
+            <RelatedAlertsByAncestry
+              documentId={documentId}
+              indices={selectedPatterns}
+              scopeId={scopeId}
+            />
           )}
         </EuiFlexGroup>
       ) : (

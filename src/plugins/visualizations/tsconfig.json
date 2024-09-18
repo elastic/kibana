@@ -1,14 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../typings/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
@@ -60,19 +55,24 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-tabbed-table-list-view",
     "@kbn/content-management-table-list-view",
-    "@kbn/content-management-utils",
     "@kbn/serverless",
     "@kbn/no-data-page-plugin",
-    "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
     "@kbn/chart-expressions-common",
     "@kbn/shared-ux-utility",
     "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-execution-context-common",
+    "@kbn/presentation-containers",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/presentation-containers",
+    "@kbn/search-response-warnings",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/content-management-utils"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as z from 'zod';
-import type {
-  RuleActionArrayCamel,
-  RuleActionNotifyWhen,
-  RuleActionThrottle,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import type {
   EQL_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
@@ -21,67 +16,64 @@ import type {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import * as z from '@kbn/zod';
+import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
+import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
-import type {
-  IsRuleEnabled,
-  RuleName,
-  RuleTagArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
+  AlertSuppressionCamel,
+  AnomalyThreshold,
   BuildingBlockType,
-  RuleIntervalFrom,
-  RuleIntervalTo,
+  ConcurrentSearches,
+  DataViewId,
+  EventCategoryOverride,
+  HistoryWindowStart,
+  IndexPatternArray,
   InvestigationFields,
   InvestigationGuide,
+  IsExternalRuleCustomized,
   IsRuleImmutable,
+  ItemsPerSearch,
+  KqlQueryLanguage,
   MaxSignals,
+  NewTermsFields,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RiskScore,
+  RiskScoreMapping,
   RuleAuthorArray,
   RuleDescription,
   RuleExceptionList,
   RuleFalsePositiveArray,
+  RuleFilterArray,
+  RuleIntervalFrom,
+  RuleIntervalTo,
   RuleLicense,
   RuleMetadata,
   RuleNameOverride,
+  RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
   RuleVersion,
+  SavedQueryId,
   SetupGuide,
-  ThreatArray,
-  TimelineTemplateId,
-  TimelineTemplateTitle,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-  RiskScore,
-  RiskScoreMapping,
   Severity,
   SeverityMapping,
-  ConcurrentSearches,
-  DataViewId,
-  EventCategoryOverride,
-  IndexPatternArray,
-  ItemsPerSearch,
-  KqlQueryLanguage,
-  RuleFilterArray,
-  RuleQuery,
-  SavedQueryId,
+  ThreatArray,
   ThreatIndex,
   ThreatIndicatorPath,
   ThreatMapping,
   ThreatQuery,
-  TiebreakerField,
-  TimestampField,
-  AlertSuppressionCamel,
   ThresholdAlertSuppression,
   ThresholdNormalized,
-  AnomalyThreshold,
-  HistoryWindowStart,
-  NewTermsFields,
+  TiebreakerField,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampField,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -103,6 +95,21 @@ export const InvestigationFieldsCombined = z.union([
   LegacyInvestigationFields,
 ]);
 
+/**
+ * This is the same type as RuleSource, but with the keys in camelCase. Intended
+ * for internal use only (not for API responses).
+ */
+export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
+export const RuleSourceCamelCased = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('external'),
+    isCustomized: IsExternalRuleCustomized,
+  }),
+  z.object({
+    type: z.literal('internal'),
+  }),
+]);
+
 // Conversion to an interface has to be disabled for the entire file; otherwise,
 // the resulting union would not be assignable to Alerting's RuleParams due to a
 // TypeScript bug: https://github.com/microsoft/TypeScript/issues/15300
@@ -119,6 +126,7 @@ export const BaseRuleParams = z.object({
   ruleId: RuleSignatureId,
   investigationFields: InvestigationFieldsCombined.optional(),
   immutable: IsRuleImmutable,
+  ruleSource: RuleSourceCamelCased.optional(),
   license: RuleLicense.optional(),
   outputIndex: AlertsIndex,
   timelineId: TimelineTemplateId.optional(),
@@ -153,6 +161,7 @@ export const EqlSpecificRuleParams = z.object({
   eventCategoryOverride: EventCategoryOverride.optional(),
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
@@ -163,6 +172,7 @@ export const EsqlSpecificRuleParams = z.object({
   type: z.literal('esql'),
   language: z.literal('esql'),
   query: RuleQuery,
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EsqlRuleParams = BaseRuleParams & EsqlSpecificRuleParams;
@@ -250,6 +260,7 @@ export const MachineLearningSpecificRuleParams = z.object({
   type: z.literal('machine_learning'),
   anomalyThreshold: AnomalyThreshold,
   machineLearningJobId: z.array(z.string()),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type MachineLearningRuleParams = BaseRuleParams & MachineLearningSpecificRuleParams;
@@ -268,6 +279,7 @@ export const NewTermsSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;
@@ -314,29 +326,8 @@ export type AllRuleTypes =
   | typeof THRESHOLD_RULE_TYPE_ID
   | typeof NEW_TERMS_RULE_TYPE_ID;
 
-export interface InternalRuleCreate {
-  name: RuleName;
-  tags: RuleTagArray;
-  alertTypeId: AllRuleTypes;
+export type InternalRuleCreate = CreateRuleData<RuleParams> & {
   consumer: typeof SERVER_APP_ID;
-  schedule: {
-    interval: string;
-  };
-  enabled: IsRuleEnabled;
-  actions: RuleActionArrayCamel;
-  params: RuleParams;
-  throttle?: RuleActionThrottle | null;
-  notifyWhen?: RuleActionNotifyWhen | null;
-}
+};
 
-export interface InternalRuleUpdate {
-  name: RuleName;
-  tags: RuleTagArray;
-  schedule: {
-    interval: string;
-  };
-  actions: RuleActionArrayCamel;
-  params: RuleParams;
-  throttle?: RuleActionThrottle | null;
-  notifyWhen?: RuleActionNotifyWhen | null;
-}
+export type InternalRuleUpdate = UpdateRuleData<RuleParams>;

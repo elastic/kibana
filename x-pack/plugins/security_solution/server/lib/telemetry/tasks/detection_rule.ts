@@ -13,10 +13,11 @@ import {
   templateExceptionList,
   newTelemetryLogger,
   createUsageCounterLabel,
+  safeValue,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
+import type { ExceptionListItem, RuleSearchResult } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -37,14 +38,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('detection_rule')).l;
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('detection_rule'), mdc);
       const usageCollector = sender.getTelemetryUsageCluster();
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
       const trace = taskMetricsService.start(taskType);
 
-      log(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
@@ -52,22 +52,16 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           receiver.fetchLicenseInfo(),
         ]);
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+        const clusterInfo = safeValue(clusterInfoPromise);
+        const licenseInfo = safeValue(licenseInfoPromise);
 
         // Lists Telemetry: Detection Rules
 
         const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
-          log('no prebuilt rules found');
-          taskMetricsService.end(trace);
+          log.debug('no prebuilt rules found');
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -108,7 +102,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           licenseInfo,
           LIST_DETECTION_RULE_EXCEPTION
         );
-        log(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+        log.l('Detection rule exception json length', {
+          length: detectionRuleExceptionsJson.length,
+        });
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -123,15 +119,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
-        log(
-          `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
-        );
+        log.l('Task executed', { length: detectionRuleExceptionsJson.length });
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

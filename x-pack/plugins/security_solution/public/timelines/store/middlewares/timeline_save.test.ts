@@ -8,12 +8,172 @@
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
-import { TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
+import { createMockStore, kibanaMock } from '../../../common/mock';
+import { selectTimelineById } from '../selectors';
+import { copyTimeline, persistTimeline } from '../../containers/api';
+import { refreshTimelines } from './helpers';
+import * as i18n from '../../pages/translations';
 
-describe('Timeline Save Middleware', () => {
+import {
+  startTimelineSaving,
+  endTimelineSaving,
+  showCallOutUnauthorizedMsg,
+  saveTimeline,
+  setChanged,
+} from '../actions';
+
+jest.mock('../actions', () => {
+  const actual = jest.requireActual('../actions');
+  const endTLSaving = jest.fn((...args) => actual.endTimelineSaving(...args));
+  (endTLSaving as unknown as { match: Function }).match = () => false;
+  return {
+    ...actual,
+    showCallOutUnauthorizedMsg: jest
+      .fn()
+      .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
+    startTimelineSaving: jest
+      .fn()
+      .mockImplementation((...args) => actual.startTimelineSaving(...args)),
+    endTimelineSaving: endTLSaving,
+  };
+});
+jest.mock('../../containers/api');
+jest.mock('./helpers');
+
+const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
+const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
+const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
+
+describe('Timeline save middleware', () => {
+  let store = createMockStore(undefined, undefined, kibanaMock);
+
+  beforeEach(() => {
+    store = createMockStore(undefined, undefined, kibanaMock);
+    jest.clearAllMocks();
+  });
+
+  it('should persist a timeline', async () => {
+    (persistTimeline as jest.Mock).mockResolvedValue({
+      data: {
+        persistTimeline: {
+          code: 200,
+          message: 'success',
+          timeline: {
+            savedObjectId: 'soid',
+            version: 'newVersion',
+          },
+        },
+      },
+    });
+    await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: null,
+        changed: true,
+      })
+    );
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
+
+    expect(startTimelineSavingMock).toHaveBeenCalled();
+    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(endTimelineSavingMock).toHaveBeenCalled();
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: 'newVersion',
+        changed: false,
+      })
+    );
+  });
+
+  it('should copy a timeline', async () => {
+    (copyTimeline as jest.Mock).mockResolvedValue({
+      data: {
+        persistTimeline: {
+          code: 200,
+          message: 'success',
+          timeline: {
+            savedObjectId: 'soid',
+            version: 'newVersion',
+          },
+        },
+      },
+    });
+    await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: null,
+        changed: true,
+      })
+    );
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: true }));
+
+    expect(copyTimeline as unknown as jest.Mock).toHaveBeenCalled();
+    expect(startTimelineSavingMock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(endTimelineSavingMock).toHaveBeenCalled();
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: 'newVersion',
+        changed: false,
+      })
+    );
+  });
+
+  it('should show an error message in case of a conflict', async () => {
+    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (copyTimeline as jest.Mock).mockResolvedValue({
+      status_code: 409,
+      message: 'test conflict',
+    });
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: true }));
+
+    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(addDangerMock).toHaveBeenCalledWith({
+      title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
+      text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
+    });
+  });
+
+  it('should show the provided message in case of an error response', async () => {
+    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (persistTimeline as jest.Mock).mockResolvedValue({
+      status_code: 404,
+      message: 'test error message',
+    });
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
+
+    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(addDangerMock).toHaveBeenCalledWith({
+      title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+      text: 'test error message',
+    });
+  });
+
+  it('should show a generic error in case of an empty response', async () => {
+    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (persistTimeline as jest.Mock).mockResolvedValue(null);
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
+
+    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(addDangerMock).toHaveBeenCalledWith({
+      title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+      text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
+    });
+  });
+
+  it('should show an error message when the call is unauthorized', async () => {
+    (persistTimeline as jest.Mock).mockResolvedValue({ data: { persistTimeline: { code: 403 } } });
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
+
+    expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(showCallOutUnauthorizedMsgMock).toHaveBeenCalled();
+  });
+
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const columns: TimelineModel['columns'] = [
@@ -102,7 +262,6 @@ describe('Timeline Save Middleware', () => {
         },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -151,7 +310,7 @@ describe('Timeline Save Middleware', () => {
         loadingEventIds: [],
         queryFields: [],
         title: 'saved',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -171,13 +330,14 @@ describe('Timeline Save Middleware', () => {
             sortDirection: Direction.desc,
           },
         ],
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
         savedSearchId: null,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 500,
       };
 
       expect(
@@ -323,9 +483,9 @@ describe('Timeline Save Middleware', () => {
         ],
         templateTimelineId: null,
         templateTimelineVersion: null,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         title: 'saved',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
       });
     });
   });

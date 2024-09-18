@@ -14,14 +14,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/securitysolution-grouping/src';
+import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import {
-  NullGroup,
-  LoadingGroup,
   firstNonNullValue,
+  LoadingGroup,
+  NullGroup,
 } from '../../../components/cloud_security_grouping';
 import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
@@ -64,15 +64,15 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceName?.buckets?.[0].key}
+                    title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0].key}
+                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {bucket.resourceSubType?.buckets?.[0].key}
+                  {bucket.resourceSubType?.buckets?.[0]?.key}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -93,8 +93,8 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {firstNonNullValue(bucket.benchmarkName?.buckets?.[0].key)}{' '}
-                  {firstNonNullValue(bucket.benchmarkVersion?.buckets?.[0].key)}
+                  {firstNonNullValue(bucket.benchmarkName?.buckets?.[0]?.key)}{' '}
+                  {firstNonNullValue(bucket.benchmarkVersion?.buckets?.[0]?.key)}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -185,7 +185,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={FINDINGS_GROUPING_COUNTER}
@@ -208,7 +208,7 @@ const ComplianceBarComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
       size="l"
       overrideCss={css`
         width: 104px;
-        margin-left: ${euiTheme.size.s}};
+        margin-left: ${euiTheme.size.s};
       `}
       totalFailed={totalFailed}
       totalPassed={totalPassed}
@@ -221,21 +221,17 @@ const ComplianceBar = React.memo(ComplianceBarComponent);
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<FindingsGroupingAggregation>
-): StatRenderer[] => {
-  const defaultBadges = [
-    {
-      title: i18n.translate('xpack.csp.findings.grouping.stats.badges.findings', {
-        defaultMessage: 'Findings',
-      }),
-      renderer: <FindingsCount bucket={bucket} />,
-    },
-    {
-      title: i18n.translate('xpack.csp.findings.grouping.stats.badges.compliance', {
-        defaultMessage: 'Compliance',
-      }),
-      renderer: <ComplianceBar bucket={bucket} />,
-    },
-  ];
-
-  return defaultBadges;
-};
+): GroupStatsItem[] => [
+  {
+    title: i18n.translate('xpack.csp.findings.grouping.stats.badges.findings', {
+      defaultMessage: 'Findings',
+    }),
+    component: <FindingsCount bucket={bucket} />,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.grouping.stats.badges.compliance', {
+      defaultMessage: 'Compliance',
+    }),
+    component: <ComplianceBar bucket={bucket} />,
+  },
+];

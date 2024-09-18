@@ -126,6 +126,7 @@ handlebars.registerHelper('contains', containsHelper);
 // and to respect any incoming newline we also need to double them, otherwise
 // they will be replaced with a space.
 function escapeStringHelper(str: string) {
+  if (!str) return undefined;
   return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
@@ -163,8 +164,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
 
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
-    patchedTemplate = patchedTemplate.replace(
-      new RegExp(`^"${key}"`, 'gm'),
+    patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
       val ? safeDump(val) : ''
     );
   });

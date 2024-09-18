@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import {
-  registerUpsellings,
-  upsellingMessages,
-  upsellingPages,
-  upsellingSections,
-} from './register_upsellings';
+import { registerUpsellings } from './register_upsellings';
+import { upsellingMessages, upsellingPages, upsellingSections } from './upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { mockServices } from '../common/services/__mocks__/services.mock';
+import { of } from 'rxjs';
 
-const mockGetProductAppFeatures = jest.fn();
+const mockGetProductProductFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
-  getProductAppFeatures: () => mockGetProductAppFeatures(),
+  getProductProductFeatures: () => mockGetProductProductFeatures(),
 }));
+
+const setPages = jest.fn();
+const setSections = jest.fn();
+const setMessages = jest.fn();
+const upselling = {
+  setPages,
+  setSections,
+  setMessages,
+  sections$: of([]),
+} as unknown as UpsellingService;
+mockServices.securitySolution.getUpselling = jest.fn(() => upselling);
 
 const allProductTypes: SecurityProductTypes = [
   { product_line: ProductLine.security, product_tier: ProductTier.complete },
@@ -29,19 +37,14 @@ const allProductTypes: SecurityProductTypes = [
 ];
 
 describe('registerUpsellings', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should not register anything when all PLIs features are enabled', () => {
-    mockGetProductAppFeatures.mockReturnValue(ALL_APP_FEATURE_KEYS);
+    mockGetProductProductFeatures.mockReturnValue(ALL_PRODUCT_FEATURE_KEYS);
 
-    const setPages = jest.fn();
-    const setSections = jest.fn();
-    const setMessages = jest.fn();
-    const upselling = {
-      setPages,
-      setSections,
-      setMessages,
-    } as unknown as UpsellingService;
-
-    registerUpsellings(upselling, allProductTypes, mockServices);
+    registerUpsellings(allProductTypes, mockServices);
 
     expect(setPages).toHaveBeenCalledTimes(1);
     expect(setPages).toHaveBeenCalledWith({});
@@ -54,19 +57,9 @@ describe('registerUpsellings', () => {
   });
 
   it('should register all upsellings pages, sections and messages when PLIs features are disabled', () => {
-    mockGetProductAppFeatures.mockReturnValue([]);
+    mockGetProductProductFeatures.mockReturnValue([]);
 
-    const setPages = jest.fn();
-    const setSections = jest.fn();
-    const setMessages = jest.fn();
-
-    const upselling = {
-      setPages,
-      setSections,
-      setMessages,
-    } as unknown as UpsellingService;
-
-    registerUpsellings(upselling, allProductTypes, mockServices);
+    registerUpsellings(allProductTypes, mockServices);
 
     const expectedPagesObject = Object.fromEntries(
       upsellingPages.map(({ pageName }) => [pageName, expect.anything()])

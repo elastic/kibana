@@ -96,7 +96,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
             error: i18n.translate(
               'xpack.snapshotRestore.editRepository.repositoryNotFoundErrorMessage',
               {
-                defaultMessage: `The repository '{name}' does not exist.`,
+                defaultMessage: `The repository ''{name}'' does not exist.`,
                 values: {
                   name,
                 },

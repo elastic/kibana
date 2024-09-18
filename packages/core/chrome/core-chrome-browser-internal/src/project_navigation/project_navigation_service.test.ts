@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -19,8 +20,17 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   GroupDefinition,
+  SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
+
+jest.mock('rxjs', () => {
+  const original = jest.requireActual('rxjs');
+  return {
+    ...original,
+    debounceTime: () => (source: Observable<any>) => source,
+  };
+});
 
 const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   id: 'kibana',
@@ -28,13 +38,14 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   baseUrl: '/app',
   url: `/app/${partial.id ?? 'kibana'}`,
   href: `/app/${partial.id ?? 'kibana'}`,
+  visibleIn: ['globalSearch'],
   ...partial,
 });
 
 const getNavLinksService = (ids: Readonly<string[]> = []) => {
   const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
 
-  const navLinksMock: ChromeNavLinks = {
+  const navLinksMock: jest.Mocked<ChromeNavLinks> = {
     getNavLinks$: jest.fn().mockReturnValue(of(navLinks)),
     has: jest.fn(),
     get: jest.fn(),
@@ -50,26 +61,36 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
-}: { locationPathName?: string; navLinkIds?: Readonly<string[]> } = {}) => {
-  const history = createMemoryHistory();
+  isServerless = true,
+}: {
+  locationPathName?: string;
+  navLinkIds?: Readonly<string[]>;
+  isServerless?: boolean;
+} = {}) => {
+  const history = createMemoryHistory({
+    initialEntries: [locationPathName],
+  });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService();
+  const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
-
+  const application = {
+    ...applicationServiceMock.createInternalStartContract(),
+    history,
+  };
+  application.navigateToUrl.mockImplementation(async (url) => {
+    history.push(url);
+  });
   const projectNavigation = projectNavigationService.start({
-    application: {
-      ...applicationServiceMock.createInternalStartContract(),
-      history,
-    },
+    application,
     navLinksService,
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
   });
 
-  return { projectNavigation, history, chromeBreadcrumbs$ };
+  return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
 };
 
 describe('initNavigation()', () => {
@@ -89,6 +110,7 @@ describe('initNavigation()', () => {
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -127,8 +149,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
     });
 
@@ -164,6 +185,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
         setupInitNavigation();
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -177,8 +199,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
       const treeDefinition = await getNavTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
@@ -189,6 +210,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -202,8 +224,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -236,6 +257,7 @@ describe('initNavigation()', () => {
                   id: 'foo',
                   title: 'FOO',
                   url: '/app/foo',
+                  visibleIn: ['globalSearch'],
                 },
                 href: '/app/foo',
                 id: 'foo',
@@ -302,10 +324,14 @@ describe('initNavigation()', () => {
                 "id": "discover",
                 "title": "DISCOVER",
                 "url": "/app/discover",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/discover",
               "id": "discover",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.discover",
               "sideNavStatus": "visible",
               "title": "DISCOVER",
@@ -317,10 +343,14 @@ describe('initNavigation()', () => {
                 "id": "dashboards",
                 "title": "DASHBOARDS",
                 "url": "/app/dashboards",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/dashboards",
               "id": "dashboards",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.dashboards",
               "sideNavStatus": "visible",
               "title": "DASHBOARDS",
@@ -332,10 +362,14 @@ describe('initNavigation()', () => {
                 "id": "visualize",
                 "title": "VISUALIZE",
                 "url": "/app/visualize",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/visualize",
               "id": "visualize",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.visualize",
               "sideNavStatus": "visible",
               "title": "VISUALIZE",
@@ -346,6 +380,7 @@ describe('initNavigation()', () => {
           "icon": "stats",
           "id": "rootNav:analytics",
           "isElasticInternalLink": false,
+          "onClick": undefined,
           "path": "rootNav:analytics",
           "renderAs": "accordion",
           "sideNavStatus": "visible",
@@ -364,6 +399,7 @@ describe('initNavigation()', () => {
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -372,8 +408,7 @@ describe('initNavigation()', () => {
             children: [{ link: 'foo' }],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     // 3. getNavigationTreeUi$() is resolved
@@ -384,7 +419,15 @@ describe('initNavigation()', () => {
 
   test('should add the Cloud links to the navigation tree', async () => {
     const { projectNavigation } = setup();
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/', // trailing slash should be removed!
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      billingUrl: 'https://cloud.elastic.co/billing/',
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
     projectNavigation.initNavigation<any>(
+      'foo',
       // @ts-expect-error - We pass a non valid cloudLink that is not TS valid
       of({
         body: [
@@ -400,15 +443,7 @@ describe('initNavigation()', () => {
             ],
           },
         ],
-      }),
-      {
-        cloudUrls: {
-          usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/', // trailing slash should be removed!
-          performanceUrl: 'https://cloud.elastic.co/performance/',
-          billingUrl: 'https://cloud.elastic.co/billing/',
-          deploymentUrl: 'https://cloud.elastic.co/deployment/',
-        },
-      }
+      })
     );
 
     const treeDefinition = await lastValueFrom(
@@ -498,7 +533,7 @@ describe('breadcrumbs', () => {
     const obs = subj.asObservable();
 
     if (initiateNavigation) {
-      projectNavigation.initNavigation(obs, { cloudUrls: {} });
+      projectNavigation.initNavigation('foo', obs);
     }
 
     return {
@@ -528,19 +563,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -593,19 +626,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -652,19 +683,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -711,7 +740,7 @@ describe('breadcrumbs', () => {
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-    projectNavigation.initNavigation(of(mockNavigation), { cloudUrls: {} }); // init navigation
+    projectNavigation.initNavigation('foo', of(mockNavigation)); // init navigation
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
@@ -750,6 +779,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -763,8 +793,7 @@ describe('getActiveNodes$()', () => {
             ],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
@@ -792,6 +821,7 @@ describe('getActiveNodes$()', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
+            visibleIn: ['globalSearch'],
           },
         },
       ],
@@ -805,6 +835,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -819,8 +850,7 @@ describe('getActiveNodes$()', () => {
             ],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
@@ -848,10 +878,129 @@ describe('getActiveNodes$()', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
+            visibleIn: ['globalSearch'],
           },
           getIsActive: expect.any(Function),
         },
       ],
     ]);
+  });
+});
+
+describe('solution navigations', () => {
+  const solution1: SolutionNavigationDefinition<any> = {
+    id: 'solution1',
+    title: 'Solution 1',
+    icon: 'logoSolution1',
+    homePage: 'discover',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app1' }] }),
+  };
+
+  const solution2: SolutionNavigationDefinition<any> = {
+    id: 'solution2',
+    title: 'Solution 2',
+    icon: 'logoSolution2',
+    homePage: 'app2',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app2' }] }),
+    sideNavComponent: () => null,
+  };
+
+  const solution3: SolutionNavigationDefinition<any> = {
+    id: 'solution3',
+    title: 'Solution 3',
+    icon: 'logoSolution3',
+    homePage: 'discover',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app3' }] }),
+  };
+
+  const localStorageGetItem = jest.fn();
+  const originalLocalStorage = window.localStorage;
+
+  beforeAll(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: localStorageGetItem,
+      },
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true,
+    });
+  });
+
+  it('should update the solution navigation definition', async () => {
+    const { projectNavigation } = setup();
+
+    {
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({});
+    }
+
+    {
+      projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2 });
+    }
+
+    {
+      // Test partial update
+      projectNavigation.updateSolutionNavigations({ 3: solution3 }, false);
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2, 3: solution3 });
+    }
+
+    {
+      // Test full replacement
+      projectNavigation.updateSolutionNavigations({ 4: solution3 }, true);
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 4: solution3 });
+    }
+  });
+
+  it('should return the active solution navigation', async () => {
+    const { projectNavigation } = setup();
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      expect(activeSolution).toBeNull();
+    }
+
+    projectNavigation.changeActiveSolutionNavigation('2'); // Set **before** the navs are registered
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      expect(activeSolution).not.toBeNull();
+      // sideNavComponentGetter should not be exposed to consumers
+      expect('sideNavComponent' in activeSolution!).toBe(false);
+      const { sideNavComponent, ...rest } = solution2;
+      expect(activeSolution).toEqual(rest);
+    }
+
+    projectNavigation.changeActiveSolutionNavigation('1'); // Set **after** the navs are registered
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      expect(activeSolution).toEqual(solution1);
+    }
   });
 });

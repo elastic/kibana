@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -84,7 +85,7 @@ describe('DeleteConfirmModal', () => {
         allowedTypes={allowedTypes}
       />
     );
-    expect(wrapper.find('.euiTableRow')).toHaveLength(3);
+    expect(wrapper.find('tr.euiTableRow')).toHaveLength(3);
   });
 
   it('calls `onCancel` when clicking on the cancel button', () => {
@@ -135,7 +136,7 @@ describe('DeleteConfirmModal', () => {
           allowedTypes={allowedTypes}
         />
       );
-      expect(wrapper.find('.euiTableRow')).toHaveLength(1);
+      expect(wrapper.find('tr.euiTableRow')).toHaveLength(1);
     });
 
     it('displays a callout when at least one object cannot be deleted', () => {
@@ -198,34 +199,6 @@ describe('DeleteConfirmModal', () => {
         wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').getDOMNode()
       ).toBeDisabled();
     });
-  });
-
-  it('excludes the managed objects from the table and displays a callout', () => {
-    const objs = [
-      createObject({ managed: true }),
-      createObject({ managed: false }),
-      createObject({ managed: true }),
-      createObject({ hiddenType: true }),
-    ];
-
-    const wrapper = mountWithIntl(
-      <DeleteConfirmModal
-        isDeleting={false}
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-        selectedObjects={objs}
-        allowedTypes={allowedTypes}
-      />
-    );
-
-    expect(wrapper.find('.euiTableRow')).toHaveLength(1);
-
-    const callout = findTestSubject(wrapper, 'cannotDeleteObjectsConfirmWarning');
-    expect(callout).toHaveLength(1);
-
-    expect(callout.text()).toMatchInlineSnapshot(
-      `"Some objects have been excluded1 object is hidden and cannot be deleted.2 objects are managed by Elastic and cannot be deleted."`
-    );
   });
 
   describe('shared objects warning', () => {

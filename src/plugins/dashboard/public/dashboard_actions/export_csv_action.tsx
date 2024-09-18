@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { exporters } from '@kbn/data-plugin/public';
@@ -17,7 +18,11 @@ import {
   HasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
-import { EmbeddableApiContext, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import {
+  EmbeddableApiContext,
+  getPanelTitle,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 
@@ -36,7 +41,7 @@ const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
 export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
-  public readonly order = 5;
+  public readonly order = 18; // right after Export in discover which is 19
 
   private fieldFormats;
   private uiSettings;
@@ -98,7 +103,7 @@ export class ExportCSVAction implements Action<ExportContext> {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
             const untitledFilename = dashboardExportCsvActionStrings.getUntitledFilename();
 
-            memo[`${embeddable.panelTitle?.value || untitledFilename}${postFix}.csv`] = {
+            memo[`${getPanelTitle(embeddable) || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
                 csvSeparator: this.uiSettings.get('csv:separator', ','),
                 quoteValues: this.uiSettings.get('csv:quoteValues', true),

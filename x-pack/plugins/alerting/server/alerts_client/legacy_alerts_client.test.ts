@@ -80,7 +80,7 @@ jest.mock('../lib/get_alerts_for_notification', () => {
 
 jest.mock('../task_runner/log_alerts', () => ({ logAlerts: jest.fn() }));
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 
@@ -243,7 +243,6 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       shouldLogAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      notifyOnActionGroupChange: true,
       maintenanceWindowIds: ['window-id1', 'window-id2'],
       alertDelay: 5,
     });
@@ -274,7 +273,6 @@ describe('Legacy Alerts Client', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
-      true,
       'default',
       5,
       {},
@@ -306,5 +304,17 @@ describe('Legacy Alerts Client', () => {
       '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
       '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
     });
+  });
+
+  test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      logger,
+      ruleType,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+    expect(alertsClient.isTrackedAlert('1')).toBe(true);
+    expect(alertsClient.isTrackedAlert('2')).toBe(true);
+    expect(alertsClient.isTrackedAlert('3')).toBe(false);
   });
 });

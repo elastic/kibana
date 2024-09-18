@@ -216,7 +216,7 @@ export function MachineLearningCommonUIProvider({
       const slider = await testSubjects.find(testDataSubj);
 
       await retry.tryForTime(60 * 1000, async () => {
-        const currentValue = await slider.getAttribute('value');
+        const currentValue = (await slider.getAttribute('value')) ?? '';
         const currentDiff = +currentValue - +value;
 
         if (currentDiff === 0) {
@@ -224,15 +224,15 @@ export function MachineLearningCommonUIProvider({
         } else {
           if (currentDiff > 0) {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_DOWN);
+              await slider.type(browser.keys.PAGE_DOWN);
             } else {
-              slider.type(browser.keys.ARROW_LEFT);
+              await slider.type(browser.keys.ARROW_LEFT);
             }
           } else {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_UP);
+              await slider.type(browser.keys.PAGE_UP);
             } else {
-              slider.type(browser.keys.ARROW_RIGHT);
+              await slider.type(browser.keys.ARROW_RIGHT);
             }
           }
           await retry.tryForTime(1000, async () => {
@@ -437,6 +437,19 @@ export function MachineLearningCommonUIProvider({
           await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
         }
       });
+    },
+
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
+    async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
     },
   };
 }

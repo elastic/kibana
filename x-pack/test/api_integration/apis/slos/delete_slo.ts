@@ -7,7 +7,7 @@
 import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
-import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from './fixtures/create_slo';
@@ -29,9 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
-      loadTestData(getService);
+      await loadTestData(getService);
     });
 
     beforeEach(() => {
@@ -48,7 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes new slo saved object and transforms', async () => {
-      const id = await slo.create(createSLOInput);
+      const response = await slo.create(createSLOInput);
+
+      expect(response.body).property('id');
+
+      const { id } = response.body;
 
       const savedObject = await kibanaServer.savedObjects.find({
         type: SO_SLO_TYPE,
@@ -86,11 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         // expect summary transform to be created
         expect(summaryTransform.body.transforms[0].id).eql(`slo-summary-${id}-1`);
 
-        await supertestAPI
-          .delete(`/api/observability/slos/${id}`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(204);
+        await slo.delete(id);
       });
 
       //   await retry.tryForTime(150 * 1000, async () => {
@@ -118,12 +119,20 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
 
       // expect summary and rollup documents to be deleted
-      await retry.tryForTime(60 * 1000, async () => {
+      await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
+        if (sloSummaryResponseAfterDeletion.hits.hits.length > 0) {
+          throw new Error('SLO summary data not deleted yet');
+        }
+        return true;
+      });
+
+      await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
         const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
-        expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);
-        // sometimes the ingest pipeline ingests one extra document after the transform is stopped
-        expect(sloRollupResponseAfterDeletion.hits.hits.length <= 1).eql(true);
+        if (sloRollupResponseAfterDeletion.hits.hits.length > 1) {
+          throw new Error('SLO rollup data not deleted yet');
+        }
+        return true;
       });
     });
   });

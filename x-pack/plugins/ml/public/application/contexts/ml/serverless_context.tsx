@@ -5,43 +5,57 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useContext, useMemo } from 'react';
-import type { MlFeatures } from '../../../../common/constants/app';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
+  showLogsSuppliedConfigurationsInfo: boolean;
+  showContextualInsights: boolean;
   showNodeInfo: boolean;
   showMLNavMenu: boolean;
   showLicenseInfo: boolean;
   isADEnabled: boolean;
   isDFAEnabled: boolean;
   isNLPEnabled: boolean;
+  showRuleFormV2: boolean;
 }
-export const EnabledFeaturesContext = createContext({
+export const EnabledFeaturesContext = createContext<EnabledFeatures>({
+  showLogsSuppliedConfigurationsInfo: true,
+  showContextualInsights: true,
   showNodeInfo: true,
   showMLNavMenu: true,
   showLicenseInfo: true,
   isADEnabled: true,
   isDFAEnabled: true,
   isNLPEnabled: true,
+  showRuleFormV2: true,
 });
 
 interface Props {
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  showMLNavMenu?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
-export const EnabledFeaturesContextProvider: FC<Props> = ({
+export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   children,
   isServerless,
+  showMLNavMenu = true,
   mlFeatures,
+  experimentalFeatures,
 }) => {
   const features: EnabledFeatures = {
+    showLogsSuppliedConfigurationsInfo: !isServerless,
+    showContextualInsights: isServerless,
     showNodeInfo: !isServerless,
-    showMLNavMenu: !isServerless,
+    showMLNavMenu,
     showLicenseInfo: !isServerless,
     isADEnabled: mlFeatures.ad,
     isDFAEnabled: mlFeatures.dfa,
     isNLPEnabled: mlFeatures.nlp,
+    showRuleFormV2: experimentalFeatures?.ruleFormV2 ?? false,
   };
 
   return (

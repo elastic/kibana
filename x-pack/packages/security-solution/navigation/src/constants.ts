@@ -7,86 +7,97 @@
 
 export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 
-export enum SecurityPageName {
-  administration = 'administration',
-  alerts = 'alerts',
-  assets = 'assets',
-  blocklist = 'blocklist',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
-   */
-  case = 'cases', // must match `CasesDeepLinkId.cases`
-  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
-  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
-   */
-  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
-  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
-  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
-   */
-  cloudDefend = 'cloud_defend',
-  cloudDefendPolicies = 'cloud_defend-policies',
-  dashboards = 'dashboards',
-  dataQuality = 'data_quality',
-  detections = 'detections',
-  detectionAndResponse = 'detection_response',
-  endpoints = 'endpoints',
-  eventFilters = 'event_filters',
-  exceptions = 'exceptions',
-  exploreLanding = 'explore',
-  hostIsolationExceptions = 'host_isolation_exceptions',
-  hosts = 'hosts',
-  hostsAnomalies = 'hosts-anomalies',
-  hostsRisk = 'hosts-risk',
-  hostsEvents = 'hosts-events',
-  investigations = 'investigations',
-  kubernetes = 'kubernetes',
-  landing = 'get_started',
-  mlLanding = 'machine_learning-landing', // serverless only
-  network = 'network',
-  networkAnomalies = 'network-anomalies',
-  networkDns = 'network-dns',
-  networkEvents = 'network-events',
-  networkHttp = 'network-http',
-  networkTls = 'network-tls',
-  noPage = '',
-  overview = 'overview',
-  policies = 'policy',
-  responseActionsHistory = 'response_actions_history',
-  rules = 'rules',
-  rulesAdd = 'rules-add',
-  rulesCreate = 'rules-create',
-  rulesLanding = 'rules-landing',
-  sessions = 'sessions',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
-   */
-  threatIntelligence = 'threat_intelligence',
-  timelines = 'timelines',
-  timelinesTemplates = 'timelines-templates',
-  trustedApps = 'trusted_apps',
-  uncommonProcesses = 'uncommon_processes',
-  users = 'users',
-  usersAnomalies = 'users-anomalies',
-  usersAuthentications = 'users-authentications',
-  usersEvents = 'users-events',
-  usersRisk = 'users-risk',
-  entityAnalytics = 'entity_analytics',
-  entityAnalyticsManagement = 'entity_analytics-management',
-  coverageOverview = 'coverage-overview',
-}
+export { SecurityPageName } from '@kbn/deeplinks-security';
 
 export enum LinkCategoryType {
   title = 'title',
   collapsibleTitle = 'collapsibleTitle',
   accordion = 'accordion',
   separator = 'separator',
+}
+
+/**
+ * External (non-Security) page names that need to be linked in the Security navigation.
+ * Format: `<pluginId>:<deepLinkId>/<path>`.
+ *
+ * `pluginId`: is the id of the plugin that owns the deep link
+ *
+ * `deepLinkId`: is the id of the deep link inside the plugin.
+ * Keep empty for the root page of the plugin, e.g. `osquery:`
+ *
+ * `path`: is the path to append to the plugin and deep link.
+ * This is optional and only needed if the path is not registered in the plugin's `deepLinks`. e.g. `integrations:/browse/security`
+ * The path should not be used for links displayed in the main left navigation, since highlighting won't work.
+ **/
+export enum ExternalPageName {
+  // Discover
+  discover = 'discover:',
+  // Osquery
+  osquery = 'osquery:',
+  // Analytics
+  maps = 'maps:',
+  visualize = 'visualize:',
+  // Machine Learning
+  // Ref: packages/default-nav/ml/default_navigation.ts
+  mlOverview = 'ml:overview',
+  mlNotifications = 'ml:notifications',
+  mlMemoryUsage = 'ml:memoryUsage',
+  mlAnomalyDetection = 'ml:anomalyDetection',
+  mlAnomalyExplorer = 'ml:anomalyExplorer',
+  mlSingleMetricViewer = 'ml:singleMetricViewer',
+  mlSuppliedConfigurations = 'ml:suppliedConfigurations',
+  mlSettings = 'ml:settings',
+  mlDataFrameAnalytics = 'ml:dataFrameAnalytics',
+  mlResultExplorer = 'ml:resultExplorer',
+  mlAnalyticsMap = 'ml:analyticsMap',
+  mlNodesOverview = 'ml:nodesOverview',
+  mlNodes = 'ml:nodes',
+  mlFileUpload = 'ml:fileUpload',
+  mlIndexDataVisualizer = 'ml:indexDataVisualizer',
+  mlDataDrift = 'ml:dataDrift',
+  mlExplainLogRateSpikes = 'ml:logRateAnalysis',
+  mlLogPatternAnalysis = 'ml:logPatternAnalysis',
+  mlChangePointDetections = 'ml:changePointDetections',
+  // Dev Tools
+  // Ref: packages/default-nav/devtools/default_navigation.ts
+  devTools = 'dev_tools:',
+  // Fleet
+  // Ref: x-pack/plugins/fleet/public/deep_links.ts
+  fleet = 'fleet:',
+  fleetAgents = 'fleet:agents',
+  fleetPolicies = 'fleet:policies',
+  fleetEnrollmentTokens = 'fleet:enrollment_tokens',
+  fleetUninstallTokens = 'fleet:uninstall_tokens',
+  fleetDataStreams = 'fleet:data_streams',
+  fleetSettings = 'fleet:settings',
+  // Integrations
+  // No deepLinkId registered, using path for the security search
+  integrationsSecurity = 'integrations:/browse/security',
+  // Management
+  // Ref: packages/default-nav/management/default_navigation.ts
+  management = 'management:',
+  managementIngestPipelines = 'management:ingest_pipelines',
+  managementPipelines = 'management:pipelines',
+  managementIndexManagement = 'management:index_management',
+  managementTransforms = 'management:transform',
+  managementMaintenanceWindows = 'management:maintenanceWindows',
+  managementTriggersActions = 'management:triggersActions',
+  managementCases = 'management:cases',
+  managementTriggersActionsConnectors = 'management:triggersActionsConnectors',
+  managementReporting = 'management:reporting',
+  managementJobsListLink = 'management:jobsListLink',
+  managementDataViews = 'management:dataViews',
+  managementObjects = 'management:objects',
+  managementApiKeys = 'management:api_keys',
+  managementTags = 'management:tags',
+  managementFiles = 'management:filesManagement',
+  managementSpaces = 'management:spaces',
+  managementSettings = 'management:settings',
+  // Cloud UI
+  // These are links to Cloud UI outside Kibana
+  // Special Format: <cloud>:<cloudUrlKey>
+  // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
+  cloudUsersAndRoles = 'cloud:usersAndRoles',
+  cloudBilling = 'cloud:billing',
+  cloudPerformance = 'cloud:performance',
 }

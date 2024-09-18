@@ -13,12 +13,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177245
   registry.when('Diagnostics: Data streams', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       before(async () => {
@@ -52,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(30)
@@ -66,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns 5 data streams', async () => {
         const { status, body } = await apmApiClient.adminUser({
@@ -74,17 +75,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
         expect(body.dataStreams).to.eql([
-          { name: 'metrics-apm.internal-default', template: 'metrics-apm.internal' },
+          { name: 'metrics-apm.internal-default', template: 'metrics-apm.internal@template' },
           {
             name: 'metrics-apm.service_summary.1m-default',
-            template: 'metrics-apm.service_summary.1m',
+            template: 'metrics-apm.service_summary.1m@template',
           },
           {
             name: 'metrics-apm.service_transaction.1m-default',
-            template: 'metrics-apm.service_transaction.1m',
+            template: 'metrics-apm.service_transaction.1m@template',
           },
-          { name: 'metrics-apm.transaction.1m-default', template: 'metrics-apm.transaction.1m' },
-          { name: 'traces-apm-default', template: 'traces-apm' },
+          {
+            name: 'metrics-apm.transaction.1m-default',
+            template: 'metrics-apm.transaction.1m@template',
+          },
+          { name: 'traces-apm-default', template: 'traces-apm@template' },
         ]);
       });
 

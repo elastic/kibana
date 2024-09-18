@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Appender, LogLevel, LogMeta, LogRecord } from '@kbn/logging';
@@ -186,7 +187,7 @@ describe('AbstractLogger', () => {
   });
 
   describe('log level', () => {
-    it('does not calls appenders for records with unsupported levels', () => {
+    it('does not call appender for records with unsupported levels', () => {
       logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory);
 
       logger.trace('some trace message');
@@ -215,19 +216,49 @@ describe('AbstractLogger', () => {
         );
       }
     });
+
+    it('does not call appender for records with unsupported levels for closure syntax', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory);
+
+      logger.trace(() => 'some trace message');
+      logger.debug(() => 'some debug message');
+      logger.info(() => 'some info message');
+      logger.warn(() => 'some warn message');
+      logger.error(() => 'some error message');
+      logger.fatal(() => 'some fatal message');
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(3);
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({
+            level: LogLevel.Warn,
+          })
+        );
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({
+            level: LogLevel.Error,
+          })
+        );
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({
+            level: LogLevel.Fatal,
+          })
+        );
+      }
+    });
   });
 
-  describe('isLevelEnabled', () => {
-    const orderedLogLevels = [
-      LogLevel.Fatal,
-      LogLevel.Error,
-      LogLevel.Warn,
-      LogLevel.Info,
-      LogLevel.Debug,
-      LogLevel.Trace,
-      LogLevel.All,
-    ];
+  const orderedLogLevels = [
+    LogLevel.Fatal,
+    LogLevel.Error,
+    LogLevel.Warn,
+    LogLevel.Info,
+    LogLevel.Debug,
+    LogLevel.Trace,
+    LogLevel.All,
+  ];
 
+  describe('isLevelEnabled', () => {
     for (const logLevel of orderedLogLevels) {
       it(`returns the correct value for a '${logLevel.id}' level logger`, () => {
         const levelLogger = new TestLogger(context, logLevel, appenderMocks, factory);
@@ -235,6 +266,24 @@ describe('AbstractLogger', () => {
           const levelEnabled = logLevel.supports(level);
           expect(levelLogger.isLevelEnabled(level.id)).toEqual(levelEnabled);
         }
+      });
+    }
+  });
+
+  describe('closure syntax', () => {
+    for (const logLevel of orderedLogLevels) {
+      it(`evaluates the log function for '${logLevel.id}' level if enabled`, () => {
+        logger = new TestLogger(context, LogLevel.All, appenderMocks, factory);
+        const logFn = jest.fn(() => 'some message');
+        logger.trace(logFn);
+        expect(logFn).toHaveBeenCalledTimes(1);
+      });
+
+      it(`does not evaluate the log function for '${logLevel.id}' level if not enabled`, () => {
+        logger = new TestLogger(context, LogLevel.Off, appenderMocks, factory);
+        const logFn = jest.fn(() => 'some message');
+        logger.trace(logFn);
+        expect(logFn).not.toHaveBeenCalled();
       });
     }
   });

@@ -10,24 +10,24 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
 import { ensureOnlyEventCollectionIsAllowed } from '../../../common/endpoint/models/policy_config_helpers';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
-import { createAppFeaturesServiceMock } from '../../lib/app_features_service/mocks';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
   let fleetServices: EndpointInternalFleetServicesInterface;
-  let appFeatureService: AppFeaturesService;
+  let productFeatureService: ProductFeaturesService;
   let logger: Logger;
 
   const callTurnOffPolicyProtections = () =>
-    turnOffPolicyProtectionsIfNotSupported(esClient, fleetServices, appFeatureService, logger);
+    turnOffPolicyProtectionsIfNotSupported(esClient, fleetServices, productFeatureService, logger);
 
   const generatePolicyMock = (
     policyGenerator: FleetPackagePolicyGenerator,
@@ -60,7 +60,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
     ({ esClient, logger } = endpointContextStartContract);
 
-    appFeatureService = endpointContextStartContract.appFeaturesService;
+    productFeatureService = endpointContextStartContract.productFeaturesService;
     fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
   });
 
@@ -89,8 +89,8 @@ describe('Turn Off Policy Protections Migration', () => {
       policyGenerator = new FleetPackagePolicyGenerator('seed');
       const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
 
-      appFeatureService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
+      productFeatureService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
       );
 
       page1Items = [
@@ -160,8 +160,8 @@ describe('Turn Off Policy Protections Migration', () => {
       policyGenerator = new FleetPackagePolicyGenerator('seed');
       const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
 
-      appFeatureService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+      productFeatureService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
 
       page1Items = [
@@ -253,8 +253,8 @@ describe('Turn Off Policy Protections Migration', () => {
       policyGenerator = new FleetPackagePolicyGenerator('seed');
       const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
 
-      appFeatureService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter(
+      productFeatureService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
           (key) => key !== 'endpoint_policy_protections' && key !== 'endpoint_protection_updates'
         )
       );

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -65,9 +65,11 @@ describe('CustomFields', () => {
   it('calls onChange on add option click', async () => {
     appMockRender.render(<CustomFields {...props} />);
 
-    userEvent.click(await screen.findByTestId('add-custom-field'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
 
-    expect(props.handleAddCustomField).toBeCalled();
+    await waitFor(() => {
+      expect(props.handleAddCustomField).toBeCalled();
+    });
   });
 
   it('calls handleEditCustomField on edit option click', async () => {
@@ -75,17 +77,13 @@ describe('CustomFields', () => {
       <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
     );
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
     );
 
-    expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
-  });
-
-  it('shows the experimental badge', async () => {
-    appMockRender.render(<CustomFields {...props} />);
-
-    expect(await screen.findByTestId('case-experimental-badge')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+    });
   });
 
   it('shows error when custom fields reaches the limit', async () => {
@@ -103,7 +101,7 @@ describe('CustomFields', () => {
 
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
-    userEvent.click(await screen.findByTestId('add-custom-field'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
 
     expect(await screen.findByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
     expect(await screen.findByTestId('add-custom-field')).toHaveAttribute('disabled');

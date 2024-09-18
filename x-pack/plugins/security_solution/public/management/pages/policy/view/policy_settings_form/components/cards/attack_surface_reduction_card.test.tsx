@@ -14,8 +14,7 @@ import type { AttackSurfaceReductionCardProps } from './attack_surface_reduction
 import {
   AttackSurfaceReductionCard,
   LOCKED_CARD_ATTACK_SURFACE_REDUCTION,
-  SWITCH_DISABLED_LABEL,
-  SWITCH_ENABLED_LABEL,
+  SWITCH_LABEL,
 } from './attack_surface_reduction_card';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { cloneDeep, set } from 'lodash';
@@ -80,7 +79,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     );
   });
 
-  it('should be able to toggle to disabled', () => {
+  it('should be able to toggle to disabled', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     set(expectedUpdate, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
     render();
@@ -90,7 +89,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'true'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -98,7 +97,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     });
   });
 
-  it('should should be able to toggle to enabled', () => {
+  it('should should be able to toggle to enabled', async () => {
     set(formProps.policy, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
 
     const expectedUpdate = cloneDeep(formProps.policy);
@@ -110,7 +109,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'false'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -150,21 +149,23 @@ describe('Policy Attack Surface Reduction Card', () => {
       expectIsViewOnly(renderResult.getByTestId(testSubj.card));
     });
 
-    it('should show correct value when disabled', () => {
+    it('should show correct value when checked', () => {
       render();
 
-      expect(renderResult.getByTestId(testSubj.viewModeValue)).toHaveTextContent(
-        SWITCH_ENABLED_LABEL
-      );
+      expect(renderResult.getByTestId(testSubj.switchLabel)).toHaveTextContent(SWITCH_LABEL);
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('true');
     });
 
-    it('should show correct value when enabled', () => {
+    it('should show correct value when unchecked', () => {
       set(formProps.policy, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
       render();
 
-      expect(renderResult.getByTestId(testSubj.viewModeValue)).toHaveTextContent(
-        SWITCH_DISABLED_LABEL
-      );
+      expect(renderResult.getByTestId(testSubj.switchLabel)).toHaveTextContent(SWITCH_LABEL);
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('false');
     });
   });
 });

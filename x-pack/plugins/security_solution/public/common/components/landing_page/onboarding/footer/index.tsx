@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { useFooterStyles } from '../styles/footer.styles';
@@ -25,7 +25,9 @@ const FooterComponent = () => {
         <EuiFlexItem key={`footer-${item.key}`}>
           <img src={item.icon} alt={item.title} height="64" width="64" />
           <EuiSpacer size="m" />
-          <p className={titleStyle}>{item.title}</p>
+          <EuiTitle>
+            <h3 className={titleStyle}>{item.title}</h3>
+          </EuiTitle>
           <p className={descriptionStyle}>{item.description}</p>
           <EuiSpacer size="m" />
           <EuiLink href={item.link.href} external={true} target="_blank" className={linkStyle}>

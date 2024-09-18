@@ -17,6 +17,13 @@ export interface InvokeBody {
     role: string;
     content: string;
   }>;
+  signal?: AbortSignal;
+}
+
+interface UsageMetadata {
+  promptTokenCount: number;
+  candidatesTokenCount: number;
+  totalTokenCount: number;
 }
 
 /**
@@ -42,30 +49,46 @@ export async function getTokenCountFromInvokeStream({
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = body;
-
-  // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-  const promptTokens = encode(
-    chatCompletionRequest.messages
-      .map((msg) => `<|start|>${msg.role}\n${msg.content}<|end|>`)
-      .join('\n')
-  ).length;
+  const { signal, ...chatCompletionRequest } = body;
 
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-  const parsedResponse = await parser(responseStream, logger);
+  const parsedResponse = await parser(responseStream, logger, signal);
+  if (typeof parsedResponse === 'string') {
+    // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+    const promptTokens = encode(
+      chatCompletionRequest.messages
+        .map((msg) => `<|start|>${msg.role}\n${msg.content}<|end|>`)
+        .join('\n')
+    ).length;
 
-  const completionTokens = encode(parsedResponse).length;
-  return {
-    prompt: promptTokens,
-    completion: completionTokens,
-    total: promptTokens + completionTokens,
-  };
+    const completionTokens = encode(parsedResponse).length;
+    return {
+      prompt: promptTokens,
+      completion: completionTokens,
+      total: promptTokens + completionTokens,
+    };
+  }
+  // if parsed response is not a string, it is the usage object
+  return parsedResponse;
 }
 
-type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
+type StreamParser = (
+  responseStream: Readable,
+  logger: Logger,
+  signal?: AbortSignal
+) => Promise<
+  | {
+      total: number;
+      prompt: number;
+      completion: number;
+    }
+  | string
+>;
 
 const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   const responseBuffer: Uint8Array[] = [];
+  // do not destroy response stream on abort for bedrock
+  // Amazon charges the same tokens whether the stream is destroyed or not, so let it finish to calculate
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
@@ -75,21 +98,100 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   } catch (e) {
     logger.error('An error occurred while calculating streaming response tokens');
   }
+  const usage = getUsageFromFinalChunk(responseBuffer[responseBuffer.length - 1], logger);
+  if (usage) {
+    return usage;
+  }
   return parseBedrockBuffer(responseBuffer);
 };
 
-const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
+const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
   let responseBody: string = '';
-  responseStream.on('data', (chunk) => {
-    // no special encoding, can safely use toString and append to responseBody
-    responseBody += chunk.toString();
-  });
+  const destroyStream = () => {
+    // Pause the stream to prevent further data events
+    responseStream.pause();
+    // Remove the 'data' event listener once the stream is paused
+    responseStream.removeListener('data', onData);
+    // Manually destroy the stream
+    responseStream.emit('close');
+    responseStream.destroy();
+  };
+
+  const onData = (chunk: Buffer) => {
+    // no special encoding, can safely use `${chunk}` and append to responseBody
+    responseBody += `${chunk}`;
+  };
+
+  responseStream.on('data', onData);
+
   try {
+    // even though the stream is destroyed in the axios request, the response body is still calculated
+    // if we do not destroy the stream, the response never resolves
+    signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
   } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
+    if (!signal?.aborted)
+      logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);
+};
+
+export const parseGeminiStreamForUsageMetadata = async ({
+  responseStream,
+  logger,
+}: {
+  responseStream: Readable;
+  logger: Logger;
+}): Promise<UsageMetadata> => {
+  let responseBody = '';
+
+  const onData = (chunk: Buffer) => {
+    responseBody += chunk.toString();
+  };
+
+  responseStream.on('data', onData);
+
+  return new Promise((resolve, reject) => {
+    responseStream.on('end', () => {
+      resolve(parseGeminiUsageMetadata(responseBody));
+    });
+    responseStream.on('error', (err) => {
+      logger.error('An error occurred while calculating streaming response tokens');
+      reject(err);
+    });
+  });
+};
+
+/** Parse Gemini stream response body */
+const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
+  const parsedLines = responseBody
+    .split('\n')
+    .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
+    .map((line) => JSON.parse(line.replace('data: ', '')));
+
+  parsedLines
+    .filter(
+      (
+        line
+      ): line is {
+        candidates: Array<{
+          content: { role: string; parts: Array<{ text: string }> };
+          finishReason: string;
+          safetyRatings: Array<{ category: string; probability: string }>;
+        }>;
+      } => 'candidates' in line
+    )
+    .reduce((prev, line) => {
+      const parts = line.candidates[0].content?.parts;
+      const chunkText = parts?.map((part) => part.text).join('');
+      return prev + chunkText;
+    }, '');
+
+  // Extract usage metadata from the last chunk
+  const lastChunk = parsedLines[parsedLines.length - 1];
+  const usageMetadata = 'usageMetadata' in lastChunk ? lastChunk.usageMetadata : null;
+
+  return usageMetadata;
 };
 
 /**
@@ -101,7 +203,6 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
 const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
@@ -187,7 +288,9 @@ const parseOpenAIResponse = (responseBody: string) =>
           delta: { content?: string; function_call?: { name?: string; arguments: string } };
         }>;
       } => {
-        return 'object' in line && line.object === 'chat.completion.chunk';
+        return (
+          'object' in line && line.object === 'chat.completion.chunk' && line.choices.length > 0
+        );
       }
     )
     .reduce((prev, line) => {
@@ -195,3 +298,46 @@ const parseOpenAIResponse = (responseBody: string) =>
       prev += msg.content || '';
       return prev;
     }, '');
+
+/**
+ * Parses the final chunk of a Bedrock buffer to extract the usage object.
+ * @param finalChunk
+ */
+const getUsageFromFinalChunk = (
+  finalChunk: Uint8Array,
+  logger: Logger
+): {
+  total: number;
+  prompt: number;
+  completion: number;
+} | null => {
+  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+  const event = awsDecoder.decode(finalChunk);
+  const body = JSON.parse(
+    Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+  );
+  if (body.type === 'message_stop') {
+    if (
+      body['amazon-bedrock-invocationMetrics'] &&
+      body['amazon-bedrock-invocationMetrics'].inputTokenCount != null &&
+      body['amazon-bedrock-invocationMetrics'].outputTokenCount != null
+    ) {
+      return {
+        total:
+          body['amazon-bedrock-invocationMetrics'].inputTokenCount +
+          body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+        prompt: body['amazon-bedrock-invocationMetrics'].inputTokenCount,
+        completion: body['amazon-bedrock-invocationMetrics'].outputTokenCount,
+      };
+    }
+    logger.error(
+      'Response from Bedrock invoke stream message_stop chunk did not contain amazon-bedrock-invocationMetrics'
+    );
+    return {
+      total: 0,
+      prompt: 0,
+      completion: 0,
+    };
+  }
+  return null;
+};

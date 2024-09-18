@@ -14,9 +14,19 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { Query } from '@kbn/es-query';
-import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { Query, Filter } from '@kbn/es-query';
+import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
+function createMockFilterManager() {
+  const filters: Filter[] = [];
+  return {
+    getFilters: () => filters,
+    addFilters: (value: Filter[]) => {
+      filters.push(...value);
+    },
+  } as unknown as jest.Mocked<FilterManager>;
+}
 // helper function to create data views
 function createMockDataView(id: string) {
   const {
@@ -229,6 +239,7 @@ describe('getEsQueryFromSavedSearch()', () => {
         dataView: mockDataView,
         savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
@@ -281,6 +292,7 @@ describe('getEsQueryFromSavedSearch()', () => {
           query: 'responsetime:>100',
           language: 'lucene',
         },
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
@@ -354,13 +366,38 @@ describe('getEsQueryFromSavedSearch()', () => {
             },
           },
         ],
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
       queryOrAggregateQuery: { language: 'lucene', query: 'responsetime:>100' },
       searchQuery: {
         bool: {
-          filter: [],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'ACA' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'FFT' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
           must: [{ query_string: { query: 'responsetime:>100' } }],
           must_not: [{ match_phrase: { airline: 'JZA' } }],
           should: [],

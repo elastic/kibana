@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ChildProcess from 'child_process';
-import { Readable } from 'stream';
 import * as Rx from 'rxjs';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { SomeDevLog } from '@kbn/some-dev-log';
-import { observeLines } from '@kbn/stdio-dev-helpers';
+import { startTSWorker } from '@kbn/dev-utils';
 import type { Result } from './extract_field_lists_from_plugins_worker';
 
 /**
@@ -25,33 +23,16 @@ import type { Result } from './extract_field_lists_from_plugins_worker';
 export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Result> {
   log.info('Loading core with all plugins enabled so that we can get all savedObject mappings...');
 
-  const fork = ChildProcess.fork(require.resolve('./extract_field_lists_from_plugins_worker.ts'), {
-    execArgv: ['--require=@kbn/babel-register/install'],
-    cwd: REPO_ROOT,
-    stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+  const { msg$, proc } = startTSWorker<Result>({
+    log,
+    src: require.resolve('./extract_field_lists_from_plugins_worker.ts'),
   });
 
   const result = await Rx.firstValueFrom(
-    Rx.merge(
-      // the actual value we are interested in
-      Rx.fromEvent(fork, 'message'),
-
-      // worker logs are written to the logger, but dropped from the stream
-      routeToLog(fork.stdout!, log, 'debug'),
-      routeToLog(fork.stderr!, log, 'error'),
-
-      // if an error occurs running the worker throw it into the stream
-      Rx.fromEvent(fork, 'error').pipe(
-        Rx.map((err) => {
-          throw err;
-        })
-      )
-    ).pipe(
-      Rx.takeUntil(Rx.fromEvent(fork, 'exit')),
-      Rx.map((results) => {
-        const [outcome] = results as [Result];
+    msg$.pipe(
+      Rx.map((outcome) => {
         log.debug('message received from worker', outcome);
-        fork.kill('SIGILL');
+        proc.kill('SIGILL');
         return outcome;
       }),
       Rx.defaultIfEmpty(undefined)
@@ -63,13 +44,4 @@ export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Res
   }
 
   return result;
-}
-
-function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
-  return observeLines(readable).pipe(
-    Rx.tap((line) => {
-      log[level](line);
-    }),
-    Rx.ignoreElements()
-  );
 }

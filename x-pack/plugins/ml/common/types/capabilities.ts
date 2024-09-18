@@ -84,6 +84,8 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  // Inference models
+  canCreateInferenceEndpoint: false,
 };
 
 export type FeatureMlCapabilities = typeof featureMlCapabilities;
@@ -243,5 +245,6 @@ export const featureCapabilities: FeatureCapabilities = {
     'canCreateTrainedModels',
     'canDeleteTrainedModels',
     'canStartStopTrainedModels',
+    'canCreateInferenceEndpoint',
   ],
 };

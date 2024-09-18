@@ -10,6 +10,8 @@ import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
 import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_page_object';
+import { BenchmarkPagePageProvider } from './benchmark_page';
+import { CspSecurityCommonProvider } from './security_common';
 import { RulePagePageProvider } from './rule_page';
 
 export const cloudSecurityPosturePageObjects = {
@@ -18,6 +20,8 @@ export const cloudSecurityPosturePageObjects = {
   cisAddIntegration: AddCisIntegrationFormPageProvider,
   vulnerabilityDashboard: VulnerabilityDashboardPageProvider,
   rule: RulePagePageProvider,
+  benchmark: BenchmarkPagePageProvider,
+  cspSecurity: CspSecurityCommonProvider,
 };
 export const pageObjects = {
   ...xpackFunctionalPageObjects,

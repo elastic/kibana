@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 
-interface CreateConnectorBody {
+export interface CreateConnectorBody {
   readonly name: string;
   readonly config: Record<string, unknown>;
   readonly connector_type_id: string;
@@ -15,13 +15,15 @@ interface CreateConnectorBody {
 }
 
 export async function createConnector(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   connector: CreateConnectorBody,
   id = ''
-): Promise<void> {
-  await supertest
+): Promise<string> {
+  const { body } = await supertest
     .post(`/api/actions/connector/${id}`)
     .set('kbn-xsrf', 'foo')
     .send(connector)
     .expect(200);
+
+  return body.id;
 }

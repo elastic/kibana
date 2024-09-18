@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   EuiLoadingSpinner,
@@ -29,7 +29,6 @@ import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
-export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
 type DropdownRuleRecord = Pick<
@@ -60,22 +59,16 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   hideSnoozeOption = false,
   direction = 'column',
 }: ComponentOpts) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
-  const [isSnoozed, setIsSnoozed] = useState<boolean>(!hideSnoozeOption && isRuleSnoozed(rule));
-
   const {
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
-  useEffect(() => {
-    setIsEnabled(rule.enabled);
-  }, [rule.enabled]);
-  useEffect(() => {
-    if (!hideSnoozeOption) setIsSnoozed(isRuleSnoozed(rule));
-  }, [rule, hideSnoozeOption]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+  const isSnoozed = !hideSnoozeOption && isRuleSnoozed(rule);
 
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
@@ -92,18 +85,18 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       title: message.summary,
       ...(message.details && {
         text: toMountPoint(
-          <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+          <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+          { i18n: i18nStart, theme }
         ),
       }),
     });
     throw new Error();
-  }, [enableRule, toasts]);
+  }, [i18nStart, theme, enableRule, toasts]);
 
   const onEnable = useCallback(async () => {
     setIsUpdating(true);
     try {
       await enableRuleInternal();
-      setIsEnabled(true);
       onRuleChanged();
     } finally {
       setIsUpdating(false);
@@ -115,7 +108,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       setIsUpdating(true);
       try {
         await disableRule(untrack);
-        setIsEnabled(false);
         onRuleChanged();
       } finally {
         setIsUpdating(false);
@@ -155,7 +147,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onSnoozeRule = useCallback(
-    async (snoozeSchedule) => {
+    async (snoozeSchedule: SnoozeSchedule) => {
       try {
         await snoozeRule(snoozeSchedule);
         onRuleChanged();
@@ -167,7 +159,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onUnsnoozeRule = useCallback(
-    async (scheduleIds) => {
+    async (scheduleIds?: string[]) => {
       try {
         await unsnoozeRule(scheduleIds);
         onRuleChanged();
@@ -178,11 +170,11 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     [unsnoozeRule, onRuleChanged, onClosePopover]
   );
 
-  const badgeColor = !isEnabled ? 'default' : isSnoozed ? 'warning' : 'primary';
-  const badgeMessage = !isEnabled ? DISABLED : isSnoozed ? SNOOZED : ENABLED;
+  const badgeColor = !rule.enabled ? 'default' : isSnoozed ? 'warning' : 'primary';
+  const badgeMessage = !rule.enabled ? DISABLED : isSnoozed ? SNOOZED : ENABLED;
 
   const remainingSnoozeTime =
-    isEnabled && isSnoozed ? (
+    rule.enabled && isSnoozed ? (
       <EuiToolTip
         content={
           rule.muteAll
@@ -243,7 +235,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               <RuleStatusMenu
                 onClosePopover={onClosePopover}
                 onChangeEnabledStatus={onChangeEnabledStatus}
-                isEnabled={isEnabled}
+                isEnabled={rule.enabled}
                 isSnoozed={isSnoozed}
                 snoozeEndTime={rule.isSnoozedUntil}
                 hideSnoozeOption={hideSnoozeOption}

@@ -424,7 +424,6 @@ export class RemoteClusterTable extends Component {
         pagination={pagination}
         sorting={sorting}
         selection={selection}
-        isSelectable={true}
         data-test-subj="remoteClusterListTable"
       />
     );

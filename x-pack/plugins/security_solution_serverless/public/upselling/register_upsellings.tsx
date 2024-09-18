@@ -4,58 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type {
   MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
-  UpsellingMessageId,
-  UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
-import React from 'react';
-import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
-import { AppFeatureKey } from '@kbn/security-solution-features/keys';
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
-import {
-  EndpointAgentTamperProtectionLazy,
-  EndpointPolicyProtectionsLazy,
-  EndpointProtectionUpdatesLazy,
-  RuleDetailsEndpointExceptionsLazy,
-} from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
-import { getProductAppFeatures } from '../../common/pli/pli_features';
-import {
-  EndpointExceptionsDetailsUpsellingLazy,
-  EntityAnalyticsUpsellingLazy,
-  OsqueryResponseActionsUpsellingSectionLazy,
-  ThreatIntelligencePaywallLazy,
-} from './lazy_upselling';
-import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
+import { getProductProductFeatures } from '../../common/pli/pli_features';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
+import { upsellingPages, upsellingSections, upsellingMessages } from './upsellings';
 
-interface UpsellingsConfig {
-  pli: AppFeatureKeyType;
-  component: React.ComponentType;
-}
+export const registerUpsellings = (productTypes: SecurityProductTypes, services: Services) => {
+  const upsellingService = registerSecuritySolutionUpsellings(productTypes, services);
+  configurePluginsUpsellings(upsellingService, services);
+};
 
-interface UpsellingsMessageConfig {
-  pli: AppFeatureKeyType;
-  message: string;
-  id: UpsellingMessageId;
-}
-
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
-type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
-type UpsellingMessages = UpsellingsMessageConfig[];
-
-export const registerUpsellings = (
-  upselling: UpsellingService,
+/**
+ * Registers the upsellings for the security solution.
+ */
+const registerSecuritySolutionUpsellings = (
   productTypes: SecurityProductTypes,
   services: Services
-) => {
-  const enabledPLIsSet = new Set(getProductAppFeatures(productTypes));
+): UpsellingService => {
+  const upsellingService = services.securitySolution.getUpselling();
+
+  const enabledPLIsSet = new Set(getProductProductFeatures(productTypes));
 
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, pli, component }) => {
@@ -70,7 +45,7 @@ export const registerUpsellings = (
   const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
     (sectionUpsellings, { id, pli, component }) => {
       if (!enabledPLIsSet.has(pli)) {
-        sectionUpsellings[id] = component;
+        sectionUpsellings[id] = withServicesProvider(component, services);
       }
       return sectionUpsellings;
     },
@@ -87,80 +62,20 @@ export const registerUpsellings = (
     {}
   );
 
-  upselling.setPages(upsellingPagesToRegister);
-  upselling.setSections(upsellingSectionsToRegister);
-  upselling.setMessages(upsellingMessagesToRegister);
+  upsellingService.setPages(upsellingPagesToRegister);
+  upsellingService.setSections(upsellingSectionsToRegister);
+  upsellingService.setMessages(upsellingMessagesToRegister);
+
+  return upsellingService;
 };
 
-// Upselling for entire pages, linked to a SecurityPageName
-export const upsellingPages: UpsellingPages = [
-  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
-  {
-    pageName: SecurityPageName.entityAnalytics,
-    pli: AppFeatureKey.advancedInsights,
-    component: () => (
-      <EntityAnalyticsUpsellingLazy
-        requiredProduct={getProductTypeByPLI(AppFeatureKey.advancedInsights) ?? undefined}
-      />
-    ),
-  },
-  {
-    pageName: SecurityPageName.threatIntelligence,
-    pli: AppFeatureKey.threatIntelligence,
-    component: () => (
-      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
-    ),
-  },
-  {
-    pageName: SecurityPageName.exceptions,
-    pli: AppFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={AppFeatureKey.endpointExceptions} />
-    ),
-  },
-];
+/**
+ * Configures the upsellings for other plugins.
+ */
+const configurePluginsUpsellings = (upsellingService: UpsellingService, services: Services) => {
+  const { integrationAssistant } = services;
 
-// Upselling for sections, linked by arbitrary ids
-export const upsellingSections: UpsellingSections = [
-  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
-  {
-    id: 'osquery_automated_response_actions',
-    pli: AppFeatureKey.osqueryAutomatedResponseActions,
-    component: () => (
-      <OsqueryResponseActionsUpsellingSectionLazy
-        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
-      />
-    ),
-  },
-  {
-    id: 'endpoint_agent_tamper_protection',
-    pli: AppFeatureKey.endpointAgentTamperProtection,
-    component: EndpointAgentTamperProtectionLazy,
-  },
-  {
-    id: 'endpointPolicyProtections',
-    pli: AppFeatureKey.endpointPolicyProtections,
-    component: EndpointPolicyProtectionsLazy,
-  },
-  {
-    id: 'ruleDetailsEndpointExceptions',
-    pli: AppFeatureKey.endpointExceptions,
-    component: RuleDetailsEndpointExceptionsLazy,
-  },
-  {
-    id: 'endpoint_protection_updates',
-    pli: AppFeatureKey.endpointProtectionUpdates,
-    component: EndpointProtectionUpdatesLazy,
-  },
-];
-
-// Upselling for sections, linked by arbitrary ids
-export const upsellingMessages: UpsellingMessages = [
-  {
-    id: 'investigation_guide',
-    pli: AppFeatureKey.investigationGuide,
-    message: UPGRADE_INVESTIGATION_GUIDE(
-      getProductTypeByPLI(AppFeatureKey.investigationGuide) ?? ''
-    ),
-  },
-];
+  upsellingService.sections$.subscribe((sections) => {
+    integrationAssistant?.renderUpselling(sections.get('integration_assistant'));
+  });
+};

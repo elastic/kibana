@@ -1,0 +1,15 @@
+{
+  "profiling.topn_functions": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_profiling/topn/functions"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/observability/current/universal-profiling.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

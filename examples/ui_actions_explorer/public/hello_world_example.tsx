@@ -1,27 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
 
 import { EuiButton, EuiSpacer, EuiText, EuiModalBody, EuiLink, EuiSwitch } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
-import { OverlayStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 
 const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-Waldo`;
 
 interface Props {
   uiActionsStartService: UiActionsStart;
-  openModal: OverlayStart['openModal'];
+  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
 }
 
-export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) => {
+export const HelloWorldExample = ({ uiActionsStartService, startServices }: Props) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const actionsMessage = isChecked ? '2 actions attached' : '1 action attached';
@@ -70,14 +71,15 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
                 type: ACTION_HELLO_WORLD,
                 getDisplayName: () => 'Say hello to Waldo',
                 execute: async () => {
-                  const overlay = openModal(
+                  const overlay = startServices.overlays.openModal(
                     toMountPoint(
                       <EuiModalBody>
                         <EuiText data-test-subj="dynamicHelloWorldActionText">Hello Waldo</EuiText>{' '}
                         <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
                           Close
                         </EuiButton>
-                      </EuiModalBody>
+                      </EuiModalBody>,
+                      startServices
                     )
                   );
                 },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider, Droppable, Draggable } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -25,7 +25,7 @@ import {
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LensAppState } from '../../../state_management';
-import { ProviderProps } from '@kbn/dom-drag-drop/src';
+import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { LayerPanelProps } from './types';
 
 jest.mock('../../../id_generator');
@@ -80,6 +80,9 @@ describe('LayerPanel', () => {
   function getDefaultProps() {
     return {
       layerId: 'first',
+      visualizationMap: {
+        testVis: mockVisualization,
+      },
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
       datasourceMap: {
@@ -163,7 +166,7 @@ describe('LayerPanel', () => {
     it('should call the clear callback when resetting layer', async () => {
       const cb = jest.fn();
       renderLayerPanel({ onRemoveLayer: cb });
-      userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
+      await userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
       expect(cb).toHaveBeenCalled();
     });
   });
@@ -236,6 +239,38 @@ describe('LayerPanel', () => {
       renderLayerPanel();
       expect(screen.getAllByTestId('lnsGroupTestId')).toHaveLength(2);
       expect(screen.getByText('Requires field')).toBeInTheDocument();
+    });
+
+    it('should not render the required warning when the chart is empty', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel();
+      expect(screen.queryByText('Requires field')).not.toBeInTheDocument();
+    });
+
+    it('should render the required warning when the chart is empty but isInlineEditing', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel({ setIsInlineFlyoutVisible: jest.fn() });
+      expect(screen.queryByText('Requires field')).toBeInTheDocument();
     });
 
     it('should tell the user to remove the correct number of dimensions', async () => {
@@ -341,7 +376,7 @@ describe('LayerPanel', () => {
         ],
       });
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).toBeInTheDocument();
     });
     it('should not render visualization dimension editor when clicking on empty dimension', async () => {
@@ -356,7 +391,7 @@ describe('LayerPanel', () => {
       });
 
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
     it('should not break if visualization dimensionEditor is not defined', async () => {
@@ -371,7 +406,7 @@ describe('LayerPanel', () => {
       });
       mockVisualization.DimensionEditorComponent = undefined;
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
     it('should not update the visualization if the datasource is incomplete', async () => {
@@ -388,7 +423,7 @@ describe('LayerPanel', () => {
         updateDatasourceAsync,
       });
 
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
 
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
@@ -417,7 +452,7 @@ describe('LayerPanel', () => {
         updateDatasourceAsync,
       });
 
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
       );
@@ -447,7 +482,7 @@ describe('LayerPanel', () => {
       });
       const onRemoveDimension = jest.fn();
       renderLayerPanel({ onRemoveDimension, layerId: 'first' });
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
 
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'columnId' })
@@ -494,7 +529,7 @@ describe('LayerPanel', () => {
 
       (generateId as jest.Mock).mockReturnValueOnce(`secondColumnId`);
       renderLayerPanel();
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
+      await userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
       expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
 
       const lastArgs =
@@ -526,16 +561,16 @@ describe('LayerPanel', () => {
       // no pending state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce(undefined);
       renderLayerPanel({ updateDatasource });
-      userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
-      userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
+      await userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
+      await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).not.toHaveBeenCalled();
 
       // // a pending state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce({ newState: {} });
 
-      userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
-      userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
+      await userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
+      await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
@@ -584,7 +619,7 @@ describe('LayerPanel', () => {
 
       const onEmptyDimensionAdd = jest.fn();
       renderLayerPanel({ onEmptyDimensionAdd });
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
+      await userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
       expect(onEmptyDimensionAdd).toHaveBeenCalledWith('newid', defaultGroup);
     });
   });
@@ -641,9 +676,9 @@ describe('LayerPanel', () => {
           source: draggingField,
         })
       );
-      const dragDropElement = screen.getByTestId('lnsDragDrop');
-      fireEvent.dragOver(dragDropElement);
-      fireEvent.drop(dragDropElement);
+      const droppableElement = screen.getByTestId('lnsDragDrop-domDroppable');
+      fireEvent.dragOver(droppableElement);
+      fireEvent.drop(droppableElement);
 
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -685,17 +720,17 @@ describe('LayerPanel', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="lnsGroupTestId"] DragDrop').first().prop('dropType')
+        instance.find('[data-test-subj="lnsGroupTestId"] Droppable').first().prop('dropType')
       ).toEqual(undefined);
 
-      const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupTestId"] DragDrop')
+      const droppableElement = instance
+        .find('[data-test-subj="lnsGroupTestId"] Droppable')
         .first()
         .find(DimensionButton)
         .first();
 
-      dragDropElement.simulate('dragOver');
-      dragDropElement.simulate('drop');
+      droppableElement.simulate('dragOver');
+      droppableElement.simulate('drop');
 
       expect(onDropToDimension).not.toHaveBeenCalled();
     });
@@ -739,11 +774,11 @@ describe('LayerPanel', () => {
 
       // Simulate drop on the pre-populated dimension
 
-      const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupTestId2"] DragDrop .domDragDrop')
+      const droppableElement = instance
+        .find('[data-test-subj="lnsGroupTestId2"] Droppable .domDroppable')
         .at(0);
-      dragDropElement.simulate('dragOver');
-      dragDropElement.simulate('drop');
+      droppableElement.simulate('dragOver');
+      droppableElement.simulate('drop');
 
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -756,12 +791,12 @@ describe('LayerPanel', () => {
 
       // Simulate drop on the empty dimension
 
-      const updatedDragDropElement = instance
-        .find('[data-test-subj="lnsGroupTestId2"] DragDrop .domDragDrop')
+      const updatedDroppableElement = instance
+        .find('[data-test-subj="lnsGroupTestId2"] Droppable .domDroppable')
         .last();
 
-      updatedDragDropElement.simulate('dragOver');
-      updatedDragDropElement.simulate('drop');
+      updatedDroppableElement.simulate('dragOver');
+      updatedDroppableElement.simulate('drop');
 
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -793,7 +828,7 @@ describe('LayerPanel', () => {
         { attachTo: holder }
       );
       act(() => {
-        instance.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+        instance.find(Droppable).at(1).prop('onDrop')!(draggingOperation, 'reorder');
       });
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -802,7 +837,7 @@ describe('LayerPanel', () => {
         })
       );
       const secondButton = instance
-        .find(DragDrop)
+        .find(Draggable)
         .at(1)
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
         .at(1)
@@ -829,7 +864,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        instance.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
+        instance.find(Droppable).at(2).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -866,7 +901,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+        instance.find(Droppable).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -911,7 +946,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+        instance.find(Droppable).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
       expect(onDropToDimension).toHaveBeenCalledWith(
@@ -962,7 +997,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+        instance.find(Droppable).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
       expect(onDropToDimension).toHaveBeenCalledWith(
@@ -998,7 +1033,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
+        instance.find(Droppable).at(3).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
     });
   });

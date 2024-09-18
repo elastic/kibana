@@ -18,6 +18,7 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
@@ -31,7 +32,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
@@ -43,6 +44,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
+import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -65,6 +67,7 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
   ActionsRequestHandlerContext,
+  UnsecuredServices,
 } from './types';
 
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
@@ -98,7 +101,11 @@ import {
   ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
-import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import {
+  ICaseServiceAbstract,
+  IServiceAbstract,
+  SubActionConnectorType,
+} from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -126,10 +133,16 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
-  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets, Incident, GetIncidentResponse>() => ICaseServiceAbstract<
+    Config,
+    Secrets,
+    Incident,
+    GetIncidentResponse
+  >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
 export interface PluginStartContract {
@@ -157,6 +170,7 @@ export interface PluginStartContract {
     params: Params,
     variables: Record<string, unknown>
   ): Params;
+  isSystemActionConnector: (connectorId: string) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -236,7 +250,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
-
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
     });
@@ -391,6 +405,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           );
         }
       },
+      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
+      },
     };
   }
 
@@ -461,6 +478,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -468,13 +486,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
-          logger: this.logger,
+          logger,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -484,17 +503,23 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     const getUnsecuredActionsClient = () => {
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
 
       return new UnsecuredActionsClient({
-        internalSavedObjectsRepository,
+        actionExecutor: actionExecutor!,
+        clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
+        inMemoryConnectors: this.inMemoryConnectors,
+        internalSavedObjectsRepository,
+        kibanaIndices: core.savedObjects.getAllIndices(),
+        logger: this.logger,
       });
     };
 
@@ -523,16 +548,25 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
+    const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
+      core.savedObjects.createInternalRepository();
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      security: plugins.security,
+      security: core.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
         (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
+      ),
+      getUnsecuredServices: this.getUnsecuredServicesFactory(
+        getInternalSavedObjectsRepositoryWithoutAccessToActions,
+        core.elasticsearch,
+        encryptedSavedObjectsClient,
+        () => core.savedObjects.createInternalRepository(includedHiddenTypes)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -540,6 +574,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
+      analyticsService: core.analytics,
     });
 
     taskRunnerFactory!.initialize({
@@ -553,15 +588,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ]),
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {});
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       createAlertHistoryIndexTemplate({
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
-      });
+      }).catch(() => {});
     }
 
     this.validateEnabledConnectorTypes(plugins);
@@ -586,6 +623,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
+      isSystemActionConnector: (connectorId: string): boolean => {
+        return this.inMemoryConnectors.some(
+          (inMemoryConnector) =>
+            inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
+        );
+      },
     };
   }
 
@@ -606,7 +649,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       request,
       authorizationMode,
       authorization: this.security?.authz,
-      authentication: this.security?.authc,
     });
   };
 
@@ -622,6 +664,25 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
+          encryptedSavedObjectsClient,
+          logger: this.logger,
+        }),
+      };
+    };
+  }
+
+  private getUnsecuredServicesFactory(
+    getSavedObjectRepository: () => ISavedObjectsRepository,
+    elasticsearch: ElasticsearchServiceStart,
+    encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+    unsecuredSavedObjectsRepository: () => ISavedObjectsRepository
+  ): () => UnsecuredServices {
+    return () => {
+      return {
+        savedObjectsClient: getSavedObjectRepository(),
+        scopedClusterClient: elasticsearch.client.asInternalUser,
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: unsecuredSavedObjectsRepository(),
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
@@ -695,6 +756,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
@@ -702,6 +764,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,

@@ -6,13 +6,23 @@
  */
 
 import React from 'react';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from './mocks';
+import {
+  expectIsViewOnly,
+  getPolicySettingsFormTestSubjects,
+  setAntivirusRegistration,
+  setMalwareMode,
+  setMalwareModeToDetect,
+} from './mocks';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { PolicySettingsFormProps } from './policy_settings_form';
 import { PolicySettingsForm } from './policy_settings_form';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { PolicyConfig } from '../../../../../../common/endpoint/types';
+import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
+import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
 
 jest.mock('../../../../../common/hooks/use_license');
 
@@ -87,6 +97,153 @@ describe('Endpoint Policy Settings Form', () => {
     it('should display upselling component', () => {
       render();
       expect(renderResult.getByTestId('paywall'));
+    });
+  });
+
+  describe('when changing related settings', () => {
+    let clickOnRadio: (selector: string) => Promise<void>;
+    let expectOnChangeToBeCalledWith: (updatedPolicy: PolicyConfig) => void;
+
+    describe('related to antivirus registration', () => {
+      beforeEach(() => {
+        clickOnRadio = (selector) =>
+          userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
+
+        expectOnChangeToBeCalledWith = (updatedPolicy) =>
+          expect(formProps.onChange).toBeCalledWith({
+            isValid: true,
+            updatedPolicy,
+          });
+      });
+
+      describe('changing malware when antivirus registration is synced with malware', () => {
+        it('should enable antivirus registration when malware is enabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
+          setMalwareMode({ policy: formProps.policy, turnOff: true });
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareMode({ policy: expectedPolicy });
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, true);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should disable antivirus registration when malware is disabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareMode({ policy: expectedPolicy, turnOff: true });
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should disable antivirus registration when malware is set to detect only', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
+          setMalwareMode({ policy: formProps.policy });
+          render();
+
+          await clickOnRadio(testSubj.malware.protectionDetectRadio);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareModeToDetect(expectedPolicy);
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+      });
+
+      describe('changing malware when antivirus registration is NOT synced with malware', () => {
+        it('should not change antivirus registration when malware is enabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
+          setMalwareMode({ policy: formProps.policy, turnOff: true });
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareMode({ policy: expectedPolicy });
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should not change antivirus registration when malware is disabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareMode({ policy: expectedPolicy, turnOff: true });
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should not change antivirus registration when malware is set to detect only', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
+          setMalwareMode({ policy: formProps.policy });
+          render();
+
+          await clickOnRadio(testSubj.malware.protectionDetectRadio);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setMalwareModeToDetect(expectedPolicy);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+      });
+
+      describe('changing antivirus registration mode when malware is enabled', () => {
+        it('should enable antivirus registration when set to sync', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
+          render();
+
+          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, true);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should disable antivirus registration when set to disabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
+          render();
+
+          await clickOnRadio(testSubj.antivirusRegistration.disabledRadioButton);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.disabled, false);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+      });
+
+      describe('changing antivirus registration mode when malware is disabled', () => {
+        beforeEach(() => {
+          setMalwareMode({ policy: formProps.policy, turnOff: true });
+        });
+
+        it('should disable antivirus registration when set to sync', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
+          render();
+
+          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+
+        it('should enable antivirus registration when set to enabled', async () => {
+          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
+          render();
+
+          await clickOnRadio(testSubj.antivirusRegistration.enabledRadioButton);
+
+          const expectedPolicy = cloneDeep(formProps.policy);
+          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.enabled, true);
+          expectOnChangeToBeCalledWith(expectedPolicy);
+        });
+      });
     });
   });
 });

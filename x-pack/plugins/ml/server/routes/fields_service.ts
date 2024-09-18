@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
+  getCardinalityOfFieldsResponse,
   getCardinalityOfFieldsSchema,
+  getTimeFieldRangeResponse,
   getTimeFieldRangeSchema,
 } from './schemas/fields_service_schema';
 import { fieldsServiceProvider } from '../models/fields_service';
@@ -31,17 +33,6 @@ function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
  * Routes for fields service
  */
 export function fieldsService({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup FieldsService
-   *
-   * @api {post} /internal/ml/fields_service/field_cardinality Get cardinality of fields
-   * @apiName GetCardinalityOfFields
-   * @apiDescription Returns the cardinality of one or more fields. Returns an Object whose keys are the names of the fields, with values equal to the cardinality of the field
-   *
-   * @apiSchema (body) getCardinalityOfFieldsSchema
-   *
-   * @apiSuccess {number} fieldName cardinality of the field.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/fields_service/field_cardinality`,
@@ -49,6 +40,9 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetFieldInfo'],
       },
+      summary: 'Gets cardinality of fields',
+      description:
+        'Returns the cardinality of one or more fields. Returns an Object whose keys are the names of the fields, with values equal to the cardinality of the field',
     })
     .addVersion(
       {
@@ -56,6 +50,12 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         validate: {
           request: {
             body: getCardinalityOfFieldsSchema,
+          },
+          response: {
+            200: {
+              body: getCardinalityOfFieldsResponse,
+              description: 'Cardinality of fields',
+            },
           },
         },
       },
@@ -72,18 +72,6 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup FieldsService
-   *
-   * @api {post} /internal/ml/fields_service/time_field_range Get time field range
-   * @apiName GetTimeFieldRange
-   * @apiDescription Returns the time range for the given index and query using the specified time range.
-   *
-   * @apiSchema (body) getTimeFieldRangeSchema
-   *
-   * @apiSuccess {Object} start start of time range with epoch and string properties.
-   * @apiSuccess {Object} end end of time range with epoch and string properties.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`,
@@ -91,6 +79,9 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetFieldInfo'],
       },
+      summary: 'Get time field range',
+      description:
+        'Returns the time range for the given index and query using the specified time range.',
     })
     .addVersion(
       {
@@ -98,6 +89,12 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         validate: {
           request: {
             body: getTimeFieldRangeSchema,
+          },
+          response: {
+            200: {
+              body: getTimeFieldRangeResponse,
+              description: 'Cardinality of fields',
+            },
           },
         },
       },

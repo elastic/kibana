@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
@@ -17,11 +16,12 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { SignalSource } from '../types';
+import { generateAlertId } from './utils';
 
 export const wrapEsqlAlerts = ({
-  results,
+  events,
   spaceId,
   completeRule,
   mergeStrategy,
@@ -29,12 +29,10 @@ export const wrapEsqlAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
   tuple,
-  sourceDocuments,
   isRuleAggregating,
 }: {
   isRuleAggregating: boolean;
-  sourceDocuments: Record<string, { fields: estypes.SearchHit['fields'] }>;
-  results: Array<Record<string, string | null>>;
+  events: Array<estypes.SearchHit<SignalSource>>;
   spaceId: string | null | undefined;
   completeRule: CompleteRule<EsqlRuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -47,51 +45,35 @@ export const wrapEsqlAlerts = ({
     maxSignals: number;
   };
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
-  const wrapped = results.map<WrappedFieldsLatest<BaseFieldsLatest>>((document, i) => {
-    const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-
-    // for aggregating rules when metadata _id is present, generate alert based on ES document event id
-    const id =
-      !isRuleAggregating && document._id
-        ? objectHash([
-            document._id,
-            document._version,
-            document._index,
-            `${spaceId}:${completeRule.alertId}`,
-          ])
-        : objectHash([
-            ruleRunId,
-            completeRule.ruleParams.query,
-            `${spaceId}:${completeRule.alertId}`,
-            i,
-          ]);
-
-    // metadata fields need to be excluded from source, otherwise alerts creation fails
-    const { _id, _version, _index, ...source } = document;
-
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+  const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
+    const id = generateAlertId({
+      event,
       spaceId,
       completeRule,
-      {
-        _source: source as SignalSource,
-        fields: _id ? sourceDocuments[_id]?.fields : undefined,
-        _id: _id ?? '',
-        _index: _index ?? '',
-      },
+      tuple,
+      isRuleAggregating,
+      index: i,
+    });
+
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+      spaceId,
+      completeRule,
+      doc: event,
       mergeStrategy,
-      [],
-      true,
-      buildReasonMessageForNewTermsAlert,
-      [],
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageForNewTermsAlert,
+      indicesToQuery: [],
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+    });
 
     return {
       _id: id,
-      _index: _index ?? '',
+      _index: event._index ?? '',
       _source: {
         ...baseAlert,
       },

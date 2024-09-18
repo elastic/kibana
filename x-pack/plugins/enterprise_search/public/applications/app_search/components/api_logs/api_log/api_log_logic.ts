@@ -36,6 +36,7 @@ export const ApiLogLogic = kea<MakeLogicType<ApiLogValues, ApiLogActions>>({
     apiLog: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         openFlyout: (_, { apiLog }) => apiLog,
         closeFlyout: () => null,
       },

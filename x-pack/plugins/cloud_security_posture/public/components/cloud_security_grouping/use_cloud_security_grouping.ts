@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  GroupOption,
-  GroupPanelRenderer,
-  GroupStatsRenderer,
-} from '@kbn/securitysolution-grouping/src';
+import { GroupOption, GroupPanelRenderer, GetGroupStats } from '@kbn/grouping/src';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
@@ -32,10 +28,11 @@ export const useCloudSecurityGrouping = ({
   getDefaultQuery,
   unit,
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel,
   groupingLocalStorageKey,
   maxGroupingLevels = DEFAULT_MAX_GROUPING_LEVELS,
+  groupsUnit,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -43,10 +40,11 @@ export const useCloudSecurityGrouping = ({
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
-  groupStatsRenderer?: GroupStatsRenderer<any>;
+  getGroupStats?: GetGroupStats<any>;
   groupingLevel?: number;
   groupingLocalStorageKey: string;
   maxGroupingLevels?: number;
+  groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -62,7 +60,8 @@ export const useCloudSecurityGrouping = ({
     componentProps: {
       unit,
       groupPanelRenderer,
-      groupStatsRenderer,
+      getGroupStats,
+      groupsUnit,
     },
     defaultGroupingOptions,
     fields: dataView.fields,
@@ -129,6 +128,7 @@ export const useCloudSecurityGrouping = ({
     query,
     error,
     selectedGroup,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,

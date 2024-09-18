@@ -30,6 +30,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./flapping_history'));
     loadTestFile(require.resolve('./check_registered_rule_types'));
     loadTestFile(require.resolve('./alert_delay'));
+    loadTestFile(require.resolve('./alert_severity'));
     loadTestFile(require.resolve('./generate_alert_schemas'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 

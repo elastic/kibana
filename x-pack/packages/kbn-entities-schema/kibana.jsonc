@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/entities-schema",
+  "owner": "@elastic/obs-entities"
+}

@@ -30,10 +30,11 @@ import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
-import type { AlertActionsProps } from './types';
+import type { AlertActionsProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
-import { TypeRegistry } from './application/type_registry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
@@ -81,7 +82,7 @@ import type {
   RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -96,6 +97,7 @@ import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -108,7 +110,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   getActionForm: (
-    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
+    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+      setActions: (actions: RuleAction[]) => void;
+    }
   ) => ReactElement<ActionAccordionFormProps>;
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
@@ -285,7 +289,7 @@ export class Plugin
           unknown
         ];
 
-        const { renderApp } = await import('./application/app');
+        const { renderApp } = await import('./application/rules_app');
 
         // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
         // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -310,7 +314,7 @@ export class Plugin
           unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
-          theme$: params.theme$,
+          theme: params.theme,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
@@ -375,9 +379,9 @@ export class Plugin
       },
     });
 
-    if (this.experimentalFeatures.globalAlertsPage) {
+    if (this.experimentalFeatures.stackAlertsPage) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: ALERTS_PLUGIN_ID,
+        id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
         capabilitiesId: PLUGIN_ID,
         order: 0,
@@ -408,7 +412,7 @@ export class Plugin
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
-            theme$: params.theme$,
+            theme: params.theme,
             storage: new Storage(window.localStorage),
             setBreadcrumbs: params.setBreadcrumbs,
             history: params.history,
@@ -426,7 +430,7 @@ export class Plugin
       });
       if (plugins.home) {
         plugins.home.featureCatalogue.register({
-          id: ALERTS_PLUGIN_ID,
+          id: ALERTS_PAGE_ID,
           title: alertsFeatureTitle,
           description: alertsFeatureDescription,
           icon: 'watchesApp',
@@ -444,7 +448,7 @@ export class Plugin
     };
   }
 
-  public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+  public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     import('./application/sections/alerts_table/configuration').then(
       ({ createGenericAlertsTableConfigurations }) => {
         createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
@@ -457,9 +461,16 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
-      getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+      getActionForm: (
+        props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+          setActions: (actions: RuleAction[]) => void;
+        }
+      ) => {
+        const { setActions, ...restProps } = props;
         return getActionFormLazy({
-          ...props,
+          ...restProps,
+          // TODO remove this cast when every solution is ready to use system actions
+          setActions: setActions as (actions: RuleUiAction[]) => void,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
         });
@@ -549,7 +560,11 @@ export class Plugin
         return getRuleStatusPanelLazy(props);
       },
       getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => {
-        return getAlertSummaryWidgetLazy(props);
+        const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+          charts: plugins.charts,
+          uiSettings: core.uiSettings,
+        };
+        return getAlertSummaryWidgetLazy({ ...props, dependencies });
       },
       getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
         return getRuleSnoozeModalLazy(props);

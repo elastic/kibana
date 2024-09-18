@@ -7,53 +7,99 @@
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
-import type { AssetCriticality } from '../../api/api';
+import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
 const PRIVILEGES_KEY = 'PRIVILEGES';
 
+const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
+  has_all_required: false,
+  has_write_permissions: false,
+  has_read_permissions: false,
+  privileges: {
+    elasticsearch: {},
+  },
+});
+
 export const useAssetCriticalityPrivileges = (
-  entityName: string
-): UseQueryResult<EntityAnalyticsPrivileges> => {
+  queryKey: string
+): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
   const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+  const isEnabled = isAssetCriticalityEnabled && hasEntityAnalyticsCapability;
 
   return useQuery({
-    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, entityName],
-    queryFn: fetchAssetCriticalityPrivileges,
+    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, isEnabled],
+    queryFn: isEnabled ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
   });
 };
 
 export const useAssetCriticalityData = ({
   entity,
   enabled = true,
+  onChange,
 }: {
   entity: Entity;
   enabled?: boolean;
+  onChange?: () => void;
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
-  const { fetchAssetCriticality, createAssetCriticality } = useEntityAnalyticsRoutes();
+  const { fetchAssetCriticality, createAssetCriticality, deleteAssetCriticality } =
+    useEntityAnalyticsRoutes();
 
   const privileges = useAssetCriticalityPrivileges(entity.name);
-  const query = useQuery<AssetCriticalityRecord, { body: { statusCode: number } }>({
+  const query = useQuery<AssetCriticalityRecord | null, { body: { statusCode: number } }>({
     queryKey: QUERY_KEY,
     queryFn: () => fetchAssetCriticality({ idField: `${entity.type}.name`, idValue: entity.name }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
     enabled,
   });
 
-  const mutation = useMutation({
-    mutationFn: createAssetCriticality,
+  const mutation = useMutation<
+    AssetCriticalityRecord | DeleteAssetCriticalityResponse,
+    unknown,
+    Params,
+    unknown
+  >({
+    mutationFn: (params: Params) => {
+      if (params.criticalityLevel === 'unassigned') {
+        return deleteAssetCriticality({
+          idField: params.idField,
+          idValue: params.idValue,
+          refresh: 'wait_for',
+        });
+      }
+
+      return createAssetCriticality({
+        idField: params.idField,
+        idValue: params.idValue,
+        criticalityLevel: params.criticalityLevel,
+        refresh: 'wait_for',
+      });
+    },
     onSuccess: (data) => {
-      QC.setQueryData(QUERY_KEY, data);
+      const queryData = 'deleted' in data ? null : data;
+      QC.setQueryData(QUERY_KEY, queryData);
+      onChange?.();
     },
   });
 
+  const was404 = query.isError && query.error.body.statusCode === 404;
+  const returnedData = query.isSuccess && query.data != null;
+  const status = was404 || !returnedData ? 'create' : 'update';
+
   return {
-    status: query.isError && query.error.body.statusCode === 404 ? 'create' : 'update',
+    status,
     query,
     mutation,
     privileges,
@@ -62,11 +108,20 @@ export const useAssetCriticalityData = ({
 
 export interface State {
   status: 'create' | 'update';
-  query: UseQueryResult<AssetCriticalityRecord>;
+  query: UseQueryResult<AssetCriticalityRecord | null>;
   privileges: UseQueryResult<EntityAnalyticsPrivileges>;
-  mutation: UseMutationResult<AssetCriticalityRecord, unknown, Params, unknown>;
+  mutation: UseMutationResult<
+    AssetCriticalityRecord | DeleteAssetCriticalityResponse,
+    unknown,
+    Params,
+    unknown
+  >;
 }
-type Params = Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>;
+interface Params {
+  idField: AssetCriticality['idField'];
+  idValue: AssetCriticality['idValue'];
+  criticalityLevel: CriticalityLevelWithUnassigned;
+}
 
 export interface ModalState {
   visible: boolean;

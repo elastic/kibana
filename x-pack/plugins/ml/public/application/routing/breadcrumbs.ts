@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
-import { NavigateToPath } from '../contexts/kibana';
+import type { NavigateToPath } from '../contexts/kibana';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
@@ -48,6 +48,14 @@ export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
   }),
   href: '/trained_models',
   deepLinkId: 'ml:modelManagement',
+});
+
+export const SUPPLIED_CONFIGURATIONS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.suppliedConfigurationsLabel', {
+    defaultMessage: 'Supplied configurations',
+  }),
+  href: '/supplied_configurations',
+  deepLinkId: 'ml:suppliedConfigurations',
 });
 
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -153,6 +161,7 @@ const breadcrumbs = {
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
+  SUPPLIED_CONFIGURATIONS,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 

@@ -62,6 +62,15 @@
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
     "@kbn/lens-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/controls-plugin",
+    "@kbn/alerting-comparators",
+    "@kbn/alerting-types",
+    "@kbn/visualization-utils",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/observability-alerting-rule-utils"
   ],
   "exclude": ["target/**/*"]
 }

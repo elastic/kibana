@@ -22,6 +22,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
           isVisible: true,
           position: 'right',
           legendSize: 'xlarge',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         fittingFunction: 'None',
@@ -36,7 +37,6 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: false,
         },
-        valuesInLegend: true,
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,
@@ -84,6 +84,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                 params: {
                   query: 'PTR',
                 },
+                // @ts-expect-error upgrade typescript v4.9.5
                 indexRefName: 'filter-index-pattern-0',
               },
               query: {

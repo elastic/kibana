@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Dictionary } from '../../../common/types/common';
-import { EsFieldName } from '../../../common/types/fields';
+import type { Dictionary } from '../../../common/types/common';
+import type { EsFieldName } from '../../../common/types/fields';
 
 export type EsId = string;
 export type EsDocSource = Dictionary<any>;

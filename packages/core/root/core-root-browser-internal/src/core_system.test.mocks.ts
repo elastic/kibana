@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -25,6 +26,8 @@ import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -155,4 +158,18 @@ export const MockLoggingSystem = loggingSystemMock.create();
 export const LoggingSystemConstructor = jest.fn().mockImplementation(() => MockLoggingSystem);
 jest.doMock('@kbn/core-logging-browser-internal', () => ({
   BrowserLoggingSystem: LoggingSystemConstructor,
+}));
+
+export const MockSecurityService = securityServiceMock.create();
+export const SecurityServiceConstructor = jest.fn().mockImplementation(() => MockSecurityService);
+jest.doMock('@kbn/core-security-browser-internal', () => ({
+  SecurityService: SecurityServiceConstructor,
+}));
+
+export const MockUserProfileService = userProfileServiceMock.create();
+export const UserProfileServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockUserProfileService);
+jest.doMock('@kbn/core-user-profile-browser-internal', () => ({
+  UserProfileService: UserProfileServiceConstructor,
 }));

@@ -28,7 +28,7 @@ jest.mock('../../../../../../common/hooks/use_license');
 
 const useLicenseMock = _useLicense as jest.Mock;
 
-describe('Policy form Detect Prevent Protection level component', () => {
+describe('Policy form Notify User option component', () => {
   let formProps: NotifyUserOptionProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -88,13 +88,13 @@ describe('Policy form Detect Prevent Protection level component', () => {
     expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
   });
 
-  it('should be able to un-check the option', () => {
+  it('should be able to un-check the option', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', false);
     set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', false);
     set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', false);
     render();
-    userEvent.click(renderResult.getByTestId('test-checkbox'));
+    await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -102,14 +102,14 @@ describe('Policy form Detect Prevent Protection level component', () => {
     });
   });
 
-  it('should be able to check the option', () => {
+  it('should be able to check the option', async () => {
     set(formProps.policy, 'windows.popup.malware.enabled', false);
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', true);
     set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', true);
     set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', true);
     render();
-    userEvent.click(renderResult.getByTestId('test-checkbox'));
+    await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -117,14 +117,14 @@ describe('Policy form Detect Prevent Protection level component', () => {
     });
   });
 
-  it('should be able to change the notification message', () => {
+  it('should be able to change the notification message', async () => {
     const msg = 'a';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.message', msg);
     set(expectedUpdatedPolicy, 'mac.popup.malware.message', msg);
     set(expectedUpdatedPolicy, 'linux.popup.malware.message', msg);
     render();
-    userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
+    await userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

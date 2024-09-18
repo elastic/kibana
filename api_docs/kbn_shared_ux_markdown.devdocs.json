@@ -27,7 +27,7 @@
         "label": "Markdown",
         "description": [],
         "signature": [
-          "({ ariaLabelContent, markdownContent, children, className, onRender, openLinksInNewTab, defaultValue, placeholder, height, readOnly, enableTooltipSupport, validateLinks, ...restProps }: ",
+          "({ ariaLabelContent, markdownContent, children, className, onRender, openLinksInNewTab, defaultValue, placeholder, height, readOnly, enableTooltipSupport, validateLinks, enableSoftLineBreaks, ...restProps }: ",
           "MarkdownProps",
           ") => JSX.Element"
         ],
@@ -40,7 +40,7 @@
             "id": "def-common.Markdown.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  ariaLabelContent,\n  markdownContent,\n  children,\n  className,\n  onRender,\n  openLinksInNewTab = true,\n  defaultValue = '',\n  placeholder = '',\n  height = 'full',\n  readOnly = false,\n  enableTooltipSupport = false,\n  validateLinks = false,\n  ...restProps\n}",
+            "label": "{\n  ariaLabelContent,\n  markdownContent,\n  children,\n  className,\n  onRender,\n  openLinksInNewTab = true,\n  defaultValue = '',\n  placeholder = '',\n  height = 'full',\n  readOnly = false,\n  enableTooltipSupport = false,\n  validateLinks = false,\n  enableSoftLineBreaks = false,\n  ...restProps\n}",
             "description": [],
             "signature": [
               "MarkdownProps"

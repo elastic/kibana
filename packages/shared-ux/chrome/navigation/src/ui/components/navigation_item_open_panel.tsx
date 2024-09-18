@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, type FC } from 'react';
@@ -73,6 +74,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`nav-item-isActive`]: isActive,
   });
   const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
+    [`panelOpener-id-${id}`]: id,
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
@@ -96,6 +98,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     }
   }, [openPanel, closePanel, item, selectedNode]);
 
+  const isExpanded = selectedNode?.path === path;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
@@ -115,15 +119,17 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
       {isIconVisible && (
         <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
-            display={selectedNode?.path === path ? 'base' : 'empty'}
+            display={isExpanded ? 'base' : 'empty'}
             size="s"
             color="text"
             onClick={onIconClick}
             iconType="spaces"
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
-              defaultMessage: 'Toggle panel navigation',
+              defaultMessage: 'Toggle "{title}" panel navigation',
+              values: { title },
             })}
+            aria-expanded={isExpanded}
             data-test-subj={buttonDataTestSubj}
           />
         </EuiFlexItem>

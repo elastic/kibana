@@ -34,6 +34,7 @@ import {
   ListAgentUploadsRequestSchema,
   GetAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
+  DeleteAgentUploadFileRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -50,14 +51,15 @@ import {
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandlerDeprecated,
-  postBulkAgentsReassignHandler,
+  postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
   getAvailableVersionsHandler,
   getActionStatusHandler,
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
-  postAgentsReassignHandler,
+  deleteAgentUploadFileHandler,
+  postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
 } from './handlers';
 import {
@@ -77,7 +79,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -93,7 +95,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .put({
       path: AGENT_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -109,7 +111,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -125,7 +127,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .delete({
       path: AGENT_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -142,7 +144,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.LIST_PATTERN,
 
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -158,7 +160,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -174,7 +176,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.ACTIONS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -194,7 +196,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -215,7 +217,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.LIST_PATTERN,
       fleetAuthz: {
-        fleet: { all: true }, // Authorizations?
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -230,7 +232,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -246,7 +248,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .put({
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -261,7 +263,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -269,14 +271,14 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         version: API_VERSIONS.public.v1,
         validate: { request: PostAgentReassignRequestSchema },
       },
-      postAgentsReassignHandler
+      postAgentReassignHandler
     );
 
   router.versioned
     .post({
       path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -291,7 +293,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -306,7 +308,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -321,7 +323,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -330,6 +332,21 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         validate: { request: GetAgentUploadFileRequestSchema },
       },
       getAgentUploadFileHandler
+    );
+
+  router.versioned
+    .delete({
+      path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
+      fleetAuthz: {
+        fleet: { allAgents: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteAgentUploadFileRequestSchema },
+      },
+      deleteAgentUploadFileHandler
     );
 
   // Get agent status for policy
@@ -353,7 +370,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -368,7 +385,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.DATA_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -384,7 +401,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.UPGRADE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -399,7 +416,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -414,9 +431,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -432,7 +448,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -440,7 +456,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         version: API_VERSIONS.public.v1,
         validate: { request: PostBulkAgentReassignRequestSchema },
       },
-      postBulkAgentsReassignHandler
+      postBulkAgentReassignHandler
     );
 
   // Bulk unenroll
@@ -448,7 +464,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -464,7 +480,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(

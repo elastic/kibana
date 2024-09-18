@@ -16,13 +16,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getConnectorCompatibility, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionConnector,
   ActionType,
-  ActionTypeIndex,
   ActionTypeModel,
+  ActionTypeIndex,
   ActionTypeRegistryContract,
 } from '../../../../types';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -88,12 +88,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
-  /* Future Developer
-   * We are excluding `UptimeConnectorFeatureId` because as this time Synthetics won't work
-   * with slack API on their UI, We need to add an ISSUE here so they can fix it
-   */
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.subtype && featureId !== UptimeConnectorFeatureId
+    actionTypeModel && actionTypeModel.subtype
       ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
           ...actionTypeRegistry.get(subtypeAction.id),
           name: subtypeAction.name,
@@ -211,7 +207,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
-        isBeta={actionTypeModel?.isBeta}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}

@@ -7,7 +7,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
@@ -25,7 +24,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/screenshot-mode-plugin",
-    "@kbn/security-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
     "@kbn/es-query",
@@ -34,7 +32,6 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/utility-types-jest",
-    "@kbn/safer-lodash-set",
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
@@ -53,7 +50,11 @@
     "@kbn/bfetch-error",
     "@kbn/es-types",
     "@kbn/code-editor",
-    "@kbn/core-test-helpers-model-versions"
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/react-kibana-mount",
+    "@kbn/search-types",
+    "@kbn/safer-lodash-set",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

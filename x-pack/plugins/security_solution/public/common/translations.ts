@@ -15,6 +15,13 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common
   defaultMessage: 'Security',
 });
 
+export const ASSISTANT_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAiAssistantManagement.app.title',
+  {
+    defaultMessage: 'AI Assistant for Security',
+  }
+);
+
 export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
   defaultMessage: 'Beta',
 });
@@ -23,6 +30,21 @@ export const BETA_TOOLTIP = i18n.translate('xpack.securitySolution.pages.common.
   defaultMessage:
     'This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
 });
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.pages.common.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
+export const TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.pages.common.technicalPreviewTooltip',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
 
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
@@ -79,13 +101,29 @@ export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
   }
 );
 
-export const getAgentTypeName = (agentType: ResponseActionAgentType) => {
+export const getAgentTypeName = (agentType: ResponseActionAgentType): string => {
   switch (agentType) {
     case 'endpoint':
       return 'Elastic Defend';
     case 'sentinel_one':
       return 'SentinelOne';
+    case 'crowdstrike':
+      return 'Crowdstrike';
     default:
       return agentType;
   }
 };
+
+export const RULE_EXECUTION_TYPE_BACKFILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.executionRunType.backfill',
+  {
+    defaultMessage: 'Manual',
+  }
+);
+
+export const RULE_EXECUTION_TYPE_STANDARD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.executionRunType.standard',
+  {
+    defaultMessage: 'Scheduled',
+  }
+);

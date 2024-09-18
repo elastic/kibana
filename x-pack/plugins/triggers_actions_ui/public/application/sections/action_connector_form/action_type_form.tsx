@@ -43,9 +43,13 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
+import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
+import { RuleActionsAlertsFilterTimeframe } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter_timeframe';
+import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -58,13 +62,10 @@ import {
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
-import { transformActionVariables } from '../../lib/action_variables';
+import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
-import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
@@ -154,6 +155,7 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
+    settings,
     http,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
@@ -368,13 +370,13 @@ export const ActionTypeForm = ({
       : false;
 
   const actionNotifyWhen = (
-    <ActionNotifyWhen
+    <RuleActionsNotifyWhen
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
       onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
+        (notifyWhen: RuleNotifyWhenType) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
         },
         [setActionFrequencyProperty, index]
@@ -522,8 +524,9 @@ export const ActionTypeForm = ({
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
-            <ActionAlertsFilterTimeframe
+            <RuleActionsAlertsFilterTimeframe
               state={actionItem.alertsFilter?.timeframe}
+              settings={settings}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>
@@ -571,6 +574,7 @@ export const ActionTypeForm = ({
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
+                    producerId={producerId}
                   />
                   {warning ? (
                     <>
@@ -702,8 +706,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     data-test-subj="action-type-form-beta-badge"
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

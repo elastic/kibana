@@ -22,11 +22,11 @@ type MobileLocationStats =
 async function generateData({
   start,
   end,
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
 }: {
   start: number;
   end: number;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
 }) {
   const galaxy10 = apm
     .mobileApp({
@@ -130,7 +130,7 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  await synthtraceEsClient.index([
+  await apmSynthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
@@ -179,7 +179,7 @@ async function generateData({
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -232,16 +232,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Location stats', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177396
+  registry.when.skip('Location stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start,
         end,
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
       let response: MobileLocationStats;

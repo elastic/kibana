@@ -31,7 +31,7 @@ export const ConnectorsOverview = () => {
   const { http, console: consolePlugin } = useKibanaServices();
   const { createConnector, isLoading } = useCreateConnector();
   const embeddableConsole = useMemo(
-    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
 
@@ -44,7 +44,7 @@ export const ConnectorsOverview = () => {
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
         rightSideItems={[
-          <EuiFlexGroup direction="row" alignItems="flexStart">
+          <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="center">
             <EuiFlexItem>
               <EuiFlexGroup
                 alignItems="center"

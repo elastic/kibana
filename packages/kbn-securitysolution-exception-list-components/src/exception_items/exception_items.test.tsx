@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -19,6 +20,7 @@ import { ruleReferences } from '../mocks/rule_references.mock';
 import { Pagination } from '@elastic/eui';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
+import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 
 const onCreateExceptionListItem = jest.fn();
 const onDeleteException = jest.fn();
@@ -47,6 +49,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('emptyViewerState')).toBeInTheDocument();
@@ -71,6 +74,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('emptySearchViewerState')).toBeInTheDocument();
@@ -96,6 +100,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -124,6 +129,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeTruthy();
@@ -151,6 +157,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -187,6 +194,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={exceptionsUtilityComponent}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -224,6 +232,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={formattedDateComponent}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -255,6 +264,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={mockGetFormattedComments}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();

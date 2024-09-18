@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   overwrites = {}
 ) {
   const { body: createdAlert } = await supertest
@@ -28,109 +28,113 @@ async function createAlert(
 
 const findTestUtils = (
   describeType: 'internal' | 'public',
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   objectRemover: ObjectRemover
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
-    it('should handle find alert request appropriately', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          connector_type_id: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
-      const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            actions: [
-              {
-                group: 'default',
-                id: createdAction.id,
-                params: {},
-                frequency: {
-                  summary: false,
-                  notify_when: 'onThrottleInterval',
-                  throttle: '1m',
-                },
-              },
-            ],
-            notify_when: undefined,
-            throttle: undefined,
-          })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/${
-          describeType === 'public' ? 'api' : 'internal'
-        }/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-      );
-
-      expect(response.status).to.eql(200);
-      expect(response.body.page).to.equal(1);
-      expect(response.body.per_page).to.be.greaterThan(0);
-      expect(response.body.total).to.be.greaterThan(0);
-      const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-      const activeSnoozes = match.active_snoozes;
-      const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
-      expect(match).to.eql({
-        id: createdAlert.id,
-        name: 'abc',
-        tags: ['foo'],
-        rule_type_id: 'test.noop',
-        revision: 0,
-        running: false,
-        consumer: 'alertsFixture',
-        schedule: { interval: '1m' },
-        enabled: true,
-        actions: [
-          {
-            group: 'default',
-            id: createdAction.id,
+    describe('handle find alert request', function () {
+      this.tags('skipFIPS');
+      it('should handle find alert request appropriately', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
             connector_type_id: 'test.noop',
-            params: {},
-            frequency: {
-              summary: false,
-              notify_when: 'onThrottleInterval',
-              throttle: '1m',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdAction.id,
+                  params: {},
+                  frequency: {
+                    summary: false,
+                    notify_when: 'onThrottleInterval',
+                    throttle: '1m',
+                  },
+                },
+              ],
+              notify_when: undefined,
+              throttle: undefined,
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.page).to.equal(1);
+        expect(response.body.per_page).to.be.greaterThan(0);
+        expect(response.body.total).to.be.greaterThan(0);
+        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+        const activeSnoozes = match.active_snoozes;
+        const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
+        expect(match).to.eql({
+          id: createdAlert.id,
+          name: 'abc',
+          tags: ['foo'],
+          rule_type_id: 'test.noop',
+          revision: 0,
+          running: false,
+          consumer: 'alertsFixture',
+          schedule: { interval: '1m' },
+          enabled: true,
+          actions: [
+            {
+              group: 'default',
+              id: createdAction.id,
+              connector_type_id: 'test.noop',
+              params: {},
+              frequency: {
+                summary: false,
+                notify_when: 'onThrottleInterval',
+                throttle: '1m',
+              },
+              uuid: match.actions[0].uuid,
             },
-            uuid: match.actions[0].uuid,
-          },
-        ],
-        params: {},
-        created_by: null,
-        api_key_owner: null,
-        api_key_created_by_user: null,
-        scheduled_task_id: match.scheduled_task_id,
-        updated_by: null,
-        throttle: null,
-        notify_when: null,
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: match.created_at,
-        updated_at: match.updated_at,
-        execution_status: match.execution_status,
-        ...(match.next_run ? { next_run: match.next_run } : {}),
-        ...(match.last_run ? { last_run: match.last_run } : {}),
-        ...(describeType === 'internal'
-          ? {
-              monitoring: match.monitoring,
-              snooze_schedule: match.snooze_schedule,
-              ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-            }
-          : {}),
+          ],
+          params: {},
+          created_by: null,
+          api_key_owner: null,
+          api_key_created_by_user: null,
+          scheduled_task_id: match.scheduled_task_id,
+          updated_by: null,
+          throttle: null,
+          notify_when: null,
+          mute_all: false,
+          muted_alert_ids: [],
+          created_at: match.created_at,
+          updated_at: match.updated_at,
+          execution_status: match.execution_status,
+          ...(match.next_run ? { next_run: match.next_run } : {}),
+          ...(match.last_run ? { last_run: match.last_run } : {}),
+          ...(describeType === 'internal'
+            ? {
+                monitoring: match.monitoring,
+                snooze_schedule: match.snooze_schedule,
+                ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                is_snoozed_until: null,
+              }
+            : {}),
+        });
+        expect(Date.parse(match.created_at)).to.be.greaterThan(0);
+        expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
       });
-      expect(Date.parse(match.created_at)).to.be.greaterThan(0);
-      expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
     });
 
     it(`shouldn't find alert from another space`, async () => {
@@ -330,7 +334,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     findTestUtils('public', supertest, objectRemover);
     findTestUtils('internal', supertest, objectRemover);
 
-    describe('legacy', () => {
+    describe('legacy', function () {
+      this.tags('skipFIPS');
       it('should handle find alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,7 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { AdvancedParametersSection } from './advanced_parameters_section';
 import { FormRow } from './form_row';
-import { PopularityField, FormatField, ScriptField, CustomLabelField } from './form_fields';
+import {
+  PopularityField,
+  FormatField,
+  ScriptField,
+  CustomLabelField,
+  CustomDescriptionField,
+} from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 
 const geti18nTexts = (): {
@@ -25,6 +32,18 @@ const geti18nTexts = (): {
     description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
       defaultMessage: `Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.`,
     }),
+  },
+  customDescription: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.customDescriptionTitle', {
+      defaultMessage: 'Set custom description',
+    }),
+    description: i18n.translate(
+      'indexPatternFieldEditor.editor.form.customDescriptionDescription',
+      {
+        defaultMessage:
+          "Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.",
+      }
+    ),
   },
   value: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.valueTitle', {
@@ -61,7 +80,7 @@ const geti18nTexts = (): {
 });
 
 export const FieldDetail = ({}) => {
-  const { links, existingConcreteFields, fieldTypeToProcess } = useFieldEditorContext();
+  const { links, fieldTypeToProcess } = useFieldEditorContext();
   const i18nTexts = geti18nTexts();
   return (
     <>
@@ -76,6 +95,17 @@ export const FieldDetail = ({}) => {
         <CustomLabelField />
       </FormRow>
 
+      {/* Set custom description */}
+      <FormRow
+        title={i18nTexts.customDescription.title}
+        description={i18nTexts.customDescription.description}
+        formFieldPath="__meta__.isCustomDescriptionVisible"
+        data-test-subj="customDescriptionRow"
+        withDividerRule
+      >
+        <CustomDescriptionField />
+      </FormRow>
+
       {/* Set value */}
       {fieldTypeToProcess === 'runtime' && (
         <FormRow
@@ -85,7 +115,7 @@ export const FieldDetail = ({}) => {
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+          <ScriptField links={links} />
         </FormRow>
       )}
 
@@ -102,6 +132,7 @@ export const FieldDetail = ({}) => {
 
       {/* Advanced settings */}
       <AdvancedParametersSection>
+        {/* Popularity score (higher value means it will be positioned higher in the fields list) */}
         <FormRow
           title={i18nTexts.popularity.title}
           description={i18nTexts.popularity.description}

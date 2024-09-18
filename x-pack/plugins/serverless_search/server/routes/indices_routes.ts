@@ -14,7 +14,7 @@ import { fetchIndices } from '../lib/indices/fetch_indices';
 import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
 
-export const registerIndicesRoutes = ({ router, security }: RouteDependencies) => {
+export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/indices',
@@ -27,8 +27,9 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
       },
     },
     async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const user = security.authc.getCurrentUser(request);
+      const core = await context.core;
+      const client = core.elasticsearch.client.asCurrentUser;
+      const user = core.security.authc.getCurrentUser();
 
       if (!user) {
         return response.customError({

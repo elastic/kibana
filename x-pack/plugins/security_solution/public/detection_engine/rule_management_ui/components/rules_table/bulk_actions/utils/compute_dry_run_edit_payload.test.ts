@@ -12,6 +12,9 @@ import { computeDryRunEditPayload } from './compute_dry_run_edit_payload';
 
 describe('computeDryRunEditPayload', () => {
   test.each<[BulkActionEditType, unknown]>([
+    [BulkActionEditTypeEnum.set_investigation_fields, { field_names: ['@timestamp'] }],
+    [BulkActionEditTypeEnum.delete_investigation_fields, { field_names: ['@timestamp'] }],
+    [BulkActionEditTypeEnum.add_investigation_fields, { field_names: ['@timestamp'] }],
     [BulkActionEditTypeEnum.set_index_patterns, []],
     [BulkActionEditTypeEnum.delete_index_patterns, []],
     [BulkActionEditTypeEnum.add_index_patterns, []],

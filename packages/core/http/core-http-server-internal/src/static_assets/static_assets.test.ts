@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { StaticAssets, type StaticAssetsParams } from './static_assets';
@@ -32,6 +33,25 @@ describe('StaticAssets', () => {
       args.cdnConfig = CdnConfig.from({ url: 'https://cdn.example.com/test' });
       staticAssets = new StaticAssets(args);
       expect(staticAssets.getHrefBase()).toEqual('https://cdn.example.com/test');
+    });
+  });
+
+  describe('#isUsingCdn()', () => {
+    it('returns false when the CDN is not configured', () => {
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(false);
+    });
+
+    it('returns true when the CDN is configured', () => {
+      args.cdnConfig = CdnConfig.from({ url: 'https://cdn.example.com/test' });
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(true);
+    });
+
+    it('returns false when CDN config contains "null" URL', () => {
+      args.cdnConfig = CdnConfig.from({ url: null });
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(false);
     });
   });
 

@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe('@ess @serverless Non ECS fields in alert document source', () => {
+  describe('@ess @serverless @serverlessQA Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
@@ -213,8 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(errors).toEqual([]);
 
-      // event properties getting flattened
-      expect(alertSource).toHaveProperty(['event.created'], validDates);
+      expect(alertSource).toHaveProperty(['event', 'created'], validDates);
     });
 
     // source threat.enrichments is keyword, ECS mapping for threat.enrichments is nested
@@ -315,6 +314,47 @@ export default ({ getService }: FtrProviderContext) => {
 
       // invalid ECS field is getting removed
       expect(alertSource).not.toHaveProperty('dll.code_signature.valid');
+    });
+
+    // The issue was found by customer and reported in
+    // https://github.com/elastic/kibana/issues/187630
+    describe('saving non-ECS compliant text field in keyword', () => {
+      it('should remove text field if the length of the string is more than 32766 bytes', async () => {
+        const document = {
+          'event.original': 'z'.repeat(32767),
+          'event.module': 'z'.repeat(32767),
+          'event.action': 'z'.repeat(32767),
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        // keywords with `ignore_above` attribute which allows long text to be stored
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.module']);
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.original']);
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.action']);
+
+        expect(alertSource).toHaveProperty(['event.module']);
+        expect(alertSource).toHaveProperty(['event.original']);
+        expect(alertSource).toHaveProperty(['event.action']);
+      });
+
+      it('should not remove text field if the length of the string is less than or equal to 32766 bytes', async () => {
+        const document = {
+          'event.original': 'z'.repeat(100),
+          'event.module': 'z'.repeat(32766),
+          'event.action': 'z'.repeat(32766),
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.original']);
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.module']);
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.action']);
+      });
     });
 
     describe('multi-fields', () => {

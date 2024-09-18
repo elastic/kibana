@@ -27,6 +27,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
         legend: {
           isVisible: false,
           position: 'right',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         preferredSeriesType: 'line',
@@ -72,7 +73,6 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
         },
         yTitle: '',
         yRightTitle: '',
-        valuesInLegend: true,
         labelsOrientation: {
           x: 0,
           yLeft: 0,

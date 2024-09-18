@@ -128,6 +128,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'agent',
   'elasticsearch',
 ] as const;
 
@@ -403,11 +404,17 @@ export function parseAndVerifyDataStreams(opts: {
     }
 
     const {
+      // @ts-expect-error upgrade typescript v5.1.6
       title: dataStreamTitle,
+      // @ts-expect-error upgrade typescript v5.1.6
       release = DEFAULT_RELEASE_VALUE,
+      // @ts-expect-error upgrade typescript v5.1.6
       type,
+      // @ts-expect-error upgrade typescript v5.1.6
       dataset,
+      // @ts-expect-error upgrade typescript v5.1.6
       streams: manifestStreams,
+      // @ts-expect-error upgrade typescript v5.1.6
       elasticsearch,
       ...restOfProps
     } = expandDottedObject(manifest);
@@ -642,41 +649,57 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.privileges) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.source_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.mappings) {
     parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.mappings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.settings) {
     parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.settings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.data_stream) {
     parsedElasticsearchEntry['index_template.data_stream'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.data_stream
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.dynamic_dataset) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.dynamic_namespace) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
@@ -687,18 +710,24 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
   const parsedElasticsearchEntry: Record<string, any> = {};
   const expandedElasticsearch = expandDottedObject(elasticsearch);
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.privileges) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.mappings) {
     parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.mappings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.settings) {
     parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.settings
     );
   }

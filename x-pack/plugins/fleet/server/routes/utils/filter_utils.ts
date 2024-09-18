@@ -9,6 +9,8 @@ import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
+import { appContextService } from '../../services/app_context';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -131,6 +133,9 @@ export const hasFilterKeyError = (
   indexMapping: IndexMapping,
   skipNormalization?: boolean
 ): string | null => {
+  if (key === null) {
+    return null;
+  }
   if (!key) {
     return `Invalid key`;
   }
@@ -223,7 +228,12 @@ export const validateKuery = (
 ) => {
   let isValid = true;
   let error: string | undefined;
+  const { enableStrictKQLValidation } = appContextService.getExperimentalFeatures();
 
+  // Skip validation when enableStrictKQLValidation is disabled
+  if (!enableStrictKQLValidation) {
+    return { isValid, error };
+  }
   if (!kuery) {
     isValid = true;
   }

@@ -7,6 +7,11 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
+if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
+  echo "--- Nothing to do in DRY_RUN mode"
+  exit 0
+fi
+
 echo "--- Push docker image"
 mkdir -p target
 
@@ -20,16 +25,11 @@ KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 # docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION -> :$FULL_VERSION-$GIT_COMMIT
 docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 if  docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; then
   echo "Cloud image already exists, skipping docker push"
 else
-  docker image push "$KIBANA_TEST_IMAGE"
+  docker_with_retry push "$KIBANA_TEST_IMAGE"
 fi
-
-docker logout docker.elastic.co
 
 echo "--- Create deployment"
 CLOUD_DEPLOYMENT_NAME="kibana-artifacts-$TAG"

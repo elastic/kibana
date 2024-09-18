@@ -18,6 +18,9 @@ import {
   addRiskInputToTimelineClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,
   toggleRiskSummaryClickedEvent,
+  assetCriticalityCsvPreviewGeneratedEvent,
+  assetCriticalityFileSelectedEvent,
+  assetCriticalityCsvImportedEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
@@ -26,6 +29,25 @@ import {
   assistantQuickPrompt,
 } from './ai_assistant';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
+import {
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+} from './document_details';
+import {
+  onboardingHubStepFinishedEvent,
+  onboardingHubStepLinkClickedEvent,
+  onboardingHubStepOpenEvent,
+} from './onboarding';
+import {
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+} from './manual_rule_run';
+import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
+import {
+  addNoteFromExpandableFlyoutClickedEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+} from './notes';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -146,6 +168,9 @@ export const telemetryEvents = [
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
+  assetCriticalityCsvPreviewGeneratedEvent,
+  assetCriticalityFileSelectedEvent,
+  assetCriticalityCsvImportedEvent,
   toggleRiskSummaryClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,
   addRiskInputToTimelineClickedEvent,
@@ -155,4 +180,16 @@ export const telemetryEvents = [
   dataQualityIndexCheckedEvent,
   dataQualityCheckAllClickedEvent,
   breadCrumbClickedEvent,
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+  onboardingHubStepOpenEvent,
+  onboardingHubStepLinkClickedEvent,
+  onboardingHubStepFinishedEvent,
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+  addNoteFromExpandableFlyoutClickedEvent,
 ];

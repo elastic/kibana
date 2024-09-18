@@ -17,7 +17,7 @@ import memoizeOne from 'memoize-one';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
@@ -125,7 +125,7 @@ const buildQueryMatch = (
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
+    dataProvider.type !== DataProviderTypeEnum.template
       ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
         ? convertNestedFieldToQuery(
             dataProvider.queryMatch.field,
@@ -136,7 +136,7 @@ const buildQueryMatch = (
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             Array.isArray(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
+              ? `(${dataProvider.queryMatch.value.join(' OR ')})`
               : prepareKQLParam(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
@@ -231,6 +231,12 @@ export const convertToBuildEsQuery = ({
   }
 };
 
+export interface CombinedQuery {
+  filterQuery: string | undefined;
+  kqlError: Error | undefined;
+  baseKqlQuery: Query;
+}
+
 export const combineQueries = ({
   config,
   dataProviders = [],
@@ -239,7 +245,7 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-}: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
+}: CombineQueries): CombinedQuery | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
@@ -254,6 +260,7 @@ export const combineQueries = ({
     return {
       filterQuery,
       kqlError,
+      baseKqlQuery: kuery,
     };
   }
 
@@ -281,5 +288,6 @@ export const combineQueries = ({
   return {
     filterQuery,
     kqlError,
+    baseKqlQuery: kuery,
   };
 };

@@ -28,7 +28,7 @@ export { Assistant } from './impl/assistant';
 // Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
 // components and hooks:
 // - `NewChat` component
-// - `NewChatById` component
+// - `NewChatByTitle` component
 // - `useAssistantOverlay` hook
 
 /**
@@ -42,7 +42,7 @@ export { Assistant } from './impl/assistant';
 export { NewChat } from './impl/new_chat';
 
 /**
- * `NewChatByID` displays a _New chat_ icon button by providing only the `promptContextId`
+ * `NewChatByTitle` displays a _New chat_ icon button by providing only the `promptContextId`
  * of a context that was (already) registered by the `useAssistantOverlay` hook. You may
  * optionally style the button icon, or override the default _New chat_ text with custom
  * content, like {'🪄✨'}
@@ -53,13 +53,13 @@ export { NewChat } from './impl/new_chat';
  * registered where the data is available, and then the _New chat_ button can be displayed
  * in another part of the tree.
  */
-export { NewChatById } from './impl/new_chat_by_id';
+export { NewChatByTitle } from './impl/new_chat_by_title';
 
 /**
  * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
  * returns an optional `showAssistantOverlay` function to display the assistant overlay.
  * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
- * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ * use the `NewChatByTitle` component and pass it the `promptContextId` returned by this hook.
  *
  * USE THIS WHEN: You want to register context in one part of the tree, and then show
  * a _New chat_ button in another part of the tree without passing around the data, or when
@@ -74,16 +74,21 @@ export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 /** Default Elastic AI Assistant logo, can be removed once included in EUI **/
 export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
 
+export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
+
+export {
+  ATTACK_DISCOVERY_STORAGE_KEY,
+  DEFAULT_ASSISTANT_NAMESPACE,
+  DEFAULT_LATEST_ALERTS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+} from './impl/assistant_context/constants';
+
+export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
+
 export {
   ELASTIC_AI_ASSISTANT_TITLE,
   WELCOME_CONVERSATION_TITLE,
 } from './impl/assistant/use_conversation/translations';
-
-/** i18n translations of system prompts */
-export * as SYSTEM_PROMPTS from './impl/content/prompts/system/translations';
-
-/** i18n translations of user prompts */
-export * as USER_PROMPTS from './impl/content/prompts/user/translations';
 
 export type {
   /** for rendering results in a code block */
@@ -99,12 +104,11 @@ export type {
   AssistantTelemetry,
   /** Conversation Interface */
   Conversation,
-  /** Message Interface */
-  Message,
+  /** Message interface on the client */
+  ClientMessage,
+  /** Function type to return messages UI */
+  GetAssistantMessages,
 } from './impl/assistant_context/types';
-
-/** Interface for defining system/user prompts */
-export type { Prompt } from './impl/assistant/types';
 
 /**
  * This interface is used to pass context to the assistant,
@@ -128,15 +132,11 @@ export type { PromptContext } from './impl/assistant/prompt_context/types';
  */
 export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
 
-/**
- * This interface is used to pass a default or base set of Quick Prompts to the Elastic Assistant that
- * can be displayed when corresponding PromptContext's are registered.
- */
-export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
+export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
+export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
+export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
-/**
- * Knowledge Base API Responses
- */
-export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
-export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
-export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
+export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
+
+export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
+export { getUserConversations, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';

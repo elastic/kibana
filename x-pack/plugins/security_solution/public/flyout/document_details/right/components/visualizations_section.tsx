@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandSection } from '../hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { ExpandableSection } from './expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 
-export interface VisualizationsSectionProps {
-  /**
-   * Boolean to allow the component to be expanded or collapsed on first render
-   */
-  expanded?: boolean;
-}
+const KEY = 'visualizations';
 
 /**
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
-export const VisualizationsSection: React.FC<VisualizationsSectionProps> = ({
-  expanded = false,
-}) => {
+export const VisualizationsSection = memo(() => {
+  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+
   return (
     <ExpandableSection
       expanded={expanded}
@@ -35,15 +31,14 @@ export const VisualizationsSection: React.FC<VisualizationsSectionProps> = ({
           defaultMessage="Visualizations"
         />
       }
+      localStorageKey={KEY}
       data-test-subj={VISUALIZATIONS_TEST_ID}
     >
       <SessionPreviewContainer />
-
       <EuiSpacer />
-
       <AnalyzerPreviewContainer />
     </ExpandableSection>
   );
-};
+});
 
 VisualizationsSection.displayName = 'VisualizationsSection';

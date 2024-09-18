@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/apm-data-access-plugin",
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-infra_services-team"],
+  "plugin": {
+    "id": "apmDataAccess",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "apm_data_access"],
+    "requiredPlugins": ["data"],
+    "optionalPlugins": ["security"],
+    "requiredBundles": []
+  }
+}

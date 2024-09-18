@@ -39,16 +39,8 @@ exports[`Inspector Data View component should render loading state 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -82,22 +74,22 @@ exports[`Inspector Data View component should render loading state 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -124,19 +116,36 @@ exports[`Inspector Data View component should render loading state 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
 >
@@ -148,6 +157,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_eventsCount": 0,
           "_maxListeners": undefined,
           "_tables": Object {},
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -199,123 +209,79 @@ Array [
     class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
-    <div>
-      <div
-        class="euiTableHeaderMobile"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
           >
-            <div
-              class="euiTableSortMobile"
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
             >
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
-              >
-                <button
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate euiButtonEmpty__text"
-                    >
-                      Sorting
-                    </span>
-                    <span
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <table
-        class="euiTable css-0 euiTable--responsive euiTable--auto"
-        id="__table_generated-id"
-        tabindex="-1"
-      >
-        <caption
-          class="euiTableCaption emotion-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_1_0"
-              role="columnheader"
-              scope="col"
-            >
-              <button
-                class="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
               >
                 <span
-                  class="euiTableCellContent"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="euiTableCellContent__text"
-                  >
-                    column1
-                  </span>
+                  column1
                 </span>
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
         >
-          <tr
-            class="euiTableRow"
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
           >
-            <td
-              class="euiTableRowCell euiTableRowCell--middle"
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
             >
               <div
-                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                column1
-              </div>
-              <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    123
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <div
-                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                    />
-                  </div>
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
                 </div>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -522,124 +488,80 @@ Array [
     class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
-    <div>
-      <div
-        class="euiTableHeaderMobile"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
           >
-            <div
-              class="euiTableSortMobile"
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
             >
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
-              >
-                <button
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate euiButtonEmpty__text"
-                    >
-                      Sorting
-                    </span>
-                    <span
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <table
-        class="euiTable css-0 euiTable--responsive euiTable--auto"
-        id="__table_generated-id"
-        tabindex="-1"
-      >
-        <caption
-          class="euiTableCaption emotion-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_1_0"
-              role="columnheader"
-              scope="col"
-            >
-              <button
-                class="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
               >
                 <span
-                  class="euiTableCellContent"
+                  class="eui-textTruncate"
+                  title="column1"
                 >
-                  <span
-                    class="euiTableCellContent__text"
-                    title="column1"
-                  >
-                    column1
-                  </span>
+                  column1
                 </span>
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
         >
-          <tr
-            class="euiTableRow"
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
           >
-            <td
-              class="euiTableRowCell euiTableRowCell--middle"
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
             >
               <div
-                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                column1
-              </div>
-              <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    123
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <div
-                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                    />
-                  </div>
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
                 </div>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"

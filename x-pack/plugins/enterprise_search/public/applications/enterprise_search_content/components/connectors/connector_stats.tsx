@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -16,19 +17,56 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
+import {
+  getConnectedConnectorsBadgeLabel,
+  getConnectedConnectorsTooltipContent,
+  getConnectedBadgeAriaLabel,
+  getIncompleteConnectorsBadgeLabel,
+  getIncompleteConnectorBadgeAriaLabel,
+  getIncompleteConnectorsTooltip,
+  getIdleJobsLabel,
+  getIdleJobsTooltip,
+  getOrphanedJobsLabel,
+  getOrphanedJobsTooltip,
+  getRunningJobsBadgeAriaLabel,
+  getRunningJobsBadgeLabel,
+  getRunningJobsLabel,
+  getRunningJobsTooltip,
+  getSyncJobErrorsLabel,
+  getSyncJobErrorsTooltip,
+} from './utils';
+
 export interface ConnectorStatsProps {
   isCrawler: boolean;
 }
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const tooltipAncherProps = {
+    css: css`
+      margin: ${euiTheme.size.xs};
+    `,
+  };
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data } = useValues(FetchSyncJobsStatsApiLogic);
+
+  const connectorCount = (data?.connected || 0) + (data?.incomplete || 0);
+  const hasMultipleConnectors = connectorCount > 1;
+  const connectedCount = data?.connected || 0;
+  const incompleteCount = data?.incomplete || 0;
+  const inProgressCount = data?.in_progress || 0;
+  const idleCount = data?.idle || 0;
+  const orphanedCount = data?.orphaned_jobs || 0;
+  const errorCount = data?.errors || 0;
 
   useEffect(() => {
     makeRequest({ isCrawler });
@@ -58,17 +96,29 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               <EuiFlexItem>
                 <EuiText>
                   {!isCrawler
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                        defaultMessage: '{count} connectors',
-                        values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
-                        },
-                      })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
+                    ? hasMultipleConnectors
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.multipleConnectorsText',
+                          {
+                            defaultMessage: '{count} connectors',
+                            values: { count: connectorCount },
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.singleConnectorText',
+                          {
+                            defaultMessage: '{count} connector',
+                            values: { count: connectorCount },
+                          }
+                        )
+                    : hasMultipleConnectors
+                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
                         defaultMessage: '{count} web crawlers',
-                        values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
-                        },
+                        values: { count: connectorCount },
+                      })
+                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                        defaultMessage: '{count} web crawler',
+                        values: { count: connectorCount },
                       })}
                 </EuiText>
               </EuiFlexItem>
@@ -76,23 +126,31 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
           </EuiSplitPanel.Inner>
 
           <EuiSplitPanel.Inner grow={false} color="subdued">
-            <EuiBadge color="success">
-              {i18n.translate('xpack.enterpriseSearch.connectorStats.connectedBadgeLabel', {
-                defaultMessage: '{number} connected',
-                values: {
-                  number: data?.connected || 0,
-                },
-              })}
-            </EuiBadge>
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteBadgeLabel', {
-                defaultMessage: '{number} incomplete',
+            <EuiToolTip
+              anchorProps={tooltipAncherProps}
+              content={getConnectedConnectorsTooltipContent(connectedCount, isCrawler)}
+            >
+              <EuiBadge
+                color="success"
+                onClick={() => {}}
+                onClickAriaLabel={getConnectedBadgeAriaLabel(connectedCount)}
+              >
+                {getConnectedConnectorsBadgeLabel(connectedCount)}
+              </EuiBadge>
+            </EuiToolTip>
 
-                values: {
-                  number: data?.incomplete || 0,
-                },
-              })}
-            </EuiBadge>
+            <EuiToolTip
+              anchorProps={tooltipAncherProps}
+              content={getIncompleteConnectorsTooltip(incompleteCount, isCrawler)}
+            >
+              <EuiBadge
+                color="warning"
+                onClick={() => {}}
+                onClickAriaLabel={getIncompleteConnectorBadgeAriaLabel(incompleteCount)}
+              >
+                {getIncompleteConnectorsBadgeLabel(incompleteCount)}
+              </EuiBadge>
+            </EuiToolTip>
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       </EuiFlexItem>
@@ -110,42 +168,56 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText>
-                  {i18n.translate('xpack.enterpriseSearch.connectorStats.runningSyncsTextLabel', {
-                    defaultMessage: '{syncs} running syncs',
-                    values: {
-                      syncs: data?.in_progress,
-                    },
-                  })}
-                </EuiText>
+                <EuiText>{getRunningJobsLabel(inProgressCount, isCrawler)}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiSplitPanel.Inner>
 
           <EuiSplitPanel.Inner grow={false} color="subdued">
-            {isCrawler
-              ? i18n.translate(
-                  'xpack.enterpriseSearch.connectorStats.crawlerSyncsOrphanedSyncsLabel',
-                  {
-                    defaultMessage: '{orphanedCount} Orphaned syncs / {errorCount} Sync errors',
-                    values: {
-                      errorCount: data?.errors || 0,
-                      orphanedCount: data?.orphaned_jobs,
-                    },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.enterpriseSearch.connectorStats.connectorSyncsOrphanedSyncsLabel',
-                  {
-                    defaultMessage:
-                      '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
-                    values: {
-                      errorCount: data?.errors || 0,
-                      idleCount: data?.idle,
-                      orphanedCount: data?.orphaned_jobs,
-                    },
-                  }
-                )}
+            <EuiToolTip
+              anchorProps={tooltipAncherProps}
+              content={getRunningJobsTooltip(inProgressCount, isCrawler)}
+            >
+              <EuiBadge
+                onClick={() => {}}
+                onClickAriaLabel={getRunningJobsBadgeAriaLabel(inProgressCount, isCrawler)}
+              >
+                {getRunningJobsBadgeLabel(inProgressCount, isCrawler)}
+              </EuiBadge>
+            </EuiToolTip>
+
+            {!isCrawler && (
+              <EuiToolTip anchorProps={tooltipAncherProps} content={getIdleJobsTooltip(idleCount)}>
+                <EuiBadge onClick={() => {}} onClickAriaLabel={getIdleJobsLabel(idleCount)}>
+                  {getIdleJobsLabel(idleCount)}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
+
+            <EuiToolTip
+              anchorProps={tooltipAncherProps}
+              content={getOrphanedJobsTooltip(orphanedCount, isCrawler)}
+            >
+              <EuiBadge
+                onClick={() => {}}
+                onClickAriaLabel={getOrphanedJobsLabel(orphanedCount, isCrawler)}
+              >
+                {getOrphanedJobsLabel(orphanedCount, isCrawler)}
+              </EuiBadge>
+            </EuiToolTip>
+
+            <EuiToolTip
+              anchorProps={tooltipAncherProps}
+              content={getSyncJobErrorsTooltip(errorCount, isCrawler)}
+            >
+              <EuiBadge
+                onClick={() => {}}
+                onClickAriaLabel={getSyncJobErrorsLabel(errorCount, isCrawler)}
+                color={errorCount > 0 ? 'danger' : 'default'}
+              >
+                {getSyncJobErrorsLabel(errorCount, isCrawler)}
+              </EuiBadge>
+            </EuiToolTip>
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       </EuiFlexItem>

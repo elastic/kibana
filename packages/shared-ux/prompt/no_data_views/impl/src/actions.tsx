@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
@@ -49,7 +50,7 @@ export const NoDataButtonLink = ({
         <EuiText size="xs" color={'subdued'}>
           <FormattedMessage
             id="sharedUXPackages.no_data_views.esqlMessage"
-            defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview). {docsLink}"
+            defaultMessage="Alternatively, you can query your data directly using ES|QL. {docsLink}"
             values={{
               docsLink: esqlDocLink && (
                 <EuiLink href={esqlDocLink} target="_blank">
@@ -65,7 +66,7 @@ export const NoDataButtonLink = ({
           <EuiButton color="success" onClick={onTryESQL} size="s" data-test-subj="tryESQLLink">
             <FormattedMessage
               id="sharedUXPackages.no_data_views.esqlButtonLabel"
-              defaultMessage="Try ES|QL"
+              defaultMessage="Language: ES|QL"
             />
           </EuiButton>
         </EuiText>

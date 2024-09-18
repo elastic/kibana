@@ -17,7 +17,6 @@
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-notifications-browser",
     "@kbn/data-plugin",
-    "@kbn/dataset-quality-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/i18n",
@@ -45,6 +44,12 @@
     "@kbn/data-views-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/lens-plugin",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/slo-plugin",
+    "@kbn/es-query",
+    "@kbn/core-analytics-browser",
+    "@kbn/react-hooks",
+    "@kbn/logs-data-access-plugin",
   ],
   "exclude": [
     "target/**/*"

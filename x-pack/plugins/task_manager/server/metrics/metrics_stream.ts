@@ -6,11 +6,13 @@
  */
 
 import { merge, of, Observable } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
+import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
+import { Logger } from '@kbn/core/server';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   isTaskManagerStatEvent,
   isTaskManagerMetricEvent,
@@ -38,6 +40,7 @@ export interface Metric<T> {
 
 interface CreateMetricsAggregatorsOpts {
   config: TaskManagerConfig;
+  logger: Logger;
   reset$: Observable<boolean>;
   taskPollingLifecycle?: TaskPollingLifecycle;
   taskManagerMetricsCollector?: TaskManagerMetricsCollector;
@@ -45,10 +48,12 @@ interface CreateMetricsAggregatorsOpts {
 export function createMetricsAggregators({
   config,
   reset$,
+  logger,
   taskPollingLifecycle,
   taskManagerMetricsCollector,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
+  const debugLogger = createWrappedLogger({ logger, tags: ['metrics-debugger'] });
   if (taskPollingLifecycle) {
     aggregators.push(
       createAggregator({
@@ -63,10 +68,11 @@ export function createMetricsAggregators({
         key: 'task_run',
         events$: taskPollingLifecycle.events,
         config,
+        logger: debugLogger,
         reset$,
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(debugLogger),
       })
     );
   }

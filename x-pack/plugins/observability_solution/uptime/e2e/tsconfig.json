@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "exclude": ["tmp", "target/**/*"],
+  "include": ["**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"],
+    "isolatedModules": false
+  },
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/ux-plugin/e2e",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/apm-plugin",
+    "@kbn/es-archiver",
+    "@kbn/ftr-common-functional-ui-services"
+  ]
+}

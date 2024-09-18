@@ -18,6 +18,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     instanceSizeMb: 1234,
     isCloudEnabled: true,
     isElasticStaffOwned: true,
+    organizationId: 'organization-id',
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     projectsUrl: 'projects-url',
     baseUrl: 'base-url',
@@ -25,11 +26,13 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       url: undefined,
       secretToken: undefined,
     },
+    onboarding: {},
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,
       projectName: undefined,
       projectType: undefined,
+      orchestratorTarget: undefined,
     },
   };
 }

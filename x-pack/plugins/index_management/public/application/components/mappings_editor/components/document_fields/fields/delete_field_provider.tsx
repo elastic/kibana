@@ -46,7 +46,7 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     modalTitle = i18n.translate(
       'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.title',
       {
-        defaultMessage: "Remove {fieldType} '{fieldName}'?",
+        defaultMessage: "Remove {fieldType} ''{fieldName}''?",
         values: {
           fieldType: isMultiField ? 'multi-field' : 'field',
           fieldName: source.name,

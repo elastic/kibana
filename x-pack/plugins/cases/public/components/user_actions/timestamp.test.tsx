@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { UserActionTimestamp } from './timestamp';
 
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');
@@ -32,7 +35,9 @@ describe('UserActionTimestamp ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    wrapper = mount(<UserActionTimestamp {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<UserActionTimestamp {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   it('it renders', async () => {
@@ -46,7 +51,7 @@ describe('UserActionTimestamp ', () => {
 
   it('it shows only the created time when the updated time is missing', async () => {
     const newWrapper = mount(<UserActionTimestamp createdAt="2020-09-06T14:40:59.889Z" />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(

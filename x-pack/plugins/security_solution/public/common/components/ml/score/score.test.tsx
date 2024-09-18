@@ -9,7 +9,6 @@ import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 import { shallow } from 'enzyme';
 
-import '../../../mock/match_media';
 import { ScoreComponent } from './score';
 import { mockAnomalies } from '../mock';
 

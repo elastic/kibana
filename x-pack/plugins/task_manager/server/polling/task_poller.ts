@@ -22,7 +22,7 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
-  pollIntervalDelay$: Observable<number>;
+  pollIntervalDelay$?: Observable<number>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -72,7 +72,7 @@ export function createTaskPoller<T, H>({
     if (running) {
       // Set the next runCycle call
       timeoutId = setTimeout(
-        runCycle,
+        () => runCycle().catch(() => {}),
         Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
       );
       // Reset delay, it's designed to shuffle only once
@@ -99,10 +99,12 @@ export function createTaskPoller<T, H>({
       pollInterval = interval;
       logger.debug(`Task poller now using interval of ${interval}ms`);
     });
-    pollIntervalDelay$.subscribe((delay) => {
-      pollIntervalDelay = delay;
-      logger.debug(`Task poller now delaying emission by ${delay}ms`);
-    });
+    if (pollIntervalDelay$) {
+      pollIntervalDelay$.subscribe((delay) => {
+        pollIntervalDelay = delay;
+        logger.debug(`Task poller now delaying emission by ${delay}ms`);
+      });
+    }
     hasSubscribed = true;
   }
 
@@ -111,7 +113,7 @@ export function createTaskPoller<T, H>({
     start: () => {
       if (!running) {
         running = true;
-        runCycle();
+        runCycle().catch(() => {});
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
         setTimeout(() => subscribe(), 0);

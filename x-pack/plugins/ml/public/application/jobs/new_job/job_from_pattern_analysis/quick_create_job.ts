@@ -8,17 +8,18 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
 import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';
-import { stashJobForCloning } from '../common/job_creator/util/general';
 import type { JobCreatorType } from '../common/job_creator';
+import { jobCloningService } from '../../../services/job_cloning_service';
 
 export const CATEGORIZATION_TYPE = {
   COUNT: ML_JOB_AGGREGATION.COUNT,
@@ -26,17 +27,18 @@ export const CATEGORIZATION_TYPE = {
   RARE: ML_JOB_AGGREGATION.RARE,
 } as const;
 
-export type CategorizationType = typeof CATEGORIZATION_TYPE[keyof typeof CATEGORIZATION_TYPE];
+export type CategorizationType = (typeof CATEGORIZATION_TYPE)[keyof typeof CATEGORIZATION_TYPE];
 
 export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
   constructor(
+    dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
     private data: DataPublicPluginStart,
-    mlApiServices: MlApiServices
+    mlApi: MlApi
   ) {
-    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
   }
 
   public async createAndSaveJob(
@@ -116,7 +118,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      stashJobForCloning(
+      jobCloningService.stashJobForCloning(
         {
           jobConfig,
           datafeedConfig,

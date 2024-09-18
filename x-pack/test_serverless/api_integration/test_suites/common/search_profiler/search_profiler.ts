@@ -8,14 +8,24 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 const API_BASE_PATH = '/api/searchprofiler';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  const supertestWithoutAuth = getService('supertestWithoutAuth') as any;
 
   describe('Profile', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
+
     it('should return profile results for a valid index', async () => {
       const payload = {
         index: '_all',
@@ -26,10 +36,11 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`${API_BASE_PATH}/profile`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set('Content-Type', 'application/json;charset=UTF-8')
+        .set(roleAuthc.apiKeyHeader)
         .send(payload)
         .expect(200);
 
@@ -46,10 +57,11 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`${API_BASE_PATH}/profile`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set('Content-Type', 'application/json;charset=UTF-8')
+        .set(roleAuthc.apiKeyHeader)
         .send(payloadWithInvalidIndex)
         .expect(404);
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Query, AggregateQuery } from '../filters';
@@ -16,21 +17,10 @@ export function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
 }
 
 // Checks if the query is of type AggregateQuery
-// currently only supports the sql query type
-// should be enhanced to support other query types
 export function isOfAggregateQueryType(
   query?: AggregateQuery | Query | { [key: string]: any }
 ): query is AggregateQuery {
-  return Boolean(query && ('sql' in query || 'esql' in query));
-}
-
-/**
- * True if the query is of type AggregateQuery and is of type esql, false otherwise.
- */
-export function isOfEsqlQueryType(
-  query?: AggregateQuery | Query | { [key: string]: any }
-): query is { esql: string } {
-  return Boolean(query && 'esql' in query && !('sql' in query));
+  return Boolean(query && 'esql' in query);
 }
 
 // returns the language of the aggregate Query, sql, esql etc

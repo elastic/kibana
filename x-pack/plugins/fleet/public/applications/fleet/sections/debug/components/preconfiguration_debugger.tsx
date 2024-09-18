@@ -29,13 +29,13 @@ import {
   useLink,
   useStartServices,
 } from '../../../hooks';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { queryClient } from '..';
 
 import { CodeBlock } from './code_block';
 
 const fetchPreconfiguredPolicies = async () => {
-  const kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`;
+  const kuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`;
 
   const response = await sendGetAgentPolicies({ kuery, perPage: SO_SEARCH_LIMIT, full: true });
 

@@ -46,6 +46,15 @@ export const clearYamlConfigBox = () => {
 
 describe('Outputs', () => {
   beforeEach(() => {
+    cy.intercept('GET', '/api/fleet/agents/setup', {
+      body: {
+        isReady: true,
+        is_secrets_storage_enabled: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+      },
+    });
+
     login();
   });
 
@@ -173,7 +182,7 @@ queue:
 
       cy.contains('Name is required');
       cy.contains('URL is required');
-      cy.contains('Service Token is required');
+      cy.contains('Service token is required');
       shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
       shouldDisplayError('serviceTokenSecretInput');
     });
@@ -272,7 +281,7 @@ queue:
         });
 
         // Verify SSL fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).find('label').click();
         cy.get('[placeholder="Specify certificate authority"]');
         cy.get('[placeholder="Specify ssl certificate"]');
         cy.get('[placeholder="Specify certificate key"]');
@@ -283,7 +292,7 @@ queue:
 
         // Verify None fields
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).find('label').click();
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SELECT).should('not.exist');
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT).should('not.exist');
@@ -299,14 +308,16 @@ queue:
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION);
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION);
 
-        cy.getBySel(
-          SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION
-        ).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION)
+          .find('label')
+          .click();
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT);
         cy.get('[placeholder="Specify certificate authority"]');
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION)
+          .find('label')
+          .click();
 
         // Verify Partitioning fields
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_PANEL).within(() => {
@@ -318,42 +329,18 @@ queue:
         });
 
         // Verify Round Robin fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).find('label').click();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_EVENTS_INPUT);
 
         // Verify Hash fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).find('label').click();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).click();
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION).find('label').click();
 
         // Topics
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_PANEL).within(() => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON);
         });
-
-        // Verify one topic processor fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT);
-
-        // Verify additional topic processor fields
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT);
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT, 1));
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT, 1));
-        cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT, 1));
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_DRAG_HANDLE_ICON);
-
-        // Verify remove topic processors
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_REMOVE_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_REMOVE_ROW_BUTTON).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT).should('not.exist');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT).should('not.exist');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT).should('not.exist');
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_PANEL).within(() => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT);
@@ -402,7 +389,6 @@ queue:
       it('displays proper error messages', () => {
         selectKafkaOutput();
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
         cy.getBySel(SETTINGS_SAVE_BTN).click();
 
         cy.contains('Name is required');
@@ -410,17 +396,13 @@ queue:
         cy.contains('Username is required');
         cy.contains('Password is required');
         cy.contains('Default topic is required');
-        cy.contains('Topic is required');
         cy.contains(
           'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
         );
-        cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
         shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
-        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
-        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
       });
     });

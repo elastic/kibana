@@ -12,7 +12,8 @@ import {
   TemplateListItem,
   TemplateType,
 } from '../types';
-import { deserializeESLifecycle } from './data_stream_serialization';
+import { deserializeESLifecycle } from './data_stream_utils';
+import { allowAutoCreateRadioValues, allowAutoCreateRadioIds } from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -27,6 +28,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     dataStream,
     _meta,
     allowAutoCreate,
+    deprecated,
   } = templateDeserialized;
 
   return {
@@ -37,8 +39,9 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     data_stream: dataStream,
     composed_of: composedOf,
     ignore_missing_component_templates: ignoreMissingComponentTemplates,
-    allow_auto_create: allowAutoCreate,
+    allow_auto_create: allowAutoCreateRadioValues?.[allowAutoCreate],
     _meta,
+    deprecated,
   };
 }
 
@@ -81,7 +84,12 @@ export function deserializeTemplate(
     composedOf: composedOf ?? [],
     ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
-    allowAutoCreate,
+    allowAutoCreate:
+      allowAutoCreate === true
+        ? allowAutoCreateRadioIds.TRUE_RADIO_OPTION
+        : allowAutoCreate === false
+        ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
+        : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     _meta,
     deprecated,
     _kbnMeta: {

@@ -6,7 +6,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  Observable,
+  map,
+  distinctUntilChanged,
+} from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -33,6 +40,7 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
+  CoreStatus,
 } from '@kbn/core/server';
 import {
   LICENSE_TYPE,
@@ -48,10 +56,7 @@ import {
   IEventLogService,
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
-import {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
@@ -61,10 +66,14 @@ import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import { RulesSettingsClientFactory } from './rules_settings_client_factory';
+import {
+  RulesSettingsClientFactory,
+  RulesSettingsService,
+  getRulesSettingsFeature,
+} from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
+import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -77,7 +86,11 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects, getLatestRuleVersion, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  setupSavedObjects,
+  RULE_SAVED_OBJECT_TYPE,
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -97,16 +110,19 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { BackfillClient } from './backfill_client/backfill_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeStart: 'execute-start',
   executeAction: 'execute-action',
+  executeBackfill: 'execute-backfill',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
@@ -118,6 +134,12 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
+  registerConnectorAdapter<
+    RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(
+    adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+  ): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -215,7 +237,9 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
+  private backfillClient?: BackfillClient;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -240,6 +264,8 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+
+    const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     const useDataStreamForAlerts = !!plugins.serverless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
@@ -267,6 +293,17 @@ export class AlertingPlugin {
       );
     }
 
+    const taskManagerStartPromise = core
+      .getStartServices()
+      .then(([_, alertingStart]) => alertingStart.taskManager);
+
+    this.backfillClient = new BackfillClient({
+      logger: this.logger,
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+      taskRunnerFactory: this.taskRunnerFactory,
+    });
+
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
@@ -291,6 +328,7 @@ export class AlertingPlugin {
           elasticsearchClientPromise: core
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+          elasticsearchAndSOAvailability$,
         });
       }
     }
@@ -305,22 +343,18 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
-      latestRuleVersion: getLatestRuleVersion(),
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertingUsageCollector(
-        usageCollection,
-        core.getStartServices().then(([_, { taskManager }]) => taskManager)
-      );
+      registerAlertingUsageCollector(usageCollection, taskManagerStartPromise);
       const eventLogIndex = this.eventLogService.getIndexPattern();
       initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
     }
 
     // Usage counter for telemetry
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTING_FEATURE_ID);
 
     const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
       plugins.data.search.searchSource
@@ -378,6 +412,14 @@ export class AlertingPlugin {
     });
 
     return {
+      registerConnectorAdapter: <
+        RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+      >(
+        adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+      ) => {
+        this.connectorAdapterRegistry.register(adapter);
+      },
       registerType: <
         Params extends RuleTypeParams = never,
         ExtractedParams extends RuleTypeParams = never,
@@ -425,7 +467,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -462,7 +504,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -507,20 +549,24 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      backfillClient: this.backfillClient!,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
+      securityService: core.security,
     });
 
     rulesSettingsClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
-      securityPluginStart: plugins.security,
+      securityService: core.security,
       isServerless: !!plugins.serverless,
     });
 
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
-      securityPluginStart: plugins.security,
+      securityService: core.security,
+      uiSettings: core.uiSettings,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -545,34 +591,38 @@ export class AlertingPlugin {
     };
 
     taskRunnerFactory.initialize({
-      logger,
-      data: plugins.data,
-      share: plugins.share,
-      dataViews: plugins.dataViews,
-      savedObjects: core.savedObjects,
-      uiSettings: core.uiSettings,
-      elasticsearch: core.elasticsearch,
-      getRulesClientWithRequest,
-      spaceIdToNamespace,
-      actionsPlugin: plugins.actions,
-      encryptedSavedObjectsClient,
-      basePathService: core.http.basePath,
-      eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
-        RULE_SAVED_OBJECT_TYPE,
-      ]),
-      executionContext: core.executionContext,
-      ruleTypeRegistry: this.ruleTypeRegistry!,
-      alertsService: this.alertsService,
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
-      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
-      maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
-      usageCounter: this.usageCounter,
-      getRulesSettingsClientWithRequest,
+      actionsPlugin: plugins.actions,
+      alertsService: this.alertsService,
+      backfillClient: this.backfillClient!,
+      basePathService: core.http.basePath,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
+      data: plugins.data,
+      dataViews: plugins.dataViews,
+      elasticsearch: core.elasticsearch,
+      encryptedSavedObjectsClient,
+      eventLogger: this.eventLogger!,
+      executionContext: core.executionContext,
       getMaintenanceWindowClientWithRequest,
+      getRulesClientWithRequest,
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      logger,
+      maxAlerts: this.config.rules.run.alerts.max,
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      rulesSettingsService: new RulesSettingsService({
+        cacheInterval: this.config.rulesSettings.cacheInterval,
+        getRulesSettingsClientWithRequest,
+        isServerless: !!plugins.serverless,
+        logger,
+      }),
+      savedObjects: core.savedObjects,
+      share: plugins.share,
+      spaceIdToNamespace,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      uiSettings: core.uiSettings,
+      usageCounter: this.usageCounter,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
@@ -583,12 +633,16 @@ export class AlertingPlugin {
           : Promise.resolve([]);
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
-    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
-    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager).catch(() => {}); // it shouldn't reject, but just in case
+    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
+      () => {}
+    ); // it shouldn't reject, but just in case
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
@@ -641,4 +695,17 @@ export class AlertingPlugin {
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }
+}
+
+export function getElasticsearchAndSOAvailability(
+  core$: Observable<CoreStatus>
+): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }

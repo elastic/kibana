@@ -198,6 +198,9 @@ Examples:
 │ New Terms         │ Custom query                      │ Overview            │ Definition          │
 │ New Terms         │ Filters                           │ Overview            │ Definition          │
 │ ESQL              │ ESQL query                        │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts by                │ Overview            │ Definition          │
+│ ESQL              │ Suppress alerts for               │ Overview            │ Definition          │
+│ ESQL              │ If a suppression field is missing │ Overview            │ Definition          │
 ```
 
 ## Scenarios
@@ -628,13 +631,9 @@ Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules of all types available to install
 When user opens the Add Rules page
 Then all X rules available for installation should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
-And all properties of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+When user opens a rule preview for any rule
+Then the preview should appear
+And all properties of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before installing**
@@ -780,15 +779,11 @@ And for all of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then all X rules available for upgrade should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
+When user opens a rule preview for any rule
+Then the preview should appear
 And the "Updates" tab should be active
 When user selects the "Overview" tab
-Then all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-When user selects the 2nd rule in the table
-Then the preview should be updated
-And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-And user should be able to repeat this for all X rules
+Then all properties of the new version of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
 #### **Scenario: Tabs and sections without content should be hidden in preview before upgrading**
@@ -978,13 +973,14 @@ Then the preview should display the changes for the newly selected rule
 
 #### **Scenario: User can see changes when updated rule is a different rule type**
 
-**Automation**: 1 UI integration test
+**Automation**: 1 e2e test
 
 ```Gherkin
 Given a prebuilt rule is installed in Kibana
 And this rule has an update available that changes the rule type
 When user opens the upgrade preview
 Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
+# When tooltip enhancement is added, this step needs to be added to the corresponding test scenario
 And a tooltip is displayed with information about changing rule types
 ```
 

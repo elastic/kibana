@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { JAVA_AGENT_NAMES, OPEN_TELEMETRY_AGENT_NAMES, RUM_AGENT_NAMES } from './agent_names';
@@ -16,11 +17,17 @@ import type {
 } from './agent_names';
 
 export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTelemetryAgentName {
-  return OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
+  return (
+    agentName?.startsWith('opentelemetry/') ||
+    OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName)
+  );
 }
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
-  return JAVA_AGENT_NAMES.includes(agentName! as JavaAgentName);
+  return (
+    agentName?.startsWith('opentelemetry/java') ||
+    JAVA_AGENT_NAMES.includes(agentName! as JavaAgentName)
+  );
 }
 
 export function isRumAgentName(agentName?: string): agentName is RumAgentName {

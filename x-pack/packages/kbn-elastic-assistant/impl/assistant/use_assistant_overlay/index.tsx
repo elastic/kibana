@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
+import { useConversation } from '../use_conversation';
+import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
+import { getGenAiConfig } from '../../connectorland/helpers';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
+import { Conversation } from '../../assistant_context/types';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean) => void;
+  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
   promptContextId: string;
 }
 
@@ -20,7 +27,7 @@ interface UseAssistantOverlay {
  * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
  * returns an optional `showAssistantOverlay` function to display the assistant overlay.
  * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
- * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ * use the `NewChatByTitle` component and pass it the `promptContextId` returned by this hook.
  *
  * USE THIS WHEN: You want to register context in one part of the tree, and then show
  * a _New chat_ button in another part of the tree without passing around the data, or when
@@ -38,7 +45,7 @@ export const useAssistantOverlay = (
   /**
    * optionally automatically add this context to a specific conversation when the assistant is displayed
    */
-  conversationId: string | null,
+  conversationTitle: string | null,
 
   /**
    * The assistant will display this **short**, static description
@@ -65,8 +72,36 @@ export const useAssistantOverlay = (
   /**
    * The assistant will display this tooltip when the user hovers over the context pill
    */
-  tooltip: PromptContext['tooltip']
+  tooltip: PromptContext['tooltip'],
+
+  /** Required to identify the availability of the Assistant for the current license level */
+  isAssistantEnabled: boolean,
+
+  /**
+   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
+   */
+  replacements?: Replacements | null
 ): UseAssistantOverlay => {
+  const { http } = useAssistantContext();
+  const { data: connectors } = useLoadConnectors({
+    http,
+  });
+
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
+
+  const { createConversation } = useConversation();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
+  );
+  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -83,6 +118,7 @@ export const useAssistantOverlay = (
     [suggestedUserPrompt]
   );
   const _tooltip = useMemo(() => tooltip, [tooltip]);
+  const _replacements = useMemo(() => replacements, [replacements]);
 
   // the assistant context is used to show/hide the assistant overlay:
   const {
@@ -92,17 +128,54 @@ export const useAssistantOverlay = (
   } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
+  // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    (showOverlay: boolean) => {
+    // shouldCreateConversation should only be passed for
+    // non-default conversations that may need to be initialized
+    async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
       if (promptContextId != null) {
+        if (shouldCreateConversation) {
+          let conversation;
+          if (!isLoading) {
+            conversation = conversationTitle
+              ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
+              : undefined;
+          }
+
+          if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
+            try {
+              await createConversation({
+                apiConfig: {
+                  ...apiConfig,
+                  actionTypeId: defaultConnector?.actionTypeId,
+                  connectorId: defaultConnector?.id,
+                },
+                category: 'assistant',
+                title: conversationTitle ?? '',
+              });
+            } catch (e) {
+              /* empty */
+            }
+          }
+        }
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
-          conversationId: conversationId ?? undefined,
+          conversationTitle: conversationTitle ?? undefined,
         });
       }
     },
-    [assistantContextShowOverlay, conversationId, promptContextId]
+    [
+      apiConfig,
+      assistantContextShowOverlay,
+      conversationTitle,
+      conversations,
+      createConversation,
+      defaultConnector,
+      isAssistantEnabled,
+      isLoading,
+      promptContextId,
+    ]
   );
 
   useEffect(() => {
@@ -115,6 +188,7 @@ export const useAssistantOverlay = (
       id: promptContextId,
       suggestedUserPrompt: _suggestedUserPrompt,
       tooltip: _tooltip,
+      replacements: _replacements ?? undefined,
     };
 
     registerPromptContext(newContext);
@@ -124,6 +198,7 @@ export const useAssistantOverlay = (
     _category,
     _description,
     _getPromptContext,
+    _replacements,
     _suggestedUserPrompt,
     _tooltip,
     promptContextId,

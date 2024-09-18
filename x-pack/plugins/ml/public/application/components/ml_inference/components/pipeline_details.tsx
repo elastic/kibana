@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 
 import {
   EuiCode,
@@ -20,8 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlInferenceState } from '../types';
-import { PipelineDetailsTitle } from '../../shared';
-import { PipelineNameAndDescription } from '../../shared';
+import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../shared';
 
 interface Props {
   handlePipelineConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;

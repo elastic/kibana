@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   tracksOverlays,
   type PresentationContainer,
@@ -26,14 +26,17 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   apiHasDynamicActions,
-  embeddableEnhancedDrilldownGrouping,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_MAX_WIDTH,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -42,7 +45,7 @@ export interface FlyoutEditDrilldownParams {
 }
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
@@ -54,7 +57,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -69,9 +71,8 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) return false;
-    if (getInheritedViewMode(embeddable) !== 'edit') return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
+    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
@@ -95,9 +96,10 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
         onClose: () => {

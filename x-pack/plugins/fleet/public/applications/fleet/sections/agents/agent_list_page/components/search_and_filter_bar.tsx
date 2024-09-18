@@ -22,7 +22,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
-import { useStartServices } from '../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../hooks';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -31,6 +31,7 @@ import { AgentStatusFilter } from './agent_status_filter';
 import { DashboardsButtons } from './dashboards_buttons';
 import { AgentPolicyFilter } from './filter_bar/agent_policy_filter';
 import { TagsFilter } from './filter_bar/tags_filter';
+import { AgentActivityBadge } from './agent_activity_badge';
 
 export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
@@ -46,20 +47,19 @@ export interface SearchAndFilterBarProps {
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  shownAgents: number;
-  inactiveShownAgents: number;
+  nAgentsInTable: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
-  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
+  latestAgentActionErrors: number;
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -76,21 +76,22 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   tags,
   selectedTags,
   onSelectedTagsChange,
-  shownAgents,
-  inactiveShownAgents,
+  nAgentsInTable,
   totalInactiveAgents,
   totalManagedAgentIds,
-  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
-  visibleAgents,
+  agentsOnCurrentPage,
   onClickAgentActivity,
   showAgentActivityTour,
+  latestAgentActionErrors,
 }) => {
+  const authz = useAuthz();
+
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
@@ -103,14 +104,20 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
           <EuiFlexItem>
             {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
           </EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <AgentActivityBadge
+                recentErrors={latestAgentActionErrors}
+                onClick={onClickAgentActivity}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            {!cloud?.isServerlessEnabled && (
+            {authz.fleet.addFleetServers && !cloud?.isServerlessEnabled ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
@@ -128,24 +135,26 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addAgentButton.tooltip"
-                    defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
-                  />
-                }
-              >
-                <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addButton"
-                    defaultMessage="Add agent"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            ) : null}
+            {authz.fleet.addAgents ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addAgentButton.tooltip"
+                      defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                    />
+                  }
+                >
+                  <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addButton"
+                      defaultMessage="Add agent"
+                    />
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexGroup>
         {/* Search and filters */}
@@ -154,14 +163,14 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={draftKuery}
+                fieldPrefix={AGENTS_PREFIX}
+                indexPattern={AGENTS_INDEX}
                 onChange={(newSearch, submit) => {
                   onDraftKueryChange(newSearch);
                   if (submit) {
                     onSubmitSearch(newSearch);
                   }
                 }}
-                fieldPrefix={AGENTS_PREFIX}
-                indexPattern={AGENTS_INDEX}
                 dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>
@@ -197,18 +206,16 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && shownAgents > 0) ? (
+            {(authz.fleet.allAgents && selectionMode === 'manual' && selectedAgents.length) ||
+            (authz.fleet.allAgents && selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  shownAgents={shownAgents}
-                  inactiveShownAgents={inactiveShownAgents}
+                  nAgentsInTable={nAgentsInTable}
                   totalManagedAgentIds={totalManagedAgentIds}
-                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
-                  visibleAgents={visibleAgents}
+                  agentsOnCurrentPage={agentsOnCurrentPage}
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}

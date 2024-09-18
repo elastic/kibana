@@ -6,14 +6,15 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { CliOptions } from './types';
 import { cliOptionsToPartialConfig } from './lib/cli_to_partial_config';
 import { createConfig, readConfig } from './lib/create_config';
 import { getEsClient } from './lib/get_es_client';
 import { parseCliOptions } from './lib/parse_cli_options';
 import { run } from './run';
 
-export async function cli() {
-  const options = parseCliOptions();
+export async function cli(cliOptions?: CliOptions) {
+  const options = cliOptions ?? parseCliOptions();
   const partialConfig = options.config
     ? await readConfig(options.config)
     : cliOptionsToPartialConfig(options);

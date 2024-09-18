@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
@@ -34,10 +35,11 @@ export class NavLinksService {
             [...apps]
               .filter(([, app]) => !app.chromeless)
               .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
-                navLinks.push(
-                  [appId, toNavLink(app, http.basePath)],
-                  ...toNavDeepLinks(app, app.deepLinks, http.basePath)
-                );
+                const navLink = toNavLink(app, http.basePath);
+                if (navLink) {
+                  navLinks.push([appId, navLink]);
+                }
+                navLinks.push(...toNavDeepLinks(app, app.deepLinks, http.basePath));
                 return navLinks;
               }, [])
           );
@@ -100,7 +102,10 @@ function toNavDeepLinks(
   return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
     const id = `${app.id}:${deepLink.id}`;
     if (deepLink.path) {
-      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
+      const navDeepLink = toNavLink(app, basePath, { ...deepLink, id });
+      if (navDeepLink) {
+        navDeepLinks.push([id, navDeepLink]);
+      }
     }
     navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
     return navDeepLinks;

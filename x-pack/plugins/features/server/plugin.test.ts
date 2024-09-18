@@ -6,6 +6,7 @@
  */
 
 import { coreMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { ConfigSchema } from './config';
 import { FeaturesPlugin } from './plugin';
 
 describe('Features Plugin', () => {
@@ -119,5 +120,80 @@ describe('Features Plugin', () => {
 
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('apply feature overrides', async () => {
+    const plugin = new FeaturesPlugin(
+      coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          { overrides: { featureA: { name: 'overriddenFeatureName', order: 321 } } },
+          { serverless: true }
+        )
+      )
+    );
+    const { registerKibanaFeature } = plugin.setup(coreSetup);
+    registerKibanaFeature({
+      id: 'featureA',
+      name: 'featureAName',
+      app: [],
+      category: { id: 'foo', label: 'foo' },
+      order: 123,
+      privileges: {
+        all: { savedObject: { all: ['one'], read: ['two'] }, ui: [] },
+        read: { savedObject: { all: ['three'], read: ['four'] }, ui: [] },
+      },
+    });
+
+    const { getKibanaFeatures } = plugin.start(coreStart);
+    expect(getKibanaFeatures().find((feature) => feature.id === 'featureA')).toMatchInlineSnapshot(`
+      KibanaFeature {
+        "config": Object {
+          "app": Array [],
+          "category": Object {
+            "id": "foo",
+            "label": "foo",
+          },
+          "id": "featureA",
+          "name": "overriddenFeatureName",
+          "order": 321,
+          "privileges": Object {
+            "all": Object {
+              "savedObject": Object {
+                "all": Array [
+                  "one",
+                  "telemetry",
+                ],
+                "read": Array [
+                  "two",
+                  "config",
+                  "config-global",
+                  "url",
+                ],
+              },
+              "ui": Array [],
+            },
+            "read": Object {
+              "savedObject": Object {
+                "all": Array [
+                  "three",
+                ],
+                "read": Array [
+                  "four",
+                  "config",
+                  "config-global",
+                  "telemetry",
+                  "url",
+                ],
+              },
+              "ui": Array [],
+            },
+          },
+          "scope": Array [
+            "security",
+          ],
+        },
+        "subFeatures": Array [],
+      }
+    `);
   });
 });

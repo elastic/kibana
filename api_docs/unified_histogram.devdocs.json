@@ -5,6 +5,86 @@
     "functions": [
       {
         "parentPluginId": "unifiedHistogram",
+        "id": "def-public.canImportVisContext",
+        "type": "Function",
+        "tags": [],
+        "label": "canImportVisContext",
+        "description": [],
+        "signature": [
+          "(visContext: unknown) => boolean"
+        ],
+        "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.canImportVisContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.fieldSupportsBreakdown",
+        "type": "Function",
+        "tags": [],
+        "label": "fieldSupportsBreakdown",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/unified_histogram/public/utils/field_supports_breakdown.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.fieldSupportsBreakdown.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/utils/field_supports_breakdown.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
         "id": "def-public.getBreakdownField",
         "type": "Function",
         "tags": [],
@@ -434,6 +514,56 @@
       },
       {
         "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedBreakdownFieldSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedBreakdownFieldSelector",
+        "description": [
+          "\nA resizable layout component with two panels that renders a histogram with a hits\ncounter in the top panel, and a main display (data table, etc.) in the bottom panel."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.BreakdownFieldSelectorProps",
+            "text": "BreakdownFieldSelectorProps"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_histogram/public/chart/lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedBreakdownFieldSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramContainer",
         "type": "Function",
         "tags": [],
@@ -466,17 +596,25 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
           {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
           },
-          " | undefined; } & Pick<",
+          " | undefined, externalVisContextStatus: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramExternalVisContextStatus",
+            "text": "UnifiedHistogramExternalVisContextStatus"
+          },
+          ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\" | \"abortController\"> & ",
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"table\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\"> & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -518,6 +656,101 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.BreakdownFieldSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BreakdownFieldSelectorProps",
+        "description": [],
+        "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.BreakdownFieldSelectorProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.BreakdownFieldSelectorProps.breakdown",
+            "type": "Object",
+            "tags": [],
+            "label": "breakdown",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramBreakdownContext"
+            ],
+            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.BreakdownFieldSelectorProps.onBreakdownFieldChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onBreakdownFieldChange",
+            "description": [],
+            "signature": [
+              "((breakdownField: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.BreakdownFieldSelectorProps.onBreakdownFieldChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "breakdownField",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramChartLoadEvent",
@@ -648,7 +881,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -730,9 +963,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -884,22 +1117,16 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramState.currentSuggestion",
+            "id": "def-public.UnifiedHistogramState.currentSuggestionContext",
             "type": "Object",
             "tags": [],
-            "label": "currentSuggestion",
+            "label": "currentSuggestionContext",
             "description": [
               "\nThe current Lens suggestion"
             ],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.Suggestion",
-                "text": "Suggestion"
-              },
-              "<unknown, unknown> | undefined"
+              "UnifiedHistogramSuggestionContext",
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
@@ -1137,9 +1364,129 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramVisContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramVisContext",
+        "description": [
+          "\nUnified Histogram type for recreating a stored Lens vis"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.attributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.requestData",
+            "type": "Object",
+            "tags": [],
+            "label": "requestData",
+            "description": [],
+            "signature": [
+              "LensRequestData"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.suggestionType",
+            "type": "Enum",
+            "tags": [],
+            "label": "suggestionType",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramSuggestionType"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramExternalVisContextStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "UnifiedHistogramExternalVisContextStatus",
+        "description": [],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramFetchStatus",
@@ -1250,17 +1597,25 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
           {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
           },
-          " | undefined; } & Pick<",
+          " | undefined, externalVisContextStatus: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramExternalVisContextStatus",
+            "text": "UnifiedHistogramExternalVisContextStatus"
+          },
+          ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\" | \"abortController\">"
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"table\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

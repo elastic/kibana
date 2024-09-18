@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ChromeNavControl, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  ChromeNavControl,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -13,6 +19,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
+import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
 
 export interface GlobalSearchBarPluginStartDeps {
@@ -22,6 +29,12 @@ export interface GlobalSearchBarPluginStartDeps {
 }
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBarPluginStartDeps> {
+  private config: GlobalSearchBarConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<GlobalSearchBarConfigType>();
+  }
+
   public setup({ analytics }: CoreSetup) {
     eventTypes.forEach((eventType) => {
       analytics.registerEventType(eventType);
@@ -46,7 +59,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
         ReactDOM.render(
           <KibanaRenderContextProvider theme={theme} i18n={i18n}>
             <SearchBar
-              globalSearch={globalSearch}
+              globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
               navigateToUrl={application.navigateToUrl}
               taggingApi={savedObjectsTagging}
               basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}

@@ -35,6 +35,7 @@ export const GetInstalledPackagesRequestSchema = {
         schema.literal('profiling'),
       ])
     ),
+    showOnlyActiveDataStreams: schema.maybe(schema.boolean()),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
     perPage: schema.number({ defaultValue: 15 }),
@@ -86,6 +87,7 @@ export const GetInfoRequestSchema = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -103,6 +105,7 @@ export const GetInfoRequestSchemaDeprecated = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -241,6 +244,26 @@ export const DeletePackageRequestSchema = {
   ),
 };
 
+export const InstallKibanaAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  // body is deprecated on delete request
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(schema.boolean()),
+    })
+  ),
+};
+
+export const DeleteKibanaAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+};
+
 export const DeletePackageRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
@@ -262,5 +285,6 @@ export const GetInputsRequestSchema = {
       defaultValue: 'json',
     }),
     prerelease: schema.maybe(schema.boolean()),
+    ignoreUnverified: schema.maybe(schema.boolean()),
   }),
 };

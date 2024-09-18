@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
 
 import {
   EuiButton,
@@ -46,6 +47,7 @@ interface ConnectorConfigurationProps {
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
+  children?: React.ReactNode;
 }
 
 interface ConfigEntry extends ConnectorConfigProperties {
@@ -80,7 +82,9 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
+export const ConnectorConfigurationComponent: FC<
+  PropsWithChildren<ConnectorConfigurationProps>
+> = ({
   children,
   connector,
   hasPlatinumLicense,

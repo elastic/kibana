@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -32,12 +31,13 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
-import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
-import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
 
@@ -69,11 +69,11 @@ const getRiskLevelTableColumns = (): Array<EuiBasicTableColumn<RiskLevelTableIte
 ];
 
 const riskLevelTableItems: RiskLevelTableItem[] = [
-  { level: RiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
-  { level: RiskSeverity.high, range: '70 - 90 ' },
-  { level: RiskSeverity.moderate, range: '40 - 70' },
-  { level: RiskSeverity.low, range: '20 - 40' },
-  { level: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
+  { level: RiskSeverity.Critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
+  { level: RiskSeverity.High, range: '70 - 90 ' },
+  { level: RiskSeverity.Moderate, range: '40 - 70' },
+  { level: RiskSeverity.Low, range: '20 - 40' },
+  { level: RiskSeverity.Unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
 interface CriticalityLevelTableItem {
@@ -104,29 +104,6 @@ const getCriticalityLevelTableColumns = (): Array<
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
-
-export const RiskInformationButtonIcon = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
-
-  return (
-    <>
-      <EuiButtonIcon
-        size="xs"
-        iconSize="m"
-        iconType="iInCircle"
-        aria-label={i18n.INFORMATION_ARIA_LABEL}
-        onClick={handleOnOpen}
-        className={
-          riskEntity === RiskScoreEntity.host
-            ? HOST_RISK_INFO_BUTTON_CLASS
-            : USER_RISK_INFO_BUTTON_CLASS
-        }
-        data-test-subj="open-risk-information-flyout-trigger"
-      />
-      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
-    </>
-  );
-};
 
 export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
@@ -285,14 +262,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           </SpacedOrderedList>
         </EuiText>
         <EuiSpacer size="m" />
-        <RiskScoreDocLink
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.learnMore"
-              defaultMessage="Learn more about Entity risk"
-            />
-          }
-        />
+        <EntityAnalyticsLearnMoreLink />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

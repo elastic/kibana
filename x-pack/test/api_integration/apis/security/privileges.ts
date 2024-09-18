@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
+      searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -68,9 +69,17 @@ export default function ({ getService }: FtrProviderContext) {
         'process_operations_all',
         'file_operations_all',
         'execute_operations_all',
+        'scan_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
-      securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAssistant: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_anonymization',
+      ],
+      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: [
         'all',
         'read',
@@ -117,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_all',
         'packs_read',
       ],
+      enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
       rulesSettings: [
@@ -129,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

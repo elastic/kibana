@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
@@ -14,8 +15,9 @@ import {
   endSelector,
 } from '../../common/components/super_date_picker/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView, getScopeFromPath } from '../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../sourcerer/store/model';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { sourcererSelectors } from '../../common/store';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {
@@ -47,11 +49,7 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
       return getEndSelector(state.inputs.global);
     }
   });
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
   const { pathname } = useLocation();
   const { selectedPatterns: nonTimelinePatterns } = useSourcererDataView(
     getScopeFromPath(pathname)

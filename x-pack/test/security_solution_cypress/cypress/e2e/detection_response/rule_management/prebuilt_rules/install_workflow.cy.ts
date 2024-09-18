@@ -30,9 +30,10 @@ import {
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/182441
+describe.skip(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     describe('Installation of prebuilt rules', () => {
       const RULE_1 = createRuleAssetSavedObject({

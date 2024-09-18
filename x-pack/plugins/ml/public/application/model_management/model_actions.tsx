@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
@@ -15,10 +15,7 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import {
-  ELASTIC_MODEL_TAG,
-  MODEL_STATE,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
@@ -30,7 +27,7 @@ import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export function useModelActions({
@@ -58,10 +55,9 @@ export function useModelActions({
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
+      ...startServices
     },
   } = useMlKibana();
 
@@ -91,7 +87,7 @@ export function useModelActions({
 
   useEffect(() => {
     let isMounted = true;
-    mlApiServices
+    mlApi
       .hasPrivileges({
         cluster: ['manage_ingest_pipelines'],
       })
@@ -106,22 +102,21 @@ export function useModelActions({
     return () => {
       isMounted = false;
     };
-  }, [mlApiServices]);
+  }, [mlApi]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
+        startServices,
         startModelDeploymentDocUrl
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -199,9 +194,8 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
@@ -335,7 +329,7 @@ export function useModelActions({
             item.deployment_ids.some(
               (dId) =>
                 Array.isArray(item.inference_apis) &&
-                !item.inference_apis.some((inference) => inference.model_id === dId)
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
@@ -409,14 +403,10 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
-        available: (item) =>
-          canCreateTrainedModels &&
-          item.tags.includes(ELASTIC_MODEL_TAG) &&
-          item.state === MODEL_STATE.NOT_DOWNLOADED,
+        available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           onModelDownloadRequest(item.model_id);

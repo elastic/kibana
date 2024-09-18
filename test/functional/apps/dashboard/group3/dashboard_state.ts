@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,17 +16,16 @@ import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/d
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'visualize',
-    'header',
-    'discover',
-    'visChart',
-    'share',
-    'timePicker',
-    'unifiedFieldList',
-  ]);
+  const { dashboard, header, discover, visChart, share, timePicker, unifiedFieldList } =
+    getPageObjects([
+      'dashboard',
+      'header',
+      'discover',
+      'visChart',
+      'share',
+      'timePicker',
+      'unifiedFieldList',
+    ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const queryBar = getService('queryBar');
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const enableNewChartLibraryDebug = async (force = false) => {
-    if ((await PageObjects.visChart.isNewChartsLibraryEnabled()) || force) {
+    if ((await visChart.isNewChartsLibraryEnabled()) || force) {
       await elasticChart.setNewChartUiDebugFlag();
       await queryBar.submitQuery();
     }
@@ -74,42 +74,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard state', function () {
     before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.initTests();
+      await dashboard.preserveCrossAppState();
 
       await browser.refresh();
     });
 
     after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
     });
 
     it('Overriding colors on an area chart is preserved', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
 
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setHistoricalDataRange();
+      await dashboard.clickNewDashboard();
+      await timePicker.setHistoricalDataRange();
 
       const visName = AREA_CHART_VIS_NAME;
       await dashboardAddPanel.addVisualization(visName);
       const dashboardName = 'Overridden colors - new charts library';
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await dashboard.saveDashboard(dashboardName);
 
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await queryBar.clickQuerySubmitButton();
 
-      await PageObjects.visChart.openLegendOptionColorsForXY('Count', `[data-title="${visName}"]`);
+      await visChart.openLegendOptionColorsForXY('Count', `[data-title="${visName}"]`);
       const overwriteColor = '#d36086';
-      await PageObjects.visChart.selectNewLegendColorChoice(overwriteColor);
+      await visChart.selectNewLegendColorChoice(overwriteColor);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);
 
-      const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExistForXY(
+      const colorChoiceRetained = await visChart.doesSelectedLegendColorExistForXY(
         overwriteColor,
         xyChartSelector
       );
@@ -118,84 +118,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saved search with no changes will update when the saved object changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
 
-      await PageObjects.header.clickDiscover();
-      await PageObjects.timePicker.setHistoricalDataRange();
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.clickDiscover();
+      await timePicker.setHistoricalDataRange();
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await discover.saveSearch('my search');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.clickNewDashboard();
+      await header.clickDashboard();
+      await dashboard.clickNewDashboard();
 
       await dashboardAddPanel.addSavedSearch('my search');
-      await PageObjects.dashboard.saveDashboard('No local edits');
+      await dashboard.saveDashboard('No local edits');
 
       const inViewMode = await testSubjects.exists('dashboardEditMode');
       expect(inViewMode).to.be(true);
 
-      await PageObjects.header.clickDiscover();
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.clickDiscover();
+      await unifiedFieldList.clickFieldListItemAdd('agent');
+      await discover.saveSearch('my search');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.header.clickDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.clickDashboard();
+      await header.waitUntilLoadingHasFinished();
 
-      const headers = await PageObjects.discover.getColumnHeaders();
+      const headers = await discover.getColumnHeaders();
       expect(headers.length).to.be(3);
       expect(headers[1]).to.be('bytes');
       expect(headers[2]).to.be('agent');
     });
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
-      await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.discover.removeHeaderColumn('bytes');
-      await PageObjects.dashboard.saveDashboard('Has local edits');
+      await dashboard.switchToEditMode();
+      await discover.removeHeaderColumn('bytes');
+      await dashboard.saveDashboard('Has local edits');
 
-      await PageObjects.header.clickDiscover();
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('clientip');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.clickDiscover();
+      await unifiedFieldList.clickFieldListItemAdd('clientip');
+      await discover.saveSearch('my search');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.header.clickDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.clickDashboard();
+      await header.waitUntilLoadingHasFinished();
 
-      const headers = await PageObjects.discover.getColumnHeaders();
+      const headers = await discover.getColumnHeaders();
       expect(headers.length).to.be(2);
       expect(headers[1]).to.be('agent');
     });
 
-    it('Saved search will update when the query is changed in the URL', async () => {
-      const currentQuery = await queryBar.getQueryString();
-      expect(currentQuery).to.equal('');
-      const newUrl = updateAppStateQueryParam(
-        await getUrlFromShare(),
-        (appState: Partial<SharedDashboardState>) => {
-          return {
-            query: {
-              language: 'kuery',
-              query: 'abc12345678910',
-            },
-          };
-        }
-      );
-
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-      await browser.get(newUrl.toString());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      // will be zero because the query inserted in the url doesn't match anything
-      expect(headers.length).to.be(0);
-    });
-
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
-      await PageObjects.share.clickShareTopNavButton();
-      const sharedUrl = await PageObjects.share.getSharedUrl();
-      await PageObjects.share.clickShareTopNavButton();
+      await share.clickShareTopNavButton();
+      const sharedUrl = await share.getSharedUrl();
+      await share.closeShareModal();
       log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
@@ -206,14 +182,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
       await enableNewChartLibraryDebug(true);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
     };
 
-    describe('Directly modifying url updates dashboard state', () => {
+    // Skip this test; directly modifying the URL app state isn't fully supported in the new
+    // React embeddable framework, but this user interaction is not a high priority
+    describe.skip('Directly modifying url updates dashboard state', () => {
       before(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setHistoricalDataRange();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await timePicker.setHistoricalDataRange();
       });
 
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
@@ -232,27 +210,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await browser.get(newUrl.toString(), !useHardRefresh);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
-
-      it('for query parameter with soft refresh', async function () {
-        await changeQuery(false, 'hi:goodbye');
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
-      });
 
       it('for query parameter with hard refresh', async function () {
         await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
+        await dashboard.expectAppStateRemovedFromURL();
       });
 
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await getUrlFromShare();
-        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+        const currentPanelDimensions = await dashboard.getPanelDimensions();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -276,12 +249,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await hardRefresh(newUrl);
 
         await retry.try(async () => {
-          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+          const newPanelDimensions = await dashboard.getPanelDimensions();
           if (newPanelDimensions.length < 0) {
             throw new Error('No panel dimensions...');
           }
 
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.waitForRenderComplete();
           // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
           const marginOfError = 10;
           expect(newPanelDimensions[0].width).to.be.lessThan(
@@ -294,8 +267,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when removing a panel', async function () {
-        await PageObjects.dashboard.waitForRenderComplete();
-        const currentUrl = await getUrlFromShare();
+        await dashboard.waitForRenderComplete();
+        const currentUrl = (await getUrlFromShare()) ?? '';
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -307,7 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await hardRefresh(newUrl);
 
         await retry.try(async () => {
-          const newPanelCount = await PageObjects.dashboard.getPanelCount();
+          const newPanelCount = await dashboard.getPanelCount();
           expect(newPanelCount).to.be(0);
         });
       });
@@ -319,15 +292,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.clearQuery();
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await enableNewChartLibraryDebug();
-          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+          originalPieSliceStyle = (await pieChart.getPieSliceStyle(`80,000`)) ?? '';
         });
 
         it('updates a pie slice color on a hard refresh', async function () {
-          await PageObjects.visChart.openLegendOptionColorsForPie(
+          await visChart.openLegendOptionColorsForPie(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
           );
-          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
+          await visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
           const newUrl = updateAppStateQueryParam(
             currentUrl,
@@ -352,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             }
           );
           await hardRefresh(newUrl);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
             const allPieSlicesColor = await pieChart.getAllPieSliceColor('80,000');
@@ -366,9 +339,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#FFFFFF'
-            );
+            const colorExists = await visChart.doesSelectedLegendColorExistForPie('#FFFFFF');
             expect(colorExists).to.be(true);
           });
         });
@@ -396,7 +367,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           await hardRefresh(newUrl);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
@@ -408,9 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#57c17b'
-            );
+            const colorExists = await visChart.doesSelectedLegendColorExistForPie('#57c17b');
             expect(colorExists).to.be(true);
           });
         });

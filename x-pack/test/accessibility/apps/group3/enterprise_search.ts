@@ -113,9 +113,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Search Applications', () => {
+    describe('Playground', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/applications');
+      });
+
+      it('loads playground', async function () {
+        await retry.waitFor(
+          'playground docs link',
+          async () => await testSubjects.exists('playground-documentation-link')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Search Applications', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/applications/search_applications');
       });
 
       it('loads search applications list', async function () {

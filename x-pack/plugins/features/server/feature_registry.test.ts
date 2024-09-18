@@ -8,6 +8,7 @@
 import { FeatureRegistry } from './feature_registry';
 import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 describe('FeatureRegistry', () => {
   describe('Kibana Features', () => {
@@ -197,6 +198,25 @@ describe('FeatureRegistry', () => {
           `"[category.label]: expected value of type [string] but got [undefined]"`
         );
       });
+    });
+
+    it('requires only a valid scope registered', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: null,
+        // @ts-expect-error
+        scope: ['foo', 'bar'],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature has unknown scope entries: foo, bar"`
+      );
     });
 
     it(`requires a value for privileges`, () => {
@@ -1928,6 +1948,270 @@ describe('FeatureRegistry', () => {
         expect(withSubFeature.subFeatures).toHaveLength(1);
         expect(withSubFeature.subFeatures[0].privilegeGroups).toHaveLength(1);
         expect(withSubFeature.subFeatures[0].privilegeGroups[0].privileges).toHaveLength(0);
+      });
+    });
+
+    describe('#applyOverrides', () => {
+      let registry: FeatureRegistry;
+      beforeEach(() => {
+        registry = new FeatureRegistry();
+        const features: KibanaFeatureConfig[] = [
+          {
+            id: 'featureA',
+            name: 'Feature A',
+            app: [],
+            order: 1,
+            category: { id: 'fooA', label: 'fooA' },
+            privileges: {
+              all: { ui: [], savedObject: { all: [], read: [] } },
+              read: { ui: [], savedObject: { all: [], read: [] } },
+            },
+          },
+          {
+            id: 'featureB',
+            name: 'Feature B',
+            app: [],
+            order: 2,
+            category: { id: 'fooB', label: 'fooB' },
+            privileges: null,
+          },
+          {
+            id: 'featureC',
+            name: 'Feature C',
+            app: [],
+            order: 1,
+            category: { id: 'fooC', label: 'fooC' },
+            privileges: {
+              all: { ui: [], savedObject: { all: [], read: [] } },
+              read: { ui: [], savedObject: { all: [], read: [] } },
+            },
+            subFeatures: [
+              {
+                name: 'subFeatureC',
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: 'subFeatureCOne',
+                        name: 'subFeature C One',
+                        includeIn: 'all',
+                        ui: [],
+                        savedObject: { all: [], read: [] },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'featureD',
+            name: 'Feature D',
+            app: [],
+            order: 1,
+            category: { id: 'fooD', label: 'fooD' },
+            privileges: {
+              all: { ui: [], savedObject: { all: [], read: [] } },
+              read: { ui: [], savedObject: { all: [], read: [] } },
+            },
+          },
+          {
+            id: 'featureE',
+            name: 'Feature E',
+            app: [],
+            order: 1,
+            category: { id: 'fooE', label: 'fooE' },
+            privileges: {
+              all: {
+                ui: [],
+                savedObject: { all: [], read: [] },
+                alerting: { alert: { all: ['one'] } },
+              },
+              read: { ui: [], savedObject: { all: [], read: [] } },
+            },
+            alerting: ['one'],
+          },
+        ];
+        features.forEach((f) => registry.registerKibanaFeature(f));
+      });
+
+      it('rejects overrides for unknown features', () => {
+        expect(() =>
+          registry.applyOverrides({ unknownFeature: {} })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot override feature \\"unknownFeature\\" since feature with such ID is not registered."`
+        );
+      });
+
+      it('can override basic feature properties', () => {
+        registry.applyOverrides({
+          featureA: {
+            hidden: true,
+            name: 'Feature A New',
+            category: 'management',
+            order: 123,
+          },
+        });
+        registry.lockRegistration();
+
+        const [featureA, featureB] = registry.getAllKibanaFeatures();
+        expect(featureA.hidden).toBe(true);
+        expect(featureB.hidden).toBeUndefined();
+
+        expect(featureA.name).toBe('Feature A New');
+        expect(featureB.name).toBe('Feature B');
+
+        expect(featureA.category).toEqual(DEFAULT_APP_CATEGORIES.management);
+        expect(featureB.category).toEqual({ id: 'fooB', label: 'fooB' });
+
+        expect(featureA.order).toBe(123);
+        expect(featureB.order).toBe(2);
+      });
+
+      it('rejects overrides for unknown privileges', () => {
+        expect(() =>
+          registry.applyOverrides({ featureB: { privileges: { all: { disabled: true } } } })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot override privilege \\"all\\" of feature \\"featureB\\" since \\"all\\" privilege is not registered."`
+        );
+      });
+
+      it('rejects overrides for `composedOf` referring to unknown feature', () => {
+        expect(() =>
+          registry.applyOverrides({
+            featureA: {
+              privileges: {
+                all: { composedOf: [{ feature: 'featureF', privileges: ['all'] }] },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot compose privilege \\"all\\" of feature \\"featureA\\" with privileges of feature \\"featureF\\" since such feature is not registered."`
+        );
+      });
+
+      it('rejects overrides for `composedOf` referring to unknown feature privilege', () => {
+        expect(() =>
+          registry.applyOverrides({
+            featureA: {
+              privileges: {
+                all: { composedOf: [{ feature: 'featureB', privileges: ['none'] }] },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot compose privilege \\"all\\" of feature \\"featureA\\" with privilege \\"none\\" of feature \\"featureB\\" since such privilege is not registered."`
+        );
+      });
+
+      it('can override `composedOf` referring to both feature and sub-feature privileges', () => {
+        registry.applyOverrides({
+          featureA: {
+            privileges: {
+              all: {
+                composedOf: [
+                  { feature: 'featureC', privileges: ['subFeatureCOne'] },
+                  { feature: 'featureD', privileges: ['all'] },
+                ],
+              },
+              read: { composedOf: [{ feature: 'featureD', privileges: ['read'] }] },
+            },
+          },
+        });
+        registry.lockRegistration();
+
+        const [featureA] = registry.getAllKibanaFeatures();
+        expect(featureA.privileges).toEqual({
+          all: {
+            ui: [],
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            composedOf: [
+              { feature: 'featureC', privileges: ['subFeatureCOne'] },
+              { feature: 'featureD', privileges: ['all'] },
+            ],
+          },
+          read: {
+            ui: [],
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+            composedOf: [{ feature: 'featureD', privileges: ['read'] }],
+          },
+        });
+      });
+
+      it('can override `composedOf` referring to a feature that requires custom RBAC', () => {
+        registry.applyOverrides({
+          featureA: {
+            privileges: {
+              all: { composedOf: [{ feature: 'featureE', privileges: ['all'] }] },
+            },
+          },
+        });
+        registry.lockRegistration();
+
+        const [featureA] = registry.getAllKibanaFeatures();
+        expect(featureA.privileges).toEqual({
+          all: {
+            ui: [],
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            composedOf: [{ feature: 'featureE', privileges: ['all'] }],
+          },
+          read: {
+            ui: [],
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+          },
+        });
+      });
+
+      it('rejects overrides for unknown sub-feature privileges', () => {
+        expect(() =>
+          registry.applyOverrides({
+            featureC: { subFeatures: { privileges: { all: { disabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot override sub-feature privilege \\"all\\" of feature \\"featureC\\" since \\"all\\" sub-feature privilege is not registered. Known sub-feature privileges are: subFeatureCOne."`
+        );
+
+        expect(() =>
+          registry.applyOverrides({
+            featureA: { subFeatures: { privileges: { subFeatureCOne: { disabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot override sub-feature privileges of feature \\"featureA\\" since it didn't register any."`
+        );
+      });
+
+      it('can override sub-feature privileges', () => {
+        registry.applyOverrides({
+          featureC: {
+            subFeatures: { privileges: { subFeatureCOne: { disabled: true, includeIn: 'none' } } },
+          },
+        });
+        registry.lockRegistration();
+
+        const [, , featureC] = registry.getAllKibanaFeatures();
+        expect(featureC.subFeatures).toEqual([
+          {
+            config: {
+              name: 'subFeatureC',
+              privilegeGroups: [
+                {
+                  groupType: 'mutually_exclusive',
+                  privileges: [
+                    {
+                      disabled: true,
+                      id: 'subFeatureCOne',
+                      includeIn: 'none',
+                      name: 'subFeature C One',
+                      savedObject: { all: [], read: [] },
+                      ui: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ]);
       });
     });
   });

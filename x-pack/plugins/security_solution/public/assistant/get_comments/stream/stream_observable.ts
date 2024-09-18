@@ -7,28 +7,25 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 interface StreamObservable {
-  connectorTypeTitle: string;
+  isError: boolean;
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  isError: boolean;
 }
+
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
+ * @param isError - indicates whether the reader response is an error message or not
  * @param reader - The ReadableStreamDefaultReader used to read data from the stream.
  * @param setLoading - A function to update the loading state.
- * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
-  connectorTypeTitle,
   isError,
   reader,
   setLoading,
@@ -37,19 +34,19 @@ export const getStreamObservable = ({
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
-    // Initialize an empty string to store the OpenAI buffer.
-    let openAIBuffer: string = '';
+    // Initialize an empty string to store the LangChain buffer.
+    let langChainBuffer: string = '';
 
-    // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
-    let bedrockBuffer: Uint8Array = new Uint8Array(0);
-    function readOpenAI() {
+    // read data from LangChain stream
+    function readLangChain() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
-              if (openAIBuffer) {
-                chunks.push(getOpenAIChunks([openAIBuffer])[0]);
+              if (langChainBuffer) {
+                const finalChunk = getLangChainChunks([langChainBuffer])[0];
+                if (finalChunk && finalChunk.length > 0) chunks.push(finalChunk);
               }
               observer.next({
                 chunks,
@@ -59,90 +56,27 @@ export const getStreamObservable = ({
               observer.complete();
               return;
             }
-
             const decoded = decoder.decode(value);
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
             } else {
-              const lines = decoded.split('\n');
-              lines[0] = openAIBuffer + lines[0];
-              openAIBuffer = lines.pop() || '';
-              nextChunks = getOpenAIChunks(lines);
-            }
-            nextChunks.forEach((chunk: string) => {
-              chunks.push(chunk);
-              observer.next({
-                chunks,
-                message: chunks.join(''),
-                loading: true,
-              });
-            });
-          } catch (err) {
-            observer.error(err);
-            return;
-          }
-          readOpenAI();
-        })
-        .catch((err) => {
-          observer.error(err);
-        });
-    }
-    function readBedrock() {
-      reader
-        .read()
-        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          try {
-            if (done) {
-              observer.next({
-                chunks,
-                message: chunks.join(''),
-                loading: false,
-              });
-              observer.complete();
-              return;
-            }
+              const output = decoded;
+              const lines = output.split('\n');
+              lines[0] = langChainBuffer + lines[0];
+              langChainBuffer = lines.pop() || '';
 
-            let content;
-            if (isError) {
-              content = `${API_ERROR}\n\n${JSON.parse(decoder.decode(value)).message}`;
-              chunks.push(content);
-              observer.next({
-                chunks,
-                message: chunks.join(''),
-                loading: true,
-              });
-            } else if (value != null) {
-              const chunk: Uint8Array = value;
-
-              // Concatenate the current chunk to the existing buffer.
-              bedrockBuffer = concatChunks(bedrockBuffer, chunk);
-              // Get the length of the next message in the buffer.
-              let messageLength = getMessageLength(bedrockBuffer);
-
-              // Initialize an array to store fully formed message chunks.
-              const buildChunks = [];
-              // Process the buffer until no complete messages are left.
-              while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
-                // Extract a chunk of the specified length from the buffer.
-                const extractedChunk = bedrockBuffer.slice(0, messageLength);
-                // Add the extracted chunk to the array of fully formed message chunks.
-                buildChunks.push(extractedChunk);
-                // Remove the processed chunk from the buffer.
-                bedrockBuffer = bedrockBuffer.slice(messageLength);
-                // Get the length of the next message in the updated buffer.
-                messageLength = getMessageLength(bedrockBuffer);
-              }
-
-              const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-              // Decode and parse each message chunk, extracting the 'completion' property.
-              buildChunks.forEach((bChunk) => {
-                const event = awsDecoder.decode(bChunk);
-                const body = JSON.parse(
-                  Buffer.from(JSON.parse(decoder.decode(event.body)).bytes, 'base64').toString()
-                );
-                content = body.completion;
-                chunks.push(content);
+              nextChunks = getLangChainChunks(lines);
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
                 observer.next({
                   chunks,
                   message: chunks.join(''),
@@ -154,27 +88,13 @@ export const getStreamObservable = ({
             observer.error(err);
             return;
           }
-          readBedrock();
+          readLangChain();
         })
         .catch((err) => {
           observer.error(err);
         });
     }
-    // this should never actually happen
-    function badConnector() {
-      observer.next({
-        chunks: [
-          `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
-        ],
-        message: `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
-        loading: false,
-      });
-      observer.complete();
-    }
-
-    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
-    else if (connectorTypeTitle === 'OpenAI') readOpenAI();
-    else badConnector();
+    readLangChain();
 
     return () => {
       reader.cancel();
@@ -211,54 +131,24 @@ export const getStreamObservable = ({
   );
 
 /**
- * Parses an OpenAI response from a string.
+ * Parses a LangChain response from a string.
  * @param lines
- * @returns {string[]} - Parsed string array from the OpenAI response.
+ * @returns {string[]} - Parsed string array from the LangChain response.
  */
-const getOpenAIChunks = (lines: string[]): string[] => {
-  const nextChunk = lines
-    .map((str) => str.substring(6))
-    .filter((str) => !!str && str !== '[DONE]')
-    .map((line) => {
+const getLangChainChunks = (lines: string[]): string[] =>
+  lines.reduce((acc: string[], b: string) => {
+    if (b.length) {
       try {
-        const openaiResponse = JSON.parse(line);
-        return openaiResponse.choices[0]?.delta.content ?? '';
-      } catch (err) {
-        return '';
+        const obj = JSON.parse(b);
+        if (obj.type === 'content' && obj.payload.length > 0) {
+          return [...acc, obj.payload];
+        }
+        return acc;
+      } catch (e) {
+        return acc;
       }
-    });
-  return nextChunk;
-};
-
-/**
- * Concatenates two Uint8Array buffers.
- *
- * @param {Uint8Array} a - First buffer.
- * @param {Uint8Array} b - Second buffer.
- * @returns {Uint8Array} - Concatenated buffer.
- */
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  // Copy the contents of the first buffer to the new buffer.
-  newBuffer.set(a);
-  // Copy the contents of the second buffer to the new buffer starting from the end of the first buffer.
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-/**
- * Gets the length of the next message from the buffer.
- *
- * @param {Uint8Array} buffer - Buffer containing the message.
- * @returns {number} - Length of the next message.
- */
-function getMessageLength(buffer: Uint8Array): number {
-  // If the buffer is empty, return 0.
-  if (buffer.byteLength === 0) return 0;
-  // Create a DataView to read the Uint32 value at the beginning of the buffer.
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  // Read and return the Uint32 value (message length).
-  return view.getUint32(0, false);
-}
+    }
+    return acc;
+  }, []);
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

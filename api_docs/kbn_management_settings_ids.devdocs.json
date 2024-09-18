@@ -414,21 +414,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DISCOVER_ENABLE_SQL_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DISCOVER_ENABLE_SQL_ID",
-        "description": [],
-        "signature": [
-          "\"discover:enableSql\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID",
         "type": "string",
         "tags": [],
@@ -631,6 +616,21 @@
         "description": [],
         "signature": [
           "\"doc_table:legacy\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.ENABLE_ESQL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_ESQL_ID",
+        "description": [],
+        "signature": [
+          "\"enableESQL\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1074,6 +1074,36 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
         "type": "string",
         "tags": [],
@@ -1171,6 +1201,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1314,13 +1359,28 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
         "description": [],
         "signature": [
-          "\"observability:enableInfrastructureHostsCustomDashboards\""
+          "\"observability:enableInfrastructureAssetCustomDashboards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureContainerAssetView\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1359,6 +1419,51 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "description": [],
+        "signature": [
+          "\"observability:entityCentricExperience\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logSources\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logsExplorer:allowedDataViews\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_MAX_SUGGESTIONS_ID",
         "type": "string",
         "tags": [],
@@ -1381,6 +1486,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingElasticsearchPlugin\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "description": [],
+        "signature": [
+          "\"observability:searchExcludedDataTiers\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1569,13 +1689,15 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
         "type": "string",
         "tags": [],
-        "label": "SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
-        "description": [],
+        "label": "SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature"
+        ],
         "signature": [
-          "\"securitySolution:enableCcsWarning\""
+          "\"securitySolution:enableAssetCriticality\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1584,15 +1706,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
         "type": "string",
         "tags": [],
-        "label": "SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
-        "description": [
-          "This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout"
-        ],
+        "label": "SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
+        "description": [],
         "signature": [
-          "\"securitySolution:enableExpandableFlyout\""
+          "\"securitySolution:enableCcsWarning\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

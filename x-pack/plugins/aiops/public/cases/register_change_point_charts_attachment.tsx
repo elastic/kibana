@@ -8,25 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  CASES_ATTACHMENT_CHANGE_POINT_CHART,
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '../../common/constants';
-import { getEmbeddableChangePointChart } from '../embeddable/embeddable_change_point_chart_component';
-import { AiopsPluginStartDeps } from '../types';
+import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
+import { getChangePointDetectionComponent } from '../shared_components';
+import type { AiopsPluginStartDeps } from '../types';
 
 export function registerChangePointChartsAttachment(
-  cases: CasesUiSetup,
+  cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
 ) {
-  const EmbeddableComponent = getEmbeddableChangePointChart(
-    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    coreStart,
-    pluginStart
-  );
+  const ChangePointDetectionComponent = getChangePointDetectionComponent(coreStart, pluginStart);
 
   cases.attachmentFramework.registerPersistableState({
     id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
@@ -46,7 +39,7 @@ export function registerChangePointChartsAttachment(
         const { initComponent } = await import('./change_point_charts_attachment');
 
         return {
-          default: initComponent(pluginStart.fieldFormats, EmbeddableComponent),
+          default: initComponent(pluginStart.fieldFormats, ChangePointDetectionComponent),
         };
       }),
     }),

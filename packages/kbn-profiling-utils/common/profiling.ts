@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -33,6 +34,7 @@ export enum FrameType {
   Perl,
   JavaScript,
   PHPJIT,
+  DotNET,
   ErrorFlag = 0x80,
   Error = 0xff,
 }
@@ -48,6 +50,7 @@ const frameTypeDescriptions = {
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
+  [FrameType.DotNET]: '.NET',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
 };
@@ -220,9 +223,9 @@ function checkIfStringHasParentheses(s: string) {
 }
 
 function getFunctionName(metadata: StackFrameMetadata) {
-  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
-    ? `${metadata.FunctionName}()`
-    : metadata.FunctionName;
+  return checkIfStringHasParentheses(metadata.FunctionName)
+    ? metadata.FunctionName
+    : `${metadata.FunctionName}()`;
 }
 
 function getExeFileName(metadata: StackFrameMetadata) {
@@ -241,17 +244,32 @@ function getExeFileName(metadata: StackFrameMetadata) {
  * @returns string
  */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
-  const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FrameType === FrameType.Error) {
     return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`;
-  } else if (metadata.FunctionName !== '') {
-    const sourceFilename = metadata.SourceFilename;
-    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+  }
+
+  const inlineLabel = metadata.Inline ? '-> ' : '';
+
+  if (metadata.FunctionName === '') {
+    return `${inlineLabel}${getExeFileName(metadata)}`;
+  }
+
+  const sourceFilename = metadata.SourceFilename;
+  const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+
+  if (!sourceURL) {
+    return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(metadata)}`;
+  }
+
+  if (metadata.SourceLine === 0) {
     return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(
       metadata
-    )} in ${sourceURL}#${metadata.SourceLine}`;
+    )} in ${sourceURL}`;
   }
-  return `${inlineLabel}${getExeFileName(metadata)}`;
+
+  return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
+    metadata.SourceLine
+  }`;
 }
 /**
  * Get callee function name

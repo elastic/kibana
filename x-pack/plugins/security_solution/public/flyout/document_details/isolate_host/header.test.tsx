@@ -6,80 +6,83 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PanelHeader } from './header';
-import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../common/utils/sentinelone_alert_check');
 jest.mock('./context');
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock;
+describe('Isolation Flyout PanelHeader', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
 
-const renderPanelHeader = () =>
-  render(
-    <IntlProvider locale="en">
-      <PanelHeader />
-    </IntlProvider>
-  );
-
-describe('<PanelHeader />', () => {
-  beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-  });
-
-  it.each([
-    {
+  const setUseIsolateHostPanelContext = (data: Partial<IsolateHostPanelContext> = {}) => {
+    const panelContextMock: IsolateHostPanelContext = {
+      eventId: 'some-even-1',
+      indexName: 'some-index-name',
+      scopeId: 'some-scope-id',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
       isolateAction: 'isolateHost',
-      title: 'Isolate host',
-    },
-    {
-      isolateAction: 'unisolateHost',
-      title: 'Release host',
-    },
-  ])('should display release host message', ({ isolateAction, title }) => {
-    (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction });
+      ...data,
+    };
 
-    const { getByTestId } = renderPanelHeader();
+    (useIsolateHostPanelContext as jest.Mock).mockReturnValue(panelContextMock);
+  };
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(title);
+  beforeEach(() => {
+    const appContextMock = createAppRootMockRenderer();
+
+    appContextMock.setExperimentalFlag({
+      responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+    });
+
+    render = () => appContextMock.render(<PanelHeader />);
+
+    setUseIsolateHostPanelContext({
+      isolateAction: 'isolateHost',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
+    });
   });
 
-  it.each(['isolateHost', 'unisolateHost'])(
-    'should display beta badge on %s host message for SentinelOne alerts',
-    (action) => {
-      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const testConditions: Array<{
+    action: IsolateHostPanelContext['isolateAction'];
+    agentType: ResponseActionAgentType;
+    title: string;
+  }> = [];
+
+  for (const agentType of RESPONSE_ACTION_AGENT_TYPE) {
+    (['isolateHost', 'unisolateHost'] as Array<IsolateHostPanelContext['isolateAction']>).forEach(
+      (action) => {
+        testConditions.push({
+          action,
+          agentType,
+          title: action === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST,
+        });
+      }
+    );
+  }
+
+  it.each(testConditions)(
+    'should display correct flyout header title for $action on agentType $agentType',
+    ({ action, agentType, title }) => {
+      setUseIsolateHostPanelContext({
         isolateAction: action,
+        dataFormattedForFieldBrowser:
+          endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType),
       });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
+      const { getByTestId } = render();
 
-      const { getByTestId } = renderPanelHeader();
-
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Beta');
-    }
-  );
-
-  it.each(['isolateHost', 'unisolateHost'])(
-    'should not display beta badge on %s host message for non-SentinelOne alerts',
-    (action) => {
-      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
-        isolateAction: action,
-      });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
-
-      const { getByTestId } = renderPanelHeader();
-
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).not.toHaveTextContent('Beta');
+      expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(title);
+      expect(getByTestId('flyoutHostIsolationHeaderIntegration'));
     }
   );
 });

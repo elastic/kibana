@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ServerlessRoleName } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -11,14 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  describe('Trained models list', () => {
+  describe('Trained models list', function () {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
       await ml.api.syncSavedObjects();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('page navigation', () => {
@@ -28,10 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await svlMl.navigation.security.navigateToTrainedModels();
 
         await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with no trained models'
+          'should display the stats bar and the analytics table with one trained model'
         );
-        await ml.trainedModels.assertStats(0);
-        await ml.trainedModelsTable.assertTableIsNotPopulated();
+        await ml.trainedModels.assertStats(1);
+        await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
   });

@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @brokenInServerless @skipInQA create_rules_bulk', () => {
+  describe('@ess @skipInServerless create_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);

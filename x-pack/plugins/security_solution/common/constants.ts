@@ -6,11 +6,10 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
 export { SecurityPageName } from '@kbn/security-solution-navigation';
-
 /**
  * as const
  *
@@ -21,6 +20,7 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
+export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -99,12 +99,17 @@ export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
+export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
+export const INVESTIGATIONS_PATH = '/investigations' as const;
+export const MACHINE_LEARNING_PATH = '/ml' as const;
+export const ASSETS_PATH = '/assets' as const;
+export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -115,20 +120,9 @@ export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
-export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
-export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
-export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
-
+export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
+  `/entity_analytics_asset_criticality` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
-export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
-export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
-
-export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
-export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
-export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
-export const APP_KUBERNETES_PATH = `${APP_PATH}${KUBERNETES_PATH}` as const;
-export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
@@ -139,8 +133,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
-export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
-export const APP_DATA_QUALITY_PATH = `${APP_PATH}${DATA_QUALITY_PATH}` as const;
+export const NOTES_MANAGEMENT_PATH = `/notes_management` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -161,9 +154,6 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
-export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -205,6 +195,10 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
 
+/** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
+export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
+  'securitySolution:excludedDataTiersForRuleExecution' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -241,43 +235,7 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-/**
- * Internal Risk Score routes
- */
-export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
-export const DEV_TOOL_PREBUILT_CONTENT =
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
-export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
-export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
-export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
-export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
-export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
-export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
-
-export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
-export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
-export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
-export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
-export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
-export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
-export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
-
-export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
-export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
-export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
-
-/**
- * Public Risk Score routes
- */
-export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
-export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+export * from './entity_analytics/constants';
 
 export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
 export const INTERNAL_TAGS_URL = `/internal/tags`;
@@ -457,10 +415,15 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+  FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+  ATTACK_DISCOVERY: 'securitySolution.attackDiscovery.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
 
 // TODO: https://github.com/elastic/kibana/pull/142950
 /**
@@ -471,15 +434,15 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
+  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
+  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
 }
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
 
-export const DEFAULT_DETECTION_PAGE_FILTERS: Array<
-  Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
-> = [
+export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
@@ -536,3 +499,9 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+
+/**
+ * Rule gaps
+ */
+export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;

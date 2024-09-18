@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
-import { GeoJobCreator } from '../../../../../common/job_creator';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { GeoJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { GeoMapExamples } from './geo_map_examples';
@@ -23,7 +24,7 @@ export const GeoDetectorsSummary: FC = () => {
   const splitField = jobCreator.splitField;
 
   const {
-    services: { data, notifications },
+    services: { notifications },
   } = useMlKibana();
 
   // Load example field values for summary view
@@ -55,14 +56,12 @@ export const GeoDetectorsSummary: FC = () => {
   useEffect(() => {
     async function getMapLayersForGeoJob() {
       if (geoField) {
-        const { filter, query } = jobCreator.savedSearchQuery ?? {};
-        const filters = [...data.query.filterManager.getFilters(), ...(filter ?? [])];
+        const { query } = jobCreator.savedSearchQuery ?? {};
 
         const layers = await mapLoader.getMapLayersForGeoJob(
           geoField,
           splitField,
           fieldValues,
-          filters,
           query
         );
         setLayerList(layers);

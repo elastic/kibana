@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { ruleReducer } from './rule_reducer';
-import { Rule } from '../../../types';
+import { getRuleReducer } from './rule_reducer';
+import { ActionTypeModel, Rule } from '../../../types';
+import { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
+const actionTypeRegistry = actionTypeRegistryMock.create();
+const actionType = {
+  id: 'test',
+  name: 'Test',
+  isSystemActionType: false,
+} as unknown as ActionTypeModel;
+actionTypeRegistry.get.mockReturnValue(actionType);
 describe('rule reducer', () => {
+  const ruleReducer = getRuleReducer(actionTypeRegistry);
   let initialRule: Rule;
   beforeAll(() => {
     initialRule = {
@@ -21,6 +31,9 @@ describe('rule reducer', () => {
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
+      alertDelay: {
+        active: 5,
+      },
     } as unknown as Rule;
   });
 
@@ -187,7 +200,7 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].group).toBe('Warning');
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).group).toBe('Warning');
   });
 
   test('if rule action frequency was updated', () => {
@@ -209,6 +222,56 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).frequency?.notifyWhen).toBe(
+      'onThrottleInterval'
+    );
+  });
+
+  test('if initial alert delay property was updated', () => {
+    const updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setAlertDelayProperty' },
+        payload: {
+          key: 'active',
+          value: 10,
+        },
+      }
+    );
+    expect(updatedRule.rule.alertDelay?.active).toBe(10);
+  });
+
+  test('if rule action alerts filter was toggled on, then off', () => {
+    initialRule.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Rule',
+      params: {},
+      uuid: '123-456',
+    });
+    let updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionAlertsFilter' },
+        payload: {
+          key: 'query',
+          value: 'hello',
+          index: 0,
+        },
+      }
+    );
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).alertsFilter).toBeDefined();
+    updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionAlertsFilter' },
+        payload: {
+          key: 'query',
+          value: undefined,
+          index: 0,
+        },
+      }
+    );
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).alertsFilter).toBeUndefined();
   });
 });

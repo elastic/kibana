@@ -26,14 +26,14 @@ export const spaceSelectorApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/spaces/space_selector',
-      mount: async ({ element, theme$ }: AppMountParameters) => {
+      mount: async ({ element }: AppMountParameters) => {
         const [[coreStart], { renderSpaceSelectorApp }] = await Promise.all([
           getStartServices(),
           import('./space_selector'),
         ]);
         return renderSpaceSelectorApp(
-          coreStart.i18n,
-          { element, theme$ },
+          coreStart,
+          { element },
           {
             spacesManager,
             serverBasePath: coreStart.http.basePath.serverBasePath,

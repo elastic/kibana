@@ -2,8 +2,8 @@ openapi: 3.0.0
 info:
   title: Asset Criticality Common Schema
   description: Common schema for asset criticality
-  version: 1.0.0
-paths: { }
+  version: '1'
+paths: {}
 components:
   parameters:
     id_value:
@@ -41,15 +41,21 @@ components:
       required:
         - id_value
         - id_field
+    AssetCriticalityLevel:
+      type: string
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      description: The criticality level of the asset.
     CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
         - type: object
           properties:
             criticality_level:
-              type: string
-              enum: [low_impact, medium_impact, high_impact, extreme_impact]
-              description: The criticality level of the asset.
+              $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
     AssetCriticalityRecord:
@@ -57,10 +63,10 @@ components:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
         - type: object
           properties:
-            "@timestamp":
+            '@timestamp':
               type: string
               format: 'date-time'
               example: '2017-07-21T17:32:28Z'
               description: The time the record was created or updated.
           required:
-            - "@timestamp"
+            - '@timestamp'

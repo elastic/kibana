@@ -15,7 +15,8 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
-  EuiTextColor,
+  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,12 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { getRootIntegrations } from '../../../../../../common/services';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
+} from '../../../constants';
 import {
   useAuthz,
   usePagination,
@@ -33,6 +39,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
+  useFleetStatus,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -41,9 +48,10 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { CreateAgentPolicyFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
+  const { isSpaceAwarenessEnabled } = useFleetStatus();
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
 
   const {
     agents: { enabled: isFleetEnabled },
@@ -90,6 +98,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
+    noAgentCount: false, // Explicitly fetch agent count
     full: true,
   });
 
@@ -104,21 +113,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '25%',
-        render: (name: string, agentPolicy: AgentPolicy) => (
-          <AgentPolicySummaryLine policy={agentPolicy} />
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate('xpack.fleet.agentPolicyList.descriptionColumnTitle', {
-          defaultMessage: 'Description',
-        }),
         width: '35%',
-        render: (value: string) => (
-          <EuiTextColor color="subdued" className="eui-textTruncate" title={value}>
-            {value}
-          </EuiTextColor>
+        render: (name: string, agentPolicy: AgentPolicy) => (
+          <AgentPolicySummaryLine policy={agentPolicy} withDescription={true} />
         ),
       },
       {
@@ -134,11 +131,88 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'agents',
         name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Agents',
+          defaultMessage: 'Unprivileged / Privileged',
         }),
         dataType: 'number',
         render: (agents: number, agentPolicy: AgentPolicy) => (
-          <LinkedAgentCount count={agents} agentPolicyId={agentPolicy.id} />
+          <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.unprivilegedAgentsTooltip"
+                    defaultMessage="Unprivileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agentPolicy.unprivileged_agents || 0}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  privilegeMode="unprivileged"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>/</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.privilegedAgentsTooltip"
+                    defaultMessage="Privileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agents - (agentPolicy.unprivileged_agents || 0)}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  privilegeMode="privileged"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltipWrapper"
+                  defaultMessage="({message})"
+                  values={{
+                    message: (
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltip"
+                            defaultMessage="Total agents"
+                          />
+                        }
+                      >
+                        <LinkedAgentCount
+                          count={agents}
+                          agentPolicyId={agentPolicy.id}
+                          showAgentText={false}
+                        />
+                      </EuiToolTip>
+                    ),
+                  }}
+                />
+              </span>
+            </EuiFlexItem>
+            {getRootIntegrations(agentPolicy.package_policies || []).length > 0 &&
+              (agentPolicy.unprivileged_agents || 0) > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="warning"
+                    color="warning"
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.containsUnprivilegedAgentsWarning"
+                        defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are running in unprivileged mode."
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              )}
+          </EuiFlexGroup>
         ),
       },
       {
@@ -181,7 +255,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasFleetAllPrivileges}
+        isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="createAgentPolicyButton"
       >
@@ -191,7 +265,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllAgentPoliciesPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyStateCreateAgentPolicyButton = useMemo(
@@ -199,7 +273,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasFleetAllPrivileges}
+        isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="emptyPromptCreateAgentPolicyButton"
       >
@@ -209,7 +283,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllAgentPoliciesPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
@@ -253,6 +327,12 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
+            indexPattern={INGEST_SAVED_OBJECT_INDEX}
+            fieldPrefix={
+              isSpaceAwarenessEnabled
+                ? AGENT_POLICY_SAVED_OBJECT_TYPE
+                : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
+            }
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -260,8 +340,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            indexPattern={`.${AGENT_POLICY_SAVED_OBJECT_TYPE}`}
-            fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
             dataTestSubj="agentPolicyList.queryInput"
           />
         </EuiFlexItem>
@@ -275,11 +353,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createAgentPolicyButton}</EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
       <EuiBasicTable<AgentPolicy>
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
@@ -308,7 +384,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}
-        isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,

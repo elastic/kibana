@@ -2,13 +2,14 @@ steps:
   - command: .buildkite/scripts/steps/functional/exploratory_view_plugin.sh
     label: 'Exploratory View @elastic/synthetics Tests'
     agents:
-      queue: n2-4-spot
+      machineType: n2-standard-4
+      preemptible: true
     depends_on:
       - build
       - quick_checks
     timeout_in_minutes: 60
     artifact_paths:
-      - 'x-pack/plugins/exploratory_view/e2e/.journeys/**/*'
+      - 'x-pack/plugins/observability_solution/exploratory_view/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'

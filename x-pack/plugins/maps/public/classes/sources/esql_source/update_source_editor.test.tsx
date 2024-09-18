@@ -45,7 +45,7 @@ jest.mock('../../../kibana_services', () => {
 describe('UpdateSourceEditor', () => {
   describe('narrow by map bounds switch', () => {
     function getNarrowByMapBoundsSwitch() {
-      return screen.getByText('Narrow ES|QL statement by visible map area');
+      return screen.getByText('Dynamically filter for data in the visible map area');
     }
 
     test('should set geoField when checked and geo field is not set', async () => {
@@ -63,7 +63,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByMapBoundsSwitch());
-      userEvent.click(getNarrowByMapBoundsSwitch());
+      await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
           { propName: 'narrowByMapBounds', value: true },
@@ -88,7 +88,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByMapBoundsSwitch());
-      userEvent.click(getNarrowByMapBoundsSwitch());
+      await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith({ propName: 'narrowByMapBounds', value: true })
       );
@@ -97,7 +97,7 @@ describe('UpdateSourceEditor', () => {
 
   describe('narrow by time switch', () => {
     function getNarrowByTimeSwitch() {
-      return screen.getByText('Narrow ES|QL statement by global time');
+      return screen.getByText('Apply global time range to ES|QL statement');
     }
 
     test('should set dateField when checked and date field is not set', async () => {
@@ -115,7 +115,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByTimeSwitch());
-      userEvent.click(getNarrowByTimeSwitch());
+      await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
           { propName: 'narrowByGlobalTime', value: true },
@@ -140,7 +140,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByTimeSwitch());
-      userEvent.click(getNarrowByTimeSwitch());
+      await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith({ propName: 'narrowByGlobalTime', value: true })
       );

@@ -332,43 +332,6 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-common.expectToBeAccessible",
-        "type": "Function",
-        "tags": [],
-        "label": "expectToBeAccessible",
-        "description": [
-          "\nFunction to test if a component doesn't have a11y violations from axe automated testing"
-        ],
-        "signature": [
-          "(component: ",
-          "ReactWrapper",
-          ") => Promise<void>"
-        ],
-        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-common.expectToBeAccessible.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "component",
-            "description": [],
-            "signature": [
-              "ReactWrapper"
-            ],
-            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.findTestSubject",
         "type": "Function",
         "tags": [],
@@ -437,45 +400,6 @@
               "Matcher"
             ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-common.getA11yViolations",
-        "type": "Function",
-        "tags": [],
-        "label": "getA11yViolations",
-        "description": [
-          "\nReturns a11y violations as found by axe testing"
-        ],
-        "signature": [
-          "(component: ",
-          "ReactWrapper",
-          ") => Promise<",
-          "Result",
-          "[]>"
-        ],
-        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-common.getA11yViolations.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "component",
-            "description": [],
-            "signature": [
-              "ReactWrapper"
-            ],
-            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -603,7 +527,7 @@
           "\nAllows for execution of hooks inside of a test component which records the\nreturned values.\n"
         ],
         "signature": [
-          "<Args extends {}, HookValue extends unknown>(body: (args: Args) => HookValue, WrapperComponent?: React.ComponentType<{}> | undefined, initialArgs?: Args) => ReactHookWrapper<Args, HookValue>"
+          "<Args extends {}, HookValue extends unknown>(body: (args: Args) => HookValue, WrapperComponent?: React.ComponentType<{ children?: React.ReactNode; }> | undefined, initialArgs?: Args) => ReactHookWrapper<Args, HookValue>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -636,7 +560,7 @@
               "A component that, if provided, will be wrapped\naround the test component. This can be useful to provide context values."
             ],
             "signature": [
-              "React.ComponentType<{}> | undefined"
+              "React.ComponentType<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
@@ -672,11 +596,13 @@
         "label": "mountWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => ",
+          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "MountRendererProps",
+          ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+          "ComponentType",
+          "<any> | undefined; }) | undefined) => ",
           "ReactWrapper",
-          "<",
-          "HTMLAttributes",
-          ", any, React.Component<{}, {}, any>>"
+          "<any, any, React.Component<{}, {}, any>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -696,6 +622,25 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.mountWithI18nProvider.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "(Omit<",
+              "MountRendererProps",
+              ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+              "ComponentType",
+              "<any> | undefined; }) | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -713,11 +658,11 @@
           "\n Creates the wrapper instance using mount with provided intl object into context\n"
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { attachTo?: HTMLElement | undefined; context?: any; childContextTypes?: ",
-          "ValidationMap",
-          "<any> | undefined; wrappingComponent?: React.ComponentType<any> | undefined; wrappingComponentProps?: {} | undefined; }) => ",
+          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: ",
+          "MountRendererProps",
+          " | undefined) => ",
           "ReactWrapper",
-          "<T & { intl: ReactIntl.InjectedIntl; }, Readonly<{}>, React.Component<{}, {}, any>>"
+          "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -733,7 +678,7 @@
               "The React element or cheerio wrapper"
             ],
             "signature": [
-              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
@@ -745,84 +690,18 @@
             "id": "def-common.mountWithIntl.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
-            "description": [],
+            "label": "options",
+            "description": [
+              "properties to pass into mount wrapper"
+            ],
+            "signature": [
+              "MountRendererProps",
+              " | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.mountWithIntl.$2.attachTo",
-                "type": "Object",
-                "tags": [],
-                "label": "attachTo",
-                "description": [],
-                "signature": [
-                  "HTMLElement | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.mountWithIntl.$2.context",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.mountWithIntl.$2.childContextTypes",
-                "type": "Object",
-                "tags": [],
-                "label": "childContextTypes",
-                "description": [],
-                "signature": [
-                  "ValidationMap",
-                  "<any> | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.mountWithIntl.$2.wrappingComponent",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "wrappingComponent",
-                "description": [],
-                "signature": [
-                  "React.ComponentType<any> | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.mountWithIntl.$2.wrappingComponentProps",
-                "type": "Object",
-                "tags": [],
-                "label": "wrappingComponentProps",
-                "description": [],
-                "signature": [
-                  "{} | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": false
           }
         ],
         "returnComment": [
@@ -857,7 +736,9 @@
           "\nWhen using @kbn/i18n `injectI18n` on components, props.intl is required."
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => React.ReactElement<T & { intl: ReactIntl.InjectedIntl; }, string | React.JSXElementConstructor<any>>"
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => React.ReactElement<T & { intl: ",
+          "IntlShape",
+          "; }, string | React.JSXElementConstructor<any>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -892,9 +773,7 @@
           "\nRegister a new Testbed to test a React Component.\n"
         ],
         "signature": [
-          "(Component: ",
-          "ComponentType",
-          "<P>, config: ",
+          "(Component: React.ComponentType<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "common",
@@ -926,8 +805,7 @@
               "The component under test"
             ],
             "signature": [
-              "ComponentType",
-              "<P>"
+              "React.ComponentType<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -970,9 +848,7 @@
         "label": "registerTestBed",
         "description": [],
         "signature": [
-          "(Component: ",
-          "ComponentType",
-          "<P>, config: ",
+          "(Component: React.ComponentType<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "common",
@@ -1002,8 +878,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "ComponentType",
-              "<P>"
+              "React.ComponentType<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1044,9 +919,7 @@
         "label": "registerTestBed",
         "description": [],
         "signature": [
-          "(Component: ",
-          "ComponentType",
-          "<P>, config: ",
+          "(Component: React.ComponentType<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "common",
@@ -1084,8 +957,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "ComponentType",
-              "<P>"
+              "React.ComponentType<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1128,6 +1000,107 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-common.renderReactTestingLibraryWithI18n",
+        "type": "Function",
+        "tags": [],
+        "label": "renderReactTestingLibraryWithI18n",
+        "description": [],
+        "signature": [
+          "(ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+          "RenderOptions",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>, \"queries\"> | undefined) => ",
+          "RenderResult",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.renderReactTestingLibraryWithI18n.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "[ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+              "RenderOptions",
+              "<typeof ",
+              "node_modules/@testing-library/dom/types/queries",
+              ", HTMLElement, HTMLElement>, \"queries\"> | undefined]"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-common.renderWithI18nProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "renderWithI18nProvider",
+        "description": [],
+        "signature": [
+          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "MountRendererProps",
+          ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+          "ComponentType",
+          "<any> | undefined; }) | undefined) => cheerio.Cheerio"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.renderWithI18nProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.renderWithI18nProvider.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "(Omit<",
+              "MountRendererProps",
+              ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+              "ComponentType",
+              "<any> | undefined; }) | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.renderWithIntl",
         "type": "Function",
         "tags": [
@@ -1138,9 +1111,7 @@
           "\n Creates the wrapper instance using render with provided intl object into context\n"
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { context?: any; childContextTypes?: ",
-          "ValidationMap",
-          "<any> | undefined; }) => any"
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: any) => cheerio.Cheerio"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -1166,44 +1137,19 @@
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-common.renderWithIntl.$2",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
-            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
-            "description": [],
+            "label": "options",
+            "description": [
+              "properties to pass into render wrapper"
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.renderWithIntl.$2.context",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.renderWithIntl.$2.childContextTypes",
-                "type": "Object",
-                "tags": [],
-                "label": "childContextTypes",
-                "description": [],
-                "signature": [
-                  "ValidationMap",
-                  "<any> | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [
@@ -1426,7 +1372,11 @@
         "label": "shallowWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => ",
+          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "ShallowRendererProps",
+          ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+          "ComponentType",
+          "<any> | undefined; }) | undefined) => ",
           "ShallowWrapper",
           "<Readonly<{}> & Readonly<{ children?: React.ReactNode; }>, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
@@ -1448,6 +1398,25 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.shallowWithI18nProvider.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "(Omit<",
+              "ShallowRendererProps",
+              ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
+              "ComponentType",
+              "<any> | undefined; }) | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1465,11 +1434,11 @@
           "\n Creates the wrapper instance using shallow with provided intl object into context\n"
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { context?: any; childContextTypes?: ",
-          "ValidationMap",
-          "<any> | undefined; }) => ",
+          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: (",
+          "ShallowRendererProps",
+          " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined) => ",
           "ShallowWrapper",
-          "<T & { intl: ReactIntl.InjectedIntl; }, Readonly<{}>, React.Component<{}, {}, any>>"
+          "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -1485,7 +1454,7 @@
               "The React element or cheerio wrapper"
             ],
             "signature": [
-              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
@@ -1495,44 +1464,21 @@
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-common.shallowWithIntl.$2",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
-            "description": [],
+            "label": "options",
+            "description": [
+              "properties to pass into shallow wrapper"
+            ],
+            "signature": [
+              "(",
+              "ShallowRendererProps",
+              " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.shallowWithIntl.$2.context",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-common.shallowWithIntl.$2.childContextTypes",
-                "type": "Object",
-                "tags": [],
-                "label": "childContextTypes",
-                "description": [],
-                "signature": [
-                  "ValidationMap",
-                  "<any> | undefined"
-                ],
-                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": false
           }
         ],
         "returnComment": [

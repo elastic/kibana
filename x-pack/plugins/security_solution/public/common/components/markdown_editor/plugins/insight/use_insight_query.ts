@@ -9,13 +9,17 @@ import { useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
-import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
+
+const fields = ['*'];
+const runtimeMappings = {};
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
@@ -64,19 +68,25 @@ export const useInsightQuery = ({
     }
   }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern, filters]);
 
-  const [isQueryLoading, { events, totalCount }] = useTimelineEvents({
+  const [dataLoadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId,
-    fields: ['*'],
+    fields,
     filterQuery: combinedQueries?.filterQuery,
     id: TimelineId.active,
     indexNames: selectedPatterns,
     language: 'kuery',
     limit: 1,
-    runtimeMappings: {},
-    ...(relativeTimerange
-      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
-      : {}),
+    runtimeMappings,
+    startDate: relativeTimerange?.from,
+    endDate: relativeTimerange?.to,
+    fetchNotes: false,
   });
+
+  const isQueryLoading = useMemo(
+    () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
+    [dataLoadingState]
+  );
+
   const [oldestEvent] = events;
   const timestamp =
     oldestEvent && oldestEvent.data && oldestEvent.data.find((d) => d.field === '@timestamp');

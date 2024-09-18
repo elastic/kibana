@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should recognize a valid job configuration`, async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize a basic invalid job configuration and skip advanced checks', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: '-(*&^',
           description: '',
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize non-basic issues in job configuration', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       // and may vary between test environments, e.g. cloud vs non-cloud,
       // so it should not be part of the validation
       body.forEach((element: any) => {
-        if (element.hasOwnProperty('maxModelMemoryLimit')) {
+        if (Object.hasOwn(element, 'maxModelMemoryLimit')) {
           delete element.maxModelMemoryLimit;
         }
       });
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not validate configuration in case request payload is invalid', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',

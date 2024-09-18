@@ -1,12 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+import React, {
+  type FC,
+  type PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  ReactNode,
+} from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
@@ -30,7 +39,11 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const PanelProvider: FC<Props> = ({ children, contentProvider, activeNodes }) => {
+export const PanelProvider: FC<PropsWithChildren<Props>> = ({
+  children,
+  contentProvider,
+  activeNodes,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelNavNode | null>(null);
 

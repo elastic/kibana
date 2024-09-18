@@ -10,17 +10,25 @@ exports[`ExecutionLogSearchBar snapshots renders correctly against snapshot 1`] 
   <EuiFlexItem
     grow={false}
   >
-    <ExecutionStatusFilter
-      items={
-        Array [
-          "succeeded",
-          "failed",
-          "partial failure",
-        ]
-      }
-      onChange={[Function]}
-      selectedItems={Array []}
-    />
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={true}
+      >
+        <ExecutionStatusFilter
+          items={
+            Array [
+              "succeeded",
+              "failed",
+              "partial failure",
+            ]
+          }
+          onChange={[Function]}
+          selectedItems={Array []}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

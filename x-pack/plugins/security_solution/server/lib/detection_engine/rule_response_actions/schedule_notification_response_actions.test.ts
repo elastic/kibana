@@ -9,10 +9,12 @@ import { getScheduleNotificationResponseActionsService } from './schedule_notifi
 import type { RuleResponseAction } from '../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
+import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
 
 describe('ScheduleNotificationResponseActions', () => {
   const signalOne = {
-    agent: { id: 'agent-id-1' },
+    agent: { id: 'agent-id-1', type: 'endpoint' },
     _id: 'alert-id-1',
     user: { id: 'S-1-5-20' },
     process: {
@@ -21,25 +23,24 @@ describe('ScheduleNotificationResponseActions', () => {
     [ALERT_RULE_UUID]: 'rule-id-1',
     [ALERT_RULE_NAME]: 'rule-name-1',
   };
-  const signalTwo = { agent: { id: 'agent-id-2' }, _id: 'alert-id-2' };
+  const signalTwo = { agent: { id: 'agent-id-2', type: 'endpoint' }, _id: 'alert-id-2' };
   const getSignals = () => [signalOne, signalTwo];
 
   const osqueryActionMock = {
     create: jest.fn(),
     stop: jest.fn(),
   };
-  const endpointActionMock = {
-    getActionCreateService: jest.fn().mockReturnValue({
-      createActionFromAlert: jest.fn(),
-    }),
-  };
+  let mockedResponseActionsClient = responseActionsClientMock.create();
+  const endpointActionMock = createMockEndpointAppContextService();
+  (endpointActionMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
+    return mockedResponseActionsClient;
+  });
+  // @ts-expect-error assignment to readonly property
+  endpointActionMock.experimentalFeatures.automatedProcessActionsEnabled = true;
+
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,
-    endpointAppContextService: endpointActionMock as never,
-    experimentalFeatures: {
-      automatedProcessActionsEnabled: true,
-      endpointResponseActionsEnabled: true,
-    } as never,
+    endpointAppContextService: endpointActionMock,
   });
 
   describe('Osquery', () => {
@@ -95,7 +96,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultQueryResultParams,
@@ -122,7 +123,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultPackResultParams,
@@ -131,6 +132,11 @@ describe('ScheduleNotificationResponseActions', () => {
     });
   });
   describe('Endpoint', () => {
+    beforeEach(() => {
+      (endpointActionMock.getInternalResponseActionsClient as jest.Mock).mockClear();
+      mockedResponseActionsClient = responseActionsClientMock.create();
+    });
+
     it('should handle endpoint isolate actions', async () => {
       const signals = getSignals();
 
@@ -143,30 +149,28 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
-      expect(
-        endpointActionMock.getActionCreateService().createActionFromAlert
-      ).toHaveBeenCalledTimes(signals.length);
-      expect(
-        endpointActionMock.getActionCreateService().createActionFromAlert
-      ).toHaveBeenCalledWith(
+      expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledTimes(1);
+      expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledWith({
+        agentType: 'endpoint',
+        username: 'unknown',
+      });
+      expect(mockedResponseActionsClient.isolate).toHaveBeenCalledTimes(signals.length);
+      expect(mockedResponseActionsClient.isolate).toHaveBeenNthCalledWith(
+        1,
         {
           alert_ids: ['alert-id-1'],
-          command: 'isolate',
           comment: 'test isolate comment',
           endpoint_ids: ['agent-id-1'],
-          agent_type: 'endpoint',
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: '',
-            },
-          },
-          rule_id: 'rule-id-1',
-          rule_name: 'rule-name-1',
+          parameters: undefined,
         },
-        ['agent-id-1']
+        {
+          error: undefined,
+          hosts: { 'agent-id-1': { id: 'agent-id-1', name: '' } },
+          ruleId: 'rule-id-1',
+          ruleName: 'rule-name-1',
+        }
       );
     });
     it('should handle endpoint kill-process actions', async () => {
@@ -184,35 +188,47 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({
+      await scheduleNotificationResponseActions({
         signals,
         responseActions,
       });
 
-      expect(
-        endpointActionMock.getActionCreateService().createActionFromAlert
-      ).toHaveBeenCalledWith(
+      expect(mockedResponseActionsClient.killProcess).toHaveBeenCalledWith(
         {
-          agent_type: 'endpoint',
           alert_ids: ['alert-id-1'],
-          command: 'kill-process',
           comment: 'test process comment',
           endpoint_ids: ['agent-id-1'],
-          error: undefined,
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: undefined,
-            },
-          },
           parameters: {
             pid: 123,
           },
-          rule_id: 'rule-id-1',
-          rule_name: 'rule-name-1',
         },
-        ['agent-id-1']
+        {
+          error: undefined,
+          hosts: { 'agent-id-1': { id: 'agent-id-1', name: undefined } },
+          ruleId: 'rule-id-1',
+          ruleName: 'rule-name-1',
+        }
       );
+    });
+
+    it('should only attempt to send response actions to alerts from endpoint', async () => {
+      const signals = getSignals();
+      signals.push({ agent: { id: '123-432', type: 'filebeat' }, _id: '1' });
+      const responseActions: RuleResponseAction[] = [
+        {
+          actionTypeId: ResponseActionTypesEnum['.endpoint'],
+          params: {
+            command: 'isolate',
+            comment: 'test process comment',
+          },
+        },
+      ];
+      await scheduleNotificationResponseActions({
+        signals,
+        responseActions,
+      });
+
+      expect(mockedResponseActionsClient.isolate).toHaveBeenCalledTimes(signals.length - 1);
     });
   });
 });

@@ -6,10 +6,11 @@
  */
 
 import {
+  AllDatasetSelection,
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
-  hydrateDatasetSelection,
+  hydrateDataSourceSelection,
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
@@ -26,7 +27,7 @@ export const getPublicStateFromContext = (
 ): LogsExplorerPublicState => {
   return {
     chart: context.chart,
-    datasetSelection: context.datasetSelection.toPlainSelection(),
+    dataSourceSelection: context.dataSourceSelection.toPlainSelection(),
     grid: context.grid,
     filters: context.filters,
     query: context.query,
@@ -37,7 +38,8 @@ export const getPublicStateFromContext = (
 };
 
 export const getContextFromPublicState = (
-  publicState: LogsExplorerPublicStateUpdate
+  publicState: LogsExplorerPublicStateUpdate,
+  allSelection: AllDatasetSelection
 ): LogsExplorerControllerContext => ({
   ...DEFAULT_CONTEXT,
   chart: {
@@ -45,10 +47,10 @@ export const getContextFromPublicState = (
     ...publicState.chart,
   },
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
-  datasetSelection:
-    publicState.datasetSelection != null
-      ? hydrateDatasetSelection(publicState.datasetSelection)
-      : DEFAULT_CONTEXT.datasetSelection,
+  dataSourceSelection:
+    publicState.dataSourceSelection != null
+      ? hydrateDataSourceSelection(publicState.dataSourceSelection, allSelection)
+      : DEFAULT_CONTEXT.dataSourceSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
     ...publicState.grid,
@@ -81,12 +83,12 @@ const getPublicControlsStateFromControlPanels = (
 const getOptionsListPublicControlStateFromControlPanel = (
   optionsListControlPanel: ControlPanels[string]
 ): OptionsListControl => ({
-  mode: optionsListControlPanel.explicitInput.exclude ? 'exclude' : 'include',
-  selection: optionsListControlPanel.explicitInput.existsSelected
+  mode: optionsListControlPanel.exclude ? 'exclude' : 'include',
+  selection: optionsListControlPanel.existsSelected
     ? { type: 'exists' }
     : {
         type: 'options',
-        selectedOptions: optionsListControlPanel.explicitInput.selectedOptions ?? [],
+        selectedOptions: optionsListControlPanel.selectedOptions ?? [],
       },
 });
 
@@ -119,16 +121,13 @@ const getControlPanelFromOptionsListPublicControlState = (
 
   return {
     ...defaultControlPanelConfig,
-    explicitInput: {
-      ...defaultControlPanelConfig.explicitInput,
-      exclude: publicControlState.mode === 'exclude',
-      ...(publicControlState.selection.type === 'exists'
-        ? {
-            existsSelected: true,
-          }
-        : {
-            selectedOptions: publicControlState.selection.selectedOptions,
-          }),
-    },
+    exclude: publicControlState.mode === 'exclude',
+    ...(publicControlState.selection.type === 'exists'
+      ? {
+          existsSelected: true,
+        }
+      : {
+          selectedOptions: publicControlState.selection.selectedOptions,
+        }),
   };
 };

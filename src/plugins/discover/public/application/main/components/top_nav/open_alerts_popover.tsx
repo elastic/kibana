@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -20,7 +21,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
 const container = document.createElement('div');
@@ -40,7 +41,7 @@ interface AlertsPopoverProps {
   savedQueryId?: string;
   adHocDataViews: DataView[];
   services: DiscoverServices;
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
 }
 
 interface EsQueryAlertMetaData extends RuleTypeMetaData {
@@ -54,7 +55,7 @@ export function AlertsPopover({
   services,
   stateContainer,
   onClose: originalOnClose,
-  isPlainRecord,
+  isEsqlMode,
 }: AlertsPopoverProps) {
   const dataView = stateContainer.internalState.getState().dataView;
   const query = stateContainer.appState.getState().query;
@@ -72,7 +73,7 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
-    if (isPlainRecord) {
+    if (isEsqlMode) {
       return {
         searchType: 'esqlQuery',
         esqlQuery: query,
@@ -87,7 +88,7 @@ export function AlertsPopover({
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isPlainRecord, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
+  }, [isEsqlMode, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -128,12 +129,12 @@ export function AlertsPopover({
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
 
   const hasTimeFieldName: boolean = useMemo(() => {
-    if (!isPlainRecord) {
+    if (!isEsqlMode) {
       return Boolean(dataView?.timeFieldName);
     } else {
       return Boolean(timeField);
     }
-  }, [dataView?.timeFieldName, isPlainRecord, timeField]);
+  }, [dataView?.timeFieldName, isEsqlMode, timeField]);
 
   const panels = [
     {
@@ -167,7 +168,7 @@ export function AlertsPopover({
           ),
           icon: 'tableOfContents',
           href: services?.application?.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/alerts'
+            'management/insightsAndAlerting/triggersActions/rules'
           ),
           ['data-test-subj']: 'discoverManageAlertsButton',
         },
@@ -183,8 +184,9 @@ export function AlertsPopover({
         button={anchorElement}
         closePopover={onClose}
         isOpen={!alertFlyoutVisible}
+        panelPaddingSize="s"
       >
-        <EuiContextMenu initialPanelId="mainPanel" panels={panels} />
+        <EuiContextMenu initialPanelId="mainPanel" size="s" panels={panels} />
       </EuiWrappingPopover>
     </>
   );
@@ -201,13 +203,13 @@ export function openAlertsPopover({
   stateContainer,
   services,
   adHocDataViews,
-  isPlainRecord,
+  isEsqlMode,
 }: {
   anchorElement: HTMLElement;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   adHocDataViews: DataView[];
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -218,7 +220,7 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <AlertsPopover
           onClose={closeAlertsPopover}
@@ -226,7 +228,7 @@ export function openAlertsPopover({
           stateContainer={stateContainer}
           adHocDataViews={adHocDataViews}
           services={services}
-          isPlainRecord={isPlainRecord}
+          isEsqlMode={isEsqlMode}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

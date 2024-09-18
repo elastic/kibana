@@ -22,7 +22,7 @@ import {
 } from './types';
 import * as i18n from './translations';
 
-import { AddIntegrationButton } from './step_links/add_integration_button';
+import { AddIntegrationButtons } from './step_links/add_integration_buttons';
 import { AlertsButton } from './step_links/alerts_link';
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
@@ -64,7 +64,7 @@ export const addIntegrationsSteps: Array<Step<AddIntegrationsSteps.connectToData
     icon: { type: 'fleetApp', size: 'xl' as const },
     id: AddIntegrationsSteps.connectToDataSources,
     title: i18n.ADD_INTEGRATIONS_TITLE,
-    description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButton />],
+    description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButtons />],
     splitPanel: <AddIntegrationsImage />,
     autoCheckIfStepCompleted: autoCheckAddIntegrationsStepCompleted,
   },
@@ -110,10 +110,6 @@ export const sections: Section[] = [
         id: QuickStartSectionCardsId.createFirstProject,
         steps: createProjectSteps,
         hideSteps: true,
-      },
-      {
-        id: QuickStartSectionCardsId.watchTheOverviewVideo,
-        steps: overviewVideoSteps,
       },
     ],
   },

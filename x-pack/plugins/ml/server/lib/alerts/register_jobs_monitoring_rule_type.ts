@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ByteSize,
   DateTime,
@@ -21,10 +22,10 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { AlertsClientError, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import type { RuleExecutorOptions, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
+import type { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   ALERT_DATAFEED_RESULTS,
@@ -265,7 +266,7 @@ export function registerJobsMonitoringRuleType({
         throw new AlertsClientError();
       }
 
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,
@@ -287,6 +288,7 @@ export function registerJobsMonitoringRuleType({
             id: alertName,
             actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
             context,
+            // @ts-expect-error type mismatch
             payload,
           });
         });
@@ -300,6 +302,7 @@ export function registerJobsMonitoringRuleType({
           alertsClient.setAlertData({
             id: recoveredAlertId,
             context: testResult.context,
+            // @ts-expect-error type mismatch
             payload: testResult.payload,
           });
         }

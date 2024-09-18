@@ -21,7 +21,6 @@ import {
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
-import { MANAGED_BY_FLEET } from '../../constants';
 
 import { useStepFromQueryString } from '../use_step_from_query_string';
 import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
@@ -48,6 +47,13 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
   const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
+  // If the component template is referenced by an index template that is part of
+  // a package and is managed we can allow the user to roll it over if possible.
+  const { data: refIndexTemplate } = api.useLoadReferencedIndexTemplateMeta(decodedName);
+  const canRollover = useMemo(
+    () => Boolean(refIndexTemplate?.managed_by && refIndexTemplate?.package),
+    [refIndexTemplate]
+  );
 
   const { showDatastreamRolloverModal } = useDatastreamsRollover();
 
@@ -68,9 +74,13 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET) {
+    // We only want to allow rolling over linked datastreams for either @custom templates
+    // or when the component template is referenced by an index template that is part of
+    // a package and is managed.
+    if (updatedComponentTemplate.name.endsWith('@custom') || canRollover) {
       await showDatastreamRolloverModal(updatedComponentTemplate.name);
     }
+
     redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
@@ -115,7 +125,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template '{name}'"
+              defaultMessage="Edit component template ''{name}''"
               values={{ name: decodedName }}
             />
           </span>
@@ -125,7 +135,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
-      {componentTemplate?.isDeprecated && (
+      {componentTemplate?.deprecated && (
         <>
           <EuiCallOut
             title={
@@ -150,6 +160,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
         dataStreams={dataStreams}
+        canRollover={canRollover}
         defaultActiveWizardSection={defaultActiveStep}
         onStepChange={updateStep}
         onSave={onSave}

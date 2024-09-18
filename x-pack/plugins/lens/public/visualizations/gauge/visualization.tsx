@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeExpressionFunctionDefinition } from '@kbn/expression-gauge-plugin/common';
+import type {
+  GaugeExpressionFunctionDefinition,
+  GaugeShape,
+} from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
@@ -20,7 +23,7 @@ import {
   getMinValue,
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
-import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
@@ -38,10 +41,14 @@ import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
-
-const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
-});
+import {
+  GAUGE_GOAL_GT_MAX,
+  GAUGE_METRIC_GT_MAX,
+  GAUGE_MIN_GT_GOAL,
+  GAUGE_MIN_GT_MAX,
+  GAUGE_MIN_GT_METRIC,
+  GAUGE_MIN_NE_MAX,
+} from '../../user_messages_ids';
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -53,23 +60,6 @@ export const isNumericMetric = (op: OperationMetadata) =>
 
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
-
-export const CHART_NAMES = {
-  horizontalBullet: {
-    icon: IconChartHorizontalBullet,
-    label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
-      defaultMessage: 'Gauge horizontal',
-    }),
-    groupLabel: groupLabelForGauge,
-  },
-  verticalBullet: {
-    icon: IconChartVerticalBullet,
-    label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
-      defaultMessage: 'Gauge vertical',
-    }),
-    groupLabel: groupLabelForGauge,
-  },
-};
 
 function computePaletteParams(params: CustomPaletteParams) {
   return {
@@ -95,6 +85,7 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
   if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
       errors.push({
+        uniqueId: GAUGE_MIN_GT_MAX,
         severity: 'error',
         displayLocations: [
           { id: 'dimensionButton', dimensionId: minAccessor! },
@@ -112,6 +103,7 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
     }
     if (maxValue === minValue) {
       errors.push({
+        uniqueId: GAUGE_MIN_NE_MAX,
         severity: 'error',
         displayLocations: [
           { id: 'dimensionButton', dimensionId: minAccessor! },
@@ -168,25 +160,31 @@ const toExpression = (
 
 export const getGaugeVisualization = ({
   paletteService,
-  theme,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
-
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
-      ...CHART_NAMES.horizontalBullet,
-      id: GaugeShapes.HORIZONTAL_BULLET,
-      showExperimentalBadge: true,
-    },
-    {
-      ...CHART_NAMES.verticalBullet,
-      id: GaugeShapes.VERTICAL_BULLET,
-      showExperimentalBadge: true,
+      id: LENS_GAUGE_ID,
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+      sortPriority: 7,
+      description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+        defaultMessage: 'Show progress to a goal in linear or arced style.',
+      }),
+      subtypes: [
+        GaugeShapes.HORIZONTAL_BULLET,
+        GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.SEMI_CIRCLE,
+        GaugeShapes.ARC,
+        GaugeShapes.CIRCLE,
+      ],
     },
   ],
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
   getLayerIds(state) {
     return [state.layerId];
   },
@@ -201,20 +199,19 @@ export const getGaugeVisualization = ({
     return newState;
   },
 
-  getDescription(state) {
-    if (state.shape === GaugeShapes.HORIZONTAL_BULLET) {
-      return CHART_NAMES.horizontalBullet;
-    }
-    return CHART_NAMES.verticalBullet;
+  getDescription() {
+    return {
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+    };
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {
     return {
       ...state,
-      shape:
-        visualizationTypeId === GaugeShapes.HORIZONTAL_BULLET
-          ? GaugeShapes.HORIZONTAL_BULLET
-          : GaugeShapes.VERTICAL_BULLET,
+      shape: visualizationTypeId as GaugeShape,
     };
   },
 
@@ -356,6 +353,12 @@ export const getGaugeVisualization = ({
     };
   },
 
+  getDisplayOptions() {
+    return {
+      noPadding: true,
+    };
+  },
+
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const update: Partial<GaugeVisualizationState> = {};
     if (groupId === GROUP_ID.MIN) {
@@ -489,6 +492,7 @@ export const getGaugeVisualization = ({
     if (typeof minValue === 'number') {
       if (minValue > metricValue) {
         warnings.push({
+          uniqueId: GAUGE_MIN_GT_METRIC,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -503,6 +507,7 @@ export const getGaugeVisualization = ({
       }
       if (minValue > goalValue) {
         warnings.push({
+          uniqueId: GAUGE_MIN_GT_GOAL,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -520,6 +525,7 @@ export const getGaugeVisualization = ({
     if (typeof maxValue === 'number') {
       if (metricValue > maxValue) {
         warnings.push({
+          uniqueId: GAUGE_METRIC_GT_MAX,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -535,6 +541,7 @@ export const getGaugeVisualization = ({
 
       if (typeof goalValue === 'number' && goalValue > maxValue) {
         warnings.push({
+          uniqueId: GAUGE_GOAL_GT_MAX,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],

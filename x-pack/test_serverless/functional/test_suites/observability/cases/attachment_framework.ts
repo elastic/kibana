@@ -8,6 +8,8 @@
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
@@ -21,11 +23,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCases = getService('svlCases');
   const find = getService('find');
   const toasts = getService('toasts');
+  const retry = getService('retry');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
-        await svlCommonPage.login();
+        await svlCommonPage.loginWithPrivilegedRole();
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
@@ -49,25 +53,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         await kibanaServer.savedObjects.cleanStandardList();
-        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
         const caseTitle = 'case created in observability from my dashboard with lens visualization';
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
 
-        await testSubjects.existOrFail('create-case-flyout');
+        await retry.waitFor('wait for the modal to open', async () => {
+          return (
+            (await testSubjects.exists('all-cases-modal')) &&
+            (await testSubjects.exists('cases-table-add-case-filter-bar'))
+          );
+        });
+
+        await retry.waitFor('wait for the flyout to open', async () => {
+          if (await testSubjects.exists('cases-table-add-case-filter-bar')) {
+            await testSubjects.click('cases-table-add-case-filter-bar');
+          }
+
+          return testSubjects.exists('create-case-flyout');
+        });
 
         await testSubjects.setValue('input', caseTitle);
-
         await testSubjects.setValue('euiMarkdownEditorTextArea', 'test description');
 
         // verify that solution picker is not visible
         await testSubjects.missingOrFail('caseOwnerSelector');
-
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
@@ -82,7 +94,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await retry.waitFor('wait for the visualization to exist', async () => {
+          return testSubjects.exists('comment-persistableState-.lens');
+        });
       });
 
       it('adds lens visualization to an existing case from dashboard', async () => {
@@ -95,10 +109,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
-
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
 

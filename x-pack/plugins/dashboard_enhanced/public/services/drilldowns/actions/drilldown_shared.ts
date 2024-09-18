@@ -12,7 +12,8 @@ import {
   type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
-  PublishesPanelTitle,
+  getPanelTitle,
+  type PublishesPanelTitle,
   type HasUniqueId,
   type HasParentApi,
 } from '@kbn/presentation-publishing';
@@ -52,8 +53,8 @@ export const createDrilldownTemplatesFromSiblings = (
   if (!apiIsPresentationContainer(parentApi)) return [];
 
   const templates: DrilldownTemplate[] = [];
-  for (const childId of parentApi.getChildIds()) {
-    const child = parentApi.getChild(childId) as Partial<HasUniqueId & PublishesPanelTitle>;
+  for (const childId of Object.keys(parentApi.children$.value)) {
+    const child = parentApi.children$.value[childId] as Partial<HasUniqueId & PublishesPanelTitle>;
     if (childId === embeddable.uuid) continue;
     if (!apiHasDynamicActions(child)) continue;
     const events = child.enhancements.dynamicActions.state.get().events;
@@ -63,7 +64,7 @@ export const createDrilldownTemplatesFromSiblings = (
         id: event.eventId,
         name: event.action.name,
         icon: 'dashboardApp',
-        description: child.panelTitle?.value ?? child.uuid ?? '',
+        description: getPanelTitle(child) ?? child.uuid ?? '',
         config: event.action.config,
         factoryId: event.action.factoryId,
         triggers: event.triggers,
@@ -74,3 +75,5 @@ export const createDrilldownTemplatesFromSiblings = (
 
   return templates;
 };
+
+export const DRILLDOWN_MAX_WIDTH = 500;

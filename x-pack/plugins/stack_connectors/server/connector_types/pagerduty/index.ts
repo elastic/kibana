@@ -21,6 +21,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { postPagerduty } from './post_pagerduty';
+import { convertTimestamp } from '../lib/convert_timestamp';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -82,7 +83,7 @@ const PayloadSeveritySchema = schema.oneOf([
 const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
 const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
 
-const ParamsSchema = schema.object(
+export const ParamsSchema = schema.object(
   {
     eventAction: schema.maybe(EventActionSchema),
     dedupKey: schema.maybe(schema.string({ maxLength: 255 })),
@@ -99,19 +100,12 @@ const ParamsSchema = schema.object(
   { validate: validateParams }
 );
 
-function validateTimestamp(timestamp?: string): string | null {
-  if (timestamp) {
-    return timestamp.trim().length > 0 ? timestamp.trim() : null;
-  }
-  return null;
-}
-
 function validateParams(paramsObject: unknown): string | void {
   const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  const validatedTimestamp = validateTimestamp(timestamp);
-  if (validatedTimestamp != null) {
+  const convertedTimestamp = convertTimestamp(timestamp);
+  if (convertedTimestamp != null) {
     try {
-      const date = moment(validatedTimestamp);
+      const date = moment(convertedTimestamp);
       if (!date.isValid()) {
         return i18n.translate('xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
@@ -198,8 +192,16 @@ function getPagerDutyApiUrl(config: ConnectorTypeConfigType): string {
 async function executor(
   execOptions: PagerDutyConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, services, configurationUtilities, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    services,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -213,7 +215,8 @@ async function executor(
     response = await postPagerduty(
       { apiUrl, data, headers, services },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.pagerduty.postingErrorMessage', {
@@ -318,13 +321,13 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     return data;
   }
 
-  const validatedTimestamp = validateTimestamp(params.timestamp);
+  const convertedTimestamp = convertTimestamp(params.timestamp);
 
   data.payload = {
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...(validatedTimestamp ? { timestamp: moment(validatedTimestamp).toISOString() } : {}),
+    ...(convertedTimestamp ? { timestamp: moment(convertedTimestamp).toISOString() } : {}),
     ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
     ...(params.customDetails ? { custom_details: params.customDetails } : {}),
   };

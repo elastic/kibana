@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.configureClient",
+        "id": "def-server.configureClient",
         "type": "Function",
         "tags": [],
         "label": "configureClient",
@@ -30,9 +22,9 @@
           "(config: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchClientConfig",
+            "section": "def-server.ElasticsearchClientConfig",
             "text": "ElasticsearchClientConfig"
           },
           ", { logger, type, scoped, getExecutionContext, agentFactoryProvider, kibanaVersion, }: { logger: ",
@@ -54,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.configureClient.$1",
+            "id": "def-server.configureClient.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -62,9 +54,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchClientConfig",
+                "section": "def-server.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               }
             ],
@@ -75,7 +67,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.configureClient.$2",
+            "id": "def-server.configureClient.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentFactoryProvider,\n    kibanaVersion,\n  }",
@@ -86,7 +78,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.logger",
+                "id": "def-server.configureClient.$2.logger",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -106,7 +98,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.type",
+                "id": "def-server.configureClient.$2.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -117,7 +109,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.scoped",
+                "id": "def-server.configureClient.$2.scoped",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "scoped",
@@ -131,7 +123,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.getExecutionContext",
+                "id": "def-server.configureClient.$2.getExecutionContext",
                 "type": "Function",
                 "tags": [],
                 "label": "getExecutionContext",
@@ -147,7 +139,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.agentFactoryProvider",
+                "id": "def-server.configureClient.$2.agentFactoryProvider",
                 "type": "Object",
                 "tags": [],
                 "label": "agentFactoryProvider",
@@ -161,7 +153,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "id": "def-common.configureClient.$2.kibanaVersion",
+                "id": "def-server.configureClient.$2.kibanaVersion",
                 "type": "string",
                 "tags": [],
                 "label": "kibanaVersion",
@@ -178,7 +170,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.getErrorMessage",
+        "id": "def-server.getErrorMessage",
         "type": "Function",
         "tags": [],
         "label": "getErrorMessage",
@@ -196,7 +188,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.getErrorMessage.$1",
+            "id": "def-server.getErrorMessage.$1",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -215,7 +207,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.getRequestDebugMeta",
+        "id": "def-server.getRequestDebugMeta",
         "type": "Function",
         "tags": [],
         "label": "getRequestDebugMeta",
@@ -228,17 +220,17 @@
           "<unknown, unknown>, apisToRedactInLogs: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchApiToRedactInLogs",
+            "section": "def-server.ElasticsearchApiToRedactInLogs",
             "text": "ElasticsearchApiToRedactInLogs"
           },
           "[] | undefined) => ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-common.RequestDebugMeta",
+            "section": "def-server.RequestDebugMeta",
             "text": "RequestDebugMeta"
           }
         ],
@@ -248,7 +240,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.getRequestDebugMeta.$1",
+            "id": "def-server.getRequestDebugMeta.$1",
             "type": "Object",
             "tags": [],
             "label": "event",
@@ -264,7 +256,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.getRequestDebugMeta.$2",
+            "id": "def-server.getRequestDebugMeta.$2",
             "type": "Array",
             "tags": [],
             "label": "apisToRedactInLogs",
@@ -272,9 +264,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchApiToRedactInLogs",
+                "section": "def-server.ElasticsearchApiToRedactInLogs",
                 "text": "ElasticsearchApiToRedactInLogs"
               },
               "[] | undefined"
@@ -292,7 +284,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.AgentStatsProvider",
+        "id": "def-server.AgentStatsProvider",
         "type": "Interface",
         "tags": [],
         "label": "AgentStatsProvider",
@@ -305,7 +297,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.AgentStatsProvider.getAgentsStats",
+            "id": "def-server.AgentStatsProvider.getAgentsStats",
             "type": "Function",
             "tags": [],
             "label": "getAgentsStats",
@@ -316,9 +308,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.ElasticsearchClientsMetrics",
+                "section": "def-server.ElasticsearchClientsMetrics",
                 "text": "ElasticsearchClientsMetrics"
               }
             ],
@@ -333,7 +325,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.RequestDebugMeta",
+        "id": "def-server.RequestDebugMeta",
         "type": "Interface",
         "tags": [],
         "label": "RequestDebugMeta",
@@ -346,7 +338,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.RequestDebugMeta.method",
+            "id": "def-server.RequestDebugMeta.method",
             "type": "string",
             "tags": [],
             "label": "method",
@@ -359,7 +351,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.RequestDebugMeta.url",
+            "id": "def-server.RequestDebugMeta.url",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -372,7 +364,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.RequestDebugMeta.body",
+            "id": "def-server.RequestDebugMeta.body",
             "type": "string",
             "tags": [],
             "label": "body",
@@ -385,7 +377,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.RequestDebugMeta.statusCode",
+            "id": "def-server.RequestDebugMeta.statusCode",
             "type": "CompoundType",
             "tags": [],
             "label": "statusCode",
@@ -407,7 +399,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.NetworkAgent",
+        "id": "def-server.NetworkAgent",
         "type": "Type",
         "tags": [],
         "label": "NetworkAgent",
@@ -423,6 +415,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -14,7 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
 
-const JOURNEY_BASE_PATH = 'x-pack/performance/journeys';
+const JOURNEY_BASE_PATH = 'x-pack/performance/journeys_e2e';
 
 export interface Journey {
   name: string;
@@ -30,8 +31,22 @@ interface EsRunProps {
 interface TestRunProps extends EsRunProps {
   journey: Journey;
   phase: 'TEST' | 'WARMUP';
+  ingestEsData: boolean;
   kibanaInstallDir: string | undefined;
 }
+
+interface JourneyTargetGroups {
+  [key: string]: string[];
+}
+
+const journeyTargetGroups: JourneyTargetGroups = {
+  kibanaStartAndLoad: ['login'],
+  crud: ['tags_listing_page', 'dashboard_listing_page'],
+  dashboard: ['ecommerce_dashboard', 'data_stress_test_lens', 'flight_dashboard'],
+  discover: ['many_fields_discover', 'many_fields_discover_esql'],
+  maps: ['ecommerce_dashboard_map_only'],
+  ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
+};
 
 const readFilesRecursively = (dir: string, callback: Function) => {
   const files = fs.readdirSync(dir);
@@ -44,6 +59,44 @@ const readFilesRecursively = (dir: string, callback: Function) => {
       callback(filePath);
     }
   });
+};
+
+const getAllJourneys = (dir: string) => {
+  const journeys: Journey[] = [];
+
+  readFilesRecursively(dir, (filePath: string) =>
+    journeys.push({
+      name: path.parse(filePath).name,
+      path: path.resolve(dir, filePath),
+    })
+  );
+
+  return journeys;
+};
+
+const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: string }) => {
+  if (group && typeof group === 'string') {
+    if (!(group in journeyTargetGroups)) {
+      throw createFlagError(`Group '${group}' is not defined, try again`);
+    }
+
+    const fileNames = journeyTargetGroups[group];
+    const dir = path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+
+    return getAllJourneys(dir).filter((journey) => fileNames.includes(journey.name));
+  }
+
+  if (journeyPath && !fs.existsSync(journeyPath)) {
+    throw createFlagError('--journey-path must be an existing path');
+  }
+
+  if (journeyPath && fs.statSync(journeyPath).isFile()) {
+    return [{ name: path.parse(journeyPath).name, path: journeyPath }];
+  } else {
+    // default dir is x-pack/performance/journeys_e2e
+    const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+    return getAllJourneys(dir);
+  }
 };
 
 async function startEs(props: EsRunProps) {
@@ -79,7 +132,7 @@ async function startEs(props: EsRunProps) {
 }
 
 async function runFunctionalTest(props: TestRunProps) {
-  const { procRunner, journey, phase, kibanaInstallDir, logsDir } = props;
+  const { procRunner, journey, phase, kibanaInstallDir, logsDir, ingestEsData } = props;
   await procRunner.run('functional-tests', {
     cmd: 'node',
     args: [
@@ -103,6 +156,7 @@ async function runFunctionalTest(props: TestRunProps) {
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',
+      TEST_INGEST_ES_DATA: ingestEsData.toString(),
     },
   });
 }
@@ -112,29 +166,17 @@ run(
     const skipWarmup = flagsReader.boolean('skip-warmup');
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
     const journeyPath = flagsReader.path('journey-path');
+    const group = flagsReader.string('group');
+
+    if (group && journeyPath) {
+      throw createFlagError('--group and --journeyPath cannot be used simultaneously');
+    }
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
 
-    if (journeyPath && !fs.existsSync(journeyPath)) {
-      throw createFlagError('--journey-path must be an existing path');
-    }
-
-    const journeys: Journey[] = [];
-
-    if (journeyPath && fs.statSync(journeyPath).isFile()) {
-      journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
-    } else {
-      // default dir is x-pack/performance/journeys
-      const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-      readFilesRecursively(dir, (filePath: string) =>
-        journeys.push({
-          name: path.parse(filePath).name,
-          path: path.resolve(dir, filePath),
-        })
-      );
-    }
+    const journeys = getJourneysToRun({ journeyPath, group });
 
     if (journeys.length === 0) {
       throw new Error('No journeys found');
@@ -162,10 +204,18 @@ run(
             phase: 'WARMUP',
             kibanaInstallDir,
             logsDir,
+            ingestEsData: true,
           });
         }
         process.stdout.write(`--- Running journey: ${journey.name} [collect metrics]\n`);
-        await runFunctionalTest({ procRunner, log, journey, phase: 'TEST', kibanaInstallDir });
+        await runFunctionalTest({
+          procRunner,
+          log,
+          journey,
+          phase: 'TEST',
+          kibanaInstallDir,
+          ingestEsData: skipWarmup, // if warmup was skipped, we need to ingest data as part of TEST phase
+        });
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey.name);
@@ -180,13 +230,14 @@ run(
   },
   {
     flags: {
-      string: ['kibana-install-dir', 'journey-path'],
+      string: ['kibana-install-dir', 'journey-path', 'group'],
       boolean: ['skip-warmup'],
       help: `
       --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source
       --journey-path=path           Define path to performance journey or directory with multiple journeys
                                     that should be executed. '${JOURNEY_BASE_PATH}' is run by default
       --skip-warmup                 Journey will be executed without warmup (TEST phase only)
+      --group                       Run subset of journeys, defined in the specified group
     `,
     },
   }

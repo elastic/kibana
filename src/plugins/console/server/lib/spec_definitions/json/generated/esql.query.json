@@ -5,7 +5,16 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "format": "",
+      "format": [
+        "csv",
+        "json",
+        "tsv",
+        "txt",
+        "yaml",
+        "cbor",
+        "smile",
+        "arrow"
+      ],
       "delimiter": ""
     },
     "methods": [
@@ -17,7 +26,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/esql-rest.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

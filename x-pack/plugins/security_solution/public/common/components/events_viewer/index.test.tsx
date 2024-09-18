@@ -8,7 +8,6 @@
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../mock/match_media';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 
@@ -16,7 +15,7 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer, type EventsViewerProps } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';

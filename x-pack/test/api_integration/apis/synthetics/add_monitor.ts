@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { omit, omitBy } from 'lodash';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -21,25 +21,71 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import {
+  removeMonitorEmptyValues,
+  transformPublicKeys,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+
+export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
+  const result = await supertestAPI
+    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+    .set('kbn-xsrf', 'true')
+    .send(monitor);
+
+  expect(result.status).eql(statusCode, JSON.stringify(result.body));
+
+  if (statusCode === 200) {
+    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
+    expect(id).not.empty();
+    expect(configId).not.empty();
+    expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+    return {
+      rawBody: result.body,
+      body: {
+        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
+      },
+    };
+  }
+  return result.body;
+};
+
+export const omitMonitorKeys = (monitor: any) => {
+  return omitBy(transformPublicKeys(monitor), removeMonitorEmptyValues);
+};
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('AddNewMonitors', function () {
+  describe('AddNewMonitorsUI', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
 
-    before(() => {
+    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
+      return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+    };
+
+    const deleteMonitor = async (
+      monitorId?: string | string[],
+      statusCode = 200,
+      spaceId?: string
+    ) => {
+      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId);
+    };
+
+    before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(() => {
@@ -49,51 +95,33 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns the newly added monitor', async () => {
       const newMonitor = httpMonitorJson;
 
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
-      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            created_at: createdAt,
-            updated_at: updatedAt,
-          },
-          secretKeys
-        )
-      );
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
       // Delete a required property to make payload invalid
       const newMonitor = { ...httpMonitorJson, 'check.request.headers': null };
-
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
-
-      expect(apiResponse.status).eql(400);
+      await addMonitorAPI(newMonitor, 400);
     });
 
     it('returns bad request if monitor type is invalid', async () => {
       const newMonitor = { ...httpMonitorJson, type: 'invalid-data-steam' };
 
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
+      const apiResponse = await addMonitorAPI(newMonitor, 400);
 
-      expect(apiResponse.status).eql(400);
-      expect(apiResponse.body.message).eql('Monitor type is invalid');
+      expect(apiResponse.message).eql('Invalid value "invalid-data-steam" supplied to "type"');
     });
+    const localLoc = {
+      id: 'dev',
+      label: 'Dev Service',
+      geo: {
+        lat: 0,
+        lon: 0,
+      },
+      isServiceManaged: true,
+    };
 
     it('can create valid monitors without all defaults', async () => {
       // Delete a required property to make payload invalid
@@ -101,44 +129,47 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'Sample name',
         type: 'http',
         urls: 'https://elastic.co',
-        locations: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        locations: [localLoc],
       };
 
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      expect(apiResponse.status).eql(200);
-
-      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
-      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            created_at: createdAt,
-            updated_at: updatedAt,
-            revision: 1,
-          },
-          secretKeys
-        )
+      expect(apiResponse).eql(
+        omitMonitorKeys({
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+          ...newMonitor,
+        })
       );
+    });
+
+    it('can disable retries', async () => {
+      const maxAttempts = 1;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
+    });
+
+    it('can enable retries', async () => {
+      const maxAttempts = 2;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {
@@ -146,26 +177,9 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = {
         name: 'Sample name',
         url: 'https://elastic.co',
-        locations: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        locations: [localLoc],
       };
-
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
-
-      expect(apiResponse.status).eql(400);
+      await addMonitorAPI(newMonitor, 400);
     });
 
     it('omits unknown keys', async () => {
@@ -175,37 +189,12 @@ export default function ({ getService }: FtrProviderContext) {
         url: 'https://elastic.co',
         unknownKey: 'unknownValue',
         type: 'http',
-        locations: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        locations: [localLoc],
       };
-
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor)
-        .expect(200);
-
-      const response = await supertestAPI
-        .get(
-          SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace(
-            '{monitorId}',
-            apiResponse.body.config_id
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      expect(response.body).not.to.have.keys('unknownkey', 'url');
+      const apiResponse = await addMonitorAPI(newMonitor, 400);
+      expect(apiResponse.message).not.to.have.keys(
+        'Invalid monitor key(s) for http type:  unknownKey","attributes":{"details":"Invalid monitor key(s) for http type:  unknownKey'
+      );
     });
 
     it('can create monitor with API key with proper permissions', async () => {
@@ -217,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],
@@ -246,9 +235,9 @@ export default function ({ getService }: FtrProviderContext) {
         .auth(name, apiKey)
         .set('kbn-xsrf', 'true')
         .set('Authorization', `ApiKey ${apiKey}`)
-        .send(httpMonitorJson);
+        .send({ ...httpMonitorJson, name: 'monitor with api key' });
 
-      expect(apiResponse.status).eql(200);
+      expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
     });
 
     it('can not create monitor with API key without proper permissions', async () => {
@@ -260,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],
@@ -336,12 +325,16 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        await supertestWithoutAuth
+        const res = await supertestWithoutAuth
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send(newMonitor)
-          .expect(500);
+          .send(newMonitor);
+        expect(res.status).to.eql(400);
+
+        expect(res.body.message).to.eql(
+          "Invalid locations specified. Private Location(s) 'policy-id' not found. No private location available to use."
+        );
 
         const response = await supertestAPI
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
@@ -360,9 +353,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('sets namespace to Kibana space when not set to a custom namespace', async () => {
-      const username = 'admin';
-      const password = `${username}-password`;
-      const roleName = 'uptime-role';
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
@@ -374,43 +364,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const apiResponse = await supertestWithoutAuth
+
+        const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
       } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
 
     it('preserves the passed namespace when preserve_namespace is passed', async () => {
-      const username = 'admin';
-      const password = `${username}-password`;
-      const roleName = 'uptime-role';
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const monitor = {
@@ -421,24 +388,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const apiResponse = await supertestWithoutAuth
+        const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
           .query({ preserve_namespace: true })
           .set('kbn-xsrf', 'true')
           .send(monitor)
@@ -446,19 +397,11 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql('default');
       } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
 
     it('sets namespace to custom namespace when set', async () => {
-      const username = 'admin';
-      const password = `${username}-password`;
-      const roleName = 'uptime-role';
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const monitor = httpMonitorJson;
@@ -466,36 +409,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const apiResponse = await supertestWithoutAuth
+
+        const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
       } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
   });

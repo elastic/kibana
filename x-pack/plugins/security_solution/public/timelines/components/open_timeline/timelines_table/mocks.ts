@@ -9,7 +9,7 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 export const getMockTimelinesTableProps = (
   mockOpenTimelineResults: OpenTimelineResult[]
@@ -31,6 +31,7 @@ export const getMockTimelinesTableProps = (
   showExtendedColumns: true,
   sortDirection: DEFAULT_SORT_DIRECTION,
   sortField: DEFAULT_SORT_FIELD,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   totalSearchResultsCount: mockOpenTimelineResults.length,
+  tableRef: { current: null },
 });

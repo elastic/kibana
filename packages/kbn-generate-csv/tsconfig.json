@@ -28,5 +28,7 @@
     "@kbn/reporting-export-types-csv-common",
     "@kbn/es-query",
     "@kbn/es-types",
+    "@kbn/data-views-plugin",
+    "@kbn/search-types",
   ]
 }

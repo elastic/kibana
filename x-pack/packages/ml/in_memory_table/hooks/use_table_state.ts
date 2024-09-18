@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction, useState } from 'react';
-import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
+import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
+import type { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 
 /**
  * Returned type for useTableState hook

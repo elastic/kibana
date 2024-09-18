@@ -41,7 +41,6 @@ import {
   updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
-  toggleDetailPanel,
   setEventsLoading,
   removeColumn,
   upsertColumn,
@@ -60,9 +59,13 @@ import {
   updateSavedSearchId,
   updateSavedSearch,
   initializeSavedSearch,
-  setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
+  updateRowHeight,
+  updateSampleSize,
+  updateColumnWidth,
+  setConfirmingNoteId,
+  deleteNoteFromEvent,
 } from './actions';
 
 import {
@@ -90,7 +93,6 @@ import {
   updateTimelineGraphEventId,
   updateFilters,
   updateTimelineSessionViewConfig,
-  updateTimelineDetailsPanel,
   setLoadingTableEvents,
   removeTableColumn,
   upsertTableColumn,
@@ -102,11 +104,12 @@ import {
   applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
+  updateTimelineColumnWidth,
 } from './helpers';
 
 import type { TimelineState } from './types';
 import { EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -125,17 +128,20 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(createTimeline, (state, { id, timelineType = TimelineType.default, ...timelineProps }) => {
-    return {
-      ...state,
-      timelineById: addNewTimeline({
-        id,
-        timelineById: state.timelineById,
-        timelineType,
-        ...timelineProps,
-      }),
-    };
-  })
+  .case(
+    createTimeline,
+    (state, { id, timelineType = TimelineTypeEnum.default, ...timelineProps }) => {
+      return {
+        ...state,
+        timelineById: addNewTimeline({
+          id,
+          timelineById: state.timelineById,
+          timelineType,
+          ...timelineProps,
+        }),
+      };
+    }
+  )
   .case(addNote, (state, { id, noteId }) => ({
     ...state,
     timelineById: addTimelineNote({ id, noteId, timelineById: state.timelineById }),
@@ -374,19 +380,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(toggleDetailPanel, (state, action) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [action.id]: {
-        ...state.timelineById[action.id],
-        expandedDetail: {
-          ...state.timelineById[action.id].expandedDetail,
-          ...updateTimelineDetailsPanel(action),
-        },
-      },
-    },
-  }))
   .case(setEventsLoading, (state, { id, eventIds, isLoading }) => ({
     ...state,
     timelineById: setLoadingTableEvents({
@@ -543,16 +536,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setIsDiscoverSavedSearchLoaded, (state, { id, isDiscoverSavedSearchLoaded }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isDiscoverSavedSearchLoaded,
-      },
-    },
-  }))
   .case(setDataProviderVisibility, (state, { id, isDataProviderVisible }) => {
     return {
       ...state,
@@ -572,6 +555,62 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+      },
+    },
+  }))
+  .case(updateColumnWidth, (state, { id, columnId, width }) => ({
+    ...state,
+    timelineById: updateTimelineColumnWidth({
+      columnId,
+      id,
+      timelineById: state.timelineById,
+      width,
+    }),
+  }))
+
+  .case(updateSampleSize, (state, { id, sampleSize }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        sampleSize,
+      },
+    },
+  }))
+
+  .case(updateRowHeight, (state, { id, rowHeight }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        rowHeight,
+      },
+    },
+  }))
+  .case(setConfirmingNoteId, (state, { id, confirmingNoteId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        confirmingNoteId,
+      },
+    },
+  }))
+  .case(deleteNoteFromEvent, (state, { id, noteId, eventId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        eventIdToNoteIds: {
+          ...state.timelineById[id].eventIdToNoteIds,
+          [eventId]: state.timelineById[id].eventIdToNoteIds[eventId].filter(
+            (note) => note !== noteId
+          ),
+        },
       },
     },
   }))

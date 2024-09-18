@@ -12,7 +12,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -33,6 +32,7 @@ import {
   getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
+  packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
@@ -71,6 +71,7 @@ import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
+  BackLink,
   IntegrationAgentPolicyCount,
   UpdateIcon,
   IconPanel,
@@ -82,7 +83,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
-import { DocumentationPage } from './documentation';
+import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
 import './index.scss';
@@ -135,9 +136,11 @@ export function Detail() {
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
-  const canInstallPackages = useAuthz().integrations.installPackages;
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const authz = useAuthz();
+  const canAddAgent = authz.fleet.addAgents;
+  const canInstallPackages = authz.integrations.installPackages;
+  const canReadPackageSettings = authz.integrations.readPackageSettings;
+  const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
 
   const {
     data: permissionCheck,
@@ -185,7 +188,9 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery();
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
+    enabled: authz.fleet.readSettings,
+  });
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
@@ -205,9 +210,10 @@ export function Detail() {
     pkgVersion,
     {
       prerelease: prereleaseIntegrationsEnabled,
+      withMetadata: true,
     },
     {
-      enabled: !isSettingsInitialLoading, // Load only after settings are loaded
+      enabled: !authz.fleet.readSettings || !isSettingsInitialLoading, // Load only after settings are loaded
       refetchOnMount: 'always',
     }
   );
@@ -263,6 +269,16 @@ export function Detail() {
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
+  // Only show config tab if package has `inputs`
+  const showConfigTab =
+    canAddAgent && (packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false);
+
+  // Only show API references tab if it is allowed & has documentation to show
+  const showDocumentationTab =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
+    packageInfo &&
+    hasDocumentation({ packageInfo, integration });
+
   // Track install status state
   useEffect(() => {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
@@ -311,12 +327,7 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseAllButtonText"
-                defaultMessage="Back to integrations"
-              />
-            </EuiButtonEmpty>
+            <BackLink queryParams={queryParams} href={href} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -363,7 +374,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, href]
+    [integrationInfo, isLoading, packageInfo, href, queryParams]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
@@ -639,7 +650,7 @@ export function Detail() {
       });
     }
 
-    if (canReadPackageSettings) {
+    if (canReadPackageSettings && showConfigTab) {
       tabs.push({
         id: 'configs',
         name: (
@@ -675,7 +686,7 @@ export function Detail() {
       });
     }
 
-    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+    if (showDocumentationTab) {
       tabs.push({
         id: 'api-reference',
         name: (
@@ -700,11 +711,13 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
-    numOfDeferredInstallations,
     isInstalled,
     CustomAssets,
     canReadPackageSettings,
+    showConfigTab,
     showCustomTab,
+    showDocumentationTab,
+    numOfDeferredInstallations,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (
@@ -773,10 +786,14 @@ export function Detail() {
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
+            <SettingsPage
+              packageInfo={packageInfo}
+              packageMetadata={packageInfoData?.metadata}
+              startServices={services}
+            />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
-            <AssetsPage packageInfo={packageInfo} />
+            <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />

@@ -21,6 +21,7 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -136,8 +137,11 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
+  }
+
   public processAlerts({
-    notifyOnActionGroupChange,
     flappingSettings,
     maintenanceWindowIds,
     alertDelay,
@@ -168,7 +172,6 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
-      notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
       alertDelay,
       processedAlertsNew,
@@ -206,12 +209,10 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore,
     shouldLogAlerts,
     flappingSettings,
-    notifyOnActionGroupChange,
     maintenanceWindowIds,
     alertDelay,
   }: ProcessAndLogAlertsOpts) {
     this.processAlerts({
-      notifyOnActionGroupChange,
       flappingSettings,
       maintenanceWindowIds,
       alertDelay,
@@ -228,15 +229,15 @@ export class LegacyAlertsClient<
   public getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ) {
-    if (this.processedAlerts.hasOwnProperty(type)) {
+    if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
     }
 
     return {};
   }
 
-  public getAlertsToSerialize(shouldSetFlapping: boolean = true) {
-    if (shouldSetFlapping) {
+  public getAlertsToSerialize(shouldSetFlappingAndOptimize: boolean = true) {
+    if (shouldSetFlappingAndOptimize) {
       setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
         this.flappingSettings,
         this.processedAlerts.active,
@@ -245,7 +246,8 @@ export class LegacyAlertsClient<
     }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
-      this.processedAlerts.recovered
+      this.processedAlerts.recovered,
+      shouldSetFlappingAndOptimize
     );
   }
 
@@ -265,7 +267,9 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts() {}
+  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]) {
+    return null;
+  }
 
   public async setAlertStatusToUntracked() {
     return;

@@ -1,0 +1,11 @@
+title: Connector request properties for a SentinelOne connector
+required:
+  - url
+description: Defines properties for connectors when type is `.sentinelone`.
+type: object
+properties:
+  url:
+    description: >
+      The SentinelOne tenant URL.
+      If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+    type: string    

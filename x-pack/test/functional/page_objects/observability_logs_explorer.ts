@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
-  logsExplorerUrlSchemaV1,
+  logsExplorerUrlSchemaV2,
 } from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
@@ -105,8 +105,8 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-const defaultPageState: logsExplorerUrlSchemaV1.UrlSchema = {
-  v: 1,
+const defaultPageState: logsExplorerUrlSchemaV2.UrlSchema = {
+  v: 2,
   time: {
     from: '2023-08-03T10:24:14.035Z',
     to: '2023-08-03T10:24:14.091Z',
@@ -119,7 +119,6 @@ export function ObservabilityLogsExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
-  const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -212,11 +211,11 @@ export function ObservabilityLogsExplorerPageObject({
     async navigateTo({
       pageState,
     }: {
-      pageState?: logsExplorerUrlSchemaV1.UrlSchema;
+      pageState?: logsExplorerUrlSchemaV2.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
         [OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY]: rison.encode(
-          logsExplorerUrlSchemaV1.urlSchemaRT.encode({
+          logsExplorerUrlSchemaV2.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
           })
@@ -260,20 +259,20 @@ export function ObservabilityLogsExplorerPageObject({
       );
     },
 
-    getDatasetSelector() {
-      return testSubjects.find('datasetSelectorPopover');
+    getDataSourceSelector() {
+      return testSubjects.find('dataSourceSelectorPopover');
     },
 
-    getDatasetSelectorButton() {
-      return testSubjects.find('datasetSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
+    getDataSourceSelectorButton() {
+      return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
-    getDatasetSelectorContent() {
-      return testSubjects.find('datasetSelectorContent');
+    getDataSourceSelectorContent() {
+      return testSubjects.find('dataSourceSelectorContent');
     },
 
-    getDatasetSelectorSearchControls() {
-      return testSubjects.find('datasetSelectorSearchControls');
+    getDataSourceSelectorSearchControls() {
+      return testSubjects.find('dataSourceSelectorSearchControls');
     },
 
     getIntegrationsContextMenu() {
@@ -281,7 +280,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getIntegrationsTab() {
-      return testSubjects.find('datasetSelectorIntegrationsTab');
+      return testSubjects.find('dataSourceSelectorIntegrationsTab');
     },
 
     getUncategorizedContextMenu() {
@@ -289,27 +288,34 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getUncategorizedTab() {
-      return testSubjects.find('datasetSelectorUncategorizedTab');
+      return testSubjects.find('dataSourceSelectorUncategorizedTab');
     },
 
     getDataViewsContextMenu() {
       return testSubjects.find('dataViewsContextMenu');
     },
 
-    getDataViewsContextMenuTitle(panelTitleNode: WebElementWrapper) {
-      return panelTitleNode.getVisibleText().then((title) => title.split('\n')[0]);
+    getDataViewsTab() {
+      return testSubjects.find('dataSourceSelectorDataViewsTab');
     },
 
-    getDataViewsTab() {
-      return testSubjects.find('datasetSelectorDataViewsTab');
+    async changeDataViewTypeFilter(type: 'All' | 'Logs') {
+      const menuButton = await testSubjects.find(
+        'logsExplorerDataSourceSelectorDataViewTypeButton'
+      );
+      await menuButton.click();
+      const targetOption = await testSubjects.find(
+        `logsExplorerDataSourceSelectorDataViewType${type}`
+      );
+      await targetOption.click();
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {
       return contextMenu.findByClassName('euiContextMenuPanel__title');
     },
 
-    async getDatasetSelectorButtonText() {
-      const button = await this.getDatasetSelectorButton();
+    async getDataSourceSelectorButtonText() {
+      const button = await this.getDataSourceSelectorButton();
       return button.getVisibleText();
     },
 
@@ -320,17 +326,12 @@ export function ObservabilityLogsExplorerPageObject({
       );
     },
 
-    getAllLogDatasetsButton() {
-      return testSubjects.find('datasetSelectorshowAllLogs');
+    getAllLogsButton() {
+      return testSubjects.find('dataSourceSelectorShowAllLogs');
     },
 
     getUnmanagedDatasetsButton() {
       return testSubjects.find('unmanagedDatasets');
-    },
-
-    async getFlyoutDetail(rowIndex: number = 0) {
-      await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logsExplorerFlyoutDetail');
     },
 
     async getIntegrations() {
@@ -345,14 +346,14 @@ export function ObservabilityLogsExplorerPageObject({
       };
     },
 
-    async openDatasetSelector() {
-      const button = await this.getDatasetSelectorButton();
+    async openDataSourceSelector() {
+      const button = await this.getDataSourceSelectorButton();
       return button.click();
     },
 
-    async closeDatasetSelector() {
-      const button = await this.getDatasetSelectorButton();
-      const isOpen = await testSubjects.exists('datasetSelectorContent');
+    async closeDataSourceSelector() {
+      const button = await this.getDataSourceSelectorButton();
+      const isOpen = await testSubjects.exists('dataSourceSelectorContent');
 
       if (isOpen) return button.click();
     },
@@ -362,7 +363,7 @@ export function ObservabilityLogsExplorerPageObject({
         asc: 'Ascending',
         desc: 'Descending',
       };
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const sortingButton = await searchControlsContainer.findByCssSelector(
         `[title=${titleMap[direction]}]`
       );
@@ -371,14 +372,14 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async getSearchFieldValue() {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       return searchField.getAttribute('value');
     },
 
     async typeSearchFieldWith(name: string) {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       await searchField.clearValueWithKeyboard();
@@ -386,7 +387,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async clearSearchField() {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       return searchField.clearValueWithKeyboard();
@@ -398,18 +399,18 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     assertLoadingSkeletonExists() {
-      return testSubjects.existOrFail('datasetSelectorSkeleton');
+      return testSubjects.existOrFail('dataSourceSelectorSkeleton');
     },
 
     async assertListStatusEmptyPromptExistsWithTitle(title: string) {
-      const [listStatus] = await testSubjects.findAll('datasetSelectorListStatusEmptyPrompt');
+      const [listStatus] = await testSubjects.findAll('dataSourceSelectorListStatusEmptyPrompt');
       const promptTitle = await listStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be(title);
     },
 
     async assertListStatusErrorPromptExistsWithTitle(title: string) {
-      const listStatus = await testSubjects.find('datasetSelectorListStatusErrorPrompt');
+      const listStatus = await testSubjects.find('dataSourceSelectorListStatusErrorPrompt');
       const promptTitle = await listStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be(title);

@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiButtonEmpty,
@@ -16,11 +15,13 @@ import {
   EuiCodeBlockProps,
   EuiCopy,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -32,49 +33,42 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
   children,
   ...props
 }) => {
-  const {
-    application,
-    share: { url },
-  } = useValues(KibanaLogic);
+  const { application, consolePlugin, share } = useValues(KibanaLogic);
 
-  const consolePreviewLink =
-    !!application?.capabilities?.dev_tools?.show &&
-    url.locators
-      .get('CONSOLE_APP_LOCATOR')
-      ?.useUrl(
-        { loadFrom: `data:text/plain,${compressToEncodedURIComponent(children)}` },
-        undefined,
-        []
-      );
+  const showConsoleLink = !!application?.capabilities?.dev_tools?.show;
 
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel hasShadow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup direction="rowReverse" gutterSize="s">
-            {consolePreviewLink && (
-              <EuiButtonEmpty
-                iconType="popout"
-                color="success"
-                href={consolePreviewLink}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.tryInConsole"
-                  defaultMessage="Try in Console"
+          <EuiFlexGroup
+            direction="rowReverse"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+          >
+            {showConsoleLink && (
+              <EuiFlexItem grow={false}>
+                <TryInConsoleButton
+                  request={children}
+                  application={application}
+                  consolePlugin={consolePlugin ?? undefined}
+                  sharePlugin={share ?? undefined}
                 />
-              </EuiButtonEmpty>
+              </EuiFlexItem>
             )}
-            <EuiCopy textToCopy={children}>
-              {(copy) => (
-                <EuiButtonEmpty iconType="copyClipboard" onClick={copy} color="text">
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy"
-                    defaultMessage="Copy"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiCopy>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={children}>
+                {(copy) => (
+                  <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy"
+                      defaultMessage="Copy"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
           <EuiCodeBlock

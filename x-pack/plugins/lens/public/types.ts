@@ -17,7 +17,11 @@ import type {
   Datatable,
   ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
-import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import type {
+  Configuration,
+  NavigateToLensContext,
+  SeriesType,
+} from '@kbn/visualizations-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -35,7 +39,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -61,6 +64,16 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+
+export type StartServices = Pick<
+  CoreStart,
+  // used extensively in lens
+  | 'overlays'
+  // used for react rendering utilities
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export interface IndexPatternRef {
   id: string;
@@ -285,15 +298,14 @@ type UserMessageDisplayLocation =
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
-  uniqueId?: string;
+  uniqueId: string;
   severity: 'error' | 'warning' | 'info';
+  hidePopoverIcon?: boolean;
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }
-
-export type RemovableUserMessage = UserMessage & { uniqueId: string };
 
 export interface UserMessageFilters {
   severity?: UserMessage['severity'];
@@ -305,11 +317,7 @@ export type UserMessagesGetter = (
   filters?: UserMessageFilters
 ) => UserMessage[];
 
-export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
-
-export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
-  return Boolean(message.uniqueId);
-}
+export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry
@@ -442,7 +450,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
-    indexPatterns: IndexPatternMap,
+    indexPatterns?: IndexPatternMap,
     filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
@@ -475,7 +483,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getSearchWarningMessages?: (
     state: P,
     warning: SearchResponseWarning,
-    request: SearchRequest,
+    request: estypes.SearchRequest,
     response: estypes.SearchResponse
   ) => UserMessage[];
 
@@ -644,7 +652,14 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+    | 'http'
+    | 'notifications'
+    | 'uiSettings'
+    | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    | 'docLinks'
   >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -934,6 +949,7 @@ export interface FramePublicAPI {
   filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
+  absDateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -959,23 +975,27 @@ export interface VisualizationType {
    * Visible label used in the chart switcher and above the workspace panel in collapsed state
    */
   label: string;
+  description: string;
   /**
    * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**
-   * The group the visualization belongs to
+   * Priority of the visualization for sorting in chart switch
+   * Lower number means higher priority (aka top of list).
+   *
    */
-  groupLabel: string;
-  /**
-   * The priority of the visualization in the list (global priority)
-   * Higher number means higher priority. When omitted defaults to 0
-   */
-  sortPriority?: number;
+  sortPriority: number;
   /**
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+  /**
+   * Indicates if visualization is deprecated.
+   */
+  isDeprecated?: boolean;
+  subtypes?: string[];
+  getCompatibleSubtype?: (seriesType?: string) => string | undefined;
 }
 
 export interface VisualizationDisplayOptions {
@@ -991,7 +1011,8 @@ interface VisualizationStateFromContextChangeProps {
 export type AddLayerFunction<T = unknown> = (
   layerType: LayerType,
   extraArg?: T,
-  ignoreInitialValues?: boolean
+  ignoreInitialValues?: boolean,
+  seriesType?: SeriesType
 ) => void;
 
 export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
@@ -1015,7 +1036,8 @@ export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
   id: string;
   group: EventAnnotationGroupConfig;
 }) => void;
-interface AddLayerButtonProps {
+interface AddLayerButtonProps<T> {
+  state: T;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
@@ -1070,13 +1092,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Return the ID of the current visualization. Used to highlight
    * the active subtype of the visualization.
    */
-  getVisualizationTypeId: (state: T) => string;
+  getVisualizationTypeId: (state: T, layerId?: string) => string;
+
+  hideFromChartSwitch?: (frame: FramePublicAPI) => boolean;
   /**
    * If the visualization has subtypes, update the subtype in state.
    */
-  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
+  switchVisualizationType?: (visualizationTypeId: string, state: T, layerId?: string) => T;
   /** Description is displayed as the clickable text in the chart switcher */
-  getDescription: (state: T) => { icon?: IconType; label: string };
+  getDescription: (state: T, layerId?: string) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Frame needs to know which layers the visualization is currently using */
@@ -1099,7 +1123,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     type: LayerType,
     indexPatternId: string,
-    extraArg?: ExtraAppendLayerArg
+    extraArg?: ExtraAppendLayerArg,
+    seriesType?: SeriesType
   ) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
@@ -1152,13 +1177,17 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     groups: VisualizationDimensionGroupConfig[];
   };
 
+  isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
    */
-  LayerHeaderComponent?: (
+  getCustomLayerHeader?: (
     props: VisualizationLayerWidgetProps<T>
-  ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
+  ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
+
+  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => (() => JSX.Element) | null;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,
@@ -1239,11 +1268,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   DimensionTriggerComponent?: (props: {
     columnId: string;
     label: string;
-    hideTooltip?: boolean;
-  }) => null | ReactElement<{ columnId: string; label: string; hideTooltip?: boolean }>;
+  }) => null | ReactElement<{ columnId: string; label: string }>;
   getAddLayerButtonComponent?: (
-    props: AddLayerButtonProps
-  ) => null | ReactElement<AddLayerButtonProps>;
+    props: AddLayerButtonProps<T>
+  ) => null | ReactElement<AddLayerButtonProps<T>>;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
    */
@@ -1285,6 +1313,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  onDatasourceUpdate?: (state: T, frame?: FramePublicAPI) => T;
 
   /**
    * Some visualization track indexPattern changes (i.e. annotations)

@@ -7,25 +7,26 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-  ISearchStart,
-} from '@kbn/data-plugin/public';
+} from '@kbn/search-types';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import type {
   Field,
   FieldExamples,
   FieldStatsCommonRequestParams,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
+import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
   const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, maxExamples } =
@@ -34,7 +35,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
   // Request at least 100 docs so that we have a chance of obtaining
   // 'maxExamples' of the field.
   const size = Math.max(100, maxExamples ?? MAX_EXAMPLES_DEFAULT);
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   // Use an exists filter to return examples of the field.
   if (Array.isArray(filterCriteria)) {

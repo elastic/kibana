@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
 import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
+import { formatRiskScore } from '../../common';
 
 interface TableItem {
   category: string;
@@ -57,11 +58,11 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: (score: number) => displayNumber(score),
+    render: formatRiskScore,
     footer: (props) =>
       showFooter ? (
         <span data-test-subj="risk-summary-result-score">
-          {displayNumber(sumBy((i) => i.score, props.items))}
+          {formatRiskScore(sumBy((i) => i.score, props.items))}
         </span>
       ) : undefined,
   },
@@ -135,8 +136,6 @@ export const getEntityData = (
 
   return riskData.host;
 };
-
-const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 export const LENS_VISUALIZATION_MIN_WIDTH = 160; // Lens visualization min-width in pixels

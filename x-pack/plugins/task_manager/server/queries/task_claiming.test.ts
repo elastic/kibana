@@ -10,6 +10,9 @@ import { mockLogger } from '../test_utils';
 import { TaskClaiming } from './task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { TaskPartitioner } from '../lib/task_partitioner';
+import { KibanaDiscoveryService } from '../kibana_discovery_service';
+import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -23,6 +26,12 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
+const taskPartitioner = new TaskPartitioner({
+  logger: taskManagerLogger,
+  podName: 'test',
+  kibanaDiscoveryService: {} as KibanaDiscoveryService,
+  kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+});
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -66,21 +75,25 @@ describe('TaskClaiming', () => {
       .mockImplementation(() => mockApmTrans as any);
   });
 
-  test(`should throw an error when invalid strategy specified`, () => {
+  test(`should log a warning when invalid strategy specified`, () => {
     const definitions = new TaskTypeDictionary(mockLogger());
 
-    expect(() => {
-      new TaskClaiming({
-        logger: taskManagerLogger,
-        strategy: 'non-default',
-        definitions,
-        excludedTaskTypes: [],
-        unusedTypes: [],
-        taskStore: taskStoreMock.create({ taskManagerId: '' }),
-        maxAttempts: 2,
-        getCapacity: () => 10,
-      });
-    }).toThrowErrorMatchingInlineSnapshot(`"Unknown task claiming strategy (non-default)"`);
+    new TaskClaiming({
+      logger: taskManagerLogger,
+      strategy: 'non-default',
+      definitions,
+      excludedTaskTypes: [],
+      unusedTypes: [],
+      taskStore: taskStoreMock.create({ taskManagerId: '' }),
+      maxAttempts: 2,
+      getAvailableCapacity: () => 10,
+      taskPartitioner,
+    });
+
+    expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+      'Unknown task claiming strategy "non-default", falling back to update_by_query',
+      { tags: ['taskClaiming'] }
+    );
   });
 
   test(`should log when a certain task type is skipped due to having a zero concurency configuration`, () => {
@@ -124,10 +137,11 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
+      taskPartitioner,
     });
 
-    expect(taskManagerLogger.info).toHaveBeenCalledTimes(1);
+    expect(taskManagerLogger.info).toHaveBeenCalledTimes(2);
     expect(taskManagerLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
       `"Task Manager will never claim tasks of the following types as their \\"maxConcurrency\\" is set to 0: limitedToZero, anotherLimitedToZero"`
     );

@@ -10,6 +10,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/security-plugin-types-common"
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-common",
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-common",
+    "@kbn/security-authorization-core"
   ]
 }

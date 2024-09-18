@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -128,7 +129,7 @@ test('getPlugins returns the list of plugins', () => {
   expect(pluginsSystem.getPlugins()).toEqual([pluginA, pluginB]);
 });
 
-test('getPluginDependencies returns dependency tree of symbols', () => {
+test('getPluginDependencies returns dependency tree with keys topologically sorted', () => {
   pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
   pluginsSystem.addPlugin(
     createPlugin('plugin-b', { required: ['plugin-a'], optional: ['no-dep', 'other'] })
@@ -138,6 +139,7 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
   expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
     Object {
       "asNames": Map {
+        "no-dep" => Array [],
         "plugin-a" => Array [
           "no-dep",
         ],
@@ -145,9 +147,9 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
           "plugin-a",
           "no-dep",
         ],
-        "no-dep" => Array [],
       },
       "asOpaqueIds": Map {
+        Symbol(no-dep) => Array [],
         Symbol(plugin-a) => Array [
           Symbol(no-dep),
         ],
@@ -155,7 +157,6 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
           Symbol(plugin-a),
           Symbol(no-dep),
         ],
-        Symbol(no-dep) => Array [],
       },
     }
   `);
@@ -888,7 +889,7 @@ describe('stop', () => {
     expect(stopSpy1.mock.invocationCallOrder[0]).toBeLessThan(stopSpy2.mock.invocationCallOrder[0]);
   });
 
-  it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
+  it('waits for 15 sec to finish "stop" and move on to the next plugin.', async () => {
     const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
       (plugin, index) => {
         jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
@@ -918,7 +919,7 @@ describe('stop', () => {
 
     expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
       expect.arrayContaining([
-        `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
+        `"timeout-stop-1" plugin didn't stop in 15sec., move on to the next.`,
       ])
     );
   });

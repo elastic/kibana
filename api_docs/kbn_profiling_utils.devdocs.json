@@ -1536,7 +1536,7 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\">"
+          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\">"
         ],
         "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
@@ -1627,6 +1627,78 @@
               "number[]"
             ],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.ESTopNFunctions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESTopNFunctions",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_count",
+            "type": "number",
+            "tags": [],
+            "label": "self_count",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.total_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_count",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_annual_co2_tons",
+            "type": "number",
+            "tags": [],
+            "label": "self_annual_co2_tons",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_annual_cost_usd",
+            "type": "number",
+            "tags": [],
+            "label": "self_annual_cost_usd",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.topn",
+            "type": "Array",
+            "tags": [],
+            "label": "topn",
+            "description": [],
+            "signature": [
+              "TopNFunction[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/es_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2425,6 +2497,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.AggregationField",
+        "type": "Type",
+        "tags": [],
+        "label": "AggregationField",
+        "description": [],
+        "signature": [
+          "\"service.name\" | \"transaction.name\""
+        ],
+        "path": "packages/kbn-profiling-utils/common/es_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/profiling-utils",
         "id": "def-common.FileID",

@@ -6,9 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs';
 
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
   IBasePath,
@@ -18,12 +19,13 @@ import type {
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
@@ -37,7 +39,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -46,13 +48,15 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { checkLicense } from '@kbn/reporting-server/check_license';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
-import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
+import { EventTracker } from './usage';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -69,6 +73,7 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   store: ReportingStore;
+  analytics: AnalyticsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -78,7 +83,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
+  securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -210,7 +215,7 @@ export class ReportingCore {
    */
   private getExportTypes(): ExportType[] {
     const { csv, pdf, png } = this.config.export_types;
-    const exportTypes = [];
+    const exportTypes: ExportType[] = [];
 
     if (csv.enabled) {
       // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
@@ -231,41 +236,6 @@ export class ReportingCore {
     }
 
     return exportTypes;
-  }
-
-  /**
-   * If xpack.reporting.roles.enabled === true, register Reporting as a feature
-   * that is controlled by user role names
-   */
-  public registerFeature() {
-    const { features } = this.getPluginSetupDeps();
-    const deprecatedRoles = this.getDeprecatedAllowedRoles();
-
-    if (deprecatedRoles !== false) {
-      // refer to roles.allow configuration (deprecated path)
-      const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map((role) => ({
-        requiredClusterPrivileges: [],
-        requiredRoles: [role],
-        ui: [],
-      }));
-
-      // self-register as an elasticsearch feature (deprecated)
-      features.registerElasticsearchFeature({
-        id: 'reporting',
-        catalogue: ['reporting'],
-        management: {
-          insightsAndAlerting: ['reporting'],
-        },
-        privileges,
-      });
-    } else {
-      this.logger.debug(
-        `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
-      );
-      // trigger application to register Reporting as a subfeature
-      features.enableReportingUiCapabilities();
-    }
   }
 
   /*
@@ -301,11 +271,24 @@ export class ReportingCore {
   }
 
   /*
-   *
-   * Track usage of code paths for telemetry
+   * Track usage of API endpoints
    */
   public getUsageCounter(): UsageCounter | undefined {
     return this.pluginSetupDeps?.usageCounter;
+  }
+
+  /*
+   * Track metrics of internal events
+   */
+  public getEventTracker(
+    reportId: string,
+    exportType: string,
+    objectType: string
+  ): EventTracker | undefined {
+    const { analytics } = this.pluginStartDeps ?? {};
+    if (analytics) {
+      return new EventTracker(analytics, reportId, exportType, objectType);
+    }
   }
 
   /*
@@ -401,6 +384,10 @@ export class ReportingCore {
     return new ReportingEventLogger(report, task);
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async getCsvSearchSourceImmediate() {
     const startDeps = await this.getPluginStartDeps();
 

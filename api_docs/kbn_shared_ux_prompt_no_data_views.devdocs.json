@@ -104,9 +104,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataViewsPromptKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -117,12 +117,12 @@
             "id": "def-public.NoDataViewsPromptKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "NoDataViewsPromptKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
             "deprecated": false,
@@ -143,9 +143,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataViewsPromptServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -159,9 +159,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "NoDataViewsPromptServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
             "deprecated": false,
@@ -259,7 +259,7 @@
               "The background color of the prompt; defaults to `plain`."
             ],
             "signature": [
-              "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+              "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,

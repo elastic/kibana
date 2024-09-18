@@ -4,38 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
-  ASSET_CRITICALITY_URL,
+  GetAssetCriticalityRecordRequestQuery,
+  type GetAssetCriticalityRecordResponse,
+} from '../../../../../common/api/entity_analytics';
+import {
+  ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
+  API_VERSIONS,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+
+export const assetCriticalityPublicGetRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .get({
-      access: 'internal',
-      path: ASSET_CRITICALITY_URL,
+      access: 'public',
+      path: ASSET_CRITICALITY_PUBLIC_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
+            query: buildRouteValidationWithZod(GetAssetCriticalityRecordRequestQuery),
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
@@ -51,6 +65,16 @@ export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, l
           if (!record) {
             return response.notFound();
           }
+
+          securitySolution.getAuditLogger()?.log({
+            message: 'User accessed the criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_GET,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.ACCESS,
+              outcome: AUDIT_OUTCOME.SUCCESS,
+            },
+          });
 
           return response.ok({ body: record });
         } catch (e) {

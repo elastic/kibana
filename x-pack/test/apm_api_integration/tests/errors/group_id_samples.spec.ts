@@ -22,7 +22,7 @@ type ErrorSampleDetails =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -75,14 +75,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when samples data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177397
+  registry.when.skip('when samples data is loaded', { config: 'basic', archives: [] }, () => {
     const { bananaTransaction } = config;
     describe('error group id', () => {
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('return correct data', () => {
         let errorsSamplesResponse: ErrorGroupSamples;
@@ -103,13 +104,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177383
+  registry.when.skip('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
     describe('error sample id', () => {
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('return correct data', () => {
         let errorSampleDetailsResponse: ErrorSampleDetails;
@@ -144,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const errorMessage = 'Error 1';
         const groupId = getErrorGroupingKey(errorMessage);
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('15m')
             .rate(1)
@@ -172,7 +174,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         errorGroupSamplesResponse = (await callErrorGroupSamplesApi({ groupId })).body;
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns the errors in the correct order (sampled first, then unsampled)', () => {
         const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) => parseInt(id, 10));

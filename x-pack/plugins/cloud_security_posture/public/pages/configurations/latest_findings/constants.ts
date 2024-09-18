@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GroupOption } from '@kbn/securitysolution-grouping';
+import { GroupOption } from '@kbn/grouping';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
@@ -16,6 +16,42 @@ export const FINDINGS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
   });
+
+export const MISCONFIGURATIONS_GROUPS_UNIT = (
+  totalCount: number,
+  selectedGroup: string,
+  hasNullGroup: boolean
+) => {
+  const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
+
+  switch (selectedGroup) {
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+      return i18n.translate('xpack.csp.findings.groupUnit.resource', {
+        values: { groupCount },
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {resource} other {resources}}`,
+      });
+    case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
+      return i18n.translate('xpack.csp.findings.groupUnit.rule', {
+        values: { groupCount },
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {rule} other {rules}}`,
+      });
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return i18n.translate('xpack.csp.findings.groupUnit.cloudAccount', {
+        values: { groupCount },
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
+      });
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+      return i18n.translate('xpack.csp.findings.groupUnit.kubernetes', {
+        values: { groupCount },
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {kubernetes cluster} other {kubernetes clusters}}`,
+      });
+    default:
+      return i18n.translate('xpack.csp.findings.groupUnit', {
+        values: { groupCount: totalCount },
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {group} other {groups}}`,
+      });
+  }
+};
 
 export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nullGroupUnit', {
   defaultMessage: 'findings',
@@ -90,5 +126,6 @@ export const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: 'rule.benchmark.rule_number' },
   { id: 'rule.name' },
   { id: 'rule.section' },
+  { id: 'data_stream.dataset' },
   { id: '@timestamp' },
 ];

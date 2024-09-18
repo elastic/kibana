@@ -8,29 +8,32 @@
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
 import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
-import { TabsContent } from './tabs_content';
+import { TabsContent } from './tabs';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { TimelineTour } from './tour';
+import { defaultUdtHeaders } from './unified_components/default_headers';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -50,6 +53,7 @@ export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
+  openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
@@ -67,15 +71,22 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   renderCellValue,
   rowRenderers,
   timelineId,
+  openToggleRef,
 }) => {
   const dispatch = useDispatch();
+
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
+  );
+
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const {
-    selectedPatterns: selectedPatternsSourcerer,
-    selectedDataViewId: selectedDataViewIdSourcerer,
-  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
+  const selectedPatternsSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+  });
+  const selectedDataViewIdSourcerer = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+  });
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
@@ -118,10 +129,13 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
+          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
+            ? timelineDefaults.excludedRowRendererIds
+            : [],
         })
       );
     }
@@ -223,7 +237,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       >
         <TimelineSavingProgress timelineId={timelineId} />
         <TimelineBody data-test-subj="timeline-body">
-          {timelineType === TimelineType.template && (
+          {timelineType === TimelineTypeEnum.template && (
             <TimelineTemplateBadge className="timeline-template-badge">
               {i18n.TIMELINE_TEMPLATE}
             </TimelineTemplateBadge>
@@ -233,7 +247,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             $isVisible={!timelineFullScreen}
             data-test-subj="timeline-hide-show-container"
           >
-            <TimelineModalHeader timelineId={timelineId} />
+            <TimelineModalHeader timelineId={timelineId} openToggleRef={openToggleRef} />
           </HideShowContainer>
 
           <TabsContent

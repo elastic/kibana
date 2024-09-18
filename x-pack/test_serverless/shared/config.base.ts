@@ -19,9 +19,23 @@ import {
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import path from 'path';
+import { defineDockerServersConfig } from '@kbn/test';
+import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
 import { services } from './services';
 
 export default async () => {
+  const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
+  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
+  /**
+   * This is used by CI to set the docker registry port
+   * you can also define this environment variable locally when running tests which
+   * will spin up a local docker package registry locally for you
+   * if this is defined it takes precedence over the `packageRegistryOverride` variable
+   */
+  const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
   const servers = {
     kibana: {
       ...kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless),
@@ -49,6 +63,17 @@ export default async () => {
 
   return {
     servers,
+    dockerServers: defineDockerServersConfig({
+      registry: {
+        enabled: !!dockerRegistryPort,
+        image: dockerImage,
+        portInContainer: 8080,
+        port: dockerRegistryPort,
+        args: dockerArgs,
+        waitForLogLine: 'package manifests loaded',
+        waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+      },
+    }),
     browser: {
       acceptInsecureCerts: true,
     },
@@ -139,6 +164,9 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        // configure security reponse header report-to settings to mimic MKI configuration
+        `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       ],
     },
 
@@ -159,7 +187,7 @@ export default async () => {
       try: 120 * 1000,
       waitFor: 20 * 1000,
       esRequestTimeout: 30 * 1000,
-      kibanaReportCompletion: 60 * 1000,
+      kibanaReportCompletion: 600 * 1000,
       kibanaStabilize: 15 * 1000,
       navigateStatusPageCheck: 250,
       waitForExists: 2500,

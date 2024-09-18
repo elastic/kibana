@@ -17,17 +17,12 @@ import {
 } from '../../../../../../common/api/timeline';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
 
 import { getExportTimelineByObjectIds } from './helpers';
 
 export * from './helpers';
 
-export const exportTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
     .post({
       path: TIMELINE_EXPORT_URL,
@@ -49,7 +44,7 @@ export const exportTimelinesRoute = (
       async (context, request, response) => {
         try {
           const siemResponse = buildSiemResponse(response);
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
 
           const exportSizeLimit = config.maxTimelineImportExportSize;
 

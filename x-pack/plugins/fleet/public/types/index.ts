@@ -80,6 +80,8 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  PostStandaloneAgentAPIKeyRequest,
+  PostStandaloneAgentAPIKeyResponse,
   PostLogstashApiKeyResponse,
   GetOutputsResponse,
   GetCurrentUpgradesResponse,
@@ -99,6 +101,7 @@ export type {
   CategorySummaryItem,
   CategorySummaryList,
   PackageInfo,
+  PackageMetadata,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
@@ -139,6 +142,10 @@ export type {
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
+  EnrollmentSettingsFleetServerPolicy,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
 } from '../../common/types';
 export {
   entries,

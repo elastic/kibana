@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { Connector } from '@kbn/search-connectors/types/connectors';
 
 export interface CreateAPIKeyArgs {
@@ -23,11 +23,11 @@ export interface IndexData {
 export interface FetchIndicesResult {
   indices: IndexData[];
 }
-
 export interface FetchIndexResult {
   index: IndicesIndexState & {
     connector?: Connector;
     count: number;
-    stats?: IndicesStatsIndicesStats;
   };
 }
+
+export type { ConnectorStats } from './connector_stats';

@@ -93,7 +93,7 @@ describe('streamFactory', () => {
   // the browser on the client side will automatically take care of unzipping
   // without the need for additional custom code.
   it('should encode and receive a compressed string based stream', (done) => {
-    (async () => {
+    void (async () => {
       const { end, push, responseWithHeaders } = streamFactory(
         {
           'accept-encoding': 'gzip',
@@ -133,7 +133,7 @@ describe('streamFactory', () => {
   });
 
   it('should encode and receive a compressed NDJSON based stream', (done) => {
-    (async () => {
+    void (async () => {
       const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
         {
           'accept-encoding': 'gzip',

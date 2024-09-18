@@ -11,7 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import z from 'zod';
+import z from '@kbn/zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -27,6 +27,8 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
+import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -34,7 +36,7 @@ import {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
-} from './rules_settings_client';
+} from './rules_settings';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -49,7 +51,6 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertsHealth,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
@@ -67,6 +68,7 @@ import {
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
+import { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -87,6 +89,7 @@ export interface AlertingApiRequestHandlerContext {
  */
 export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
 }>;
 
 /**
@@ -99,7 +102,6 @@ export interface RuleExecutorServices<
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
-  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -118,8 +120,9 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
   share: SharePluginStart;
-  dataViews: DataViewsContract;
   ruleResultService?: PublicRuleResultService;
+  getDataViews: () => Promise<DataViewsContract>;
+  getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
 }
 
 export interface RuleExecutorOptions<
@@ -138,11 +141,12 @@ export interface RuleExecutorOptions<
   services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
   spaceId: string;
   startedAt: Date;
+  startedAtOverridden: boolean;
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
-  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -412,7 +416,7 @@ export interface PublicMetricsSetters {
 }
 
 export interface PublicLastRunSetters {
-  addLastRunError: (outcome: string) => void;
+  addLastRunError: (message: string, userError?: boolean) => void;
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
@@ -435,7 +439,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
 
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
@@ -445,6 +449,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
+  useAlertDataAsTemplate?: boolean;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial

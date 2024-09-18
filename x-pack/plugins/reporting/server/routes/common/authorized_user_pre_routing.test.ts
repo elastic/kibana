@@ -49,7 +49,7 @@ describe('authorized_user_pre_routing', function () {
 
     mockStartDeps = await createMockPluginStart(
       {
-        security: {
+        securityService: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -97,7 +97,7 @@ describe('authorized_user_pre_routing', function () {
       security: { license: { isEnabled: () => true } },
     });
     mockStartDeps = await createMockPluginStart(
-      { security: { authc: { getCurrentUser: () => null } } },
+      { securityService: { authc: { getCurrentUser: () => null } } },
       mockReportingConfig
     );
     mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
@@ -126,7 +126,7 @@ describe('authorized_user_pre_routing', function () {
     it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
       mockStartDeps = await createMockPluginStart(
         {
-          security: {
+          securityService: {
             authc: {
               getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
             },
@@ -154,7 +154,7 @@ describe('authorized_user_pre_routing', function () {
     it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
       mockStartDeps = await createMockPluginStart(
         {
-          security: {
+          securityService: {
             authc: {
               getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
             },
@@ -176,7 +176,7 @@ describe('authorized_user_pre_routing', function () {
     it('should return from handler when security is enabled and user has superuser role', async function () {
       mockStartDeps = await createMockPluginStart(
         {
-          security: {
+          securityService: {
             authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['superuser'] }) },
           },
         },

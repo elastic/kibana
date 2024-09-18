@@ -8,13 +8,11 @@
 import moment from 'moment';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { format } from 'url';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
@@ -36,6 +34,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServerConfig = config.get('servers.kibana');
   const kibanaUrl = format(kibanaServerConfig);
   const supertest = getService('supertest');
+  const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule - AVG - US - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
+        logger,
       });
     });
 
@@ -76,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
     });
 
@@ -85,10 +87,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -97,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 aggType: 'custom',
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',
@@ -147,6 +152,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -156,6 +163,8 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
@@ -211,6 +220,8 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');

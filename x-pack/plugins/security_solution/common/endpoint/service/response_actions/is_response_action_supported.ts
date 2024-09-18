@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { getRbacControl } from './utils';
-import type { EndpointPrivileges } from '../../types';
 import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   type ResponseActionAgentType,
   type ResponseActionsApiCommandNames,
   type ResponseActionType,
@@ -20,60 +17,127 @@ type SupportMap = Record<
 >;
 
 /** @private */
-const getResponseActionsSupportMap = ({
-  agentType,
-  actionName,
-  actionType,
-  privileges,
-}: {
-  agentType: ResponseActionAgentType;
-  actionName: ResponseActionsApiCommandNames;
-  actionType: ResponseActionType;
-  privileges: EndpointPrivileges;
-}): boolean => {
-  const commandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[actionName];
-  const RESPONSE_ACTIONS_SUPPORT_MAP = {
-    [actionName]: {
-      automated: {
-        [agentType]:
-          agentType === 'endpoint'
-            ? getRbacControl({
-                commandName,
-                privileges,
-              })
-            : false,
-      },
-      manual: {
-        [agentType]:
-          agentType === 'endpoint'
-            ? getRbacControl({
-                commandName,
-                privileges,
-              })
-            : actionName === 'isolate' || actionName === 'unisolate',
-      },
+const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
+  isolate: {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
     },
-  } as SupportMap;
-  return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: true,
+    },
+  },
+  unisolate: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: true,
+    },
+  },
+  upload: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+  },
+  'get-file': {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: false,
+    },
+  },
+  'kill-process': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: false,
+    },
+  },
+  execute: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+  },
+  'suspend-process': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+  },
+  'running-processes': {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: false,
+    },
+  },
+  scan: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+  },
 };
 
 /**
- * Determine if a given response action is currently supported
+ * Check if a given Response action is supported (implemented) for a given agent type and action type
  * @param agentType
  * @param actionName
  * @param actionType
- * @param privileges
  */
-export const isResponseActionSupported = (
+export const isActionSupportedByAgentType = (
   agentType: ResponseActionAgentType,
   actionName: ResponseActionsApiCommandNames,
-  actionType: ResponseActionType,
-  privileges: EndpointPrivileges
+  actionType: ResponseActionType
 ): boolean => {
-  return getResponseActionsSupportMap({
-    privileges,
-    actionName,
-    actionType,
-    agentType,
-  });
+  return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
 };

@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
+import { EuiPanel } from '@elastic/eui';
 import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { UserRiskScoreQueryId } from '../common/utils';
@@ -23,6 +24,9 @@ import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_st
 import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from './risk_score_update_panel';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
+import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -63,6 +67,8 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
+  const privileges = useMissingRiskEnginePrivileges();
+
   const {
     data,
     inspect,
@@ -92,14 +98,29 @@ export const UserRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return (
+      <EuiPanel hasBorder>
+        <RiskEnginePrivilegesCallOut privileges={privileges} />
+      </EuiPanel>
+    );
+  }
+
   if (status.isDisabled || status.isDeprecated) {
     return (
-      <EnableRiskScore
-        {...status}
-        entityType={RiskScoreEntity.user}
-        refetch={refetch}
-        timerange={timerange}
-      />
+      <EuiPanel hasBorder>
+        <EnableRiskScore
+          {...status}
+          entityType={RiskScoreEntity.host}
+          refetch={refetch}
+          timerange={timerange}
+        />
+      </EuiPanel>
     );
   }
 

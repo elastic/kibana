@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -36,14 +37,12 @@ describe('Customize panel action', () => {
 
   it('is compatible in view mode when API exposes writable unified search', async () => {
     (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
-    context.embeddable.localTimeRange = new BehaviorSubject<TimeRange | undefined>({
+    context.embeddable.timeRange$ = new BehaviorSubject<TimeRange | undefined>({
       from: 'now-15m',
       to: 'now',
     });
-    context.embeddable.localFilters = new BehaviorSubject<Filter[] | undefined>([]);
-    context.embeddable.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(
-      undefined
-    );
+    context.embeddable.filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+    context.embeddable.query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     expect(await action.isCompatible(context)).toBe(true);
   });
 
@@ -63,6 +62,7 @@ describe('Customize panel action', () => {
   it('opens overlay on parent if parent is an overlay tracker', async () => {
     context.embeddable.parentApi = {
       openOverlay: jest.fn(),
+      timeRange$: undefined,
       clearOverlays: jest.fn(),
     };
     await action.execute(context);

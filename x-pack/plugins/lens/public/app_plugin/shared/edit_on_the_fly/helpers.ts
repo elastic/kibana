@@ -4,37 +4,79 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLAdHocDataview,
+  getESQLResults,
+  formatESQLColumns,
+} from '@kbn/esql-utils';
+import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { getTime } from '@kbn/data-plugin/common';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
-export const getQueryColumns = async (
+export interface ESQLDataGridAttrs {
+  rows: ESQLRow[];
+  dataView: DataView;
+  columns: DatatableColumn[];
+}
+
+const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+  const kqlQuery = queryService.queryString.getQuery();
+  const filters = queryService.filterManager.getFilters();
+  const timeFilter =
+    queryService.timefilter.timefilter.getTime() &&
+    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
+      fieldName: timeFieldName,
+    });
+
+  return buildEsQuery(undefined, kqlQuery || [], [
+    ...(filters ?? []),
+    ...(timeFilter ? [timeFilter] : []),
+  ]);
+};
+
+export const getGridAttrs = async (
   query: AggregateQuery,
+  adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
   abortController?: AbortController
-) => {
-  // Fetching only columns for ES|QL for performance reasons with limit 0
-  // Important note: ES doesnt return the warnings for 0 limit,
-  // I am skipping them in favor of performance now
-  // but we should think another way to get them (from Lens embeddable or store)
-  const performantQuery = { ...query };
-  if ('esql' in performantQuery && performantQuery.esql) {
-    performantQuery.esql = `${performantQuery.esql} | limit 0`;
-  }
-  const table = await fetchFieldsFromESQL(
-    performantQuery,
-    deps.expressions,
-    undefined,
-    abortController
-  );
-  return table?.columns;
+): Promise<ESQLDataGridAttrs> => {
+  const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+  const dataViewSpec = adHocDataViews.find((adHoc) => {
+    return adHoc.name === indexPattern;
+  });
+
+  const dataView = dataViewSpec
+    ? await deps.dataViews.create(dataViewSpec)
+    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+
+  const filter = getDSLFilter(deps.data.query, dataView.timeFieldName);
+
+  const results = await getESQLResults({
+    esqlQuery: query.esql,
+    search: deps.data.search.search,
+    signal: abortController?.signal,
+    filter,
+    dropNullColumns: true,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+  });
+
+  const columns = formatESQLColumns(results.response.columns);
+
+  return {
+    rows: results.response.values,
+    dataView,
+    columns,
+  };
 };
 
 export const getSuggestions = async (
@@ -44,30 +86,25 @@ export const getSuggestions = async (
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
   setErrors: (errors: Error[]) => void,
-  abortController?: AbortController
+  abortController?: AbortController,
+  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    let indexPattern = '';
-    if ('sql' in query) {
-      indexPattern = getIndexPatternFromSQLQuery(query.sql);
-    }
-    if ('esql' in query) {
-      indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    }
-    const dataViewSpec = adHocDataViews.find((adHoc) => {
-      return adHoc.name === indexPattern;
+    const { dataView, columns, rows } = await getGridAttrs(
+      query,
+      adHocDataViews,
+      deps,
+      abortController
+    );
+
+    setDataGridAttrs?.({
+      rows,
+      dataView,
+      columns,
     });
 
-    const dataView = dataViewSpec
-      ? await deps.dataViews.create(dataViewSpec)
-      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
-
-    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
-      dataView.timeFieldName = '@timestamp';
-    }
-    const columns = await getQueryColumns(query, deps, abortController);
     const context = {
-      dataViewSpec: dataView?.toSpec(),
+      dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
       textBasedColumns: columns,
       query,

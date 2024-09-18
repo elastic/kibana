@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
@@ -32,9 +33,9 @@ export type DocTableRow = EsHitRecord & {
 
 export interface TableRowProps {
   columns: string[];
-  filter: DocViewFilterFn;
+  filter?: DocViewFilterFn;
   filters?: Filter[];
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
   rows: DataTableRecord[];
@@ -47,7 +48,7 @@ export interface TableRowProps {
 
 export const TableRow = ({
   filters,
-  isPlainRecord,
+  isEsqlMode,
   columns,
   filter,
   savedSearchId,
@@ -105,7 +106,7 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = dataView.fields.getByName(column);
-      filter(field!, row.flattened[column], type);
+      filter?.(field!, row.flattened[column], type);
     },
     [filter, dataView.fields, row.flattened]
   );
@@ -219,7 +220,7 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
-            isPlainRecord={isPlainRecord}
+            isEsqlMode={isEsqlMode}
           >
             <UnifiedDocViewer
               columns={columns}
@@ -228,7 +229,7 @@ export const TableRow = ({
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
-              textBasedHits={isPlainRecord ? rows : undefined}
+              textBasedHits={isEsqlMode ? rows : undefined}
             />
           </TableRowDetails>
         )}

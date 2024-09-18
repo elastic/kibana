@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
 import { getMockSearchConfig } from '../../../../config.mock';
@@ -243,7 +244,7 @@ describe('ES|QL async search strategy', () => {
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(indexNotFoundException);
+      expect(err?.errBody).toEqual(indexNotFoundException);
     });
 
     it('throws normalized error if Error is thrown', async () => {
@@ -308,7 +309,7 @@ describe('ES|QL async search strategy', () => {
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(xContentParseException);
+      expect(err?.errBody).toEqual(xContentParseException);
     });
   });
 

@@ -19,6 +19,7 @@ import type {
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
+import type { LensBaseEmbeddableInput } from '@kbn/lens-plugin/public/embeddable';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -27,7 +28,7 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
@@ -63,6 +64,7 @@ const LensComponentWrapper = styled.div<{
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -99,6 +101,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,
@@ -157,7 +160,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   });
 
   const updateDateRange = useCallback(
-    ({ range }) => {
+    ({ range }: { range: Array<number | string> }) => {
       const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -170,7 +173,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const onFilterCallback = useCallback(
+  const onFilterCallback = useCallback<Required<LensBaseEmbeddableInput>['onFilter']>(
     (event) => {
       if (disableOnClickFilter) {
         event.preventDefault();

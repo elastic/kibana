@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type {
   AnomalyDetectionUrlState,
   ExplorerAppState,
@@ -21,7 +22,7 @@ import type {
 import { ML_PAGES } from '../../../common/constants/locator';
 import { formatGenericMlUrl } from './common';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import type { AppPageState } from '../../../common/types/common';
 
 /**
  * Creates URL to the Anomaly Detection Job management page
@@ -90,6 +91,13 @@ export function formatAnomalyDetectionCreateJobSelectIndex(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
     pageState
   );
+}
+
+export function formatSuppliedConfigurationsManagementUrl(
+  appBasePath: string,
+  pageState: MlGenericUrlState['pageState']
+): string {
+  return formatGenericMlUrl(appBasePath, ML_PAGES.SUPPLIED_CONFIGURATIONS, pageState);
 }
 
 /**

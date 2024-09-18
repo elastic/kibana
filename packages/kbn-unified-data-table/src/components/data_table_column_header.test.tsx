@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement } from 'react';
 import { FieldIcon } from '@kbn/field-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
   createStubDataView,
   stubLogstashDataView,
@@ -53,9 +54,9 @@ const stubDataViewWithNested = createStubDataView({
 
 describe('DataTableColumnHeader', function () {
   async function mountComponent(element: ReactElement) {
-    const component = mountWithIntl(element);
+    const component = mountWithI18nProvider(element);
     // wait for lazy modules
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 5));
     component.update();
 
     return component;
@@ -69,8 +70,8 @@ describe('DataTableColumnHeader', function () {
         showColumnTokens
       />
     );
-    expect(component.text()).toBe('NumberbytesDisplayName');
     expect(component.find(FieldIcon).first().prop('type')).toBe('number');
+    expect(component.text()).toBe('NumberbytesDisplayName');
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
@@ -78,8 +79,11 @@ describe('DataTableColumnHeader', function () {
       <DataTableColumnHeader
         columnName="bytes"
         columnDisplayName="bytesDisplayName"
-        columnTypes={{
-          bytes: 'keyword',
+        columnsMeta={{
+          bytes: {
+            type: 'string',
+            esType: 'keyword',
+          },
         }}
         dataView={stubLogstashDataView}
         showColumnTokens

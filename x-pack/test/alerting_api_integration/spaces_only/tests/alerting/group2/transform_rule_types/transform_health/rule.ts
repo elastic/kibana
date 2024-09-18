@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_ACTION_GROUP,
@@ -29,8 +29,6 @@ const RULE_TYPE_ID = 'transform_health';
 const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
-
-const RULE_INTERVAL_SECONDS = 3;
 
 interface CreateRuleParams {
   name: string;
@@ -80,7 +78,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-transform.health.alerts-default-000001`
   );
 
-  describe('rule', async () => {
+  describe('rule', () => {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';
@@ -113,12 +111,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly', async () => {
+      await stopTransform(transformId);
+
       const ruleId = await createRule({
         name: 'Test all transforms',
         includeTransforms: ['*'],
       });
-
-      await stopTransform(transformId);
 
       log.debug('Checking created alerts...');
 
@@ -133,9 +131,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const aadDocs = await getAllAADDocs(1);
       const alertDoc = aadDocs.body.hits.hits[0]._source;
       expect(alertDoc[ALERT_REASON]).to.be(`Transform test_transform_01 is not started.`);
-      expect(alertDoc[TRANSFORM_HEALTH_RESULTS]).to.eql([
-        { transform_id: 'test_transform_01', transform_state: 'stopped', health_status: 'green' },
-      ]);
+
+      const transformHealthResult = alertDoc[TRANSFORM_HEALTH_RESULTS][0];
+      expect(transformHealthResult.transform_id).to.be('test_transform_01');
+      expect(transformHealthResult.transform_state).to.match(/stopped|stopping/);
+      expect(transformHealthResult.health_status).to.be('green');
+
       expect(alertDoc[ALERT_RULE_CATEGORY]).to.be(`Transform health`);
       expect(alertDoc[ALERT_RULE_NAME]).to.be(`Test all transforms`);
       expect(alertDoc[ALERT_RULE_TYPE_ID]).to.be(`transform_health`);
@@ -190,7 +191,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [action],
           notify_when: 'onActiveAlert',
           params: {

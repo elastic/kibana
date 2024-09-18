@@ -1,46 +1,49 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
-  aiAssistantManagementObservability: 19279
   aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
   apm: 64385
-  assetManager: 25000
   banners: 17946
   bfetch: 22837
-  canvas: 1066647
+  canvas: 29355
   cases: 180037
   charts: 55000
   cloud: 21076
   cloudChat: 19894
   cloudDataMigration: 19170
   cloudDefend: 18697
-  cloudExperiments: 59358
+  cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 55082
-  core: 435325
+  controls: 60000
+  core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 82025
+  dashboard: 52967
   dashboardEnhanced: 65646
   data: 454087
-  datasetQuality: 50624
+  dataQuality: 19384
+  datasetQuality: 52000
   dataViewEditor: 28082
-  dataViewFieldEditor: 27000
-  dataViewManagement: 5176
-  dataViews: 51000
+  dataViewFieldEditor: 42021
+  dataViewManagement: 5300
+  dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
+  discoverShared: 17111
   embeddable: 87309
   embeddableEnhanced: 22107
-  enterpriseSearch: 50858
+  enterpriseSearch: 66810
+  entityManager: 17175
+  esql: 37000
+  esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841
@@ -52,7 +55,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29000
+  expressionPartitionVis: 44888
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -61,10 +64,11 @@ pageLoadAssetSize:
   expressionXY: 45000
   features: 21723
   fieldFormats: 65209
+  fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 174609
+  fleet: 190461
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -75,11 +79,16 @@ pageLoadAssetSize:
   imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
+  inference: 20403
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
+  integrationAssistant: 19524
   interactiveSetup: 80000
+  inventory: 27430
+  investigate: 17970
+  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -90,31 +99,34 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logsExplorer: 55000
+  logsDataAccess: 16759
+  logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82187
+  ml: 85000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 115443
-  observabilityAIAssistant: 25000
+  observability: 118191
+  observabilityAIAssistant: 58230
+  observabilityAIAssistantApp: 27680
+  observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 72039
+  observabilityShared: 80000
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327
-  reporting: 57003
+  reporting: 58600
   rollup: 97204
   runtimeFields: 41752
   savedObjects: 108518
@@ -125,24 +137,31 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchAssistant: 19831
+  searchConnectors: 30000
+  searchHomepage: 19831
+  searchIndices: 20519
+  searchInferenceEndpoints: 20470
+  searchNotebooks: 18942
+  searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
-  securitySolution: 82780
-  securitySolutionEss: 16573
+  securitySolution: 98429
+  securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750
-  share: 71239
+  share: 88160
+  slo: 37039
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
-  stackConnectors: 52131
-  synthetics: 40958
+  stackConnectors: 67227
+  synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
-  textBasedLanguages: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007

@@ -268,6 +268,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -322,7 +323,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -346,11 +347,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -426,8 +427,8 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -637,6 +638,13 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -650,6 +658,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -675,12 +684,15 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -734,6 +746,12 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -1184,6 +1202,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1238,7 +1257,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -1262,11 +1281,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -1342,8 +1361,8 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -1553,6 +1572,13 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -1566,6 +1592,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1591,12 +1618,15 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -1650,6 +1680,12 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -2160,6 +2196,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2214,7 +2251,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -2238,11 +2275,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -2318,8 +2355,8 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -2529,6 +2566,13 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -2542,6 +2586,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2567,12 +2612,15 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -2626,6 +2674,12 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -3138,6 +3192,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3192,7 +3247,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -3216,11 +3271,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -3296,8 +3351,8 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -3507,6 +3562,13 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -3520,6 +3582,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3545,12 +3608,15 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -3604,6 +3670,12 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -4054,6 +4126,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4108,7 +4181,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -4132,11 +4205,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -4212,8 +4285,8 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -4423,6 +4496,13 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -4436,6 +4516,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4461,12 +4542,15 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -4520,6 +4604,12 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -4925,6 +5015,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4979,7 +5070,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -5003,11 +5094,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   ],
                   "vertical": Object {
                     "dash": Array [
-                      4,
-                      4,
+                      0,
+                      0,
                     ],
                     "opacity": 1,
-                    "stroke": "#eaedf3",
+                    "stroke": "#E9EDF3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -5083,8 +5174,8 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -5294,6 +5385,13 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -5307,6 +5405,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -5332,12 +5431,15 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "right",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -5392,6 +5494,12 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
               },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
+              },
               "scales": Object {
                 "barsPadding": 0.25,
                 "histogramPadding": 0.05,
@@ -5422,6 +5530,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          legendValues={
+            Array [
+              "value",
+            ]
+          }
           locale="en"
           noResults={
             <VisualizationNoResults
@@ -5432,7 +5545,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={true}
           theme={
             Array [
               Object {

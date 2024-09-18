@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   threatIntelSourceRequestOptionsSchema,
@@ -18,24 +18,15 @@ import {
   hostDetailsSchema,
   hostOverviewSchema,
   hostUncommonProcessesSchema,
-  kpiHostsSchema,
-  kpiUniqueIpsSchema,
 } from './hosts/hosts';
-import { matrixHistogramSchema } from './matrix_histogram/matrix_histogram';
 import { networkDetailsSchema } from './network/details';
 import { networkDnsSchema } from './network/dns';
 import { networkHttpSchema } from './network/http';
-import {
-  networkKpiDns,
-  networkKpiEvents,
-  networkKpiTlsHandshakes,
-  networkKpiUniqueFlows,
-  networkKpiUniquePrivateIps,
-} from './network/kpi';
+
 import { networkOverviewSchema } from './network/overview';
 import { networkTlsSchema } from './network/tls';
 import { networkTopCountriesSchema } from './network/top_countries';
-import { networkTopNFlowSchema } from './network/top_n_flow';
+import { networkTopNFlowCountSchema, networkTopNFlowSchema } from './network/top_n_flow';
 import { networkUsersSchema } from './network/users';
 
 import {
@@ -50,10 +41,8 @@ import {
 } from './risk_score/risk_score';
 
 import {
-  authenticationsKpiSchema,
   managedUserDetailsSchema,
   observedUserDetailsSchema,
-  totalUsersKpiSchema,
   userAuthenticationsSchema,
   usersSchema,
 } from './users/users';
@@ -63,8 +52,6 @@ export * from './first_seen_last_seen/first_seen_last_seen';
 export * from './hosts/hosts';
 
 export * from './users/users';
-
-export * from './matrix_histogram/matrix_histogram';
 
 export * from './network/network';
 
@@ -84,15 +71,11 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   firstLastSeenRequestOptionsSchema,
   allHostsSchema,
   hostDetailsSchema,
-  kpiHostsSchema,
-  kpiUniqueIpsSchema,
   hostOverviewSchema,
   hostUncommonProcessesSchema,
   usersSchema,
   observedUserDetailsSchema,
   managedUserDetailsSchema,
-  totalUsersKpiSchema,
-  authenticationsKpiSchema,
   userAuthenticationsSchema,
   hostsRiskScoreRequestOptionsSchema,
   usersRiskScoreRequestOptionsSchema,
@@ -106,13 +89,8 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   networkTlsSchema,
   networkTopCountriesSchema,
   networkTopNFlowSchema,
+  networkTopNFlowCountSchema,
   networkUsersSchema,
-  networkKpiDns,
-  networkKpiEvents,
-  networkKpiTlsHandshakes,
-  networkKpiUniqueFlows,
-  networkKpiUniquePrivateIps,
-  matrixHistogramSchema,
   threatIntelSourceRequestOptionsSchema,
   eventEnrichmentRequestOptionsSchema,
 ]);

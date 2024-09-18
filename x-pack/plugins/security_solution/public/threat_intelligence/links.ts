@@ -17,6 +17,6 @@ import type { LinkItem } from '../common/links';
  */
 export const indicatorsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('indicators'),
-  globalNavPosition: 7,
+  globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.threat-intelligence`],
 };

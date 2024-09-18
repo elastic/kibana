@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -32,11 +33,19 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return props.displayAsLink ? (
-      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiLink
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiLink>
     ) : (
-      <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiButton
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiButton>
     );
@@ -69,7 +78,11 @@ export const ViewDetailsPopover = (props: Props) => {
       id="ViewDetailsPopover"
       button={
         props.displayAsLink ? (
-          <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          <EuiLink
+            color="primary"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="searchResponseWarningsViewDetails"
+          >
             <>
               {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
             </>
@@ -80,6 +93,7 @@ export const ViewDetailsPopover = (props: Props) => {
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             iconSide="right"
             iconType="arrowRight"
+            data-test-subj="searchResponseWarningsViewDetails"
           >
             {viewDetailsLabel}
           </EuiButton>
@@ -90,7 +104,7 @@ export const ViewDetailsPopover = (props: Props) => {
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="viewDetailsContextMenu" />
     </EuiPopover>
   );
 };

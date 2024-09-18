@@ -6,35 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { KibanaFeature } from '@kbn/features-plugin/common';
 
-import type { RolePayloadSchemaType } from './model';
+import { roleGrantsSubFeaturePrivileges } from './lib';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-
-const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
-  if (!role.kibana) {
-    return false;
-  }
-
-  const subFeaturePrivileges = new Map(
-    features.map((feature) => [
-      feature.id,
-      feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2),
-    ])
-  );
-
-  const hasAnySubFeaturePrivileges = role.kibana.some((kibanaPrivilege) =>
-    Object.entries(kibanaPrivilege.feature ?? {}).some(([featureId, privileges]) => {
-      return !!subFeaturePrivileges.get(featureId)?.some(({ id }) => privileges.includes(id));
-    })
-  );
-
-  return hasAnySubFeaturePrivileges;
-};
 
 export function definePutRolesRoutes({
   router,
@@ -45,6 +23,9 @@ export function definePutRolesRoutes({
   router.put(
     {
       path: '/api/security/role/{name}',
+      options: {
+        summary: `Create or update a role`,
+      },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
         query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
@@ -62,12 +43,14 @@ export function definePutRolesRoutes({
       const { createOnly } = request.query;
       try {
         const esClient = (await context.core).elasticsearch.client;
+
         const [features, rawRoles] = await Promise.all([
           getFeatures(),
           esClient.asCurrentUser.security.getRole({ name: request.params.name }, { ignore: [404] }),
         ]);
 
         const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
+
         if (validationErrors.length) {
           return response.badRequest({
             body: {
@@ -94,7 +77,6 @@ export function definePutRolesRoutes({
 
         await esClient.asCurrentUser.security.putRole({
           name: request.params.name,
-          // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
           body,
         });
 

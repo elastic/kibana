@@ -6,35 +6,26 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockImplementation((featureFlagName: string) => {
-        return featureFlagName === 'alertSuppressionForIndicatorMatchRuleEnabled';
-      });
-    const { result } = renderHook(() => useAlertSuppression('threat_match'));
+  (
+    [
+      'new_terms',
+      'threat_match',
+      'saved_query',
+      'query',
+      'threshold',
+      'eql',
+      'esql',
+      'machine_learning',
+    ] as Type[]
+  ).forEach((ruleType) => {
+    it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
+      const { result } = renderHook(() => useAlertSuppression(ruleType));
 
-    expect(result.current.isSuppressionEnabled).toBe(true);
-  });
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockImplementation((featureFlagName: string) => {
-        return featureFlagName !== 'alertSuppressionForIndicatorMatchRuleEnabled';
-      });
-    const { result } = renderHook(() => useAlertSuppression('threat_match'));
-
-    expect(result.current.isSuppressionEnabled).toBe(false);
-  });
-
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES', () => {
-    const { result } = renderHook(() => useAlertSuppression('query'));
-
-    expect(result.current.isSuppressionEnabled).toBe(true);
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
   });
 
   it('should return false if rule type is undefined', () => {
@@ -42,7 +33,7 @@ describe('useAlertSuppression', () => {
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 
-  it('should return false if rule type is not THREAT_MATCH', () => {
+  it('should return false if rule type is not a suppressible rule', () => {
     const { result } = renderHook(() => useAlertSuppression('OTHER_RULE_TYPE' as Type));
 
     expect(result.current.isSuppressionEnabled).toBe(false);

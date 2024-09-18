@@ -8,19 +8,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { GroupingArgs } from '@kbn/grouping/src';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
@@ -89,7 +90,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [telemetry]
   );
 
-  const onOptionsChange = useCallback(
+  const onOptionsChange = useCallback<NonNullable<GroupingArgs<{}>['onOptionsChange']>>(
     (options) => {
       dispatch(
         updateGroups({
@@ -104,7 +105,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
-      groupStatsRenderer: getStats,
+      getGroupStats: getStats,
       onGroupToggle,
       unit: defaultUnit,
     },
@@ -116,8 +117,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onOptionsChange,
     tracker: track,
   });
-
-  const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
   useEffect(() => {
     // only ever set to `none` - siem only handles group selector when `none` is selected
     if (isNoneGroup(selectedGroups)) {

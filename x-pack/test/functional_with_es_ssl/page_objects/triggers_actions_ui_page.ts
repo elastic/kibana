@@ -16,6 +16,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const rules = getService('rules');
+  const dataGrid = getService('dataGrid');
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
@@ -51,7 +52,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
@@ -201,7 +202,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
         const statusControl = await testSubjects.find(controlName);
-        const title = await statusControl.getAttribute('title');
+        const title = (await statusControl.getAttribute('title')) ?? '';
         expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
@@ -221,15 +222,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await columnsButton.click();
     },
     async sortEventLogColumn(columnId: string, direction: string) {
-      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
-      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
-      const popoverListItems = await popover.findAllByCssSelector('li');
-
       if (direction === 'asc') {
-        await popoverListItems[1].click();
+        await dataGrid.clickColumnActionAt(columnId, 1);
       }
       if (direction === 'desc') {
-        await popoverListItems[2].click();
+        await dataGrid.clickColumnActionAt(columnId, 2);
       }
     },
     async clickAlertsPageShowQueryMenuButton() {

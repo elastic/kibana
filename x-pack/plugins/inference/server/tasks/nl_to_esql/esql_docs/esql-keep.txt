@@ -1,0 +1,77 @@
+# KEEP
+
+The KEEP command allows you to specify which columns to return and in what order.
+
+## Syntax
+
+`KEEP columns`
+
+### Parameters
+
+#### columns
+
+A comma-separated list of columns to retain. Wildcards are supported. If an existing column matches multiple provided wildcards or column names, certain rules apply.
+
+## Note
+
+The KEEP command is used to specify which columns to return and their order.
+
+When a field name matches multiple expressions, precedence rules are applied. Fields are added in the order they appear. If one field matches multiple expressions, the following precedence rules apply (from highest to lowest priority):
+
+1. Complete field name (no wildcards)
+2. Partial wildcard expressions (for example: `fieldNam*`)
+3. Wildcard only (`*`)
+
+If a field matches two expressions with the same precedence, the rightmost expression wins.
+
+Important: only the columns in the KEEP command can be used after a KEEP command.
+
+## Examples
+
+#### Example 1: Specifying Columns Explicitly
+This example demonstrates how to explicitly specify the columns to be returned.
+
+```esql
+FROM employees
+| KEEP emp_no, first_name, last_name, height
+```
+
+#### Example 2: Using Wildcards to Match Column Names
+This example shows how to use wildcards to return all columns that match a specific pattern.
+
+```esql
+FROM employees
+| KEEP h*
+```
+
+#### Example 3: Combining Wildcards and Explicit Column Names
+This example illustrates how to combine wildcards and explicit column names, and how precedence rules are applied.
+
+```esql
+FROM employees
+| KEEP h*, *
+```
+
+#### Example 4: Precedence Rules with Complete Field Names
+This example demonstrates how complete field names take precedence over wildcard expressions.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, first_name*
+```
+
+#### Example 5: Wildcard Expressions with Same Priority
+This example shows how the last wildcard expression wins when multiple wildcard expressions have the same priority.
+
+```esql
+FROM employees
+| KEEP first_name*, last_name, first_na*
+```
+
+#### Example 6: Simple Wildcard Expression with Lowest Precedence
+This example illustrates how the simple wildcard expression `*` has the lowest precedence.
+
+```esql
+FROM employees
+| KEEP *, first_name
+```

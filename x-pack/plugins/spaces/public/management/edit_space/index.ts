@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// @ts-ignore
 export { ManageSpacePage } from './manage_space_page';

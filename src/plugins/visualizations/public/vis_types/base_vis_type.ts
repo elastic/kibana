@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { defaultsDeep } from 'lodash';
@@ -21,9 +22,10 @@ const defaultOptions: VisTypeOptions = {
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 
-export class BaseVisType<TVisParams = VisParams> {
+export class BaseVisType<TVisParams extends VisParams = VisParams> {
   public readonly name;
   public readonly title;
+  public readonly order;
   public readonly description;
   public readonly note;
   public readonly getSupportedTriggers;
@@ -67,6 +69,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
+    this.order = opts.order ?? 0;
     this.suppressWarnings = opts.suppressWarnings;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });

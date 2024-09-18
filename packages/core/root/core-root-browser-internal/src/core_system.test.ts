@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -44,6 +45,10 @@ import {
   MockSettingsService,
   MockCustomBrandingService,
   CustomBrandingServiceConstructor,
+  MockSecurityService,
+  SecurityServiceConstructor,
+  MockUserProfileService,
+  UserProfileServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -150,6 +155,8 @@ describe('constructor', () => {
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
     expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -308,6 +315,16 @@ describe('#setup()', () => {
   it('calls chrome#setup()', async () => {
     await setupCore();
     expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls security#setup()', async () => {
+    await setupCore();
+    expect(MockSecurityService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#setup()', async () => {
+    await setupCore();
+    expect(MockUserProfileService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -494,6 +511,16 @@ describe('#start()', () => {
   it('calls theme#start()', async () => {
     await startCore();
     expect(MockThemeService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls security#start()', async () => {
+    await startCore();
+    expect(MockSecurityService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#start()', async () => {
+    await startCore();
+    expect(MockUserProfileService.start).toHaveBeenCalledTimes(1);
   });
 });
 

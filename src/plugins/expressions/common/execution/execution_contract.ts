@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
@@ -17,7 +18,11 @@ import { ExpressionAstExpression } from '../ast';
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
  * same functionality but does not expose Expressions plugin internals.
  */
-export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
+export class ExecutionContract<
+  Input = unknown,
+  Output = unknown,
+  InspectorAdapters extends Adapters = object
+> {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();
     const finished = state === 'error' || (state === 'result' && !result?.partial);

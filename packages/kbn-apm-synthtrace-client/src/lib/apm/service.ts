@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServiceAsset } from '../assets';
 import { Entity } from '../entity';
 import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
@@ -17,15 +17,6 @@ export class Service extends Entity<ApmFields> {
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
-    });
-  }
-
-  asset() {
-    return new ServiceAsset({
-      'asset.kind': 'service',
-      'asset.id': this.fields['service.name']!,
-      'asset.name': this.fields['service.name'],
-      'asset.ean': `service:${this.fields['service.name']}`,
     });
   }
 }

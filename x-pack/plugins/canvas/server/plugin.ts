@@ -11,11 +11,10 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
@@ -33,7 +32,6 @@ interface PluginsSetup {
   embeddable: EmbeddableSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
-  bfetch: BfetchServerSetup;
   data: DataPluginSetup;
   reporting?: ReportingServerPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -81,7 +79,6 @@ export class CanvasPlugin implements Plugin {
     initRoutes({
       router: canvasRouter,
       expressions: expressionsSetup,
-      bfetch: plugins.bfetch,
       logger: this.logger,
     });
 
@@ -99,7 +96,7 @@ export class CanvasPlugin implements Plugin {
 
   public start(coreStart: CoreStart) {
     const client = coreStart.savedObjects.createInternalRepository();
-    initializeTemplates(client);
+    initializeTemplates(client).catch(() => {});
   }
 
   public stop() {}

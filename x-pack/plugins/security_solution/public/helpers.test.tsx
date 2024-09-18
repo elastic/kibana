@@ -24,6 +24,7 @@ import {
   readCasesCapabilities,
 } from './cases_test_utils';
 import { createStartServicesMock } from './common/lib/kibana/kibana_react.mock';
+import { set } from '@kbn/safer-lodash-set';
 
 const mockServices = createStartServicesMock();
 
@@ -85,12 +86,12 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('cases routes should return NoPrivilegesPage component when cases plugin is NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
-      {
+      set(mockServices, 'application.capabilities', {
         [SERVER_APP_ID]: { show: true, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
-      } as unknown as Capabilities,
-      mockServices
+      })
     );
+
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<any>;
@@ -105,11 +106,10 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('alerts should return NoPrivilegesPage component when siem plugin is NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
-      {
+      set(mockServices, 'application.capabilities', {
         [SERVER_APP_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: readCasesCapabilities(),
-      } as unknown as Capabilities,
-      mockServices
+      })
     );
     const alertsRoute = routes.find((r) => r.path === 'alerts');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,11 +125,10 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('should return NoPrivilegesPage for each route when both plugins are NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(
       mockSubPlugins,
-      {
+      set(mockServices, 'application.capabilities', {
         [SERVER_APP_ID]: { show: false, crud: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
-      } as unknown as Capabilities,
-      mockServices
+      })
     );
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

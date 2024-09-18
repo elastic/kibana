@@ -5,18 +5,16 @@
  * 2.0.
  */
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { createMockStartDependencies } from '../../editor_frame_service/mocks';
 import { DOC_TYPE } from '../../../common/constants';
 import { ConfigureInLensPanelAction } from './edit_action';
 
 describe('open config panel action', () => {
-  const overlays = overlayServiceMock.createStartContract();
-  const theme = themeServiceMock.createStartContract();
+  const coreStart = coreMock.createStart();
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   describe('compatibility check', () => {
@@ -32,8 +30,7 @@ describe('open config panel action', () => {
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
-        overlays,
-        theme
+        coreStart
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -54,8 +51,7 @@ describe('open config panel action', () => {
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
-        overlays,
-        theme
+        coreStart
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -78,8 +74,7 @@ describe('open config panel action', () => {
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
-        overlays,
-        theme
+        coreStart
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -100,7 +95,7 @@ describe('open config panel action', () => {
           };
         },
         getIsEditable: () => true,
-        openConfingPanel: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
+        openConfigPanel: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
         getRoot: () => {
           return {
             openOverlay: jest.fn(),
@@ -110,10 +105,9 @@ describe('open config panel action', () => {
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
-        overlays,
-        theme
+        coreStart
       );
-      const spy = jest.spyOn(overlays, 'openFlyout');
+      const spy = jest.spyOn(coreStart.overlays, 'openFlyout');
 
       await configurablePanelAction.execute({
         embeddable,

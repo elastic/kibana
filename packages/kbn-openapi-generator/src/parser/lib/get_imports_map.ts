@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq } from 'lodash';
 import type { OpenApiDocument } from '../openapi_types';
-import { traverseObject } from './traverse_object';
+import { findRefs } from './helpers/find_refs';
 
 export interface ImportsMap {
   [importPath: string]: string[];
@@ -37,31 +38,3 @@ export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
 
   return importMap;
 };
-
-/**
- * Check if an object has a $ref property
- *
- * @param obj Any object
- * @returns True if the object has a $ref property
- */
-const hasRef = (obj: unknown): obj is { $ref: string } => {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
-};
-
-/**
- * Traverse the OpenAPI document recursively and find all references
- *
- * @param obj Any object
- * @returns A list of external references
- */
-function findRefs(obj: unknown): string[] {
-  const refs: string[] = [];
-
-  traverseObject(obj, (element) => {
-    if (hasRef(element)) {
-      refs.push(element.$ref);
-    }
-  });
-
-  return refs;
-}

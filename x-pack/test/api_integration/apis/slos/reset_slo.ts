@@ -6,7 +6,7 @@
  */
 import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
-import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { loadTestData } from './helper/load_test_data';
@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Reset SLOs', function () {
     this.tags('skipCloud');
 
-    const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
@@ -25,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await sloEsClient.deleteTestSourceData();
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await loadTestData(getService);
     });
@@ -79,25 +79,13 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const responseBeforeReset = await supertestAPI
-        .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const responseBeforeReset = await slo.getDefinitions();
 
       expect(responseBeforeReset.body.results[0].version).eql(1);
 
-      await supertestAPI
-        .post(`/api/observability/slos/${id}/_reset`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      await slo.reset(id);
 
-      const responseAfterReset = await supertestAPI
-        .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const responseAfterReset = await slo.getDefinitions();
 
       expect(responseAfterReset.body.results[0].version).eql(2);
     });

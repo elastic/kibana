@@ -65,13 +65,13 @@ export class ManifestTask {
               const taskInterval = packagerTaskInterval;
               const startTime = new Date();
 
-              this.logger.info(`Started. Checking for changes to endpoint artifacts`);
+              this.logger.debug(`Started. Checking for changes to endpoint artifacts`);
 
               await this.runTask(taskInstance.id);
 
               const endTime = new Date().getTime();
 
-              this.logger.info(
+              this.logger.debug(
                 `Complete. Task run took ${
                   endTime - startTime.getTime()
                 }ms [ stated: ${startTime.toISOString()} ]`
@@ -170,13 +170,12 @@ export class ManifestTask {
           this.logger.error(
             `unable to recover from error while attempting to retrieve last computed manifest`
           );
-
           return;
         }
       }
 
       if (!oldManifest) {
-        this.logger.info('Last computed manifest not available yet');
+        this.logger.debug('Last computed manifest not available yet');
         return;
       }
 
@@ -186,9 +185,10 @@ export class ManifestTask {
       const diff = newManifest.diff(oldManifest);
 
       this.logger.debug(
-        `New -vs- old manifest diff counts: ${Object.entries(diff).map(
-          ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
-        )}`
+        () =>
+          `New -vs- old manifest diff counts: ${Object.entries(diff).map(
+            ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
+          )}`
       );
 
       const persistErrors = await manifestManager.pushArtifacts(

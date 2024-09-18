@@ -128,6 +128,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
       return !agentPolicy?.is_managed;
     }) || [];
+  const filteredTotal = rowItems.length;
 
   const columns = [
     {
@@ -245,6 +246,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
+            indexPattern={ENROLLMENT_API_KEYS_INDEX}
+            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -252,8 +255,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            indexPattern={ENROLLMENT_API_KEYS_INDEX}
-            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
             dataTestSubj="enrollmentKeysList.queryInput"
           />
         </EuiFlexItem>
@@ -275,7 +276,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
@@ -295,7 +295,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: total,
+          totalItemCount: filteredTotal,
           pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {

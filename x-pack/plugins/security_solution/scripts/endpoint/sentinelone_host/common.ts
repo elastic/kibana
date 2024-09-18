@@ -10,8 +10,10 @@ import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import pRetry from 'p-retry';
+import { fetchActiveSpace } from '../common/spaces';
+import { dump } from '../common/utils';
 import { type RuleResponse } from '../../../common/api/detection_engine';
-import { dump } from '../endpoint_agent_runner/utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,
@@ -20,7 +22,6 @@ import type {
 } from './types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import type { HostVm } from '../common/types';
-
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 import { createRule, findRules } from '../common/detection_rules_services';
 
@@ -86,13 +87,18 @@ export class S1Client {
 
     this.log.debug(`Request: `, requestOptions);
 
-    return axios
-      .request<T>(requestOptions)
-      .then((response) => {
-        this.log.verbose(`Response: `, response);
-        return response.data;
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    return pRetry(
+      async () => {
+        return axios
+          .request<T>(requestOptions)
+          .then((response) => {
+            this.log.verbose(`Response: `, response);
+            return response.data;
+          })
+          .catch(catchAxiosErrorFormatAndThrow);
+      },
+      { maxTimeout: 10000 }
+    );
   }
 
   public buildUrl(path: string): string {
@@ -209,7 +215,10 @@ export const installSentinelOneAgent = async ({
 
     try {
       // Generate an alert in SentinelOne
-      await hostVm.exec('nslookup amazon.com');
+      const command = 'nslookup elastic.co';
+
+      log?.info(`Triggering alert using command: ${command}`);
+      await hostVm.exec(command);
     } catch (e) {
       log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
     }
@@ -236,8 +245,10 @@ export const createSentinelOneStackConnectorIfNeeded = async ({
   log,
   s1ApiToken,
   s1Url,
-  name = 'SentinelOne Dev instance',
+  name: _name,
 }: CreateSentinelOneStackConnectorIfNeededOptions): Promise<void> => {
+  const name =
+    _name ?? `SentinelOne Dev instance (space: ${(await fetchActiveSpace(kbnClient)).id})`;
   const connector = await fetchConnectorByType(kbnClient, SENTINELONE_CONNECTOR_ID);
 
   if (connector) {
@@ -262,14 +273,21 @@ export const createSentinelOneStackConnectorIfNeeded = async ({
 
 export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   kbnClient: KbnClient,
-  log: ToolingLog
+  log: ToolingLog,
+  /** If defined, then the Index patterns used the SIEM rule will include this value */
+  namespace?: string
 ): Promise<RuleResponse> => {
   const ruleName = 'Promote SentinelOne alerts';
-  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert*';
-  const ruleQueryValue = 'observer.serial_number:*';
+  const tag = 'dev-script-run-sentinelone-host';
+  const indexNamespace = namespace ? `-${namespace}` : '';
+  const index = [
+    `logs-sentinel_one.alert${indexNamespace}*`,
+    `logs-sentinel_one.threat${indexNamespace}*`,
+  ];
+  const ruleQueryValue = 'sentinel_one.alert.agent.id:* OR sentinel_one.threat.agent.id:*';
 
   const { data } = await findRules(kbnClient, {
-    filter: `(alert.attributes.params.query: "${ruleQueryValue}" AND alert.attributes.params.index: ${sentinelOneAlertsIndexPattern})`,
+    filter: `alert.attributes.tags:("${tag}")`,
   });
 
   if (data.length) {
@@ -283,9 +301,12 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log.info(`Creating new detection engine rule named [${ruleName}] for SentinelOne`);
 
   const createdRule = await createRule(kbnClient, {
-    index: [sentinelOneAlertsIndexPattern],
+    index,
     query: ruleQueryValue,
     from: 'now-3660s',
+    name: ruleName,
+    description: `Created by dev script located at: ${__filename}`,
+    tags: [tag],
   });
 
   log.verbose(dump(createdRule));

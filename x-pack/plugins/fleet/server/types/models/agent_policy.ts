@@ -7,8 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { GlobalDataTag } from '../../../common/types';
+
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
+import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { PackagePolicySchema } from './package_policy';
 
@@ -38,6 +41,7 @@ function isInteger(n: number) {
 
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
+  space_ids: schema.maybe(schema.arrayOf(schema.string())),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: AgentPolicyNamespaceSchema,
   description: schema.maybe(schema.string()),
@@ -53,7 +57,11 @@ export const AgentPolicyBaseSchema = {
   }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
-      schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
+      schema.oneOf([
+        schema.literal(dataTypes.Logs),
+        schema.literal(dataTypes.Metrics),
+        schema.literal(dataTypes.Traces),
+      ])
     )
   ),
   keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -81,7 +89,56 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
+  ...getSettingsAPISchema('AGENT_POLICY_ADVANCED_SETTINGS'),
+  supports_agentless: schema.maybe(schema.boolean({ defaultValue: false })),
+  global_data_tags: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        value: schema.oneOf([schema.string(), schema.number()]),
+      }),
+      {
+        validate: validateGlobalDataTagInput,
+      }
+    )
+  ),
 };
+
+function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
+  const seen = new Set<string>([]);
+  const duplicates: string[] = [];
+  const namesWithSpaces: string[] = [];
+  const errors: string[] = [];
+
+  for (const tag of tags) {
+    if (/\s/.test(tag.name)) {
+      namesWithSpaces.push(`'${tag.name}'`);
+    }
+
+    if (!seen.has(tag.name.trim())) {
+      seen.add(tag.name.trim());
+    } else {
+      duplicates.push(`'${tag.name.trim()}'`);
+    }
+  }
+
+  if (duplicates.length !== 0) {
+    errors.push(
+      `Found duplicate tag names: [${duplicates.join(', ')}], duplicate tag names are not allowed.`
+    );
+  }
+  if (namesWithSpaces.length !== 0) {
+    errors.push(
+      `Found tag names with spaces: [${namesWithSpaces.join(
+        ', '
+      )}], tag names with spaces are not allowed.`
+    );
+  }
+
+  if (errors.length !== 0) {
+    return errors.join(' ');
+  }
+}
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,

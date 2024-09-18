@@ -6,6 +6,7 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
@@ -20,27 +21,39 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOpenAsPageButton');
     },
 
+    async hostMetricsChartsGroupExists(metric: string) {
+      return testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
+    },
+
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
+    async getOverviewTab() {
+      return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
     async getAssetDetailsKPITileValue(type: string) {
-      const container = await testSubjects.find('infraAssetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
+      const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
     },
 
-    async overviewAlertsTitleExists() {
-      return testSubjects.existOrFail('infraAssetDetailsAlertsTitle');
+    async getAssetDetailsKPIMissingFieldMessageExists(type: string) {
+      const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
+      const badge = await element.findByTestSubject('lens-message-list-trigger');
+
+      await badge.click();
+
+      await testSubjects.existOrFail('lens-message-list-warning');
+      await testSubjects.existOrFail('infraLensCustomErrorHanlderText');
+
+      await badge.click();
     },
 
-    async getAssetDetailsMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsHostMetricsChartGrid');
-      return container.findAllByCssSelector(
-        '[data-test-subj*="infraAssetDetailsHostMetricsChart"]'
-      );
+    async overviewAlertsTitleExists() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTitle');
     },
 
     async getAssetDetailsServicesWithIconsAndNames() {
@@ -70,19 +83,12 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return servicesWithIconsAndNames;
     },
 
-    async getAssetDetailsKubernetesMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
-      return container.findAllByCssSelector(
-        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
-      );
+    async overviewLinkToAlertsExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabAlertsShowAllButton');
     },
 
-    async clickOverviewLinkToAlerts() {
-      return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
-    },
-
-    async clickOverviewOpenAlertsFlyout() {
-      return testSubjects.click('infraAssetDetailsCreateAlertsRuleButton');
+    async overviewOpenAlertsFlyoutExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabCreateAlertsRuleButton');
     },
 
     async clickShowAllMetadataOverviewTab() {
@@ -90,51 +96,74 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async cpuProfilingPromptExists() {
-      return await testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
+      return testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
     },
 
     async cpuProfilingPromptMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
+      return testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
     },
 
     async profilingTabExists() {
-      return await testSubjects.existOrFail('infraAssetDetailsProfilingTab');
+      return testSubjects.existOrFail('infraAssetDetailsProfilingTab');
     },
 
     async profilingTabMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
+      return testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
+    },
+
+    async getOverviewTabHostMetricCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsHostChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getOverviewTabDockerMetricCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getOverviewTabKubernetesMetricCharts() {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
     // Collapsable sections
     async metadataSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsMetadataCollapsible');
+      return testSubjects.existOrFail('infraAssetDetailsMetadataCollapsible');
     },
     async alertsSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
+      return testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
     },
     async servicesSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsServicesCollapsible');
+      return testSubjects.existOrFail('infraAssetDetailsServicesCollapsible');
     },
     async metricsSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');
+      return testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');
     },
 
     async alertsSectionCollapsibleClick() {
-      return await testSubjects.click('infraAssetDetailsAlertsCollapsible');
+      return testSubjects.click('infraAssetDetailsAlertsCollapsible');
     },
 
     async alertsSectionClosedContentExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+      return testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
     },
     async alertsSectionClosedContentMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+      return testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
     },
 
     async alertsSectionClosedContentNoAlertsExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
+      return testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
     },
     async alertsSectionClosedContentNoAlertsMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
+      return testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
     },
 
     // Metadata
@@ -151,7 +180,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
+      // Make this selector tied to the field to avoid flakiness
+      // https://github.com/elastic/kibana/issues/191565
+      return testSubjects.click('infraAssetDetailsMetadataField.host.name');
     },
 
     async clickRemoveMetadataFilter() {
@@ -163,7 +194,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async metadataTableMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+      return testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
     },
 
     async metadataRemovePinExists() {
@@ -173,8 +204,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
         `filter-badge-${stringHash(
-          'host.architecture: arm64'
-        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
+          'host.name: host-1'
+        )} filter filter-enabled filter-key-host.name filter-value-host-1 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },
@@ -184,7 +215,42 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getMetadataSearchField() {
-      return await testSubjects.find('infraAssetDetailsMetadataSearchBarInput');
+      return testSubjects.find('infraAssetDetailsMetadataSearchBarInput');
+    },
+
+    // Metrics
+    async clickMetricsTab() {
+      return testSubjects.click('infraAssetDetailsMetricsTab');
+    },
+
+    async metricsChartsContentExists() {
+      return testSubjects.click('infraAssetDetailsMetricChartsContent');
+    },
+
+    async getMetricsTabHostCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsHostChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getMetricsTabKubernetesCharts() {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getMetricsTabDockerCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async quickAccessItemExists(metric: string) {
+      return testSubjects.click(`infraMetricsQuickAccessItem${metric}`);
     },
 
     // Processes
@@ -197,6 +263,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
         'infraAssetDetailsProcessesSummaryTableItem'
       );
       return processesListElements[index].findByCssSelector('dt');
+    },
+
+    async processesContentExist() {
+      return testSubjects.existOrFail('infraAssetDetailsProcessesTabContent');
     },
 
     async getProcessesTabContentTotalValue() {
@@ -220,15 +290,15 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getProcessesSearchField() {
-      return await testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
+      return testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
     },
 
     async processesSearchInputErrorMissing() {
-      return await testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
+      return testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
     },
 
     async processesSearchInputErrorExists() {
-      return await testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
+      return testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
     },
 
     // Logs
@@ -237,11 +307,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async logsExists() {
-      await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+      return testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
     },
 
     async getLogsSearchField() {
-      return await testSubjects.find('infraAssetDetailsLogsTabFieldSearch');
+      return testSubjects.find('infraAssetDetailsLogsTabFieldSearch');
     },
 
     // Anomalies
@@ -254,9 +324,44 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOsqueryTab');
     },
 
+    // Dashboards
+    async clickDashboardsTab() {
+      return testSubjects.click('infraAssetDetailsDashboardsTab');
+    },
+
+    async dashboardsTabExists() {
+      return testSubjects.exists('infraAssetDetailsDashboardsTab');
+    },
+
+    async addDashboardExists() {
+      await testSubjects.existOrFail('infraAddDashboard');
+    },
+
+    async getAddDashboardButton() {
+      return testSubjects.find('infraAddDashboard');
+    },
+
     // APM Tab link
     async clickApmTabLink() {
       return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
+    },
+
+    setAlertStatusFilter(alertStatus?: AlertStatus) {
+      const buttons: Record<AlertStatus | 'all', string> = {
+        active: 'hostsView-alert-status-filter-active-button',
+        recovered: 'hostsView-alert-status-filter-recovered-button',
+        untracked: 'hostsView-alert-status-filter-untracked-button',
+        all: 'hostsView-alert-status-filter-show-all-button',
+      };
+
+      const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
+
+      return testSubjects.click(buttonSubject);
+    },
+
+    // Callouts
+    async legacyMetricAlertCalloutExists() {
+      return testSubjects.exists('infraAssetDetailsLegacyMetricAlertCallout');
     },
   };
 }

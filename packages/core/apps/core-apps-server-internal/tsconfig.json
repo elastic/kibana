@@ -33,6 +33,10 @@
     "@kbn/core-ui-settings-server",
     "@kbn/monaco",
     "@kbn/core-http-server-internal",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",

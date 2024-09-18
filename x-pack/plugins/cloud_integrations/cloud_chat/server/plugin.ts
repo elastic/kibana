@@ -7,23 +7,15 @@
 
 import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { registerChatRoute } from './routes';
 import type { CloudChatConfigType } from './config';
-import type { ChatVariant } from '../common/types';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
-  security?: SecurityPluginSetup;
 }
 
-interface CloudChatStartDeps {
-  cloudExperiments?: CloudExperimentsPluginStart;
-}
-
-export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, CloudChatStartDeps> {
+export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
   private readonly config: CloudChatConfigType;
   private readonly isDev: boolean;
 
@@ -32,7 +24,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     this.isDev = initializerContext.env.mode.dev;
   }
 
-  public setup(core: CoreSetup<CloudChatStartDeps>, { cloud, security }: CloudChatSetupDeps) {
+  public setup(core: CoreSetup, { cloud }: CloudChatSetupDeps) {
     const { chatIdentitySecret, trialBuffer } = this.config;
     const { isCloudEnabled, trialEndDate } = cloud;
 
@@ -42,29 +34,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
         chatIdentitySecret,
         trialEndDate,
         trialBuffer,
-        security,
         isDev: this.isDev,
-        getChatVariant: () =>
-          core.getStartServices().then(([_, { cloudExperiments }]) => {
-            if (!cloudExperiments) {
-              return 'header';
-            } else {
-              return cloudExperiments
-                .getVariation<ChatVariant>('cloud-chat.chat-variant', 'header')
-                .catch(() => 'header');
-            }
-          }),
-        getChatDisabledThroughExperiments: () =>
-          core.getStartServices().then(([_, { cloudExperiments }]) => {
-            if (!cloudExperiments) {
-              return false;
-            } else {
-              return cloudExperiments
-                .getVariation<boolean>('cloud-chat.enabled', true)
-                .then((enabled) => !enabled)
-                .catch(() => false);
-            }
-          }),
       });
     }
   }

@@ -16,11 +16,12 @@
       "discover",
       "logsExplorer",
       "logsShared",
-      "observabilityAIAssistant",
       "observabilityShared",
+      "slo",
       "share",
       "kibanaUtils",
-      "datasetQuality"
+      "dataQuality",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "serverless",
@@ -28,13 +29,15 @@
       "unifiedSearch",
       "dataViews",
       "dataViewEditor",
-      "lens"
+      "lens",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "triggersActionsUi"
     ],
     "extraPublicDirs": [
-      "common",
+      "common"
     ]
   }
 }

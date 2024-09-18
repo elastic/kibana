@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import classnames from 'classnames';
 
 /**
@@ -27,7 +28,7 @@ export interface DropOverlayWrapperProps {
  * @param otherProps
  * @constructor
  */
-export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
+export const DropOverlayWrapper: React.FC<PropsWithChildren<DropOverlayWrapperProps>> = ({
   isVisible,
   children,
   overlayProps,
@@ -35,15 +36,12 @@ export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
   ...otherProps
 }) => {
   return (
-    <div
-      className={classnames('domDragDrop__dropOverlayWrapper', className)}
-      {...(otherProps || {})}
-    >
+    <div className={classnames('domDroppable__overlayWrapper', className)} {...(otherProps || {})}>
       {children}
       {isVisible && (
         <div
-          className="domDragDrop__dropOverlay"
-          data-test-subj="domDragDrop__dropOverlay"
+          className="domDroppable_overlay"
+          data-test-subj="domDroppable_overlay"
           {...(overlayProps || {})}
         />
       )}

@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -106,15 +106,6 @@ function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
  * Routes for results service
  */
 export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/anomalies_table_data Get anomalies records for table display
-   * @apiName GetAnomaliesTableData
-   * @apiDescription Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display.
-   *
-   * @apiSchema (body) anomaliesTableDataSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
@@ -122,6 +113,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get anomalies records for table display',
+      description:
+        'Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display.',
     })
     .addVersion(
       {
@@ -145,15 +139,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/category_definition Get category definition
-   * @apiName GetCategoryDefinition
-   * @apiDescription Returns the definition of the category with the specified ID and job ID
-   *
-   * @apiSchema (body) categoryDefinitionSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_definition`,
@@ -161,6 +146,8 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get category definition',
+      description: 'Returns the definition of the category with the specified ID and job ID.',
     })
     .addVersion(
       {
@@ -184,15 +171,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/max_anomaly_score Get the maximum anomaly_score
-   * @apiName GetMaxAnomalyScore
-   * @apiDescription Returns the maximum anomaly score of the bucket results for the request job ID(s) and time range
-   *
-   * @apiSchema (body) maxAnomalyScoreSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/max_anomaly_score`,
@@ -200,6 +178,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get the maximum anomaly_score',
+      description:
+        'Returns the maximum anomaly score of the bucket results for the request job ID(s) and time range.',
     })
     .addVersion(
       {
@@ -223,15 +204,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/category_examples Get category examples
-   * @apiName GetCategoryExamples
-   * @apiDescription Returns examples for the categories with the specified IDs from the job with the supplied ID
-   *
-   * @apiSchema (body) categoryExamplesSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_examples`,
@@ -239,6 +211,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get category examples',
+      description:
+        'Returns examples for the categories with the specified IDs from the job with the supplied ID.',
     })
     .addVersion(
       {
@@ -262,15 +237,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/partition_fields_values Returns partition fields values
-   * @apiName GetPartitionFieldsValues
-   * @apiDescription Returns the partition fields with values that match the provided criteria for the specified job ID.
-   *
-   * @apiSchema (body) partitionFieldValuesSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/partition_fields_values`,
@@ -278,6 +244,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get partition fields values',
+      description:
+        'Returns the partition fields with values that match the provided criteria for the specified job ID.',
     })
     .addVersion(
       {
@@ -301,14 +270,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/anomaly_search Run a search on the anomaly results index
-   * @apiName AnomalySearch
-   * @apiDescription Runs the supplied query against the anomaly results index for the specified job IDs.
-   * @apiSchema (body) anomalySearchSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
@@ -316,6 +277,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Run a search on the anomaly results index',
+      description:
+        'Runs the supplied query against the anomaly results index for the specified job IDs.',
     })
     .addVersion(
       {
@@ -339,15 +303,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {get} /internal/ml/results/:jobId/categorizer_stats Return categorizer statistics
-   * @apiName GetCategorizerStats
-   * @apiDescription Returns the categorizer stats for the specified job ID
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (query) getCategorizerStatsSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/results/{jobId}/categorizer_stats`,
@@ -355,6 +310,8 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get categorizer statistics',
+      description: 'Returns the categorizer statistics for the specified job ID.',
     })
     .addVersion(
       {
@@ -378,14 +335,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/category_stopped_partitions Get partitions that have stopped being categorized
-   * @apiName GetCategoryStoppedPartitions
-   * @apiDescription Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.
-   * @apiSchema (body) getCategorizerStoppedPartitionsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_stopped_partitions`,
@@ -393,6 +342,9 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get partitions that have stopped being categorized',
+      description:
+        'Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.',
     })
     .addVersion(
       {
@@ -415,15 +367,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/datafeed_results_chart Get datafeed results chart data
-   * @apiName GetDatafeedResultsChartData
-   * @apiDescription Returns datafeed results chart data
-   *
-   * @apiSchema (body) getDatafeedResultsChartDataSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/datafeed_results_chart`,
@@ -431,6 +374,8 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get datafeed results chart data',
+      description: 'Returns datafeed results chart data',
     })
     .addVersion(
       {
@@ -455,15 +400,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/anomaly_charts Get data for anomaly charts
-   * @apiName GetAnomalyChartsData
-   * @apiDescription Returns anomaly charts data
-   *
-   * @apiSchema (body) getAnomalyChartsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_charts`,
@@ -471,6 +407,8 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get data for anomaly charts',
+      description: 'Returns anomaly charts data',
     })
     .addVersion(
       {
@@ -495,15 +433,6 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       })
     );
 
-  /**
-   * @apiGroup ResultsService
-   *
-   * @api {post} /internal/ml/results/anomaly_records Get anomaly records for criteria
-   * @apiName GetAnomalyRecords
-   * @apiDescription Returns anomaly records
-   *
-   * @apiSchema (body) getAnomalyRecordsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
@@ -511,6 +440,8 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       options: {
         tags: ['access:ml:canGetJobs'],
       },
+      summary: 'Get anomaly records for criteria',
+      description: 'Returns anomaly records',
     })
     .addVersion(
       {

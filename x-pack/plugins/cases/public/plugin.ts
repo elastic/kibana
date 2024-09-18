@@ -16,6 +16,7 @@ import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import { createClientAPI } from './client/api';
 import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
@@ -28,16 +29,28 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
-import type { CasesPluginSetup, CasesPluginStart, CasesUiSetup, CasesUiStart } from './types';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerActions } from './components/visualizations/actions';
+import type {
+  CasesPublicSetup,
+  CasesPublicStart,
+  CasesPublicSetupDependencies,
+  CasesPublicStartDependencies,
+} from './types';
+import { registerSystemActions } from './components/system_actions';
 
 /**
  * @public
  * A plugin for retrieving Cases UI components
  */
 export class CasesUiPlugin
-  implements Plugin<void, CasesUiStart, CasesPluginSetup, CasesPluginStart>
+  implements
+    Plugin<
+      CasesPublicSetup,
+      CasesPublicStart,
+      CasesPublicSetupDependencies,
+      CasesPublicStartDependencies
+    >
 {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
@@ -50,7 +63,7 @@ export class CasesUiPlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
+  public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
@@ -83,7 +96,7 @@ export class CasesUiPlugin
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
-            CasesPluginStart,
+            CasesPublicStartDependencies,
             unknown
           ];
 
@@ -102,6 +115,8 @@ export class CasesUiPlugin
       });
     }
 
+    registerSystemActions(plugins.triggersActionsUi);
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -114,7 +129,7 @@ export class CasesUiPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
+  public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
     KibanaServices.init({
@@ -134,17 +149,19 @@ export class CasesUiPlugin
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
-    registerActions({
-      core,
-      plugins,
-      caseContextProps: {
+    registerActions(
+      {
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
       },
-      history: createBrowserHistory(),
-      storage: this.storage,
-    });
+      {
+        core,
+        plugins,
+        history: createBrowserHistory(),
+        storage: this.storage,
+      }
+    );
 
     return {
       api: createClientAPI({ http: core.http }),
@@ -176,6 +193,7 @@ export class CasesUiPlugin
       hooks: {
         useCasesAddToNewCaseFlyout,
         useCasesAddToExistingCaseModal,
+        useIsAddToCaseOpen,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

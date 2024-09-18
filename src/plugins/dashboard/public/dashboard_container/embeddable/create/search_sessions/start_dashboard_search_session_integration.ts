@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pairwise, skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { DashboardContainerInput } from '../../../../../common';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
-import { getShouldRefresh } from '../../../state/diffing/dashboard_diffing_integration';
+import { newSession$ } from './new_session';
 
 /**
  * Enables dashboard search sessions.
@@ -54,37 +54,28 @@ export function startDashboardSearchSessionIntegration(
     ?.pipe(skip(1))
     .subscribe(() => this.forceRefresh());
 
-  // listen to and compare states to determine when to launch a new session.
-  this.getInput$()
-    .pipe(pairwise())
-    .subscribe((states) => {
-      const [previous, current] = states as DashboardContainerInput[];
-      const shouldRefetch = getShouldRefresh.bind(this)(previous, current);
-      if (!shouldRefetch) return;
+  newSession$(this).subscribe(() => {
+    const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
 
-      const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
-
-      const updatedSearchSessionId: string | undefined = (() => {
-        // do not update session id if this is irrelevant state change to prevent excessive searches
-        if (!shouldRefetch) return;
-
-        let searchSessionIdFromURL = getSearchSessionIdFromURL();
-        if (searchSessionIdFromURL) {
-          if (session.isRestore() && session.isCurrentSession(searchSessionIdFromURL)) {
-            // we had previously been in a restored session but have now changed state so remove the session id from the URL.
-            removeSessionIdFromUrl();
-            searchSessionIdFromURL = undefined;
-          } else {
-            session.restore(searchSessionIdFromURL);
-          }
+    const updatedSearchSessionId: string | undefined = (() => {
+      let searchSessionIdFromURL = getSearchSessionIdFromURL();
+      if (searchSessionIdFromURL) {
+        if (session.isRestore() && session.isCurrentSession(searchSessionIdFromURL)) {
+          // we had previously been in a restored session but have now changed state so remove the session id from the URL.
+          removeSessionIdFromUrl();
+          searchSessionIdFromURL = undefined;
+        } else {
+          session.restore(searchSessionIdFromURL);
         }
-        return searchSessionIdFromURL ?? session.start();
-      })();
-
-      if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-        this.searchSessionId = updatedSearchSessionId;
       }
-    });
+      return searchSessionIdFromURL ?? session.start();
+    })();
+
+    if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
+      this.searchSessionId = updatedSearchSessionId;
+      this.searchSessionId$.next(updatedSearchSessionId);
+    }
+  });
 
   this.integrationSubscriptions.add(searchSessionIdChangeSubscription);
 }

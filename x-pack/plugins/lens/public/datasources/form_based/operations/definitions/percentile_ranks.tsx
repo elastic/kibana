@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition } from '.';
 import {
@@ -20,7 +20,6 @@ import {
   isValidNumber,
   getFilter,
   isColumnOfType,
-  combineErrorMessages,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -169,11 +168,10 @@ export const percentileRanksOperation: OperationDefinition<
       }
     ).toAst();
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
     currentColumn,
@@ -187,7 +185,7 @@ export const percentileRanksOperation: OperationDefinition<
         defaultMessage: 'Percentile ranks value',
       });
     const onChange = useCallback(
-      (value) => {
+      (value?: string) => {
         if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
@@ -221,7 +219,7 @@ export const percentileRanksOperation: OperationDefinition<
     );
     const inputValueIsValid = isValidNumber(inputValue, isInline);
 
-    const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
+    const handleInputChange = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
       (e) => {
         handleInputChangeWithoutValidation(e.currentTarget.value);
       },

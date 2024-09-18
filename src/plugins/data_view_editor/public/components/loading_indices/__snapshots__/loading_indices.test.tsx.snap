@@ -16,10 +16,9 @@ exports[`LoadingIndices should render normally 1`] = `
       <h3
         className="eui-textCenter"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Looking for matching indices…"
           id="indexPatternEditor.loadingHeader"
-          values={Object {}}
         />
       </h3>
     </EuiTitle>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useContext, useState } from 'react';
@@ -135,13 +136,21 @@ export function FilterItem({
 
   const onHandleOperator = useCallback(
     (selectedOperator: Operator) => {
+      const preservedParams =
+        params && selectedOperator.getParamsFromPrevOperator?.(operator, params);
+      setMultiValueFilterParams(Array.isArray(preservedParams) ? preservedParams : []);
       setOperator(selectedOperator);
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, field, operator: selectedOperator },
+        payload: {
+          dest: { path, index },
+          field,
+          operator: selectedOperator,
+          params: params && selectedOperator.getParamsFromPrevOperator?.(operator, params),
+        },
       });
     },
-    [dispatch, path, index, field]
+    [dispatch, path, index, field, operator, params]
   );
 
   const onHandleParamsChange = useCallback(

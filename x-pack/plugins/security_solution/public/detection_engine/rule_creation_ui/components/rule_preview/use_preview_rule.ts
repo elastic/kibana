@@ -8,7 +8,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { PreviewResponse, RuleCreateProps } from '../../../../../common/api/detection_engine';
+import type {
+  RuleCreateProps,
+  RulePreviewResponse,
+} from '../../../../../common/api/detection_engine';
 
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
@@ -16,7 +19,7 @@ import type { TimeframePreviewOptions } from '../../../../detections/pages/detec
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
 
-const emptyPreviewRule: PreviewResponse = {
+const emptyPreviewRule: RulePreviewResponse = {
   previewId: undefined,
   logs: [],
   isAborted: false,
@@ -28,7 +31,7 @@ export const usePreviewRule = ({
   timeframeOptions: TimeframePreviewOptions;
 }) => {
   const [rule, setRule] = useState<RuleCreateProps | null>(null);
-  const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
+  const [response, setResponse] = useState<RulePreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   const { invocationCount, interval, from } = usePreviewInvocationCount({ timeframeOptions });

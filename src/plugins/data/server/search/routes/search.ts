@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { reportSearchError } from '../report_search_error';
@@ -36,6 +37,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 sessionId: schema.maybe(schema.string()),
                 isStored: schema.maybe(schema.boolean()),
                 isRestore: schema.maybe(schema.boolean()),
+                retrieveResults: schema.maybe(schema.boolean()),
               },
               { unknowns: 'allow' }
             ),
@@ -48,6 +50,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           sessionId,
           isStored,
           isRestore,
+          retrieveResults,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -65,6 +68,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 sessionId,
                 isStored,
                 isRestore,
+                retrieveResults,
               }
             )
             .pipe(first())

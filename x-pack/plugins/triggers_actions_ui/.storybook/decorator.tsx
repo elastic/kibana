@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
@@ -15,6 +15,7 @@ import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/pu
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -49,7 +50,9 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
-export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps> = (props) => {
+export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (
+  props
+) => {
   const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;
@@ -59,13 +62,14 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
     experimentalFeatures: {
       rulesListDatagrid: true,
       ruleTagFilter: true,
-      globalAlertsPage: false,
+      stackAlertsPage: true,
       ruleStatusFilter: true,
       rulesDetailLogs: true,
       ruleUseExecutionStatus: false,
       ruleKqlBar: true,
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
+      ruleFormV2: false,
     },
   });
   return (
@@ -91,6 +95,27 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
               http: getHttp(context),
               actionTypeRegistry: getActionTypeRegistry(),
               ruleTypeRegistry: getRuleTypeRegistry(),
+              charts: {
+                theme: {
+                  useChartsBaseTheme: () => (darkMode ? DARK_THEME : LIGHT_THEME),
+                  useSparklineOverrides: () => ({
+                    lineSeriesStyle: {
+                      point: {
+                        visible: false,
+                        strokeWidth: 1,
+                        radius: 1,
+                      },
+                    },
+                    areaSeriesStyle: {
+                      point: {
+                        visible: false,
+                        strokeWidth: 1,
+                        radius: 1,
+                      },
+                    },
+                  }),
+                },
+              },
               ...servicesOverride,
             }}
           >

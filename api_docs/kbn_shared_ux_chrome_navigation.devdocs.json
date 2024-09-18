@@ -67,7 +67,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/shared-ux-chrome-navigation",
             "scope": "public",
@@ -75,7 +75,7 @@
             "section": "def-public.NavigationKibanaDependencies",
             "text": "NavigationKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
@@ -89,7 +89,7 @@
             "label": "{\n  children,\n  ...dependencies\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-chrome-navigation",
                 "scope": "public",
@@ -97,7 +97,7 @@
                 "section": "def-public.NavigationKibanaDependencies",
                 "text": "NavigationKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
@@ -118,7 +118,7 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/shared-ux-chrome-navigation",
             "scope": "public",
@@ -126,7 +126,7 @@
             "section": "def-public.NavigationServices",
             "text": "NavigationServices"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
@@ -137,10 +137,10 @@
             "id": "def-public.NavigationProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-chrome-navigation",
                 "scope": "public",
@@ -148,7 +148,7 @@
                 "section": "def-public.NavigationServices",
                 "text": "NavigationServices"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
@@ -185,9 +185,9 @@
               "{ application: { navigateToUrl: (url: string, options?: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
+                "section": "def-public.NavigateToUrlOptions",
                 "text": "NavigateToUrlOptions"
               },
               " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
@@ -195,9 +195,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeRecentlyAccessedHistoryItem",
+                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
                 "text": "ChromeRecentlyAccessedHistoryItem"
               },
               "[]>; }; navLinks: { getNavLinks$: () => ",
@@ -205,16 +205,18 @@
               "<readonly ",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeNavLink",
+                "section": "def-public.ChromeNavLink",
                 "text": "ChromeNavLink"
               },
               "[]>; }; getIsSideNavCollapsed$: () => ",
               "Observable",
-              "<boolean>; }; http: { basePath: BasePathService; getLoadingCount$(): ",
+              "<boolean>; }; http: { basePath: ",
+              "BasePathService",
+              "; getLoadingCount$(): ",
               "Observable",
-              "<number>; }; }"
+              "<number>; }; analytics: { reportEvent: (eventType: string, eventData: object) => void; }; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -232,9 +234,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]>"
@@ -267,7 +269,7 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "{ prepend: (url: string) => string; }"
+              "{ prepend: (url: string) => string; remove: (url: string) => string; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -285,9 +287,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeRecentlyAccessedHistoryItem",
+                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
                 "text": "ChromeRecentlyAccessedHistoryItem"
               },
               "[]>"
@@ -318,9 +320,9 @@
               "(url: string, options?: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
+                "section": "def-public.NavigateToUrlOptions",
                 "text": "NavigateToUrlOptions"
               },
               " | undefined) => Promise<void>"
@@ -351,9 +353,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToUrlOptions",
+                    "section": "def-public.NavigateToUrlOptions",
                     "text": "NavigateToUrlOptions"
                   },
                   " | undefined"
@@ -376,9 +378,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]>"
@@ -394,6 +396,20 @@
             "tags": [],
             "label": "isSideNavCollapsed",
             "description": [],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.eventTracker",
+            "type": "Object",
+            "tags": [],
+            "label": "eventTracker",
+            "description": [],
+            "signature": [
+              "EventTracker"
+            ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -443,12 +459,12 @@
               "Pick<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
-              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\"> & { title: React.ReactNode; }"
+              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
@@ -466,9 +482,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]"
@@ -553,9 +569,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.NavigationTreeDefinitionUI",
+                "section": "def-public.NavigationTreeDefinitionUI",
                 "text": "NavigationTreeDefinitionUI"
               },
               ">"
@@ -603,7 +619,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
@@ -639,6 +668,18 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.EventType",
+        "type": "string",
+        "tags": [],
+        "label": "EventType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

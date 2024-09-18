@@ -20,6 +20,7 @@ import {
 } from '../../../shared_imports';
 
 import {
+  allowAutoCreateRadioIds,
   INVALID_INDEX_PATTERN_CHARS,
   INVALID_TEMPLATE_NAME_CHARS,
 } from '../../../../common/constants';
@@ -127,6 +128,18 @@ export const schemas: Record<string, FormSchema> = {
           validator: indexPatternField(i18n),
           type: VALIDATION_TYPES.ARRAY_ITEM,
           isBlocking: false,
+        },
+        {
+          validator: startsWithField({
+            char: '.',
+            message: i18n.translate(
+              'xpack.idxMgmt.templateValidation.indexPatternDotPrefixedError',
+              {
+                defaultMessage: 'Index patterns cannot match dot-prefixed indices.',
+              }
+            ),
+          }),
+          type: VALIDATION_TYPES.ARRAY_ITEM,
         },
       ],
     },
@@ -238,11 +251,11 @@ export const schemas: Record<string, FormSchema> = {
     },
 
     allowAutoCreate: {
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.RADIO_GROUP,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldAllowAutoCreateLabel', {
-        defaultMessage: 'Allow auto create (optional)',
+        defaultMessage: 'Allow auto create',
       }),
-      defaultValue: false,
+      defaultValue: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     },
     _meta: {
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {

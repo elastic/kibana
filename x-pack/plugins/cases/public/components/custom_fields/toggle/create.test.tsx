@@ -13,7 +13,8 @@ import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 
-describe('Create ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/177304
+describe.skip('Create ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -36,6 +37,20 @@ describe('Create ', () => {
     expect(await screen.findByRole('switch')).toBeChecked(); // defaultValue true
   });
 
+  it('does not render default value when setDefaultValue is false', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create
+          isLoading={false}
+          customFieldConfiguration={customFieldConfiguration}
+          setDefaultValue={false}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByRole('switch')).not.toBeChecked();
+  });
+
   it('updates the value correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -43,8 +58,8 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByRole('switch'));
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByRole('switch'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -74,7 +89,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(

@@ -18,6 +18,7 @@ const mockProps: HostPanelProps = {
   contextID: 'test-host -panel',
   scopeId: 'test-scope-id',
   isDraggable: false,
+  isPreviewMode: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -49,22 +50,7 @@ describe('HostPanel', () => {
     expect(getByTestId('host-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
-  });
-
-  it('renders loading state when risk score is loading', () => {
-    mockedHostRiskScore.mockReturnValue({
-      ...mockHostRiskScoreState,
-      data: undefined,
-      loading: true,
-    });
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <HostPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+    expect(queryByTestId('host-preview-footer')).not.toBeInTheDocument();
   });
 
   it('renders loading state when observed host is loading', () => {
@@ -80,5 +66,20 @@ describe('HostPanel', () => {
     );
 
     expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+  });
+
+  it('renders preview panel', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <HostPanel {...mockProps} isPreviewMode />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-panel-header')).toBeInTheDocument();
+    expect(getByTestId('host-preview-footer')).toBeInTheDocument();
+    expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
+    expect(
+      queryByTestId('securitySolutionFlyoutNavigationExpandDetailButton')
+    ).not.toBeInTheDocument();
   });
 });

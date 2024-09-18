@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,6 +14,12 @@ export const LinksStrings = {
     i18n.translate('links.description', {
       defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
     }),
+  embeddable: {
+    getUnsupportedLinkTypeError: () =>
+      i18n.translate('links.embeddable.unsupportedLinkTypeError', {
+        defaultMessage: 'Unsupported link type',
+      }),
+  },
   editor: {
     getAddButtonLabel: () =>
       i18n.translate('links.editor.addButtonLabel', {
@@ -37,15 +44,6 @@ export const LinksStrings = {
         defaultMessage: 'Close',
       }),
     panelEditor: {
-      getTechnicalPreviewTooltip: () =>
-        i18n.translate('links.panelEditor.technicalPreviewTooltip', {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }),
-      getTechnicalPreviewLabel: () =>
-        i18n.translate('links.panelEditor.technicalPreviewLabel', {
-          defaultMessage: 'Technical preview',
-        }),
       getLinksTitle: () =>
         i18n.translate('links.panelEditor.linksTitle', {
           defaultMessage: 'Links',
@@ -109,7 +107,7 @@ export const LinksStrings = {
         }),
       getErrorDuringSaveToastTitle: () =>
         i18n.translate('links.editor.unableToSaveToastTitle', {
-          defaultMessage: 'Error saving Link panel',
+          defaultMessage: 'Error saving links panel',
         }),
     },
     linkEditor: {
