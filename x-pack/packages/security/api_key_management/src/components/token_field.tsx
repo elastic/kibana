@@ -111,7 +111,7 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
           closePopover={closePopover}
         >
           <EuiContextMenuPanel
-            initialFocusedItemIndex={selectedIndex * 2}
+            initialFocusedItemIndex={selectedIndex}
             items={options.reduce<ReactElement[]>((items, option, i) => {
               items.push(
                 <EuiContextMenuItem
