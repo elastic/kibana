@@ -89,7 +89,7 @@ export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
   };
   [key: string]: any;
 }

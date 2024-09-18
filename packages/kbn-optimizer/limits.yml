@@ -14,14 +14,14 @@ pageLoadAssetSize:
   cloudChat: 19894
   cloudDataMigration: 19170
   cloudDefend: 18697
-  cloudExperiments: 59358
+  cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
   controls: 60000
-  core: 435325
+  core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
   dashboard: 52967
@@ -119,7 +119,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 72039
+  observabilityShared: 80000
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
@@ -159,7 +159,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
-  synthetics: 40958
+  synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
   threatIntelligence: 44299
