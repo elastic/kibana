@@ -7,10 +7,13 @@
 
 import { omit, pick } from 'lodash';
 import {
+  ElasticsearchClient,
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RawRule } from '../types';
 
 import {
@@ -65,5 +68,36 @@ export async function partiallyUpdateRule(
       return;
     }
     throw err;
+  }
+}
+
+// direct, partial update to a rule saved object via ElasticsearchClient
+// using namespace set in the client
+export async function partiallyUpdateRuleWithEs(
+  esClient: ElasticsearchClient,
+  id: string,
+  attributes: PartiallyUpdateableRuleAttributes,
+  options: PartiallyUpdateRuleSavedObjectOptions = {}
+): Promise<void> {
+  // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
+  const attributeUpdates = omit(attributes, [
+    ...RuleAttributesToEncrypt,
+    ...RuleAttributesIncludedInAAD,
+  ]);
+
+  const updateParams = {
+    id: `alert:${id}`,
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    ...(options.version ? decodeRequestVersion(options.version) : {}),
+    doc: {
+      alert: attributeUpdates,
+    },
+    ...(options.refresh ? { refresh: options.refresh } : {}),
+  };
+
+  if (options.ignore404) {
+    await esClient.update(updateParams, { ignore: [404] });
+  } else {
+    await esClient.update(updateParams);
   }
 }

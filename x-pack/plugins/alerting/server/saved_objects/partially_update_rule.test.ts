@@ -10,16 +10,22 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-
-import { PartiallyUpdateableRuleAttributes, partiallyUpdateRule } from './partially_update_rule';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  PartiallyUpdateableRuleAttributes,
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+} from './partially_update_rule';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { estypes } from '@elastic/elasticsearch';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
   MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
+const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-describe('partially_update_rule', () => {
+describe('partiallyUpdateRule', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -104,6 +110,98 @@ describe('partially_update_rule', () => {
     });
 });
 
+describe('partiallyUpdateRuleWithEs', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
+  test('should work with no options', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes);
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: DefaultAttributes,
+      },
+    });
+  });
+
+  test('should work with extraneous attributes ', async () => {
+    const attributes = ExtraneousAttributes as unknown as PartiallyUpdateableRuleAttributes;
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, attributes);
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: ExtraneousAttributes,
+      },
+    });
+  });
+
+  test('should handle ES errors', async () => {
+    esClient.update.mockRejectedValueOnce(new Error('wops'));
+
+    await expect(
+      partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes)
+    ).rejects.toThrowError('wops');
+  });
+
+  test('should handle the version option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, {
+      version: 'WzQsMV0=',
+    });
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      if_primary_term: 1,
+      if_seq_no: 4,
+      doc: {
+        alert: DefaultAttributes,
+      },
+    });
+  });
+
+  test('should handle the ignore404 option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, { ignore404: true });
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        id: `alert:${MockRuleId}`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        doc: {
+          alert: DefaultAttributes,
+        },
+      },
+      { ignore: [404] }
+    );
+  });
+
+  test('should handle the refresh option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, {
+      refresh: 'wait_for',
+    });
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: DefaultAttributes,
+      },
+      refresh: 'wait_for',
+    });
+  });
+});
+
 function getMockSavedObjectClients(): Record<
   string,
   jest.Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
@@ -137,3 +235,13 @@ const MockUpdateValue = {
   },
   references: [],
 };
+
+const MockEsUpdateResponse = (id: string) => ({
+  _index: '.kibana_alerting_cases_9.0.0_001',
+  _id: `alert:${id}`,
+  _version: 3,
+  result: 'updated' as estypes.Result,
+  _shards: { total: 1, successful: 1, failed: 0 },
+  _seq_no: 5,
+  _primary_term: 1,
+});

@@ -64,6 +64,7 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -226,53 +227,57 @@ describe('Task Runner Cancel', () => {
 
     testAlertingEventLogCalls({ status: 'ok' });
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       {
-        executionStatus: {
-          error: {
-            message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
-            reason: 'timeout',
-          },
-          lastDuration: 0,
-          lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          status: 'error',
-          warning: null,
-        },
-        lastRun: {
-          alertsCount: {},
-          outcome: 'failed',
-          outcomeMsg: [
-            'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
-          ],
-          outcomeOrder: 20,
-          warning: 'timeout',
-        },
-        monitoring: {
-          run: {
-            calculated_metrics: {
-              success_ratio: 0,
-            },
-            history: [],
-            last_run: {
-              metrics: {
-                duration: 0,
-                gap_duration_s: null,
-                total_alerts_created: null,
-                total_alerts_detected: null,
-                total_indexing_duration_ms: null,
-                total_search_duration_ms: null,
+        id: `alert:1`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        doc: {
+          alert: {
+            executionStatus: {
+              error: {
+                message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
+                reason: 'timeout',
               },
-              timestamp: '1970-01-01T00:00:00.000Z',
+              lastDuration: 0,
+              lastExecutionDate: '1970-01-01T00:00:00.000Z',
+              status: 'error',
+              warning: null,
             },
+            lastRun: {
+              alertsCount: {},
+              outcome: 'failed',
+              outcomeMsg: [
+                'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
+              ],
+              outcomeOrder: 20,
+              warning: 'timeout',
+            },
+            monitoring: {
+              run: {
+                calculated_metrics: {
+                  success_ratio: 0,
+                },
+                history: [],
+                last_run: {
+                  metrics: {
+                    duration: 0,
+                    gap_duration_s: null,
+                    total_alerts_created: null,
+                    total_alerts_detected: null,
+                    total_indexing_duration_ms: null,
+                    total_search_duration_ms: null,
+                  },
+                  timestamp: '1970-01-01T00:00:00.000Z',
+                },
+              },
+            },
+            nextRun: '1970-01-01T00:00:10.000Z',
+            running: false,
           },
         },
-        nextRun: '1970-01-01T00:00:10.000Z',
-        running: false,
       },
-      { refresh: false, namespace: undefined }
+      { ignore: [404] }
     );
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({

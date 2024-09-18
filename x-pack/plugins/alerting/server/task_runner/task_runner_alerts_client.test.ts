@@ -45,7 +45,7 @@ import {
   RULE_NAME,
   generateRunnerResult,
   RULE_ACTIONS,
-  generateSavedObjectParams,
+  generateRuleUpdateParams,
   mockTaskInstance,
   DATE_1970,
   DATE_1970_5_MIN,
@@ -354,8 +354,8 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -488,8 +488,8 @@ describe('Task Runner', () => {
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
           { tags: ['1', 'test'] }
         );
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -682,8 +682,8 @@ describe('Task Runner', () => {
           tags: ['1', 'test'],
         });
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -769,8 +769,8 @@ describe('Task Runner', () => {
           tags: ['1', 'test'],
         });
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
