@@ -26,7 +26,6 @@ interface Props {
   index: number;
   highestIndex: number;
   ariaLabel: string;
-  text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setButtonRef?: (ref: HTMLButtonElement | HTMLAnchorElement | null) => void;
   url: string;

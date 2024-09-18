@@ -569,7 +569,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
-    const { series, metadata } = getSeriesAndDomain(
+    const { metadata } = getSeriesAndDomain(
       networkItemsWithUnknownMimeType,
       false,
       mockDateFormatter

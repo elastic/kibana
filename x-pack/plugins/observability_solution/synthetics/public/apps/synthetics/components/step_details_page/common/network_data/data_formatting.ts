@@ -20,7 +20,8 @@ import {
   Metadata,
   MimeType,
   MimeTypesMap,
-  SidebarItem,
+  WaterfallNetworkItem,
+  WaterfallTooltipItem,
   TIMING_ORDER,
   Timings,
 } from './types';
@@ -305,7 +306,7 @@ const formatMetadata = ({
   requestStart: number;
   dateFormatter: DateFormatter;
   showTooltip: boolean;
-  networkItemTooltipProps?: Array<Record<string, string | number>>;
+  networkItemTooltipProps: WaterfallTooltipItem[];
 }) => {
   const {
     certificates,
@@ -404,7 +405,7 @@ export const getSidebarItems = (
   onlyHighlighted: boolean,
   query: string,
   activeFilters: string[]
-): SidebarItem[] => {
+): WaterfallNetworkItem[] => {
   const queryMatcher = getQueryMatcher(query);
   const filterMatcher = getFilterMatcher(activeFilters);
   const sideBarItems = items.map((item, index) => {
