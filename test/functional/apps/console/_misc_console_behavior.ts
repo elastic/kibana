@@ -25,6 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
+
+      await PageObjects.console.openConfig();
+      await PageObjects.console.toggleKeyboardShortcuts(true);
+      await PageObjects.console.openConsole();
     });
 
     beforeEach(async () => {
@@ -94,7 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // flaky
       it.skip('should go to line number when Ctrl+L is pressed', async () => {
         await PageObjects.console.enterText(
           '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
@@ -131,13 +134,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Settings not yet implemented
-    it.skip('can toggle keyboard shortcuts', async () => {
+    it('can toggle keyboard shortcuts', async () => {
       // Enter a sample command
       await PageObjects.console.enterText('GET _search');
 
       // Disable keyboard shorcuts
+      await PageObjects.console.openConfig();
       await PageObjects.console.toggleKeyboardShortcuts(false);
+      await PageObjects.console.openConsole();
 
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.pressCtrlEnter();
@@ -145,11 +149,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
 
       // Restore setting
+      await PageObjects.console.openConfig();
       await PageObjects.console.toggleKeyboardShortcuts(true);
+      await PageObjects.console.openConsole();
     });
 
     describe('customizable font size', () => {
-      // flaky
       it('should allow the font size to be customized', async () => {
         await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(20);
