@@ -281,14 +281,7 @@ export function EntityDetailViewWithoutParams({
       label: i18n.translate('xpack.inventory.entityDetailView.relatedTabLabel', {
         defaultMessage: 'Relationships',
       }),
-      content: (
-        <EntityRelationshipsView
-          entity={entity}
-          typeDefinition={typeDefinition}
-          allTypeDefinitions={typeDefinitionsFetch.value!.definitions}
-          dataStreams={dataStreams}
-        />
-      ),
+      content: <EntityRelationshipsView entity={entity} dataStreams={dataStreams} />,
     },
     ...Object.fromEntries(
       getAdditionalTabs?.({

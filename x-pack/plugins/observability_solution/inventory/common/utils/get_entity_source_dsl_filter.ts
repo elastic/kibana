@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Entity, IdentityField } from '../../../common/entities';
+import { Entity, IdentityField } from '../entities';
 
 export function getEntitySourceDslFilter({
   entity,

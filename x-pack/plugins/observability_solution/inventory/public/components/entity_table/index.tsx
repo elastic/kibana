@@ -61,11 +61,12 @@ export function EntityTable({
             kuery: persistedKqlFilter,
             type: selectedType,
             fromSourceIfEmpty: true,
+            dslFilter,
           },
         },
       });
     },
-    [inventoryAPIClient, selectedType, persistedKqlFilter, start, end]
+    [inventoryAPIClient, selectedType, persistedKqlFilter, start, end, dslFilter]
   );
 
   const availableTypesFetch = useAbortableAsync(

@@ -22,11 +22,11 @@ import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_ra
 import { Entity, EntityDefinition } from '../../../common/entities';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { useKibana } from '../../hooks/use_kibana';
-import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
 import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { InventorySearchBar } from '../inventory_search_bar';
+import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
 
 export function EntityOverview({
   entity,

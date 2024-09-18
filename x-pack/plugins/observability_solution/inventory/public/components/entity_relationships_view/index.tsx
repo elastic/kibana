@@ -4,28 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { parse, render } from 'mustache';
-import pLimit from 'p-limit';
+import { groupBy } from 'lodash';
 import React from 'react';
-import { Entity, EntityDefinition, InventoryEntityDefinition } from '../../../common/entities';
+import { Entity } from '../../../common/entities';
 import { useKibana } from '../../hooks/use_kibana';
-import { getEntitiesFromSource } from '../../util/entities/get_entities_from_source';
-import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
 import { EntityTable } from '../entity_table';
 
 export function EntityRelationshipsView({
   entity,
-  typeDefinition,
-  allTypeDefinitions,
   dataStreams,
 }: {
   entity: Entity;
-  typeDefinition: InventoryEntityDefinition;
-  allTypeDefinitions: EntityDefinition[];
   dataStreams: Array<{ name: string }>;
 }) {
   const {
@@ -39,105 +31,78 @@ export function EntityRelationshipsView({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
-  const relationshipsFetch = useAbortableAsync(
-    async ({ signal }): Promise<undefined | QueryDslQueryContainer[]> => {
+  const relationshipQueryFetch = useAbortableAsync(
+    async ({ signal }) => {
       if (!dataStreams) {
         return undefined;
       }
 
-      const entityFilter = getEntitySourceDslFilter({
-        entity,
-        identityFields: typeDefinition.identityFields,
-      });
+      const queries = await inventoryAPIClient
+        .fetch('POST /internal/inventory/entity/relationships', {
+          signal,
+          params: {
+            body: {
+              type: entity.type,
+              displayName: entity.displayName,
+              start,
+              end,
+              indexPatterns: dataStreams.map((dataStream) => dataStream.name),
+            },
+          },
+        })
+        .then((response) => {
+          const relationshipsByType = groupBy(
+            response.relatedEntities,
+            (relatedEntity) => relatedEntity.type
+          );
 
-      const allOtherDefinitions = allTypeDefinitions.filter((currentDefinition) => {
-        return currentDefinition.id !== typeDefinition.id;
-      });
-
-      const limiter = pLimit(5);
-
-      const allFilters = (
-        await Promise.all(
-          allOtherDefinitions.map((currentDefinition) => {
-            return limiter(async () => {
-              const entitiesForDefinition = await getEntitiesFromSource({
-                dslFilter: entityFilter,
-                indexPatterns: dataStreams.map((dataStream) => dataStream.name),
-                definition: currentDefinition,
-                signal,
-                start,
-                end,
-                inventoryAPIClient,
-              });
-
-              const tpl = currentDefinition.displayNameTemplate!;
-              parse(tpl);
-
-              const entityQueries = entitiesForDefinition.flatMap((foundEntity) => {
-                const index = foundEntity._index ?? '';
-                const remote = index.includes(':') ? index.split(':')[0] + ':' : '';
-
-                const displayName = render(tpl, { ...foundEntity, remote });
-                return [
+          return Object.entries(relationshipsByType).map(([type, entities]) => {
+            return {
+              bool: {
+                filter: [
                   {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'entity.displayName.keyword': displayName,
-                          },
-                        },
-                        { term: { 'entity.type': currentDefinition.type } },
-                      ],
+                    term: {
+                      'entity.type': type,
                     },
                   },
-                ];
-              });
-
-              return entityQueries.length
-                ? entityQueries
-                : [
-                    {
-                      bool: {
-                        must_not: [
-                          {
-                            term: {
-                              'entity.type': currentDefinition.type,
-                            },
-                          },
-                        ],
-                      },
+                  {
+                    terms: {
+                      ['entity.displayName.keyword']: entities.map(
+                        (relatedEntity) => relatedEntity.displayName
+                      ),
                     },
-                  ];
-            });
-          })
-        )
-      ).flat();
+                  },
+                ],
+              },
+            };
+          });
+        });
+
+      if (!queries.length) {
+        return [
+          {
+            bool: {
+              must_not: {
+                match_all: {},
+              },
+            },
+          },
+        ];
+      }
 
       return [
         {
           bool: {
-            should: allFilters,
+            should: queries,
             minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  'entity.type': typeDefinition.type,
-                },
-              },
-            ],
           },
         },
       ];
     },
-    [dataStreams, entity, typeDefinition, allTypeDefinitions, inventoryAPIClient, start, end]
+    [dataStreams, entity, inventoryAPIClient, start, end]
   );
 
-  const dslFilter = relationshipsFetch.value;
+  const dslFilter = relationshipQueryFetch.value;
 
   return (
     <EuiFlexGroup direction="column">

@@ -38,6 +38,8 @@ export async function getEntitiesFromSource({
   const requiredFields =
     allFields.filter(({ optional }) => !optional).map(({ field }) => field) ?? [];
 
+  // we need to figure out which indices we can and cannot query due to
+  // mapping conflicts and ES|QL throwing an error
   const columnVerificationResponse = await esClient
     .fieldCaps('get_entities_source_columns', {
       index: indexPatterns,
@@ -134,7 +136,10 @@ export async function getEntitiesFromSource({
     .map(({ field }) => field);
 
   const entitiesFromSourceQuery =
-    baseQuery + ` | STATS _index = VALUES(_index) BY ${groupingFields.join(',')}`;
+    baseQuery +
+    ` | STATS _index = VALUES(_index) BY ${groupingFields
+      .map((field) => `${field} = TO_STRING(${field})`)
+      .join(',')}`;
 
   const searchSourceRequest = getEsqlRequest({
     query: entitiesFromSourceQuery,

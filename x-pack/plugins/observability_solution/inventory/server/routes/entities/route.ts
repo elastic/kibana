@@ -13,12 +13,14 @@ import type {
   VirtualEntityDefinition,
 } from '../../../common/entities';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
+import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
 import { toEntity } from '../../../common/utils/to_entity';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { InventoryRouteHandlerResources } from '../types';
 import { eemToInventoryDefinition } from './eem_to_inventory_definition';
 import { getDataStreamsForFilter } from './get_data_streams_for_filter';
+import { getEntitiesFromSource } from './get_entities_from_source';
 import { getLatestEntities } from './get_latest_entities';
 
 async function fetchEntityDefinitions({
@@ -60,6 +62,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
       }),
       t.partial({
         fromSourceIfEmpty: t.boolean,
+        dslFilter: t.array(t.record(t.string, t.any)),
       }),
     ]),
   }),
@@ -80,7 +83,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
     });
 
     const {
-      body: { start, end, kuery, type, fromSourceIfEmpty },
+      body: { start, end, kuery, type, fromSourceIfEmpty, dslFilter },
     } = params;
 
     const { definitions } = fromSourceIfEmpty
@@ -99,7 +102,87 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
           : definitions.filter((definition) => definition.type === type)
         ).map(eemToInventoryDefinition),
         logger,
+        dslFilter,
       }),
+    };
+  },
+});
+
+const listRelationshipsRoute = createInventoryServerRoute({
+  endpoint: 'POST /internal/inventory/entity/relationships',
+  params: t.type({
+    body: t.type({
+      displayName: t.string,
+      type: t.string,
+      start: t.number,
+      end: t.number,
+      indexPatterns: t.array(t.string),
+    }),
+  }),
+  options: {
+    tags: ['access:inventory'],
+  },
+  handler: async ({
+    context,
+    logger,
+    params,
+    plugins,
+    request,
+  }): Promise<{ relatedEntities: Array<Pick<Entity, 'displayName' | 'type'>> }> => {
+    const esClient = createObservabilityEsClient({
+      client: (await context.core).elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: 'inventory',
+    });
+
+    const {
+      body: { start, end, displayName, type, indexPatterns },
+    } = params;
+
+    const [{ definitions }, entity] = await Promise.all([
+      fetchEntityDefinitions({ plugins, request }),
+      getLatestEntities({
+        esClient,
+        start,
+        end,
+        kuery: `entity.type:"${type}" AND entity.displayName:"${displayName}"`,
+        logger,
+        fromSourceIfEmpty: false,
+      }).then((response) => {
+        return response[0];
+      }),
+    ]);
+
+    if (!entity) {
+      throw notFound();
+    }
+
+    const allDefinitions = definitions.map(eemToInventoryDefinition);
+
+    const allOtherDefinitions = allDefinitions.filter((definition) => definition.type !== type);
+
+    const relatedEntitiesFromSource = await Promise.all(
+      allOtherDefinitions.map((definition) =>
+        getEntitiesFromSource({
+          esClient,
+          start,
+          end,
+          definition,
+          indexPatterns,
+          logger,
+          kuery: '',
+          dslFilter: [
+            ...getEntitySourceDslFilter({
+              entity,
+              identityFields: definition.identityFields,
+            }),
+          ],
+        })
+      )
+    );
+
+    return {
+      relatedEntities: relatedEntitiesFromSource.flat(),
     };
   },
 });
@@ -247,4 +330,5 @@ export const entitiesRoutes = {
   ...listDataStreamsForEntityRoute,
   ...getEntityRoute,
   ...listEntitiesRoute,
+  ...listRelationshipsRoute,
 };

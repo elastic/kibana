@@ -9,6 +9,7 @@ import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-serve
 import { uniq } from 'lodash';
 import pLimit from 'p-limit';
 import { Logger } from '@kbn/logging';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { InventoryEntityDefinition } from '../../../common/entities';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { lookupEntitiesById } from './lookup_entities_by_id';
@@ -23,6 +24,7 @@ export async function getLatestEntities({
   fromSourceIfEmpty,
   typeDefinitions,
   logger,
+  dslFilter,
 }: {
   esClient: ObservabilityElasticsearchClient;
   kuery: string;
@@ -31,21 +33,25 @@ export async function getLatestEntities({
   fromSourceIfEmpty?: boolean;
   typeDefinitions?: InventoryEntityDefinition[];
   logger: Logger;
+  dslFilter?: QueryDslQueryContainer[];
 }) {
   const response = await searchLatestEntitiesIndex({
     esClient,
     start,
     end,
     kuery,
-    dslFilter: typeDefinitions?.length
-      ? [
-          {
-            terms: {
-              'entity.type': typeDefinitions.map((definition) => definition.type),
+    dslFilter: [
+      ...(dslFilter ?? []),
+      ...(typeDefinitions?.length
+        ? [
+            {
+              terms: {
+                'entity.type': typeDefinitions.map((definition) => definition.type),
+              },
             },
-          },
-        ]
-      : [],
+          ]
+        : []),
+    ],
   });
 
   if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
@@ -71,6 +77,7 @@ export async function getLatestEntities({
           indexPatterns,
           definition,
           logger,
+          dslFilter,
         });
       });
     })
