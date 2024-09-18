@@ -8,6 +8,7 @@
  */
 
 import path from 'path';
+import Semver from 'semver';
 import { unlink } from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
@@ -17,7 +18,8 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 
@@ -93,6 +95,48 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
     await Promise.all([startEsPromise, startKibanaPromise]);
   };
 
+  const getExpectedVersionPerType = () =>
+    coreStart.savedObjects
+      .getTypeRegistry()
+      .getAllTypes()
+      .reduce((versionMap, type) => {
+        const { name, migrations, convertToMultiNamespaceTypeVersion, modelVersions } = type;
+        if (migrations || convertToMultiNamespaceTypeVersion) {
+          const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
+          const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
+          if (convertToMultiNamespaceTypeVersion) {
+            // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
+            migrationsKeys.push(convertToMultiNamespaceTypeVersion);
+          }
+
+          const modelVersionCreateSchemas =
+            typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
+
+          Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
+            migrationsKeys.push(modelVersionToVirtualVersion(key));
+          });
+
+          const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
+          return {
+            ...versionMap,
+            [name]: highestVersion,
+          };
+        } else {
+          return {
+            ...versionMap,
+            [name]: undefined,
+          };
+        }
+      }, {} as Record<string, string | undefined>);
+
+  const assertMigrationVersion = (
+    doc: SavedObjectsRawDoc,
+    expectedVersions: Record<string, string | undefined>
+  ) => {
+    const type = doc._source.type;
+    expect(doc._source.typeMigrationVersion).toEqual(expectedVersions[type]);
+  };
+
   const stopServers = async () => {
     if (root) {
       await root.shutdown();
@@ -129,5 +173,20 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
     expect(migratedIndexResponse.count).toBeGreaterThanOrEqual(
       oldIndexResponse.count - UNUSED_SO_COUNT
     );
+  });
+
+  it('migrates the documents to the highest version', async () => {
+    const expectedVersions = getExpectedVersionPerType();
+    const res = await esClient.search({
+      index: ALL_SAVED_OBJECT_INDICES,
+      body: {
+        sort: ['_doc'],
+      },
+      size: 1000,
+    });
+    const allDocuments = res.hits.hits as SavedObjectsRawDoc[];
+    allDocuments.forEach((doc) => {
+      assertMigrationVersion(doc, expectedVersions);
+    });
   });
 });
