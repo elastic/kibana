@@ -72,7 +72,7 @@ const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) =
       <DashboardGrid viewportWidth={1000} />
     </DashboardContext.Provider>
   );
-  return { dashboardContainer, component };
+  return { dashboardApi: dashboardContainer, component };
 };
 
 test('renders DashboardGrid', async () => {
@@ -87,16 +87,21 @@ test('renders DashboardGrid with no visualizations', async () => {
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { component } = await createAndMountDashboardGrid({
+  const { dashboardApi, component } = await createAndMountDashboardGrid(PANELS);
+  expect(component.find('GridItem').length).toBe(2);
+
+  dashboardApi.setPanels({
     '2': PANELS['2'],
   });
-  const panelElements = component.find('GridItem');
-  expect(panelElements.length).toBe(1);
+  await new Promise((resolve) => setTimeout(resolve, 1));
+  component.update();
+
+  expect(component.find('GridItem').length).toBe(1);
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
-  dashboardContainer.setExpandedPanelId('1');
+  const { dashboardApi, component } = await createAndMountDashboardGrid();
+  dashboardApi.setExpandedPanelId('1');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -105,7 +110,7 @@ test('DashboardGrid renders expanded panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('expandedPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
-  dashboardContainer.setExpandedPanelId();
+  dashboardApi.setExpandedPanelId();
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);
@@ -115,8 +120,8 @@ test('DashboardGrid renders expanded panel', async () => {
 });
 
 test('DashboardGrid renders focused panel', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
-  dashboardContainer.setFocusedPanelId('2');
+  const { dashboardApi, component } = await createAndMountDashboardGrid();
+  dashboardApi.setFocusedPanelId('2');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -125,7 +130,7 @@ test('DashboardGrid renders focused panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('blurredPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(true);
 
-  dashboardContainer.setFocusedPanelId(undefined);
+  dashboardApi.setFocusedPanelId(undefined);
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);
