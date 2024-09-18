@@ -1,0 +1,330 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "name": "Kibana Sample Data Logs",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-26T13:11:17.374Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-10-26T13:11:17.374Z",
+  "version": "WzEzNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "[Logs] Machine OS and Destination Sankey Chart",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"[Logs] Machine OS and Destination Sankey Chart\",\"type\":\"vega\",\"params\":{\"spec\":\"{ \\n $schema: https://vega.github.io/schema/vega/v5.json\\n  data: [\\n\\t{\\n  \\t// query ES based on the currently selected time range and filter string\\n  \\tname: rawData\\n  \\turl: {\\n    \\t%context%: true\\n    \\t%timefield%: timestamp\\n    \\tindex: kibana_sample_data_logs\\n    \\tbody: {\\n      \\tsize: 0\\n      \\taggs: {\\n        \\ttable: {\\n          \\tcomposite: {\\n            \\tsize: 10000\\n            \\tsources: [\\n              \\t{\\n                \\tstk1: {\\n                  \\tterms: {field: \\\"machine.os.keyword\\\"}\\n                \\t}\\n              \\t}\\n              \\t{\\n                \\tstk2: {\\n                  \\tterms: {field: \\\"geo.dest\\\"}\\n                \\t}\\n              \\t}\\n            \\t]\\n          \\t}\\n        \\t}\\n      \\t}\\n    \\t}\\n  \\t}\\n  \\t// From the result, take just the data we are interested in\\n  \\tformat: {property: \\\"aggregations.table.buckets\\\"}\\n  \\t// Convert key.stk1 -> stk1 for simpler access below\\n  \\ttransform: [\\n    \\t{type: \\\"formula\\\", expr: \\\"datum.key.stk1\\\", as: \\\"stk1\\\"}\\n    \\t{type: \\\"formula\\\", expr: \\\"datum.key.stk2\\\", as: \\\"stk2\\\"}\\n    \\t{type: \\\"formula\\\", expr: \\\"datum.doc_count\\\", as: \\\"size\\\"}\\n  \\t]\\n\\t}\\n\\t{\\n  \\tname: nodes\\n  \\tsource: rawData\\n  \\ttransform: [\\n    \\t// when a country is selected, filter out unrelated data\\n    \\t{\\n      \\ttype: filter\\n      \\texpr: !groupSelector || groupSelector.stk1 == datum.stk1 || groupSelector.stk2 == datum.stk2\\n    \\t}\\n    \\t// Set new key for later lookups - identifies each node\\n    \\t{type: \\\"formula\\\", expr: \\\"datum.stk1+datum.stk2\\\", as: \\\"key\\\"}\\n    \\t// instead of each table row, create two new rows,\\n    \\t// one for the source (stack=stk1) and one for destination node (stack=stk2).\\n    \\t// The country code stored in stk1 and stk2 fields is placed into grpId field.\\n    \\t{\\n      \\ttype: fold\\n      \\tfields: [\\\"stk1\\\", \\\"stk2\\\"]\\n      \\tas: [\\\"stack\\\", \\\"grpId\\\"]\\n    \\t}\\n    \\t// Create a sortkey, different for stk1 and stk2 stacks.\\n    \\t{\\n      \\ttype: formula\\n      \\texpr: datum.stack == 'stk1' ? datum.stk1+datum.stk2 : datum.stk2+datum.stk1\\n      \\tas: sortField\\n    \\t}\\n    \\t// Calculate y0 and y1 positions for stacking nodes one on top of the other,\\n    \\t// independently for each stack, and ensuring they are in the proper order,\\n    \\t// alphabetical from the top (reversed on the y axis)\\n    \\t{\\n      \\ttype: stack\\n      \\tgroupby: [\\\"stack\\\"]\\n      \\tsort: {field: \\\"sortField\\\", order: \\\"descending\\\"}\\n      \\tfield: size\\n    \\t}\\n    \\t// calculate vertical center point for each node, used to draw edges\\n    \\t{type: \\\"formula\\\", expr: \\\"(datum.y0+datum.y1)/2\\\", as: \\\"yc\\\"}\\n  \\t]\\n\\t}\\n\\t{\\n  \\tname: groups\\n  \\tsource: nodes\\n  \\ttransform: [\\n    \\t// combine all nodes into country groups, summing up the doc counts\\n    \\t{\\n      \\ttype: aggregate\\n      \\tgroupby: [\\\"stack\\\", \\\"grpId\\\"]\\n      \\tfields: [\\\"size\\\"]\\n      \\tops: [\\\"sum\\\"]\\n      \\tas: [\\\"total\\\"]\\n    \\t}\\n    \\t// re-calculate the stacking y0,y1 values\\n    \\t{\\n      \\ttype: stack\\n      \\tgroupby: [\\\"stack\\\"]\\n      \\tsort: {field: \\\"grpId\\\", order: \\\"descending\\\"}\\n      \\tfield: total\\n    \\t}\\n    \\t// project y0 and y1 values to screen coordinates\\n    \\t// doing it once here instead of doing it several times in marks\\n    \\t{type: \\\"formula\\\", expr: \\\"scale('y', datum.y0)\\\", as: \\\"scaledY0\\\"}\\n    \\t{type: \\\"formula\\\", expr: \\\"scale('y', datum.y1)\\\", as: \\\"scaledY1\\\"}\\n    \\t// boolean flag if the label should be on the right of the stack\\n    \\t{type: \\\"formula\\\", expr: \\\"datum.stack == 'stk1'\\\", as: \\\"rightLabel\\\"}\\n    \\t// Calculate traffic percentage for this country using \\\"y\\\" scale\\n    \\t// domain upper bound, which represents the total traffic\\n    \\t{\\n      \\ttype: formula\\n      \\texpr: datum.total/domain('y')[1]\\n      \\tas: percentage\\n    \\t}\\n  \\t]\\n\\t}\\n\\t{\\n  \\t// This is a temp lookup table with all the 'stk2' stack nodes\\n  \\tname: destinationNodes\\n  \\tsource: nodes\\n  \\ttransform: [\\n    \\t{type: \\\"filter\\\", expr: \\\"datum.stack == 'stk2'\\\"}\\n  \\t]\\n\\t}\\n\\t{\\n  \\tname: edges\\n  \\tsource: nodes\\n  \\ttransform: [\\n    \\t// we only want nodes from the left stack\\n    \\t{type: \\\"filter\\\", expr: \\\"datum.stack == 'stk1'\\\"}\\n    \\t// find corresponding node from the right stack, keep it as \\\"target\\\"\\n    \\t{\\n      \\ttype: lookup\\n      \\tfrom: destinationNodes\\n      \\tkey: key\\n      \\tfields: [\\\"key\\\"]\\n      \\tas: [\\\"target\\\"]\\n    \\t}\\n    \\t// calculate SVG link path between stk1 and stk2 stacks for the node pair\\n    \\t{\\n      \\ttype: linkpath\\n      \\torient: horizontal\\n      \\tshape: diagonal\\n      \\tsourceY: {expr: \\\"scale('y', datum.yc)\\\"}\\n      \\tsourceX: {expr: \\\"scale('x', 'stk1') + bandwidth('x')\\\"}\\n      \\ttargetY: {expr: \\\"scale('y', datum.target.yc)\\\"}\\n      \\ttargetX: {expr: \\\"scale('x', 'stk2')\\\"}\\n    \\t}\\n    \\t// A little trick to calculate the thickness of the line.\\n    \\t// The value needs to be the same as the hight of the node, but scaling\\n    \\t// size to screen's height gives inversed value because screen's Y\\n    \\t// coordinate goes from the top to the bottom, whereas the graph's Y=0\\n    \\t// is at the bottom. So subtracting scaled doc count from screen height\\n    \\t// (which is the \\\"lower\\\" bound of the \\\"y\\\" scale) gives us the right value\\n    \\t{\\n      \\ttype: formula\\n      \\texpr: range('y')[0]-scale('y', datum.size)\\n      \\tas: strokeWidth\\n    \\t}\\n    \\t// Tooltip needs individual link's percentage of all traffic\\n    \\t{\\n      \\ttype: formula\\n      \\texpr: datum.size/domain('y')[1]\\n      \\tas: percentage\\n    \\t}\\n  \\t]\\n\\t}\\n  ]\\n  scales: [\\n\\t{\\n  \\t// calculates horizontal stack positioning\\n  \\tname: x\\n  \\ttype: band\\n  \\trange: width\\n  \\tdomain: [\\\"stk1\\\", \\\"stk2\\\"]\\n  \\tpaddingOuter: 0.05\\n  \\tpaddingInner: 0.95\\n\\t}\\n\\t{\\n  \\t// this scale goes up as high as the highest y1 value of all nodes\\n  \\tname: y\\n  \\ttype: linear\\n  \\trange: height\\n  \\tdomain: {data: \\\"nodes\\\", field: \\\"y1\\\"}\\n\\t}\\n\\t{\\n  \\t// use rawData to ensure the colors stay the same when clicking.\\n  \\tname: color\\n  \\ttype: ordinal\\n  \\trange: category\\n  \\tdomain: {data: \\\"rawData\\\", field: \\\"stk1\\\"}\\n\\t}\\n\\t{\\n  \\t// this scale is used to map internal ids (stk1, stk2) to stack names\\n  \\tname: stackNames\\n  \\ttype: ordinal\\n  \\trange: [\\\"Source\\\", \\\"Destination\\\"]\\n  \\tdomain: [\\\"stk1\\\", \\\"stk2\\\"]\\n\\t}\\n  ]\\n  axes: [\\n\\t{\\n  \\t// x axis should use custom label formatting to print proper stack names\\n  \\torient: bottom\\n  \\tscale: x\\n  \\tencode: {\\n    \\tlabels: {\\n      \\tupdate: {\\n        \\ttext: {scale: \\\"stackNames\\\", field: \\\"value\\\"}\\n      \\t}\\n    \\t}\\n  \\t}\\n\\t}\\n\\t{orient: \\\"left\\\", scale: \\\"y\\\"}\\n  ]\\n  marks: [\\n\\t{\\n  \\t// draw the connecting line between stacks\\n  \\ttype: path\\n  \\tname: edgeMark\\n  \\tfrom: {data: \\\"edges\\\"}\\n  \\t// this prevents some autosizing issues with large strokeWidth for paths\\n  \\tclip: true\\n  \\tencode: {\\n    \\tupdate: {\\n      \\t// By default use color of the left node, except when showing traffic\\n      \\t// from just one country, in which case use destination color.\\n      \\tstroke: [\\n        \\t{\\n          \\ttest: groupSelector && groupSelector.stack=='stk1'\\n          \\tscale: color\\n          \\tfield: stk2\\n        \\t}\\n        \\t{scale: \\\"color\\\", field: \\\"stk1\\\"}\\n      \\t]\\n      \\tstrokeWidth: {field: \\\"strokeWidth\\\"}\\n      \\tpath: {field: \\\"path\\\"}\\n      \\t// when showing all traffic, and hovering over a country,\\n      \\t// highlight the traffic from that country.\\n      \\tstrokeOpacity: {\\n        \\tsignal: !groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 0.9 : 0.3\\n      \\t}\\n      \\t// Ensure that the hover-selected edges show on top\\n      \\tzindex: {\\n        \\tsignal: !groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 1 : 0\\n      \\t}\\n      \\t// format tooltip string\\n      \\ttooltip: {\\n        \\tsignal: datum.stk1 + ' → ' + datum.stk2 + '\\t' + format(datum.size, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'\\n      \\t}\\n    \\t}\\n    \\t// Simple mouseover highlighting of a single line\\n    \\thover: {\\n      \\tstrokeOpacity: {value: 1}\\n    \\t}\\n  \\t}\\n\\t}\\n\\t{\\n  \\t// draw stack groups (countries)\\n  \\ttype: rect\\n  \\tname: groupMark\\n  \\tfrom: {data: \\\"groups\\\"}\\n  \\tencode: {\\n    \\tenter: {\\n      \\tfill: {scale: \\\"color\\\", field: \\\"grpId\\\"}\\n      \\twidth: {scale: \\\"x\\\", band: 1}\\n    \\t}\\n    \\tupdate: {\\n      \\tx: {scale: \\\"x\\\", field: \\\"stack\\\"}\\n      \\ty: {field: \\\"scaledY0\\\"}\\n      \\ty2: {field: \\\"scaledY1\\\"}\\n      \\tfillOpacity: {value: 0.6}\\n      \\ttooltip: {\\n        \\tsignal: datum.grpId + '   ' + format(datum.total, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'\\n      \\t}\\n    \\t}\\n    \\thover: {\\n      \\tfillOpacity: {value: 1}\\n    \\t}\\n  \\t}\\n\\t}\\n\\t{\\n  \\t// draw country code labels on the inner side of the stack\\n  \\ttype: text\\n  \\tfrom: {data: \\\"groups\\\"}\\n  \\t// don't process events for the labels - otherwise line mouseover is unclean\\n  \\tinteractive: false\\n  \\tencode: {\\n    \\tupdate: {\\n      \\t// depending on which stack it is, position x with some padding\\n      \\tx: {\\n        \\tsignal: scale('x', datum.stack) + (datum.rightLabel ? bandwidth('x') + 8 : -8)\\n      \\t}\\n      \\t// middle of the group\\n      \\tyc: {signal: \\\"(datum.scaledY0 + datum.scaledY1)/2\\\"}\\n      \\talign: {signal: \\\"datum.rightLabel ? 'left' : 'right'\\\"}\\n      \\tbaseline: {value: \\\"middle\\\"}\\n      \\tfontWeight: {value: \\\"bold\\\"}\\n      \\t// only show text label if the group's height is large enough\\n      \\ttext: {signal: \\\"abs(datum.scaledY0-datum.scaledY1) > 13 ? datum.grpId : ''\\\"}\\n    \\t}\\n  \\t}\\n\\t}\\n\\t{\\n  \\t// Create a \\\"show all\\\" button. Shown only when a country is selected.\\n  \\ttype: group\\n  \\tdata: [\\n    \\t// We need to make the button show only when groupSelector signal is true.\\n    \\t// Each mark is drawn as many times as there are elements in the backing data.\\n    \\t// Which means that if values list is empty, it will not be drawn.\\n    \\t// Here I create a data source with one empty object, and filter that list\\n    \\t// based on the signal value. This can only be done in a group.\\n    \\t{\\n      \\tname: dataForShowAll\\n      \\tvalues: [{}]\\n      \\ttransform: [{type: \\\"filter\\\", expr: \\\"groupSelector\\\"}]\\n    \\t}\\n  \\t]\\n  \\t// Set button size and positioning\\n  \\tencode: {\\n    \\tenter: {\\n      \\txc: {signal: \\\"width/2\\\"}\\n      \\ty: {value: 30}\\n      \\twidth: {value: 80}\\n      \\theight: {value: 30}\\n    \\t}\\n  \\t}\\n  \\tmarks: [\\n    \\t{\\n      \\t// This group is shown as a button with rounded corners.\\n      \\ttype: group\\n      \\t// mark name allows signal capturing\\n      \\tname: groupReset\\n      \\t// Only shows button if dataForShowAll has values.\\n      \\tfrom: {data: \\\"dataForShowAll\\\"}\\n      \\tencode: {\\n        \\tenter: {\\n          \\tcornerRadius: {value: 6}\\n          \\tfill: {value: \\\"#F5F7FA\\\"}\\n          \\tstroke: {value: \\\"#c1c1c1\\\"}\\n          \\tstrokeWidth: {value: 2}\\n          \\t// use parent group's size\\n          \\theight: {\\n            \\tfield: {group: \\\"height\\\"}\\n          \\t}\\n          \\twidth: {\\n            \\tfield: {group: \\\"width\\\"}\\n          \\t}\\n        \\t}\\n        \\tupdate: {\\n          \\t// groups are transparent by default\\n          \\topacity: {value: 1}\\n        \\t}\\n        \\thover: {\\n          \\topacity: {value: 0.7}\\n        \\t}\\n      \\t}\\n      \\tmarks: [\\n        \\t{\\n          \\ttype: text\\n          \\t// if true, it will prevent clicking on the button when over text.\\n          \\tinteractive: false\\n          \\tencode: {\\n            \\tenter: {\\n              \\t// center text in the paren group\\n              \\txc: {\\n                \\tfield: {group: \\\"width\\\"}\\n                \\tmult: 0.5\\n              \\t}\\n              \\tyc: {\\n                \\tfield: {group: \\\"height\\\"}\\n                \\tmult: 0.5\\n                \\toffset: 2\\n              \\t}\\n              \\talign: {value: \\\"center\\\"}\\n              \\tbaseline: {value: \\\"middle\\\"}\\n              \\tfontWeight: {value: \\\"bold\\\"}\\n              \\ttext: {value: \\\"Show All\\\"}\\n            \\t}\\n          \\t}\\n        \\t}\\n      \\t]\\n    \\t}\\n  \\t]\\n\\t}\\n  ]\\n  signals: [\\n\\t{\\n  \\t// used to highlight traffic to/from the same country\\n  \\tname: groupHover\\n  \\tvalue: {}\\n  \\ton: [\\n    \\t{\\n      \\tevents: @groupMark:mouseover\\n      \\tupdate: \\\"{stk1:datum.stack=='stk1' && datum.grpId, stk2:datum.stack=='stk2' && datum.grpId}\\\"\\n    \\t}\\n    \\t{events: \\\"mouseout\\\", update: \\\"{}\\\"}\\n  \\t]\\n\\t}\\n\\t// used to filter only the data related to the selected country\\n\\t{\\n  \\tname: groupSelector\\n  \\tvalue: false\\n  \\ton: [\\n    \\t{\\n      \\t// Clicking groupMark sets this signal to the filter values\\n      \\tevents: @groupMark:click!\\n      \\tupdate: \\\"{stack:datum.stack, stk1:datum.stack=='stk1' && datum.grpId, stk2:datum.stack=='stk2' && datum.grpId}\\\"\\n    \\t}\\n    \\t{\\n      \\t// Clicking \\\"show all\\\" button, or double-clicking anywhere resets it\\n      \\tevents: [\\n        \\t{type: \\\"click\\\", markname: \\\"groupReset\\\"}\\n        \\t{type: \\\"dblclick\\\"}\\n      \\t]\\n      \\tupdate: \\\"false\\\"\\n    \\t}\\n  \\t]\\n\\t}\\n  ]\\n}\\n\"},\"aggs\":[]}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-26T13:11:17.374Z",
+  "id": "7cbd2350-2223-11e8-b802-5bcf64c2cfb4",
+  "migrationVersion": {
+    "visualization": "8.5.0"
+  },
+  "references": [],
+  "type": "visualization",
+  "updated_at": "2022-10-26T13:11:17.374Z",
+  "version": "WzEzMywxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "[Logs] Unique Destination Heatmap",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"[Logs] Unique Destination Heatmap\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: kibana_sample_data_logs\\n      body: {\\n        aggs: {\\n          countries: {\\n            terms: {\\n              field: geo.dest\\n              size: 25\\n            }\\n            aggs: {\\n              hours: {\\n                histogram: {\\n                  field: hour_of_day\\n                  interval: 1\\n                }\\n                aggs: {\\n                  unique: {\\n                    cardinality: {\\n                      field: clientip\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {property: \\\"aggregations.countries.buckets\\\"}\\n  }\\n  \\n  transform: [\\n    {\\n      flatten: [\\\"hours.buckets\\\"],\\n      as: [\\\"buckets\\\"]\\n    },\\n    {\\n      filter: \\\"datum.buckets.unique.value > 0\\\"\\n    }\\n  ]\\n\\n  mark: {\\n    type: rect\\n    tooltip: {\\n      expr: \\\"{\\\\\\\"Unique Visitors\\\\\\\": datum.buckets.unique.value,\\\\\\\"geo.src\\\\\\\": datum.key,\\\\\\\"Hour\\\\\\\": datum.buckets.key}\\\"\\n    }\\n  }\\n\\n  encoding: {\\n    x: {\\n      field: buckets.key\\n      type: nominal\\n      scale: {\\n        domain: {\\n          expr: \\\"sequence(0, 24)\\\"\\n        }\\n      }\\n      axis: {\\n        title: false\\n        labelAngle: 0\\n      }\\n    }\\n    y: {\\n      field: key\\n      type: nominal\\n      sort: {\\n        field: -buckets.unique.value\\n      }\\n      axis: {title: false}\\n    }\\n    color: {\\n      field: buckets.unique.value\\n      type: quantitative\\n      axis: {title: false}\\n      scale: {\\n        scheme: blues\\n      }\\n    }\\n  }\\n}\\n\"}}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-26T13:11:17.374Z",
+  "id": "cb099a20-ea66-11eb-9425-113343a037e3",
+  "migrationVersion": {
+    "visualization": "8.5.0"
+  },
+  "references": [],
+  "type": "visualization",
+  "updated_at": "2022-10-26T13:11:17.374Z",
+  "version": "WzEzMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "7d9a32b1-8cc2-410c-83a5-2eb66a3f0321": {
+              "columnOrder": [
+                "a8511a62-2b78-4ba4-9425-a417df6e059f",
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260",
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1",
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2",
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3"
+              ],
+              "columns": {
+                "a8511a62-2b78-4ba4-9425-a417df6e059f": {
+                  "dataType": "number",
+                  "isBucketed": true,
+                  "label": "bytes",
+                  "operationType": "range",
+                  "params": {
+                    "maxBars": "auto",
+                    "ranges": [
+                      {
+                        "from": 0,
+                        "label": "",
+                        "to": 1000
+                      }
+                    ],
+                    "type": "histogram"
+                  },
+                  "scale": "interval",
+                  "sourceField": "bytes"
+                },
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "% of visits",
+                  "operationType": "formula",
+                  "params": {
+                    "format": {
+                      "id": "percent",
+                      "params": {
+                        "decimals": 1
+                      }
+                    },
+                    "formula": "count() / overall_sum(count())",
+                    "isFormulaBroken": false
+                  },
+                  "references": [
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3"
+                  ],
+                  "scale": "ratio"
+                },
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Part of count() / overall_sum(count())",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                },
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Part of count() / overall_sum(count())",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                },
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Part of count() / overall_sum(count())",
+                  "operationType": "overall_sum",
+                  "references": [
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1"
+                  ],
+                  "scale": "ratio"
+                },
+                "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Part of count() / overall_sum(count())",
+                  "operationType": "math",
+                  "params": {
+                    "tinymathAst": {
+                      "args": [
+                        "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                        "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2"
+                      ],
+                      "location": {
+                        "max": 30,
+                        "min": 0
+                      },
+                      "name": "divide",
+                      "text": "count() / overall_sum(count())",
+                      "type": "function"
+                    }
+                  },
+                  "references": [
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2"
+                  ],
+                  "scale": "ratio"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": false,
+          "yLeft": false,
+          "yRight": true
+        },
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "layers": [
+          {
+            "accessors": [
+              "b5f3dc78-dba8-4db8-87b6-24a0b9cca260"
+            ],
+            "layerId": "7d9a32b1-8cc2-410c-83a5-2eb66a3f0321",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "a8511a62-2b78-4ba4-9425-a417df6e059f"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "legendSize": "auto",
+          "position": "right"
+        },
+        "preferredSeriesType": "bar_stacked",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide",
+        "yLeftExtent": {
+          "mode": "full"
+        },
+        "yRightExtent": {
+          "mode": "full"
+        }
+      }
+    },
+    "title": "[Logs] Bytes distribution",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-26T13:11:17.374Z",
+  "id": "16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d",
+  "migrationVersion": {
+    "lens": "8.6.0"
+  },
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-layer-7d9a32b1-8cc2-410c-83a5-2eb66a3f0321",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "updated_at": "2022-10-26T13:11:17.374Z",
+  "version": "WzEzNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "version": 2,
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{\"612f8db8-9ba9-41cf-a809-d133fe9b83a8\":{\"order\":0,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"fieldName\":\"geo.src\",\"title\":\"Source Country\",\"id\":\"612f8db8-9ba9-41cf-a809-d133fe9b83a8\",\"enhancements\":{}}},\"9807212f-5078-4c42-879c-6f28b3033fc9\":{\"order\":1,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"fieldName\":\"machine.os.keyword\",\"parentFieldName\":\"machine.os\",\"title\":\"OS\",\"id\":\"9807212f-5078-4c42-879c-6f28b3033fc9\",\"enhancements\":{}}},\"6bf7a1b4-282e-43ac-aa46-81b97fa3acae\":{\"order\":2,\"width\":\"small\",\"grow\":true,\"type\":\"rangeSliderControl\",\"explicitInput\":{\"fieldName\":\"bytes\",\"title\":\"Bytes\",\"id\":\"6bf7a1b4-282e-43ac-aa46-81b97fa3acae\",\"enhancements\":{}}}}"
+    },
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":7,\"i\":\"4fe72258-efdd-4bdd-abdf-05262776290e\"},\"panelIndex\":\"4fe72258-efdd-4bdd-abdf-05262776290e\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"savedVis\":{\"title\":\"[Logs] Markdown Instructions\",\"description\":\"\",\"type\":\"markdown\",\"params\":{\"fontSize\":12,\"openLinksInNewTab\":true,\"markdown\":\"## Sample Logs Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}}},{\"type\":\"lens\",\"gridData\":{\"x\":24,\"y\":0,\"w\":11,\"h\":8,\"i\":\"a44f3813-2797-4593-bd35-6cede8306306\"},\"panelIndex\":\"a44f3813-2797-4593-bd35-6cede8306306\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Metric\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"64a4cc71-c831-4644-9022-3fc833b8be77\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs | STATS COUNT(*) | RENAME `COUNT(*)` as `Visits`\"},\"columns\":[{\"columnId\":\"Visits\",\"fieldName\":\"Visits\",\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs | STATS COUNT(*) | RENAME `COUNT(*)` as `Visits`\"},\"visualization\":{\"layerId\":\"64a4cc71-c831-4644-9022-3fc833b8be77\",\"layerType\":\"data\",\"metricAccessor\":\"Visits\"},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsMetric\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"title\":\"\"},{\"type\":\"lens\",\"gridData\":{\"x\":35,\"y\":0,\"w\":12,\"h\":8,\"i\":\"5fe87c12-e623-4fbb-81af-d3cea2fb7861\"},\"panelIndex\":\"5fe87c12-e623-4fbb-81af-d3cea2fb7861\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Metric\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"323d8ae0-0a4e-4540-84e2-0d36c8f15b46\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs | STATS COUNT_DISTINCT(clientip) | RENAME `COUNT_DISTINCT(clientip)` as `Unique Visitors`\"},\"columns\":[{\"columnId\":\"Unique Visitors\",\"fieldName\":\"Unique Visitors\",\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs | STATS COUNT_DISTINCT(clientip) | RENAME `COUNT_DISTINCT(clientip)` as `Unique Visitors`\"},\"visualization\":{\"layerId\":\"323d8ae0-0a4e-4540-84e2-0d36c8f15b46\",\"layerType\":\"data\",\"metricAccessor\":\"Unique Visitors\",\"palette\":{\"name\":\"custom\",\"type\":\"palette\",\"params\":{\"steps\":3,\"name\":\"custom\",\"reverse\":false,\"rangeType\":\"number\",\"rangeMin\":0,\"rangeMax\":null,\"progression\":\"fixed\",\"stops\":[{\"color\":\"#D23115\",\"stop\":500},{\"color\":\"#FCC400\",\"stop\":1000},{\"color\":\"#68BC00\",\"stop\":1640}],\"colorStops\":[{\"color\":\"#D23115\",\"stop\":0},{\"color\":\"#FCC400\",\"stop\":500},{\"color\":\"#68BC00\",\"stop\":1000}],\"continuity\":\"above\",\"maxSteps\":5}}},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsMetric\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"title\":\"\"},{\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":7,\"w\":24,\"h\":9,\"i\":\"8f731f6b-9bf3-44b8-bc3c-c4dfe6f1aef8\"},\"panelIndex\":\"8f731f6b-9bf3-44b8-bc3c-c4dfe6f1aef8\",\"embeddableConfig\":{\"attributes\":{\"title\":\"results over Over time\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"03e904c7-6fa2-4c18-953f-bd1c87c53826\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL timestamp=DATE_TRUNC(3 hour, @timestamp), status = CASE(    TO_INTEGER(response.keyword) >= 200 and TO_INTEGER(response.keyword) < 400, \\\"HTTP 2xx and 3xx\\\",    TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"HTTP 4xx\\\",     \\\"HTTP 5xx\\\")\\n| STATS results = COUNT(*) by `Over time` = BUCKET(timestamp, 50, ?t_start, ?t_end), status\"},\"columns\":[{\"columnId\":\"results\",\"fieldName\":\"results\",\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true},{\"columnId\":\"Over time\",\"fieldName\":\"Over time\",\"meta\":{\"type\":\"date\",\"esType\":\"date\"}},{\"columnId\":\"status\",\"fieldName\":\"status\",\"meta\":{\"type\":\"string\",\"esType\":\"keyword\"}}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL timestamp=DATE_TRUNC(3 hour, @timestamp), status = CASE(    TO_INTEGER(response.keyword) >= 200 and TO_INTEGER(response.keyword) < 400, \\\"HTTP 2xx and 3xx\\\",    TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"HTTP 4xx\\\",     \\\"HTTP 5xx\\\")\\n| STATS results = COUNT(*) by `Over time` = BUCKET(timestamp, 50, ?t_start, ?t_end), status\"},\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"None\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"area_percentage_stacked\",\"layers\":[{\"layerId\":\"03e904c7-6fa2-4c18-953f-bd1c87c53826\",\"seriesType\":\"area_percentage_stacked\",\"xAccessor\":\"Over time\",\"splitAccessor\":\"status\",\"accessors\":[\"results\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rule\":{\"type\":\"other\"},\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"eui_amsterdam_color_blind\",\"colorMode\":{\"type\":\"categorical\"}}}]},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"description\":\"\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{},\"description\":\"\"},\"title\":\"[Logs] Response Codes Over Time\"},{\"type\":\"lens\",\"gridData\":{\"x\":24,\"y\":8,\"w\":11,\"h\":8,\"i\":\"5fe9ddf8-b36b-4a81-b7b4-57278d7f4e7a\"},\"panelIndex\":\"5fe9ddf8-b36b-4a81-b7b4-57278d7f4e7a\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Metric\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"bc54f0c9-40ec-4082-92f5-3d6a6fdc4463\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"4xx\\\", \\\"Other\\\")\\n| STATS count = COUNT(*) by type\\n| EVAL count_4xx = CASE(type == \\\"4xx\\\", count), count_rest = CASE(type == \\\"Other\\\", count)\\n| DROP count, type\\n| STATS count_4xx = MAX(count_4xx), count_rest = MAX(count_rest)\\n| EVAL percentage = ROUND(count_4xx / TO_DOUBLE(count_4xx + count_rest), 3) * 100\\n| RENAME percentage as `HTTP 4xx (%)`\\n| DROP count_4xx, count_rest\"},\"columns\":[{\"columnId\":\"HTTP 4xx (%)\",\"fieldName\":\"HTTP 4xx (%)\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"4xx\\\", \\\"Other\\\")\\n| STATS count = COUNT(*) by type\\n| EVAL count_4xx = CASE(type == \\\"4xx\\\", count), count_rest = CASE(type == \\\"Other\\\", count)\\n| DROP count, type\\n| STATS count_4xx = MAX(count_4xx), count_rest = MAX(count_rest)\\n| EVAL percentage = ROUND(count_4xx / TO_DOUBLE(count_4xx + count_rest), 3) * 100\\n| RENAME percentage as `HTTP 4xx (%)`\\n| DROP count_4xx, count_rest\"},\"visualization\":{\"layerId\":\"bc54f0c9-40ec-4082-92f5-3d6a6fdc4463\",\"layerType\":\"data\",\"metricAccessor\":\"HTTP 4xx (%)\"},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsMetric\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"hidePanelTitles\":true,\"enhancements\":{}},\"title\":\"count_4xx & count_rest & HTTP 4xx of (empty)\"},{\"type\":\"lens\",\"gridData\":{\"x\":35,\"y\":8,\"w\":12,\"h\":8,\"i\":\"08ff3801-880c-492d-8bd2-64987ebcd20e\"},\"panelIndex\":\"08ff3801-880c-492d-8bd2-64987ebcd20e\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Metric\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"81ca7215-7fcf-4d72-98d7-911faade8c71\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 500, \\\"5xx\\\", \\\"Other\\\")\\n| STATS count = COUNT(*) by type\\n| EVAL count_5xx = CASE(type == \\\"5xx\\\", count), count_rest = CASE(type == \\\"Other\\\", count)\\n| DROP count, type\\n| STATS count_5xx = MAX(count_5xx), count_rest = MAX(count_rest)\\n| EVAL percentage = ROUND(count_5xx / TO_DOUBLE(count_5xx + count_rest), 3) * 100\\n| RENAME percentage as `HTTP 5xx (%)`\\n| DROP count_5xx, count_rest\"},\"columns\":[{\"columnId\":\"HTTP 5xx (%)\",\"fieldName\":\"HTTP 5xx (%)\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 500, \\\"5xx\\\", \\\"Other\\\")\\n| STATS count = COUNT(*) by type\\n| EVAL count_5xx = CASE(type == \\\"5xx\\\", count), count_rest = CASE(type == \\\"Other\\\", count)\\n| DROP count, type\\n| STATS count_5xx = MAX(count_5xx), count_rest = MAX(count_rest)\\n| EVAL percentage = ROUND(count_5xx / TO_DOUBLE(count_5xx + count_rest), 3) * 100\\n| RENAME percentage as `HTTP 5xx (%)`\\n| DROP count_5xx, count_rest\"},\"visualization\":{\"layerId\":\"81ca7215-7fcf-4d72-98d7-911faade8c71\",\"layerType\":\"data\",\"metricAccessor\":\"HTTP 5xx (%)\"},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsMetric\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"hidePanelTitles\":true,\"enhancements\":{}},\"title\":\"count_4xx & count_rest & HTTP 4xx of (empty) (copy)\"},{\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":16,\"w\":24,\"h\":15,\"i\":\"b7c1b7cb-4e8b-44cd-b47b-624922ab4881\"},\"panelIndex\":\"b7c1b7cb-4e8b-44cd-b47b-624922ab4881\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}}},\"panelRefName\":\"panel_b7c1b7cb-4e8b-44cd-b47b-624922ab4881\"},{\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":16,\"w\":22,\"h\":38,\"i\":\"243222f6-1f49-4cfd-85eb-68c1028f06cf\"},\"panelIndex\":\"243222f6-1f49-4cfd-85eb-68c1028f06cf\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}}},\"panelRefName\":\"panel_243222f6-1f49-4cfd-85eb-68c1028f06cf\"},{\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":31,\"w\":24,\"h\":11,\"i\":\"3b5a152d-3747-4c1c-8e4f-00395008210f\"},\"panelIndex\":\"3b5a152d-3747-4c1c-8e4f-00395008210f\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Unique Visits (Last hour) & Unique Visits (Total) & Bytes(Total - MB) & Bytes(Last hour - KB) of Type\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"60e6000b-e8d9-4143-b43c-f4c9b60ec127\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| SORT @timestamp\\n| EVAL t = now()\\n| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, \\\"Last hour\\\", \\\"Other\\\")\\n| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) by key, extension.keyword\\n| EVAL sum_last_hour = CASE(key == \\\"Last hour\\\", sum), sum_rest = CASE(key == \\\"Other\\\", sum), count_last_hour = CASE(key == \\\"Last hour\\\", count), count_rest = CASE(key == \\\"Other\\\", count)\\n| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) by key, extension.keyword\\n| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))\\n| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))\\n| EVAL bytes_transform = ROUND(total_bytes / 1000000.0, 1)\\n| EVAL bytes_transform_last_hour = ROUND(sum_last_hour / 1000.0, 2)\\n| KEEP count_last_hour, total_visits, bytes_transform, bytes_transform_last_hour, extension.keyword\\n| STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword\\n| RENAME total_visits as `Unique Visits (Total)`, count_last_hour as `Unique Visits (Last hour)`, bytes_transform as `Bytes(Total - MB)`, bytes_transform_last_hour as `Bytes(Last hour - KB)`, extension.keyword as `Type`\"},\"columns\":[{\"columnId\":\"Unique Visits (Last hour)\",\"fieldName\":\"Unique Visits (Last hour)\",\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true},{\"columnId\":\"Unique Visits (Total)\",\"fieldName\":\"Unique Visits (Total)\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"Bytes(Total - MB)\",\"fieldName\":\"Bytes(Total - MB)\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"Bytes(Last hour - KB)\",\"fieldName\":\"Bytes(Last hour - KB)\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"Type\",\"fieldName\":\"Type\",\"meta\":{\"type\":\"string\",\"esType\":\"keyword\"},\"inMetricDimension\":true}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| SORT @timestamp\\n| EVAL t = now()\\n| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, \\\"Last hour\\\", \\\"Other\\\")\\n| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) by key, extension.keyword\\n| EVAL sum_last_hour = CASE(key == \\\"Last hour\\\", sum), sum_rest = CASE(key == \\\"Other\\\", sum), count_last_hour = CASE(key == \\\"Last hour\\\", count), count_rest = CASE(key == \\\"Other\\\", count)\\n| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) by key, extension.keyword\\n| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))\\n| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))\\n| EVAL bytes_transform = ROUND(total_bytes / 1000000.0, 1)\\n| EVAL bytes_transform_last_hour = ROUND(sum_last_hour / 1000.0, 2)\\n| KEEP count_last_hour, total_visits, bytes_transform, bytes_transform_last_hour, extension.keyword\\n| STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword\\n| RENAME total_visits as `Unique Visits (Total)`, count_last_hour as `Unique Visits (Last hour)`, bytes_transform as `Bytes(Total - MB)`, bytes_transform_last_hour as `Bytes(Last hour - KB)`, extension.keyword as `Type`\"},\"visualization\":{\"layerId\":\"60e6000b-e8d9-4143-b43c-f4c9b60ec127\",\"layerType\":\"data\",\"columns\":[{\"columnId\":\"Unique Visits (Last hour)\",\"colorMode\":\"text\",\"palette\":{\"name\":\"custom\",\"type\":\"palette\",\"params\":{\"steps\":5,\"stops\":[{\"color\":\"#D23115\",\"stop\":10},{\"color\":\"#FCC400\",\"stop\":25},{\"color\":\"#68BC00\",\"stop\":26}],\"rangeType\":\"number\",\"rangeMin\":0,\"rangeMax\":null,\"continuity\":\"above\",\"colorStops\":[{\"color\":\"#D23115\",\"stop\":0},{\"color\":\"#FCC400\",\"stop\":10},{\"color\":\"#68BC00\",\"stop\":25}],\"name\":\"custom\"}}},{\"columnId\":\"Unique Visits (Total)\",\"colorMode\":\"text\",\"palette\":{\"name\":\"custom\",\"type\":\"palette\",\"params\":{\"steps\":5,\"stops\":[{\"color\":\"#D23115\",\"stop\":1000},{\"color\":\"#FCC400\",\"stop\":1500},{\"color\":\"#68BC00\",\"stop\":1501}],\"rangeType\":\"number\",\"rangeMin\":0,\"rangeMax\":null,\"continuity\":\"above\",\"colorStops\":[{\"color\":\"#D23115\",\"stop\":0},{\"color\":\"#FCC400\",\"stop\":1000},{\"color\":\"#68BC00\",\"stop\":1500}],\"name\":\"custom\"}}},{\"columnId\":\"Bytes(Total - MB)\"},{\"columnId\":\"Bytes(Last hour - KB)\"},{\"columnId\":\"Type\"}]},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsDatatable\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"hidePanelTitles\":true,\"enhancements\":{}},\"title\":\"SUM(bytes) & Unique Visits (Total - MB) & Bytes(Total) of Type\"},{\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":42,\"w\":24,\"h\":12,\"i\":\"26ecb41a-f605-4bc9-8c84-7936ce98f348\"},\"panelIndex\":\"26ecb41a-f605-4bc9-8c84-7936ce98f348\",\"embeddableConfig\":{\"hidePanelTitles\":false,\"enhancements\":{},\"attributes\":{\"title\":\"[Logs] Bytes distribution\",\"visualizationType\":\"lnsXY\",\"state\":{\"datasourceStates\":{\"formBased\":{\"layers\":{\"7d9a32b1-8cc2-410c-83a5-2eb66a3f0321\":{\"columnOrder\":[\"a8511a62-2b78-4ba4-9425-a417df6e059f\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3\"],\"columns\":{\"a8511a62-2b78-4ba4-9425-a417df6e059f\":{\"dataType\":\"number\",\"isBucketed\":true,\"label\":\"bytes\",\"operationType\":\"range\",\"params\":{\"maxBars\":\"auto\",\"ranges\":[{\"from\":0,\"label\":\"\",\"to\":1000}],\"type\":\"histogram\"},\"scale\":\"interval\",\"sourceField\":\"bytes\"},\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0\":{\"label\":\"Part of % of visits\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"___records___\",\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1\":{\"label\":\"Part of % of visits\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"___records___\",\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2\":{\"label\":\"Part of % of visits\",\"dataType\":\"number\",\"operationType\":\"overall_sum\",\"isBucketed\":false,\"scale\":\"ratio\",\"references\":[\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1\"],\"customLabel\":true},\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3\":{\"label\":\"Part of % of visits\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"scale\":\"ratio\",\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"divide\",\"args\":[\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2\"],\"location\":{\"min\":0,\"max\":30},\"text\":\"count() / overall_sum(count())\"}},\"references\":[\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0\",\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2\"],\"customLabel\":true},\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260\":{\"customLabel\":true,\"dataType\":\"number\",\"isBucketed\":false,\"label\":\"% of visits\",\"operationType\":\"formula\",\"params\":{\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":1}},\"formula\":\"count() / overall_sum(count())\",\"isFormulaBroken\":false},\"references\":[\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3\"],\"scale\":\"ratio\"}},\"incompleteColumns\":{},\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\"}},\"currentIndexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\"}},\"filters\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"visualization\":{\"axisTitlesVisibilitySettings\":{\"x\":false,\"yLeft\":false,\"yRight\":true},\"fittingFunction\":\"None\",\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"layers\":[{\"accessors\":[\"b5f3dc78-dba8-4db8-87b6-24a0b9cca260\"],\"layerId\":\"7d9a32b1-8cc2-410c-83a5-2eb66a3f0321\",\"position\":\"top\",\"seriesType\":\"bar_stacked\",\"showGridlines\":false,\"xAccessor\":\"a8511a62-2b78-4ba4-9425-a417df6e059f\",\"layerType\":\"data\"}],\"legend\":{\"isVisible\":true,\"position\":\"right\",\"legendSize\":\"auto\"},\"preferredSeriesType\":\"bar_stacked\",\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"valueLabels\":\"hide\",\"yLeftExtent\":{\"mode\":\"full\"},\"yRightExtent\":{\"mode\":\"full\"}}},\"references\":[{\"type\":\"index-pattern\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"name\":\"indexpattern-datasource-layer-7d9a32b1-8cc2-410c-83a5-2eb66a3f0321\"}],\"type\":\"lens\",\"savedObjectId\":\"16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d\"}},\"title\":\"[Logs] Bytes distribution\"},{\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":13,\"i\":\"ef74e09a-4bf9-4a38-8251-e754404871fd\"},\"panelIndex\":\"ef74e09a-4bf9-4a38-8251-e754404871fd\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Unique & 95th percentile of bytes & Median of bytes & count_5xx of url.keyword\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"8d5e3fae-adad-4bfc-8ec2-a1926a447315\":{\"index\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| KEEP bytes, clientip, url.keyword, response.keyword\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"4xx\\\", TO_INTEGER(response.keyword) >= 500, \\\"5xx\\\", \\\"Other\\\")\\n| STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword\\n| EVAL count_4xx = CASE(type == \\\"4xx\\\", Visits), count_5xx = CASE(type == \\\"5xx\\\", Visits), count_rest =  CASE(type == \\\"Other\\\", Visits)\\n| STATS count_4xx = SUM(count_4xx), count_5xx  = SUM(count_5xx), count_rest = SUM(count_rest), Unique = SUM(Unique),`95th percentile of bytes` = MAX(p95), `Median of bytes` = MAX(median)  BY url.keyword\\n| EVAL count_4xx = COALESCE(count_4xx, 0::LONG), count_5xx = COALESCE(count_5xx, 0::LONG), count_rest = COALESCE(count_rest, 0::LONG)\\n| EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)\\n| EVAL percentage_4xx = count_4xx / total_records, percentage_5xx = count_5xx / total_records\\n| EVAL percentage_4xx = ROUND(100 * percentage_4xx, 2)\\n| EVAL percentage_5xx = ROUND(100 * percentage_5xx, 2)\\n| DROP count_4xx, count_rest, total_records\\n| RENAME percentage_4xx as `HTTP 4xx`, percentage_5xx as `HTTP 5xx`\"},\"columns\":[{\"columnId\":\"Unique\",\"fieldName\":\"Unique\",\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true},{\"columnId\":\"95th percentile of bytes\",\"fieldName\":\"95th percentile of bytes\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"Median of bytes\",\"fieldName\":\"Median of bytes\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"url.keyword\",\"fieldName\":\"url.keyword\",\"meta\":{\"type\":\"string\",\"esType\":\"keyword\"},\"inMetricDimension\":true},{\"columnId\":\"count_5xx\",\"fieldName\":\"HTTP 5xx\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"},\"inMetricDimension\":true},{\"columnId\":\"0089839c-ab91-420e-bdec-9583ce4d6015\",\"fieldName\":\"HTTP 4xx\",\"meta\":{\"type\":\"number\",\"esType\":\"double\"}}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM kibana_sample_data_logs\\n| KEEP bytes, clientip, url.keyword, response.keyword\\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \\\"4xx\\\", TO_INTEGER(response.keyword) >= 500, \\\"5xx\\\", \\\"Other\\\")\\n| STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword\\n| EVAL count_4xx = CASE(type == \\\"4xx\\\", Visits), count_5xx = CASE(type == \\\"5xx\\\", Visits), count_rest =  CASE(type == \\\"Other\\\", Visits)\\n| STATS count_4xx = SUM(count_4xx), count_5xx  = SUM(count_5xx), count_rest = SUM(count_rest), Unique = SUM(Unique),`95th percentile of bytes` = MAX(p95), `Median of bytes` = MAX(median)  BY url.keyword\\n| EVAL count_4xx = COALESCE(count_4xx, 0::LONG), count_5xx = COALESCE(count_5xx, 0::LONG), count_rest = COALESCE(count_rest, 0::LONG)\\n| EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)\\n| EVAL percentage_4xx = count_4xx / total_records, percentage_5xx = count_5xx / total_records\\n| EVAL percentage_4xx = ROUND(100 * percentage_4xx, 2)\\n| EVAL percentage_5xx = ROUND(100 * percentage_5xx, 2)\\n| DROP count_4xx, count_rest, total_records\\n| RENAME percentage_4xx as `HTTP 4xx`, percentage_5xx as `HTTP 5xx`\"},\"visualization\":{\"layerId\":\"8d5e3fae-adad-4bfc-8ec2-a1926a447315\",\"layerType\":\"data\",\"columns\":[{\"columnId\":\"Unique\"},{\"columnId\":\"95th percentile of bytes\"},{\"columnId\":\"Median of bytes\"},{\"columnId\":\"url.keyword\"},{\"columnId\":\"count_5xx\",\"colorMode\":\"cell\",\"palette\":{\"name\":\"custom\",\"type\":\"palette\",\"params\":{\"steps\":5,\"stops\":[{\"color\":\"#FBDDD6\",\"stop\":10},{\"color\":\"#CC5642\",\"stop\":100}],\"rangeType\":\"number\",\"rangeMin\":5,\"rangeMax\":null,\"continuity\":\"above\",\"colorStops\":[{\"color\":\"#FBDDD6\",\"stop\":5},{\"color\":\"#CC5642\",\"stop\":10}],\"name\":\"custom\"}}},{\"columnId\":\"0089839c-ab91-420e-bdec-9583ce4d6015\",\"isTransposed\":false,\"isMetric\":true,\"colorMode\":\"cell\",\"palette\":{\"name\":\"custom\",\"type\":\"palette\",\"params\":{\"steps\":5,\"stops\":[{\"color\":\"#FBDDD6\",\"stop\":10},{\"color\":\"#CC5642\",\"stop\":100}],\"rangeType\":\"number\",\"rangeMin\":0.05,\"rangeMax\":null,\"continuity\":\"above\",\"colorStops\":[{\"color\":\"#FBDDD6\",\"stop\":0.05},{\"color\":\"#CC5642\",\"stop\":10}],\"name\":\"custom\"}}}]},\"adHocDataViews\":{\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\":{\"id\":\"e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a\",\"title\":\"kibana_sample_data_logs\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"kibana_sample_data_logs\",\"allowHidden\":false}}},\"visualizationType\":\"lnsDatatable\",\"type\":\"lens\"},\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}}}]",
+    "refreshInterval": {
+      "pause": false,
+      "value": 900000
+    },
+    "timeTo": "2022-10-26T09:00:00.000Z",
+    "timeFrom": "2022-10-19T09:00:00.000Z",
+    "timeRestore": true,
+    "title": "Logs dashboard with ES|QL"
+  },
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2024-09-18T12:44:30.513Z",
+  "created_at": "2024-09-17T10:56:39.390Z",
+  "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "references": [
+    {
+      "name": "b7c1b7cb-4e8b-44cd-b47b-624922ab4881:panel_b7c1b7cb-4e8b-44cd-b47b-624922ab4881",
+      "type": "visualization",
+      "id": "cb099a20-ea66-11eb-9425-113343a037e3"
+    },
+    {
+      "name": "243222f6-1f49-4cfd-85eb-68c1028f06cf:panel_243222f6-1f49-4cfd-85eb-68c1028f06cf",
+      "type": "visualization",
+      "id": "7cbd2350-2223-11e8-b802-5bcf64c2cfb4"
+    },
+    {
+      "type": "index-pattern",
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "26ecb41a-f605-4bc9-8c84-7936ce98f348:indexpattern-datasource-layer-7d9a32b1-8cc2-410c-83a5-2eb66a3f0321"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "controlGroup_612f8db8-9ba9-41cf-a809-d133fe9b83a8:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "controlGroup_9807212f-5078-4c42-879c-6f28b3033fc9:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "controlGroup_6bf7a1b4-282e-43ac-aa46-81b97fa3acae:rangeSliderDataView",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "version": "WzIyNiwxXQ=="
+}
