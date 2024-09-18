@@ -109,7 +109,7 @@ export const GroupByExpression = ({
   }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
-    if (fields) {
+    if (fields && fields.length > 0) {
       // if current field set doesn't contain selected field, clear selection
       const hasUnknownField = selectedTermsFieldsOptions.some(
         (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
@@ -197,7 +197,10 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={Number(errors.termSize.length) > 0} error={errors.termSize}>
+                <EuiFormRow
+                  isInvalid={Number(errors.termSize.length) > 0}
+                  error={errors.termSize as string[]}
+                >
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
@@ -218,7 +221,7 @@ export const GroupByExpression = ({
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   isInvalid={Number(errors.termField.length) > 0}
-                  error={errors.termField}
+                  error={errors.termField as string}
                 >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}

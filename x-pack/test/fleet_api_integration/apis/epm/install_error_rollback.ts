@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx');
   };
 
-  describe('package installation error handling and rollback', async () => {
+  describe('package installation error handling and rollback', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

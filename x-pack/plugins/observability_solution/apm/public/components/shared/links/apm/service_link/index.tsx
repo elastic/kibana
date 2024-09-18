@@ -12,16 +12,14 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
-import { SignalTypes } from '../../../../../../common/entities/types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { isApmSignal } from '../../../../../utils/get_signal_type';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
+import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -34,21 +32,13 @@ interface ServiceLinkProps {
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
   serviceOverflowCount?: number;
-  signalTypes?: SignalTypes[];
 }
-export function ServiceLink({
-  agentName,
-  query,
-  serviceName,
-  signalTypes = [SignalTypes.METRICS],
-}: ServiceLinkProps) {
+export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
   const apmRouter = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
-    : isApmSignal(signalTypes)
-    ? '/services/{serviceName}/overview'
-    : '/logs-services/{serviceName}/overview';
+    : '/services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {
     return (

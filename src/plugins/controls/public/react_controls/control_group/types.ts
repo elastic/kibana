@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
@@ -19,34 +20,33 @@ import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
+  PublishesDisabledActionIds,
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ParentIgnoreSettings } from '../..';
-import { ControlInputTransform } from '../../../common';
-import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle } from '../../types';
-import { DefaultControlState } from '../controls/types';
+import {
+  ControlGroupChainingSystem,
+  ControlGroupEditorConfig,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+  ControlStyle,
+  DefaultControlState,
+  ParentIgnoreSettings,
+} from '../../../common';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
-export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
-  [panelId: string]: ControlState;
-}
-
-export type ControlGroupUnsavedChanges = Omit<
-  ControlGroupRuntimeState,
-  'initialChildControlState'
-> & {
-  filters: Filter[] | undefined;
-};
-
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
+/**
+ * ----------------------------------------------------------------
+ * Control group API
+ * ----------------------------------------------------------------
+ */
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -55,50 +55,50 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
+  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
   PublishesTimeslice &
+  PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
-    asyncResetUnsavedChanges: () => Promise<void>;
-    autoApplySelections$: PublishingSubject<boolean>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
-    getLastSavedControlState: (controlUuid: string) => object;
-    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
-    untilInitialized: () => Promise<void>;
-    openAddDataControlFlyout: (settings?: {
-      controlInputTransform?: ControlInputTransform;
-    }) => void;
+    autoApplySelections$: PublishingSubject<boolean>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     labelPosition: PublishingSubject<ControlStyle>;
+
+    asyncResetUnsavedChanges: () => Promise<void>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    openAddDataControlFlyout: (options?: {
+      controlStateTransform?: ControlStateTransform;
+      onSave?: () => void;
+    }) => void;
+    untilInitialized: () => Promise<void>;
+
+    /** Public getters */
+    getEditorConfig: () => ControlGroupEditorConfig | undefined;
+    getLastSavedControlState: (controlUuid: string) => object;
+
+    /** Public setters */
+    setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
   };
 
-export interface ControlGroupRuntimeState {
-  chainingSystem: ControlGroupChainingSystem;
-  labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
-  autoApplySelections: boolean;
-  ignoreParentSettings?: ParentIgnoreSettings;
+/**
+ * ----------------------------------------------------------------
+ * Helper types
+ * ----------------------------------------------------------------
+ */
 
-  initialChildControlState: ControlPanelsState<ControlPanelState>;
-  /** TODO: Handle the editor config, which is used with the control group renderer component */
-  editorConfig?: {
-    hideDataViewSelector?: boolean;
-    hideWidthSettings?: boolean;
-    hideAdditionalSettings?: boolean;
-  };
-}
+export type ControlGroupUnsavedChanges = Omit<
+  ControlGroupRuntimeState,
+  'initialChildControlState'
+> & {
+  filters: Filter[] | undefined;
+};
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
-export interface ControlGroupSerializedState {
-  chainingSystem: ControlGroupChainingSystem;
-  panelsJSON: string;
-  ignoreParentSettingsJSON: string;
-  // In runtime state, we refer to this property as `labelPosition`;
-  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
-  controlStyle: ControlStyle;
-  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
-  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
-  showApplySelections: boolean | undefined;
-}
+export type ControlStateTransform<State extends DefaultControlState = DefaultControlState> = (
+  newState: Partial<State>,
+  controlType: string
+) => Partial<State>;

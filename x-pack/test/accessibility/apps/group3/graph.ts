@@ -12,24 +12,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header', 'home']);
+  const { common, header, home } = getPageObjects(['common', 'header', 'home']);
 
   describe('Graph app a11y tests', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('graph');
+      await header.waitUntilLoadingHasFinished();
+      await home.addSampleDataSet('flights');
+      await common.navigateToApp('graph');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
+      await header.waitUntilLoadingHasFinished();
+      await home.removeSampleDataSet('flights');
     });
 
     it('Graph listing page', async function () {

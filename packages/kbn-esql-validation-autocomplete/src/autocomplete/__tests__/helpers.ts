@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS } from '../factories';
+import { TIME_SYSTEM_PARAMS, getSafeInsertText } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
@@ -148,7 +149,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
+    list.push(...aggregationFunctionDefinitions);
     // right now all grouping functions are agg functions too
     list.push(...groupingFunctionDefinitions);
   }
@@ -157,7 +158,7 @@ export function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
-    list.push(...evalFunctionDefinitions);
+    list.push(...scalarFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
@@ -279,10 +280,7 @@ export function createCompletionContext(triggerCharacter?: string) {
 export function getPolicyFields(policyName: string) {
   return policies
     .filter(({ name }) => name === policyName)
-    .flatMap(({ enrichFields }) =>
-      // ok, this is a bit of cheating as it's using the same logic as in the helper
-      enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
-    );
+    .flatMap(({ enrichFields }) => enrichFields.map((field) => getSafeInsertText(field)));
 }
 
 export interface SuggestOptions {
@@ -319,22 +317,28 @@ export const setup = async (caret = '/') => {
     expected: Array<string | PartialSuggestionWithText>,
     opts?: SuggestOptions
   ) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+    try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    const expectedTexts = expected
-      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
-      .sort();
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
 
-    expect(resultTexts).toEqual(expectedTexts);
+      expect(resultTexts).toEqual(expectedTexts);
 
-    const expectedNonStringSuggestions = expected.filter(
-      (suggestion) => typeof suggestion !== 'string'
-    ) as PartialSuggestionWithText[];
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
 
-    for (const expectedSuggestion of expectedNonStringSuggestions) {
-      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
-      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
     }
   };
 

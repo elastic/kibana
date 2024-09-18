@@ -86,6 +86,9 @@ export const LogEntryTimestampColumn = dynamic(
 export const ScrollableLogTextStreamView = dynamic(
   () => import('./components/logging/log_text_stream/scrollable_log_text_stream_view')
 );
+export const OpenInLogsExplorerButton = dynamic(
+  () => import('./components/open_in_logs_explorer_button')
+);
 
 // State machine utils
 export {

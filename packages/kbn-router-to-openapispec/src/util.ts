@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -61,7 +62,7 @@ export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: st
 };
 
 export const getPathParameters = (path: string): KnownParameters => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+  return Array.from(path.matchAll(/\{([^{}?]+\??)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
     acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
     return acc;

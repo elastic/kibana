@@ -122,7 +122,10 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         bulkRequest.pipeline = pipelineId;
       }
 
-      const resp = await asCurrentUser.bulk(bulkRequest, { maxRetries: 0 });
+      const resp = await asCurrentUser.bulk(bulkRequest, {
+        maxRetries: 0,
+        requestTimeout: 3600000,
+      });
       if (resp.errors) {
         throw resp;
       } else {

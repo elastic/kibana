@@ -180,7 +180,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
+      // Make this selector tied to the field to avoid flakiness
+      // https://github.com/elastic/kibana/issues/191565
+      return testSubjects.click('infraAssetDetailsMetadataField.host.name');
     },
 
     async clickRemoveMetadataFilter() {
