@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../../common';
 
-export const migrateAgentPolicyToV8160: SavedObjectMigrationFn<AgentPolicy, AgentPolicy> = (
+export const backfillAgentPolicyToV4: SavedObjectModelDataBackfillFn<AgentPolicy, AgentPolicy> = (
   agentPolicyDoc
 ) => {
   const advancedSettings = agentPolicyDoc.attributes.advanced_settings;

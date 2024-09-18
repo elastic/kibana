@@ -91,7 +91,7 @@ import {
   migratePackagePolicyToV81102,
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
-import { settingsV1 } from './model_versions/v1';
+import { settingsV1 } from './model_versions/settings_v1';
 import {
   packagePolicyV13AdvancedFields,
   packagePolicyV10OnWriteScanFix,
@@ -100,7 +100,7 @@ import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
-import { migrateAgentPolicyToV8160 } from './migrations/to_v8_16_0';
+import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 
 /*
  * Saved object types and mappings
@@ -235,7 +235,6 @@ export const getSavedObjectTypes = (
         '8.4.0': migrateAgentPolicyToV840,
         '8.5.0': migrateAgentPolicyToV850,
         '8.9.0': migrateAgentPolicyToV890,
-        '8.16.0': migrateAgentPolicyToV8160,
       },
       modelVersions: {
         '1': {
@@ -277,6 +276,10 @@ export const getSavedObjectTypes = (
                 monitoring_http: { type: 'flattened', index: false },
                 monitoring_diagnostics: { type: 'flattened', index: false },
               },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyToV4,
             },
           ],
         },

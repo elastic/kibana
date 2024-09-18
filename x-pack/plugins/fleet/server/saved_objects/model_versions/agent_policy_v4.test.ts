@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectMigrationContext } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObject,
+  SavedObjectModelTransformationContext,
+} from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../../common';
 
-import { migrateAgentPolicyToV8160 } from './to_v8_16_0';
+import { backfillAgentPolicyToV4 } from './agent_policy_v4';
 
 describe('migrateAgentPolicyToV8160', () => {
   it('should migrate advanced_settings.agent_monitoring_http to monitoring_http', () => {
@@ -38,9 +41,9 @@ describe('migrateAgentPolicyToV8160', () => {
       },
     };
 
-    const migratedAgentPolicyDoc = migrateAgentPolicyToV8160(
+    const migratedAgentPolicyDoc = backfillAgentPolicyToV4(
       agentPolicyDoc,
-      {} as SavedObjectMigrationContext
+      {} as SavedObjectModelTransformationContext
     );
 
     expect(migratedAgentPolicyDoc.attributes.monitoring_http).toEqual({
@@ -79,9 +82,9 @@ describe('migrateAgentPolicyToV8160', () => {
       },
     };
 
-    const migratedAgentPolicyDoc = migrateAgentPolicyToV8160(
+    const migratedAgentPolicyDoc = backfillAgentPolicyToV4(
       agentPolicyDoc,
-      {} as SavedObjectMigrationContext
+      {} as SavedObjectModelTransformationContext
     );
 
     expect(migratedAgentPolicyDoc.attributes.monitoring_http).toEqual({
@@ -116,9 +119,9 @@ describe('migrateAgentPolicyToV8160', () => {
       },
     };
 
-    const migratedAgentPolicyDoc = migrateAgentPolicyToV8160(
+    const migratedAgentPolicyDoc = backfillAgentPolicyToV4(
       agentPolicyDoc,
-      {} as SavedObjectMigrationContext
+      {} as SavedObjectModelTransformationContext
     );
 
     expect(migratedAgentPolicyDoc.attributes.monitoring_http).toEqual({
