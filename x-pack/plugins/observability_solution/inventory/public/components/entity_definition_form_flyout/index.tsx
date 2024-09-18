@@ -66,7 +66,7 @@ export function EntityDefinitionFormFlyout({
           signal,
           params: {
             body: {
-              kuery: 'entity.type == "data_stream"',
+              kuery: 'entity.type:"data_stream"',
               start,
               end,
             },
