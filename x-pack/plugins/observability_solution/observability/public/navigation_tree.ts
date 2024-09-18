@@ -167,8 +167,10 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
           },
           {
             id: 'machine_learning-landing',
-            link: 'securitySolutionUI:machine_learning-landing',
             renderAs: 'panelOpener',
+            title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+              defaultMessage: 'Machine learning',
+            }),
             children: [
               {
                 children: [
