@@ -19,7 +19,7 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['dashboard', 'common']);
+  const { dashboard } = getPageObjects(['dashboard']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const screenshot = getService('screenshots');
@@ -50,14 +50,15 @@ export default function ({
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('dashboard with everything');
 
       await browser.setWindowSize(1300, 900);
     });
 
-    describe('default URL params', () => {
+    // Fails in with chrome 128+ https://github.com/elastic/kibana/issues/163207
+    describe.skip('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
         expect(globalNavShown).to.be(true);
@@ -82,7 +83,7 @@ export default function ({
       });
 
       it('renders as expected', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode',
           updateBaselines
@@ -91,7 +92,8 @@ export default function ({
       });
     });
 
-    describe('non-default URL params', () => {
+    // Fails in with chrome 128+ https://github.com/elastic/kibana/issues/163207
+    describe.skip('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
@@ -105,7 +107,7 @@ export default function ({
       });
 
       it('renders as expected', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode_with_url_params',
           updateBaselines
@@ -114,7 +116,7 @@ export default function ({
       });
 
       it('renders as expected when scrolling', async () => {
-        const panels = await PageObjects.dashboard.getDashboardPanels();
+        const panels = await dashboard.getDashboardPanels();
         const lastPanel = panels[panels.length - 1];
         const lastPanelHeight = -parseInt(await lastPanel.getComputedStyle('height'), 10);
         log.debug(

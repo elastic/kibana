@@ -42,7 +42,7 @@ import {
   useDebounceWithOptions,
   type MonacoMessage,
 } from './helpers';
-import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
+import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
@@ -51,7 +51,6 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
-import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
@@ -112,6 +111,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -128,12 +128,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: [],
     warnings: [],
   });
-  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
-
-  // as the duration on the history component is being calculated from
-  // the isLoading property, if this property is not defined we want
-  // to hide the history component
-  const hideHistoryComponent = hideQueryHistory || isLoading == null;
+  const hideHistoryComponent = hideQueryHistory;
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -358,7 +353,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   type: c.meta.esType as FieldType,
                 };
               }) || [];
-            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
+
+            return columns;
           } catch (e) {
             // no action yet
           }
@@ -378,6 +374,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           histogramBarTarget,
         };
       },
+      // @ts-expect-error To prevent circular type import, type defined here is partial of full client
+      getFieldsMetadata: fieldsMetadata?.getClient(),
     };
     return callbacks;
   }, [
@@ -391,8 +389,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
-    fieldsMetadata,
     histogramBarTarget,
+    fieldsMetadata,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -450,19 +448,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
     };
     if (isQueryLoading || isLoading) {
+      validateQuery();
       addQueriesToCache({
         queryString: code,
         timeZone,
-      });
-      validateQuery();
-      setRefetchHistoryItems(false);
-    } else {
-      updateCachedQueries({
-        queryString: code,
         status: clientParserStatus,
       });
-
-      setRefetchHistoryItems(true);
     }
   }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
 
@@ -567,6 +558,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onLayoutChangeRef.current = onLayoutChange;
 
   const codeEditorOptions: CodeEditorProps['options'] = {
+    hover: {
+      above: false,
+    },
     accessibilitySupport: 'off',
     autoIndent: 'none',
     automaticLayout: true,
@@ -744,7 +738,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-        refetchHistoryItems={refetchHistoryItems}
         isHelpMenuOpen={isLanguagePopoverOpen}
         setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />

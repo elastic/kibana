@@ -8,13 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { lastValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -23,7 +19,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
@@ -34,7 +35,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -48,8 +49,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
-      setControlFilters([...newFilters]);
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+      setControlFilters(newFilters ?? []);
     });
     return () => {
       subscription.unsubscribe();
@@ -131,15 +132,15 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         />
         <ControlGroupRenderer
           filters={filters}
-          getCreationOptions={async (initialInput, builder) => {
-            await builder.addDataControlFromField(initialInput, {
+          getCreationOptions={async (initialState, builder) => {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
-            await builder.addDataControlFromField(initialInput, {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               fieldName: 'bytes',
               width: 'medium',
@@ -147,14 +148,11 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              initialInput: {
-                ...initialInput,
-                viewMode: ViewMode.VIEW,
-              },
+              initialState,
             };
           }}
           query={query}
-          ref={setControlGroupAPI}
+          onApiAvailable={setControlGroupAPI}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">

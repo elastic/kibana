@@ -130,8 +130,8 @@
             "pluginId": "@kbn/expandable-flyout",
             "scope": "public",
             "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-public.FlyoutState",
-            "text": "FlyoutState"
+            "section": "def-public.FlyoutPanels",
+            "text": "FlyoutPanels"
           }
         ],
         "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts",
@@ -652,7 +652,8 @@
               "\nSet of properties that drive a settings menu"
             ],
             "signature": [
-              "{ hideSettings?: boolean | undefined; pushVsOverlay?: { disabled: boolean; tooltip: string; } | undefined; } | undefined"
+              "FlyoutCustomProps",
+              " | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,
@@ -745,18 +746,18 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-public.FlyoutState",
+        "id": "def-public.FlyoutPanels",
         "type": "Interface",
         "tags": [],
-        "label": "FlyoutState",
+        "label": "FlyoutPanels",
         "description": [],
-        "path": "packages/kbn-expandable-flyout/src/state.ts",
+        "path": "packages/kbn-expandable-flyout/src/store/state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.FlyoutState.left",
+            "id": "def-public.FlyoutPanels.left",
             "type": "Object",
             "tags": [],
             "label": "left",
@@ -773,13 +774,13 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.FlyoutState.right",
+            "id": "def-public.FlyoutPanels.right",
             "type": "Object",
             "tags": [],
             "label": "right",
@@ -796,13 +797,13 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.FlyoutState.preview",
+            "id": "def-public.FlyoutPanels.preview",
             "type": "Array",
             "tags": [],
             "label": "preview",
@@ -819,7 +820,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           }

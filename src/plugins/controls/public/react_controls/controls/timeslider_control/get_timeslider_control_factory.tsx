@@ -8,33 +8,39 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
+
 import { EuiInputPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
+  ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
   getUnchangingComparator,
   getViewModeSubject,
   useBatchedPublishingSubjects,
-  ViewMode,
 } from '@kbn/presentation-publishing';
-import { ControlFactory } from '../types';
-import { TimesliderControlState, TimesliderControlApi, Services, Timeslice } from './types';
+
+import { TIME_SLIDER_CONTROL } from '../../../../common';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import { ControlFactory } from '../types';
+import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
+import { TimeSliderPrepend } from './components/time_slider_prepend';
+import { initTimeRangePercentage } from './init_time_range_percentage';
 import { initTimeRangeSubscription } from './init_time_range_subscription';
 import {
   FROM_INDEX,
+  TO_INDEX,
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
-  TO_INDEX,
 } from './time_utils';
-import { initTimeRangePercentage } from './init_time_range_percentage';
-import './components/index.scss';
-import { TimeSliderPrepend } from './components/time_slider_prepend';
-import { TIME_SLIDER_CONTROL } from '../../../../common';
+import { Services, Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+
+const displayName = i18n.translate('controls.timesliderControl.displayName', {
+  defaultMessage: 'Time slider',
+});
 
 export const getTimesliderControlFactory = (
   services: Services
@@ -42,10 +48,7 @@ export const getTimesliderControlFactory = (
   return {
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
-    getDisplayName: () =>
-      i18n.translate('controls.timesliderControl.displayName', {
-        defaultMessage: 'Time slider',
-      }),
+    getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
@@ -204,6 +207,7 @@ export const getTimesliderControlFactory = (
       const api = buildApi(
         {
           ...defaultControl.api,
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
           timeslice$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
