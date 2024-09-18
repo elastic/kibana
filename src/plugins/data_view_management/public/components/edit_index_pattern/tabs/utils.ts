@@ -95,7 +95,11 @@ export function getTabs(
     'data-test-subj': 'tab-indexedFields',
   });
 
-  if (!isRollup(indexPattern.type) && scriptedFieldsEnabled) {
+  if (
+    !isRollup(indexPattern.type) &&
+    scriptedFieldsEnabled &&
+    indexPattern.getScriptedFields().length > 0
+  ) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,

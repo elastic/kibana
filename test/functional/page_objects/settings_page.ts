@@ -723,7 +723,7 @@ export class SettingsPageObject extends FtrService {
     popularity: string,
     script: string
   ) {
-    await this.clickAddScriptedField();
+    await this.goToAddScriptedField();
     await this.setScriptedFieldName(name);
     if (language) await this.setScriptedFieldLanguage(language);
     if (type) await this.setScriptedFieldType(type);
@@ -892,9 +892,12 @@ export class SettingsPageObject extends FtrService {
     await this.monacoEditor.setCodeEditorValue(script);
   }
 
-  async clickAddScriptedField() {
-    this.log.debug('click Add Scripted Field');
-    await this.testSubjects.click('addScriptedFieldLink');
+  async goToAddScriptedField() {
+    this.log.debug('go to Add Scripted Field url');
+    const url = await this.browser.getCurrentUrl();
+    const newUrl = url.split('#')[0];
+    await this.browser.get(newUrl + '/create-field/');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveScriptedField() {
