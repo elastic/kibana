@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
-import { ApmPluginStartDeps } from '../plugin';
+import { ApmPluginStartDeps } from '../../plugin';
 
 export enum ENTITY_FETCH_STATUS {
   LOADING = 'loading',
