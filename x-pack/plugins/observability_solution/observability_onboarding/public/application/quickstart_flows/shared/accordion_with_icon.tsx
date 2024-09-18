@@ -15,13 +15,14 @@ import {
 } from '@elastic/eui';
 
 interface AccordionWithIconProps
-  extends Omit<EuiAccordionProps, 'buttonContent' | 'buttonProps' | 'borders' | 'paddingSize'> {
+  extends Omit<EuiAccordionProps, 'buttonContent' | 'buttonProps' | 'paddingSize'> {
   title: string;
   icon: React.ReactNode;
 }
 export const AccordionWithIcon: FunctionComponent<AccordionWithIconProps> = ({
   title,
   icon,
+  borders = 'horizontal',
   children,
   ...rest
 }) => {
@@ -39,7 +40,7 @@ export const AccordionWithIcon: FunctionComponent<AccordionWithIconProps> = ({
         </EuiFlexGroup>
       }
       buttonProps={{ paddingSize: 'l' }}
-      borders="horizontal"
+      borders={borders}
       paddingSize="none"
     >
       <div css={{ paddingLeft: 36, paddingBottom: 24 }}>{children}</div>
