@@ -12,11 +12,13 @@ import { BehaviorSubject } from 'rxjs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
-import { OptionsListDisplaySettings } from '../options_list_control/types';
+import type {
+  OptionsListDisplaySettings,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
+  OptionsListSuggestions,
+} from '../../../../../common/options_list';
 
 export const getOptionsListMocks = () => {
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);
