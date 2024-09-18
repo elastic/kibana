@@ -27,8 +27,6 @@ export class DatasetQualityServerPlugin implements Plugin {
     core: CoreSetup<DatasetQualityPluginStartDependencies, DatasetQualityPluginStart>,
     plugins: DatasetQualityPluginSetupDependencies
   ) {
-    this.logger.debug('dataset_quality: Setup');
-
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -59,8 +57,6 @@ export class DatasetQualityServerPlugin implements Plugin {
   }
 
   start() {
-    this.logger.debug('dataset_quality: Started');
-
     return {};
   }
 }
