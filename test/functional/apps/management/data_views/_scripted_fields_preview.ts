@@ -33,8 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
-      // only able to go to add scripted field via url, not button
-      // await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(SCRIPTED_FIELD_NAME);
     });

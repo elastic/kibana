@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../../../types';
@@ -18,13 +19,18 @@ import { IndexPatternManagmentContext } from '../../../../../types';
 export const Header = () => {
   const { docLinks } = useKibana<IndexPatternManagmentContext>().services;
   const links = docLinks?.links;
-  // todo localize
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiCallOut title="Scripted fields are deprecated." color="warning" iconType="warning">
+        <EuiCallOut
+          title={i18n.translate('indexPatternManagement.editIndexPattern.deprecation.title', {
+            defaultMessage: 'Scripted fields are deprecated.',
+          })}
+          color="warning"
+          iconType="warning"
+        >
           <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.deprecation.title"
+            id="indexPatternManagement.editIndexPattern.deprecation.message"
             tagName="span"
             defaultMessage="Use {runtimeDocs} instead."
             values={{
