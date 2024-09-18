@@ -74,7 +74,7 @@ export const getMonitorSummary = ({
   checks,
   params,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
-  const { downThreshold, locationsThreshold, numberOfChecks } = getConditionType(params?.condition);
+  const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
   const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
   const formattedLocationName = Array.isArray(locationName)
@@ -120,9 +120,6 @@ export const getMonitorSummary = ({
       location: formattedLocationName,
       status: statusMessage,
       checks,
-      downThreshold,
-      locationsThreshold,
-      numberOfChecks,
       params,
     }),
     checks,

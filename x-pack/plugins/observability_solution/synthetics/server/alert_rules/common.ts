@@ -41,7 +41,7 @@ import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_syn
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule, MonitorStatusAlertDocument } from './status_rule/types';
-import { StatusRuleParams, getConditionType } from '../../common/rules/status_rule';
+import { StatusRuleParams } from '../../common/rules/status_rule';
 import { SyntheticsMonitorStatusAlertState } from '../../common/runtime_types/alert_rules/common';
 
 export const updateState = (
@@ -168,7 +168,6 @@ export const setRecoveredAlertsContext = ({
   tz: string;
   groupByLocation: boolean;
 }) => {
-  const { isDefaultRule } = getConditionType(params?.condition);
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();

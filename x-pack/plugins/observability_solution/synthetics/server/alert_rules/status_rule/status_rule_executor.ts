@@ -290,7 +290,6 @@ export class StatusRuleExecutor {
           const alertId = configId;
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
-            locationsThreshold,
           });
           return this.scheduleAlert({
             idWithLocation: configId,
@@ -322,14 +321,7 @@ export class StatusRuleExecutor {
     });
   }
 
-  getUngroupedDownSummary({
-    statusConfigs,
-    locationsThreshold,
-  }: {
-    statusConfigs: AlertStatusMetaData[];
-    locationsThreshold: number;
-  }) {
-    const { numberOfChecks, downThreshold } = getConditionType(this.params.condition);
+  getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
     const { ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({

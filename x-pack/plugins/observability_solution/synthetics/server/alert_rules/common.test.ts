@@ -287,13 +287,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
@@ -383,13 +376,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
@@ -474,13 +460,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs,
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
@@ -552,13 +531,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
@@ -634,13 +606,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
@@ -718,13 +683,6 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
-      condition: {
-        window: {
-          numberOfChecks: 1,
-        },
-        locationsThreshold: 1,
-        downThreshold: 1,
-      },
       groupByLocation: false,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
