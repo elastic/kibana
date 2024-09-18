@@ -12,6 +12,7 @@ import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeah
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
+import { cloneDeep } from 'lodash';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
@@ -19,7 +20,6 @@ import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
-import { cloneDeep } from 'lodash';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];

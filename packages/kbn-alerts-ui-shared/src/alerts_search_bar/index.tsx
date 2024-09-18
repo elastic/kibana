@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo, useEffect, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
@@ -15,7 +16,6 @@ import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
-import { cloneDeep } from 'lodash';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
@@ -110,11 +110,6 @@ export const AlertsSearchBar = ({
     let isFirstRender = true;
 
     if (initialFilters?.length && isFirstRender) {
-      console.log('adding filter', {
-        initialFilters,
-        isFirstRender,
-        getFilters: dataService.query.filterManager.getFilters(),
-      });
       dataService.query.filterManager.addFilters(cloneDeep(initialFilters));
     }
 
@@ -152,6 +147,7 @@ export const AlertsSearchBar = ({
     submitOnBlur,
     onQueryChange: onSearchQueryChange,
     suggestionsAbstraction: isSecurity ? undefined : SA_ALERTS,
+    filters: initialFilters,
   });
 };
 
