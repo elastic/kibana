@@ -11,17 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 function createDiscoverLocator({
   slo,
   showBad = false,
   showGood = false,
   timeRange,
+  uiSettings,
 }: {
   slo: SLOWithSummaryResponse;
   showBad: boolean;
   showGood: boolean;
   timeRange: TimeRange;
+  uiSettings?: IUiSettingsClient;
 }) {
   const indexId = v4();
   const filters: Filter[] = [];
@@ -51,10 +55,12 @@ function createDiscoverLocator({
     const customGoodFilter = buildEsQuery({
       kuery: goodKuery,
       filters: goodFilters,
+      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
     });
     const customTotalFilter = buildEsQuery({
       kuery: totalKuery,
       filters: totalFilters,
+      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
     });
     const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
 
@@ -160,12 +166,20 @@ export function getDiscoverLink({
   slo,
   timeRange,
   discover,
+  uiSettings,
 }: {
   slo: SLOWithSummaryResponse;
   timeRange: TimeRange;
   discover?: DiscoverStart;
+  uiSettings?: IUiSettingsClient;
 }) {
-  const locatorConfig = createDiscoverLocator({ slo, showBad: false, showGood: false, timeRange });
+  const locatorConfig = createDiscoverLocator({
+    slo,
+    showBad: false,
+    showGood: false,
+    timeRange,
+    uiSettings,
+  });
   return discover?.locator?.getRedirectUrl(locatorConfig);
 }
 
@@ -175,13 +189,15 @@ export function openInDiscover({
   showGood = false,
   timeRange,
   discover,
+  uiSettings,
 }: {
   slo: SLOWithSummaryResponse;
   showBad: boolean;
   showGood: boolean;
   timeRange: TimeRange;
   discover?: DiscoverStart;
+  uiSettings?: IUiSettingsClient;
 }) {
-  const locatorConfig = createDiscoverLocator({ slo, showBad, showGood, timeRange });
+  const locatorConfig = createDiscoverLocator({ slo, showBad, showGood, timeRange, uiSettings });
   discover?.locator?.navigate(locatorConfig);
 }

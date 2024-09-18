@@ -37,7 +37,7 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
-  const { discover } = useKibana().services;
+  const { discover, uiSettings } = useKibana().services;
 
   const { isLoading, data } = useGetPreviewData({
     range,
@@ -112,6 +112,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
                     mode: 'relative',
                   },
                   discover,
+                  uiSettings,
                 })}
                 data-test-subj="sloDetailDiscoverLink"
               >
