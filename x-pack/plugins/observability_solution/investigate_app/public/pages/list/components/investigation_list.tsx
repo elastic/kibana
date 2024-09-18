@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
@@ -24,12 +23,12 @@ import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
 import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
+import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
 import { InvestigationStats } from './investigation_stats';
 import { InvestigationsError } from './investigations_error';
 import { SearchBar } from './search_bar/search_bar';
-import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 
 export function InvestigationList() {
   const {
@@ -88,12 +87,7 @@ export function InvestigationList() {
         return isUserProfilesLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          <EuiToolTip
-            position="top"
-            content={
-              userProfiles?.[value]?.user.full_name ?? userProfiles?.[value]?.user.username ?? value
-            }
-          >
+          <EuiFlexGroup gutterSize="s" direction="row">
             <EuiAvatar
               name={
                 userProfiles?.[value]?.user.full_name ??
@@ -102,7 +96,12 @@ export function InvestigationList() {
               }
               size="s"
             />
-          </EuiToolTip>
+            <EuiText size="s">
+              {userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value}
+            </EuiText>
+          </EuiFlexGroup>
         );
       },
     },
