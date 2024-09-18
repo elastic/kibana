@@ -42,6 +42,7 @@ export const builtInContainersFromEcsEntityDefinition: EntityDefinition =
       },
       'container.name',
       'container.image.name',
+      'container.image.tag',
       'container.runtime',
       'host.name',
       'host.ip',

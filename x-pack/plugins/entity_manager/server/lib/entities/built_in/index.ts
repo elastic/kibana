@@ -6,9 +6,9 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { builtInServicesFromEcsEntityDefinition } from './services';
-import { builtInHostsFromEcsEntityDefinition } from './hosts';
-import { builtInContainersFromEcsEntityDefinition } from './containers';
+import { builtInServicesFromEcsEntityDefinition } from './services_from_ecs_data';
+import { builtInHostsFromEcsEntityDefinition } from './hosts_from_ecs_data';
+import { builtInContainersFromEcsEntityDefinition } from './containers_from_ecs_data';
 
 export { BUILT_IN_ID_PREFIX } from './constants';
 
