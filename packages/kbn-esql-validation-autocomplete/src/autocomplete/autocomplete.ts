@@ -1942,10 +1942,18 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
       ];
     }
     case 'nulls': {
+      const end = innerText.length + 1;
+      const start = end - nulls.length;
       const suggestions: SuggestionRawDefinition[] = [];
       for (const modifier of Object.values(sortModifierSuggestions)) {
         if (modifier.label.startsWith(nulls)) {
-          suggestions.push(modifier);
+          suggestions.push({
+            ...modifier,
+            rangeToReplace: {
+              start,
+              end,
+            },
+          });
         }
       }
       return suggestions;
