@@ -361,6 +361,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       optimized: v.value,
                     });
                   }}
+                  data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
                 />
                 <EuiSpacer size="m" />
               </Fragment>
@@ -378,6 +379,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           />
         }
         initialIsOpen={isUpdate}
+        data-test-subj={'mlModelsStartDeploymentModalAdvancedConfiguration'}
       >
         <EuiSpacer size={'m'} />
 
@@ -417,6 +419,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 { defaultMessage: 'vCPUs level selector' }
               )}
               aria-describedby={'vCpuRangeHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalVCPULevel'}
             />
           </EuiFormRow>
 
@@ -448,11 +451,15 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 });
               }}
               aria-describedby={'adaptiveResourcesHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalAdaptiveResources'}
             />
 
             <EuiSpacer size={'s'} />
 
-            <EuiFormHelpText id={'adaptiveResourcesHelp'}>
+            <EuiFormHelpText
+              id={'adaptiveResourcesHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalVCPULevelHelpText'}
+            >
               <FormattedMessage
                 id={'xpack.ml.trainedModels.modelsList.startDeployment.adaptiveResourcesHelp'}
                 defaultMessage={

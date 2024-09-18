@@ -504,49 +504,78 @@ export function TrainedModelsTableProvider(
       await this.assertDeployModelFlyoutExists();
     }
 
-    async assertNumOfAllocations(expectedValue: number) {
-      const actualValue = await testSubjects.getAttribute(
-        'mlModelsStartDeploymentModalNumOfAllocations',
-        'value'
+    async assertOptimizedFor(expectedValue: 'optimizedForIngest' | 'optimizedForSearch') {
+      const element = await testSubjects.find(
+        `mlModelsStartDeploymentModalOptimized_${expectedValue}`
       );
-      expect(actualValue).to.eql(
+      const inputElement = await element.findByTagName('input');
+      const isChecked = await inputElement.getAttribute('checked');
+
+      expect(isChecked).to.eql(
+        'true',
+        `Expected optimized for ${expectedValue} to be selected, got ${isChecked}`
+      );
+    }
+
+    public async setOptimizedFor(optimized: 'optimizedForIngest' | 'optimizedForSearch') {
+      const element = await testSubjects.find(`mlModelsStartDeploymentModalOptimized_${optimized}`);
+      await element.click();
+      await this.assertOptimizedFor(optimized);
+    }
+
+    public async setVCPULevel(value: 'low' | 'medium' | 'high') {
+      const valuesMap = {
+        low: 0.5,
+        medium: 1.5,
+        high: 2.5,
+      };
+      await mlCommonUI.setSliderValue('mlModelsStartDeploymentModalVCPULevel', valuesMap[value]);
+      await mlCommonUI.assertSliderValue('mlModelsStartDeploymentModalVCPULevel', valuesMap[value]);
+    }
+
+    public async assertAdvancedConfigurationOpen(expectedValue: boolean) {
+      const panelElement = await testSubjects.find(
+        'mlModelsStartDeploymentModalAdvancedConfiguration'
+      );
+      const isOpen = await panelElement.elementHasClass('euiPanel-isOpen');
+
+      expect(isOpen).to.eql(
         expectedValue,
-        `Expected number of allocations to equal ${expectedValue}, got ${actualValue}`
+        `Expected Advanced configuration to be ${expectedValue ? 'open' : 'closed'}`
       );
     }
 
-    public async setNumOfAllocations(value: number) {
-      await testSubjects.setValue('mlModelsStartDeploymentModalNumOfAllocations', value.toString());
-      await this.assertNumOfAllocations(value);
-    }
-
-    public async setPriority(value: 'low' | 'normal') {
-      await mlCommonUI.selectButtonGroupValue(
-        'mlModelsStartDeploymentModalPriority',
-        value.toString(),
-        value === 'normal'
-          ? 'mlModelsStartDeploymentModalNormalPriority'
-          : 'mlModelsStartDeploymentModalLowPriority'
+    public async toggleAdvancedConfiguration(open: boolean) {
+      const panelElement = await testSubjects.find(
+        'mlModelsStartDeploymentModalAdvancedConfiguration'
       );
-    }
-
-    public async setThreadsPerAllocation(value: number) {
-      await mlCommonUI.selectButtonGroupValue(
-        'mlModelsStartDeploymentModalThreadsPerAllocation',
-        value.toString(),
-        `mlModelsStartDeploymentModalThreadsPerAllocation_${value}`
-      );
+      const toggleButton = await panelElement.findByTagName('button');
+      await toggleButton.click();
+      await this.assertAdvancedConfigurationOpen(open);
     }
 
     public async startDeploymentWithParams(
       modelId: string,
-      params: { priority: 'low' | 'normal'; numOfAllocations: number; threadsPerAllocation: number }
+      params: {
+        optimized: 'optimizedForIngest' | 'optimizedForSearch';
+        vCPULevel?: 'low' | 'medium' | 'high';
+        adaptiveResources?: boolean;
+      }
     ) {
       await this.openStartDeploymentModal(modelId);
 
-      await this.setPriority(params.priority);
-      await this.setNumOfAllocations(params.numOfAllocations);
-      await this.setThreadsPerAllocation(params.threadsPerAllocation);
+      await this.setOptimizedFor(params.optimized);
+
+      const hasAdvancedConfiguration =
+        params.vCPULevel !== undefined || params.adaptiveResources !== undefined;
+
+      if (hasAdvancedConfiguration) {
+        await this.toggleAdvancedConfiguration(true);
+      }
+
+      if (params.vCPULevel) {
+        await this.setVCPULevel(params.vCPULevel);
+      }
 
       await testSubjects.click('mlModelsStartDeploymentModalStartButton');
       await this.assertStartDeploymentModalExists(false);

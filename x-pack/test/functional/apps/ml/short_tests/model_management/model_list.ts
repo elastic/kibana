@@ -495,9 +495,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           it(`starts deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
-              priority: 'normal',
-              numOfAllocations: 1,
-              threadsPerAllocation: 2,
+              vCPULevel: 'medium',
+              optimized: 'optimizedForSearch',
+              adaptiveResources: false,
             });
             await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, false);
           });
