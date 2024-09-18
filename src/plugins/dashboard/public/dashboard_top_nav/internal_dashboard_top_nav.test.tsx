@@ -13,8 +13,9 @@ import { buildMockDashboard } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardAPIContext } from '../dashboard_app/dashboard_app';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { DashboardContext } from '../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../dashboard_api/types';
 
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
@@ -42,9 +43,9 @@ describe('Internal dashboard top nav', () => {
 
   it('should not render the managed badge by default', async () => {
     const component = render(
-      <DashboardAPIContext.Provider value={buildMockDashboard()}>
+      <DashboardContext.Provider value={buildMockDashboard() as DashboardApi}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
-      </DashboardAPIContext.Provider>
+      </DashboardContext.Provider>
     );
 
     expect(component.queryByText('Managed')).toBeNull();
@@ -54,9 +55,9 @@ describe('Internal dashboard top nav', () => {
     const container = buildMockDashboard();
     container.dispatch.setManaged(true);
     const component = render(
-      <DashboardAPIContext.Provider value={container}>
+      <DashboardContext.Provider value={container as DashboardApi}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
-      </DashboardAPIContext.Provider>
+      </DashboardContext.Provider>
     );
 
     expect(component.getByText('Managed')).toBeInTheDocument();
