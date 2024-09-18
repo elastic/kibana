@@ -80,9 +80,9 @@ function getFieldAgg(
             ...(fieldConfig?.filterBy
               ? [
                   {
-                    wildcard: {
+                    term: {
                       [fieldConfig.filterBy.field]: {
-                        value: `*${fieldConfig.filterBy.query}*`,
+                        value: fieldConfig.filterBy.query,
                       },
                     },
                   },

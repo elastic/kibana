@@ -54,15 +54,9 @@ export type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, undefined>;
 export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 
 /**
- * Returns a filterBy object for the by_field config.
+ * Returns a filterBy object based on the partition_field value.
  */
-const getFilterBy = (
-  currentEntity: Entity,
-  entities: Entity[]
-): Pick<UiPartitionFieldConfig, 'filterBy'> | null => {
-  if (currentEntity.fieldType !== 'by_field') {
-    return null;
-  }
+const getFilterBy = (entities: Entity[]): Pick<UiPartitionFieldConfig, 'filterBy'> | null => {
   const query = entities.find((e) => e.fieldType === 'partition_field')?.fieldValue;
 
   if (!query) return null;
@@ -88,7 +82,7 @@ const getDefaultFieldConfig = (
       applyTimeRange,
       anomalousOnly: isAnomalousOnly,
       sort: { by: 'anomaly_score', order: 'desc' },
-      ...getFilterBy(f, entities),
+      ...(f.fieldType === 'by_field' ? getFilterBy(entities) : {}),
     };
     return acc;
   }, {} as UiPartitionFieldsConfig);
