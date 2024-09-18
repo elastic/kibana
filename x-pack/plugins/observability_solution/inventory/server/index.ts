@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  PluginConfigDescriptor,
-  PluginInitializer,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import type { InventoryConfig } from './config';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
 import { InventoryPlugin } from './plugin';
 import type {
   InventoryServerSetup,
@@ -22,16 +17,10 @@ export type { InventoryServerRouteRepository } from './routes/get_global_invento
 
 export type { InventoryServerSetup, InventoryServerStart };
 
-import { config as configSchema } from './config';
-
-export const config: PluginConfigDescriptor<InventoryConfig> = {
-  schema: configSchema,
-};
-
 export const plugin: PluginInitializer<
   InventoryServerSetup,
   InventoryServerStart,
   InventorySetupDependencies,
   InventoryStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InventoryConfig>) =>
+> = async (pluginInitializerContext: PluginInitializerContext) =>
   new InventoryPlugin(pluginInitializerContext);
