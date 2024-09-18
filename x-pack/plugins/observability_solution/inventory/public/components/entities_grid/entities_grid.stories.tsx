@@ -43,3 +43,23 @@ export const Example: Story<{}> = () => {
     />
   );
 };
+
+export const EmptyGridExample: Story<{}> = () => {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
+    id: ENTITY_LAST_SEEN,
+    direction: 'desc',
+  });
+
+  return (
+    <EntitiesGrid
+      entities={[]}
+      loading={false}
+      sortDirection={sort.direction}
+      sortField={sort.id}
+      onChangePage={setPageIndex}
+      onChangeSort={setSort}
+      pageIndex={pageIndex}
+    />
+  );
+};

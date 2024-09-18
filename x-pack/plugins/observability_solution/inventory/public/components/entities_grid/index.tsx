@@ -40,7 +40,7 @@ const columns: EuiDataGridColumn[] = [
   {
     id: ENTITY_TYPE,
     displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
-      defaultMessage: 'type',
+      defaultMessage: 'Type',
     }),
     isSortable: true,
   },
@@ -88,56 +88,59 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
+  const CellValue = useCallback(
+    ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+      const entity = entities[rowIndex];
+      if (entity === undefined) {
+        return null;
+      }
+
+      const columnEntityTableId = columnId as EntityColumnIds;
+      switch (columnEntityTableId) {
+        case ENTITY_TYPE:
+          return <EuiBadge color="hollow">{entity[columnEntityTableId]}</EuiBadge>;
+        case ENTITY_LAST_SEEN:
+          return (
+            <FormattedMessage
+              id="xpack.inventory.entitiesGrid.euiDataGrid.lastSeen"
+              defaultMessage="{date} @ {time}"
+              values={{
+                date: (
+                  <FormattedDate
+                    value={entity[columnEntityTableId]}
+                    month="short"
+                    day="numeric"
+                    year="numeric"
+                  />
+                ),
+                time: (
+                  <FormattedTime
+                    value={entity[columnEntityTableId]}
+                    hour12={false}
+                    hour="2-digit"
+                    minute="2-digit"
+                    second="2-digit"
+                  />
+                ),
+              }}
+            />
+          );
+        case ENTITY_DISPLAY_NAME:
+          return (
+            // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
+            <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
+              {entity[columnEntityTableId]}
+            </EuiLink>
+          );
+        default:
+          return entity[columnId as EntityColumnIds] || '';
+      }
+    },
+    [entities]
+  );
+
   if (loading) {
     return <EuiLoadingSpinner size="s" />;
-  }
-
-  function CellValue({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
-    const entity = entities[rowIndex];
-    if (entity === undefined) {
-      return null;
-    }
-
-    const columnEntityTableId = columnId as EntityColumnIds;
-    switch (columnEntityTableId) {
-      case ENTITY_TYPE:
-        return <EuiBadge color="hollow">{entity[columnEntityTableId]}</EuiBadge>;
-      case ENTITY_LAST_SEEN:
-        return (
-          <FormattedMessage
-            id="xpack.inventory.entitiesGrid.euiDataGrid.lastSeen"
-            defaultMessage="{date} @ {time}"
-            values={{
-              date: (
-                <FormattedDate
-                  value={entity[columnEntityTableId]}
-                  month="short"
-                  day="numeric"
-                  year="numeric"
-                />
-              ),
-              time: (
-                <FormattedTime
-                  value={entity[columnEntityTableId]}
-                  hour12={false}
-                  hour="2-digit"
-                  minute="2-digit"
-                  second="2-digit"
-                />
-              ),
-            }}
-          />
-        );
-      case ENTITY_DISPLAY_NAME:
-        return (
-          // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
-          <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
-            {entity[columnEntityTableId]}
-          </EuiLink>
-        );
-      default:
-        return entity[columnId as EntityColumnIds] || '';
-    }
   }
 
   const currentPage = pageIndex + 1;
@@ -165,7 +168,8 @@ export function EntitiesGrid({
                   values={{
                     currentItems: (
                       <strong>
-                        {pageIndex * PAGE_SIZE + 1}-{PAGE_SIZE * currentPage}
+                        {Math.min(entities.length, pageIndex * PAGE_SIZE + 1)}-
+                        {Math.min(entities.length, PAGE_SIZE * currentPage)}
                       </strong>
                     ),
                     total: entities.length,

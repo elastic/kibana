@@ -14,11 +14,15 @@ import { getLatestEntities } from './get_latest_entities';
 export const listLatestEntitiesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities',
   params: t.type({
-    query: t.type({
-      sortField: t.string,
-      sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-      entityTypes: jsonRt.pipe(t.array(entityTypeRt)),
-    }),
+    query: t.intersection([
+      t.type({
+        sortField: t.string,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+      }),
+      t.partial({
+        entityTypes: jsonRt.pipe(t.array(entityTypeRt)),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:inventory'],

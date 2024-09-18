@@ -27,8 +27,6 @@ export function InventoryPage() {
           query: {
             sortDirection,
             sortField,
-            // TODO: update this to read data from the entity type search filter https://github.com/elastic/kibana/issues/192329
-            entityTypes: JSON.stringify(['service', 'host', 'container']),
           },
         },
         signal,

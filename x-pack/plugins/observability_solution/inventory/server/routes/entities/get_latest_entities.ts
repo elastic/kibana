@@ -33,6 +33,8 @@ export interface LatestEntity {
   [ENTITY_ID]: string;
 }
 
+const DEFAULT_ENTITY_TYPES = ['service', 'host', 'container'];
+
 export async function getLatestEntities({
   inventoryEsClient,
   sortDirection,
@@ -42,11 +44,12 @@ export async function getLatestEntities({
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
   sortField: string;
-  entityTypes: EntityType[];
+  entityTypes?: EntityType[];
 }) {
+  const entityTypesFilter = entityTypes?.length ? entityTypes : DEFAULT_ENTITY_TYPES;
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | WHERE ${ENTITY_TYPE} IN (${entityTypes.map((entityType) => `"${entityType}"`).join()}) 
+     | WHERE ${ENTITY_TYPE} IN (${entityTypesFilter.map((entityType) => `"${entityType}"`).join()}) 
      | WHERE ${ENTITY_DEFINITION_ID} IN (${[
       BUILTIN_SERVICES_FROM_ECS_DATA,
       BUILTIN_HOSTS_FROM_ECS_DATA,
