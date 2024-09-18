@@ -14,9 +14,7 @@
     ],
     "requiredPlugins": [
       "cloud",
-      "dataViews"
-    ],
-    "optionalPlugins": [
+      "dataViews",
       "usageCollection"
     ]
   }

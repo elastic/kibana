@@ -20,6 +20,7 @@ import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
+import { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
@@ -69,6 +70,7 @@ export class Server {
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
+  private readonly featureFlags: FeatureFlagsService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
   private readonly log: Logger;
@@ -118,6 +120,7 @@ export class Server {
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
     this.context = new ContextService(core);
+    this.featureFlags = new FeatureFlagsService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
@@ -325,9 +328,11 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
+    const featureFlagsSetup = this.featureFlags.setup();
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
+      featureFlags: featureFlagsSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
@@ -352,6 +357,7 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
       executionContext: executionContextSetup,
+      featureFlags: featureFlagsSetup,
       http: httpSetup,
       i18n: i18nServiceSetup,
       savedObjects: savedObjectsSetup,
@@ -432,6 +438,8 @@ export class Server {
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
+    const featureFlagsStart = this.featureFlags.start();
+
     this.status.start();
 
     this.coreStart = {
@@ -441,6 +449,7 @@ export class Server {
       docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
       executionContext: executionContextStart,
+      featureFlags: featureFlagsStart,
       http: httpStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
@@ -484,6 +493,7 @@ export class Server {
     await this.status.stop();
     await this.logging.stop();
     await this.customBranding.stop();
+    await this.featureFlags.stop();
     this.node.stop();
     this.deprecations.stop();
     this.security.stop();

@@ -130,6 +130,7 @@ export interface Props {
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  isSideNavCollapsed$: Observable<boolean>;
   toggleSideNav: (isCollapsed: boolean) => void;
 }
 
@@ -248,7 +249,12 @@ export const ProjectHeader = ({
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <Router history={application.history}>
-                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
+                <ProjectNavigation
+                  isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                  toggleSideNav={toggleSideNav}
+                >
+                  {children}
+                </ProjectNavigation>
               </Router>
 
               <EuiHeaderSectionItem>
