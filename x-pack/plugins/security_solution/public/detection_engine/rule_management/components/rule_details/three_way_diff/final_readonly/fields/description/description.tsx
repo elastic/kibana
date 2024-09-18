@@ -10,14 +10,6 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleDescription } from '../../../../../../../../../common/api/detection_engine';
 
-interface DescriptionProps {
-  description: RuleDescription;
-}
-
-function Description({ description }: DescriptionProps) {
-  return <>{description}</>;
-}
-
 interface DescriptionReadOnlyProps {
   description: RuleDescription;
 }
@@ -33,4 +25,12 @@ export function DescriptionReadOnly({ description }: DescriptionReadOnlyProps) {
       ]}
     />
   );
+}
+
+interface DescriptionProps {
+  description: RuleDescription;
+}
+
+function Description({ description }: DescriptionProps) {
+  return <>{description}</>;
 }

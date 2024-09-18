@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type {
   DiffableAllFields,
@@ -77,10 +78,12 @@ export function getQueryLanguageLabel(language: string) {
 }
 
 /**
- * Assigns type `Filter[]` to an array if every item in has a `meta` property.
+ * Assigns type `Filter[]` to an array if every item in it has a `meta` property.
  */
 export function isFilters(maybeFilters: unknown[]): maybeFilters is Filter[] {
-  return maybeFilters.every((f) => typeof f === 'object' && f !== null && 'meta' in f);
+  return maybeFilters.every(
+    (f) => typeof f === 'object' && f !== null && 'meta' in f && isPlainObject(f.meta)
+  );
 }
 
 type DataSourceProps =

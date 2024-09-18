@@ -10,14 +10,6 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleName } from '../../../../../../../../../common/api/detection_engine';
 
-interface NameProps {
-  name: RuleName;
-}
-
-function Name({ name }: NameProps) {
-  return <>{name}</>;
-}
-
 interface NameReadOnlyProps {
   name: RuleName;
 }
@@ -33,4 +25,12 @@ export function NameReadOnly({ name }: NameReadOnlyProps) {
       ]}
     />
   );
+}
+
+interface NameProps {
+  name: RuleName;
+}
+
+function Name({ name }: NameProps) {
+  return <>{name}</>;
 }
