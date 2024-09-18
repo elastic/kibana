@@ -8,20 +8,27 @@ exports[`Header should render normally 1`] = `
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiText emotion-euiText-s"
+      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
     >
-      <p>
-        <span>
-          Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
-        </span>
-        <br />
+      <p
+        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+      >
         <span
-          color="warning"
+          aria-hidden="true"
+          class="emotion-euiCallOut__icon"
+          color="inherit"
           data-euiicon-type="warning"
-          style="margin-right: 4px;"
         />
+        Scripted fields are deprecated.
+      </p>
+      <div
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
+      >
         <span>
-          Scripted fields are deprecated. Use 
+          Use 
           <button
             class="euiLink emotion-euiLink-primary"
             type="button"
@@ -29,6 +36,16 @@ exports[`Header should render normally 1`] = `
             runtime fields
           </button>
            instead.
+        </span>
+      </div>
+    </div>
+    <br />
+    <div
+      class="euiText emotion-euiText-s"
+    >
+      <p>
+        <span>
+          Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
         </span>
       </p>
     </div>
