@@ -42,7 +42,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -69,7 +69,6 @@ import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_mainte
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
-import { partiallyUpdateRuleWithEs } from '../saved_objects/partially_update_rule';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';

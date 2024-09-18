@@ -72,7 +72,6 @@ export async function partiallyUpdateRule(
 }
 
 // direct, partial update to a rule saved object via ElasticsearchClient
-// using namespace set in the client
 export async function partiallyUpdateRuleWithEs(
   esClient: ElasticsearchClient,
   id: string,
