@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,8 +19,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ONBOARDING_VIDEO_SOURCE } from '../../../../../common/constants';
-import { useStoredHasVideoVisited } from '../../../../hooks/use_stored_state';
-import { useOnboardingContext } from '../../../onboarding_context';
 import * as i18n from './translations';
 
 // Not ideal, but we could not find any other way to remove the padding from the modal body
@@ -39,20 +37,13 @@ interface OnboardingHeaderVideoModalProps {
 export const OnboardingHeaderVideoModal = React.memo<OnboardingHeaderVideoModalProps>(
   ({ onClose }) => {
     const modalTitle = useGeneratedHtmlId();
-    const { spaceId } = useOnboardingContext();
-    const [isVideoVisited, setIsVideoVisited] = useStoredHasVideoVisited(spaceId);
-
-    const closeModal = useCallback(() => {
-      setIsVideoVisited(true);
-      onClose();
-    }, [onClose, setIsVideoVisited]);
 
     return (
       <EuiModal
         data-test-subj="data-ingestion-hub-video-modal"
         aria-labelledby={modalTitle}
         maxWidth={550}
-        onClose={closeModal}
+        onClose={onClose}
         className={modalStyles}
       >
         <EuiModalBody>
@@ -79,10 +70,8 @@ export const OnboardingHeaderVideoModal = React.memo<OnboardingHeaderVideoModalP
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="video-modal-button" color="primary" onClick={closeModal}>
-                {isVideoVisited
-                  ? i18n.ONBOARDING_HEADER_VIDEO_MODAL_BUTTON_CLOSE
-                  : i18n.ONBOARDING_HEADER_VIDEO_MODAL_BUTTON}
+              <EuiButton data-test-subj="video-modal-button" color="primary" onClick={onClose}>
+                {i18n.ONBOARDING_HEADER_VIDEO_MODAL_BUTTON_CLOSE}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

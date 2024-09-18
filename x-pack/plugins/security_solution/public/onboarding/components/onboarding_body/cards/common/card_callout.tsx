@@ -8,17 +8,17 @@
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import type { EuiCallOutProps, IconType } from '@elastic/eui';
-import { useCardCalloutStyles } from './card_callout.styles';
+import { useCardCallOutStyles } from './card_callout.styles';
 
-export interface CardCalloutProps {
+export interface CardCallOutProps {
   text: string;
   color?: EuiCallOutProps['color'];
   icon?: IconType;
   action?: React.ReactNode;
 }
 
-export const CardCallout = React.memo<CardCalloutProps>(({ text, color, icon, action }) => {
-  const styles = useCardCalloutStyles();
+export const CardCallOut = React.memo<CardCallOutProps>(({ text, color, icon, action }) => {
+  const styles = useCardCallOutStyles();
   return (
     <EuiCallOut color={color} className={styles}>
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -43,4 +43,4 @@ export const CardCallout = React.memo<CardCalloutProps>(({ text, color, icon, ac
     </EuiCallOut>
   );
 });
-CardCallout.displayName = 'CardCallout';
+CardCallOut.displayName = 'CardCallOut';

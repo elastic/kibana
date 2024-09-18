@@ -6,15 +6,32 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
+import { CardCallOut } from '../common/card_callout';
 
-export const IntegrationsCard: OnboardingCardComponent = ({ setComplete }) => {
-  // TODO: implement. The Button is just for testing purposes
+export const IntegrationsCard: OnboardingCardComponent = ({
+  setComplete,
+  checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
+}) => {
+  // TODO: implement. This is just for demo purposes
   return (
     <OnboardingCardContentPanel>
-      <EuiButton onClick={() => setComplete(false)}>{'Set not complete'}</EuiButton>
+      <EuiFlexGroup gutterSize="m" direction="column" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          {checkCompleteMetadata ? (
+            <CardCallOut
+              text={`${checkCompleteMetadata.integrationsInstalled} integrations installed`}
+            />
+          ) : (
+            <EuiLoadingSpinner size="s" />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => setComplete(false)}>{'Set not complete'}</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </OnboardingCardContentPanel>
   );
 };

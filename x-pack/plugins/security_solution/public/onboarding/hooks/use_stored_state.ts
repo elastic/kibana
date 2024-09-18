@@ -43,9 +43,3 @@ export const useStoredExpandedCardId = (spaceId: string) =>
     `${LocalStorageKey.expandedCard}.${spaceId}`,
     null
   );
-
-/**
- * Stores either the video card has been visited or not, per space
- */
-export const useStoredHasVideoVisited = (spaceId: string) =>
-  useDefinedLocalStorage<boolean>(`${LocalStorageKey.videoVisited}.${spaceId}`, false);

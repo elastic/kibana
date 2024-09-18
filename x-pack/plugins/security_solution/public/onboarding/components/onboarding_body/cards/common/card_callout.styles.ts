@@ -8,7 +8,7 @@
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 
-export const useCardCalloutStyles = () => {
+export const useCardCallOutStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
     padding: ${euiTheme.size.s};

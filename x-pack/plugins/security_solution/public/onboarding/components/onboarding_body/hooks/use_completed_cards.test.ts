@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useCheckCompleteCards } from './use_check_complete_cards';
+import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingCardConfig, OnboardingGroupConfig } from '../../../types';
 import type { OnboardingCardId } from '../../../constants';
 
@@ -30,15 +30,13 @@ const mockCardsGroupConfig: OnboardingGroupConfig[] = [
   },
 ];
 
-describe('useCheckCompleteCards', () => {
+describe('useCompletedCards', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should call checkComplete for all cards when checkAllCardsComplete is called', async () => {
-    const { result } = renderHook(() =>
-      useCheckCompleteCards(mockCardsGroupConfig, mockSetCardComplete)
-    );
+    const { result } = renderHook(() => useCompletedCards(mockCardsGroupConfig));
 
     // Trigger checkAllCardsComplete function
     await act(async () => {
@@ -55,9 +53,7 @@ describe('useCheckCompleteCards', () => {
   });
 
   it('should call checkComplete for a specific card when checkCardComplete is called', async () => {
-    const { result } = renderHook(() =>
-      useCheckCompleteCards(mockCardsGroupConfig, mockSetCardComplete)
-    );
+    const { result } = renderHook(() => useCompletedCards(mockCardsGroupConfig));
 
     // Trigger checkCardComplete function for card-1
     await act(async () => {
@@ -95,7 +91,7 @@ describe('useCheckCompleteCards', () => {
     ];
 
     const { result } = renderHook(() =>
-      useCheckCompleteCards(mockCardsGroupConfigWithoutCheckComplete, mockSetCardComplete)
+      useCompletedCards(mockCardsGroupConfigWithoutCheckComplete)
     );
 
     // Trigger checkCardComplete for card-3

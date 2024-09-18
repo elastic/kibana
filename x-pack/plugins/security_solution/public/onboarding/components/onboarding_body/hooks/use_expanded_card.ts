@@ -11,6 +11,7 @@ import { useStoredExpandedCardId } from '../../../hooks/use_stored_state';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 import type { OnboardingCardId } from '../../../constants';
 import type { SetExpandedCardId } from '../../../types';
+import { useOnboardingContext } from '../../onboarding_context';
 
 const HEADER_OFFSET = 40;
 
@@ -31,7 +32,8 @@ const setHash = (cardId: OnboardingCardId | null) => {
 /**
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
  */
-export const useExpandedCard = (spaceId: string) => {
+export const useExpandedCard = () => {
+  const { spaceId, reportCardOpen } = useOnboardingContext();
   const [expandedCardId, setStorageExpandedCardId] = useStoredExpandedCardId(spaceId);
   const location = useLocation();
 
@@ -57,6 +59,7 @@ export const useExpandedCard = (spaceId: string) => {
     // If the hash is defined and different from the storage, the hash takes precedence
     if (expandedCardId !== cardIdFromHash) {
       setStorageExpandedCardId(cardIdFromHash);
+      reportCardOpen(cardIdFromHash, { auto: true });
     }
     scrollToCard(cardIdFromHash);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,11 +69,14 @@ export const useExpandedCard = (spaceId: string) => {
     (cardId, options) => {
       setStorageExpandedCardId(cardId);
       setHash(cardId);
-      if (cardId && options?.scroll) {
-        scrollToCard(cardId);
+      if (cardId != null) {
+        reportCardOpen(cardId);
+        if (options?.scroll) {
+          scrollToCard(cardId);
+        }
       }
     },
-    [setStorageExpandedCardId]
+    [setStorageExpandedCardId, reportCardOpen]
   );
 
   return { expandedCardId, setExpandedCardId };
