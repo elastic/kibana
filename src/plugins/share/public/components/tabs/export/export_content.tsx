@@ -123,19 +123,19 @@ const ExportContentUi = ({
     }
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
-  const postUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton && publicAPIEnabled) {
+      const absoluteUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={postUrl ?? ''}>
+            <EuiCopy textToCopy={absoluteUrl ?? ''}>
               {(copy) => (
                 <EuiButtonEmpty
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
-                  data-share-url={postUrl}
+                  data-share-url={absoluteUrl}
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"
@@ -162,7 +162,7 @@ const ExportContentUi = ({
         </EuiFlexGroup>
       );
     }
-  }, [renderCopyURLButton, publicAPIEnabled, postUrl]);
+  }, [renderCopyURLButton, publicAPIEnabled, usePrintLayout, generateExportUrl, intl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

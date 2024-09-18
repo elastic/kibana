@@ -147,7 +147,6 @@ export const downloadCsvShareProvider = ({
         label: 'CSV' as const,
         reportType: 'lens_csv' as const,
         generateExport: downloadCSVHandler,
-        generateExportUrl: null, // Lens CSV does not use a remote service to generate
         ...(atLeastGold()
           ? {
               helpText: (

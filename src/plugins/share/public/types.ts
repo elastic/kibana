@@ -95,7 +95,8 @@ export type SupportedExportTypes =
  * Definition of a menu item rendered in the share menu. In the redesign, the
  * `shareMenuItem` is shown in a modal. However, Canvas
  * uses the legacy panel implementation.
- **/
+ * */
+
 interface ShareMenuItemBase {
   shareMenuItem?: ShareContextMenuPanelItem;
 }
