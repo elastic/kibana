@@ -331,7 +331,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.maxSpaces (number?)',
         'xpack.spaces.allowFeatureVisibility (false|boolean?)',
         'xpack.spaces.allowSolutionVisibility (false|boolean?)',
-        'xpack.spaces.forceSolutionVisibility (boolean?)',
+        'xpack.spaces.experimental.forceSolutionVisibility (boolean?)',
         'xpack.securitySolution.enableExperimental (array?)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string?)',
         'xpack.securitySolution.offeringSettings (record?)',
